@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -91,6 +92,12 @@ class WissensfreundProvider extends ChangeNotifier {
   int _selectedImageIndex = -1;
   final Map<String, Uint8List> _imageBytesCache = {};
 
+  // Caption-resume state (Schritt 3: Thumbnail-Tap während TTS)
+  bool   _isCaptionPlaying       = false;
+  bool   _isPromptPlaying        = false;
+  bool   _showCaptionResumePrompt = false;
+  Timer? _captionResumeTimer;
+
   AppState get state          => _state;
   String get recognizedText   => _recognizedText;
   String get articleText      => _articleText;
@@ -103,7 +110,8 @@ class WissensfreundProvider extends ChangeNotifier {
     return Uri(scheme: 'https', host: 'klexikon.zum.de', pathSegments: ['wiki', path]).toString();
   }
   int get ttsCursor           => _ttsCursor;
-  bool get isPaused           => _isPaused;
+  bool get isPaused                  => _isPaused;
+  bool get showCaptionResumePrompt  => _showCaptionResumePrompt;
   ArticleViewMode get viewMode => _viewMode;
   bool   get zimReady        => _zimReady;
   bool   get zimNotFound     => _zimNotFound;
@@ -161,6 +169,22 @@ class WissensfreundProvider extends ChangeNotifier {
     await _tts.setVolume(1.0);
     await _tts.setPitch(1.0);
     _tts.setCompletionHandler(() {
+      // Caption finished → speak "Soll ich weiterlesen?" then start 5s timer
+      if (_isCaptionPlaying) {
+        _isCaptionPlaying = false;
+        _isPromptPlaying  = true;
+        _showCaptionResumePrompt = true;
+        notifyListeners();
+        _captionResumeTimer?.cancel();
+        _captionResumeTimer = Timer(const Duration(seconds: 5), resumeAfterCaption);
+        _tts.speak('Soll ich weiterlesen?');
+        return;
+      }
+      // Prompt finished → timer is already running, nothing more to do
+      if (_isPromptPlaying) {
+        _isPromptPlaying = false;
+        return;
+      }
       // After disambiguation question, auto-start listening — no mic tap needed.
       if (_awaitingDisambiguation && _state == AppState.idle) {
         Future.delayed(const Duration(milliseconds: 500), startListening);
@@ -244,6 +268,11 @@ class WissensfreundProvider extends ChangeNotifier {
 
   Future<void> startListening() async {
     if (_state != AppState.idle) return;
+    _captionResumeTimer?.cancel();
+    _captionResumeTimer = null;
+    _isCaptionPlaying = false;
+    _isPromptPlaying  = false;
+    _showCaptionResumePrompt = false;
     _state = AppState.listening;
     _recognizedText = '';
     _articleText = '';
@@ -403,6 +432,47 @@ class WissensfreundProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Thumbnail-Tap während TTS (Schritt 3).
+  /// Fall A: TTS läuft → pausieren, Caption vorlesen, "Soll ich weiterlesen?" → 5s Auto-Resume
+  /// Fall C: TTS läuft nicht → nur Bild anzeigen
+  Future<void> onThumbnailTap(int index) async {
+    selectImage(index);
+
+    final wasSpeaking = _state == AppState.speaking;
+    if (!wasSpeaking && !_isPaused) return; // Fall C
+
+    if (wasSpeaking) await pauseSpeaking();
+
+    final caption = index < _articleImages.length
+        ? _articleImages[index].caption
+        : null;
+
+    if (caption != null && caption.isNotEmpty) {
+      _isCaptionPlaying = true;
+      await _tts.speak(caption);
+      // Completion handler will speak prompt + start timer
+    } else {
+      // No caption — go straight to prompt
+      _isPromptPlaying = true;
+      _showCaptionResumePrompt = true;
+      notifyListeners();
+      _captionResumeTimer?.cancel();
+      _captionResumeTimer = Timer(const Duration(seconds: 5), resumeAfterCaption);
+      await _tts.speak('Soll ich weiterlesen?');
+    }
+  }
+
+  /// Sofortiges Resume nach Caption (tapped by user or called by 5s timer).
+  void resumeAfterCaption() {
+    _captionResumeTimer?.cancel();
+    _captionResumeTimer = null;
+    _isCaptionPlaying = false;
+    _isPromptPlaying  = false;
+    _showCaptionResumePrompt = false;
+    notifyListeners();
+    resumeSpeaking();
+  }
+
   Future<void> loadImages(int urlIndex) async {
     try {
       final rawList =
@@ -463,6 +533,11 @@ class WissensfreundProvider extends ChangeNotifier {
   }
 
   Future<void> stopSpeaking() async {
+    _captionResumeTimer?.cancel();
+    _captionResumeTimer = null;
+    _isCaptionPlaying = false;
+    _isPromptPlaying  = false;
+    _showCaptionResumePrompt = false;
     await _tts.stop();
     _isPaused = false;
     _resumeOffset = 0;

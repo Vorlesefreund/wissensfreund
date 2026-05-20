@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -77,6 +78,14 @@ class ArticleScreen extends StatelessWidget {
                     child: _ArticleMicButton(provider: provider),
                   ),
                 ),
+                // ── Caption-Resume Prompt ──────────────────────────────────
+                if (provider.showCaptionResumePrompt)
+                  Positioned(
+                    bottom: _kMicClear + 16,
+                    left: 0,
+                    right: 0,
+                    child: const Center(child: _CaptionResumeOverlay()),
+                  ),
               ],
             ),
           ),
@@ -606,6 +615,69 @@ class _KlexikonAttribution extends StatelessWidget {
             decoration: TextDecoration.underline,
             decorationColor: color,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Caption-Resume Overlay — shown after caption is read, countdown to auto-resume
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _CaptionResumeOverlay extends StatefulWidget {
+  const _CaptionResumeOverlay();
+
+  @override
+  State<_CaptionResumeOverlay> createState() => _CaptionResumeOverlayState();
+}
+
+class _CaptionResumeOverlayState extends State<_CaptionResumeOverlay> {
+  int _countdown = 5;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (_countdown <= 1) { t.cancel(); return; }
+      setState(() => _countdown--);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => context.read<WissensfreundProvider>().resumeAfterCaption(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 13),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2D6A4F),
+          borderRadius: BorderRadius.circular(32),
+          boxShadow: const [
+            BoxShadow(color: Colors.black26, blurRadius: 14, offset: Offset(0, 4)),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 22),
+            const SizedBox(width: 8),
+            Text(
+              'Weiterlesen ($_countdown)',
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -1206,7 +1278,7 @@ class _ThumbnailRow extends StatelessWidget {
             itemBuilder: (ctx, i) {
               final isSelected = i == provider.selectedImageIndex;
               return GestureDetector(
-                onTap: () => provider.selectImage(i),
+                onTap: () => provider.onThumbnailTap(i),
                 child: _ZimImageTile(
                   key: ValueKey(images[i].filename),
                   image: images[i],
