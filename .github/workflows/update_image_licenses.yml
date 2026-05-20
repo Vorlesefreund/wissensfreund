@@ -12,7 +12,7 @@ on:
 
 env:
   ZIM_VERSION: klexikon_de_all_maxi_2026-05
-  ZIM_URL: https://lbo.download.kiwix.org/zim/other/klexikon_de_all_maxi_2026-05.zim
+  ZIM_URL: https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim
 
 jobs:
   generate:
