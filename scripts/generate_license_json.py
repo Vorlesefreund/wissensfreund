@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 Generates image_licenses.json by:
-  1. Opening the Klexikon ZIM file (via python-libzim)
-  2. Enumerating all image entries in namespace I
+  1. Opening the Klexikon ZIM file (binary parsing, no libzim required)
+  2. Enumerating all image entries in namespace I and -
   3. Querying Wikimedia Commons API for license info (batched, rate-limited)
   4. Writing image_licenses.json to the repo root
 
@@ -16,16 +16,17 @@ Run in GitHub Actions:
 import json
 import os
 import re
+import struct
 import sys
 import time
 from datetime import date
 from pathlib import Path
+from urllib.parse import unquote
 
 try:
     import requests
-    from libzim.reader import Archive
 except ImportError:
-    print("Missing dependencies. Run: pip install libzim requests")
+    print("Missing dependencies. Run: pip install requests")
     sys.exit(1)
 
 ZIM_FILE    = os.environ.get("ZIM_FILE", "klexikon.zim")
@@ -34,8 +35,10 @@ OUTPUT_FILE = Path("image_licenses.json")
 
 COMMONS_API   = "https://commons.wikimedia.org/w/api.php"
 ALLOWED_EXTS  = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
-BATCH_SIZE    = 50    # Wikimedia API limit per request
-REQUEST_DELAY = 0.5   # seconds between API calls (be a good citizen)
+BATCH_SIZE    = 50
+REQUEST_DELAY = 0.5
+
+ZIM_MAGIC = 0x5a494d04
 
 
 def is_permitted(license_str: str) -> bool:
@@ -53,6 +56,68 @@ def is_permitted(license_str: str) -> bool:
 
 def strip_html(s: str) -> str:
     return re.sub(r"<[^>]+>", "", s or "").strip()
+
+
+def _read_cstr(f) -> str:
+    buf = bytearray()
+    while True:
+        b = f.read(1)
+        if not b or b == b'\x00':
+            break
+        buf.extend(b)
+    return buf.decode('utf-8', errors='replace')
+
+
+def extract_image_filenames(zim_path: Path) -> list[str]:
+    """Parse ZIM binary format to collect all image filenames (no libzim)."""
+    filenames = []
+    with open(zim_path, 'rb') as f:
+        header = f.read(80)
+        if len(header) < 80:
+            print("ERROR: ZIM file too small to be valid", file=sys.stderr)
+            sys.exit(1)
+
+        magic, = struct.unpack_from('<I', header, 0)
+        if magic != ZIM_MAGIC:
+            print(f"ERROR: Not a ZIM file (magic={hex(magic)})", file=sys.stderr)
+            sys.exit(1)
+
+        # Header offsets per ZIM spec v5/v6
+        entry_count, = struct.unpack_from('<I', header, 24)
+        url_ptr_pos, = struct.unpack_from('<Q', header, 32)
+
+        print(f"ZIM: {entry_count} entries, url_ptr_pos=0x{url_ptr_pos:x}")
+
+        for i in range(entry_count):
+            f.seek(url_ptr_pos + i * 8)
+            raw = f.read(8)
+            if len(raw) < 8:
+                break
+            ptr, = struct.unpack_from('<Q', raw)
+
+            f.seek(ptr)
+            entry_hdr = f.read(4)
+            if len(entry_hdr) < 4:
+                continue
+            mime_idx, param_len, ns_byte = struct.unpack_from('<HBc', entry_hdr)
+            namespace = ns_byte.decode('ascii', errors='replace')
+
+            if namespace not in ('I', '-'):
+                continue
+
+            f.read(4)  # revision (uint32)
+
+            if mime_idx == 0xffff:
+                f.read(4)  # redirect target index
+            else:
+                f.read(8)  # cluster number + blob number
+
+            url = _read_cstr(f)
+            decoded = unquote(url)
+            if Path(decoded).suffix.lower() in ALLOWED_EXTS:
+                filenames.append(decoded)
+
+    return filenames
 
 
 def query_batch(filenames: list[str]) -> dict:
@@ -96,16 +161,7 @@ def main():
         sys.exit(1)
 
     print(f"Opening {zim_path} ({zim_path.stat().st_size // 1_048_576} MB)")
-    archive = Archive(str(zim_path))
-
-    filenames: list[str] = []
-    for entry in archive:
-        path = entry.path
-        if path.startswith("I/") or path.startswith("-/"):
-            name = path.split("/", 1)[1]
-            if Path(name).suffix.lower() in ALLOWED_EXTS:
-                filenames.append(name)
-
+    filenames = extract_image_filenames(zim_path)
     print(f"Found {len(filenames)} images to check")
 
     results: dict[str, dict] = {}
