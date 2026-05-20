@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-Generates image_licenses.json by:
+Generates media_licenses.json by:
   1. Opening the Klexikon ZIM file (binary parsing, no libzim required)
-  2. Enumerating all image entries in namespace I and -
+  2. Enumerating all image entries (namespace I/-) and audio entries
   3. Querying Wikimedia Commons API for license info (batched, rate-limited)
-  4. Writing image_licenses.json to the repo root
+  4. Writing media_licenses.json to the repo root
 
 Run locally:
   ZIM_FILE=path/to/klexikon.zim python scripts/generate_license_json.py
@@ -31,10 +31,11 @@ except ImportError:
 
 ZIM_FILE    = os.environ.get("ZIM_FILE", "klexikon.zim")
 ZIM_VERSION = os.environ.get("ZIM_VERSION", "klexikon_de_all_maxi_2026-05")
-OUTPUT_FILE = Path("image_licenses.json")
+OUTPUT_FILE = Path("media_licenses.json")
 
 COMMONS_API   = "https://commons.wikimedia.org/w/api.php"
-ALLOWED_EXTS  = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+IMAGE_EXTS    = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
+AUDIO_EXTS    = {".ogg", ".oga", ".mp3", ".opus", ".wav", ".flac"}
 BATCH_SIZE    = 50
 REQUEST_DELAY = 0.5
 
@@ -68,9 +69,11 @@ def _read_cstr(f) -> str:
     return buf.decode('utf-8', errors='replace')
 
 
-def extract_image_filenames(zim_path: Path) -> list[str]:
-    """Parse ZIM binary format to collect all image filenames (no libzim)."""
-    filenames = []
+def extract_media_filenames(zim_path: Path) -> tuple[list[str], list[str]]:
+    """Parse ZIM binary to collect image and audio filenames (no libzim)."""
+    images = []
+    audio  = []
+
     with open(zim_path, 'rb') as f:
         header = f.read(80)
         if len(header) < 80:
@@ -82,7 +85,6 @@ def extract_image_filenames(zim_path: Path) -> list[str]:
             print(f"ERROR: Not a ZIM file (magic={hex(magic)})", file=sys.stderr)
             sys.exit(1)
 
-        # Header offsets per ZIM spec v5/v6
         entry_count, = struct.unpack_from('<I', header, 24)
         url_ptr_pos, = struct.unpack_from('<Q', header, 32)
 
@@ -100,24 +102,24 @@ def extract_image_filenames(zim_path: Path) -> list[str]:
             if len(entry_hdr) < 4:
                 continue
             mime_idx, param_len, ns_byte = struct.unpack_from('<HBc', entry_hdr)
-            namespace = ns_byte.decode('ascii', errors='replace')
 
-            if namespace not in ('I', '-'):
-                continue
-
-            f.read(4)  # revision (uint32)
+            f.read(4)  # revision
 
             if mime_idx == 0xffff:
                 f.read(4)  # redirect target index
             else:
                 f.read(8)  # cluster number + blob number
 
-            url = _read_cstr(f)
+            url     = _read_cstr(f)
             decoded = unquote(url)
-            if Path(decoded).suffix.lower() in ALLOWED_EXTS:
-                filenames.append(decoded)
+            ext     = Path(decoded).suffix.lower()
 
-    return filenames
+            if ext in IMAGE_EXTS:
+                images.append(decoded)
+            elif ext in AUDIO_EXTS:
+                audio.append(decoded)
+
+    return images, audio
 
 
 def query_batch(filenames: list[str]) -> dict:
@@ -138,7 +140,7 @@ def query_batch(filenames: list[str]) -> dict:
     return r.json().get("query", {}).get("pages", {})
 
 
-def process_page(page: dict) -> dict:
+def process_image_page(page: dict) -> dict:
     info_list = page.get("imageinfo") or []
     if not info_list:
         return {"allowed": False, "license": None, "author": None, "license_url": None}
@@ -154,6 +156,41 @@ def process_page(page: dict) -> dict:
     }
 
 
+def process_audio_page(page: dict) -> dict:
+    info_list = page.get("imageinfo") or []
+    if not info_list:
+        return {"allowed": False, "license": None, "author": None, "license_url": None, "caption": None}
+    meta    = info_list[0].get("extmetadata") or {}
+    lic     = meta.get("LicenseShortName", {}).get("value", "")
+    auth    = strip_html(meta.get("Artist", {}).get("value", ""))
+    url     = meta.get("LicenseUrl", {}).get("value", "")
+    caption = strip_html(meta.get("ImageDescription", {}).get("value", ""))
+    return {
+        "allowed":     is_permitted(lic),
+        "license":     lic  or None,
+        "author":      auth or None,
+        "license_url": url  or None,
+        "caption":     caption or None,
+    }
+
+
+def process_in_batches(filenames: list[str], process_fn, label: str) -> dict[str, dict]:
+    results: dict[str, dict] = {}
+    batches = [filenames[i:i + BATCH_SIZE] for i in range(0, len(filenames), BATCH_SIZE)]
+    for i, batch in enumerate(batches, 1):
+        print(f"  {label} batch {i}/{len(batches)} ({len(batch)} files)...", end=" ", flush=True)
+        try:
+            pages = query_batch(batch)
+            for page in pages.values():
+                fname = page.get("title", "").removeprefix("File:")
+                results[fname] = process_fn(page)
+            print("ok")
+        except Exception as e:
+            print(f"ERROR: {e}")
+        time.sleep(REQUEST_DELAY)
+    return results
+
+
 def main():
     zim_path = Path(ZIM_FILE)
     if not zim_path.exists():
@@ -161,34 +198,26 @@ def main():
         sys.exit(1)
 
     print(f"Opening {zim_path} ({zim_path.stat().st_size // 1_048_576} MB)")
-    filenames = extract_image_filenames(zim_path)
-    print(f"Found {len(filenames)} images to check")
+    image_filenames, audio_filenames = extract_media_filenames(zim_path)
+    print(f"Found {len(image_filenames)} images, {len(audio_filenames)} audio files")
 
-    results: dict[str, dict] = {}
-    batches = [filenames[i:i + BATCH_SIZE] for i in range(0, len(filenames), BATCH_SIZE)]
-
-    for i, batch in enumerate(batches, 1):
-        print(f"  Batch {i}/{len(batches)} ({len(batch)} images)...", end=" ", flush=True)
-        try:
-            pages = query_batch(batch)
-            for page in pages.values():
-                fname = page.get("title", "").removeprefix("File:")
-                results[fname] = process_page(page)
-            print("ok")
-        except Exception as e:
-            print(f"ERROR: {e}")
-        time.sleep(REQUEST_DELAY)
+    image_results = process_in_batches(image_filenames, process_image_page, "image")
+    audio_results = process_in_batches(audio_filenames, process_audio_page, "audio")
 
     output = {
         "generated":   date.today().isoformat(),
         "zim_version": ZIM_VERSION,
-        "images":      results,
+        "images":      image_results,
+        "audio":       audio_results,
     }
     OUTPUT_FILE.write_text(
         json.dumps(output, indent=2, ensure_ascii=False), encoding="utf-8"
     )
-    allowed = sum(1 for v in results.values() if v["allowed"])
-    print(f"\nDone: {len(results)} images, {allowed} allowed → {OUTPUT_FILE}")
+
+    img_allowed   = sum(1 for v in image_results.values() if v["allowed"])
+    audio_allowed = sum(1 for v in audio_results.values() if v["allowed"])
+    print(f"\nDone: {len(image_results)} images ({img_allowed} allowed), "
+          f"{len(audio_results)} audio ({audio_allowed} allowed) → {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":

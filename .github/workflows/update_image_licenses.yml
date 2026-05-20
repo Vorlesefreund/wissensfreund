@@ -54,7 +54,7 @@ jobs:
             which images may be displayed (CC0 / CC BY / CC BY-SA only).
 
             Updated automatically on the 1st of every month.
-          files: image_licenses.json
+          files: media_licenses.json
           make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

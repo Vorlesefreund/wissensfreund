@@ -19,6 +19,26 @@ class LicenseEntry {
   });
 }
 
+class AudioLicenseEntry {
+  final String audioFilename;
+  final String? urheber;
+  final String? lizenz;
+  final String? lizenzUrl;
+  final String? caption;
+  final bool erlaubt;
+  final DateTime checkedAt;
+
+  const AudioLicenseEntry({
+    required this.audioFilename,
+    this.urheber,
+    this.lizenz,
+    this.lizenzUrl,
+    this.caption,
+    required this.erlaubt,
+    required this.checkedAt,
+  });
+}
+
 class LicenseCacheDb {
   LicenseCacheDb._();
   static final LicenseCacheDb instance = LicenseCacheDb._();
@@ -34,7 +54,7 @@ class LicenseCacheDb {
     final dbPath = join(await getDatabasesPath(), 'license_cache.db');
     return openDatabase(
       dbPath,
-      version: 2,
+      version: 3,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE license_cache (
@@ -42,6 +62,17 @@ class LicenseCacheDb {
             urheber        TEXT,
             lizenz         TEXT,
             lizenz_url     TEXT,
+            erlaubt        INTEGER NOT NULL,
+            checked_at     INTEGER NOT NULL
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE audio_cache (
+            audio_filename TEXT PRIMARY KEY,
+            urheber        TEXT,
+            lizenz         TEXT,
+            lizenz_url     TEXT,
+            caption        TEXT,
             erlaubt        INTEGER NOT NULL,
             checked_at     INTEGER NOT NULL
           )
@@ -64,9 +95,24 @@ class LicenseCacheDb {
             )
           ''');
         }
+        if (oldVersion < 3) {
+          await db.execute('''
+            CREATE TABLE IF NOT EXISTS audio_cache (
+              audio_filename TEXT PRIMARY KEY,
+              urheber        TEXT,
+              lizenz         TEXT,
+              lizenz_url     TEXT,
+              caption        TEXT,
+              erlaubt        INTEGER NOT NULL,
+              checked_at     INTEGER NOT NULL
+            )
+          ''');
+        }
       },
     );
   }
+
+  // ── Images ─────────────────────────────────────────────────────────────────
 
   Future<LicenseEntry?> get(String imageFilename) async {
     final rows = await (await _database).query(
@@ -87,18 +133,52 @@ class LicenseCacheDb {
   }
 
   Future<void> put(LicenseEntry entry) async {
-    await _putSingle(await _database, entry);
+    await (await _database).insert('license_cache', _imageToMap(entry),
+        conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   Future<void> putBatch(List<LicenseEntry> entries) async {
     final db = await _database;
     final batch = db.batch();
     for (final e in entries) {
-      batch.insert('license_cache', _entryToMap(e),
+      batch.insert('license_cache', _imageToMap(e),
           conflictAlgorithm: ConflictAlgorithm.replace);
     }
     await batch.commit(noResult: true);
   }
+
+  // ── Audio ───────────────────────────────────────────────────────────────────
+
+  Future<AudioLicenseEntry?> getAudio(String audioFilename) async {
+    final rows = await (await _database).query(
+      'audio_cache',
+      where: 'audio_filename = ?',
+      whereArgs: [audioFilename],
+    );
+    if (rows.isEmpty) return null;
+    final r = rows.first;
+    return AudioLicenseEntry(
+      audioFilename: r['audio_filename'] as String,
+      urheber: r['urheber'] as String?,
+      lizenz: r['lizenz'] as String?,
+      lizenzUrl: r['lizenz_url'] as String?,
+      caption: r['caption'] as String?,
+      erlaubt: (r['erlaubt'] as int) == 1,
+      checkedAt: DateTime.fromMillisecondsSinceEpoch(r['checked_at'] as int),
+    );
+  }
+
+  Future<void> putBatchAudio(List<AudioLicenseEntry> entries) async {
+    final db = await _database;
+    final batch = db.batch();
+    for (final e in entries) {
+      batch.insert('audio_cache', _audioToMap(e),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+    }
+    await batch.commit(noResult: true);
+  }
+
+  // ── Sync info ───────────────────────────────────────────────────────────────
 
   Future<bool> isSynced() async {
     final rows = await (await _database).query('sync_info', limit: 1);
@@ -115,16 +195,23 @@ class LicenseCacheDb {
     });
   }
 
-  Future<void> _putSingle(Database db, LicenseEntry entry) async {
-    await db.insert('license_cache', _entryToMap(entry),
-        conflictAlgorithm: ConflictAlgorithm.replace);
-  }
+  // ── Helpers ─────────────────────────────────────────────────────────────────
 
-  Map<String, dynamic> _entryToMap(LicenseEntry e) => {
+  Map<String, dynamic> _imageToMap(LicenseEntry e) => {
         'image_filename': e.imageFilename,
         'urheber': e.urheber,
         'lizenz': e.lizenz,
         'lizenz_url': e.lizenzUrl,
+        'erlaubt': e.erlaubt ? 1 : 0,
+        'checked_at': e.checkedAt.millisecondsSinceEpoch,
+      };
+
+  Map<String, dynamic> _audioToMap(AudioLicenseEntry e) => {
+        'audio_filename': e.audioFilename,
+        'urheber': e.urheber,
+        'lizenz': e.lizenz,
+        'lizenz_url': e.lizenzUrl,
+        'caption': e.caption,
         'erlaubt': e.erlaubt ? 1 : 0,
         'checked_at': e.checkedAt.millisecondsSinceEpoch,
       };
