@@ -345,13 +345,15 @@ class _MainArticleImageState extends State<_MainArticleImage> {
         if (_bytesFuture == null) {
           return _ArticleImage(title: widget.fallbackTitle);
         }
-        return GestureDetector(
-          onTap: widget.onTap,
-          child: FutureBuilder<Uint8List?>(
-            future: _bytesFuture,
-            builder: (_, snap) {
-              final bytes = snap.data;
-              return Stack(
+        return FutureBuilder<Uint8List?>(
+          future: _bytesFuture,
+          builder: (_, snap) {
+            final bytes = snap.data;
+            return GestureDetector(
+              onTap: bytes != null
+                  ? () => _showFullscreenImage(context, _loadedFilename!, _bytesFuture!)
+                  : widget.onTap,
+              child: Stack(
                 fit: StackFit.expand,
                 children: [
                   bytes != null
@@ -363,9 +365,9 @@ class _MainArticleImageState extends State<_MainArticleImage> {
                     child: _LicenseInfoButton(filename: _loadedFilename!),
                   ),
                 ],
-              );
-            },
-          ),
+              ),
+            );
+          },
         );
       },
     );
@@ -614,6 +616,110 @@ class _KlexikonAttribution extends StatelessWidget {
             color: color,
             decoration: TextDecoration.underline,
             decorationColor: color,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Fullscreen image viewer (Schritt 5)
+// Opens on tap of _MainArticleImage. TTS continues, no stop.
+// Close via X-button, tap on black area, or swipe down.
+// ─────────────────────────────────────────────────────────────────────────────
+
+void _showFullscreenImage(
+  BuildContext context,
+  String filename,
+  Future<Uint8List?> bytesFuture,
+) {
+  Navigator.of(context).push(
+    PageRouteBuilder(
+      opaque: false,
+      barrierColor: Colors.transparent,
+      pageBuilder: (ctx, anim, _) => _FullscreenImagePage(
+        filename: filename,
+        bytesFuture: bytesFuture,
+        animation: anim,
+      ),
+      transitionDuration: const Duration(milliseconds: 300),
+    ),
+  );
+}
+
+class _FullscreenImagePage extends StatelessWidget {
+  final String filename;
+  final Future<Uint8List?> bytesFuture;
+  final Animation<double> animation;
+
+  const _FullscreenImagePage({
+    required this.filename,
+    required this.bytesFuture,
+    required this.animation,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.pop(context),
+      onVerticalDragEnd: (details) {
+        if (details.primaryVelocity != null && details.primaryVelocity! > 200) {
+          Navigator.pop(context);
+        }
+      },
+      child: FadeTransition(
+        opacity: animation,
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: SafeArea(
+            child: Stack(
+              children: [
+                // ── Bild ──────────────────────────────────────────────────
+                Center(
+                  child: FutureBuilder<Uint8List?>(
+                    future: bytesFuture,
+                    builder: (_, snap) {
+                      final bytes = snap.data;
+                      if (bytes == null) {
+                        return const CircularProgressIndicator(color: Colors.white54);
+                      }
+                      return ScaleTransition(
+                        scale: Tween<double>(begin: 0.85, end: 1.0).animate(
+                          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
+                        ),
+                        child: InteractiveViewer(
+                          child: Image.memory(bytes, fit: BoxFit.contain),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                // ── X-Button ──────────────────────────────────────────────
+                Positioned(
+                  top: 8,
+                  right: 12,
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      width: 36,
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
+                    ),
+                  ),
+                ),
+                // ── ⓘ-Icon ────────────────────────────────────────────────
+                Positioned(
+                  bottom: 16,
+                  right: 16,
+                  child: _LicenseInfoButton(filename: filename),
+                ),
+              ],
+            ),
           ),
         ),
       ),

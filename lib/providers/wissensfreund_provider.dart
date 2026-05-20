@@ -501,7 +501,9 @@ class WissensfreundProvider extends ChangeNotifier {
     try {
       final bytes =
           await _zimChannel.invokeMethod<Uint8List>('getImageBytes', {'filename': filename});
-      if (bytes != null) _imageBytesCache[filename] = bytes;
+      if (bytes != null && bytes.length <= 2 * 1024 * 1024) {
+        _imageBytesCache[filename] = bytes;
+      }
       return bytes;
     } catch (_) {
       return null;
