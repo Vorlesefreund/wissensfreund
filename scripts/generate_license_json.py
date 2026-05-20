@@ -38,7 +38,7 @@ ALLOWED_EXTS  = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 BATCH_SIZE    = 50
 REQUEST_DELAY = 0.5
 
-ZIM_MAGIC = 0x5a494d04
+ZIM_MAGIC = 0x044d495a  # little-endian: bytes 5a 49 4d 04 ("ZIM\x04")
 
 
 def is_permitted(license_str: str) -> bool:
