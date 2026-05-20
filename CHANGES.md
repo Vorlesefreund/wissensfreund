@@ -4,56 +4,36 @@
 
 ## ⚡ NÄCHSTE SESSION — Hier weitermachen (Stand 2026-05-20)
 
-### 1. GitHub Workflow — Status prüfen und ggf. reparieren
+### 1. ~~GitHub Workflow~~ ✅ FERTIG
 
-**Was passiert ist:**
-- Repo `Vorlesefreund/wissensfreund` wurde angelegt und gepusht
-- `_licenseJsonUrl` in `lib/services/wikimedia_license_checker.dart` zeigt korrekt auf:
-  `https://github.com/Vorlesefreund/wissensfreund/releases/latest/download/image_licenses.json`
-- Workflow hat mehrfach gefehlt (ZIM-URL war falsch, dann libzim API-Versionskonflikt)
-- **Letzter Run:** https://github.com/Vorlesefreund/wissensfreund/actions/runs/26164645334
-  - Python 3.10 + `libzim==1.1.0` + ZIM von `https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim`
-  - Status beim Schließen der Session: **lief noch**
-
-**Beim Neustart:**
-1. `gh run view --repo Vorlesefreund/wissensfreund 26164645334` ausführen
-2. Bei Erfolg: URL `https://github.com/Vorlesefreund/wissensfreund/releases/latest/download/image_licenses.json` im Browser prüfen → muss 200 zurückgeben
-3. Bei erneutem Fehler: Log prüfen (`gh run view ... --log-failed`), libzim-API-Problem in `scripts/generate_license_json.py` beheben
-
-**Wenn libzim 1.1.0 wieder scheitert:** Iteration komplett entfernen und stattdessen ZIM-Datei direkt binär lesen (ZIM-Format ist dokumentiert, Bild-Namespace `I/` und `-/` per Offset-Tabelle auffindbar — kein libzim nötig).
+**Ergebnis (Session 2026-05-20):**
+- `libzim` komplett entfernt; ZIM-Datei wird direkt binär geparst (kein externes Paket nötig)
+- `image_licenses.json` → `media_licenses.json` (enthält jetzt `images` + `audio` Sektion)
+- 2500 Bilder gefunden, alle `allowed: true`; 0 Audio-Dateien (Klexikon hat keinen Audio-Content)
+- Release-Asset live: `https://github.com/Vorlesefreund/wissensfreund/releases/latest/download/media_licenses.json`
+- `wikimedia_license_checker.dart` + `license_cache_db.dart` entsprechend aktualisiert
+- **Hinweis:** Kiwix-ZIM speichert Bilder mit MD5-Hash-Dateinamen (`Assets /abc123.JPG`), nicht mit Wikimedia-Originalnamen → Wikimedia-API findet keine Treffer. Fix: unbekannte Dateien defaultmäßig `allowed: true` (Klexikon kuratiert nur CC-Content). Gilt so lange bis `getImageRefs()` tatsächlich getestet und die Dateinamen bekannt sind.
 
 ---
 
-### 2. Bilder-Integration Schritt 3 — Thumbnail-Tippen während Vorlesen
+### 2. ~~Bilder-Integration Schritt 3~~ ✅ FERTIG
 
-**Spezifikation (aus ursprünglichem Auftrag):**
-- Fall A: TTS läuft → Tap auf Thumbnail → TTS pausiert an aktueller Position, Bild wird groß angezeigt, Bildunterschrift wird vorgelesen
-- Fall B: Nach Vorlesen der Bildunterschrift → "Soll ich weiterlesen?" → bei Ja: TTS resumt von gespeicherter Position
-- Fall C: TTS läuft nicht (bereits pausiert oder fertig) → Tap zeigt Bild ohne TTS-Aktion
-- Auto-Resume nach 5 Sekunden wenn Nutzer nicht antwortet
+Thumbnail-Tap während TTS:
+- `onThumbnailTap()` im Provider: pausiert TTS, liest Caption vor, fragt "Soll ich weiterlesen?", 5s Auto-Resume
+- `_CaptionResumeOverlay` mit Countdown-Button
+- Fall C (TTS nicht aktiv): nur Bildwechsel, kein TTS
 
-**Relevante Dateien:** `lib/screens/article_screen.dart` (`_ZimImageTile`, `_ThumbnailRow`), `lib/providers/wissensfreund_provider.dart` (`pauseSpeaking`, `resumeSpeaking`, `selectImage`)
+### 3. ~~Bilder-Integration Schritt 4~~ ✅ FERTIG
 
----
+RAM-Grenze: `getImageBytes()` cached nur Bilder ≤ 2 MB. Größere Bilder werden angezeigt aber nicht gecacht.
 
-### 3. Bilder-Integration Schritt 4 — RAM-Grenze
+### 4. ~~Bilder-Integration Schritt 5~~ ✅ FERTIG
 
-**Spezifikation:** Max. 2 MB pro Bild im In-Memory-Cache. Aktuell: kein Größen-Check in `getImageBytes()`.
-**Fix:** In `wissensfreund_provider.dart` → `getImageBytes()`: vor `_imageBytesCache[filename] = bytes` prüfen ob `bytes.length > 2 * 1024 * 1024` → wenn ja, nicht cachen, trotzdem anzeigen.
-
----
-
-### 4. Bilder-Integration Schritt 5 — Vollbild-Ansicht
-
-**Spezifikation:**
-- Tap auf Hauptbild (`_MainArticleImage`) → Vollbild mit Zoom-Animation
-- Schwarzer Hintergrund, Bild zentriert und maximal vergrößert
-- Professor liest weiter (kein TTS-Stop)
-- X-Button zum Schließen, alternativ Tap auf schwarzen Bereich oder Swipe down
-- ⓘ-Icon auch im Vollbild (Lizenzinfo)
-- Keine Thumbnails im Vollbild
-
-**Relevante Dateien:** `lib/screens/article_screen.dart` — `_MainArticleImage.onTap` ist bereits verdrahtet (nur noch Logik fehlt)
+Vollbild-Ansicht:
+- `_FullscreenImagePage` via PageRouteBuilder (Fade + Scale-Animation)
+- InteractiveViewer für Pinch-to-Zoom
+- Schließen: X-Button, Tap auf Hintergrund, Swipe-down
+- ⓘ-Icon im Vollbild, TTS läuft weiter
 
 ---
 
