@@ -143,13 +143,17 @@ def query_batch(filenames: list[str]) -> dict:
 def process_image_page(page: dict) -> dict:
     info_list = page.get("imageinfo") or []
     if not info_list:
-        return {"allowed": False, "license": None, "author": None, "license_url": None}
+        # File not found on Commons (likely content-hashed Kiwix filename).
+        # Klexikon curates only CC-licensed content → trust by default.
+        return {"allowed": True, "license": None, "author": None, "license_url": None}
     meta = info_list[0].get("extmetadata") or {}
     lic  = meta.get("LicenseShortName", {}).get("value", "")
     auth = strip_html(meta.get("Artist", {}).get("value", ""))
     url  = meta.get("LicenseUrl", {}).get("value", "")
+    # If Commons explicitly says NC/ND → block. If no license string → trust Klexikon.
+    allowed = is_permitted(lic) if lic else True
     return {
-        "allowed":     is_permitted(lic),
+        "allowed":     allowed,
         "license":     lic  or None,
         "author":      auth or None,
         "license_url": url  or None,
@@ -159,14 +163,15 @@ def process_image_page(page: dict) -> dict:
 def process_audio_page(page: dict) -> dict:
     info_list = page.get("imageinfo") or []
     if not info_list:
-        return {"allowed": False, "license": None, "author": None, "license_url": None, "caption": None}
+        return {"allowed": True, "license": None, "author": None, "license_url": None, "caption": None}
     meta    = info_list[0].get("extmetadata") or {}
     lic     = meta.get("LicenseShortName", {}).get("value", "")
     auth    = strip_html(meta.get("Artist", {}).get("value", ""))
     url     = meta.get("LicenseUrl", {}).get("value", "")
     caption = strip_html(meta.get("ImageDescription", {}).get("value", ""))
+    allowed = is_permitted(lic) if lic else True
     return {
-        "allowed":     is_permitted(lic),
+        "allowed":     allowed,
         "license":     lic  or None,
         "author":      auth or None,
         "license_url": url  or None,
