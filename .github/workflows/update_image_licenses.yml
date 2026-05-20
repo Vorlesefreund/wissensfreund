@@ -28,7 +28,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install Python dependencies
-        run: pip install "libzim<3" requests
+        run: pip install "libzim==1.1.0" requests
 
       - name: Download ZIM file
         run: |
