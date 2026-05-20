@@ -29,7 +29,7 @@ except ImportError:
     sys.exit(1)
 
 ZIM_FILE    = os.environ.get("ZIM_FILE", "klexikon.zim")
-ZIM_VERSION = os.environ.get("ZIM_VERSION", "klexikon_de_all_maxi_2025-10")
+ZIM_VERSION = os.environ.get("ZIM_VERSION", "klexikon_de_all_maxi_2026-05")
 OUTPUT_FILE = Path("image_licenses.json")
 
 COMMONS_API   = "https://commons.wikimedia.org/w/api.php"
