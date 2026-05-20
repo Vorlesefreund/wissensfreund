@@ -25,10 +25,10 @@ jobs:
 
       - uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.11'
 
       - name: Install Python dependencies
-        run: pip install libzim requests
+        run: pip install "libzim==1.1.2" requests
 
       - name: Download ZIM file
         run: |
