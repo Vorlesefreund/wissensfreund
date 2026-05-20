@@ -1,0 +1,710 @@
+package de.wissensfreund.wissensfreund_app
+
+import android.util.Log
+import org.tukaani.xz.XZInputStream
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.RandomAccessFile
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+
+class ZimReader(private val filePath: String) {
+
+    companion object {
+        private const val TAG = "ZimReader"
+        private const val ZIM_MAGIC = 0x044D495AL
+        private const val MIME_REDIRECT = 0xFFFF
+
+        // German stopwords: query prefixes, filler words, articles, prepositions, etc.
+        // These must NOT be used as search terms — they'd match irrelevant articles.
+        private val STOPWORDS = setOf(
+            // Query-style prefixes / interrogatives
+            "erzähl", "erzähle", "erkläre", "erklärt", "sag", "sage", "sagt",
+            "was", "wer", "wie", "warum", "wann", "wem", "wen",
+            "wo", "woher", "wohin", "wozu", "wieso", "weshalb",
+            "welche", "welcher", "welches", "welchem", "welchen",
+            // Filler
+            "mir", "dir", "uns", "euch", "ihm", "ihnen", "sich",
+            "bitte", "gerne", "mal", "doch", "denn", "eigentlich",
+            "etwas", "alles", "nichts", "sehr", "viel", "mehr",
+            "wirklich", "echt", "halt", "eben", "schon", "noch",
+            // Articles and pronouns
+            "der", "die", "das", "dem", "den", "des",
+            "ein", "eine", "einen", "einem", "einer", "eines",
+            "kein", "keine", "keinen", "keinem", "keiner", "keines",
+            "ich", "du", "er", "sie", "es", "wir", "ihr",
+            "mich", "dich", "ihn",
+            "mein", "dein", "sein", "unser", "euer",
+            // Prepositions
+            "an", "auf", "aus", "bei", "bis", "durch", "für", "gegen",
+            "in", "mit", "nach", "neben", "ob", "ohne", "seit",
+            "über", "um", "unter", "von", "vor", "während", "wegen",
+            "zu", "zwischen",
+            // Conjunctions
+            "und", "oder", "aber", "auch", "weil", "wenn",
+            "dass", "als", "damit", "obwohl",
+            // Common verbs (including knowledge/query verbs)
+            "ist", "sind", "war", "waren", "bin", "bist",
+            "hat", "haben", "hatte", "hatten",
+            "wird", "werden", "wurde", "wurden",
+            "kann", "können", "konnte", "will", "wollen",
+            "soll", "sollen", "muss", "müssen",
+            "weiß", "weißt", "wissen", "wisst", "kennen", "kennst", "weißt",
+            "magst", "magst", "möchtest", "möchte", "mögen",
+            // Other
+            "hier", "da", "dort", "nicht", "nun", "jetzt", "dann",
+            "immer", "ja", "nein", "so"
+        )
+    }
+
+    private var raf: RandomAccessFile? = null
+
+    private var majorVersion = 0
+    private var articleCount = 0
+    private var clusterCount = 0
+    private var urlPtrPos   = 0L
+    private var titlePtrPos = 0L
+    private var clusterPtrPos = 0L
+    private var mimeListPos = 0L
+
+    private var urlPtrs        = LongArray(0)
+    private var titlePtrs      = IntArray(0)
+    private var clusterPtrs    = LongArray(0)
+    private var hasTitleIndex  = true        // false for ZIM v6 (titlePtrPos == -1)
+    private var htmlMimeIndices = emptySet<Int>()  // MIME type indices for text/html
+
+    // title-sorted list: Pair(urlIndex, title) — loaded once at open
+    val allTitles = mutableListOf<Pair<Int, String>>()
+
+    // ── Public API ─────────────────────────────────────────────────────────────
+
+    fun open(onProgress: ((Double) -> Unit)? = null): Boolean {
+        return try {
+            raf = RandomAccessFile(filePath, "r")
+            readHeader()
+            readMimeTypes()
+            readPtrTables()
+            loadAllTitles(onProgress)
+            Log.d(TAG, "ZIM open: $articleCount articles, $clusterCount clusters, ${allTitles.size} readable")
+            true
+        } catch (e: Exception) {
+            Log.e(TAG, "open failed: ${e.message}", e)
+            false
+        }
+    }
+
+    fun close() {
+        raf?.close()
+        raf = null
+    }
+
+    /**
+     * Returns scored results sorted by score descending.
+     * Scoring (per matched term):
+     *   Title match        +3
+     *   First-para match   +2
+     *   Body match         +1
+     *   Multiple terms in same article → multiply accumulated bonus
+     */
+    fun search(query: String, maxResults: Int = 5): List<Map<String, Any>> {
+        val terms = query.lowercase()
+            .split(Regex("[\\s,?!.]+"))
+            .filter { it.length >= 2 && it !in STOPWORDS }
+        if (terms.isEmpty()) return emptyList()
+
+        // Phase 1: fast title scan
+        data class Candidate(val urlIndex: Int, val title: String, var score: Int)
+        val candidates = mutableListOf<Candidate>()
+
+        for ((urlIndex, title) in allTitles) {
+            val tl   = title.lowercase()
+            val tlN  = normalizeUmlauts(tl)   // umlaut-folded for fuzzy matching
+            var score = 0
+            var hits  = 0
+            for (term in terms) {
+                val termN = normalizeUmlauts(term)
+                val pts = when {
+                    tl == term                                    -> 5  // exact
+                    tl.length >= 4 && term.startsWith(tl)        -> 4  // inflection (hunde→hund)
+                    tl.startsWith(term)                           -> 3  // title prefix
+                    tlN == termN                                  -> 5  // exact after umlaut fold
+                    tlN.length >= 4 && termN.startsWith(tlN)     -> 4  // inflection after fold
+                    tlN.startsWith(termN)                         -> 3  // prefix after fold (mäuse→maus)
+                    tl.contains(term)                             -> 1  // compound
+                    tl.length >= 4 && term.contains(tl)          -> 1  // reverse substring
+                    tlN.contains(termN)                           -> 1  // compound after fold
+                    else                                          -> 0
+                }
+                if (pts > 0) { score += pts; hits++ }
+            }
+            if (score > 0) {
+                val finalScore = if (hits > 1) (score * hits * 0.7).toInt() else score
+                candidates.add(Candidate(urlIndex, title, finalScore))
+            }
+        }
+
+        candidates.sortByDescending { it.score }
+        val top = candidates.take(20)
+
+        // Phase 2: re-score top candidates with article body
+        val reScored = top.map { c ->
+            try {
+                val art = getArticleByUrlIndex(c.urlIndex)
+                val paraLower = art["firstParagraph"]!!.lowercase()
+                val bodyLower = art["text"]!!.lowercase()
+                var bonus = 0
+                var bodyHits = 0
+                for (term in terms) {
+                    when {
+                        paraLower.contains(term) -> { bonus += 2; bodyHits++ }
+                        bodyLower.contains(term)  -> { bonus += 1; bodyHits++ }
+                    }
+                }
+                val finalScore = if (bodyHits > 1) c.score + bonus * bodyHits else c.score + bonus
+                c.copy(score = finalScore)
+            } catch (_: Exception) { c }
+        }
+
+        return reScored
+            .sortedByDescending { it.score }
+            .take(maxResults)
+            .map { mapOf("urlIndex" to it.urlIndex, "title" to it.title, "score" to it.score) }
+    }
+
+    fun getArticleByUrlIndex(urlIndex: Int): Map<String, String> {
+        val entry = readDirEntry(urlIndex)
+            ?: throw IllegalStateException("No entry at $urlIndex")
+
+        // Follow redirect chain (max 5 hops)
+        var cur = entry
+        repeat(5) {
+            if (cur.mimeType != MIME_REDIRECT) return@repeat
+            cur = readDirEntry(cur.redirectIndex)
+                ?: throw IllegalStateException("Broken redirect")
+        }
+        if (cur.mimeType == MIME_REDIRECT) throw IllegalStateException("Redirect loop")
+
+        val (clusterData, extOffsets) = readCluster(cur.clusterNumber)
+        val blob = extractBlob(clusterData, cur.blobNumber, extOffsets)
+        val html = blob.toString(Charsets.UTF_8)
+        val text = htmlToText(html)
+        val firstPara = extractFirstParagraph(html)
+        val title = cur.title.ifEmpty { cur.url }
+        val zimUrl = cur.url.removePrefix("A/").removePrefix("C/").trim()
+
+        return mapOf("title" to title, "text" to text, "firstParagraph" to firstPara, "url" to zimUrl)
+    }
+
+    // ── Image extraction ──────────────────────────────────────────────────────
+
+    data class ImageRef(
+        val filename: String,
+        val mimeType: String,
+        val caption: String?,
+    )
+
+    fun getImageRefs(articleUrlIndex: Int): List<ImageRef> {
+        var cur = readDirEntry(articleUrlIndex) ?: return emptyList()
+        for (i in 0 until 5) {
+            if (cur.mimeType != MIME_REDIRECT) break
+            cur = readDirEntry(cur.redirectIndex) ?: return emptyList()
+        }
+        if (cur.mimeType == MIME_REDIRECT) return emptyList()
+        return try {
+            val (data, ext) = readCluster(cur.clusterNumber)
+            val html = extractBlob(data, cur.blobNumber, ext).toString(Charsets.UTF_8)
+            extractImageRefsFromHtml(html)
+        } catch (e: Exception) {
+            Log.e(TAG, "getImageRefs($articleUrlIndex) failed: ${e.message}")
+            emptyList()
+        }
+    }
+
+    fun getImageBytes(filename: String): ByteArray? {
+        val urlIdx = findUrlIndexByPath("I/$filename")
+            ?: findUrlIndexByPath("-/$filename")
+            ?: return null
+        return try {
+            var cur = readDirEntry(urlIdx) ?: return null
+            for (i in 0 until 5) {
+                if (cur.mimeType != MIME_REDIRECT) break
+                cur = readDirEntry(cur.redirectIndex) ?: return null
+            }
+            if (cur.mimeType == MIME_REDIRECT) return null
+            val (data, ext) = readCluster(cur.clusterNumber)
+            extractBlob(data, cur.blobNumber, ext)
+        } catch (e: Exception) {
+            Log.e(TAG, "getImageBytes($filename) failed: ${e.message}")
+            null
+        }
+    }
+
+    private fun extractImageRefsFromHtml(html: String): List<ImageRef> {
+        val result = mutableListOf<ImageRef>()
+        val seen = mutableSetOf<String>()
+        val imgRegex = Regex("""<img\b[^>]*?\bsrc="([^"]+)"[^>]*>""", RegexOption.IGNORE_CASE)
+        for (match in imgRegex.findAll(html)) {
+            val filename = extractImageFilename(match.groupValues[1]) ?: continue
+            if (filename in seen) continue
+            val ext = filename.substringAfterLast('.', "").lowercase()
+            if (ext !in setOf("jpg", "jpeg", "png", "webp", "gif")) continue
+            val mimeType = when (ext) {
+                "jpg", "jpeg" -> "image/jpeg"
+                "png"  -> "image/png"
+                "webp" -> "image/webp"
+                "gif"  -> "image/gif"
+                else   -> "image/jpeg"
+            }
+            val caption = findNearbyCaption(html, match.range.last)
+            seen.add(filename)
+            result.add(ImageRef(filename, mimeType, caption))
+        }
+        return result
+    }
+
+    private fun extractImageFilename(src: String): String? {
+        val decoded = try { java.net.URLDecoder.decode(src, "UTF-8") } catch (_: Exception) { src }
+        // Match I/ or -/ namespace prefixes (both are used in different ZIM versions)
+        for (prefix in listOf("I/", "-/")) {
+            val idx = decoded.lastIndexOf(prefix)
+            if (idx >= 0) {
+                val name = decoded.substring(idx + prefix.length)
+                if (name.contains('.')) return name
+            }
+        }
+        val name = decoded.substringAfterLast('/')
+        return if (name.contains('.')) name else null
+    }
+
+    private fun findNearbyCaption(html: String, afterPos: Int): String? {
+        val window = html.substring(afterPos, minOf(afterPos + 800, html.length))
+        val m = Regex("""<div\b[^>]*\bthumbcaption\b[^>]*>([\s\S]*?)</div>""", RegexOption.IGNORE_CASE)
+            .find(window) ?: return null
+        return m.groupValues[1]
+            .replace(Regex("<[^>]+>"), "")
+            .replace("&amp;", "&").replace("&nbsp;", " ")
+            .replace("&lt;", "<").replace("&gt;", ">")
+            .trim().ifEmpty { null }
+    }
+
+    private fun findUrlIndexByPath(targetPath: String): Int? {
+        var lo = 0; var hi = articleCount - 1
+        while (lo <= hi) {
+            val mid = (lo + hi) ushr 1
+            val e = readDirEntry(mid) ?: break
+            val path = "${e.namespace}/${e.url}"
+            when {
+                path < targetPath -> lo = mid + 1
+                path > targetPath -> hi = mid - 1
+                else              -> return mid
+            }
+        }
+        return null
+    }
+
+    // ── Header / index loading ─────────────────────────────────────────────────
+
+    private fun readHeader() {
+        val buf = ByteArray(80)
+        raf!!.seek(0)
+        raf!!.readFully(buf)
+        val bb = ByteBuffer.wrap(buf).order(ByteOrder.LITTLE_ENDIAN)
+
+        val magic = bb.int.toLong() and 0xFFFFFFFFL
+        if (magic != ZIM_MAGIC)
+            throw IllegalStateException("Bad ZIM magic: 0x${magic.toString(16)}")
+
+        majorVersion = bb.short.toInt() and 0xFFFF
+        bb.position(24)
+        articleCount = bb.int
+        clusterCount = bb.int
+        urlPtrPos    = bb.long
+        titlePtrPos  = bb.long
+        clusterPtrPos = bb.long
+        mimeListPos  = bb.long
+        Log.d(TAG, "v$majorVersion, articles=$articleCount, clusters=$clusterCount")
+    }
+
+    private fun readMimeTypes() {
+        raf!!.seek(mimeListPos)
+        val types = mutableListOf<String>()
+        for (i in 0 until 256) {
+            val s = readNullTermString() ?: break
+            if (s.isEmpty()) break
+            types.add(s)
+        }
+        htmlMimeIndices = types.indices.filter { types[it].startsWith("text/html") }.toSet()
+        Log.d(TAG, "MIME types: $types — HTML indices: $htmlMimeIndices")
+    }
+
+    private fun readPtrTables() {
+        urlPtrs = LongArray(articleCount)
+        raf!!.seek(urlPtrPos)
+        val urlBuf = ByteArray(articleCount * 8)
+        raf!!.readFully(urlBuf)
+        ByteBuffer.wrap(urlBuf).order(ByteOrder.LITTLE_ENDIAN).asLongBuffer().get(urlPtrs)
+
+        // ZIM v6 sets titlePtrPos = 0xFFFFFFFF_FFFFFFFF (-1 signed) → no title index
+        hasTitleIndex = titlePtrPos > 0
+        if (hasTitleIndex) {
+            titlePtrs = IntArray(articleCount)
+            raf!!.seek(titlePtrPos)
+            val titleBuf = ByteArray(articleCount * 4)
+            raf!!.readFully(titleBuf)
+            ByteBuffer.wrap(titleBuf).order(ByteOrder.LITTLE_ENDIAN).asIntBuffer().get(titlePtrs)
+        }
+
+        clusterPtrs = LongArray(clusterCount)
+        raf!!.seek(clusterPtrPos)
+        val clBuf = ByteArray(clusterCount * 8)
+        raf!!.readFully(clBuf)
+        ByteBuffer.wrap(clBuf).order(ByteOrder.LITTLE_ENDIAN).asLongBuffer().get(clusterPtrs)
+    }
+
+    private fun loadAllTitles(onProgress: ((Double) -> Unit)? = null) {
+        for (i in 0 until articleCount) {
+            // v5: iterate title-sorted table; v6: iterate URL table directly
+            val urlIdx = if (hasTitleIndex) titlePtrs[i] else i
+            val entry = readDirEntry(urlIdx) ?: continue
+            if (entry.mimeType == MIME_REDIRECT) continue
+            if (hasTitleIndex) {
+                // v5: namespace filter
+                if (entry.namespace != 'A' && entry.namespace != 'C') continue
+            } else {
+                // v6: filter by MIME type — only text/html entries are actual articles
+                if (htmlMimeIndices.isNotEmpty() && entry.mimeType !in htmlMimeIndices) continue
+            }
+            val title = entry.title.ifEmpty { entry.url }
+            allTitles.add(Pair(urlIdx, title))
+
+            if (articleCount > 0 && i % 50 == 0) {
+                onProgress?.invoke(i.toDouble() / articleCount)
+            }
+        }
+        onProgress?.invoke(1.0)
+    }
+
+    // ── Directory entry ────────────────────────────────────────────────────────
+
+    private data class DirEntry(
+        val mimeType: Int,
+        val namespace: Char,
+        val url: String,
+        val title: String,
+        val clusterNumber: Int,
+        val blobNumber: Int,
+        val redirectIndex: Int,
+    )
+
+    private fun readDirEntry(urlIndex: Int): DirEntry? {
+        if (urlIndex < 0 || urlIndex >= articleCount) return null
+        raf!!.seek(urlPtrs[urlIndex])
+
+        val mimeType   = readUInt16()
+        val paramLen   = raf!!.read()
+        val namespace  = raf!!.read().toChar()
+        raf!!.skipBytes(4) // revision
+
+        val clusterNumber: Int
+        val blobNumber:    Int
+        val redirectIndex: Int
+
+        if (mimeType == MIME_REDIRECT) {
+            redirectIndex  = readUInt32()
+            clusterNumber  = 0
+            blobNumber     = 0
+        } else {
+            clusterNumber  = readUInt32()
+            blobNumber     = readUInt32()
+            redirectIndex  = 0
+        }
+
+        val url   = readNullTermString() ?: ""
+        val title = readNullTermString() ?: ""
+        if (paramLen > 0) raf!!.skipBytes(paramLen)
+
+        return DirEntry(mimeType, namespace, url, title, clusterNumber, blobNumber, redirectIndex)
+    }
+
+    // ── Cluster / blob ─────────────────────────────────────────────────────────
+
+    private fun readCluster(clusterNumber: Int): Pair<ByteArray, Boolean> {
+        val offset     = clusterPtrs[clusterNumber]
+        val nextOffset = if (clusterNumber + 1 < clusterCount) clusterPtrs[clusterNumber + 1]
+                         else raf!!.length()
+
+        raf!!.seek(offset)
+        val info           = raf!!.read()
+        val comprType      = info and 0x0F
+        val extendedBlobs  = (info and 0x10) != 0
+
+        val compSize = (nextOffset - offset - 1).toInt().coerceAtLeast(0)
+        val compData = ByteArray(compSize)
+        raf!!.readFully(compData)
+
+        val decompressed = when (comprType) {
+            0, 1 -> compData
+            2    -> InflaterInputStream(ByteArrayInputStream(compData)).readBytes()
+            4    -> XZInputStream(ByteArrayInputStream(compData)).readBytes()
+            5    -> ZimZstd.decompress(compData) ?: throw IllegalStateException("ZSTD decompression failed")
+            else -> throw IllegalStateException("Unsupported cluster compression: $comprType")
+        }
+        return Pair(decompressed, extendedBlobs)
+    }
+
+    private fun extractBlob(data: ByteArray, blobNumber: Int, extendedOffsets: Boolean): ByteArray {
+        val bb = ByteBuffer.wrap(data).order(ByteOrder.LITTLE_ENDIAN)
+        return if (extendedOffsets) {
+            val start = bb.getLong(blobNumber * 8)
+            val end   = bb.getLong((blobNumber + 1) * 8)
+            data.copyOfRange(start.toInt(), end.toInt())
+        } else {
+            val start = Integer.toUnsignedLong(bb.getInt(blobNumber * 4))
+            val end   = Integer.toUnsignedLong(bb.getInt((blobNumber + 1) * 4))
+            data.copyOfRange(start.toInt(), end.toInt())
+        }
+    }
+
+    // ── HTML → plain text ──────────────────────────────────────────────────────
+
+    // Remove header/footer and image captions before text extraction
+    private fun preClean(html: String): String {
+        var s = html
+
+        // 1. Start from main article body — skip <head>, page title <h1>, nav chrome
+        val startMarkers = arrayOf("id=\"mw-content-text\"", "id=\"mw-parser-output\"", "id=\"bodyContent\"", "<body")
+        for (marker in startMarkers) {
+            val idx = s.indexOf(marker, ignoreCase = true)
+            if (idx > 0) {
+                val tagEnd = s.indexOf('>', idx)
+                if (tagEnd > 0) { s = s.substring(tagEnd + 1); break }
+            }
+        }
+
+        // 2. Cut at MediaWiki footer/category markers
+        for (marker in arrayOf(
+            "id=\"mw-footer\"", "id=\"footer\"", "class=\"printfooter\"",
+            "id=\"catlinks\"", "id=\"mw-data-after-content\"", "id=\"mw-navigation\"",
+            "class=\"noprint\"", "id=\"oer-award\"", "id=\"oer-logo\"", "id=\"cc-logo\""
+        )) {
+            val idx = s.indexOf(marker, ignoreCase = true)
+            if (idx > 0) {
+                var pos = idx
+                while (pos > 0 && s[pos] != '<') pos--
+                if (pos > 0) { s = s.substring(0, pos); break }
+            }
+        }
+
+        // 3. Cut at the Klexikon "Weblinks" section (article body, not MediaWiki footer)
+        //    Klexikon articles end with a standard Weblinks section linking to MiniKlexikon + FragFinn.
+        for (marker in arrayOf(
+            "id=\"Weblinks\"",
+            "id=\"Weiterführende_Informationen\"",
+            "id=\"Weitere_Informationen\"",
+            "id=\"Mehr_Informationen\""
+        )) {
+            val idx = s.indexOf(marker, ignoreCase = true)
+            if (idx > 0) {
+                // Walk back to the heading tag that contains this anchor
+                var pos = idx
+                while (pos > 0 && s[pos] != '<') pos--
+                // Step back one more tag boundary to include the heading wrapper
+                if (pos > 1) {
+                    pos--
+                    while (pos > 0 && s[pos] != '<') pos--
+                }
+                if (pos > 0) { s = s.substring(0, pos); break }
+            }
+        }
+
+        // 4. Cut at Klexikon credit/license/outro text.
+        //    Find the EARLIEST position across all markers — multiple promo blocks may appear
+        //    in different orders; a break-on-first-match would cut too late.
+        run {
+            val markers = arrayOf(
+                // Paragraph starting with "Klexikon ist für Kinder…" (oldest variant)
+                "Klexikon ist für Kinder",
+                "Online-Lexikon für Schulkinder",
+                "findet ihr einen besonders einfachen Artikel",
+                "weitere Kinderseiten",
+                "Kindersuchmaschine",
+                "MiniKlexikon.de",
+                "miniklexikon.zum.de",
+                "FragFinn", "Frag Finn",            // children's search engine in outro
+                // Older donation-link paragraph
+                "Klexikon ist ein",
+                "betterplace.org",
+                "zu 3.500 Themen",
+                "für Unterricht, Hausaufgaben",
+                // "Das Kinderlexikon Klexikon sorgt…" paragraph
+                "Das Kinderlexikon Klexikon sorgt",
+                "Medienkompetenz und Bildungsgerechtigkeit",
+                // Ambassador paragraph
+                "Klexikon-Botschafter",
+                "KiKA-Moderatoren",
+                "Ralph Caspers",
+                "Checker Julian",
+                "Julian Janssen",
+                "Wissen macht Ah",
+                // Funding-body paragraph
+                "bzkj.de",
+                "mabb.de",
+                "Bundeszentrale für Kinder",
+                // Generic fallbacks
+                "Diese Seite wurde zuletzt",
+                "Dieser Artikel ist Teil des Klexikons",
+                "Klexikon gehört",
+                "Das Klexikon ist",
+                "steht unter der Lizenz",
+                "Creative Commons"
+            )
+            var cutPos = -1
+            for (marker in markers) {
+                val idx = s.indexOf(marker, ignoreCase = true)
+                if (idx > 0 && (cutPos < 0 || idx < cutPos)) {
+                    var pos = idx
+                    while (pos > 0 && s[pos] != '<') pos--
+                    if (pos > 0) cutPos = pos
+                }
+            }
+            if (cutPos > 0) s = s.substring(0, cutPos)
+        }
+
+        // 4. Remove image blocks — inside-out so captions are gone even if outer class differs
+        s = removeNestedDivsByClass(s, "thumbcaption") // innermost caption
+        s = removeNestedDivsByClass(s, "thumbinner")   // mid-level wrapper
+        s = removeNestedDivsByClass(s, "thumb")        // outer thumb wrapper
+        s = removeNestedDivsByClass(s, "gallerytext")  // image gallery captions
+        s = removeNestedDivsByClass(s, "gallery")      // gallery <div>
+
+        // 4b. Remove <ul class="gallery"> blocks (Klexikon media galleries are <ul>, not <div>)
+        s = s.replace(Regex("<ul\\b[^>]*\\bgallery\\b[^>]*>[\\s\\S]*?</ul>", RegexOption.IGNORE_CASE), "")
+
+        // 4c. Cut at visual-reference paragraphs that precede galleries/videos
+        for (marker in arrayOf(
+            "Unten sieht man Film",
+            "Unten seht ihr",
+            "Im folgenden Film",
+            "Im folgenden Video",
+            "Hier sieht man Film",
+            "Hier seht ihr"
+        )) {
+            val idx = s.indexOf(marker, ignoreCase = true)
+            if (idx > 0) {
+                var pos = idx
+                while (pos > 0 && s[pos] != '<') pos--
+                s = s.substring(0, pos)
+                break
+            }
+        }
+
+        // 5. Remove table of contents
+        s = removeNestedDivsByClass(s, "toc")
+
+        // 6. Remove <figure> blocks (image + figcaption)
+        s = s.replace(Regex("<figure\\b[^>]*>[\\s\\S]*?</figure>", RegexOption.IGNORE_CASE), "")
+
+        // 7. Remove edit-section links
+        s = s.replace(Regex("<span[^>]*class=\"[^\"]*mw-editsection[^\"]*\"[^>]*>[\\s\\S]*?</span>", RegexOption.IGNORE_CASE), "")
+
+        // 8. Remove remaining bare <img> and <video> tags
+        s = s.replace(Regex("<img\\b[^>]*>", RegexOption.IGNORE_CASE), "")
+        s = s.replace(Regex("<video\\b[^>]*>|</video>", RegexOption.IGNORE_CASE), "")
+
+        return s
+    }
+
+    // Walk the html string and remove every <div> whose class contains cssClass,
+    // including all nested content. Uses a depth counter so nested divs are handled correctly.
+    private fun removeNestedDivsByClass(html: String, cssClass: String): String {
+        val result = StringBuilder()
+        var i = 0
+        val pattern = Regex("""<div\b[^>]*\bclass="[^"]*\b${Regex.escape(cssClass)}\b""", RegexOption.IGNORE_CASE)
+        while (i < html.length) {
+            val match = pattern.find(html, i) ?: run {
+                result.append(html.substring(i))
+                return result.toString()
+            }
+            result.append(html.substring(i, match.range.first))
+            // Advance to end of the opening tag
+            var pos = match.range.last + 1
+            while (pos < html.length && html[pos] != '>') pos++
+            if (pos < html.length) pos++ // skip '>'
+            // Walk to the matching </div>
+            var depth = 1
+            while (pos < html.length && depth > 0) {
+                val nextOpen  = html.indexOf("<div", pos, ignoreCase = true)
+                val nextClose = html.indexOf("</div>", pos, ignoreCase = true)
+                when {
+                    nextClose < 0                        -> { pos = html.length; depth = 0 }
+                    nextOpen < 0 || nextClose < nextOpen -> { pos = nextClose + 6; depth-- }
+                    else                                 -> { pos = nextOpen + 4; depth++ }
+                }
+            }
+            i = pos
+        }
+        return result.toString()
+    }
+
+    private fun htmlToText(html: String): String {
+        var s = preClean(html)
+        // Drop script / style blocks
+        s = s.replace(Regex("<script[\\s\\S]*?</script>", RegexOption.IGNORE_CASE), "")
+        s = s.replace(Regex("<style[\\s\\S]*?</style>", RegexOption.IGNORE_CASE), "")
+        // Drop nav, header, footer, table, figure blocks
+        s = s.replace(Regex("<(nav|header|footer|table|figure|figcaption)[\\s\\S]*?</(nav|header|footer|table|figure|figcaption)>", RegexOption.IGNORE_CASE), "")
+        // Block → newline
+        s = s.replace(Regex("</(p|div|h[1-6]|li|tr)>", RegexOption.IGNORE_CASE), "\n")
+        s = s.replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), "\n")
+        // Strip remaining tags
+        s = s.replace(Regex("<[^>]+>"), "")
+        // Decode common entities
+        s = s.replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
+            .replace("&quot;", "\"").replace("&apos;", "'")
+            .replace("&nbsp;", " ").replace("&#160;", " ")
+            .replace("&ndash;", "–").replace("&mdash;", "—")
+        // Normalise whitespace
+        s = s.replace(Regex("[ \t]+"), " ")
+        s = s.replace(Regex("\n[ \t]+"), "\n")
+        s = s.replace(Regex("\n{3,}"), "\n\n")
+        return s.trim()
+    }
+
+    private fun extractFirstParagraph(html: String): String {
+        val cleaned = preClean(html)
+        val m = Regex("<p[^>]*>([\\s\\S]*?)</p>", RegexOption.IGNORE_CASE).find(cleaned)
+            ?: return ""
+        return htmlToText(m.groupValues[1]).take(600)
+    }
+
+    private fun normalizeUmlauts(s: String): String =
+        s.replace("ä", "a").replace("ö", "o").replace("ü", "u")
+         .replace("Ä", "A").replace("Ö", "O").replace("Ü", "U")
+         .replace("ß", "ss")
+
+    // ── Low-level I/O ──────────────────────────────────────────────────────────
+
+    private fun readNullTermString(): String? {
+        val out = ByteArrayOutputStream()
+        while (true) {
+            val b = raf!!.read()
+            if (b == -1) return null
+            if (b == 0)  return out.toByteArray().toString(Charsets.UTF_8)
+            out.write(b)
+        }
+    }
+
+    private fun readUInt16(): Int {
+        val b0 = raf!!.read(); val b1 = raf!!.read()
+        return (b0 and 0xFF) or ((b1 and 0xFF) shl 8)
+    }
+
+    private fun readUInt32(): Int {
+        val buf = ByteArray(4); raf!!.readFully(buf)
+        return ByteBuffer.wrap(buf).order(ByteOrder.LITTLE_ENDIAN).int
+    }
+}
+
+// Minimal stand-in if zlib is needed without the full Inflater setup
+private fun InflaterInputStream(input: ByteArrayInputStream) =
+    java.util.zip.InflaterInputStream(input)

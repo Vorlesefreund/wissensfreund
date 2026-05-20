@@ -1,0 +1,61 @@
+name: Update Image Licenses
+
+# Runs on the 1st of every month at 03:00 UTC, and on manual trigger.
+# Downloads the Klexikon ZIM, extracts all image filenames, queries
+# Wikimedia Commons for license info, and publishes image_licenses.json
+# as a GitHub Release Asset at tag "image-licenses".
+
+on:
+  schedule:
+    - cron: '0 3 1 * *'
+  workflow_dispatch:
+
+env:
+  ZIM_VERSION: klexikon_de_all_maxi_2025-10
+  # Verify this URL at https://download.kiwix.org/zim/klexikon/ before first run.
+  ZIM_URL: https://download.kiwix.org/zim/klexikon/klexikon_de_all_maxi_2025-10.zim
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # required to create/update GitHub Releases
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: pip install libzim requests
+
+      - name: Download ZIM file
+        run: |
+          echo "Downloading $ZIM_URL"
+          curl -fsSL -o klexikon.zim "$ZIM_URL"
+          ls -lh klexikon.zim
+
+      - name: Generate image_licenses.json
+        run: python scripts/generate_license_json.py
+        env:
+          ZIM_FILE: klexikon.zim
+          ZIM_VERSION: ${{ env.ZIM_VERSION }}
+
+      - name: Publish as release asset (tag image-licenses)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: image-licenses
+          name: Image License Data (${{ env.ZIM_VERSION }})
+          body: |
+            Auto-generated Wikimedia Commons license data for `${{ env.ZIM_VERSION }}`.
+
+            The Wissensfreund app downloads this file on first start to check
+            which images may be displayed (CC0 / CC BY / CC BY-SA only).
+
+            Updated automatically on the 1st of every month.
+          files: image_licenses.json
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
