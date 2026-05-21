@@ -49,8 +49,27 @@ neben den Bildern, in der Reihenfolge wie sie im Artikel vorkommen (HTML-Positio
 - `_ThumbnailRow` — nutzt jetzt `provider.mediaItems` statt `provider.articleImages`,
   rendert `_SoundThumbnailTile` oder `_ZimImageTile` je nach `item.isAudio`
 
-**Hinweis:** Ob die Klexikon-ZIM tatsächlich Audiodateien enthält ist noch ungetestet.
-Falls keine `<audio>` Tags gefunden werden, erscheinen nur Bild-Thumbnails (Graceful Degradation).
+**Hinweis:** Die Klexikon-ZIM enthält **keine Audiodateien** — Audio auf klexikon.zum.de wird
+dynamisch aus Wikimedia via JavaScript nachgeladen und ist nicht im Offline-Archiv enthalten.
+Die Sound-Thumbnail-Infrastruktur ist fertig und wartet auf ein ZIM mit Audio-Inhalten.
+
+---
+
+## ✅ FERTIG — Bugfix: Klexikon-Logo als Thumbnail (Stand 2026-05-21)
+
+### Ursache
+
+Das Klexikon-K-Logo (`Klexikon_K_yellow.png`) erschien als zweites Thumbnail in der Leiste,
+weil `extractImageRefsFromHtml()` alle `<img>`-Tags erfasste — auch Logos und Navigationsgrafiken.
+
+### Fix (`ZimReader.kt`)
+
+In `extractImageRefsFromHtml()`: Bilder ohne `class="thumbimage"` werden übersprungen.
+Klexikon setzt `thumbimage` ausschließlich auf redaktionellen Artikelbildern, nie auf Logos/Icons.
+
+```kotlin
+if (!match.value.contains("thumbimage", ignoreCase = true)) continue
+```
 
 ---
 

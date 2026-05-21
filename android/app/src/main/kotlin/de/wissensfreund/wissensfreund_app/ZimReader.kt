@@ -264,9 +264,11 @@ class ZimReader(private val filePath: String) {
         val allMatches = imgRegex.findAll(html).toList()
         Log.d(TAG, "imgExtract: regex found ${allMatches.size} matches")
         for (match in allMatches) {
+            // Only include article-content images (class="thumbimage"). Logos, icons, and
+            // navigation images never have this class in Klexikon's HTML.
+            if (!match.value.contains("thumbimage", ignoreCase = true)) continue
             val src = match.groupValues[1]
             val filename = extractImageFilename(src)
-            Log.d(TAG, "imgExtract src=$src -> filename=$filename")
             if (filename == null) continue
             if (filename in seen) continue
             val ext = filename.substringAfterLast('.', "").lowercase()
