@@ -11,7 +11,14 @@ import '../services/wikimedia_license_checker.dart';
 class ArticleImageInfo {
   final String filename;
   final String? caption;
-  const ArticleImageInfo({required this.filename, this.caption});
+  // true = Bild stammt nachweislich aus der Klexikon-ZIM (CC BY-SA 3.0).
+  // false = Herkunft unklar → Bild wird nicht angezeigt.
+  final bool fromKlexikon;
+  const ArticleImageInfo({
+    required this.filename,
+    this.caption,
+    this.fromKlexikon = false,
+  });
 }
 
 enum AppState { idle, listening, thinking, speaking }
@@ -92,11 +99,12 @@ class WissensfreundProvider extends ChangeNotifier {
   int _selectedImageIndex = -1;
   final Map<String, Uint8List> _imageBytesCache = {};
 
-  // Caption-resume state (Schritt 3: Thumbnail-Tap während TTS)
-  bool   _isCaptionPlaying       = false;
-  bool   _isPromptPlaying        = false;
+  // Caption-resume state (Vollbild-Modus: Lautsprecher-Tap oder Wisch-Settle)
+  bool   _isCaptionPlaying        = false;
+  bool   _isPromptPlaying         = false;
   bool   _showCaptionResumePrompt = false;
   Timer? _captionResumeTimer;
+  Timer? _captionPromptDelayTimer;
 
   AppState get state          => _state;
   String get recognizedText   => _recognizedText;
@@ -169,15 +177,19 @@ class WissensfreundProvider extends ChangeNotifier {
     await _tts.setVolume(1.0);
     await _tts.setPitch(1.0);
     _tts.setCompletionHandler(() {
-      // Caption finished → speak "Soll ich weiterlesen?" then start 5s timer
+      // Caption fertig → 5s Pause → "Soll ich weiterlesen?" → weitere 5s → Auto-Resume
       if (_isCaptionPlaying) {
         _isCaptionPlaying = false;
-        _isPromptPlaying  = true;
         _showCaptionResumePrompt = true;
         notifyListeners();
-        _captionResumeTimer?.cancel();
-        _captionResumeTimer = Timer(const Duration(seconds: 5), resumeAfterCaption);
-        _tts.speak('Soll ich weiterlesen?');
+        _captionPromptDelayTimer?.cancel();
+        _captionPromptDelayTimer = Timer(const Duration(seconds: 5), () {
+          if (!_showCaptionResumePrompt) return;
+          _isPromptPlaying = true;
+          _captionResumeTimer?.cancel();
+          _captionResumeTimer = Timer(const Duration(seconds: 5), resumeAfterCaption);
+          _tts.speak('Soll ich weiterlesen?');
+        });
         return;
       }
       // Prompt finished → timer is already running, nothing more to do
@@ -268,6 +280,8 @@ class WissensfreundProvider extends ChangeNotifier {
 
   Future<void> startListening() async {
     if (_state != AppState.idle) return;
+    _captionPromptDelayTimer?.cancel();
+    _captionPromptDelayTimer = null;
     _captionResumeTimer?.cancel();
     _captionResumeTimer = null;
     _isCaptionPlaying = false;
@@ -432,38 +446,56 @@ class WissensfreundProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Thumbnail-Tap während TTS (Schritt 3).
-  /// Fall A: TTS läuft → pausieren, Caption vorlesen, "Soll ich weiterlesen?" → 5s Auto-Resume
-  /// Fall C: TTS läuft nicht → nur Bild anzeigen
-  Future<void> onThumbnailTap(int index) async {
-    selectImage(index);
-
-    final wasSpeaking = _state == AppState.speaking;
-    if (!wasSpeaking && !_isPaused) return; // Fall C
-
-    if (wasSpeaking) await pauseSpeaking();
-
-    final caption = index < _articleImages.length
-        ? _articleImages[index].caption
-        : null;
-
-    if (caption != null && caption.isNotEmpty) {
-      _isCaptionPlaying = true;
-      await _tts.speak(caption);
-      // Completion handler will speak prompt + start timer
-    } else {
-      // No caption — go straight to prompt
-      _isPromptPlaying = true;
-      _showCaptionResumePrompt = true;
-      notifyListeners();
-      _captionResumeTimer?.cancel();
-      _captionResumeTimer = Timer(const Duration(seconds: 5), resumeAfterCaption);
-      await _tts.speak('Soll ich weiterlesen?');
-    }
+  /// Thumbnail-Tap: nur Bild wechseln, kein TTS.
+  void onThumbnailTap(int index) {
+    _selectedImageIndex = index;
+    notifyListeners();
   }
 
-  /// Sofortiges Resume nach Caption (tapped by user or called by 5s timer).
+  /// Liefert den Zeichen-Offset des ANFANGS des aktuellen Satzes.
+  int _sentenceStartOffset() {
+    if (_articleText.isEmpty) return 0;
+    final pos = _ttsCursor.clamp(0, _articleText.length - 1);
+    for (int i = pos - 1; i >= 0; i--) {
+      if ('.!?'.contains(_articleText[i])) {
+        int start = i + 1;
+        while (start < _articleText.length && _articleText[start] == ' ') start++;
+        return start;
+      }
+    }
+    return 0;
+  }
+
+  /// Professor unterbricht sich, liest Caption vor, fragt danach "Soll ich weiterlesen?".
+  /// Wird vom Vollbild-Lautsprecher-Button oder nach Wisch-Settle aufgerufen.
+  Future<void> interruptForCaption(String caption) async {
+    if (caption.isEmpty) return;
+    _captionPromptDelayTimer?.cancel();
+    _captionResumeTimer?.cancel();
+    _isCaptionPlaying = false;
+    _isPromptPlaying  = false;
+    _showCaptionResumePrompt = false;
+
+    // Immer zum Satzanfang zurückspringen — gilt sowohl für sprechenden als auch pausierten Professor
+    final sentStart = _sentenceStartOffset();
+
+    if (_state == AppState.speaking) {
+      _isPaused = true;
+      _state    = AppState.idle;
+      await _tts.stop();
+    }
+
+    _resumeOffset     = sentStart;
+    _isCaptionPlaying = true;
+    notifyListeners();
+    await _tts.speak(caption);
+    // Completion handler adds 1s delay → prompt → 5s auto-resume
+  }
+
+  /// Sofortiges Resume nach Caption (Tap auf "Weiterlesen" oder 5s-Timer).
   void resumeAfterCaption() {
+    _captionPromptDelayTimer?.cancel();
+    _captionPromptDelayTimer = null;
     _captionResumeTimer?.cancel();
     _captionResumeTimer = null;
     _isCaptionPlaying = false;
@@ -478,18 +510,15 @@ class WissensfreundProvider extends ChangeNotifier {
       final rawList =
           await _zimChannel.invokeMethod<List>('listImages', {'urlIndex': urlIndex});
       if (rawList == null) return;
-      final allowed = <ArticleImageInfo>[];
-      for (final ref in rawList.cast<Map>()) {
-        final filename = ref['filename'] as String? ?? '';
-        if (filename.isEmpty) continue;
-        if (await WikimediaLicenseChecker.instance.isAllowed(filename)) {
-          allowed.add(ArticleImageInfo(
-            filename: filename,
-            caption: ref['caption'] as String?,
-          ));
-        }
-      }
-      _articleImages = allowed;
+      // All Klexikon images are CC-licensed — no per-image gate.
+      // License info (author/URL) is fetched on-demand by the ⓘ overlay.
+      _articleImages = rawList.cast<Map>().map((ref) {
+        return ArticleImageInfo(
+          filename:     ref['filename'] as String? ?? '',
+          caption:      ref['caption']  as String?,
+          fromKlexikon: true, // einzige Quelle in dieser App = Klexikon-ZIM (CC BY-SA 3.0)
+        );
+      }).where((img) => img.filename.isNotEmpty && img.fromKlexikon).toList();
     } catch (e) {
       debugPrint('loadImages error: $e');
     }
@@ -511,6 +540,19 @@ class WissensfreundProvider extends ChangeNotifier {
   }
 
   // ── Playback controls ─────────────────────────────────────────────────────
+
+  /// Unterbricht den Artikel-Vortrag, spricht einen einmaligen Satz (z.B. Rückfrage),
+  /// und speichert den Satzanfang als Resume-Punkt. Kein Auto-Resume-Timer.
+  Future<void> speakInterrupt(String text) async {
+    if (_state == AppState.speaking) {
+      _resumeOffset = _sentenceStartOffset();
+      _isPaused = true;
+      _state = AppState.idle;
+      notifyListeners();
+      await _tts.stop();
+    }
+    await _tts.speak(text);
+  }
 
   Future<void> pauseSpeaking() async {
     if (_state != AppState.speaking) return;
@@ -535,6 +577,8 @@ class WissensfreundProvider extends ChangeNotifier {
   }
 
   Future<void> stopSpeaking() async {
+    _captionPromptDelayTimer?.cancel();
+    _captionPromptDelayTimer = null;
     _captionResumeTimer?.cancel();
     _captionResumeTimer = null;
     _isCaptionPlaying = false;

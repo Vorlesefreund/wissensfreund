@@ -221,9 +221,22 @@ class ZimReader(private val filePath: String) {
     }
 
     fun getImageBytes(filename: String): ByteArray? {
-        val urlIdx = findUrlIndexByPath("I/$filename")
+        Log.d(TAG, "getImageBytes: '$filename'")
+        // Try every namespace that Kiwix ZIMs use for images, most-likely-first:
+        // Klexikon format : namespace='C', url='_assets_/hash/file'  → "C/file"
+        // ZIM v5          : namespace='I', url='file'                → "I/file"
+        // ZIM v6          : namespace='-', url='I/file'              → "-/I/file"
+        // ZIM v6 flat     : namespace='-', url='file'                → "-/file"
+        val urlIdx = findUrlIndexByPath("C/$filename")
+            ?: findUrlIndexByPath("I/$filename")
+            ?: findUrlIndexByPath("-/I/$filename")
             ?: findUrlIndexByPath("-/$filename")
-            ?: return null
+            ?: findUrlIndexByPath("A/$filename")
+            ?: run {
+                Log.w(TAG, "getImageBytes: not found: '$filename'")
+                return null
+            }
+        Log.d(TAG, "getImageBytes: found at urlIndex=$urlIdx")
         return try {
             var cur = readDirEntry(urlIdx) ?: return null
             for (i in 0 until 5) {
@@ -242,9 +255,18 @@ class ZimReader(private val filePath: String) {
     private fun extractImageRefsFromHtml(html: String): List<ImageRef> {
         val result = mutableListOf<ImageRef>()
         val seen = mutableSetOf<String>()
+        // Debug: log first <img occurrence so we can see the exact format
+        val firstImg = html.indexOf("<img", ignoreCase = true)
+        Log.d(TAG, "imgExtract: htmlLen=${html.length} firstImgAt=$firstImg")
+        if (firstImg >= 0) Log.d(TAG, "imgExtract snippet: ${html.substring(firstImg, minOf(firstImg + 300, html.length))}")
         val imgRegex = Regex("""<img\b[^>]*?\bsrc="([^"]+)"[^>]*>""", RegexOption.IGNORE_CASE)
-        for (match in imgRegex.findAll(html)) {
-            val filename = extractImageFilename(match.groupValues[1]) ?: continue
+        val allMatches = imgRegex.findAll(html).toList()
+        Log.d(TAG, "imgExtract: regex found ${allMatches.size} matches")
+        for (match in allMatches) {
+            val src = match.groupValues[1]
+            val filename = extractImageFilename(src)
+            Log.d(TAG, "imgExtract src=$src -> filename=$filename")
+            if (filename == null) continue
             if (filename in seen) continue
             val ext = filename.substringAfterLast('.', "").lowercase()
             if (ext !in setOf("jpg", "jpeg", "png", "webp", "gif")) continue
@@ -259,21 +281,24 @@ class ZimReader(private val filePath: String) {
             seen.add(filename)
             result.add(ImageRef(filename, mimeType, caption))
         }
+        Log.d(TAG, "imgExtract: returning ${result.size} images")
         return result
     }
 
     private fun extractImageFilename(src: String): String? {
-        val decoded = try { java.net.URLDecoder.decode(src, "UTF-8") } catch (_: Exception) { src }
-        // Match I/ or -/ namespace prefixes (both are used in different ZIM versions)
-        for (prefix in listOf("I/", "-/")) {
-            val idx = decoded.lastIndexOf(prefix)
-            if (idx >= 0) {
-                val name = decoded.substring(idx + prefix.length)
-                if (name.contains('.')) return name
-            }
+        // Do NOT URL-decode: ZIM URL table stores percent-encoded URLs,
+        // and the HTML src also uses percent-encoding — they must match as-is.
+        // Strip relative path prefixes (./  ../  ../../  leading /) so what remains
+        // is the path that can be found under any namespace prefix in getImageBytes().
+        var path = src
+        while (path.startsWith("../")) path = path.removePrefix("../")
+        if (path.startsWith("./")) path = path.removePrefix("./")
+        if (path.startsWith("/")) path = path.removePrefix("/")
+        val ext = path.substringAfterLast('.', "").lowercase()
+        return if (ext.isNotEmpty() && path.contains('/')) path else {
+            // No subdirectory — bare filename only
+            if (ext.isNotEmpty()) path else null
         }
-        val name = decoded.substringAfterLast('/')
-        return if (name.contains('.')) name else null
     }
 
     private fun findNearbyCaption(html: String, afterPos: Int): String? {

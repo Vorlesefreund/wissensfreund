@@ -2,6 +2,10 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-permission android:name="android.permission.USE_BIOMETRIC"/>
+    <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <application
         android:label="wissensfreund_app"
         android:name="${applicationName}"
@@ -33,6 +37,30 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <!-- Kinderschutz: Gerätesperre via DevicePolicyManager.lockNow() -->
+        <receiver
+            android:name=".WissensfreundDeviceAdmin"
+            android:permission="android.permission.BIND_DEVICE_ADMIN"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin"/>
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/>
+            </intent-filter>
+        </receiver>
+        <!-- Kinderschutz: Foreground Service — zeigt Overlay wenn Kind die App verlässt -->
+        <service
+            android:name=".WissensfreundForegroundService"
+            android:exported="false"
+            android:foregroundServiceType="shortService"/>
+        <!-- Kinderschutz: Transparente Activity für nativen BiometricPrompt -->
+        <activity
+            android:name=".ParentalUnlockActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Transparent"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"/>
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

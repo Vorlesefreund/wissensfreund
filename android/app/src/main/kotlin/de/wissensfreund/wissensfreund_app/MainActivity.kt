@@ -1,9 +1,12 @@
 package de.wissensfreund.wissensfreund_app
 
 import android.Manifest
+import android.app.admin.DevicePolicyManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.provider.Settings
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioFormat
@@ -18,19 +21,20 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.util.Log
-import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.android.FlutterFragmentActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 import java.io.File
 import java.util.concurrent.Executors
 
-class MainActivity : FlutterActivity() {
+class MainActivity : FlutterFragmentActivity() {
 
     private val tag = "WissensfreundSTT"
     private val channelName = "wissensfreund/speech"
     private val zimChannelName = "wissensfreund/zim"
     private val zimProgressChannelName = "wissensfreund/zim_progress"
+    private val parentalChannelName = "wissensfreund/parental"
 
     private var recognizer: SpeechRecognizer? = null
     private var pendingResult: MethodChannel.Result? = null
@@ -41,9 +45,29 @@ class MainActivity : FlutterActivity() {
     private var zimProgressSink: EventChannel.EventSink? = null
     private var zimLoadStarted = false
 
+    private var suppressRestoreOnce = false
+
     companion object {
         private const val MIC_PERMISSION_CODE = 1001
         private const val ZIM_FILENAME = "klexikon.zim"
+
+        @Volatile var kioskEnabled = false
+    }
+
+    // onStop: feuert für ALLE Navigationsarten (Home-Button, Recents, Wischgesten)
+    override fun onStop() {
+        super.onStop()
+        if (kioskEnabled && !suppressRestoreOnce && !WissensfreundForegroundService.released) {
+            WissensfreundForegroundService.showOverlay()
+        }
+        suppressRestoreOnce = false
+    }
+
+    // onStart: App kommt zurück in den Vordergrund — Overlay ausblenden, released zurücksetzen
+    override fun onStart() {
+        super.onStart()
+        WissensfreundForegroundService.released = false
+        WissensfreundForegroundService.hideOverlay()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +86,32 @@ class MainActivity : FlutterActivity() {
                     "startSpeech" -> startSpeech(result)
                     "stopSpeech"  -> stopSpeech(result)
                     else          -> result.notImplemented()
+                }
+            }
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, parentalChannelName)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "isDeviceAdminActive"      -> result.success(isDeviceAdminActive())
+                    "requestDeviceAdmin"       -> { requestDeviceAdmin(); result.success(null) }
+                    "lockDevice"               -> lockDevice(result)
+                    "startKioskMode"           -> startKioskMode(result)
+                    "stopKioskMode"            -> stopKioskMode(result)
+                    "isInKioskMode"            -> result.success(isInKioskMode())
+                    "hasOverlayPermission"     -> result.success(Settings.canDrawOverlays(this))
+                    "requestOverlayPermission" -> {
+                        suppressRestoreOnce = true // Rückkehr aus Einstellungen kein Overlay
+                        startActivity(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION).apply {
+                            data = android.net.Uri.parse("package:$packageName")
+                        })
+                        result.success(null)
+                    }
+                    "suppressRestoreOnce"      -> { suppressRestoreOnce = true; result.success(null) }
+                    "releaseKioskTemporarily"  -> {
+                        WissensfreundForegroundService.released = true
+                        result.success(null)
+                    }
+                    else                       -> result.notImplemented()
                 }
             }
 
@@ -387,6 +437,57 @@ class MainActivity : FlutterActivity() {
         runOnUiThread {
             recognizer?.stopListening()
             result.success(null)
+        }
+    }
+
+    // ── Parental lock — Kiosk (Overlay via Foreground Service) ───────────────
+
+    private fun startKioskMode(result: MethodChannel.Result) {
+        kioskEnabled = true
+        if (Settings.canDrawOverlays(this)) {
+            startForegroundService(Intent(this, WissensfreundForegroundService::class.java))
+        }
+        result.success(true)
+    }
+
+    private fun stopKioskMode(result: MethodChannel.Result) {
+        kioskEnabled = false
+        WissensfreundForegroundService.released = false
+        WissensfreundForegroundService.hideOverlay()
+        stopService(Intent(this, WissensfreundForegroundService::class.java))
+        result.success(true)
+    }
+
+    private fun isInKioskMode(): Boolean = kioskEnabled
+
+    // ── Parental lock — Device Admin ──────────────────────────────────────────
+
+    private fun isDeviceAdminActive(): Boolean {
+        val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val comp = ComponentName(this, WissensfreundDeviceAdmin::class.java)
+        return dpm.isAdminActive(comp)
+    }
+
+    private fun requestDeviceAdmin() {
+        val comp = ComponentName(this, WissensfreundDeviceAdmin::class.java)
+        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
+            putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, comp)
+            putExtra(
+                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
+                "Wissensfreund sperrt das Gerät automatisch, wenn dein Kind die App verlässt."
+            )
+        }
+        startActivity(intent)
+    }
+
+    private fun lockDevice(result: MethodChannel.Result) {
+        val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
+        val comp = ComponentName(this, WissensfreundDeviceAdmin::class.java)
+        if (dpm.isAdminActive(comp)) {
+            dpm.lockNow()
+            result.success(true)
+        } else {
+            result.success(false)
         }
     }
 

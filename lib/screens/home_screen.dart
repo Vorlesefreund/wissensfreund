@@ -1,10 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show FontFeature;
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/wissensfreund_provider.dart';
+import '../services/parental_lock_service.dart';
 import '../widgets/professor_widget.dart';
 import 'article_screen.dart';
 
@@ -28,6 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _zimFadeTimer;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkOnboarding());
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final p = context.read<WissensfreundProvider>();
@@ -36,6 +43,74 @@ class _HomeScreenState extends State<HomeScreen> {
       _provider = p;
       _provider?.addListener(_onProviderChanged);
     }
+  }
+
+  Future<void> _checkOnboarding() async {
+    if (!mounted) return;
+    final ps = context.read<ParentalLockService>();
+    if (ps.onboardingDone) return;
+    await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => _ParentalOnboardingDialog(ps: ps),
+    );
+    // Accessibility-Status nach Rückkehr aus Einstellungen aktualisieren
+    if (mounted) await ps.refreshAdminStatus();
+  }
+
+  Future<void> _onBackPressed(bool didPop, dynamic result) async {
+    if (didPop) return;
+    final provider = context.read<WissensfreundProvider>();
+    final ps = context.read<ParentalLockService>();
+
+    // Professor spricht die Rückfrage (unterbricht Artikel am Satzanfang)
+    await provider.speakInterrupt('Möchtest du Wissensfreund wirklich verlassen?');
+
+    if (!mounted) return;
+    final exit = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text('Wissensfreund verlassen?'),
+        content: const Text(
+          'Möchtest du wirklich aufhören zu lernen?',
+          style: TextStyle(fontSize: 16),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Nein, weiterlernen'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(
+                foregroundColor: Colors.red.shade700),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Ja, beenden'),
+          ),
+        ],
+      ),
+    );
+
+    if (exit != true) {
+      // Kind bleibt → Professor weiterlesen lassen
+      provider.resumeSpeaking();
+      return;
+    }
+
+    if (!mounted) return;
+    final authenticated = await ps.authenticate(
+      'Zum Beenden der App bitte authentifizieren.',
+    );
+
+    if (!authenticated) {
+      provider.resumeSpeaking();
+      return;
+    }
+
+    // Auth erfolgreich → Kiosk-Modus beenden, dann Gerät sperren, dann App beenden
+    if (ps.isKioskMode) await ps.stopKioskMode();
+    if (ps.isAdminActive) await ps.lockDevice();
+    SystemNavigator.pop();
   }
 
   void _onProviderChanged() {
@@ -111,8 +186,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<WissensfreundProvider>(
-      builder: (context, provider, _) {
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: _onBackPressed,
+      child: Consumer<WissensfreundProvider>(
+        builder: (context, provider, _) {
         final isSpeaking = provider.state == AppState.speaking;
 
         if (isSpeaking && provider.articleText.isNotEmpty) {
@@ -207,7 +285,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         );
       },
-    );
+    ),   // Consumer
+    );   // PopScope
   }
 }
 
@@ -459,10 +538,13 @@ class _BottomBar extends StatelessWidget {
   const _BottomBar({required this.provider});
 
   void _openMenu(BuildContext context) {
+    // context (HomeScreen-Ebene) wird als outerContext weitergegeben,
+    // damit Dialoge aus _AppMenu nach dem Schließen des BottomSheets
+    // noch einen gültigen BuildContext haben.
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => _AppMenu(provider: provider),
+      builder: (_) => _AppMenu(provider: provider, outerContext: context),
     );
   }
 
@@ -549,7 +631,8 @@ class _MenuIconButton extends StatelessWidget {
 
 class _AppMenu extends StatelessWidget {
   final WissensfreundProvider provider;
-  const _AppMenu({required this.provider});
+  final BuildContext outerContext; // HomeScreen-Ebene — bleibt nach BottomSheet-Pop gültig
+  const _AppMenu({required this.provider, required this.outerContext});
 
   @override
   Widget build(BuildContext context) {
@@ -583,7 +666,7 @@ class _AppMenu extends StatelessWidget {
             label: 'Texteingabe',
             onTap: () {
               Navigator.pop(context);
-              _showTextInput(context);
+              _showTextInput(outerContext);
             },
           ),
           const Divider(height: 1, indent: 24, endIndent: 24),
@@ -600,8 +683,162 @@ class _AppMenu extends StatelessWidget {
             onTap: () => Navigator.pop(context),
             comingSoon: true,
           ),
+          const Divider(height: 1, indent: 24, endIndent: 24),
+          _MenuItem(
+            icon: Icons.shield_rounded,
+            label: 'Kinderschutz',
+            onTap: () {
+              Navigator.pop(context);
+              _authenticateAndShowDashboard(outerContext);
+            },
+          ),
           const SizedBox(height: 16),
         ],
+      ),
+    );
+  }
+
+  void _authenticateAndShowDashboard(BuildContext ctx) async {
+    final ps = ctx.read<ParentalLockService>();
+    final ok = await ps.authenticate(
+      'Bitte authentifizieren um die Kinderschutz-Einstellungen zu öffnen.',
+    );
+    if (!ok || !ctx.mounted) return;
+    _showParentalDashboard(ctx);
+  }
+
+  void _showParentalDashboard(BuildContext stableCtx) {
+    showDialog(
+      context: stableCtx,
+      builder: (ctx) => Consumer<ParentalLockService>(
+        builder: (ctx, ps, _) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: const Row(children: [
+            Icon(Icons.shield_rounded, color: Color(0xFF2E7D32), size: 22),
+            SizedBox(width: 8),
+            Text('Kinderschutz'),
+          ]),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // ── Overlay-Berechtigung ──────────────────────────────
+                _DashboardRow(
+                  icon: ps.hasOverlayPermission
+                      ? Icons.layers_rounded
+                      : Icons.layers_clear_rounded,
+                  color: ps.hasOverlayPermission
+                      ? const Color(0xFF2E7D32)
+                      : Colors.red.shade700,
+                  label: ps.hasOverlayPermission
+                      ? 'Overlay-Berechtigung erteilt'
+                      : 'Overlay-Berechtigung fehlt',
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  ps.hasOverlayPermission
+                      ? 'Wissensfreund kann ein Sperr-Bildschirm über anderen Apps anzeigen.'
+                      : 'Ohne diese Berechtigung kann kein Overlay erscheinen. Bitte unten einrichten.',
+                  style: const TextStyle(fontSize: 13, height: 1.45),
+                ),
+                const SizedBox(height: 16),
+
+                // ── Kindersicherung (Kiosk) ──────────────────────────
+                _DashboardRow(
+                  icon: ps.isKioskMode
+                      ? Icons.lock_outline_rounded
+                      : Icons.lock_open_rounded,
+                  color: ps.isKioskMode
+                      ? const Color(0xFF2E7D32)
+                      : Colors.orange.shade700,
+                  label: ps.isKioskMode
+                      ? 'Kindermodus aktiv'
+                      : 'Kindermodus inaktiv',
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  ps.isKioskMode
+                      ? 'Home- und Recents-Taste führen direkt zum Eltern-Bildschirm. Das Kind kann nicht frei surfen.'
+                      : 'Wenn aktiviert, kehrt das Gerät bei Home- oder Recents-Taste sofort zum Eltern-Bildschirm zurück.',
+                  style: const TextStyle(fontSize: 13, height: 1.45),
+                ),
+                const SizedBox(height: 16),
+
+                // ── Eltern-Entsperrung ──────────────────────────────────
+                _DashboardRow(
+                  icon: ps.isAdminActive
+                      ? Icons.verified_rounded
+                      : Icons.info_outline_rounded,
+                  color: ps.isAdminActive
+                      ? const Color(0xFF2E7D32)
+                      : Colors.orange.shade700,
+                  label: ps.isAdminActive
+                      ? 'Gerätesperre beim Beenden'
+                      : 'Eltern-Bildschirm (Fallback)',
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  ps.isAdminActive
+                      ? 'Beim Verlassen der App über die Zurück-Taste sperrt sich das Gerät.'
+                      : 'Beim Zurückkehren zur App erscheint der Eltern-Bildschirm mit Fingerabdruck/PIN.',
+                  style: const TextStyle(fontSize: 13, height: 1.45),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Schließen'),
+            ),
+            if (!ps.hasOverlayPermission)
+              FilledButton(
+                style: FilledButton.styleFrom(
+                    backgroundColor: Colors.red.shade700),
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  await ps.requestOverlayPermission();
+                  await ps.refreshAdminStatus();
+                },
+                child: const Text('Overlay-Berechtigung einrichten'),
+              ),
+            if (!ps.isAdminActive)
+              OutlinedButton(
+                onPressed: () async {
+                  Navigator.pop(ctx);
+                  await ps.requestDeviceAdmin();
+                  await ps.refreshAdminStatus();
+                },
+                child: const Text('Gerätesperre aktivieren'),
+              ),
+            if (!ps.isKioskMode)
+              FilledButton(
+                style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF2E7D32)),
+                onPressed: () async {
+                  await ps.startKioskMode();
+                  if (ctx.mounted) Navigator.pop(ctx);
+                },
+                child: const Text('Kindermodus aktivieren'),
+              )
+            else
+              FilledButton(
+                style: FilledButton.styleFrom(
+                    backgroundColor: Colors.grey.shade600),
+                onPressed: () async {
+                  final authenticated = await ps.authenticate(
+                    'Kindersicherung deaktivieren — bitte authentifizieren.',
+                  );
+                  if (authenticated) {
+                    await ps.stopKioskMode();
+                    if (ctx.mounted) Navigator.pop(ctx);
+                  }
+                },
+                child: const Text('Kindersicherung deaktivieren'),
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -861,6 +1098,262 @@ class _PulsingRingsState extends State<_PulsingRings>
           ),
         );
       }),
+    );
+  }
+}
+
+// ── Dashboard-Hilfswidget ──────────────────────────────────────────────────
+
+class _DashboardRow extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final String label;
+  const _DashboardRow({
+    required this.icon,
+    required this.color,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Icon(icon, color: color, size: 20),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            label,
+            style: TextStyle(
+                fontWeight: FontWeight.bold, color: color, fontSize: 14),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Onboarding-Dialog (Schritt-für-Schritt-Einrichtung) ────────────────────
+
+class _ParentalOnboardingDialog extends StatefulWidget {
+  final ParentalLockService ps;
+  const _ParentalOnboardingDialog({required this.ps});
+
+  @override
+  State<_ParentalOnboardingDialog> createState() =>
+      _ParentalOnboardingDialogState();
+}
+
+class _ParentalOnboardingDialogState extends State<_ParentalOnboardingDialog>
+    with WidgetsBindingObserver {
+  // 0 = Willkommen, 1 = Wartet auf Berechtigung, 2 = Fertig
+  int _step = 0;
+  bool _permissionDenied = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed && _step == 1) {
+      _checkPermissionAndActivate();
+    }
+  }
+
+  Future<void> _checkPermissionAndActivate() async {
+    await widget.ps.refreshAdminStatus();
+    if (!mounted) return;
+    if (widget.ps.hasOverlayPermission) {
+      await widget.ps.startKioskMode();
+      if (!mounted) return;
+      setState(() { _step = 2; _permissionDenied = false; });
+    } else {
+      setState(() => _permissionDenied = true);
+    }
+  }
+
+  Future<void> _openSettings() async {
+    setState(() { _step = 1; _permissionDenied = false; });
+    await widget.ps.requestOverlayPermission();
+  }
+
+  Future<void> _dismiss() async {
+    await widget.ps.markOnboardingDone();
+    if (mounted) Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: false,
+      child: AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        contentPadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+        content: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: _buildContent(),
+        ),
+        actions: [_buildActions()],
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    if (_step == 0) {
+      return Column(
+        key: const ValueKey(0),
+        mainAxisSize: MainAxisSize.min,
+        children: const [
+          Text('🎓', style: TextStyle(fontSize: 40)),
+          SizedBox(height: 10),
+          Text(
+            'Kinderschutz einrichten',
+            style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2E7D32)),
+            textAlign: TextAlign.center,
+          ),
+          SizedBox(height: 16),
+          Text(
+            'Wissensfreund benötigt einmalig die Berechtigung, über anderen Apps '
+            'angezeigt zu werden — wie Messenger oder Chat-Bubbles.\n\n'
+            'So erscheint ein Sperr-Bildschirm, wenn dein Kind die App verlässt.',
+            style: TextStyle(fontSize: 15, height: 1.55),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      );
+    }
+    if (_step == 1) {
+      return Column(
+        key: const ValueKey(1),
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(_permissionDenied ? '⚠️' : '🔐',
+              style: const TextStyle(fontSize: 40)),
+          const SizedBox(height: 10),
+          Text(
+            _permissionDenied
+                ? 'Berechtigung nicht erteilt'
+                : 'Fast geschafft!',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: _permissionDenied
+                  ? Colors.red.shade700
+                  : const Color(0xFF2E7D32),
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _permissionDenied
+                ? 'Ohne diese Berechtigung kann kein Sperr-Bildschirm erscheinen. '
+                  'Bitte erteile sie, um dein Kind zu schützen.'
+                : 'Bitte aktiviere in den Einstellungen den Schalter für '
+                  'Wissensfreund und kehre dann zurück.',
+            style: const TextStyle(fontSize: 15, height: 1.55),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      );
+    }
+    // _step == 2
+    return const Column(
+      key: ValueKey(2),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('✅', style: TextStyle(fontSize: 40)),
+        SizedBox(height: 10),
+        Text(
+          'Kinderschutz ist aktiv!',
+          style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF2E7D32)),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 16),
+        Text(
+          'Ab jetzt erscheint ein Sperr-Bildschirm, wenn dein Kind Wissensfreund '
+          'verlässt. Du kannst ihn jederzeit mit Fingerabdruck oder PIN entsperren.',
+          style: TextStyle(fontSize: 15, height: 1.55),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActions() {
+    final btnStyle = FilledButton.styleFrom(
+      backgroundColor: const Color(0xFF2E7D32),
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+    );
+
+    if (_step == 0) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          FilledButton(
+            style: btnStyle,
+            onPressed: _openSettings,
+            child: const Text('Jetzt einrichten — empfohlen',
+                style: TextStyle(fontSize: 16)),
+          ),
+          const SizedBox(height: 10),
+          TextButton(
+            onPressed: _dismiss,
+            child: Text('Später / Ohne Kinderschutz',
+                style: TextStyle(color: Colors.grey.shade600)),
+          ),
+        ],
+      );
+    }
+    if (_step == 1) {
+      if (_permissionDenied) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            FilledButton(
+              style: btnStyle,
+              onPressed: _openSettings,
+              child: const Text('Berechtigung erteilen',
+                  style: TextStyle(fontSize: 16)),
+            ),
+            const SizedBox(height: 10),
+            TextButton(
+              onPressed: _dismiss,
+              child: Text('Ohne Kinderschutz fortfahren',
+                  style: TextStyle(color: Colors.grey.shade600)),
+            ),
+          ],
+        );
+      }
+      return TextButton(
+        onPressed: _dismiss,
+        child:
+            Text('Überspringen', style: TextStyle(color: Colors.grey.shade600)),
+      );
+    }
+    // _step == 2
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton(
+        style: btnStyle,
+        onPressed: _dismiss,
+        child: const Text('Alles klar!', style: TextStyle(fontSize: 16)),
+      ),
     );
   }
 }

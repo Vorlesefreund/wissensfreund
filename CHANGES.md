@@ -2,7 +2,266 @@
 
 ---
 
-## ⚡ NÄCHSTE SESSION — Hier weitermachen (Stand 2026-05-20)
+## ✅ FERTIG — Kommunikations-Infrastruktur + BIOMETRIC_WEAK (Stand 2026-05-21)
+
+### BIOMETRIC_WEAK — Frontkamera-Gesichtserkennung
+
+`ParentalUnlockActivity.kt`: Authenticators jetzt API-abhängig:
+- **API 30+ (Android 11+):** `BIOMETRIC_STRONG | BIOMETRIC_WEAK | DEVICE_CREDENTIAL`
+  → Fingerabdruck, Frontkamera-Gesicht, PIN, Muster, Passwort
+- **API 29 (Android 10):** `BIOMETRIC_STRONG | DEVICE_CREDENTIAL`
+  → Fingerabdruck, PIN, Muster, Passwort (`BIOMETRIC_WEAK` erst ab API 30 mit DEVICE_CREDENTIAL kombinierbar)
+
+Grundsatz: Was der Nutzer auf seinem Gerät eingerichtet hat, soll auch zum Entsperren funktionieren.
+
+### Neue Dateien im Repository
+
+**PROJEKTDOKUMENT.md** — Kompakte Architektur-Referenz:
+- App-Konzept, Tech-Stack, Zielgruppen, Kern-Entscheidungen
+- Dient als schneller Einstieg für neue Claude-Sessions
+- Bei neuer Projektdokument-Version (v17 etc.) bitte aktualisieren und pushen
+
+**CLAUDE_CHAT_NOTIZEN.md** — Kommunikationskanal Claude Chat → Claude Code:
+- Claude Chat schreibt Entscheidungen und Aufträge hinein
+- Claude Code liest am Session-Start, setzt offene Aufträge um, markiert mit [x]
+- Format: Datum, Thema, Entscheidung/Auftrag, Priorität, Erledigt-Checkbox
+
+### CLAUDE.md — Neue Pflicht-Regeln ergänzt
+
+1. **Session-Start Reihenfolge:** CLAUDE.md → CLAUDE_CHAT_NOTIZEN.md → CHANGES.md → dann Aufgaben
+2. **Nach jeder Session:** CHANGES.md (+ weitere geänderte Dateien) committen und pushen
+
+---
+
+## ✅ FERTIG — Kinderschutz: Overlay-Flow überarbeitet (Stand 2026-05-21)
+
+### Problem: Doppelter Overlay + ANR
+
+**Bisheriger Fehler:**
+- Kind drückt Recents → natives Overlay erscheint
+- "Entsperren" brachte Wissensfreund in den Vordergrund → Flutter-Overlay erschien (gleicher Screen, doppelt)
+- "Gerät freigeben" landete in Wissensfreund statt in Recents
+- ANR-Crash nach "Gerät freigeben"
+
+### Neue Architektur: Alles im nativen Overlay
+
+**Natives Overlay (WissensfreundForegroundService):**
+- Zeigt "Entsperren" (Eltern-Aktion) + "Zurück zu Wissensfreund" (Kind-Aktion)
+- "Entsperren" startet `ParentalUnlockActivity` (transparent) — **kein Umweg über Wissensfreund**
+- "Zurück zu Wissensfreund" schließt Overlay und bringt App in Vordergrund — keine Auth nötig
+
+**ParentalUnlockActivity** (neu):
+- Transparent, erscheint nicht in Recents (`excludeFromRecents`)
+- Zeigt direkt den System-`BiometricPrompt` (Fingerabdruck / PIN / Muster)
+- Erfolg → `released = true`, Activity schließt sich → Nutzer ist auf Recents/Home
+- Abbruch → Overlay wird wieder eingeblendet, Activity schließt sich
+
+**Flutter-Overlay** (`_ParentalOverlay` in main.dart):
+- Wird **nicht mehr automatisch** durch Lifecycle-Events ausgelöst
+- `didChangeAppLifecycleState`: nur noch `pauseSpeaking()` / `resumeSpeaking()` — kein Overlay-Trigger
+- Kinderschutz läuft vollständig über das native Overlay
+
+**Neue Dateien:**
+- `ParentalUnlockActivity.kt` — transparente Activity mit BiometricPrompt
+
+**Geänderte Dateien:**
+- `WissensfreundForegroundService.kt`: "Zurück zu Wissensfreund"-Button im Overlay; "Entsperren" startet `ParentalUnlockActivity`
+- `AndroidManifest.xml`: `ParentalUnlockActivity` registriert (transparent, excludeFromRecents)
+- `android/app/build.gradle`: `androidx.biometric:biometric:1.1.0` als explizite Dependency
+- `res/values/styles.xml`: `Theme.Transparent` für `ParentalUnlockActivity`
+- `main.dart`: `didChangeAppLifecycleState` vereinfacht — kein Flutter-Overlay-Trigger
+
+---
+
+## ✅ FERTIG — Kinderschutz: In-App-Schutz + Onboarding-Wizard (Stand 2026-05-21)
+
+### BiometricPrompt-Gate für Kinderschutz-Einstellungen
+
+Sicherheitsrelevante Bereiche innerhalb der App sind nur nach Eltern-Entsperrung zugänglich.
+Nicht-sicherheitsrelevante Bereiche (Lautstärke, Darstellung) bleiben frei nutzbar.
+
+**Gesperrt (BiometricPrompt erforderlich):**
+- Kinderschutz-Dashboard (Menü → Kinderschutz)
+- Kindermodus aktivieren/deaktivieren
+- Overlay-Berechtigung einrichten
+- Gerätesperre aktivieren
+
+**Verhalten:** Tippen auf "Kinderschutz" im Menü → BiometricPrompt erscheint sofort.
+Ohne Entsperrung: Dashboard öffnet sich nicht. Nach Entsperrung: voller Zugang.
+
+**Explizit NICHT blockiert:** Android-System-Einstellungen (Einstellungen → Apps → Wissensfreund).
+Eltern die systemseitig auf die App zugreifen werden nicht unterbrochen — das wäre unerwartet
+und nicht vertrauenerweckend.
+
+### Onboarding-Wizard überarbeitet
+
+**Vorher:** Einmaliger Dialog → markiert als erledigt → öffnet Einstellungen → Dialog weg → Kind nicht geschützt.
+
+**Nachher:** 3-Schritt-Wizard (Dialog bleibt geöffnet):
+- **Schritt 1:** Erklärung + "Jetzt einrichten"
+- **Schritt 2:** Dialog bleibt offen während Nutzer den Schalter aktiviert; `WidgetsBindingObserver` erkennt Rückkehr → prüft Berechtigung → startet Kindermodus automatisch
+- **Schritt 3:** ✅ "Kinderschutz ist aktiv!" → "Alles klar!" schließt Dialog
+
+**Bugfix Flutter-Overlay:** `didChangeAppLifecycleState` zeigte Flutter-Overlay bei JEDEM
+App-Resume, auch ohne aktiven Kindermodus. Gefixt: Overlay erscheint nur wenn `ps.isKioskMode == true`.
+
+**Geänderte Dateien:**
+- `home_screen.dart`: `_authenticateAndShowDashboard()` in `_AppMenu`; `_ParentalOnboardingDialog` → `StatefulWidget` mit 3 Schritten + `WidgetsBindingObserver`
+- `main.dart`: `didChangeAppLifecycleState` prüft `ps.isKioskMode` vor Overlay-Anzeige
+
+---
+
+## ✅ FERTIG — Kinderschutz: SYSTEM_ALERT_WINDOW Overlay (Stand 2026-05-21)
+
+### Implementierung
+
+**Berechtigung:** `SYSTEM_ALERT_WINDOW` — "Über anderen Apps anzeigen"
+- Gleiche Berechtigung wie Messenger-Bubbles, WhatsApp, etc.
+- Kein beängstigender Datenschutz-Hinweis
+- Einmalige Einrichtung: Ein Tap in der App → Toggle in Android-Einstellungen
+
+**Wie es funktioniert:**
+1. `onStop()` in `MainActivity` feuert bei ALLEN Navigationsarten (Home-Button, Recents, Wischgesten)
+2. `WissensfreundForegroundService` (Foreground Service) zeigt sofort ein natives Overlay via `WindowManager.TYPE_APPLICATION_OVERLAY`
+3. Overlay liegt über Homescreen und allen anderen Apps — Kind kann nichts bedienen
+4. "Entsperren" im Overlay → Overlay wird entfernt, Wissensfreund kommt in Vordergrund
+5. Flutter-Parental-Overlay zeigt BiometricPrompt (Fingerabdruck/PIN)
+6. Nach Auth: "Zurück zu Wissensfreund" oder "Gerät freigeben"
+7. "Gerät freigeben" → `released = true` im Service → kein Overlay bis Wissensfreund wieder geöffnet wird
+
+**Neue Dateien:**
+- `WissensfreundForegroundService.kt` — verwaltet WindowManager-Overlay, persistente Benachrichtigung "Kinderschutz aktiv"
+
+**Entfernte Dateien:**
+- `WissensfreundAccessibilityService.kt` — ersetzt durch Overlay-Ansatz
+- `accessibility_service_config.xml` — nicht mehr benötigt
+
+**Geänderte Dateien:**
+- `MainActivity.kt`: `onStop()`/`onStart()` für Overlay-Steuerung, neue Channel-Methoden `hasOverlayPermission`/`requestOverlayPermission`, Service-Start/-Stop in `startKioskMode`/`stopKioskMode`
+- `AndroidManifest.xml`: `SYSTEM_ALERT_WINDOW` + `FOREGROUND_SERVICE` Permissions, Foreground-Service-Eintrag
+- `parental_lock_service.dart`: `hasOverlayPermission`/`requestOverlayPermission` statt Accessibility-API
+- `home_screen.dart`: Dashboard zeigt Overlay-Berechtigung, Onboarding-Text angepasst
+- `main.dart`: `_ParentalOverlay` ist jetzt `StatefulWidget` mit Post-Auth-Optionen ("Zurück"/"Freigeben")
+
+**Abweichungen vom Plan:**
+- Kein separater `foregroundServiceType` außer `shortService` notwendig — Service zeigt nur ein Overlay, nutzt keine eingeschränkten Capabilities (kein Netzwerk, Kamera etc.)
+- Foreground Service Notification: Nutzt Android-System-Icon (`ic_lock_lock`) statt App-Icon, da Notification-Icons monochrom sein müssen
+
+---
+
+## ✅ FERTIG — Kinderschutz (Stand 2026-05-21)
+
+### Implementierte Schutz-Mechanismen
+
+**Zwei-Stufen-Architektur:**
+- **Stufe 1 (bevorzugt):** DevicePolicyManager.lockNow() — echter Android Gerätesperr-Bildschirm
+- **Stufe 2 (Fallback):** Eigener Eltern-Bildschirm in App-Farben mit 🔒 + "Für Erwachsene" + Entsperren-Button
+
+**Entsperr-Methode:** BiometricPrompt über `local_auth` mit `biometricOnly: false`
+→ deckt Fingerabdruck, Gesicht, Iris, PIN, Muster, Passwort ab
+
+**Fall 1 — Zurück-Taste:**
+- `PopScope(canPop: false)` in `HomeScreen` fängt letzten Back-Press ab
+- Professor spricht: "Möchtest du Wissensfreund wirklich verlassen?" (`speakInterrupt()`)
+- Dialog: "Nein, weiterlernen" / "Ja, beenden"
+- "Ja" → BiometricPrompt → bei Erfolg: Stufe 1 (lockDevice) dann `SystemNavigator.pop()`
+- Auth-Fehler oder "Nein" → Professor liest weiter ab Satzanfang
+
+**Fall 2 — Externe Links:**
+- Alle drei launchUrl-Stellen durch `_launchUrlWithParentalAuth()` ersetzt
+- Dialog: "Dieser Link ist für Erwachsene. Bitte Mama oder Papa fragen!" + [Entsperren]-Button
+- [Entsperren] → BiometricPrompt → bei Erfolg Link öffnen
+- Abbrechen → Link wird nicht geöffnet
+
+**Fall 3 — Home-Button:**
+- `WidgetsBindingObserver.didChangeAppLifecycleState()` in `_WissensfreundAppState`
+- `AppLifecycleState.paused` → `_wentToBackground = true`
+  - Stufe 1 aktiv: `lockDevice()` sofort
+  - Stufe 2: kein sofortiger Lock
+- `AppLifecycleState.resumed` (nach Home → zurück):
+  - Admin-Status refresh
+  - Stufe 2: Professor stoppen + Eltern-Bildschirm zeigen
+  - Stufe 1: kein Overlay nötig (Gerätesperre war aktiv)
+- Wichtig: Starten einer anderen Activity (z.B. Device-Admin-Aktivierung) triggert nur
+  `inactive` (nicht `paused`) → kein ungewolltes Overlay danach
+
+**Onboarding:**
+- Einmalig beim ersten App-Start (SharedPreferences: `parental_onboarding_done`)
+- Dialog erklärt Gerätesperre, zwei Optionen:
+  - "Jetzt aktivieren — empfohlen" → Device Admin Aktivierungsscreen
+  - "Später / Nein danke" → App läuft mit Stufe 2
+
+**Eltern-Dashboard:**
+- Neuer Menü-Eintrag "Kinderschutz" im App-Menü
+- Zeigt aktive Schutz-Stufe + Erklärungstext
+- Wenn Stufe 2: Button "Gerätesperre aktivieren" → Device Admin
+
+### Neue Dateien
+- `android/app/src/main/res/xml/device_admin.xml` — Device-Admin-Policy (force-lock)
+- `android/app/src/main/kotlin/.../WissensfreundDeviceAdmin.kt` — DeviceAdminReceiver
+- `lib/services/parental_lock_service.dart` — ChangeNotifier-Service (Singleton)
+
+### Geänderte Dateien
+- `AndroidManifest.xml` — USE_BIOMETRIC/USE_FINGERPRINT permissions + DeviceAdmin receiver
+- `MainActivity.kt` — `wissensfreund/parental` Channel + isDeviceAdminActive/requestDeviceAdmin/lockDevice
+- `main.dart` — MultiProvider, WidgetsBindingObserver, MaterialApp.builder Overlay
+- `home_screen.dart` — PopScope, Onboarding-Dialog, Kinderschutz-Dashboard, `speakInterrupt`-Aufruf
+- `wissensfreund_provider.dart` — `speakInterrupt(String text)` hinzugefügt
+- `article_screen.dart` — `_launchUrlWithParentalAuth` auf ParentalLockService umgestellt
+
+### Abweichungen vom Plan
+- Kein separater Dart-Import für `AuthenticationOptions.biometricOnly` nötig — `local_auth`-Paket
+  (bereits installiert) erledigt BiometricPrompt mit DeviceCredential-Fallback automatisch
+- Device-Admin-Aktivierungsscreen ist eine externe Activity — Flutter sieht nur `inactive`
+  (nicht `paused`) → `_wentToBackground`-Flag bleibt false → kein Overlay nach Rückkehr ✓
+
+---
+
+## ⚡ NÄCHSTE SESSION — Hier weitermachen (Stand 2026-05-21)
+
+### Thumbnail- und Vollbild-Verhalten komplett neu gestaltet ✅ FERTIG
+
+**Thumbnail antippen:**
+- Hauptbild wechselt mit crossFade 200ms (`AnimatedSwitcher` in `_MainArticleImageState`)
+- Professor läuft weiter — keine Unterbrechung, kein Ton
+- Kein Bildtext im Hauptbereich (Mode A: `_ImageCaption` entfernt)
+
+**Vollbild öffnen (Hauptbild antippen):**
+- Neue `_FullscreenGallery` ersetzt `_FullscreenImagePage`
+- Fade + Zoom-Animation (Scale 0.88 → 1.0, EaseOutCubic)
+- Schwarzer Hintergrund, Bild mit `BoxFit.contain`
+- Bildtext kursiv unterhalb des Bildes (falls vorhanden)
+- 🔊 Lautsprecher-Button auf dem Bild (nur wenn Bildtext vorhanden)
+- ← Zurück-Button unten mittig (56px, gut für Kinderfinger)
+
+**Wischen links/rechts im Vollbild:**
+- `onHorizontalDragEnd` wechselt Bild über `provider.onThumbnailTap()`
+- 2,5-Sekunden-Timer nach Wischen: wenn Caption vorhanden → `interruptForCaption()`
+- Am Rand (erstes/letztes Bild) kein weiteres Wischen möglich
+
+**Vollbild — 🔊 antippen:**
+- `provider.interruptForCaption(caption)` aufgerufen
+- Professor pausiert, Position auf Satzanfang (`_sentenceStartOffset()`)
+- Caption wird vorgelesen
+- 1 Sekunde Pause, dann "Soll ich weiterlesen?"
+- 5 Sekunden Auto-Resume ab Satzanfang
+- `_CaptionResumeOverlay` erscheint sowohl im Vollbild als auch im Hauptbildschirm
+
+**Vollbild schliessen:**
+- ← Zurück-Button (primär)
+- Swipe nach unten (velocity > 300)
+
+**Abweichungen vom Konzept:**
+- "Tap auf schwarzen Hintergrund → schliessen" nicht implementiert: bei `BoxFit.contain` ist der gesamte Expanded-Bereich vom GestureDetector abgedeckt, eine pixelgenaue Unterscheidung Bild/Randbereich wäre unverhältnismäßig komplex. Swipe-down und Zurück-Button sind die primären Schliess-Mechanismen.
+- Zoom-Animation: beginnt nicht exakt von der Bildposition (kein Hero-Widget), sondern skaliert von der Bildschirmmitte. Hero mit PageView/AnimatedSwitcher hätte Konflikte verursacht.
+- `_ImageCaption` (Caption unter Hauptbild in Modus A) wieder entfernt — Spec sagt "Kein Bildtext" beim Thumbnail-Tap.
+
+**Offen (nächste Session):**
+- Missing images für Thumbnails 5+ (vermutlich URL-decode-Problem in getImageBytes)
+
+---
+
+## ✅ ARCHIV — Abgeschlossene Sessions (Stand 2026-05-20)
 
 ### 1. ~~GitHub Workflow~~ ✅ FERTIG
 
@@ -16,24 +275,21 @@
 
 ---
 
-### 2. ~~Bilder-Integration Schritt 3~~ ✅ FERTIG
+### 2. ~~Bilder-Integration Schritt 3~~ ✅ FERTIG (neu gestaltet 2026-05-21)
 
-Thumbnail-Tap während TTS:
-- `onThumbnailTap()` im Provider: pausiert TTS, liest Caption vor, fragt "Soll ich weiterlesen?", 5s Auto-Resume
-- `_CaptionResumeOverlay` mit Countdown-Button
-- Fall C (TTS nicht aktiv): nur Bildwechsel, kein TTS
+Thumbnail-Tap: nur Bildwechsel (crossFade 200ms), kein TTS.
+Vollbild: 🔊-Button → `interruptForCaption()` im Provider → Satzanfang, Caption, Prompt.
 
 ### 3. ~~Bilder-Integration Schritt 4~~ ✅ FERTIG
 
 RAM-Grenze: `getImageBytes()` cached nur Bilder ≤ 2 MB. Größere Bilder werden angezeigt aber nicht gecacht.
 
-### 4. ~~Bilder-Integration Schritt 5~~ ✅ FERTIG
+### 4. ~~Bilder-Integration Schritt 5~~ ✅ FERTIG (neu gestaltet 2026-05-21)
 
-Vollbild-Ansicht:
-- `_FullscreenImagePage` via PageRouteBuilder (Fade + Scale-Animation)
-- InteractiveViewer für Pinch-to-Zoom
-- Schließen: X-Button, Tap auf Hintergrund, Swipe-down
-- ⓘ-Icon im Vollbild, TTS läuft weiter
+Vollbild-Galerie (`_FullscreenGallery`):
+- Fade + Scale-Animation, schwarzer Hintergrund
+- Wischen links/rechts für Bildnavigation
+- 🔊 auf Bild, Bildtext darunter, ← Zurück-Button unten mittig (56px)
 
 ---
 

@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/wissensfreund_provider.dart';
+import '../services/parental_lock_service.dart';
 import '../services/wikimedia_license_checker.dart';
 import '../widgets/professor_widget.dart';
 
@@ -22,6 +23,59 @@ const double _kMicClear   = _kMicSize + _kMicBottom * 2; //  80 — scroll botto
 const double _kProfZone   = _kProfH + _kProfBottom + 21; // 245 — viewport bottom covered by professor
 const double _kThumbRight = _kProfW + 2.0;               // 180 — thumbnail row right padding
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Parental auth — required before any external URL is opened
+// ─────────────────────────────────────────────────────────────────────────────
+
+Future<void> _launchUrlWithParentalAuth(BuildContext context, Uri uri) async {
+  final ps = context.read<ParentalLockService>();
+  bool authenticated = false;
+
+  await showDialog<void>(
+    context: context,
+    barrierDismissible: true,
+    builder: (ctx) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: const Row(children: [
+        Icon(Icons.lock_rounded, color: Color(0xFF2E7D32), size: 22),
+        SizedBox(width: 8),
+        Text('Für Erwachsene'),
+      ]),
+      content: const Text(
+        'Dieser Link ist für Erwachsene.\n\nBitte Mama oder Papa fragen!',
+        style: TextStyle(fontSize: 16, height: 1.5),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text('Schließen',
+              style: TextStyle(color: Colors.grey.shade600)),
+        ),
+        FilledButton.icon(
+          icon: const Icon(Icons.fingerprint_rounded, size: 20),
+          label: const Text('Entsperren'),
+          style: FilledButton.styleFrom(
+            backgroundColor: const Color(0xFF2E7D32),
+          ),
+          onPressed: () async {
+            final ok = await ps.authenticate(
+              'Zum Öffnen externer Links bitte authentifizieren.',
+            );
+            if (ok) {
+              authenticated = true;
+              if (ctx.mounted) Navigator.pop(ctx);
+            }
+          },
+        ),
+      ],
+    ),
+  );
+
+  if (authenticated && context.mounted) {
+    ps.suppressNextOverlay(); // Rückkehr vom Browser kein Overlay + Professor läuft weiter
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Root screen — manages mode switching; professor + mic are always on top
@@ -310,7 +364,12 @@ class _ArticleImage extends StatelessWidget {
 class _MainArticleImage extends StatefulWidget {
   final String fallbackTitle;
   final VoidCallback? onTap;
-  const _MainArticleImage({required this.fallbackTitle, this.onTap});
+  final bool enableFullscreenTap;
+  const _MainArticleImage({
+    required this.fallbackTitle,
+    this.onTap,
+    this.enableFullscreenTap = true,
+  });
 
   @override
   State<_MainArticleImage> createState() => _MainArticleImageState();
@@ -337,37 +396,63 @@ class _MainArticleImageState extends State<_MainArticleImage> {
     }
   }
 
+  void _openFullscreen(BuildContext ctx, int initialIndex) {
+    Navigator.of(ctx).push(PageRouteBuilder(
+      opaque: false,
+      barrierColor: Colors.transparent,
+      pageBuilder: (routeCtx, anim, _) =>
+          _FullscreenGallery(initialIndex: initialIndex, animation: anim),
+      transitionDuration: const Duration(milliseconds: 280),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<WissensfreundProvider>(
       builder: (ctx, provider, _) {
         _updateFuture(provider);
-        if (_bytesFuture == null) {
-          return _ArticleImage(title: widget.fallbackTitle);
-        }
-        return FutureBuilder<Uint8List?>(
-          future: _bytesFuture,
-          builder: (_, snap) {
-            final bytes = snap.data;
-            return GestureDetector(
-              onTap: bytes != null
-                  ? () => _showFullscreenImage(context, _loadedFilename!, _bytesFuture!)
-                  : widget.onTap,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  bytes != null
-                      ? Image.memory(bytes, fit: BoxFit.cover)
-                      : _ArticleImage(title: widget.fallbackTitle),
-                  Positioned(
-                    right: 8,
-                    bottom: 8,
-                    child: _LicenseInfoButton(filename: _loadedFilename!),
-                  ),
-                ],
-              ),
-            );
-          },
+        final images = provider.articleImages;
+        final selIdx = provider.selectedImageIndex < 0
+            ? 0
+            : provider.selectedImageIndex.clamp(0, images.length - 1);
+        final fromKlexikon = images.isEmpty ? false : images[selIdx].fromKlexikon;
+
+        final future = _bytesFuture;
+        final fn     = _loadedFilename;
+
+        return AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          child: future == null
+              ? _ArticleImage(
+                  key: const ValueKey('fallback'),
+                  title: widget.fallbackTitle,
+                )
+              : FutureBuilder<Uint8List?>(
+                  key: ValueKey(fn),
+                  future: future,
+                  builder: (_, snap) {
+                    final bytes = snap.data;
+                    if (bytes == null) {
+                      return _ArticleImage(title: widget.fallbackTitle);
+                    }
+                    return GestureDetector(
+                      onTap: widget.enableFullscreenTap
+                          ? () => _openFullscreen(context, selIdx)
+                          : widget.onTap,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.memory(bytes, fit: BoxFit.cover),
+                          Positioned(
+                            right: 8,
+                            bottom: 8,
+                            child: _LicenseInfoButton(filename: fn!, fromKlexikon: fromKlexikon),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
         );
       },
     );
@@ -432,11 +517,53 @@ class _ZimImageTileState extends State<_ZimImageTile> {
             Positioned(
               right: 4,
               bottom: 4,
-              child: _LicenseInfoButton(filename: widget.image.filename),
+              child: _LicenseInfoButton(filename: widget.image.filename, fromKlexikon: widget.image.fromKlexikon),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Caption strip below main image (Mode A)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ImageCaption extends StatelessWidget {
+  const _ImageCaption();
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<WissensfreundProvider>(
+      builder: (ctx, provider, _) {
+        final images = provider.articleImages;
+        if (images.isEmpty) return const SizedBox.shrink();
+        final idx = provider.selectedImageIndex < 0
+            ? 0
+            : provider.selectedImageIndex.clamp(0, images.length - 1);
+        final caption = images[idx].caption;
+        if (caption == null || caption.isEmpty) return const SizedBox.shrink();
+        return Container(
+          width: double.infinity,
+          decoration: const BoxDecoration(
+            color: Color(0xFFF0F7F2),
+            border: Border(top: BorderSide(color: Color(0xFFB2DFBF), width: 1)),
+          ),
+          padding: const EdgeInsets.fromLTRB(10, 5, 10, 6),
+          child: Text(
+            caption,
+            style: const TextStyle(
+              fontSize: 11.5,
+              height: 1.4,
+              color: Color(0xFF3D7A52),
+              fontStyle: FontStyle.italic,
+            ),
+            maxLines: 3,
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
+      },
     );
   }
 }
@@ -447,12 +574,13 @@ class _ZimImageTileState extends State<_ZimImageTile> {
 
 class _LicenseInfoButton extends StatelessWidget {
   final String filename;
-  const _LicenseInfoButton({required this.filename});
+  final bool fromKlexikon;
+  const _LicenseInfoButton({required this.filename, this.fromKlexikon = false});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _showLicenseInfo(context, filename),
+      onTap: () => _showLicenseInfo(context, filename, fromKlexikon: fromKlexikon),
       child: Container(
         width: 20,
         height: 20,
@@ -471,9 +599,18 @@ class _LicenseInfoButton extends StatelessWidget {
   }
 }
 
-void _showLicenseInfo(BuildContext context, String filename) async {
-  final entry = await WikimediaLicenseChecker.instance.getCached(filename);
+void _showLicenseInfo(
+  BuildContext context,
+  String filename, {
+  bool fromKlexikon = false,
+}) async {
+  final basename = filename.split('/').last;
+  final entry = await WikimediaLicenseChecker.instance.getCached(basename);
   if (!context.mounted) return;
+
+  final hasWikimediaData =
+      entry != null && (entry.urheber != null || entry.lizenz != null);
+
   showDialog(
     context: context,
     barrierDismissible: true,
@@ -490,6 +627,7 @@ void _showLicenseInfo(BuildContext context, String filename) async {
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
             const SizedBox(height: 12),
+            // ── Wikimedia-Daten (wenn vorhanden) ─────────────────────────
             if (entry?.urheber != null) ...[
               Text('Urheber: ${entry!.urheber}',
                   style: const TextStyle(fontSize: 14)),
@@ -502,9 +640,9 @@ void _showLicenseInfo(BuildContext context, String filename) async {
             ],
             if (entry?.lizenzUrl != null)
               GestureDetector(
-                onTap: () => launchUrl(
+                onTap: () => _launchUrlWithParentalAuth(
+                  context,
                   Uri.parse(entry!.lizenzUrl!),
-                  mode: LaunchMode.externalApplication,
                 ),
                 child: const Text(
                   'Auf Wikimedia Commons ansehen →',
@@ -515,11 +653,34 @@ void _showLicenseInfo(BuildContext context, String filename) async {
                   ),
                 ),
               ),
-            if (entry == null ||
-                (entry.urheber == null && entry.lizenz == null))
+            // ── Fallback: CC BY-SA NUR wenn Klexikon-Herkunft bestätigt ──
+            if (!hasWikimediaData && fromKlexikon) ...[
+              const Text('Quelle: Klexikon (ZIM)',
+                  style: TextStyle(fontSize: 14)),
+              const SizedBox(height: 4),
+              const Text('Lizenz: CC BY-SA 3.0',
+                  style: TextStyle(fontSize: 14)),
+              const SizedBox(height: 8),
+              GestureDetector(
+                onTap: () => _launchUrlWithParentalAuth(
+                  context,
+                  Uri.parse('https://klexikon.zum.de'),
+                ),
+                child: const Text(
+                  'klexikon.zum.de →',
+                  style: TextStyle(
+                    color: Color(0xFF2E7D32),
+                    fontSize: 14,
+                    decoration: TextDecoration.underline,
+                  ),
+                ),
+              ),
+            ],
+            // ── Unbekannte Herkunft → klar kennzeichnen ───────────────────
+            if (!hasWikimediaData && !fromKlexikon)
               const Text(
-                'Keine Lizenzinformationen verfügbar.',
-                style: TextStyle(fontSize: 14, color: Colors.grey),
+                'Lizenz unbekannt — Bild gesperrt.',
+                style: TextStyle(fontSize: 14, color: Colors.red),
               ),
           ],
         ),
@@ -603,7 +764,7 @@ class _KlexikonAttribution extends StatelessWidget {
       onTap: () async {
         final uri = Uri.tryParse(url);
         if (uri != null) {
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
+          await _launchUrlWithParentalAuth(context, uri);
         }
       },
       child: Padding(
@@ -624,105 +785,273 @@ class _KlexikonAttribution extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Fullscreen image viewer (Schritt 5)
-// Opens on tap of _MainArticleImage. TTS continues, no stop.
-// Close via X-button, tap on black area, or swipe down.
+// Vollbild-Galerie — öffnet sich beim Antippen des Hauptbilds.
+// Wischen links/rechts: nächstes/vorheriges Bild.
+// Nach 2,5s Wisch-Pause mit Caption: Professor unterbricht sich.
+// Schliessen: ← Zurück, Wischen nach unten.
 // ─────────────────────────────────────────────────────────────────────────────
 
-void _showFullscreenImage(
-  BuildContext context,
-  String filename,
-  Future<Uint8List?> bytesFuture,
-) {
-  Navigator.of(context).push(
-    PageRouteBuilder(
-      opaque: false,
-      barrierColor: Colors.transparent,
-      pageBuilder: (ctx, anim, _) => _FullscreenImagePage(
-        filename: filename,
-        bytesFuture: bytesFuture,
-        animation: anim,
-      ),
-      transitionDuration: const Duration(milliseconds: 300),
-    ),
-  );
-}
-
-class _FullscreenImagePage extends StatelessWidget {
-  final String filename;
-  final Future<Uint8List?> bytesFuture;
+class _FullscreenGallery extends StatefulWidget {
+  final int initialIndex;
   final Animation<double> animation;
 
-  const _FullscreenImagePage({
-    required this.filename,
-    required this.bytesFuture,
+  const _FullscreenGallery({
+    required this.initialIndex,
     required this.animation,
   });
 
   @override
+  State<_FullscreenGallery> createState() => _FullscreenGalleryState();
+}
+
+class _FullscreenGalleryState extends State<_FullscreenGallery> {
+  late int _currentIndex;
+  final _futures = <String, Future<Uint8List?>>{};
+  Timer? _swipeSettleTimer;
+  // Nur true wenn Nutzer auf diesem Bild auf 🔊 getippt hat.
+  // Nach Wischen auf nächstes Bild übertragen → Auto-Vorlesen aktivieren.
+  bool _speakerWasUsed = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
+
+  @override
+  void dispose() {
+    _swipeSettleTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<Uint8List?> _futureFor(String fn, WissensfreundProvider p) =>
+      _futures.putIfAbsent(fn, () => p.getImageBytes(fn));
+
+  void _swipe(DragEndDetails d) {
+    final v = d.primaryVelocity ?? 0;
+    if (v.abs() < 200) return;
+    final provider = context.read<WissensfreundProvider>();
+    final images   = provider.articleImages;
+    final next     = v < 0 ? _currentIndex + 1 : _currentIndex - 1;
+    if (next < 0 || next >= images.length) return;
+
+    // Merken ob 🔊 beim aktuellen Bild gedrückt wurde → Auto-Vorlesen für nächstes
+    final autoRead = _speakerWasUsed;
+    _speakerWasUsed = false;
+
+    provider.onThumbnailTap(next);
+    setState(() => _currentIndex = next);
+    _swipeSettleTimer?.cancel();
+    _swipeSettleTimer = Timer(const Duration(milliseconds: 2500), () {
+      if (!mounted) return;
+      if (!autoRead) return; // Kein Auto-Vorlesen wenn Nutzer 🔊 nicht gedrückt hat
+      final caption = images[next].caption;
+      if (caption != null && caption.isNotEmpty) {
+        provider.interruptForCaption(caption);
+      }
+    });
+  }
+
+  void _close() {
+    _swipeSettleTimer?.cancel();
+    Navigator.of(context).pop();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => Navigator.pop(context),
-      onVerticalDragEnd: (details) {
-        if (details.primaryVelocity != null && details.primaryVelocity! > 200) {
-          Navigator.pop(context);
-        }
-      },
-      child: FadeTransition(
-        opacity: animation,
-        child: Scaffold(
-          backgroundColor: Colors.black,
-          body: SafeArea(
-            child: Stack(
-              children: [
-                // ── Bild ──────────────────────────────────────────────────
-                Center(
-                  child: FutureBuilder<Uint8List?>(
-                    future: bytesFuture,
-                    builder: (_, snap) {
-                      final bytes = snap.data;
-                      if (bytes == null) {
-                        return const CircularProgressIndicator(color: Colors.white54);
-                      }
-                      return ScaleTransition(
-                        scale: Tween<double>(begin: 0.85, end: 1.0).animate(
-                          CurvedAnimation(parent: animation, curve: Curves.easeOutCubic),
-                        ),
-                        child: InteractiveViewer(
-                          child: Image.memory(bytes, fit: BoxFit.contain),
-                        ),
-                      );
-                    },
-                  ),
+    return Consumer<WissensfreundProvider>(
+      builder: (ctx, provider, _) {
+        final images       = provider.articleImages;
+        final cur          = _currentIndex.clamp(0, images.isEmpty ? 0 : images.length - 1);
+        final image        = images.isEmpty ? null : images[cur];
+        final fn           = image?.filename;
+        final caption      = image?.caption;
+        final hasCaption   = caption != null && caption.isNotEmpty;
+        final fromKlexikon = image?.fromKlexikon ?? false;
+        final future       = fn != null ? _futureFor(fn, provider) : null;
+
+        return Stack(
+          fit: StackFit.expand,
+          children: [
+            // Immediate black backdrop
+            const ColoredBox(color: Colors.black),
+
+            // Fade + zoom entry animation
+            FadeTransition(
+              opacity: widget.animation,
+              child: ScaleTransition(
+                scale: Tween<double>(begin: 0.88, end: 1.0).animate(
+                  CurvedAnimation(parent: widget.animation, curve: Curves.easeOutCubic),
                 ),
-                // ── X-Button ──────────────────────────────────────────────
-                Positioned(
-                  top: 8,
-                  right: 12,
-                  child: GestureDetector(
-                    onTap: () => Navigator.pop(context),
-                    child: Container(
-                      width: 36,
-                      height: 36,
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.15),
-                        shape: BoxShape.circle,
+                child: Scaffold(
+                  backgroundColor: Colors.black,
+                  body: SafeArea(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onHorizontalDragEnd: _swipe,
+                      onVerticalDragEnd: (d) {
+                        if ((d.primaryVelocity ?? 0) > 300) _close();
+                      },
+                      child: Column(
+                        children: [
+                          // ── Bildbereich ─────────────────────────────────
+                          Expanded(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 220),
+                              child: future == null
+                                  ? const Center(
+                                      key: ValueKey('loading'),
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white54,
+                                      ),
+                                    )
+                                  : FutureBuilder<Uint8List?>(
+                                      key: ValueKey(fn),
+                                      future: future,
+                                      builder: (_, snap) {
+                                        final bytes = snap.data;
+                                        return Stack(
+                                          fit: StackFit.expand,
+                                          children: [
+                                            // Image — füllt gesamten Expanded-Bereich
+                                            bytes == null
+                                                ? const Center(
+                                                    child: CircularProgressIndicator(
+                                                        color: Colors.white54))
+                                                : InteractiveViewer(
+                                                    minScale: 1.0,
+                                                    maxScale: 4.0,
+                                                    clipBehavior: Clip.none,
+                                                    child: SizedBox.expand(
+                                                      child: Image.memory(
+                                                        bytes,
+                                                        fit: BoxFit.contain,
+                                                      ),
+                                                    ),
+                                                  ),
+                                            // Speaker-Button wurde unter das Bild verschoben
+                                            // ⓘ Lizenz
+                                            if (fn != null)
+                                              Positioned(
+                                                bottom: 16,
+                                                right: 16,
+                                                child: _LicenseInfoButton(filename: fn, fromKlexikon: fromKlexikon),
+                                              ),
+                                          ],
+                                        );
+                                      },
+                                    ),
+                            ),
+                          ),
+
+                          // ── 🔊 Button + Bildtext unter dem Bild ──────────────
+                          if (hasCaption) ...[
+                            // Lautsprecher-Button
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10),
+                              child: Center(
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    setState(() => _speakerWasUsed = true);
+                                    provider.interruptForCaption(caption);
+                                  },
+                                  child: Container(
+                                    width: 52,
+                                    height: 52,
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF1B4332)
+                                          .withValues(alpha: 0.88),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white.withValues(alpha: 0.35),
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                    child: const Icon(
+                                      Icons.volume_up_rounded,
+                                      color: Colors.white,
+                                      size: 26,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Bildtext — scrollbar bei langem Text, max. ~5 Zeilen
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxHeight: 110),
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: () {},
+                                child: SingleChildScrollView(
+                                  padding: const EdgeInsets.fromLTRB(20, 8, 20, 4),
+                                  child: Text(
+                                    caption,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 13,
+                                      height: 1.4,
+                                      fontStyle: FontStyle.italic,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+
+                          // ── ← Zurück-Button ───────────────────────────────
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 10, 0, 20),
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: _close,
+                              child: Container(
+                                height: 56,
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 28),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withValues(alpha: 0.13),
+                                  borderRadius: BorderRadius.circular(28),
+                                ),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.arrow_back_rounded,
+                                        color: Colors.white, size: 26),
+                                    SizedBox(width: 10),
+                                    Text(
+                                      'Zurück',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      child: const Icon(Icons.close_rounded, color: Colors.white, size: 20),
                     ),
                   ),
                 ),
-                // ── ⓘ-Icon ────────────────────────────────────────────────
-                Positioned(
-                  bottom: 16,
-                  right: 16,
-                  child: _LicenseInfoButton(filename: filename),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
-      ),
+
+            // Caption-Resume-Prompt — schwimmt über allem
+            if (provider.showCaptionResumePrompt)
+              const Positioned(
+                bottom: 100,
+                left: 0,
+                right: 0,
+                child: Center(child: _CaptionResumeOverlay()),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -1422,7 +1751,10 @@ class _ModeCContent extends StatelessWidget {
                 children: [
                   // ── Vollbild-Bild ─────────────────────────────────────────
                   Positioned.fill(
-                    child: _MainArticleImage(fallbackTitle: provider.articleTitle),
+                    child: _MainArticleImage(
+                      fallbackTitle: provider.articleTitle,
+                      enableFullscreenTap: false,
+                    ),
                   ),
 
                   // ── Oben: Gradient + Artikeltitel ─────────────────────────

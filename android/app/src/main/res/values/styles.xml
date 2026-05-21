@@ -15,4 +15,10 @@
     <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
     </style>
+    <!-- Transparente Activity für BiometricPrompt (ParentalUnlockActivity).
+         Eltern-Theme.Translucent.NoTitleBar ist ein Standard-Android-Theme,
+         das ohne AppCompat funktioniert und kein eigenes Window-Background zeigt. -->
+    <style name="Theme.Transparent" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <item name="android:backgroundDimEnabled">false</item>
+    </style>
 </resources>
