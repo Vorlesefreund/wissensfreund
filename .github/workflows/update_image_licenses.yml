@@ -1,14 +1,23 @@
-name: Update Image Licenses
+name: Update Media Assets
 
 # Runs on the 1st of every month at 03:00 UTC, and on manual trigger.
-# Downloads the Klexikon ZIM, extracts all image filenames, queries
-# Wikimedia Commons for license info, and publishes image_licenses.json
-# as a GitHub Release Asset at tag "image-licenses".
+# Downloads the Klexikon ZIM, extracts all media metadata, queries
+# Wikimedia Commons for license info, downloads permitted audio files,
+# and publishes the results as GitHub Release Assets.
+#
+# Manual test run with limited articles:
+#   Go to Actions → Update Media Assets → Run workflow
+#   Set "max_articles" to e.g. 10
 
 on:
   schedule:
     - cron: '0 3 1 * *'
   workflow_dispatch:
+    inputs:
+      max_articles:
+        description: 'Max HTML articles to scan for audio (0 = all, 10 = quick test)'
+        required: false
+        default: '0'
 
 env:
   ZIM_VERSION: klexikon_de_all_maxi_2026-05
@@ -28,7 +37,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install Python dependencies
-        run: pip install requests
+        run: pip install requests libzim
 
       - name: Download ZIM file
         run: |
@@ -36,13 +45,28 @@ jobs:
           curl -fsSL -o klexikon.zim "$ZIM_URL"
           ls -lh klexikon.zim
 
-      - name: Generate image_licenses.json
+      # ── Step 1: Image + audio metadata from ZIM binary ──────────────────────
+      - name: Generate media_licenses.json
         run: python scripts/generate_license_json.py
         env:
           ZIM_FILE: klexikon.zim
           ZIM_VERSION: ${{ env.ZIM_VERSION }}
 
-      - name: Publish as release asset (tag image-licenses)
+      # ── Step 2: Audio links from article HTML (wpDestFile= pattern) ─────────
+      - name: Extract audio refs from article HTML
+        run: python scripts/extract_article_audio.py
+        env:
+          ZIM_FILE: klexikon.zim
+          MAX_ARTICLES: ${{ inputs.max_articles || '0' }}
+
+      # ── Step 3+4: License check, download, ZIP + index ──────────────────────
+      - name: Download audio files and build package
+        run: python scripts/download_audio.py
+        env:
+          ZIM_VERSION: ${{ env.ZIM_VERSION }}
+
+      # ── Publish: image license data ──────────────────────────────────────────
+      - name: Publish image license data
         uses: softprops/action-gh-release@v2
         with:
           tag_name: image-licenses
@@ -55,6 +79,28 @@ jobs:
 
             Updated automatically on the 1st of every month.
           files: media_licenses.json
+          make_latest: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # ── Publish: audio package ───────────────────────────────────────────────
+      - name: Publish audio package
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: wissensfreund-audio
+          name: Audio Package (${{ env.ZIM_VERSION }})
+          body: |
+            Wikimedia Commons audio files linked in Klexikon articles (`${{ env.ZIM_VERSION }}`).
+
+            **Files:**
+            - `wissensfreund_audio.zip` — audio files (CC0 / CC BY / CC BY-SA, max 5 MB each, max 50 MB total)
+            - `audio_index.json` — article → audio file mapping with captions and local paths
+
+            The Wissensfreund app downloads this package on first start for offline audio playback.
+            Updated automatically on the 1st of every month.
+          files: |
+            wissensfreund_audio.zip
+            audio_index.json
           make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

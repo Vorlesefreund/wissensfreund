@@ -2,6 +2,46 @@
 
 ---
 
+## ✅ FERTIG — GitHub Actions: Audio-Pipeline (Stand 2026-05-21)
+
+### Neue Dateien
+
+**`scripts/extract_article_audio.py`** (neu):
+- Öffnet ZIM mit `libzim` Python-Bindings
+- Scannt alle Artikel-HTML-Einträge nach `wpDestFile=`-Links (Wikimedia-Audio)
+- Extrahiert Dateinamen (ogg/mp3/wav) + Caption (Text vor dem Link, bis 500 Zeichen zurück)
+- Schreibt `article_audio_refs.json` (Artikel → Liste von {filename, caption, position})
+- Testmodus: `MAX_ARTICLES=10` begrenzt den Scan (z.B. für Probedurchlauf mit Beethoven)
+
+**`scripts/download_audio.py`** (neu):
+- Liest `article_audio_refs.json`
+- Fragt Wikimedia Commons API für Lizenz + Download-URL (`iiprop=extmetadata|url`)
+- Gleiche Lizenzregeln wie Bilder: CC0, CC BY, CC BY-SA — alle anderen gesperrt
+- Lädt erlaubte Dateien herunter: max 5 MB pro Datei, max 50 MB gesamt
+- Schreibt `audio_index.json` (Artikel → [{filename, caption, local_path}])
+- Packt alle Dateien als `wissensfreund_audio.zip` (intern: `audio/DATEINAME`)
+
+### Workflow-Update: `update_image_licenses.yml`
+
+Umbenannt in "Update Media Assets". Neue Eingabe `max_articles` für Testläufe.
+
+Neue Schritte nach dem bestehenden `generate_license_json.py`:
+1. `extract_article_audio.py` — Audio-Links aus HTML extrahieren
+2. `download_audio.py` — Lizenzcheck + Download + ZIP erstellen
+3. Release-Asset: `wissensfreund_audio.zip` + `audio_index.json` unter Tag `wissensfreund-audio`
+
+### Bekannte Einschränkungen / Abweichungen vom Plan
+
+- **Klexikon-ZIM hat KEINE eingebetteten Audio-Dateien.** Audio auf klexikon.zum.de sind
+  Wikimedia-Links, die per JavaScript nachgeladen werden — nicht im ZIM-Archiv enthalten.
+  Die `generate_license_json.py` Audio-Sektion bleibt daher leer (korrekt, da keine ZIM-Einträge).
+- **`extract_article_audio.py` findet die Wikimedia-Links** aus dem Artikel-HTML direkt
+  (wpDestFile= Muster) — das ist der richtige Ansatz für diesen Inhalt.
+- **App-Seite (Schritt 5)** — Download + Entpacken + SQLite-Cache + getAudioRefs() —
+  ist noch nicht implementiert. Folgt in nächster Session.
+
+---
+
 ## ✅ FERTIG — Sound-Thumbnails in der Thumbnail-Leiste (Stand 2026-05-21)
 
 ### Neue Funktionalität
