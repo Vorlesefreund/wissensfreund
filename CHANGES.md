@@ -54,6 +54,29 @@ Falls keine `<audio>` Tags gefunden werden, erscheinen nur Bild-Thumbnails (Grac
 
 ---
 
+## ✅ FERTIG — Bugfix: Fehlende Thumbnails (URL-Doppelkodierung) (Stand 2026-05-21)
+
+### Ursache
+
+Bilder in der Thumbnail-Leiste fehlten, wenn ihre Dateinamen Sonderzeichen enthielten.
+
+**Logcat-Befund:**
+```
+getImageBytes: '_assets_/.../Wien%252C_...jpg'  → not found
+```
+Das HTML im ZIM kodiert Sonderzeichen doppelt: `%252C` (im HTML) steht für `%2C` in der ZIM-URL-Tabelle.
+Auch `%C3%A9` (UTF-8 für `é`) kommt im HTML vor, die ZIM-URL-Tabelle speichert es als `é` (Literal).
+
+### Fix (`ZimReader.kt`)
+
+- `findByFilename(filename)` — neue Hilfsmethode, sucht in allen Namespaces (C/, I/, -/I/, -/, A/)
+- `urlDecodeOnce(filename)` — neue Hilfsmethode: URL-dekodiert den Dateinamen einmal (`%25XX` → `%XX`, `%C3%A9` → `é`); schützt `+` vor fälschlicher Dekodierung als Leerzeichen; gibt `null` zurück wenn keine Änderung
+- `getImageBytes()`: probiert jetzt as-is (`findByFilename(filename)`), dann einmal-dekodiert (`findByFilename(urlDecodeOnce(filename))`)
+- `getAudioBytes()`: identische Logik
+- Bereits funktionierende Bilder (ASCII-Dateinamen ohne Sonderzeichen) unverändert — as-is-Suche findet sie auf dem ersten Versuch
+
+---
+
 ## ✅ FERTIG — ANR-Fix: Foreground Service Typ (Stand 2026-05-21)
 
 ### Ursache

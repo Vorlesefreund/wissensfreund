@@ -230,16 +230,9 @@ class ZimReader(private val filePath: String) {
 
     fun getImageBytes(filename: String): ByteArray? {
         Log.d(TAG, "getImageBytes: '$filename'")
-        // Try every namespace that Kiwix ZIMs use for images, most-likely-first:
-        // Klexikon format : namespace='C', url='_assets_/hash/file'  → "C/file"
-        // ZIM v5          : namespace='I', url='file'                → "I/file"
-        // ZIM v6          : namespace='-', url='I/file'              → "-/I/file"
-        // ZIM v6 flat     : namespace='-', url='file'                → "-/file"
-        val urlIdx = findUrlIndexByPath("C/$filename")
-            ?: findUrlIndexByPath("I/$filename")
-            ?: findUrlIndexByPath("-/I/$filename")
-            ?: findUrlIndexByPath("-/$filename")
-            ?: findUrlIndexByPath("A/$filename")
+        // HTML src attributes may be double-encoded (%252C in HTML → %2C in ZIM URL table,
+        // %C3%A9 in HTML → é literal in ZIM URL table). Try as-is first, then decoded once.
+        val urlIdx = findByFilename(filename) ?: findByFilename(urlDecodeOnce(filename))
             ?: run {
                 Log.w(TAG, "getImageBytes: not found: '$filename'")
                 return null
@@ -312,11 +305,7 @@ class ZimReader(private val filePath: String) {
 
     fun getAudioBytes(filename: String): ByteArray? {
         Log.d(TAG, "getAudioBytes: '$filename'")
-        val urlIdx = findUrlIndexByPath("I/$filename")
-            ?: findUrlIndexByPath("-/I/$filename")
-            ?: findUrlIndexByPath("C/$filename")
-            ?: findUrlIndexByPath("-/$filename")
-            ?: findUrlIndexByPath("A/$filename")
+        val urlIdx = findByFilename(filename) ?: findByFilename(urlDecodeOnce(filename))
             ?: run {
                 Log.w(TAG, "getAudioBytes: not found: '$filename'")
                 return null
@@ -389,6 +378,25 @@ class ZimReader(private val filePath: String) {
             // No subdirectory — bare filename only
             if (ext.isNotEmpty()) path else null
         }
+    }
+
+    // Search all typical namespaces for a given filename (as-is).
+    private fun findByFilename(filename: String?): Int? {
+        if (filename == null) return null
+        return findUrlIndexByPath("C/$filename")
+            ?: findUrlIndexByPath("I/$filename")
+            ?: findUrlIndexByPath("-/I/$filename")
+            ?: findUrlIndexByPath("-/$filename")
+            ?: findUrlIndexByPath("A/$filename")
+    }
+
+    // Decode %XX sequences once. Replaces %25XX → %XX, %C3%A9 → é, etc.
+    // Does NOT decode '+' as space (filenames never use + for space).
+    private fun urlDecodeOnce(filename: String): String? {
+        return try {
+            val decoded = java.net.URLDecoder.decode(filename.replace("+", "%2B"), "UTF-8")
+            if (decoded == filename) null else decoded  // null = no change, skip redundant search
+        } catch (_: Exception) { null }
     }
 
     private fun findNearbyCaption(html: String, afterPos: Int): String? {
