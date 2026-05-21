@@ -24,4 +24,31 @@ Was Claude Code wissen oder umsetzen soll.
 
 ---
 
-*(Noch keine Einträge — erste Notiz von Claude Chat eintragen)*
+---
+## 2026-05-21 Offene Aufgaben aus Claude Chat Session
+
+**Entscheidung / Auftrag:**
+Folgende Punkte wurden heute besprochen und sind noch offen:
+
+1. Sound-Thumbnails & Wiedergabe (🎵)
+   - Sound-Dateien in Thumbnail-Leiste neben Bildern anzeigen
+   - Notenschlüssel-Icon als Erkennungszeichen
+   - Pulsier-Animation beim Abspielen
+   - Erklärtext als Overlay, identisches Unterbrechungsverhalten wie bei Bildern
+   - Kein Vollbild für Audio
+
+2. Immersive Mode + neues Button-Layout
+   - Immersive Mode nur im Artikel-Screen und Vollbild
+   - Neues Button-Layout: [←] [🎤] [⏸] während Vorlesen
+   - Mikrofon unterbricht Professor, merkt Position, öffnet STT
+   - Zurück-Button kehrt zu Home zurück
+   - Pause/Play rechts
+
+3. Missing images für Thumbnails 5+ (URL-decode-Problem in getImageBytes)
+   - Aus CHANGES.md: "vermutlich URL-decode-Problem"
+   - Bitte fixen
+
+**Priorität:** 3 = hoch, 1+2 = mittel
+
+**Erledigt:** [ ]
+---
