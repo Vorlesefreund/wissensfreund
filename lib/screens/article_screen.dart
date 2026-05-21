@@ -1691,7 +1691,7 @@ class _ModeBContentState extends State<_ModeBContent> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Thumbnail row (used in Mode A and later Mode B/C)
+// Thumbnail row — images and audio mixed in document order
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ThumbnailRow extends StatelessWidget {
@@ -1701,24 +1701,35 @@ class _ThumbnailRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<WissensfreundProvider>(
       builder: (ctx, provider, _) {
-        final images = provider.articleImages;
-        if (images.isEmpty) return const SizedBox(height: 100);
+        final items = provider.mediaItems;
+        if (items.isEmpty) return const SizedBox(height: 100);
         return SizedBox(
           height: 100,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.only(right: _kThumbRight),
-            itemCount: images.length,
+            itemCount: items.length,
             separatorBuilder: (_, __) => const SizedBox(width: 10),
             itemBuilder: (ctx, i) {
-              final isSelected = i == provider.selectedImageIndex;
+              final item = items[i];
+              final isSelected = i == provider.selectedMediaIndex;
               return GestureDetector(
-                onTap: () => provider.onThumbnailTap(i),
-                child: _ZimImageTile(
-                  key: ValueKey(images[i].filename),
-                  image: images[i],
-                  isSelected: isSelected,
-                ),
+                onTap: () => provider.onMediaTap(i),
+                child: item.isAudio
+                    ? _SoundThumbnailTile(
+                        key: ValueKey('audio_${item.filename}'),
+                        isSelected: isSelected,
+                        isPlaying: provider.activeAudioIndex == i,
+                      )
+                    : _ZimImageTile(
+                        key: ValueKey(item.filename),
+                        image: ArticleImageInfo(
+                          filename: item.filename,
+                          caption:  item.caption,
+                          fromKlexikon: true,
+                        ),
+                        isSelected: isSelected,
+                      ),
               );
             },
           ),
@@ -1726,6 +1737,142 @@ class _ThumbnailRow extends StatelessWidget {
       },
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sound thumbnail tile — 🎵 icon with pulse animation when playing
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _SoundThumbnailTile extends StatefulWidget {
+  final bool isSelected;
+  final bool isPlaying;
+
+  const _SoundThumbnailTile({
+    super.key,
+    required this.isSelected,
+    required this.isPlaying,
+  });
+
+  @override
+  State<_SoundThumbnailTile> createState() => _SoundThumbnailTileState();
+}
+
+class _SoundThumbnailTileState extends State<_SoundThumbnailTile>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _pulse;
+  late final Animation<double> _scale;
+
+  @override
+  void initState() {
+    super.initState();
+    _pulse = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    )..addStatusListener((s) {
+        if (s == AnimationStatus.completed) _pulse.reverse();
+        if (s == AnimationStatus.dismissed && widget.isPlaying) _pulse.forward();
+      });
+    _scale = Tween<double>(begin: 1.0, end: 1.18).animate(
+      CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
+    );
+    if (widget.isPlaying) _pulse.forward();
+  }
+
+  @override
+  void didUpdateWidget(_SoundThumbnailTile old) {
+    super.didUpdateWidget(old);
+    if (widget.isPlaying && !_pulse.isAnimating) {
+      _pulse.forward();
+    } else if (!widget.isPlaying && _pulse.isAnimating) {
+      _pulse.stop();
+      _pulse.value = 0;
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulse.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: SizedBox(
+        width: 100,
+        height: 100,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Background — subtle waveform-like gradient
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: widget.isPlaying
+                      ? [const Color(0xFF1B5E20), const Color(0xFF2E7D32)]
+                      : [const Color(0xFFE8F5E9), const Color(0xFFC8E6C9)],
+                ),
+              ),
+            ),
+            // Waveform decoration lines
+            Positioned.fill(
+              child: CustomPaint(painter: _WaveformPainter(playing: widget.isPlaying)),
+            ),
+            // Animated music note icon
+            Center(
+              child: ScaleTransition(
+                scale: _scale,
+                child: Text(
+                  '🎵',
+                  style: TextStyle(fontSize: widget.isPlaying ? 36 : 32),
+                ),
+              ),
+            ),
+            // Selection border
+            if (widget.isSelected)
+              Positioned.fill(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.white, width: 2.5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WaveformPainter extends CustomPainter {
+  final bool playing;
+  const _WaveformPainter({required this.playing});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = (playing ? Colors.white : const Color(0xFF2E7D32)).withValues(alpha: 0.15)
+      ..strokeWidth = 2.5
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round;
+
+    const barCount = 7;
+    final barW = size.width / (barCount * 2.0);
+    final heights = [0.3, 0.55, 0.75, 0.9, 0.75, 0.55, 0.3];
+    for (int i = 0; i < barCount; i++) {
+      final x = barW + i * barW * 2;
+      final h = size.height * heights[i];
+      final top = (size.height - h) / 2;
+      canvas.drawLine(Offset(x, top), Offset(x, top + h), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(_WaveformPainter old) => old.playing != playing;
 }
 
 

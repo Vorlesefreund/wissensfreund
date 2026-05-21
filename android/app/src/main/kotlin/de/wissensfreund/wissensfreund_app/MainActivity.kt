@@ -149,6 +149,14 @@ class MainActivity : FlutterFragmentActivity() {
                         val filename = call.argument<String>("filename") ?: ""
                         zimGetImageBytes(filename, result)
                     }
+                    "listAudio" -> {
+                        val urlIndex = call.argument<Int>("urlIndex") ?: -1
+                        zimListAudio(urlIndex, result)
+                    }
+                    "getAudioBytes" -> {
+                        val filename = call.argument<String>("filename") ?: ""
+                        zimGetAudioBytes(filename, result)
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -216,6 +224,27 @@ class MainActivity : FlutterFragmentActivity() {
                 mapOf("filename" to it.filename, "mimeType" to it.mimeType, "caption" to it.caption)
             }
             Handler(Looper.getMainLooper()).post { result.success(mapped) }
+        }
+    }
+
+    private fun zimListAudio(urlIndex: Int, result: MethodChannel.Result) {
+        val reader = zimReader
+        if (reader == null || urlIndex < 0) { result.success(emptyList<Any>()); return }
+        zimExecutor.execute {
+            val refs = reader.getAudioRefs(urlIndex)
+            val mapped = refs.map {
+                mapOf("filename" to it.filename, "mimeType" to it.mimeType, "caption" to it.caption, "posInHtml" to it.posInHtml)
+            }
+            Handler(Looper.getMainLooper()).post { result.success(mapped) }
+        }
+    }
+
+    private fun zimGetAudioBytes(filename: String, result: MethodChannel.Result) {
+        val reader = zimReader
+        if (reader == null || filename.isEmpty()) { result.success(null); return }
+        zimExecutor.execute {
+            val bytes = reader.getAudioBytes(filename)
+            Handler(Looper.getMainLooper()).post { result.success(bytes) }
         }
     }
 

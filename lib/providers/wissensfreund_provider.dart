@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/wikimedia_license_checker.dart';
@@ -19,6 +20,40 @@ class ArticleImageInfo {
     this.caption,
     this.fromKlexikon = false,
   });
+}
+
+// Unified media item for the thumbnail bar (image or audio).
+class ArticleMediaItem {
+  final String filename;
+  final String? caption;
+  final bool isAudio;
+  final int posInHtml; // for ordering images + audio by document position
+  const ArticleMediaItem({
+    required this.filename,
+    this.caption,
+    required this.isAudio,
+    this.posInHtml = 0,
+  });
+}
+
+// just_audio source backed by raw bytes (avoids temp file on disk).
+class _BytesAudioSource extends StreamAudioSource {
+  final Uint8List _bytes;
+  final String _contentType;
+  _BytesAudioSource(this._bytes, this._contentType) : super(tag: 'ZimAudio');
+
+  @override
+  Future<StreamAudioResponse> request([int? start, int? end]) async {
+    start ??= 0;
+    end ??= _bytes.length;
+    return StreamAudioResponse(
+      sourceLength: _bytes.length,
+      contentLength: end - start,
+      offset: start,
+      stream: Stream.value(_bytes.sublist(start, end)),
+      contentType: _contentType,
+    );
+  }
 }
 
 enum AppState { idle, listening, thinking, speaking }
@@ -99,6 +134,15 @@ class WissensfreundProvider extends ChangeNotifier {
   int _selectedImageIndex = -1;
   final Map<String, Uint8List> _imageBytesCache = {};
 
+  // Media state — unified thumbnail list (images + audio in document order)
+  List<ArticleMediaItem> _mediaItems = [];
+  int _selectedMediaIndex = -1;
+
+  // Audio playback
+  final _audioPlayer = AudioPlayer();
+  bool _isPlayingAudio = false;
+  int _activeAudioIndex = -1; // index in _mediaItems
+
   // Caption-resume state (Vollbild-Modus: Lautsprecher-Tap oder Wisch-Settle)
   bool   _isCaptionPlaying        = false;
   bool   _isPromptPlaying         = false;
@@ -128,6 +172,11 @@ class WissensfreundProvider extends ChangeNotifier {
 
   List<ArticleImageInfo> get articleImages     => List.unmodifiable(_articleImages);
   int                    get selectedImageIndex => _selectedImageIndex;
+
+  List<ArticleMediaItem> get mediaItems        => List.unmodifiable(_mediaItems);
+  int                    get selectedMediaIndex => _selectedMediaIndex;
+  bool                   get isPlayingAudio    => _isPlayingAudio;
+  int                    get activeAudioIndex  => _activeAudioIndex;
 
   WissensfreundProvider() {
     _initTts();
@@ -424,7 +473,7 @@ class WissensfreundProvider extends ChangeNotifier {
       _resumeOffset = 0;
       _isPaused     = false;
       _startSpeakingFrom(0);
-      loadImages(urlIndex); // fire-and-forget — updates UI via notifyListeners
+      loadMedia(urlIndex); // fire-and-forget — updates UI via notifyListeners
     } on PlatformException catch (e) {
       debugPrint('ZIM article error: ${e.message}');
       await _speakAndIdle(_noArticleMessage);
@@ -525,6 +574,177 @@ class WissensfreundProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Loads images + audio in one call and merges them by HTML document position.
+  Future<void> loadMedia(int urlIndex) async {
+    _mediaItems = [];
+    _selectedMediaIndex = -1;
+    _activeAudioIndex = -1;
+    _isPlayingAudio = false;
+
+    final imagesFuture = _zimChannel.invokeMethod<List>('listImages', {'urlIndex': urlIndex});
+    final audioFuture  = _zimChannel.invokeMethod<List>('listAudio',  {'urlIndex': urlIndex});
+
+    final results = await Future.wait([imagesFuture, audioFuture]);
+    final rawImages = results[0] ?? [];
+    final rawAudio  = results[1] ?? [];
+
+    final items = <ArticleMediaItem>[];
+    for (final ref in rawImages.cast<Map>()) {
+      final filename = ref['filename'] as String? ?? '';
+      if (filename.isEmpty) continue;
+      items.add(ArticleMediaItem(
+        filename:  filename,
+        caption:   ref['caption'] as String?,
+        isAudio:   false,
+        posInHtml: ref['posInHtml'] as int? ?? 0,
+      ));
+    }
+    for (final ref in rawAudio.cast<Map>()) {
+      final filename = ref['filename'] as String? ?? '';
+      if (filename.isEmpty) continue;
+      items.add(ArticleMediaItem(
+        filename:  filename,
+        caption:   ref['caption'] as String?,
+        isAudio:   true,
+        posInHtml: ref['posInHtml'] as int? ?? 0,
+      ));
+    }
+
+    // Sort by document position so images and sounds appear in article order.
+    items.sort((a, b) => a.posInHtml.compareTo(b.posInHtml));
+    _mediaItems = items;
+
+    // Also keep _articleImages in sync for existing code (e.g. main image display).
+    _articleImages = rawImages.cast<Map>().map((ref) {
+      return ArticleImageInfo(
+        filename:     ref['filename'] as String? ?? '',
+        caption:      ref['caption']  as String?,
+        fromKlexikon: true,
+      );
+    }).where((img) => img.filename.isNotEmpty).toList();
+
+    if (_mediaItems.isNotEmpty) _selectedMediaIndex = 0;
+    notifyListeners();
+  }
+
+  // Thumbnail tap — handles image selection AND audio playback (Fall A, B, C).
+  Future<void> onMediaTap(int index) async {
+    final item = _mediaItems[index];
+    if (!item.isAudio) {
+      // Image tap: just select it (mirrors existing onThumbnailTap behaviour).
+      _selectedMediaIndex = index;
+      // Also sync _selectedImageIndex for the main image display.
+      final imgIdx = _mediaItems
+          .take(index + 1)
+          .where((m) => !m.isAudio)
+          .length - 1;
+      _selectedImageIndex = imgIdx;
+      notifyListeners();
+      return;
+    }
+
+    // ── Audio thumbnail tapped ────────────────────────────────────────────────
+
+    // Fall C: Sound läuft gerade → stoppen, Professor weiter ab gespeicherter Position.
+    if (_isPlayingAudio && _activeAudioIndex == index) {
+      await _stopAudio();
+      if (_isPaused && _articleText.isNotEmpty) {
+        resumeSpeaking();
+      }
+      return;
+    }
+
+    // Stoppe laufenden Sound falls ein anderer Sound angetippt wird.
+    if (_isPlayingAudio) await _stopAudio();
+
+    // Fall A: Professor liest gerade → Position merken, Professor pausieren.
+    final wasReadingArticle = _state == AppState.speaking;
+    if (wasReadingArticle) {
+      _resumeOffset = _sentenceStartOffset();
+      _isPaused = true;
+      _state = AppState.idle;
+      notifyListeners();
+      await _tts.stop();
+    } else if (_isPaused) {
+      // Professor war bereits pausiert — Resume-Position bleibt erhalten.
+    }
+
+    _selectedMediaIndex = index;
+    _activeAudioIndex   = index;
+    _isPlayingAudio     = true;
+    notifyListeners();
+
+    await _playAudioItem(item, wasReadingArticle: wasReadingArticle);
+  }
+
+  Future<void> _playAudioItem(ArticleMediaItem item, {required bool wasReadingArticle}) async {
+    try {
+      final bytes = await _getAudioBytes(item.filename);
+      if (bytes == null || bytes.isEmpty) {
+        debugPrint('getAudioBytes returned null for ${item.filename}');
+        await _onAudioFinished(item, wasReadingArticle: wasReadingArticle);
+        return;
+      }
+      final mimeType = item.filename.toLowerCase().endsWith('.ogg') ? 'audio/ogg' : 'audio/mpeg';
+      await _audioPlayer.setAudioSource(_BytesAudioSource(bytes, mimeType));
+
+      // Listen for completion once.
+      late StreamSubscription<PlayerState> sub;
+      sub = _audioPlayer.playerStateStream.listen((ps) async {
+        if (ps.processingState == ProcessingState.completed) {
+          sub.cancel();
+          await _onAudioFinished(item, wasReadingArticle: wasReadingArticle);
+        }
+      });
+      await _audioPlayer.play();
+    } catch (e) {
+      debugPrint('_playAudioItem error: $e');
+      await _onAudioFinished(item, wasReadingArticle: wasReadingArticle);
+    }
+  }
+
+  Future<void> _onAudioFinished(ArticleMediaItem item, {required bool wasReadingArticle}) async {
+    _isPlayingAudio  = false;
+    _activeAudioIndex = -1;
+    notifyListeners();
+
+    final caption = item.caption ?? '';
+
+    if (caption.isNotEmpty) {
+      // Erklärtext vorlesen — danach "Soll ich weiterlesen?" (wie bei Bild-Caption).
+      _isCaptionPlaying = true;
+      notifyListeners();
+      await _tts.speak(caption);
+      // Completion handler übernimmt ab hier (5s → "Soll ich weiterlesen?" → Auto-Resume).
+    } else if (wasReadingArticle || _isPaused) {
+      // Kein Erklärtext: 2s Pause, dann automatisch ab gespeicherter Position weiter.
+      await Future.delayed(const Duration(seconds: 2));
+      if (!_isPlayingAudio) resumeSpeaking();
+    }
+    // Fall B (idle, kein Erklärtext): nichts — Professor schweigt.
+  }
+
+  Future<void> _stopAudio() async {
+    _isPlayingAudio   = false;
+    _activeAudioIndex = -1;
+    try { await _audioPlayer.stop(); } catch (_) {}
+    notifyListeners();
+  }
+
+  final Map<String, Uint8List> _audioBytesCache = {};
+
+  Future<Uint8List?> _getAudioBytes(String filename) async {
+    if (_audioBytesCache.containsKey(filename)) return _audioBytesCache[filename];
+    try {
+      final bytes = await _zimChannel.invokeMethod<Uint8List>('getAudioBytes', {'filename': filename});
+      if (bytes != null && bytes.isNotEmpty) _audioBytesCache[filename] = bytes;
+      return bytes;
+    } catch (e) {
+      debugPrint('getAudioBytes error: $e');
+      return null;
+    }
+  }
+
   Future<Uint8List?> getImageBytes(String filename) async {
     if (_imageBytesCache.containsKey(filename)) return _imageBytesCache[filename];
     try {
@@ -594,6 +814,7 @@ class WissensfreundProvider extends ChangeNotifier {
   @override
   void dispose() {
     _tts.stop();
+    _audioPlayer.dispose();
     super.dispose();
   }
 }

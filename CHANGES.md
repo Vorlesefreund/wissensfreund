@@ -2,6 +2,58 @@
 
 ---
 
+## ✅ FERTIG — Sound-Thumbnails in der Thumbnail-Leiste (Stand 2026-05-21)
+
+### Neue Funktionalität
+
+Audiodateien aus der Klexikon-ZIM erscheinen als eigene Slots in der Thumbnail-Leiste —
+neben den Bildern, in der Reihenfolge wie sie im Artikel vorkommen (HTML-Position).
+
+**Sound-Thumbnail-Darstellung:**
+- 🎵 Notenschlüssel-Icon mittig
+- Statischer Wellenform-Hintergrund (7 Balken via `CustomPainter`)
+- Grüner Gradient-Hintergrund, dunkler beim Abspielen
+- Pulsier-Animation (ScaleTransition) wenn Audio läuft
+
+**Tap-Verhalten — 3 Fälle:**
+- **Fall A (Professor liest):** Position auf Satzanfang merken → Professor pausieren → Sound abspielen → danach Caption vorlesen (falls vorhanden) oder 2s Pause → automatisch ab Satzanfang weiter
+- **Fall B (Professor idle):** Sound abspielen → Caption vorlesen wenn vorhanden, sonst Stille
+- **Fall C (Sound läuft, nochmals angetippt):** Sound sofort stoppen → Professor weiter ab gespeicherter Position
+
+**Kein Vollbild für Audio** — Sound-Thumbnails öffnen keinen Vollbild-Screen.
+
+### Technische Umsetzung
+
+**`ZimReader.kt`:**
+- `AudioRef(filename, mimeType, caption, posInHtml)` — neue Datenklasse
+- `getAudioRefs(articleUrlIndex)` — extrahiert `<audio><source>` Tags aus HTML
+- `getAudioBytes(filename)` — wie `getImageBytes()`, sucht in Namespaces I/, -/I/, C/, -/, A/
+- `ImageRef` um `posInHtml: Int` erweitert (für Sortierung)
+- `extractAudioRefsFromHtml()` + `extractAudioFilename()` — private Hilfsmethoden
+
+**`MainActivity.kt`:**
+- `listAudio` und `getAudioBytes` im ZIM MethodChannel ergänzt
+
+**`wissensfreund_provider.dart`:**
+- `ArticleMediaItem` (unified Bild/Audio) — neue Klasse mit `isAudio`, `posInHtml`
+- `_BytesAudioSource extends StreamAudioSource` — Audio aus Bytes ohne Temp-Datei
+- `AudioPlayer` (`just_audio`) — Audio-Wiedergabe
+- `loadMedia(urlIndex)` — lädt Images + Audio parallel, sortiert nach HTML-Position
+- `onMediaTap(index)` — implementiert Fall A/B/C
+- `_playAudioItem()`, `_onAudioFinished()`, `_stopAudio()`, `_getAudioBytes()` — Audio-Logik
+- `loadImages()` Aufruf → `loadMedia()` Aufruf beim Artikel-Laden
+
+**`article_screen.dart`:**
+- `_SoundThumbnailTile` — neues `StatefulWidget` mit `AnimationController` für Pulsieren
+- `_WaveformPainter` — `CustomPainter` für statische Wellenform-Dekoration
+- `_ThumbnailRow` — nutzt jetzt `provider.mediaItems` statt `provider.articleImages`,
+  rendert `_SoundThumbnailTile` oder `_ZimImageTile` je nach `item.isAudio`
+
+**Hinweis:** Ob die Klexikon-ZIM tatsächlich Audiodateien enthält ist noch ungetestet.
+Falls keine `<audio>` Tags gefunden werden, erscheinen nur Bild-Thumbnails (Graceful Degradation).
+
+---
+
 ## ✅ FERTIG — ANR-Fix: Foreground Service Typ (Stand 2026-05-21)
 
 ### Ursache

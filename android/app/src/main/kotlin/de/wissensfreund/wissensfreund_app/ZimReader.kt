@@ -195,12 +195,20 @@ class ZimReader(private val filePath: String) {
         return mapOf("title" to title, "text" to text, "firstParagraph" to firstPara, "url" to zimUrl)
     }
 
-    // ── Image extraction ──────────────────────────────────────────────────────
+    // ── Media extraction (images + audio) ────────────────────────────────────
 
     data class ImageRef(
         val filename: String,
         val mimeType: String,
         val caption: String?,
+        val posInHtml: Int = 0,
+    )
+
+    data class AudioRef(
+        val filename: String,
+        val mimeType: String,
+        val caption: String?,
+        val posInHtml: Int = 0,
     )
 
     fun getImageRefs(articleUrlIndex: Int): List<ImageRef> {
@@ -279,10 +287,92 @@ class ZimReader(private val filePath: String) {
             }
             val caption = findNearbyCaption(html, match.range.last)
             seen.add(filename)
-            result.add(ImageRef(filename, mimeType, caption))
+            result.add(ImageRef(filename, mimeType, caption, match.range.first))
         }
         Log.d(TAG, "imgExtract: returning ${result.size} images")
         return result
+    }
+
+    fun getAudioRefs(articleUrlIndex: Int): List<AudioRef> {
+        var cur = readDirEntry(articleUrlIndex) ?: return emptyList()
+        for (i in 0 until 5) {
+            if (cur.mimeType != MIME_REDIRECT) break
+            cur = readDirEntry(cur.redirectIndex) ?: return emptyList()
+        }
+        if (cur.mimeType == MIME_REDIRECT) return emptyList()
+        return try {
+            val (data, ext) = readCluster(cur.clusterNumber)
+            val html = extractBlob(data, cur.blobNumber, ext).toString(Charsets.UTF_8)
+            extractAudioRefsFromHtml(html)
+        } catch (e: Exception) {
+            Log.e(TAG, "getAudioRefs($articleUrlIndex) failed: ${e.message}")
+            emptyList()
+        }
+    }
+
+    fun getAudioBytes(filename: String): ByteArray? {
+        Log.d(TAG, "getAudioBytes: '$filename'")
+        val urlIdx = findUrlIndexByPath("I/$filename")
+            ?: findUrlIndexByPath("-/I/$filename")
+            ?: findUrlIndexByPath("C/$filename")
+            ?: findUrlIndexByPath("-/$filename")
+            ?: findUrlIndexByPath("A/$filename")
+            ?: run {
+                Log.w(TAG, "getAudioBytes: not found: '$filename'")
+                return null
+            }
+        return try {
+            var cur = readDirEntry(urlIdx) ?: return null
+            for (i in 0 until 5) {
+                if (cur.mimeType != MIME_REDIRECT) break
+                cur = readDirEntry(cur.redirectIndex) ?: return null
+            }
+            if (cur.mimeType == MIME_REDIRECT) return null
+            val (data, ext) = readCluster(cur.clusterNumber)
+            extractBlob(data, cur.blobNumber, ext)
+        } catch (e: Exception) {
+            Log.e(TAG, "getAudioBytes($filename) failed: ${e.message}")
+            null
+        }
+    }
+
+    private fun extractAudioRefsFromHtml(html: String): List<AudioRef> {
+        val result = mutableListOf<AudioRef>()
+        val seen = mutableSetOf<String>()
+        val audioBlockRegex = Regex("""<audio\b[^>]*>([\s\S]*?)</audio>""", RegexOption.IGNORE_CASE)
+        val sourceRegex = Regex("""<source\b[^>]*?\bsrc="([^"]+)"[^>]*>""", RegexOption.IGNORE_CASE)
+        for (audioMatch in audioBlockRegex.findAll(html)) {
+            val block = audioMatch.value
+            val pos = audioMatch.range.first
+            val srcMatch = sourceRegex.find(block) ?: continue
+            val src = srcMatch.groupValues[1]
+            val filename = extractAudioFilename(src) ?: continue
+            if (filename in seen) continue
+            val ext = filename.substringAfterLast('.', "").lowercase()
+            if (ext !in setOf("mp3", "ogg", "oga", "opus", "wav")) continue
+            val mimeType = when (ext) {
+                "mp3"       -> "audio/mpeg"
+                "ogg", "oga" -> "audio/ogg"
+                "opus"      -> "audio/opus"
+                "wav"       -> "audio/wav"
+                else        -> "audio/mpeg"
+            }
+            val caption = findNearbyCaption(html, audioMatch.range.last)
+            seen.add(filename)
+            result.add(AudioRef(filename, mimeType, caption, pos))
+            Log.d(TAG, "audioExtract: found $filename at pos=$pos caption=$caption")
+        }
+        Log.d(TAG, "audioExtract: returning ${result.size} audio files")
+        return result
+    }
+
+    private fun extractAudioFilename(src: String): String? {
+        var path = src
+        while (path.startsWith("../")) path = path.removePrefix("../")
+        if (path.startsWith("./")) path = path.removePrefix("./")
+        if (path.startsWith("/")) path = path.removePrefix("/")
+        val ext = path.substringAfterLast('.', "").lowercase()
+        return if (ext.isNotEmpty()) path else null
     }
 
     private fun extractImageFilename(src: String): String? {
