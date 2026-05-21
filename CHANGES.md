@@ -2,6 +2,32 @@
 
 ---
 
+## ✅ FERTIG — ANR-Fix: Foreground Service Typ (Stand 2026-05-21)
+
+### Ursache
+
+`WissensfreundForegroundService` war als `foregroundServiceType="shortService"` deklariert.
+`shortService` hat ein hartes **3-Minuten-Limit** (Android 14+) — danach tötet das System den Service
+und löst einen ANR aus. Das ist der Grund für alle 6 ANRs an diesem Tag (15:35, 15:39, 15:44, 20:08, 20:21, 20:57 Uhr).
+
+### Fix
+
+**`AndroidManifest.xml`:**
+- `foregroundServiceType="shortService"` → `foregroundServiceType="specialUse"`
+- Permission `FOREGROUND_SERVICE_SPECIAL_USE` hinzugefügt
+- `<property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="childSafetyOverlay"/>` innerhalb `<service>` (Android 14+ Pflichtangabe)
+
+**`WissensfreundForegroundService.kt`:**
+- Import `android.content.pm.ServiceInfo` und `android.os.Build` hinzugefügt
+- `startForeground()` auf API 34+ mit explizitem `FOREGROUND_SERVICE_TYPE_SPECIAL_USE` aufgerufen
+- Auf API < 34: weiterhin 2-Argument-Form (kein Typ-Argument verfügbar)
+
+**Warum `specialUse`:** Der Service zeigt nur ein Overlay-Fenster und läuft unbegrenzt.
+Kein anderer Android-Typ passt (kein Location, kein Kamera, kein Media-Playback etc.).
+`specialUse` ist der korrekte Typ für App-spezifische Daueraufgaben.
+
+---
+
 ## ✅ FERTIG — Kommunikations-Infrastruktur + BIOMETRIC_WEAK (Stand 2026-05-21)
 
 ### BIOMETRIC_WEAK — Frontkamera-Gesichtserkennung

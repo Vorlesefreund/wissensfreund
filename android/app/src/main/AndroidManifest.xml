@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.USE_FINGERPRINT"/>
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE"/>
     <application
         android:label="wissensfreund_app"
         android:name="${applicationName}"
@@ -49,11 +50,16 @@
                 <action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/>
             </intent-filter>
         </receiver>
-        <!-- Kinderschutz: Foreground Service — zeigt Overlay wenn Kind die App verlässt -->
+        <!-- Kinderschutz: Foreground Service — zeigt Overlay wenn Kind die App verlässt.
+             specialUse: kein anderer Typ passt (kein Location/Kamera/Media), unbegrenzte Laufzeit nötig. -->
         <service
             android:name=".WissensfreundForegroundService"
             android:exported="false"
-            android:foregroundServiceType="shortService"/>
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="childSafetyOverlay"/>
+        </service>
         <!-- Kinderschutz: Transparente Activity für nativen BiometricPrompt -->
         <activity
             android:name=".ParentalUnlockActivity"
