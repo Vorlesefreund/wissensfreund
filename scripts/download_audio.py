@@ -192,6 +192,7 @@ def main() -> None:
                     "filename":   fn,
                     "caption":    item.get("caption"),
                     "local_path": f"audio/{fn}",
+                    "position":   item.get("position", 0),
                 })
         if entries:
             index_audio[article] = entries

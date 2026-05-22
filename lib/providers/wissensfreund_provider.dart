@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:flutter_tts/flutter_tts.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../services/audio_package_service.dart';
 import '../services/wikimedia_license_checker.dart';
 
 class ArticleImageInfo {
@@ -27,12 +29,14 @@ class ArticleMediaItem {
   final String filename;
   final String? caption;
   final bool isAudio;
-  final int posInHtml; // for ordering images + audio by document position
+  final int posInHtml;    // for ordering images + audio by document position
+  final String? localPath; // absolute path for locally downloaded audio files
   const ArticleMediaItem({
     required this.filename,
     this.caption,
     required this.isAudio,
     this.posInHtml = 0,
+    this.localPath,
   });
 }
 
@@ -209,6 +213,8 @@ class WissensfreundProvider extends ChangeNotifier {
           _zimArticleCount = (event['articleCount'] as int?) ?? 0;
           _zimProgress     = 1.0;
           debugPrint('ZIM ready: $_zimArticleCount articles');
+          // Download audio package in background (parallel to normal use).
+          unawaited(AudioPackageService.instance.initialize());
         } else {
           _zimNotFound = true;
           debugPrint('ZIM not found — running without offline knowledge base');
@@ -574,19 +580,15 @@ class WissensfreundProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Loads images + audio in one call and merges them by HTML document position.
+  // Loads images from ZIM + audio from local package, merges by document position.
   Future<void> loadMedia(int urlIndex) async {
     _mediaItems = [];
     _selectedMediaIndex = -1;
     _activeAudioIndex = -1;
     _isPlayingAudio = false;
 
-    final imagesFuture = _zimChannel.invokeMethod<List>('listImages', {'urlIndex': urlIndex});
-    final audioFuture  = _zimChannel.invokeMethod<List>('listAudio',  {'urlIndex': urlIndex});
-
-    final results = await Future.wait([imagesFuture, audioFuture]);
-    final rawImages = results[0] ?? [];
-    final rawAudio  = results[1] ?? [];
+    final rawImages =
+        await _zimChannel.invokeMethod<List>('listImages', {'urlIndex': urlIndex}) ?? [];
 
     final items = <ArticleMediaItem>[];
     for (final ref in rawImages.cast<Map>()) {
@@ -599,22 +601,23 @@ class WissensfreundProvider extends ChangeNotifier {
         posInHtml: ref['posInHtml'] as int? ?? 0,
       ));
     }
-    for (final ref in rawAudio.cast<Map>()) {
-      final filename = ref['filename'] as String? ?? '';
-      if (filename.isEmpty) continue;
+
+    // Audio refs come from the locally downloaded package (not the ZIM).
+    final audioRefs = AudioPackageService.instance.getAudioRefs(_articleTitle);
+    for (final ref in audioRefs) {
       items.add(ArticleMediaItem(
-        filename:  filename,
-        caption:   ref['caption'] as String?,
+        filename:  ref.filename,
+        caption:   ref.caption,
         isAudio:   true,
-        posInHtml: ref['posInHtml'] as int? ?? 0,
+        posInHtml: ref.posInHtml,
+        localPath: ref.localPath,
       ));
     }
 
-    // Sort by document position so images and sounds appear in article order.
     items.sort((a, b) => a.posInHtml.compareTo(b.posInHtml));
     _mediaItems = items;
 
-    // Also keep _articleImages in sync for existing code (e.g. main image display).
+    // Keep _articleImages in sync for the main image display.
     _articleImages = rawImages.cast<Map>().map((ref) {
       return ArticleImageInfo(
         filename:     ref['filename'] as String? ?? '',
@@ -679,14 +682,19 @@ class WissensfreundProvider extends ChangeNotifier {
 
   Future<void> _playAudioItem(ArticleMediaItem item, {required bool wasReadingArticle}) async {
     try {
-      final bytes = await _getAudioBytes(item.filename);
-      if (bytes == null || bytes.isEmpty) {
-        debugPrint('getAudioBytes returned null for ${item.filename}');
-        await _onAudioFinished(item, wasReadingArticle: wasReadingArticle);
-        return;
+      if (item.localPath != null && File(item.localPath!).existsSync()) {
+        await _audioPlayer.setFilePath(item.localPath!);
+      } else {
+        // Fallback: try loading from ZIM (will be empty for Klexikon, kept for completeness).
+        final bytes = await _getAudioBytes(item.filename);
+        if (bytes == null || bytes.isEmpty) {
+          debugPrint('_playAudioItem: no audio for ${item.filename}');
+          await _onAudioFinished(item, wasReadingArticle: wasReadingArticle);
+          return;
+        }
+        final mimeType = item.filename.toLowerCase().endsWith('.ogg') ? 'audio/ogg' : 'audio/mpeg';
+        await _audioPlayer.setAudioSource(_BytesAudioSource(bytes, mimeType));
       }
-      final mimeType = item.filename.toLowerCase().endsWith('.ogg') ? 'audio/ogg' : 'audio/mpeg';
-      await _audioPlayer.setAudioSource(_BytesAudioSource(bytes, mimeType));
 
       // Listen for completion once.
       late StreamSubscription<PlayerState> sub;

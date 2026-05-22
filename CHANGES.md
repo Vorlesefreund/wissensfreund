@@ -2,6 +2,42 @@
 
 ---
 
+## ✅ FERTIG — App: Audio-Paket laden und abspielen (Stand 2026-05-22)
+
+### Neue Datei
+
+**`lib/services/audio_package_service.dart`** — `AudioPackageService` (Singleton):
+- `initialize()` — lädt lokalen Index sofort, startet Update-Check im Hintergrund
+- `getAudioRefs(articleTitle)` — gibt Refs zurück, nur für Dateien die lokal vorhanden sind
+- Download-Flow: `audio_index.json` holen (klein) → Versionscheck → bei Änderung
+  `wissensfreund_audio.zip` laden → entpacken nach `<AppDocuments>/audio/` → Index neu laden
+- Graceful Degradation: bei Netzwerkfehler läuft App mit bereits gecachten Dateien weiter
+
+### Änderungen in bestehenden Dateien
+
+**`pubspec.yaml`:**
+- `archive: ^3.4.0` — ZIP-Entpackung (ZipDecoder)
+- `path_provider: ^2.1.0` — App-Verzeichnis ermitteln (war bereits transitive dep)
+
+**`wissensfreund_provider.dart`:**
+- `ArticleMediaItem` — neues Feld `localPath: String?` für lokale Audio-Dateien
+- `loadMedia()` — lädt nur noch Bilder aus ZIM; Audio kommt aus `AudioPackageService`
+- `_playAudioItem()` — bei `localPath != null`: `_audioPlayer.setFilePath()` statt Bytes;
+  Fallback auf ZIM-Bytes weiterhin vorhanden (greift bei Klexikon-ZIM nie)
+- `_initZim()` — ruft `AudioPackageService.instance.initialize()` wenn ZIM bereit ist
+
+**`scripts/download_audio.py`:**
+- `position` wird jetzt in `audio_index.json` gespeichert (für Thumbnail-Reihenfolge)
+
+### Ablauf beim ersten App-Start
+1. ZIM-Ladefortschritt 0..100% (wie bisher)
+2. ZIM bereit → AudioPackageService.initialize() startet im Hintergrund
+3. Sofort: lokaler Index geladen (leer beim ersten Mal)
+4. Hintergrund: audio_index.json von GitHub holen → neu? → ZIP laden → entpacken
+5. Nächster Artikel-Abruf: Sound-Thumbnails erscheinen für Artikel mit Audio
+
+---
+
 ## ✅ FERTIG — GitHub Actions: Audio-Pipeline (Stand 2026-05-21)
 
 ### Neue Dateien
