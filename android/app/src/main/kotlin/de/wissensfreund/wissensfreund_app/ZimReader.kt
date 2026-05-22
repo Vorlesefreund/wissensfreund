@@ -230,13 +230,10 @@ class ZimReader(private val filePath: String) {
 
     fun getImageBytes(filename: String): ByteArray? {
         Log.d(TAG, "getImageBytes: '$filename'")
-        // HTML src attributes may be double-encoded (%252C in HTML → %2C in ZIM URL table,
-        // %C3%A9 in HTML → é literal in ZIM URL table). Try as-is first, then decoded once.
-        val urlIdx = findByFilename(filename) ?: findByFilename(urlDecodeOnce(filename))
-            ?: run {
-                Log.w(TAG, "getImageBytes: not found: '$filename'")
-                return null
-            }
+        val urlIdx = findByFilename(filename) ?: run {
+            Log.w(TAG, "getImageBytes: not found: '$filename'")
+            return null
+        }
         Log.d(TAG, "getImageBytes: found at urlIndex=$urlIdx")
         return try {
             var cur = readDirEntry(urlIdx) ?: return null
@@ -316,11 +313,10 @@ class ZimReader(private val filePath: String) {
 
     fun getAudioBytes(filename: String): ByteArray? {
         Log.d(TAG, "getAudioBytes: '$filename'")
-        val urlIdx = findByFilename(filename) ?: findByFilename(urlDecodeOnce(filename))
-            ?: run {
-                Log.w(TAG, "getAudioBytes: not found: '$filename'")
-                return null
-            }
+        val urlIdx = findByFilename(filename) ?: run {
+            Log.w(TAG, "getAudioBytes: not found: '$filename'")
+            return null
+        }
         return try {
             var cur = readDirEntry(urlIdx) ?: return null
             for (i in 0 until 5) {
@@ -424,23 +420,43 @@ class ZimReader(private val filePath: String) {
         }
     }
 
-    // Search all typical namespaces for a given filename (as-is).
+    // Robust multi-variant filename lookup.
+    //
+    // Tries each candidate against all namespace prefixes (C/, I/, -/I/, -/, A/).
+    // Candidates tried in order:
+    //   1. filename as-is                      (covers new ZIM: namespace=C, url=I/name.jpg)
+    //   2. basename (strips first path segment) (covers old ZIM: namespace=I, url=name.jpg)
+    // Each candidate is also tried URL-decoded once and twice
+    // (handles %C3%A9 → é and %2520 → %20 → space double-encoding).
     private fun findByFilename(filename: String?): Int? {
-        if (filename == null) return null
-        return findUrlIndexByPath("C/$filename")
-            ?: findUrlIndexByPath("I/$filename")
-            ?: findUrlIndexByPath("-/I/$filename")
-            ?: findUrlIndexByPath("-/$filename")
-            ?: findUrlIndexByPath("A/$filename")
-    }
+        if (filename.isNullOrEmpty()) return null
 
-    // Decode %XX sequences once. Replaces %25XX → %XX, %C3%A9 → é, etc.
-    // Does NOT decode '+' as space (filenames never use + for space).
-    private fun urlDecodeOnce(filename: String): String? {
-        return try {
-            val decoded = java.net.URLDecoder.decode(filename.replace("+", "%2B"), "UTF-8")
-            if (decoded == filename) null else decoded  // null = no change, skip redundant search
+        fun tryPrefixes(name: String): Int? =
+            findUrlIndexByPath("C/$name")
+                ?: findUrlIndexByPath("I/$name")
+                ?: findUrlIndexByPath("-/I/$name")
+                ?: findUrlIndexByPath("-/$name")
+                ?: findUrlIndexByPath("A/$name")
+
+        fun decode(s: String): String? = try {
+            java.net.URLDecoder.decode(s.replace("+", "%2B"), "UTF-8").takeIf { it != s }
         } catch (_: Exception) { null }
+
+        val slash = filename.indexOf('/')
+        val candidates = buildList {
+            add(filename)
+            // Strip first path component ("I/name.jpg" → "name.jpg") for old-ZIM compat
+            if (slash in 1 until filename.lastIndex) add(filename.substring(slash + 1))
+        }
+
+        for (base in candidates) {
+            tryPrefixes(base)?.let { return it }
+            val d1 = decode(base) ?: continue
+            tryPrefixes(d1)?.let { return it }
+            val d2 = decode(d1) ?: continue
+            tryPrefixes(d2)?.let { return it }
+        }
+        return null
     }
 
     private fun findNearbyCaption(html: String, afterPos: Int): String? {
