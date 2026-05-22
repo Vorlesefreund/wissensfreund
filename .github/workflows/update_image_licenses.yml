@@ -45,6 +45,15 @@ jobs:
           curl -fsSL -o klexikon.zim "$ZIM_URL"
           ls -lh klexikon.zim
 
+      # ── Step 0 (optional): Dump article HTML for caption debugging ─────────
+      - name: Dump article HTML structure (diagnostic)
+        if: ${{ inputs.max_articles != '0' }}
+        run: python scripts/dump_article_html.py
+        env:
+          ZIM_FILE: klexikon.zim
+          ARTICLE: Beethoven
+          CONTEXT: '1500'
+
       # ── Step 1: Image + audio metadata from ZIM binary ──────────────────────
       - name: Generate media_licenses.json
         run: python scripts/generate_license_json.py

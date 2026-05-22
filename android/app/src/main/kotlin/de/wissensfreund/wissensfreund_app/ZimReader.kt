@@ -460,38 +460,60 @@ class ZimReader(private val filePath: String) {
     }
 
     private fun findNearbyCaption(html: String, afterPos: Int): String? {
-        val window = html.substring(afterPos, minOf(afterPos + 1200, html.length))
-
         fun cleanHtml(raw: String): String? = raw
             // Remove magnify helper div — otherwise "Vergrößern" leaks into caption text
             .replace(Regex("""<div\b[^>]*\bmagnify\b[^>]*>[\s\S]*?</div>""", RegexOption.IGNORE_CASE), "")
             .replace(Regex("<[^>]+>"), " ")
             .replace("&amp;", "&").replace("&nbsp;", " ")
             .replace("&lt;", "<").replace("&gt;", ">")
+            .replace("&auml;", "ä").replace("&ouml;", "ö").replace("&uuml;", "ü")
+            .replace("&Auml;", "Ä").replace("&Ouml;", "Ö").replace("&Uuml;", "Ü")
+            .replace("&szlig;", "ß").replace("&ndash;", "–").replace("&mdash;", "—")
+            .replace("&quot;", "\"").replace("&apos;", "'")
             .replace(Regex("\\s+"), " ").trim()
             .ifEmpty { null }
 
-        // HTML5 / modern Kiwix: <figcaption>…</figcaption>
-        val figIdx = window.indexOf("<figcaption", ignoreCase = true)
-        if (figIdx >= 0) {
-            val gt    = window.indexOf('>', figIdx)
-            val close = window.indexOf("</figcaption>", figIdx, ignoreCase = true)
-            if (gt >= 0 && close > gt)
-                cleanHtml(window.substring(gt + 1, close))?.let { return it }
+        fun captionFromWindow(w: String): String? {
+            // HTML5 / modern Kiwix: <figcaption>…</figcaption>
+            val figIdx = w.indexOf("<figcaption", ignoreCase = true)
+            if (figIdx >= 0) {
+                val gt    = w.indexOf('>', figIdx)
+                val close = w.indexOf("</figcaption>", figIdx, ignoreCase = true)
+                if (gt >= 0 && close > gt)
+                    cleanHtml(w.substring(gt + 1, close))?.let { return it }
+            }
+
+            // Classic MediaWiki / Klexikon: <div class="thumbcaption">…</div>
+            // Uses nestedDivContent() so the inner magnify div doesn't terminate the match early.
+            val thumbIdx = w.indexOf("thumbcaption", ignoreCase = true)
+            if (thumbIdx >= 0) {
+                val gt = w.indexOf('>', thumbIdx)
+                if (gt >= 0)
+                    nestedDivContent(w, gt + 1)?.let { cleanHtml(it) }?.let { return it }
+            }
+
+            // MediaWiki image galleries: <div class="gallerytext">…</div>
+            val galIdx = w.indexOf("gallerytext", ignoreCase = true)
+            if (galIdx >= 0) {
+                val gt = w.indexOf('>', galIdx)
+                if (gt >= 0)
+                    nestedDivContent(w, gt + 1)?.let { cleanHtml(it) }?.let { return it }
+            }
+
+            return null
         }
 
-        // Classic MediaWiki / Klexikon: <div class="thumbcaption">…</div>
-        // Uses nestedDivContent() so the inner magnify div doesn't terminate the match early.
-        val thumbIdx = window.indexOf("thumbcaption", ignoreCase = true)
-        if (thumbIdx >= 0) {
-            val gt = window.indexOf('>', thumbIdx)
-            if (gt >= 0)
-                nestedDivContent(window, gt + 1)
-                    ?.let { cleanHtml(it) }
-                    ?.let { return it }
-        }
+        val end = minOf(afterPos + 3000, html.length)
 
-        return null
+        // Primary: forward search from end of <img> tag
+        captionFromWindow(html.substring(afterPos, end))?.let { return it }
+
+        // Fallback: find the enclosing container block and search from its opening tag.
+        // Handles cases where the caption marker is more than 3000 chars from the img end
+        // (e.g. large srcset) or where the img is nested deeper than expected.
+        val blockStart = findEnclosingBlock(html, afterPos) ?: return null
+        if (blockStart >= afterPos) return null
+        return captionFromWindow(html.substring(blockStart, end))
     }
 
     // Returns the inner HTML of a div whose opening tag has already been consumed,
@@ -509,6 +531,29 @@ class ZimReader(private val filePath: String) {
             }
         }
         return null
+    }
+
+    // Searches backwards from beforePos to find the opening of the nearest enclosing
+    // image container block (thumbinner, gallerybox, or <figure>).
+    // Returns the absolute position of the opening '<' in html, or null if not found.
+    private fun findEnclosingBlock(html: String, beforePos: Int): Int? {
+        val searchFrom = maxOf(0, beforePos - 3000)
+        val prefix = html.substring(searchFrom, beforePos)
+        var best = -1
+
+        for (cls in listOf("thumbinner", "gallerybox")) {
+            val idx = prefix.lastIndexOf(cls)
+            if (idx < 0) continue
+            // Walk back to the opening '<' of the tag containing this class
+            var t = idx
+            while (t > 0 && prefix[t] != '<') t--
+            if (t >= 0 && prefix.regionMatches(t, "<div", 0, 4, ignoreCase = true) && t > best)
+                best = t
+        }
+        val figIdx = prefix.lastIndexOf("<figure", ignoreCase = true)
+        if (figIdx >= 0 && figIdx > best) best = figIdx
+
+        return if (best >= 0) searchFrom + best else null
     }
 
     private fun findUrlIndexByPath(targetPath: String): Int? {
