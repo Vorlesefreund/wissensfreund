@@ -460,14 +460,55 @@ class ZimReader(private val filePath: String) {
     }
 
     private fun findNearbyCaption(html: String, afterPos: Int): String? {
-        val window = html.substring(afterPos, minOf(afterPos + 800, html.length))
-        val m = Regex("""<div\b[^>]*\bthumbcaption\b[^>]*>([\s\S]*?)</div>""", RegexOption.IGNORE_CASE)
-            .find(window) ?: return null
-        return m.groupValues[1]
-            .replace(Regex("<[^>]+>"), "")
+        val window = html.substring(afterPos, minOf(afterPos + 1200, html.length))
+
+        fun cleanHtml(raw: String): String? = raw
+            // Remove magnify helper div — otherwise "Vergrößern" leaks into caption text
+            .replace(Regex("""<div\b[^>]*\bmagnify\b[^>]*>[\s\S]*?</div>""", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("<[^>]+>"), " ")
             .replace("&amp;", "&").replace("&nbsp;", " ")
             .replace("&lt;", "<").replace("&gt;", ">")
-            .trim().ifEmpty { null }
+            .replace(Regex("\\s+"), " ").trim()
+            .ifEmpty { null }
+
+        // HTML5 / modern Kiwix: <figcaption>…</figcaption>
+        val figIdx = window.indexOf("<figcaption", ignoreCase = true)
+        if (figIdx >= 0) {
+            val gt    = window.indexOf('>', figIdx)
+            val close = window.indexOf("</figcaption>", figIdx, ignoreCase = true)
+            if (gt >= 0 && close > gt)
+                cleanHtml(window.substring(gt + 1, close))?.let { return it }
+        }
+
+        // Classic MediaWiki / Klexikon: <div class="thumbcaption">…</div>
+        // Uses nestedDivContent() so the inner magnify div doesn't terminate the match early.
+        val thumbIdx = window.indexOf("thumbcaption", ignoreCase = true)
+        if (thumbIdx >= 0) {
+            val gt = window.indexOf('>', thumbIdx)
+            if (gt >= 0)
+                nestedDivContent(window, gt + 1)
+                    ?.let { cleanHtml(it) }
+                    ?.let { return it }
+        }
+
+        return null
+    }
+
+    // Returns the inner HTML of a div whose opening tag has already been consumed,
+    // tracking nested <div> depth so the result isn't cut off by an inner </div>.
+    private fun nestedDivContent(html: String, start: Int): String? {
+        var depth = 1
+        var pos   = start
+        while (pos < html.length) {
+            val o = html.indexOf("<div",  pos, ignoreCase = true)
+            val c = html.indexOf("</div>", pos, ignoreCase = true)
+            when {
+                c < 0               -> return null
+                o >= 0 && o < c     -> { depth++; pos = o + 4 }
+                else                -> { if (--depth == 0) return html.substring(start, c); pos = c + 6 }
+            }
+        }
+        return null
     }
 
     private fun findUrlIndexByPath(targetPath: String): Int? {
