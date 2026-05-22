@@ -316,12 +316,13 @@ class _ArticleControlsState extends State<_ArticleControls>
     final isListening = provider.state == AppState.listening;
 
     // Three-button row: [←] left  |  [⏸/▶] center  |  [🎤] right.
-    // right: 80 leaves enough room for the professor while giving generous spacing.
+    // Fixed 24dp gaps, anchored at left: 16 → group ends at ~220dp from left,
+    // safely clear of the professor whose body starts at ~227dp.
     if (isSpeaking || isPaused || isListening) {
       return Padding(
-        padding: const EdgeInsets.only(left: 16, right: 80),
+        padding: const EdgeInsets.only(left: 16),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
           children: [
             _btn(
               icon: Icons.arrow_back_rounded,
@@ -331,6 +332,7 @@ class _ArticleControlsState extends State<_ArticleControls>
                 if (context.mounted) Navigator.pop(context);
               },
             ),
+            const SizedBox(width: 24),
             _btn(
               icon: isSpeaking ? Icons.pause_rounded : Icons.play_arrow_rounded,
               bg: const Color(0xFF2D6A4F),
@@ -338,6 +340,7 @@ class _ArticleControlsState extends State<_ArticleControls>
                   ? provider.pauseSpeaking()
                   : provider.resumeSpeaking(),
             ),
+            const SizedBox(width: 24),
             _micBtn(isListening),
           ],
         ),
@@ -575,7 +578,7 @@ class _MainArticleImageState extends State<_MainArticleImage> {
       builder: (ctx, provider, _) {
         _updateFuture(provider);
         final images = provider.articleImages;
-        final selIdx = provider.selectedImageIndex < 0
+        final selIdx = (images.isEmpty || provider.selectedImageIndex < 0)
             ? 0
             : provider.selectedImageIndex.clamp(0, images.length - 1);
         final fromKlexikon = images.isEmpty ? false : images[selIdx].fromKlexikon;
@@ -2057,6 +2060,7 @@ class _ModeCContent extends StatelessWidget {
     if (v.abs() < 200) return;
     final images     = provider.articleImages;
     final mediaItems = provider.mediaItems;
+    if (images.isEmpty) return;
     final curImgIdx  = provider.selectedImageIndex.clamp(0, images.length - 1);
     final nextImgIdx = v < 0 ? curImgIdx + 1 : curImgIdx - 1;
     if (nextImgIdx < 0 || nextImgIdx >= images.length) return;
@@ -2084,7 +2088,8 @@ class _ModeCContent extends StatelessWidget {
 
         // Caption of the currently selected image (for the 🔊 button).
         final images  = provider.articleImages;
-        final imgIdx  = provider.selectedImageIndex.clamp(0, images.length - 1);
+        final imgIdx  = images.isEmpty ? 0
+            : provider.selectedImageIndex.clamp(0, images.length - 1);
         final caption = images.isNotEmpty ? images[imgIdx].caption : null;
         final hasCaption = caption != null && caption.isNotEmpty;
 
