@@ -337,33 +337,66 @@ class ZimReader(private val filePath: String) {
     }
 
     private fun extractAudioRefsFromHtml(html: String): List<AudioRef> {
+        val body = extractArticleBody(html)
         val result = mutableListOf<AudioRef>()
         val seen = mutableSetOf<String>()
+
+        // Path 1: <audio><source src="..."> tags (rare in Klexikon ZIM, kept for completeness)
         val audioBlockRegex = Regex("""<audio\b[^>]*>([\s\S]*?)</audio>""", RegexOption.IGNORE_CASE)
         val sourceRegex = Regex("""<source\b[^>]*?\bsrc="([^"]+)"[^>]*>""", RegexOption.IGNORE_CASE)
-        for (audioMatch in audioBlockRegex.findAll(html)) {
-            val block = audioMatch.value
-            val pos = audioMatch.range.first
-            val srcMatch = sourceRegex.find(block) ?: continue
-            val src = srcMatch.groupValues[1]
-            val filename = extractAudioFilename(src) ?: continue
+        for (audioMatch in audioBlockRegex.findAll(body)) {
+            val srcMatch = sourceRegex.find(audioMatch.value) ?: continue
+            val filename = extractAudioFilename(srcMatch.groupValues[1]) ?: continue
             if (filename in seen) continue
             val ext = filename.substringAfterLast('.', "").lowercase()
             if (ext !in setOf("mp3", "ogg", "oga", "opus", "wav")) continue
             val mimeType = when (ext) {
-                "mp3"       -> "audio/mpeg"
-                "ogg", "oga" -> "audio/ogg"
-                "opus"      -> "audio/opus"
-                "wav"       -> "audio/wav"
-                else        -> "audio/mpeg"
+                "mp3" -> "audio/mpeg"; "ogg", "oga" -> "audio/ogg"
+                "opus" -> "audio/opus"; "wav" -> "audio/wav"; else -> "audio/mpeg"
             }
-            val caption = findNearbyCaption(html, audioMatch.range.last)
             seen.add(filename)
-            result.add(AudioRef(filename, mimeType, caption, pos))
-            Log.d(TAG, "audioExtract: found $filename at pos=$pos caption=$caption")
+            result.add(AudioRef(filename, mimeType, findNearbyCaption(body, audioMatch.range.last), audioMatch.range.first))
         }
-        Log.d(TAG, "audioExtract: returning ${result.size} audio files")
+
+        // Path 2: Wikimedia audio links via wpDestFile= (Klexikon's actual audio format)
+        // e.g. href="...?wpDestFile=Ludwig_van_Beethoven_-_symphony_no._5.ogg"
+        val wpRegex = Regex(
+            """href="[^"]*[?&]wpDestFile=([^"&]+\.(?:ogg|oga|mp3|opus|wav))""",
+            RegexOption.IGNORE_CASE
+        )
+        for (m in wpRegex.findAll(body)) {
+            val filename = java.net.URLDecoder.decode(m.groupValues[1], "UTF-8")
+            if (filename in seen) continue
+            seen.add(filename)
+            val ext = filename.substringAfterLast('.', "").lowercase()
+            val mimeType = when (ext) {
+                "mp3" -> "audio/mpeg"; "ogg", "oga" -> "audio/ogg"
+                "opus" -> "audio/opus"; "wav" -> "audio/wav"; else -> "audio/ogg"
+            }
+            val caption = findCaptionBefore(body, m.range.first)
+            result.add(AudioRef(filename, mimeType, caption, m.range.first))
+            Log.d(TAG, "audioExtract(wpDestFile): $filename caption=$caption")
+        }
+
+        Log.d(TAG, "audioExtract: ${result.size} audio refs (${seen.size} unique)")
         return result
+    }
+
+    // Looks back up to 300 chars for the last sentence-ending text before a link.
+    private fun findCaptionBefore(html: String, beforePos: Int): String? {
+        val window = html.substring(maxOf(0, beforePos - 300), beforePos)
+        val text = window.replace(Regex("<[^>]+>"), " ")
+            .replace(Regex("&[a-zA-Z#0-9]+;"), " ")
+            .replace(Regex("\\s+"), " ").trim()
+        if (text.isEmpty()) return null
+        for (sep in listOf(":", ".", "!", "?")) {
+            val idx = text.lastIndexOf(sep)
+            if (idx >= 0) {
+                val candidate = text.substring(idx + 1).trim()
+                if (candidate.length in 5..200) return candidate
+            }
+        }
+        return text.takeLast(120).trim().ifEmpty { null }
     }
 
     private fun extractAudioFilename(src: String): String? {
