@@ -19,7 +19,6 @@ import os
 import re
 import struct
 import sys
-import zlib
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -81,23 +80,22 @@ def _read_mime_types(f, pos: int) -> list[str]:
 
 
 def _decompress(data: bytes, compression: int, cluster_idx: int = -1) -> bytes | None:
+    # Compression types per current libzim/Kiwix:
+    #   0/1 = none,  4 = lzma,  5 = zstd (NOT bzip2!),  6 = xz,  8 = zstd (old tools)
     try:
         if compression in (0, 1):
             return data
         if compression == 4:
-            return zlib.decompress(data)
-        if compression == 5:
-            import bz2
-            return bz2.decompress(data)
-        if compression == 6:
             return lzma.decompress(data)
-        if compression == 8:
+        if compression in (5, 8):  # zstd — type 5 in current libzim, type 8 in older tools
             if not HAS_ZSTD:
                 print("ERROR: zstd cluster found but zstandard not installed; pip install zstandard",
                       file=sys.stderr)
                 return None
             dctx = _zstd.ZstdDecompressor()
             return dctx.decompress(data, max_length=256 * 1024 * 1024)
+        if compression == 6:
+            return lzma.decompress(data)
         print(f"WARNING: unknown compression type {compression} in cluster {cluster_idx}", file=sys.stderr)
         return None
     except Exception as e:
