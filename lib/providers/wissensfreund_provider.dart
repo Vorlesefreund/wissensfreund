@@ -264,13 +264,20 @@ class WissensfreundProvider extends ChangeNotifier {
         return;
       }
       // After disambiguation question, auto-start listening — no mic tap needed.
+      // TTS is already done here, so skip the Dart-side lead delay (Kotlin warmup suffices).
       if (_awaitingDisambiguation && _state == AppState.idle) {
-        Future.delayed(const Duration(milliseconds: 500), startListening);
+        Future.delayed(
+          const Duration(milliseconds: 80),
+          () => startListening(skipLeadDelay: true),
+        );
         return;
       }
       // After article-switch confirmation question, auto-start listening.
       if (_awaitingArticleSwitch && _state == AppState.idle) {
-        Future.delayed(const Duration(milliseconds: 500), startListening);
+        Future.delayed(
+          const Duration(milliseconds: 80),
+          () => startListening(skipLeadDelay: true),
+        );
         return;
       }
       // Mid-article mic interrupt: restore saved article + show resume prompt.
@@ -356,7 +363,9 @@ class WissensfreundProvider extends ChangeNotifier {
 
   // ── STT ───────────────────────────────────────────────────────────────────
 
-  Future<void> startListening() async {
+  // skipLeadDelay: true when called right after TTS completion (Kotlin warmup is enough).
+  // false (default) when TTS may still be running (user-initiated mic tap).
+  Future<void> startListening({bool skipLeadDelay = false}) async {
     if (_state != AppState.idle) return;
     _captionPromptDelayTimer?.cancel();
     _captionPromptDelayTimer = null;
@@ -378,7 +387,7 @@ class WissensfreundProvider extends ChangeNotifier {
     notifyListeners();
 
     await _tts.stop();
-    await Future.delayed(const Duration(milliseconds: 500));
+    await Future.delayed(Duration(milliseconds: skipLeadDelay ? 80 : 500));
     if (_state != AppState.listening) return;
 
     try {
