@@ -70,37 +70,70 @@ def _is_html_item(item) -> bool:
     return False
 
 
+def _diag_entry(n: int, entry, archive) -> None:
+    """Print diagnostics for one entry (first few only)."""
+    try:
+        path = getattr(entry, 'path', '?')
+        is_redir = getattr(entry, 'is_redirect', '?')
+        print(f"  [dbg{n}] path={path!r} is_redirect={is_redir}", flush=True)
+    except Exception as e:
+        print(f"  [dbg{n}] path/is_redirect failed: {type(e).__name__}: {e}", flush=True)
+    try:
+        item = entry.get_item()
+        mt = getattr(item, 'mimetype', None)
+        print(f"  [dbg{n}] get_item() ok, mimetype={mt!r} (type={type(mt).__name__})", flush=True)
+        try:
+            snip = bytes(item.content[:30])
+            print(f"  [dbg{n}] content[:30]={snip!r}", flush=True)
+        except Exception as e2:
+            print(f"  [dbg{n}] content failed: {e2}", flush=True)
+    except Exception as e:
+        print(f"  [dbg{n}] get_item() -> {type(e).__name__}: {e}", flush=True)
+
+
 def iter_entries(archive):
     """
     Yield all HTML content entries from archive.
     Robust to libzim API differences (1.x/2.x/3.x) and ZIM format versions.
-    Does NOT filter on is_redirect — calls get_item() directly and skips on failure.
     """
     n_tried = 0
+    n_ok = 0
+    n_err = 0
+    iterated = False
 
     # Strategy 1: direct iteration (libzim 2.x / 3.x)
     try:
         for entry in archive:
+            iterated = True
             n_tried += 1
+            if n_tried <= 5:
+                _diag_entry(n_tried, entry, archive)
             try:
                 item = entry.get_item()
+                n_ok += 1
+                if _is_html_item(item):
+                    yield entry, item
             except Exception:
-                # redirect or unsupported entry type
+                n_err += 1
                 continue
-            if _is_html_item(item):
-                yield entry, item
-            if n_tried == 10:
-                # Debug: print MIME types of first 10 non-error entries
-                try:
-                    mt = (item.mimetype or "").lower()
-                    print(f"  [dbg] entry {n_tried}: path={getattr(entry,'path','?')!r} mime={mt!r}", flush=True)
-                except Exception:
-                    pass
-        return
+        if n_tried > 0:
+            print(f"  [dbg] Strategy1: {n_tried} entries, {n_ok} get_item ok, {n_err} errors", flush=True)
+        if iterated:
+            return  # ran to completion (even if n_ok==0)
     except TypeError:
         pass  # Archive not iterable — fall through
 
     # Strategy 2: index-based access (libzim 1.x)
+    print(f"  [dbg] Trying Strategy2: archive.get_entry_by_id()", flush=True)
+    n2 = 0
+    for i in range(min(archive.entry_count, 5)):
+        try:
+            entry = archive.get_entry_by_id(i)
+            item = entry.get_item()
+            print(f"  [dbg2] id={i} path={getattr(entry,'path','?')!r} mime={getattr(item,'mimetype','?')!r}", flush=True)
+            n2 += 1
+        except Exception as e:
+            print(f"  [dbg2] id={i} failed: {type(e).__name__}: {e}", flush=True)
     for i in range(archive.entry_count):
         try:
             entry = archive.get_entry_by_id(i)
