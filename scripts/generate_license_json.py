@@ -37,7 +37,7 @@ COMMONS_API   = "https://commons.wikimedia.org/w/api.php"
 IMAGE_EXTS    = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 AUDIO_EXTS    = {".ogg", ".oga", ".mp3", ".opus", ".wav", ".flac"}
 BATCH_SIZE    = 50
-REQUEST_DELAY = 0.5
+REQUEST_DELAY = 1.5   # Wikimedia Commons API rate limit: erhöht von 0.5 auf 1.5s
 
 ZIM_MAGIC = 0x044d495a  # little-endian: bytes 5a 49 4d 04 ("ZIM\x04")
 

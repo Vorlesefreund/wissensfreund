@@ -27,8 +27,8 @@ ZIM_FILE     = os.environ.get("ZIM_FILE", "klexikon.zim")
 OUTPUT_FILE  = Path("article_audio_refs.json")
 MAX_ARTICLES = int(os.environ.get("MAX_ARTICLES", "0"))   # 0 = alle Artikel
 
-# Matches:  href="...?wpDestFile=Ludwig_van_Beethoven_...ogg"
-# Also:     href="...&wpDestFile=...ogg"
+# href="...?wpDestFile=Ludwig_van_Beethoven_...ogg"
+# href="...&wpDestFile=...ogg"
 AUDIO_LINK_RE = re.compile(
     r'href="[^"]*[?&]wpDestFile=([^"&]+\.(?:ogg|oga|mp3|opus|wav|flac))',
     re.IGNORECASE,
@@ -36,17 +36,12 @@ AUDIO_LINK_RE = re.compile(
 
 
 def extract_caption(html: str, match_start: int) -> str | None:
-    """
-    Returns the text fragment immediately before the audio link.
-    Looks back up to 500 chars, strips HTML tags, returns the last clause.
-    """
     window = html[max(0, match_start - 500): match_start]
-    text = re.sub(r"<[^>]+>", " ", window)         # strip HTML tags
-    text = re.sub(r"&[a-zA-Z#0-9]+;", " ", text)   # strip HTML entities
+    text = re.sub(r"<[^>]+>", " ", window)
+    text = re.sub(r"&[a-zA-Z#0-9]+;", " ", text)
     text = re.sub(r"\s+", " ", text).strip()
     if not text:
         return None
-    # Prefer the last clause that ends with ': ' or a sentence end
     for sep in (":", ".", "!", "?"):
         idx = text.rfind(sep)
         if idx >= 0:
@@ -57,6 +52,41 @@ def extract_caption(html: str, match_start: int) -> str | None:
     return tail if len(tail) >= 5 else None
 
 
+def iter_entries(archive):
+    """
+    Yield all non-redirect entries with HTML content.
+    Supports libzim 2.x (Archive iterable) and 3.x (get_entry_by_id).
+    """
+    # Try direct iteration first (libzim >= 2.x)
+    try:
+        for entry in archive:
+            if not entry.is_redirect:
+                try:
+                    item = entry.get_item()
+                    if "html" in item.mimetype.lower():
+                        yield entry, item
+                except Exception:
+                    pass
+        return
+    except TypeError:
+        pass  # Archive not iterable — fall through to index-based access
+
+    # Fallback: iterate by index (libzim 1.x)
+    for i in range(archive.entry_count):
+        try:
+            entry = archive.get_entry_by_id(i)
+        except Exception:
+            continue
+        if entry.is_redirect:
+            continue
+        try:
+            item = entry.get_item()
+            if "html" in item.mimetype.lower():
+                yield entry, item
+        except Exception:
+            continue
+
+
 def main() -> None:
     zim_path = Path(ZIM_FILE)
     if not zim_path.exists():
@@ -65,29 +95,14 @@ def main() -> None:
 
     print(f"Opening {zim_path} ({zim_path.stat().st_size // 1_048_576} MB)...")
     archive = Archive(str(zim_path))
-    total_entries = archive.entry_count
-    print(f"Total ZIM entries: {total_entries}")
+    print(f"Total ZIM entries: {archive.entry_count}")
     if MAX_ARTICLES:
         print(f"Test mode: scanning at most {MAX_ARTICLES} HTML articles")
 
     results: dict[str, list] = {}
     html_count = 0
 
-    for i in range(total_entries):
-        try:
-            entry = archive[i]
-        except Exception:
-            continue
-        if entry.is_redirect:
-            continue
-
-        try:
-            item = entry.get_item()
-        except Exception:
-            continue
-        if "html" not in item.mimetype.lower():
-            continue
-
+    for entry, item in iter_entries(archive):
         html_count += 1
         if MAX_ARTICLES and html_count > MAX_ARTICLES:
             break
@@ -108,6 +123,7 @@ def main() -> None:
         if refs:
             title = entry.title or entry.path.rsplit("/", 1)[-1]
             results[title] = refs
+            print(f"  [{html_count}] {title}: {len(refs)} audio ref(s)")
 
         if html_count % 500 == 0:
             print(f"  {html_count} articles scanned, {len(results)} with audio...")
@@ -118,7 +134,7 @@ def main() -> None:
     total_refs = sum(len(v) for v in results.values())
     print(
         f"\nDone: {html_count} articles scanned, "
-        f"{total_refs} audio refs in {len(results)} articles → {OUTPUT_FILE}"
+        f"{total_refs} audio refs in {len(results)} articles -> {OUTPUT_FILE}"
     )
 
 
