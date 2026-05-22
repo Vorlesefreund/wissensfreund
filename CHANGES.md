@@ -2,6 +2,77 @@
 
 ---
 
+## ✅ FERTIG — GitHub Actions: Wikipedia-Audio-Pipeline (Stand 2026-05-22)
+
+### Feature
+
+Der bestehende "Update Media Assets"-Workflow wurde um eine Wikipedia-Audio-Suche erweitert.
+Für jeden der ~3.500 Klexikon-Artikel wird die deutsche Wikipedia-API abgefragt, um passende
+Audio-Dateien (Tierlaute, Musik, Naturgeräusche, Aussprachen) zu finden.
+
+### Neue Datei: `scripts/find_wikipedia_audio.py`
+
+**Pipeline (5 Schritte):**
+
+1. **Artikel-Titel aus ZIM lesen** — nutzt nur den URL-Pointer-Table (kein Cluster-Dekomprimieren),
+   daher schnell (~1 s für alle 3.500 Artikel)
+
+2. **Wikipedia-API abfragen** — pro Artikel:
+   `https://de.wikipedia.org/w/api.php?action=query&titles={title}&prop=images&imlimit=50&format=json`
+   - Filtert auf Audio-Formate: `.ogg`, `.oga`, `.mp3`, `.opus`, `.wav`, `.flac`
+   - Schließt aus: Dateinamen die `"gesprochen"` oder `"spoken"` enthalten
+   - Rate-Limiting: 0,5 s zwischen Anfragen
+   - User-Agent: `Wissensfreund/1.0`
+   - Bei Fehler: überspringen, weiter mit nächstem Artikel
+
+3. **Wikimedia Commons Lizenzprüfung** — gebatcht (50 Dateien pro Anfrage):
+   - Nur CC0, CC BY, CC BY-SA erlaubt
+   - Audio OHNE Commons-Eintrag wird blockiert (kein implizites Vertrauen wie bei Bildern,
+     wo Klexikon-Kuration als Vertrauensbeweis gilt)
+
+4. **`media_licenses.json` aktualisieren** — audio-Sektion wird erweitert:
+   ```json
+   {
+     "filename": "Elephas_maximus_call.ogg",
+     "allowed": true,
+     "license": "CC-BY-SA-4.0",
+     "author": "...",
+     "license_url": "...",
+     "caption": "",
+     "article": "Elefant"
+   }
+   ```
+   Neues Feld `"article"` gibt an, in welchem Klexikon-Artikel die Datei gefunden wurde.
+
+5. **`wikipedia_audio_refs.json` schreiben** — nur erlaubte Dateien, im gleichen Format wie
+   `article_audio_refs.json`, als Input für `download_audio.py`
+
+**Umgebungsvariablen:**
+- `ZIM_FILE` — Pfad zur ZIM-Datei
+- `ZIM_VERSION` — Versions-String für media_licenses.json
+- `MAX_ARTICLES` — Test-Modus: nur die ersten N Artikel (0 = alle)
+- `LICENSES_FILE` — Pfad zu media_licenses.json (Standard: media_licenses.json)
+
+### Workflow-Änderungen (`.github/workflows/update_image_licenses.yml`)
+
+- **Neuer Schritt 2b** "Find Wikipedia audio files" — läuft nach `generate_license_json.py`
+  und `extract_article_audio.py`, vor dem Download-Schritt
+- **Download-Schritt** bekommt `REFS_FILE: wikipedia_audio_refs.json` — damit liest
+  `download_audio.py` die Wikipedia-Ergebnisse statt der (leeren) ZIM-internen Refs
+- Test-Modus (`max_articles != '0'`) gilt für alle drei Audio-Schritte
+
+### Abweichungen vom Plan
+
+- **`article`-Feld in `media_licenses.json`**: Die Spezifikation zeigt die `media_licenses.json`
+  audio-Sektion als flaches Dict (filename als Key). Das neue Feld `"article"` gibt den
+  Klexikon-Artikel an, in dem die Datei gefunden wurde. Wenn dieselbe Datei in mehreren
+  Artikeln vorkommt, gewinnt der letzte Treffer — für den MVP akzeptabel.
+- **Zweifache Commons-Abfrage**: `find_wikipedia_audio.py` prüft Lizenzen (extmetadata),
+  `download_audio.py` fragt nochmals (extmetadata|url) für die Download-URL. Die Redundanz
+  ist bewusst, um `download_audio.py` unverändert zu lassen.
+
+---
+
 ## ✅ FERTIG — Professor-Antwort-Katalog + Ruhemodus (Stand 2026-05-22)
 
 ### Feature

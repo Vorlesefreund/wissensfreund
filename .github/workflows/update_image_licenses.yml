@@ -68,11 +68,21 @@ jobs:
           ZIM_FILE: klexikon.zim
           MAX_ARTICLES: ${{ inputs.max_articles || '0' }}
 
+      # ── Step 2b: Wikipedia-Audio-Dateien suchen (Tierlaute, Musik, etc.) ───
+      - name: Find Wikipedia audio files
+        run: python scripts/find_wikipedia_audio.py
+        env:
+          ZIM_FILE:      klexikon.zim
+          ZIM_VERSION:   ${{ env.ZIM_VERSION }}
+          MAX_ARTICLES:  ${{ inputs.max_articles || '0' }}
+          LICENSES_FILE: media_licenses.json
+
       # ── Step 3+4: License check, download, ZIP + index ──────────────────────
       - name: Download audio files and build package
         run: python scripts/download_audio.py
         env:
           ZIM_VERSION: ${{ env.ZIM_VERSION }}
+          REFS_FILE:   wikipedia_audio_refs.json
 
       # ── Publish: image license data ──────────────────────────────────────────
       - name: Publish image license data
