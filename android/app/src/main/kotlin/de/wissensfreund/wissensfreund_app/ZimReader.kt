@@ -253,20 +253,29 @@ class ZimReader(private val filePath: String) {
         }
     }
 
+    // Trim HTML to the article body section, so header/nav images (e.g. K-logo) are excluded.
+    private fun extractArticleBody(html: String): String {
+        val startMarkers = arrayOf(
+            "id=\"mw-content-text\"", "id=\"mw-parser-output\"",
+            "id=\"bodyContent\"", "<body"
+        )
+        for (marker in startMarkers) {
+            val idx = html.indexOf(marker, ignoreCase = true)
+            if (idx > 0) {
+                val tagEnd = html.indexOf('>', idx)
+                if (tagEnd > 0) return html.substring(tagEnd + 1)
+            }
+        }
+        return html
+    }
+
     private fun extractImageRefsFromHtml(html: String): List<ImageRef> {
+        // Only search the article body — excludes logo/nav images in the page header.
+        val body = extractArticleBody(html)
         val result = mutableListOf<ImageRef>()
         val seen = mutableSetOf<String>()
-        // Debug: log first <img occurrence so we can see the exact format
-        val firstImg = html.indexOf("<img", ignoreCase = true)
-        Log.d(TAG, "imgExtract: htmlLen=${html.length} firstImgAt=$firstImg")
-        if (firstImg >= 0) Log.d(TAG, "imgExtract snippet: ${html.substring(firstImg, minOf(firstImg + 300, html.length))}")
         val imgRegex = Regex("""<img\b[^>]*?\bsrc="([^"]+)"[^>]*>""", RegexOption.IGNORE_CASE)
-        val allMatches = imgRegex.findAll(html).toList()
-        Log.d(TAG, "imgExtract: regex found ${allMatches.size} matches")
-        for (match in allMatches) {
-            // Only include article-content images (class="thumbimage"). Logos, icons, and
-            // navigation images never have this class in Klexikon's HTML.
-            if (!match.value.contains("thumbimage", ignoreCase = true)) continue
+        for (match in imgRegex.findAll(body)) {
             val src = match.groupValues[1]
             val filename = extractImageFilename(src)
             if (filename == null) continue
@@ -280,7 +289,7 @@ class ZimReader(private val filePath: String) {
                 "gif"  -> "image/gif"
                 else   -> "image/jpeg"
             }
-            val caption = findNearbyCaption(html, match.range.last)
+            val caption = findNearbyCaption(body, match.range.last)
             seen.add(filename)
             result.add(ImageRef(filename, mimeType, caption, match.range.first))
         }

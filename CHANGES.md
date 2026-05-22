@@ -2,6 +2,28 @@
 
 ---
 
+## ✅ FERTIG — Bugfix: Zu wenige Bilder nach thumbimage-Filter (Stand 2026-05-22)
+
+### Ursache
+
+Der `thumbimage`-Klassen-Filter aus dem K-Logo-Fix war zu aggressiv:
+`class="thumbimage"` kommt nur auf Floating-Thumbnails vor, nicht auf
+Infobox-Bildern, Galerie-Bildern usw. — dadurch fielen ~80% der Artikel-Bilder weg.
+
+Außerdem: `extractImageRefsFromHtml()` durchsuchte das volle HTML-Dokument
+inklusive Navigation/Header — daher war das K-Logo überhaupt sichtbar.
+
+### Fix (`ZimReader.kt`)
+
+- Neue Methode `extractArticleBody(html)` trimmt das HTML auf den Artikel-Body
+  (gleiche Start-Marker wie `preClean()`: `mw-content-text`, `mw-parser-output`,
+  `bodyContent`, `<body`).
+- `extractImageRefsFromHtml()` sucht jetzt nur im Artikel-Body — K-Logo im Header
+  wird damit automatisch ausgeschlossen, ohne jeglichen Klassen-Filter.
+- `thumbimage`-Filter und Debug-Logs entfernt.
+
+---
+
 ## ✅ FERTIG — App: Audio-Paket laden und abspielen (Stand 2026-05-22)
 
 ### Neue Datei
