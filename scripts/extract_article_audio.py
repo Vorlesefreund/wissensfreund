@@ -93,7 +93,7 @@ def _decompress(data: bytes, compression: int, cluster_idx: int = -1) -> bytes |
                       file=sys.stderr)
                 return None
             dctx = _zstd.ZstdDecompressor()
-            return dctx.decompress(data, max_length=256 * 1024 * 1024)
+            return dctx.decompress(data, max_output_size=256 * 1024 * 1024)
         if compression == 6:
             return lzma.decompress(data)
         print(f"WARNING: unknown compression type {compression} in cluster {cluster_idx}", file=sys.stderr)
