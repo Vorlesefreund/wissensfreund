@@ -178,7 +178,7 @@ class _ArticleControls extends StatelessWidget {
   static Widget _ctrlBtn({
     required IconData icon,
     required VoidCallback onTap,
-    Color? bg,
+    required Color bg,
   }) {
     return GestureDetector(
       onTap: onTap,
@@ -188,16 +188,16 @@ class _ArticleControls extends StatelessWidget {
         height: _kMicSize,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: bg ?? Colors.white.withValues(alpha: 0.2),
+          color: bg,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.22),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
+              color: Colors.black.withValues(alpha: 0.30),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: Icon(icon, color: Colors.white, size: 26),
+        child: Icon(icon, color: Colors.white, size: 28),
       ),
     );
   }
@@ -208,16 +208,21 @@ class _ArticleControls extends StatelessWidget {
     final isPaused    = provider.isPaused;
     final isListening = provider.state == AppState.listening;
 
-    // Three-button row during speaking / paused / listening for follow-up question.
-    // Right padding clears the professor widget (_kThumbRight = 180px).
+    // Three-button row during speaking / paused / listening.
+    // Constrained to left portion to clear the professor (_kThumbRight = 180px).
+    // Horizontal padding adds breathing room between buttons and screen edges.
     if (isSpeaking || isPaused || isListening) {
+      const kGreen  = Color(0xFF2D6A4F);
+      const kOrange = Color(0xFFF57C00);
+      const kGrey   = Color(0xFF37474F);
       return Padding(
-        padding: const EdgeInsets.only(right: _kThumbRight),
+        padding: const EdgeInsets.only(left: 12, right: _kThumbRight + 8),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _ctrlBtn(
               icon: Icons.arrow_back_rounded,
+              bg: kGrey,
               onTap: () async {
                 await provider.stopSpeaking();
                 if (context.mounted) Navigator.pop(context);
@@ -225,18 +230,12 @@ class _ArticleControls extends StatelessWidget {
             ),
             _ctrlBtn(
               icon: Icons.mic_rounded,
-              bg: isListening
-                  ? const Color(0xFFF57C00)
-                  : Colors.white.withValues(alpha: 0.2),
+              bg: isListening ? kOrange : kGreen,
               onTap: () => provider.interruptAndStartListening(),
             ),
             _ctrlBtn(
-              icon: isSpeaking
-                  ? Icons.pause_rounded
-                  : Icons.play_arrow_rounded,
-              bg: isSpeaking
-                  ? const Color(0xFF2D6A4F)
-                  : const Color(0xFF2D6A4F),
+              icon: isSpeaking ? Icons.pause_rounded : Icons.play_arrow_rounded,
+              bg: kGreen,
               onTap: () => isSpeaking
                   ? provider.pauseSpeaking()
                   : provider.resumeSpeaking(),
@@ -246,7 +245,7 @@ class _ArticleControls extends StatelessWidget {
       );
     }
 
-    // Idle — single centered back button.
+    // Idle — single centered back button (matches existing style).
     final isDark = provider.viewMode != ArticleViewMode.a;
     return Center(
       child: GestureDetector(
@@ -265,13 +264,13 @@ class _ArticleControls extends StatelessWidget {
                 : const Color(0xFF546E7A),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.22),
-                blurRadius: 10,
-                offset: const Offset(0, 3),
+                color: Colors.black.withValues(alpha: 0.30),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 26),
+          child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 28),
         ),
       ),
     );

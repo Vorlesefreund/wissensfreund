@@ -161,6 +161,10 @@ class WissensfreundProvider extends ChangeNotifier {
   String _savedArticlePathForMic    = '';
   int    _savedResumeOffsetForMic   = 0;
 
+  // Article-switch confirmation: professor asks before leaving the current article
+  bool                   _awaitingArticleSwitch   = false;
+  Map<String, dynamic>?  _pendingArticleCandidate;
+
   AppState get state          => _state;
   String get recognizedText   => _recognizedText;
   String get articleText      => _articleText;
@@ -264,28 +268,16 @@ class WissensfreundProvider extends ChangeNotifier {
         Future.delayed(const Duration(milliseconds: 500), startListening);
         return;
       }
+      // After article-switch confirmation question, auto-start listening.
+      if (_awaitingArticleSwitch && _state == AppState.idle) {
+        Future.delayed(const Duration(milliseconds: 500), startListening);
+        return;
+      }
       // Mid-article mic interrupt: restore saved article + show resume prompt.
-      // Fires after any TTS completes (error msg, answer, etc.) if flag is still set.
-      // _loadAndSpeak() clears the flag when a new article is loaded instead.
+      // Fires after any TTS (error msg, no-match, etc.) when flag is still set.
+      // _handleArticleSwitchConfirmation clears the flag when user confirms switch.
       if (_hasInterruptedForMic && _savedArticleTextForMic.isNotEmpty) {
-        _hasInterruptedForMic = false;
-        _articleText   = _savedArticleTextForMic;
-        _articleTitle  = _savedArticleTitleForMic;
-        _articlePath   = _savedArticlePathForMic;
-        _resumeOffset  = _savedResumeOffsetForMic;
-        _isPaused      = true;
-        _savedArticleTextForMic = '';
-        _state = AppState.idle;
-        notifyListeners();
-        _showCaptionResumePrompt = true;
-        _captionPromptDelayTimer?.cancel();
-        _captionPromptDelayTimer = Timer(const Duration(seconds: 5), () {
-          if (!_showCaptionResumePrompt) return;
-          _isPromptPlaying = true;
-          _captionResumeTimer?.cancel();
-          _captionResumeTimer = Timer(const Duration(seconds: 5), resumeAfterCaption);
-          _tts.speak('Soll ich weiterlesen?');
-        });
+        _restoreInterruptedArticle();
         return;
       }
       if (_state != AppState.speaking || _isPaused) return;
@@ -396,7 +388,11 @@ class WissensfreundProvider extends ChangeNotifier {
       if (text.isNotEmpty) {
         _recognizedText = text;
         notifyListeners();
-        await _processQuery(text);
+        if (_awaitingArticleSwitch) {
+          await _handleArticleSwitchConfirmation(text);
+        } else {
+          await _processQuery(text);
+        }
       } else {
         _handleNoSpeech();
       }
@@ -407,6 +403,23 @@ class WissensfreundProvider extends ChangeNotifier {
   }
 
   void _handleNoSpeech() {
+    if (_awaitingArticleSwitch) {
+      // User said nothing during article-switch confirmation → keep reading.
+      _awaitingArticleSwitch = false;
+      _pendingArticleCandidate = null;
+      _state = AppState.idle;
+      notifyListeners();
+      _tts.speak('Ok, ich lese weiter.');
+      // TTS completion → _hasInterruptedForMic still true → _restoreInterruptedArticle
+      return;
+    }
+    if (_hasInterruptedForMic) {
+      _state = AppState.idle;
+      notifyListeners();
+      _tts.speak('Ich hab dich nicht gehört.');
+      // TTS completion → _restoreInterruptedArticle fires automatically
+      return;
+    }
     _state = AppState.idle;
     notifyListeners();
     _tts.speak(_noSpeechMessage);
@@ -460,7 +473,14 @@ class WissensfreundProvider extends ChangeNotifier {
 
       // No match at all
       if (results.isEmpty || (results.first['score'] as int) < _kMinScore) {
-        await _speakAndIdle(_noArticleMessage);
+        if (_hasInterruptedForMic) {
+          _state = AppState.idle;
+          notifyListeners();
+          await _tts.speak('Das weiß ich leider nicht.');
+          // TTS completion → _restoreInterruptedArticle fires (prompt to continue)
+        } else {
+          await _speakAndIdle(_noArticleMessage);
+        }
         return;
       }
 
@@ -483,7 +503,20 @@ class WissensfreundProvider extends ChangeNotifier {
         return;
       }
 
-      // Clear winner (or second disambiguation call)
+      // Clear winner → if mid-article, ask before switching; otherwise load immediately.
+      if (_hasInterruptedForMic) {
+        _pendingArticleCandidate = best;
+        _awaitingArticleSwitch   = true;
+        _state = AppState.idle;
+        notifyListeners();
+        final newTitle   = best['title'] as String;
+        final savedTitle = _savedArticleTitleForMic;
+        await _tts.speak(
+          'Soll ich aufhören, über $savedTitle zu lesen, '
+          'und dir stattdessen von $newTitle erzählen?',
+        );
+        return;
+      }
       await _loadAndSpeak(best['urlIndex'] as int, best['title'] as String);
     } on PlatformException catch (e) {
       debugPrint('ZIM search error: ${e.message}');
@@ -850,6 +883,53 @@ class WissensfreundProvider extends ChangeNotifier {
     _resumeOffset = 0;
     _state = AppState.idle;
     notifyListeners();
+  }
+
+  /// Stellt den unterbrochenen Artikel wieder her und zeigt "Weiterlesen?"-Prompt.
+  void _restoreInterruptedArticle() {
+    if (!_hasInterruptedForMic || _savedArticleTextForMic.isEmpty) return;
+    _hasInterruptedForMic    = false;
+    _awaitingArticleSwitch   = false;
+    _pendingArticleCandidate = null;
+    _articleText   = _savedArticleTextForMic;
+    _articleTitle  = _savedArticleTitleForMic;
+    _articlePath   = _savedArticlePathForMic;
+    _resumeOffset  = _savedResumeOffsetForMic;
+    _isPaused      = true;
+    _savedArticleTextForMic = '';
+    _state = AppState.idle;
+    notifyListeners();
+    _showCaptionResumePrompt = true;
+    _captionPromptDelayTimer?.cancel();
+    _captionPromptDelayTimer = Timer(const Duration(seconds: 5), () {
+      if (!_showCaptionResumePrompt) return;
+      _isPromptPlaying = true;
+      _captionResumeTimer?.cancel();
+      _captionResumeTimer = Timer(const Duration(seconds: 5), resumeAfterCaption);
+      _tts.speak('Soll ich weiterlesen?');
+    });
+  }
+
+  /// Verarbeitet die Ja/Nein-Antwort auf die Artikel-Wechsel-Frage des Professors.
+  Future<void> _handleArticleSwitchConfirmation(String text) async {
+    _awaitingArticleSwitch = false;
+    final lc = text.toLowerCase();
+    final isYes = lc.contains('ja') || lc.contains('yes') ||
+                  lc.contains('okay') || lc.contains('ok') ||
+                  lc.contains('klar') || lc.contains('gerne') ||
+                  lc.contains('natürlich') || lc.contains('wechsel') ||
+                  lc.contains('erzähl') || lc.contains('bitte');
+
+    if (isYes && _pendingArticleCandidate != null) {
+      final candidate = _pendingArticleCandidate!;
+      _pendingArticleCandidate = null;
+      _hasInterruptedForMic   = false;
+      _savedArticleTextForMic = '';
+      await _loadAndSpeak(candidate['urlIndex'] as int, candidate['title'] as String);
+    } else {
+      _pendingArticleCandidate = null;
+      _restoreInterruptedArticle();
+    }
   }
 
   /// Mic-Tap im Artikel-Screen: Professor pausieren, Position merken, STT starten.
