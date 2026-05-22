@@ -1886,101 +1886,179 @@ class _WaveformPainter extends CustomPainter {
 class _ModeCContent extends StatelessWidget {
   const _ModeCContent({super.key});
 
+  // Swipe to next/previous image — syncs both selectedImageIndex and selectedMediaIndex.
+  void _swipeImage(DragEndDetails d, WissensfreundProvider provider) {
+    final v = d.primaryVelocity ?? 0;
+    if (v.abs() < 200) return;
+    final images     = provider.articleImages;
+    final mediaItems = provider.mediaItems;
+    final curImgIdx  = provider.selectedImageIndex.clamp(0, images.length - 1);
+    final nextImgIdx = v < 0 ? curImgIdx + 1 : curImgIdx - 1;
+    if (nextImgIdx < 0 || nextImgIdx >= images.length) return;
+
+    // Find the mediaItems index for the target image (skip audio items).
+    int imgCount = 0;
+    for (int i = 0; i < mediaItems.length; i++) {
+      if (!mediaItems[i].isAudio) {
+        if (imgCount == nextImgIdx) {
+          provider.onMediaTap(i); // syncs both _selectedMediaIndex + _selectedImageIndex
+          return;
+        }
+        imgCount++;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<WissensfreundProvider>(
       builder: (context, provider, _) {
+        // Bottom of image = professor's top edge (_kProfH + _kProfBottom = 224px).
+        // This clears both the professor (224px) and the thumbnail row (180px).
+        const double imageClearance = _kProfH + _kProfBottom;
+
+        // Caption of the currently selected image (for the 🔊 button).
+        final images  = provider.articleImages;
+        final imgIdx  = provider.selectedImageIndex.clamp(0, images.length - 1);
+        final caption = images.isNotEmpty ? images[imgIdx].caption : null;
+        final hasCaption = caption != null && caption.isNotEmpty;
+
         return Column(
           children: [
             _ArticleHeader(provider: provider, dark: true),
             Expanded(
-              child: Stack(
-                children: [
-                  // ── Vollbild-Bild ─────────────────────────────────────────
-                  Positioned.fill(
-                    child: _MainArticleImage(
-                      fallbackTitle: provider.articleTitle,
-                      enableFullscreenTap: false,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onHorizontalDragEnd: (d) => _swipeImage(d, provider),
+                child: Stack(
+                  children: [
+                    // ── Hintergrund unter dem Bild (sichtbar ab Bildunterkante) ──
+                    const Positioned.fill(
+                      child: ColoredBox(color: Color(0xFF112D1F)),
                     ),
-                  ),
 
-                  // ── Oben: Gradient + Artikeltitel ─────────────────────────
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    height: 90,
-                    child: const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Color(0xCC112D1F), Colors.transparent],
+                    // ── Vollbild-Bild — endet oberhalb von Thumbnails+Professor ──
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: imageClearance,
+                      child: _MainArticleImage(
+                        fallbackTitle: provider.articleTitle,
+                        enableFullscreenTap: false,
+                      ),
+                    ),
+
+                    // ── Oben: Gradient + Artikeltitel ───────────────────────
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: 90,
+                      child: const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Color(0xCC112D1F), Colors.transparent],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    top: 12,
-                    left: 14,
-                    right: 14,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          provider.articleTitle.toUpperCase(),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.white.withValues(alpha: 0.7),
-                            letterSpacing: 1.2,
-                            fontWeight: FontWeight.w600,
+                    Positioned(
+                      top: 12,
+                      left: 14,
+                      right: 14,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            provider.articleTitle.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: Colors.white.withValues(alpha: 0.7),
+                              letterSpacing: 1.2,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          provider.articleTitle,
-                          style: const TextStyle(
-                            fontSize: 19,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
+                          const SizedBox(height: 3),
+                          Text(
+                            provider.articleTitle,
+                            style: const TextStyle(
+                              fontSize: 19,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
 
-                  // ── Unten: Gradient + Thumbnails (identisch Mode B) ───────
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    height: _kMicClear + 130,
-                    child: const DecoratedBox(
-                      decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topCenter,
-                          end: Alignment.bottomCenter,
-                          colors: [Colors.transparent, Color(0xDD112D1F)],
+                    // ── Unten: Gradient an der Bildunterkante ───────────────
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom: imageClearance,
+                      height: 80,
+                      child: const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [Colors.transparent, Color(0xFF112D1F)],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Positioned(
-                    bottom: _kMicClear,
-                    left: 0,
-                    right: 0,
-                    child: const _ThumbnailRow(),
-                  ),
-                  Positioned(
-                    bottom: _kMicClear + 104,
-                    left: 0,
-                    right: 0,
-                    child: _KlexikonAttribution(
-                      url: provider.articleUrl,
-                      dark: true,
+
+                    // ── 🔊 Bildtext vorlesen — nur wenn Caption vorhanden ───
+                    Positioned(
+                      bottom: imageClearance + 10,
+                      right: 14,
+                      child: hasCaption
+                          ? GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => provider.interruptForCaption(caption!),
+                              child: Container(
+                                width: 48,
+                                height: 48,
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF1B4332)
+                                      .withValues(alpha: 0.88),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.35),
+                                    width: 1.5,
+                                  ),
+                                ),
+                                child: const Icon(
+                                  Icons.volume_up_rounded,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
-                  ),
-                ],
+
+                    // ── Thumbnails + Attribution ─────────────────────────────
+                    Positioned(
+                      bottom: _kMicClear,
+                      left: 0,
+                      right: 0,
+                      child: const _ThumbnailRow(),
+                    ),
+                    Positioned(
+                      bottom: _kMicClear + 104,
+                      left: 0,
+                      right: 0,
+                      child: _KlexikonAttribution(
+                        url: provider.articleUrl,
+                        dark: true,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
