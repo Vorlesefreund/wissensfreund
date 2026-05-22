@@ -16,11 +16,16 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   final _scrollController = ScrollController();
   WissensfreundProvider? _provider;
   AppState _lastState = AppState.idle;
   bool _navigatingToArticle = false;
+
+  // Breathing animation for rest mode
+  late final AnimationController _breathCtrl;
+  late final Animation<double> _breathScale;
 
   // ZIM status bar: visible while loading, briefly after ready, hidden otherwise
   bool _lastZimReady        = false;
@@ -31,6 +36,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _breathCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3000),
+    )..repeat(reverse: true);
+    _breathScale = Tween<double>(begin: 1.0, end: 1.04).animate(
+      CurvedAnimation(parent: _breathCtrl, curve: Curves.easeInOut),
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) => _checkOnboarding());
   }
 
@@ -167,6 +179,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
+    _breathCtrl.dispose();
     _zimFadeTimer?.cancel();
     _provider?.removeListener(_onProviderChanged);
     _scrollController.dispose();
@@ -262,19 +275,50 @@ class _HomeScreenState extends State<HomeScreen> {
                             padding: isSpeaking
                                 ? const EdgeInsets.only(bottom: 4)
                                 : EdgeInsets.zero,
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.easeInOut,
-                              height: isSpeaking ? 160 : 268,
-                              width: isSpeaking ? 120.0 : 240.0,
-                              child: ProfessorWidget(
-                                state: provider.state,
-                                compact: isSpeaking,
-                              ),
+                            child: GestureDetector(
+                              onTap: provider.isRestMode
+                                  ? () => provider.wakeFromRest()
+                                  : null,
+                              child: provider.isRestMode
+                                  ? AnimatedBuilder(
+                                      animation: _breathCtrl,
+                                      builder: (_, child) => Transform.scale(
+                                        scale: _breathScale.value,
+                                        child: Opacity(opacity: 0.65, child: child),
+                                      ),
+                                      child: AnimatedContainer(
+                                        duration: const Duration(milliseconds: 500),
+                                        curve: Curves.easeInOut,
+                                        height: 268,
+                                        width: 240,
+                                        child: ProfessorWidget(
+                                          state: AppState.idle,
+                                          compact: false,
+                                        ),
+                                      ),
+                                    )
+                                  : AnimatedContainer(
+                                      duration: const Duration(milliseconds: 500),
+                                      curve: Curves.easeInOut,
+                                      height: isSpeaking ? 160 : 268,
+                                      width: isSpeaking ? 120.0 : 240.0,
+                                      child: ProfessorWidget(
+                                        state: provider.state,
+                                        compact: isSpeaking,
+                                      ),
+                                    ),
                             ),
                           ),
                         ),
                       ),
+                      // Rest mode: "Tippe mich an" badge below professor
+                      if (provider.isRestMode)
+                        const Positioned(
+                          top: 270,
+                          left: 0,
+                          right: 0,
+                          child: Center(child: _RestModeBadge()),
+                        ),
                     ],
                   ),
                 ),
@@ -562,42 +606,47 @@ class _BottomBar extends StatelessWidget {
         ],
       ),
       padding: const EdgeInsets.fromLTRB(24, 4, 24, 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Menu button
-          _MenuIconButton(onTap: () => _openMenu(context)),
-          // Dominant mic FAB with pulsing rings
-          SizedBox(
-            width: 96,
-            height: 96,
-            child: Stack(
-              clipBehavior: Clip.none,
-              alignment: Alignment.center,
+      child: provider.isRestMode
+          // Rest mode: only menu button, centered
+          ? SizedBox(
+              height: 96,
+              child: Center(
+                child: _MenuIconButton(onTap: () => _openMenu(context)),
+              ),
+            )
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _PulsingRings(active: provider.state == AppState.listening),
-                _MicButtonCore(
-                  isListening: provider.state == AppState.listening,
-                  isSpeaking: provider.state == AppState.speaking,
-                  isThinking: provider.state == AppState.thinking,
-                  onTap: () {
-                    if (provider.state == AppState.speaking) {
-                      provider.stopSpeaking();
-                    } else if (provider.state == AppState.listening) {
-                      provider.stopListening();
-                    } else if (provider.state != AppState.thinking) {
-                      provider.startListening();
-                    }
-                  },
+                _MenuIconButton(onTap: () => _openMenu(context)),
+                SizedBox(
+                  width: 96,
+                  height: 96,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    alignment: Alignment.center,
+                    children: [
+                      _PulsingRings(active: provider.state == AppState.listening),
+                      _MicButtonCore(
+                        isListening: provider.state == AppState.listening,
+                        isSpeaking: provider.state == AppState.speaking,
+                        isThinking: provider.state == AppState.thinking,
+                        onTap: () {
+                          if (provider.state == AppState.speaking) {
+                            provider.stopSpeaking();
+                          } else if (provider.state == AppState.listening) {
+                            provider.stopListening();
+                          } else if (provider.state != AppState.thinking) {
+                            provider.startListening();
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 48),
               ],
             ),
-          ),
-          // Right spacer (balances menu button)
-          const SizedBox(width: 48),
-        ],
-      ),
     );
   }
 }
@@ -1353,6 +1402,41 @@ class _ParentalOnboardingDialogState extends State<_ParentalOnboardingDialog>
         style: btnStyle,
         onPressed: _dismiss,
         child: const Text('Alles klar!', style: TextStyle(fontSize: 16)),
+      ),
+    );
+  }
+}
+
+// ── Rest mode badge ────────────────────────────────────────────────────────────
+
+class _RestModeBadge extends StatelessWidget {
+  const _RestModeBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2E7D32).withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 2)),
+        ],
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('💤', style: TextStyle(fontSize: 16)),
+          SizedBox(width: 8),
+          Text(
+            'Tippe mich an',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -2,6 +2,64 @@
 
 ---
 
+## ✅ FERTIG — Professor-Antwort-Katalog + Ruhemodus (Stand 2026-05-22)
+
+### Feature
+
+**SQLite-Katalog (~200 Sätze):** Alle Professor-Sprachausgaben kommen jetzt aus einem
+SQLite-Datenbank-Katalog (`professor_responses.db`) statt aus fest verdrahteten Strings.
+Kein Satz wird zweimal in Folge verwendet (`zuletzt_verwendet`-Zeitstempel).
+
+**8 Kataloge mit Eskalationslogik:**
+- `k1` — nicht verstanden (2 Varianten)
+- `k2` — kein Artikel gefunden (3 Varianten)
+- `k3_s1/s2/s3` — Eskalation bei wiederholten Fehlern (1./2./3.+ Folgeversuch)
+- `k4` — dieselbe Frage wie zuvor, anderer Hinweis
+- `k5_s1/s2/s3` — technische Fehler (STT/TTS PlatformException)
+- `k6_s1/s2/s3` — Pause-Prompts (nach 30s, 60s, 90s Stille)
+- `k6_wake` — Aufwach-Begrüßung aus dem Ruhemodus
+- `k7` / `k8` — Reaktion auf Dankeschön / Tschüss-Keywords
+
+**Zähler und Resets:**
+- `_misserfolgZaehler` — zählt aufeinanderfolgende Misserfolge (STT leer + kein Artikel);
+  treibt k1/k2/k3-Eskalation; Reset bei erfolgreichem Artikel-Fund
+- `_technischZaehler` — zählt PlatformExceptions; treibt k5-Eskalation
+- `_lastFailedQuery` — erkennt Wiederholung derselben Frage → k4 statt k2
+- Alle Zähler + Timer werden bei Texteingabe (`submitText`) und Keywords zurückgesetzt
+
+**Pause-Timer-Kette:**
+- 30 s Stille → k6_s1 vorlesen → TTS-Ende → 60 s → k6_s2 → TTS-Ende → 90 s → k6_s3 → Ruhemodus
+- Timer-Kette wird durch jede Nutzer-Interaktion (Mikrofon, Text, Artikelstart) abgebrochen
+
+**Ruhemodus (`_isRestMode`):**
+- Professor-Charakter atmet sanft (Scale-Animation 1.0→1.04, 3 s, reverse)
+- Transparenz 65%, "Tippe mich an"-Badge (grünes Pill) erscheint unterhalb
+- Mikrofon-Button ausgeblendet — nur Menü-Icon sichtbar
+- Tippen auf Professor → `wakeFromRest()` → k6_wake + Zähler-Reset
+
+**Keyword-Erkennung (STT-Ergebnis):**
+- Dankeschön-Keywords (`danke`, `toll`, `super`, `klasse`, `prima`, `cool`, `schön`, `gefällt mir`, `du bist`) → k7
+- Abschied-Keywords (`tschüss`, `auf wiedersehen`, `bye`, `ich muss gehen`, `ich gehe jetzt`, `bis später`) → k8
+
+### Neue Datei
+
+**`lib/services/professor_response_service.dart`** — Singleton mit:
+- `initialize()` — Completer-Pattern, safe für mehrfaches Aufrufen
+- `_onCreate()` — Tabelle erstellen + Batch-Insert aller ~200 Einträge
+- `getResponse(katalogId)` — zufällig, aber vermeidet zuletzt verwendeten Satz
+
+### Geänderte Dateien
+
+- `lib/providers/wissensfreund_provider.dart` — Zähler, Timer-Kette, Ruhemodus-Logik,
+  `_catalogOrFallback()`, `_isThankKeyword()`, `_isGoodbyeKeyword()`, `_handleKeyword()`,
+  `_checkStartIdleTimer()`, `_cancelIdleTimers()`, `_fireK6S1/S2/S3()`, `_enterRestMode()`,
+  `wakeFromRest()`; `_handleNoSpeech()` zu `Future<void>` konvertiert
+- `lib/screens/home_screen.dart` — `SingleTickerProviderStateMixin`, Atem-Animation
+  (`AnimationController` 3 s repeat-reverse), Ruhemodus-Zweig im Professor-Bereich,
+  `_RestModeBadge`-Widget, Mic-Button ausblenden im Ruhemodus
+
+---
+
 ## ✅ FERTIG — Immersive Mode + 3-Button-Layout im Artikel-Screen (Stand 2026-05-22)
 
 ### Feature

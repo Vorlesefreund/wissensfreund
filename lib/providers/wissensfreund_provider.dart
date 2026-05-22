@@ -9,6 +9,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/audio_package_service.dart';
+import '../services/professor_response_service.dart';
 import '../services/wikimedia_license_checker.dart';
 
 class ArticleImageInfo {
@@ -165,6 +166,18 @@ class WissensfreundProvider extends ChangeNotifier {
   bool                   _awaitingArticleSwitch   = false;
   Map<String, dynamic>?  _pendingArticleCandidate;
 
+  // Professor Response Catalog — failure counters
+  int    _misserfolgZaehler = 0; // consecutive no-speech + no-article failures
+  int    _technischZaehler  = 0; // consecutive technical errors
+  String _lastFailedQuery   = ''; // for k4 (same topic repeated)
+
+  // Rest mode — professor goes to sleep after extended idle
+  bool   _isRestMode  = false;
+
+  // Pause timers — k6 sequence (30s → 60s → 90s → rest)
+  Timer? _idleTimer;
+  int    _pausePhase = 0; // 1=k6_s1 in TTS, 2=k6_s2, 3=k6_s3
+
   AppState get state          => _state;
   String get recognizedText   => _recognizedText;
   String get articleText      => _articleText;
@@ -192,12 +205,14 @@ class WissensfreundProvider extends ChangeNotifier {
   int                    get selectedMediaIndex => _selectedMediaIndex;
   bool                   get isPlayingAudio    => _isPlayingAudio;
   int                    get activeAudioIndex  => _activeAudioIndex;
+  bool                   get isRestMode        => _isRestMode;
 
   WissensfreundProvider() {
     _initTts();
     _loadViewMode();
     _initZim();
     _initLicenseCache();
+    unawaited(ProfessorResponseService.instance.initialize());
   }
 
   // ── License cache initialisation ─────────────────────────────────────────
@@ -287,7 +302,31 @@ class WissensfreundProvider extends ChangeNotifier {
         _restoreInterruptedArticle();
         return;
       }
-      if (_state != AppState.speaking || _isPaused) return;
+      // Pause phase — k6 prompt just finished; schedule next prompt or enter rest mode.
+      if (_pausePhase == 1) {
+        _pausePhase = 0;
+        if (_state == AppState.idle && _articleText.isEmpty && !_isRestMode) {
+          _idleTimer = Timer(const Duration(seconds: 60), _fireK6S2);
+        }
+        return;
+      }
+      if (_pausePhase == 2) {
+        _pausePhase = 0;
+        if (_state == AppState.idle && _articleText.isEmpty && !_isRestMode) {
+          _idleTimer = Timer(const Duration(seconds: 90), _fireK6S3);
+        }
+        return;
+      }
+      if (_pausePhase == 3) {
+        _pausePhase = 0;
+        _enterRestMode();
+        return;
+      }
+      if (_state != AppState.speaking || _isPaused) {
+        // A non-article TTS (k1, k2, k7, k8, …) just completed — start idle timer.
+        _checkStartIdleTimer();
+        return;
+      }
       _currentChunk++;
       if (_currentChunk < _speechChunks.length) {
         _tts.speak(_speechChunks[_currentChunk]);
@@ -367,6 +406,7 @@ class WissensfreundProvider extends ChangeNotifier {
   // false (default) when TTS may still be running (user-initiated mic tap).
   Future<void> startListening({bool skipLeadDelay = false}) async {
     if (_state != AppState.idle) return;
+    _cancelIdleTimers();
     _captionPromptDelayTimer?.cancel();
     _captionPromptDelayTimer = null;
     _captionResumeTimer?.cancel();
@@ -399,11 +439,17 @@ class WissensfreundProvider extends ChangeNotifier {
         notifyListeners();
         if (_awaitingArticleSwitch) {
           await _handleArticleSwitchConfirmation(text);
+        } else if (!_awaitingDisambiguation && !_hasInterruptedForMic &&
+                   _isGoodbyeKeyword(text)) {
+          await _handleKeyword('k8');
+        } else if (!_awaitingDisambiguation && !_hasInterruptedForMic &&
+                   _isThankKeyword(text)) {
+          await _handleKeyword('k7');
         } else {
           await _processQuery(text);
         }
       } else {
-        _handleNoSpeech();
+        unawaited(_handleNoSpeech());
       }
     } on PlatformException catch (e) {
       debugPrint('Speech channel error: ${e.message}');
@@ -411,27 +457,36 @@ class WissensfreundProvider extends ChangeNotifier {
     }
   }
 
-  void _handleNoSpeech() {
+  Future<void> _handleNoSpeech() async {
     if (_awaitingArticleSwitch) {
-      // User said nothing during article-switch confirmation → keep reading.
       _awaitingArticleSwitch = false;
       _pendingArticleCandidate = null;
       _state = AppState.idle;
       notifyListeners();
       _tts.speak('Ok, ich lese weiter.');
-      // TTS completion → _hasInterruptedForMic still true → _restoreInterruptedArticle
       return;
     }
     if (_hasInterruptedForMic) {
       _state = AppState.idle;
       notifyListeners();
-      _tts.speak('Ich hab dich nicht gehört.');
-      // TTS completion → _restoreInterruptedArticle fires automatically
+      final msg = await _catalogOrFallback('k1', _noSpeechMessage);
+      if (_state == AppState.idle) _tts.speak(msg);
       return;
     }
+    _misserfolgZaehler++;
     _state = AppState.idle;
     notifyListeners();
-    _tts.speak(_noSpeechMessage);
+    final katalogId = _noSpeechKatalogId();
+    final msg = await _catalogOrFallback(katalogId, _noSpeechMessage);
+    if (_state == AppState.idle) _tts.speak(msg);
+  }
+
+  String _noSpeechKatalogId() {
+    if (_misserfolgZaehler == 1) return 'k1';
+    if (_misserfolgZaehler == 2) return 'k3_s1';
+    if (_misserfolgZaehler <= 4) return 'k3_s2';
+    _misserfolgZaehler = 0;
+    return 'k3_s3';
   }
 
   Future<void> stopListening() async {
@@ -444,6 +499,10 @@ class WissensfreundProvider extends ChangeNotifier {
     _recognizedText = query.trim();
     _articleText = '';
     _articleTitle = '';
+    _misserfolgZaehler = 0;
+    _technischZaehler  = 0;
+    _lastFailedQuery   = '';
+    _cancelIdleTimers();
     notifyListeners();
     await _processQuery(_recognizedText);
   }
@@ -482,14 +541,16 @@ class WissensfreundProvider extends ChangeNotifier {
 
       // No match at all
       if (results.isEmpty || (results.first['score'] as int) < _kMinScore) {
-        if (_hasInterruptedForMic) {
-          _state = AppState.idle;
-          notifyListeners();
-          await _tts.speak('Das weiß ich leider nicht.');
-          // TTS completion → _restoreInterruptedArticle fires (prompt to continue)
-        } else {
-          await _speakAndIdle(_noArticleMessage);
-        }
+        _misserfolgZaehler++;
+        final nq = query.toLowerCase().trim();
+        final isRepeat = nq.isNotEmpty && nq == _lastFailedQuery;
+        _lastFailedQuery = nq;
+        final katalogId = _noArticleKatalogId(isRepeat: isRepeat);
+        final msg = await _catalogOrFallback(katalogId, _noArticleMessage);
+        _state = AppState.idle;
+        notifyListeners();
+        await _tts.speak(msg);
+        // TTS completion → if _hasInterruptedForMic → _restoreInterruptedArticle
         return;
       }
 
@@ -529,7 +590,12 @@ class WissensfreundProvider extends ChangeNotifier {
       await _loadAndSpeak(best['urlIndex'] as int, best['title'] as String);
     } on PlatformException catch (e) {
       debugPrint('ZIM search error: ${e.message}');
-      await _speakAndIdle(_noArticleMessage);
+      _technischZaehler++;
+      final katalogId = _technischZaehler == 1 ? 'k5_s1'
+          : _technischZaehler == 2 ? 'k5_s2'
+          : 'k5_s3';
+      final msg = await _catalogOrFallback(katalogId, _noArticleMessage);
+      await _speakAndIdle(msg);
     }
   }
 
@@ -542,8 +608,12 @@ class WissensfreundProvider extends ChangeNotifier {
 
       _awaitingDisambiguation = false;
       _pendingCandidates = [];
-      _hasInterruptedForMic    = false;  // new article loaded — discard saved article
+      _hasInterruptedForMic    = false;
       _savedArticleTextForMic  = '';
+      _misserfolgZaehler = 0;
+      _technischZaehler  = 0;
+      _lastFailedQuery   = '';
+      _cancelIdleTimers();
       _articleTitle = raw['title'] as String? ?? title;
       _articleText  = raw['text']  as String? ?? '';
       _articlePath  = raw['url']   as String? ?? '';
@@ -557,7 +627,12 @@ class WissensfreundProvider extends ChangeNotifier {
       loadMedia(urlIndex); // fire-and-forget — updates UI via notifyListeners
     } on PlatformException catch (e) {
       debugPrint('ZIM article error: ${e.message}');
-      await _speakAndIdle(_noArticleMessage);
+      _technischZaehler++;
+      final katalogId = _technischZaehler == 1 ? 'k5_s1'
+          : _technischZaehler == 2 ? 'k5_s2'
+          : 'k5_s3';
+      final msg = await _catalogOrFallback(katalogId, _noArticleMessage);
+      await _speakAndIdle(msg);
     }
   }
 
@@ -964,8 +1039,131 @@ class WissensfreundProvider extends ChangeNotifier {
     await startListening();
   }
 
+  // ── Professor Response Catalog helpers ───────────────────────────────────
+
+  Future<String> _catalogOrFallback(String katalogId, String fallback) async {
+    try {
+      final msg = await ProfessorResponseService.instance.getResponse(katalogId);
+      return msg.isNotEmpty ? msg : fallback;
+    } catch (_) {
+      return fallback;
+    }
+  }
+
+  // katalogId for no-article failures (k2 → k3 escalation, k4 for repeats)
+  String _noArticleKatalogId({required bool isRepeat}) {
+    if (isRepeat) return 'k4';
+    if (_misserfolgZaehler == 1) return 'k2';
+    if (_misserfolgZaehler == 2) return 'k3_s1';
+    if (_misserfolgZaehler <= 4) return 'k3_s2';
+    _misserfolgZaehler = 0;
+    return 'k3_s3';
+  }
+
+  // ── Keyword detection ─────────────────────────────────────────────────────
+
+  bool _isThankKeyword(String text) {
+    final lc = text.toLowerCase();
+    return lc.contains('danke') || lc.contains('toll') || lc.contains('super') ||
+           lc.contains('klasse') || lc.contains('prima') || lc.contains('cool') ||
+           lc.contains('schön') || lc.contains('gefällt mir') || lc.contains('du bist');
+  }
+
+  bool _isGoodbyeKeyword(String text) {
+    final lc = text.toLowerCase();
+    return lc.contains('tschüss') || lc.contains('auf wiedersehen') ||
+           lc.contains('bye') || lc.contains('ich muss gehen') ||
+           lc.contains('ich gehe jetzt') || lc.contains('bis später');
+  }
+
+  Future<void> _handleKeyword(String katalogId) async {
+    _misserfolgZaehler = 0;
+    _technischZaehler  = 0;
+    _lastFailedQuery   = '';
+    _cancelIdleTimers();
+    _state = AppState.idle;
+    notifyListeners();
+    final msg = await _catalogOrFallback(katalogId, '');
+    if (msg.isNotEmpty) _tts.speak(msg);
+  }
+
+  // ── Idle / pause / rest mode ──────────────────────────────────────────────
+
+  void _checkStartIdleTimer() {
+    if (_state != AppState.idle) return;
+    if (_articleText.isNotEmpty) return;
+    if (_isRestMode) return;
+    if (_awaitingDisambiguation) return;
+    if (_awaitingArticleSwitch) return;
+    if (_hasInterruptedForMic) return;
+    if (_pausePhase != 0) return;
+    if (_idleTimer != null) return;
+    _idleTimer = Timer(const Duration(seconds: 30), _fireK6S1);
+  }
+
+  void _cancelIdleTimers() {
+    _idleTimer?.cancel();
+    _idleTimer = null;
+    _pausePhase = 0;
+  }
+
+  Future<void> _fireK6S1() async {
+    _idleTimer = null;
+    if (_state != AppState.idle || _articleText.isNotEmpty || _isRestMode) return;
+    _pausePhase = 1;
+    final msg = await _catalogOrFallback('k6_s1', 'Ich bin noch da!');
+    if (_pausePhase == 1 && _state == AppState.idle && !_isRestMode) {
+      _tts.speak(msg);
+    } else {
+      _pausePhase = 0;
+    }
+  }
+
+  Future<void> _fireK6S2() async {
+    _idleTimer = null;
+    if (_state != AppState.idle || _articleText.isNotEmpty || _isRestMode) return;
+    _pausePhase = 2;
+    final msg = await _catalogOrFallback('k6_s2', 'Ich bin noch hier!');
+    if (_pausePhase == 2 && _state == AppState.idle && !_isRestMode) {
+      _tts.speak(msg);
+    } else {
+      _pausePhase = 0;
+    }
+  }
+
+  Future<void> _fireK6S3() async {
+    _idleTimer = null;
+    if (_state != AppState.idle || _articleText.isNotEmpty || _isRestMode) return;
+    _pausePhase = 3;
+    final msg = await _catalogOrFallback('k6_s3', 'Tippe mich an wenn du weitermachen möchtest!');
+    if (_pausePhase == 3 && _state == AppState.idle && !_isRestMode) {
+      _tts.speak(msg);
+    } else {
+      _pausePhase = 0;
+    }
+  }
+
+  void _enterRestMode() {
+    if (_isRestMode) return;
+    _isRestMode = true;
+    _cancelIdleTimers();
+    notifyListeners();
+  }
+
+  Future<void> wakeFromRest() async {
+    if (!_isRestMode) return;
+    _isRestMode = false;
+    _misserfolgZaehler = 0;
+    _technischZaehler  = 0;
+    _lastFailedQuery   = '';
+    notifyListeners();
+    final msg = await _catalogOrFallback('k6_wake', 'Oh, da bist du ja wieder!');
+    _tts.speak(msg);
+  }
+
   @override
   void dispose() {
+    _cancelIdleTimers();
     _tts.stop();
     _audioPlayer.dispose();
     super.dispose();
