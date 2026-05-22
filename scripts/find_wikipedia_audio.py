@@ -45,9 +45,10 @@ MAX_ARTICLES  = int(os.environ.get("MAX_ARTICLES", "0"))
 LICENSES_FILE = Path(os.environ.get("LICENSES_FILE", "media_licenses.json"))
 OUTPUT_FILE   = Path("wikipedia_audio_refs.json")
 
-WIKIPEDIA_API = "https://de.wikipedia.org/w/api.php"
-COMMONS_API   = "https://commons.wikimedia.org/w/api.php"
-UA            = "Wissensfreund/1.0 (https://github.com/Vorlesefreund/wissensfreund)"
+WIKIPEDIA_API_DE = "https://de.wikipedia.org/w/api.php"
+WIKIPEDIA_API_EN = "https://en.wikipedia.org/w/api.php"
+COMMONS_API      = "https://commons.wikimedia.org/w/api.php"
+UA               = "Wissensfreund/1.0 (https://github.com/Vorlesefreund/wissensfreund)"
 
 AUDIO_EXTS = {".ogg", ".oga", ".mp3", ".opus", ".wav", ".flac"}
 EXCLUDE_KW = {"gesprochen", "spoken"}
@@ -153,17 +154,18 @@ def _is_audio(filename: str) -> bool:
     return not any(kw in name_lower for kw in EXCLUDE_KW)
 
 
-def query_wikipedia_images(title: str, session: requests.Session) -> list[str]:
-    """Fragt Wikipedia prop=images ab und gibt Audio-Dateinamen zurück."""
+def _query_wp_api(api_url: str, title: str, session: requests.Session) -> list[str]:
+    """Fragt einen Wikipedia-API-Endpunkt ab und gibt Audio-Dateinamen zurück."""
     try:
         resp = session.get(
-            WIKIPEDIA_API,
+            api_url,
             params={
-                "action":  "query",
-                "titles":  title,
-                "prop":    "images",
-                "imlimit": "50",
-                "format":  "json",
+                "action":    "query",
+                "titles":    title,
+                "prop":      "images",
+                "imlimit":   "50",
+                "format":    "json",
+                "redirects": "1",
             },
             timeout=15,
         )
@@ -181,8 +183,24 @@ def query_wikipedia_images(title: str, session: requests.Session) -> list[str]:
                     audio_files.append(filename)
         return audio_files
     except Exception as e:
-        print(f"  WARNING Wikipedia '{title}': {e}")
+        print(f"  WARNING Wikipedia API '{title}': {e}")
         return []
+
+
+def query_wikipedia_images(title: str, session: requests.Session) -> list[str]:
+    """
+    Sucht Audio-Dateien auf Deutsch-Wikipedia, fällt auf Englisch-Wikipedia zurück
+    wenn keine gefunden (z.B. Beethoven: de.wp hat kein Audio, en.wp hat OGG-Aufnahmen).
+    """
+    audio = _query_wp_api(WIKIPEDIA_API_DE, title, session)
+    if audio:
+        return audio
+    # Fallback: Englisch-Wikipedia (extra Delay einhalten)
+    time.sleep(WP_DELAY)
+    audio = _query_wp_api(WIKIPEDIA_API_EN, title, session)
+    if audio:
+        print(f"  (EN-Fallback für '{title}')")
+    return audio
 
 
 # ── Wikimedia Commons Lizenzprüfung ──────────────────────────────────────────

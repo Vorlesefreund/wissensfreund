@@ -61,6 +61,17 @@ Audio-Dateien (Tierlaute, Musik, Naturgeräusche, Aussprachen) zu finden.
   `download_audio.py` die Wikipedia-Ergebnisse statt der (leeren) ZIM-internen Refs
 - Test-Modus (`max_articles != '0'`) gilt für alle drei Audio-Schritte
 
+### Nachträgliche Korrektur: Englisch-Wikipedia-Fallback
+
+Analyse ergab: `action=query&prop=images` funktioniert korrekt (Amsel: beide OGGs gefunden).
+Das Problem war inhaltlich: **de.Wikipedia hat im Beethoven-Artikel keine Audiodateien**,
+en.Wikipedia dagegen schon (Namensaussprache + 2 Klaviersonaten-OGGs).
+
+Lösung: `query_wikipedia_images()` prüft jetzt zuerst de.Wikipedia, fällt bei leerem
+Ergebnis auf en.Wikipedia zurück (+ 0,5 s Extra-Delay). Logging: `(EN-Fallback für 'X')`.
+
+---
+
 ### Abweichungen vom Plan
 
 - **`article`-Feld in `media_licenses.json`**: Die Spezifikation zeigt die `media_licenses.json`
