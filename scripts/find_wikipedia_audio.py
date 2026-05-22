@@ -53,6 +53,10 @@ UA               = "Wissensfreund/1.0 (https://github.com/Vorlesefreund/wissensf
 AUDIO_EXTS = {".ogg", ".oga", ".mp3", ".opus", ".wav", ".flac"}
 EXCLUDE_KW = {"gesprochen", "spoken"}
 
+# Aussprache-Dateien: beginnen mit Sprachkürzel + Bindestrich (De-, En-, Da-, Roh-, …)
+# oder mit Lingua-Libre-Präfix (LL-Q). Nur Tierlaute/Musik/Naturgeräusche sind erwünscht.
+PRONUNCIATION_RE = re.compile(r'^[A-Za-z]{2,5}-|^LL-Q', re.IGNORECASE)
+
 BATCH_SIZE    = 50
 WP_DELAY      = 0.5   # Sekunden zwischen Wikipedia-API-Anfragen
 COMMONS_DELAY = 1.5   # Sekunden zwischen Commons-Batches
@@ -151,7 +155,11 @@ def _is_audio(filename: str) -> bool:
     if ext not in AUDIO_EXTS:
         return False
     name_lower = filename.lower()
-    return not any(kw in name_lower for kw in EXCLUDE_KW)
+    if any(kw in name_lower for kw in EXCLUDE_KW):
+        return False
+    if PRONUNCIATION_RE.match(filename):
+        return False   # Aussprache-Datei → kein Mehrwert für Kinder
+    return True
 
 
 def _query_wp_api(api_url: str, title: str, session: requests.Session) -> list[str]:
