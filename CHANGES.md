@@ -2,6 +2,66 @@
 
 ---
 
+## ✅ FERTIG — Immersive Mode + 3-Button-Layout im Artikel-Screen (Stand 2026-05-22)
+
+### Feature
+
+**Immersive Mode:** Der Artikel-Screen (`ArticleScreen`) und das Vollbild-Galerie-Screen
+(`_FullscreenGallery`) aktivieren jetzt Android's Immersive-Sticky-Modus beim Öffnen
+(`SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky)`) und stellen den
+Normalzustand beim Verlassen wieder her (`SystemUiMode.edgeToEdge`).
+
+**Neues Button-Layout während des Vorlesens:**
+
+Während der Professor liest (`speaking`), pausiert (`isPaused`) oder einer Folgefrage lauscht
+(`listening`), erscheinen drei Buttons im unteren Bereich links des Professors:
+
+| [←] Zurück | [🎤] Mikrofon | [⏸/▶] Pause/Play |
+|---|---|---|
+| `stopSpeaking()` + `Navigator.pop` | `interruptAndStartListening()` | `pauseSpeaking()` / `resumeSpeaking()` |
+
+Im Leerlauf (`idle`) bleibt der einzelne Zurück-Pfeil in der Mitte (bisheriges Verhalten).
+
+**Mikrofon-Interrupt-Logik (`interruptAndStartListening()`):**
+
+- Artikel-Text, Titel, Pfad und Leseposition werden gespeichert
+- Professor pausiert, STT startet auf dem Artikel-Screen
+- Nach der Antwort: Artikel wird wiederhergestellt, `_isPaused = true`
+- "Soll ich weiterlesen?"-Prompt erscheint automatisch nach 5 s
+- Wenn eine neue Frage zu einem anderen Thema gestellt wird (`_loadAndSpeak` feuert):
+  gespeicherter Artikel wird verworfen — kein unerwartetes Wiederherstellen
+
+### Geänderte Dateien
+
+- `lib/screens/article_screen.dart` — `ArticleScreen` zu `StatefulWidget`, `_ArticleControls`
+  (neu), Immersive Mode in `_FullscreenGalleryState`
+- `lib/providers/wissensfreund_provider.dart` — `interruptAndStartListening()` (neu),
+  TTS-Completion-Handler: Artikel-Restore-Zweig, `_loadAndSpeak`: Flag löschen
+
+---
+
+## ✅ FERTIG — Modus-C: Bild oberhalb von Thumbnails/Professor, Swipe, 🔊-Button (Stand 2026-05-22)
+
+### Feature
+
+Modus C (Nur-Bild-Modus) wurde komplett überarbeitet:
+
+- **Bild endet oberhalb des Professors:** `Positioned(bottom: imageClearance)` mit
+  `imageClearance = _kProfH + _kProfBottom = 224px` — deckt weder Professor (224px) noch
+  Thumbnails (180px) ab.
+- **Hintergrund:** `ColoredBox(Color(0xFF112D1F))` füllt den Bereich unterhalb des Bildes.
+- **Gradient an der Bildunterkante** für weiches Ausblenden.
+- **Wischen:** `GestureDetector(onHorizontalDragEnd)` navigiert zum nächsten/vorherigen Bild;
+  sucht den korrekten `mediaItems`-Index (überspringt Audio-Elemente).
+- **🔊-Button:** erscheint rechts an der Bildunterkante wenn eine Caption vorhanden ist;
+  Tap → `provider.interruptForCaption(caption)`.
+
+### Geänderte Datei
+
+- `lib/screens/article_screen.dart` — `_ModeCContent` komplett neu
+
+---
+
 ## ✅ FERTIG — Bugfix: Bildtexte fehlen (Galerie + Fallback-Suche) (Stand 2026-05-22)
 
 ### Ursache

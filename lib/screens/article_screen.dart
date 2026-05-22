@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -81,8 +82,25 @@ Future<void> _launchUrlWithParentalAuth(BuildContext context, Uri uri) async {
 // Root screen — manages mode switching; professor + mic are always on top
 // ─────────────────────────────────────────────────────────────────────────────
 
-class ArticleScreen extends StatelessWidget {
+class ArticleScreen extends StatefulWidget {
   const ArticleScreen({super.key});
+
+  @override
+  State<ArticleScreen> createState() => _ArticleScreenState();
+}
+
+class _ArticleScreenState extends State<ArticleScreen> {
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+  }
+
+  @override
+  void dispose() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,14 +141,12 @@ class ArticleScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                // ── Mic / Play-Pause ───────────────────────────────────────
+                // ── Controls (back / mic / pause) ──────────────────────────
                 Positioned(
                   bottom: _kMicBottom,
                   left: 0,
                   right: 0,
-                  child: Center(
-                    child: _ArticleMicButton(provider: provider),
-                  ),
+                  child: _ArticleControls(provider: provider),
                 ),
                 // ── Caption-Resume Prompt ──────────────────────────────────
                 if (provider.showCaptionResumePrompt)
@@ -152,53 +168,27 @@ class ArticleScreen extends StatelessWidget {
 // ─────────────────────────────────────────────────────────────────────────────
 // Shared: Mic / Play-Pause button
 // ─────────────────────────────────────────────────────────────────────────────
+// Bottom controls — single back button (idle) or [←][🎤][⏸] (speaking/paused)
+// ─────────────────────────────────────────────────────────────────────────────
 
-class _ArticleMicButton extends StatelessWidget {
+class _ArticleControls extends StatelessWidget {
   final WissensfreundProvider provider;
-  const _ArticleMicButton({required this.provider});
+  const _ArticleControls({required this.provider});
 
-  @override
-  Widget build(BuildContext context) {
-    final isDark = provider.viewMode != ArticleViewMode.a;
-    final isSpeaking = provider.state == AppState.speaking;
-    final isPaused = provider.isPaused;
-
-    final Color bg;
-    final IconData icon;
-
-    if (isSpeaking) {
-      bg = isDark ? const Color(0xFF2D6A4F) : const Color(0xFFF57C00);
-      icon = Icons.pause_rounded;
-    } else if (isPaused) {
-      bg = isDark
-          ? Colors.white.withValues(alpha: 0.2)
-          : const Color(0xFF2D6A4F);
-      icon = Icons.play_arrow_rounded;
-    } else {
-      bg = isDark
-          ? Colors.white.withValues(alpha: 0.2)
-          : const Color(0xFF546E7A);
-      icon = Icons.arrow_back_rounded;
-    }
-
+  static Widget _ctrlBtn({
+    required IconData icon,
+    required VoidCallback onTap,
+    Color? bg,
+  }) {
     return GestureDetector(
-      onTap: () {
-        if (isSpeaking) {
-          provider.pauseSpeaking();
-        } else if (isPaused) {
-          provider.resumeSpeaking();
-        } else {
-          provider.stopSpeaking();
-          Navigator.pop(context);
-        }
-      },
+      onTap: onTap,
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
+        duration: const Duration(milliseconds: 200),
         width: _kMicSize,
         height: _kMicSize,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          color: bg,
+          color: bg ?? Colors.white.withValues(alpha: 0.2),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.22),
@@ -208,6 +198,81 @@ class _ArticleMicButton extends StatelessWidget {
           ],
         ),
         child: Icon(icon, color: Colors.white, size: 26),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isSpeaking  = provider.state == AppState.speaking;
+    final isPaused    = provider.isPaused;
+    final isListening = provider.state == AppState.listening;
+
+    // Three-button row during speaking / paused / listening for follow-up question.
+    // Right padding clears the professor widget (_kThumbRight = 180px).
+    if (isSpeaking || isPaused || isListening) {
+      return Padding(
+        padding: const EdgeInsets.only(right: _kThumbRight),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _ctrlBtn(
+              icon: Icons.arrow_back_rounded,
+              onTap: () async {
+                await provider.stopSpeaking();
+                if (context.mounted) Navigator.pop(context);
+              },
+            ),
+            _ctrlBtn(
+              icon: Icons.mic_rounded,
+              bg: isListening
+                  ? const Color(0xFFF57C00)
+                  : Colors.white.withValues(alpha: 0.2),
+              onTap: () => provider.interruptAndStartListening(),
+            ),
+            _ctrlBtn(
+              icon: isSpeaking
+                  ? Icons.pause_rounded
+                  : Icons.play_arrow_rounded,
+              bg: isSpeaking
+                  ? const Color(0xFF2D6A4F)
+                  : const Color(0xFF2D6A4F),
+              onTap: () => isSpeaking
+                  ? provider.pauseSpeaking()
+                  : provider.resumeSpeaking(),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Idle — single centered back button.
+    final isDark = provider.viewMode != ArticleViewMode.a;
+    return Center(
+      child: GestureDetector(
+        onTap: () {
+          provider.stopSpeaking();
+          Navigator.pop(context);
+        },
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          width: _kMicSize,
+          height: _kMicSize,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.2)
+                : const Color(0xFF546E7A),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.22),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 26),
+        ),
       ),
     );
   }
@@ -816,11 +881,13 @@ class _FullscreenGalleryState extends State<_FullscreenGallery> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex;
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
   }
 
   @override
   void dispose() {
     _swipeSettleTimer?.cancel();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
 

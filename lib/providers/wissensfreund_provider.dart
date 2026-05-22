@@ -154,6 +154,13 @@ class WissensfreundProvider extends ChangeNotifier {
   Timer? _captionResumeTimer;
   Timer? _captionPromptDelayTimer;
 
+  // Mid-article mic interrupt: saves article context so reading can resume after answer
+  bool   _hasInterruptedForMic      = false;
+  String _savedArticleTextForMic    = '';
+  String _savedArticleTitleForMic   = '';
+  String _savedArticlePathForMic    = '';
+  int    _savedResumeOffsetForMic   = 0;
+
   AppState get state          => _state;
   String get recognizedText   => _recognizedText;
   String get articleText      => _articleText;
@@ -255,6 +262,30 @@ class WissensfreundProvider extends ChangeNotifier {
       // After disambiguation question, auto-start listening — no mic tap needed.
       if (_awaitingDisambiguation && _state == AppState.idle) {
         Future.delayed(const Duration(milliseconds: 500), startListening);
+        return;
+      }
+      // Mid-article mic interrupt: restore saved article + show resume prompt.
+      // Fires after any TTS completes (error msg, answer, etc.) if flag is still set.
+      // _loadAndSpeak() clears the flag when a new article is loaded instead.
+      if (_hasInterruptedForMic && _savedArticleTextForMic.isNotEmpty) {
+        _hasInterruptedForMic = false;
+        _articleText   = _savedArticleTextForMic;
+        _articleTitle  = _savedArticleTitleForMic;
+        _articlePath   = _savedArticlePathForMic;
+        _resumeOffset  = _savedResumeOffsetForMic;
+        _isPaused      = true;
+        _savedArticleTextForMic = '';
+        _state = AppState.idle;
+        notifyListeners();
+        _showCaptionResumePrompt = true;
+        _captionPromptDelayTimer?.cancel();
+        _captionPromptDelayTimer = Timer(const Duration(seconds: 5), () {
+          if (!_showCaptionResumePrompt) return;
+          _isPromptPlaying = true;
+          _captionResumeTimer?.cancel();
+          _captionResumeTimer = Timer(const Duration(seconds: 5), resumeAfterCaption);
+          _tts.speak('Soll ich weiterlesen?');
+        });
         return;
       }
       if (_state != AppState.speaking || _isPaused) return;
@@ -469,6 +500,8 @@ class WissensfreundProvider extends ChangeNotifier {
 
       _awaitingDisambiguation = false;
       _pendingCandidates = [];
+      _hasInterruptedForMic    = false;  // new article loaded — discard saved article
+      _savedArticleTextForMic  = '';
       _articleTitle = raw['title'] as String? ?? title;
       _articleText  = raw['text']  as String? ?? '';
       _articlePath  = raw['url']   as String? ?? '';
@@ -817,6 +850,29 @@ class WissensfreundProvider extends ChangeNotifier {
     _resumeOffset = 0;
     _state = AppState.idle;
     notifyListeners();
+  }
+
+  /// Mic-Tap im Artikel-Screen: Professor pausieren, Position merken, STT starten.
+  /// Nach der Antwort wird der Artikel wiederhergestellt und "Weiterlesen?" angezeigt.
+  Future<void> interruptAndStartListening() async {
+    final wasSpeaking = _state == AppState.speaking;
+    final wasPaused   = _isPaused;
+    if (!wasSpeaking && !wasPaused) return;
+
+    _savedArticleTextForMic  = _articleText;
+    _savedArticleTitleForMic = _articleTitle;
+    _savedArticlePathForMic  = _articlePath;
+    _savedResumeOffsetForMic = wasSpeaking ? _sentenceStartOffset() : _resumeOffset;
+    _hasInterruptedForMic    = true;
+
+    if (wasSpeaking) {
+      _isPaused = false;
+      _state    = AppState.idle;
+      await _tts.stop();
+      notifyListeners();
+    }
+    // startListening() will clear _articleText etc. — saved copies are preserved above.
+    await startListening();
   }
 
   @override
