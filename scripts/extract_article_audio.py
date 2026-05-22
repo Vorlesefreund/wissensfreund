@@ -80,7 +80,7 @@ def _read_mime_types(f, pos: int) -> list[str]:
     return types
 
 
-def _decompress(data: bytes, compression: int) -> bytes | None:
+def _decompress(data: bytes, compression: int, cluster_idx: int = -1) -> bytes | None:
     try:
         if compression in (0, 1):
             return data
@@ -98,10 +98,11 @@ def _decompress(data: bytes, compression: int) -> bytes | None:
                 return None
             dctx = _zstd.ZstdDecompressor()
             return dctx.decompress(data, max_length=256 * 1024 * 1024)
-        print(f"WARNING: unknown compression type {compression}", file=sys.stderr)
+        print(f"WARNING: unknown compression type {compression} in cluster {cluster_idx}", file=sys.stderr)
         return None
     except Exception as e:
-        print(f"WARNING: decompression failed (type={compression}): {e}", file=sys.stderr)
+        print(f"WARNING: cluster {cluster_idx} decompression failed (type={compression}): {e} "
+              f"[raw prefix: {data[:16].hex()}]", file=sys.stderr)
         return None
 
 
@@ -120,7 +121,7 @@ def _read_cluster(f, cluster_ptrs: list[int], idx: int, checksum_pos: int) -> tu
     if raw_size <= 0:
         return None, extended
     raw  = f.read(raw_size)
-    data = _decompress(raw, comp)
+    data = _decompress(raw, comp, cluster_idx=idx)
     return data, extended
 
 
@@ -163,12 +164,12 @@ def iter_html_content(zim_path: Path):
         mime_list_pos, = struct.unpack_from('<Q', header, 56)
         checksum_pos,  = struct.unpack_from('<Q', header, 72)
 
-        print(f"ZIM: {entry_count} entries, {cluster_count} clusters")
+        print(f"ZIM: {entry_count} entries, {cluster_count} clusters", flush=True)
 
         mime_types = _read_mime_types(f, mime_list_pos)
         html_idxs  = {i for i, mt in enumerate(mime_types) if 'html' in mt.lower()}
-        print(f"MIME types ({len(mime_types)}): {mime_types}")
-        print(f"HTML MIME indices: {html_idxs}")
+        print(f"MIME types ({len(mime_types)}): {mime_types}", flush=True)
+        print(f"HTML MIME indices: {html_idxs}", flush=True)
         if not html_idxs:
             print("ERROR: no text/html MIME type found in ZIM", file=sys.stderr)
             return
@@ -209,7 +210,7 @@ def iter_html_content(zim_path: Path):
                 title = unquote(url).rsplit('/', 1)[-1]
             entries.append((cluster_num, blob_num, url, title))
 
-        print(f"HTML entries found: {len(entries)}")
+        print(f"HTML entries found: {len(entries)}", flush=True)
         if not entries:
             print("ERROR: 0 HTML entries — check MIME type list above", file=sys.stderr)
             return
@@ -225,8 +226,9 @@ def iter_html_content(zim_path: Path):
             if cluster_num != cur_cluster_idx:
                 cur_cluster_idx = cluster_num
                 cur_data, cur_extended = _read_cluster(f, cluster_ptrs, cluster_num, checksum_pos)
-                if cur_data is None:
-                    continue
+
+            if cur_data is None:   # skip all entries from a failed cluster
+                continue
 
             blob = _extract_blob(cur_data, blob_num, cur_extended)
             if blob:
