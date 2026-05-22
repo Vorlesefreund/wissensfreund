@@ -129,16 +129,19 @@ def main() -> None:
     ]
     print(f"\nAllowed: {len(allowed)} / {len(filenames)} files. Downloading...")
 
-    # Initial pause: after heavy Commons API usage the runner IP may be rate-limited.
+    # Initial pause: generate_license_json.py und find_wikipedia_audio.py haben
+    # die Wikimedia-Commons-Rate-Limits ausgeschöpft. 5 Minuten warten damit
+    # das Limit-Fenster zurückgesetzt wird, bevor wir upload.wikimedia.org anfragen.
     if allowed:
-        print("  Warte 30 s vor Download-Start (Rate-Limit-Pause)...")
-        time.sleep(30)
+        print(f"  Warte 300 s vor Download-Start (Rate-Limit-Reset nach API-Intensive)...")
+        time.sleep(300)
 
     download_dir = Path("audio_downloads")
     download_dir.mkdir(exist_ok=True)
 
     downloaded: dict[str, Path] = {}
     total_bytes = 0
+    rate_limited = 0
 
     for fn, info in allowed:
         if total_bytes >= MAX_TOTAL_BYTES:
@@ -149,60 +152,58 @@ def main() -> None:
         out_path.parent.mkdir(parents=True, exist_ok=True)
         print(f"  {fn}...", end=" ", flush=True)
 
-        # Retry mit Exponential Backoff bei 429
-        retry_delays = [30, 90, 270]  # 30 s → 90 s → 270 s
-        success = False
-        for attempt, backoff in enumerate([0] + retry_delays):
-            if backoff:
-                print(f"429 — warte {backoff} s...", end=" ", flush=True)
-                time.sleep(backoff)
-            try:
+        try:
+            r = requests.get(
+                info["download_url"], timeout=60, stream=True,
+                headers={"User-Agent": UA},
+            )
+            if r.status_code == 429:
+                # Rate-Limit noch aktiv — einmal 60 s warten und nochmal versuchen
+                print(f"429 — warte 60 s...", end=" ", flush=True)
+                time.sleep(60)
                 r = requests.get(
                     info["download_url"], timeout=60, stream=True,
                     headers={"User-Agent": UA},
                 )
-                if r.status_code == 429:
-                    if attempt < len(retry_delays):
-                        continue   # nächste Runde mit Backoff
-                    print("SKIP (429 nach 3 Versuchen)")
-                    file_info[fn]["allowed"] = False
-                    file_info[fn]["reason"]  = "rate_limited"
+            if r.status_code == 429:
+                print("SKIP (429)")
+                file_info[fn]["allowed"] = False
+                file_info[fn]["reason"]  = "rate_limited"
+                rate_limited += 1
+                time.sleep(REQUEST_DELAY)
+                continue
+            r.raise_for_status()
+
+            buf  = bytearray()
+            size = 0
+            too_large = False
+            for chunk in r.iter_content(65536):
+                size += len(chunk)
+                if size > MAX_FILE_BYTES:
+                    too_large = True
                     break
-                r.raise_for_status()
+                buf.extend(chunk)
 
-                buf  = bytearray()
-                size = 0
-                too_large = False
-                for chunk in r.iter_content(65536):
-                    size += len(chunk)
-                    if size > MAX_FILE_BYTES:
-                        too_large = True
-                        break
-                    buf.extend(chunk)
+            if too_large:
+                print(f"SKIP (>{MAX_FILE_BYTES // 1_048_576} MB)")
+                file_info[fn]["allowed"] = False
+                file_info[fn]["reason"]  = "too_large"
+                continue
 
-                if too_large:
-                    print(f"SKIP (>{MAX_FILE_BYTES // 1_048_576} MB)")
-                    file_info[fn]["allowed"] = False
-                    file_info[fn]["reason"]  = "too_large"
-                    break
+            out_path.write_bytes(bytes(buf))
+            total_bytes += size
+            downloaded[fn] = out_path
+            print(f"ok ({size // 1024} KB, total {total_bytes // 1_048_576} MB)")
 
-                out_path.write_bytes(bytes(buf))
-                total_bytes += size
-                downloaded[fn] = out_path
-                print(f"ok ({size // 1024} KB, total {total_bytes // 1_048_576} MB)")
-                success = True
-                break
+        except Exception as e:
+            print(f"ERROR: {e}")
+            file_info[fn]["allowed"] = False
+            file_info[fn]["reason"]  = str(e)
 
-            except Exception as e:
-                if attempt < len(retry_delays):
-                    print(f"ERROR: {e} — retry...", end=" ", flush=True)
-                else:
-                    print(f"ERROR: {e}")
-                    file_info[fn]["allowed"] = False
-                    file_info[fn]["reason"]  = str(e)
+        time.sleep(REQUEST_DELAY)
 
-        if success:
-            time.sleep(REQUEST_DELAY)
+    if rate_limited:
+        print(f"  {rate_limited} Dateien wegen Rate-Limit übersprungen")
 
     print(f"\nDownloaded: {len(downloaded)} files, {total_bytes // 1_048_576} MB total")
 
