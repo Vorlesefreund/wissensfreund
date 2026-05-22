@@ -50,5 +50,8 @@ Folgende Punkte wurden heute besprochen und sind noch offen:
 
 **Priorität:** 3 = hoch, 1+2 = mittel
 
-**Erledigt:** [ ]
+**Erledigt:**
+- [x] Punkt 3: Fehlende Thumbnails 5+ — umgesetzt am 2026-05-22 (commit 94da0d1: robust multi-variant findByFilename)
+- [ ] Punkt 1: Sound-Thumbnails — Audio-Infrastruktur fertig; wartet auf Ergebnis des Audio-Pipeline-Runs (GH Actions)
+- [ ] Punkt 2: Immersive Mode + Button-Layout — noch offen
 ---
