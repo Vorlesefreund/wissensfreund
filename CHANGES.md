@@ -2,6 +2,35 @@
 
 ---
 
+## ✅ FERTIG — Bugfix: Bildtexte fehlen (Galerie + Fallback-Suche) (Stand 2026-05-22)
+
+### Ursache
+
+Bildtexte (Captions) fehlten in zwei Szenarien:
+1. **Galerie-Bilder:** `findNearbyCaption()` kannte `<div class="gallerytext">` nicht — nur
+   `thumbcaption` und `figcaption` waren implementiert. Galerie-Bilder haben deshalb nie einen Bildtext bekommen.
+2. **Edge-Cases bei `thumbcaption`:** Das Suchfenster war nur 1200 Zeichen breit; außerdem
+   fehlte ein Fallback-Pfad für Fälle wo die Caption erst nach dem `thumbinner`-Block gefunden wird.
+
+### Fix (`ZimReader.kt`)
+
+- `captionFromWindow()` als lokale Hilfsfunktion extrahiert (sucht `figcaption`, `thumbcaption`, `gallerytext`)
+- Suchfenster von 1200 auf 3000 Zeichen erweitert
+- Neuer Rückwärts-Fallback: `findEnclosingBlock()` findet das nächste `thumbinner`/`gallerybox`/`<figure>`
+  vor dem `<img>` und restartet die Suche von dort — fängt komplexe Schachtelungen ab
+- `cleanHtml()` um deutsche HTML-Entities erweitert (`&auml;` → ä, `&szlig;` → ß usw.)
+
+### Neues Skript: `scripts/dump_article_html.py`
+
+Diagnostik-Skript: öffnet ZIM-Datei, sucht Artikel nach Keyword, druckt HTML-Kontext um alle
+`<img>`-Tags — so ist das Kaptions-Suchmuster leicht zu überprüfen.
+
+Verwendung: `ZIM_FILE=klexikon.zim ARTICLE=Beethoven python scripts/dump_article_html.py`
+
+Im GH-Actions-Workflow (bei Test-Runs mit `max_articles != 0`) läuft dieser Schritt automatisch.
+
+---
+
 ## ✅ FERTIG — Bugfix: Zu wenige Bilder nach thumbimage-Filter (Stand 2026-05-22)
 
 ### Ursache
