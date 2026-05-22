@@ -170,16 +170,83 @@ class _ArticleScreenState extends State<ArticleScreen> {
 // ─────────────────────────────────────────────────────────────────────────────
 // Bottom controls — single back button (idle) or [←][🎤][⏸] (speaking/paused)
 // ─────────────────────────────────────────────────────────────────────────────
+// Bottom controls — [←] back | [⏸/▶] pause/play | [🎤] mic (animated when listening)
+// ─────────────────────────────────────────────────────────────────────────────
 
-class _ArticleControls extends StatelessWidget {
+class _ArticleControls extends StatefulWidget {
   final WissensfreundProvider provider;
   const _ArticleControls({required this.provider});
 
-  static Widget _ctrlBtn({
-    required IconData icon,
-    required VoidCallback onTap,
-    required Color bg,
-  }) {
+  @override
+  State<_ArticleControls> createState() => _ArticleControlsState();
+}
+
+class _ArticleControlsState extends State<_ArticleControls>
+    with TickerProviderStateMixin {
+  static const _ringCount = 3;
+  static const _ringDelayMs = 550;
+
+  final List<AnimationController> _ringCtrls = [];
+  final List<Animation<double>> _ringScales = [];
+  final List<Animation<double>> _ringOpacities = [];
+
+  // Tracks previous listening state to detect transitions.
+  late AppState _prevState;
+
+  @override
+  void initState() {
+    super.initState();
+    _prevState = widget.provider.state;
+    for (int i = 0; i < _ringCount; i++) {
+      final ctrl = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 1700),
+      );
+      _ringCtrls.add(ctrl);
+      _ringScales.add(Tween<double>(begin: 1.0, end: 2.4).animate(
+        CurvedAnimation(parent: ctrl, curve: Curves.easeOut),
+      ));
+      _ringOpacities.add(Tween<double>(begin: 0.55, end: 0.0).animate(
+        CurvedAnimation(parent: ctrl, curve: Curves.easeOut),
+      ));
+    }
+    if (_prevState == AppState.listening) _startRings();
+  }
+
+  @override
+  void didUpdateWidget(_ArticleControls old) {
+    super.didUpdateWidget(old);
+    final isListening = widget.provider.state == AppState.listening;
+    final wasListening = _prevState == AppState.listening;
+    if (isListening && !wasListening) _startRings();
+    if (!isListening && wasListening) _stopRings();
+    _prevState = widget.provider.state;
+  }
+
+  void _startRings() {
+    for (int i = 0; i < _ringCount; i++) {
+      Future.delayed(Duration(milliseconds: i * _ringDelayMs), () {
+        if (mounted && widget.provider.state == AppState.listening) {
+          _ringCtrls[i].repeat();
+        }
+      });
+    }
+  }
+
+  void _stopRings() {
+    for (final c in _ringCtrls) {
+      c.stop();
+      c.reset();
+    }
+  }
+
+  @override
+  void dispose() {
+    for (final c in _ringCtrls) c.dispose();
+    super.dispose();
+  }
+
+  Widget _btn({required IconData icon, required Color bg, required VoidCallback onTap}) {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
@@ -202,50 +269,82 @@ class _ArticleControls extends StatelessWidget {
     );
   }
 
+  Widget _micBtn(bool isListening) {
+    const kRed   = Color(0xFFE53935);
+    const kGreen = Color(0xFF2D6A4F);
+    return SizedBox(
+      width: _kMicSize,
+      height: _kMicSize,
+      child: Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          // Pulsing rings — same style as home screen, scaled to _kMicSize
+          ...List.generate(_ringCount, (i) => AnimatedBuilder(
+            animation: _ringCtrls[i],
+            builder: (_, __) => Transform.scale(
+              scale: _ringScales[i].value,
+              child: Container(
+                width: _kMicSize,
+                height: _kMicSize,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: kRed.withValues(alpha: _ringOpacities[i].value),
+                    width: 2.0,
+                  ),
+                ),
+              ),
+            ),
+          )),
+          // Mic button itself
+          _btn(
+            icon: Icons.mic_rounded,
+            bg: isListening ? kRed : kGreen,
+            onTap: () => widget.provider.interruptAndStartListening(),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final provider    = widget.provider;
     final isSpeaking  = provider.state == AppState.speaking;
     final isPaused    = provider.isPaused;
     final isListening = provider.state == AppState.listening;
 
-    // Three-button row during speaking / paused / listening.
-    // Constrained to left portion to clear the professor (_kThumbRight = 180px).
-    // Horizontal padding adds breathing room between buttons and screen edges.
+    // Three-button row: [←] left  |  [⏸/▶] center  |  [🎤] right.
+    // right: 80 leaves enough room for the professor while giving generous spacing.
     if (isSpeaking || isPaused || isListening) {
-      const kGreen  = Color(0xFF2D6A4F);
-      const kOrange = Color(0xFFF57C00);
-      const kGrey   = Color(0xFF37474F);
       return Padding(
-        padding: const EdgeInsets.only(left: 12, right: _kThumbRight + 8),
+        padding: const EdgeInsets.only(left: 16, right: 80),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _ctrlBtn(
+            _btn(
               icon: Icons.arrow_back_rounded,
-              bg: kGrey,
+              bg: const Color(0xFF37474F),
               onTap: () async {
                 await provider.stopSpeaking();
                 if (context.mounted) Navigator.pop(context);
               },
             ),
-            _ctrlBtn(
-              icon: Icons.mic_rounded,
-              bg: isListening ? kOrange : kGreen,
-              onTap: () => provider.interruptAndStartListening(),
-            ),
-            _ctrlBtn(
+            _btn(
               icon: isSpeaking ? Icons.pause_rounded : Icons.play_arrow_rounded,
-              bg: kGreen,
+              bg: const Color(0xFF2D6A4F),
               onTap: () => isSpeaking
                   ? provider.pauseSpeaking()
                   : provider.resumeSpeaking(),
             ),
+            _micBtn(isListening),
           ],
         ),
       );
     }
 
-    // Idle — single centered back button (matches existing style).
+    // Idle — single centered back button.
     final isDark = provider.viewMode != ArticleViewMode.a;
     return Center(
       child: GestureDetector(
