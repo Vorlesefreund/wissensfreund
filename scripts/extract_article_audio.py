@@ -52,36 +52,60 @@ def extract_caption(html: str, match_start: int) -> str | None:
     return tail if len(tail) >= 5 else None
 
 
+def _is_html_item(item) -> bool:
+    """Return True if item appears to be an HTML article."""
+    try:
+        mt = (item.mimetype or "").lower()
+    except Exception:
+        mt = ""
+    if "html" in mt:
+        return True
+    if not mt:
+        # Content-sniff: check first 20 bytes
+        try:
+            snip = bytes(item.content[:20]).lower()
+            return b"<!doctype" in snip or b"<html" in snip
+        except Exception:
+            pass
+    return False
+
+
 def iter_entries(archive):
     """
-    Yield all non-redirect entries with HTML content.
-    Supports libzim 2.x (Archive iterable) and 3.x (get_entry_by_id).
+    Yield all HTML content entries from archive.
+    Robust to libzim API differences (1.x/2.x/3.x) and ZIM format versions.
+    Does NOT filter on is_redirect — calls get_item() directly and skips on failure.
     """
-    # Try direct iteration first (libzim >= 2.x)
+    n_tried = 0
+
+    # Strategy 1: direct iteration (libzim 2.x / 3.x)
     try:
         for entry in archive:
-            if not entry.is_redirect:
+            n_tried += 1
+            try:
+                item = entry.get_item()
+            except Exception:
+                # redirect or unsupported entry type
+                continue
+            if _is_html_item(item):
+                yield entry, item
+            if n_tried == 10:
+                # Debug: print MIME types of first 10 non-error entries
                 try:
-                    item = entry.get_item()
-                    if "html" in item.mimetype.lower():
-                        yield entry, item
+                    mt = (item.mimetype or "").lower()
+                    print(f"  [dbg] entry {n_tried}: path={getattr(entry,'path','?')!r} mime={mt!r}", flush=True)
                 except Exception:
                     pass
         return
     except TypeError:
-        pass  # Archive not iterable — fall through to index-based access
+        pass  # Archive not iterable — fall through
 
-    # Fallback: iterate by index (libzim 1.x)
+    # Strategy 2: index-based access (libzim 1.x)
     for i in range(archive.entry_count):
         try:
             entry = archive.get_entry_by_id(i)
-        except Exception:
-            continue
-        if entry.is_redirect:
-            continue
-        try:
             item = entry.get_item()
-            if "html" in item.mimetype.lower():
+            if _is_html_item(item):
                 yield entry, item
         except Exception:
             continue
