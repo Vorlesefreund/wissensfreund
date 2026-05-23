@@ -86,40 +86,34 @@ jobs:
 
       # ── Publish: image license data ──────────────────────────────────────────
       - name: Publish image license data
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: image-licenses
-          name: Image License Data (${{ env.ZIM_VERSION }})
-          body: |
-            Auto-generated Wikimedia Commons license data for `${{ env.ZIM_VERSION }}`.
+        run: |
+          gh release delete image-licenses --yes 2>/dev/null || true
+          gh release create image-licenses media_licenses.json \
+            --tag image-licenses \
+            --title "Image License Data ($ZIM_VERSION)" \
+            --notes "Auto-generated Wikimedia Commons license data for \`$ZIM_VERSION\`.
 
-            The Wissensfreund app downloads this file on first start to check
-            which images may be displayed (CC0 / CC BY / CC BY-SA only).
+          The Wissensfreund app downloads this file on first start to check which images may be displayed (CC0 / CC BY / CC BY-SA only).
 
-            Updated automatically on the 1st of every month.
-          files: media_licenses.json
-          make_latest: false
+          Updated automatically on the 1st of every month." \
+            --latest=false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ZIM_VERSION: ${{ env.ZIM_VERSION }}
 
       # ── Publish: audio package ───────────────────────────────────────────────
       - name: Publish audio package
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: wissensfreund-audio
-          name: Audio Package (${{ env.ZIM_VERSION }})
-          body: |
-            Wikimedia Commons audio files linked in Klexikon articles (`${{ env.ZIM_VERSION }}`).
+        run: |
+          gh release delete wissensfreund-audio --yes 2>/dev/null || true
+          gh release create wissensfreund-audio wissensfreund_audio.zip audio_index.json \
+            --tag wissensfreund-audio \
+            --title "Audio Package ($ZIM_VERSION)" \
+            --notes "Wikimedia Commons audio files linked in Klexikon articles (\`$ZIM_VERSION\`).
 
-            **Files:**
-            - `wissensfreund_audio.zip` — audio files (CC0 / CC BY / CC BY-SA, max 5 MB each, max 50 MB total)
-            - `audio_index.json` — article → audio file mapping with captions and local paths
+          Files: wissensfreund_audio.zip (CC0/CC BY/CC BY-SA, max 5 MB each, max 50 MB total) and audio_index.json (article to audio file mapping).
 
-            The Wissensfreund app downloads this package on first start for offline audio playback.
-            Updated automatically on the 1st of every month.
-          files: |
-            wissensfreund_audio.zip
-            audio_index.json
-          make_latest: true
+          The Wissensfreund app downloads this package on first start for offline audio playback. Updated automatically on the 1st of every month." \
+            --latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ZIM_VERSION: ${{ env.ZIM_VERSION }}
