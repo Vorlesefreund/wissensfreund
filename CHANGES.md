@@ -2,6 +2,25 @@
 
 ---
 
+## ✅ FERTIG — GitHub Actions: Audio-Pipeline Publish-Fix (Stand 2026-05-23)
+
+Drei Bugs behoben, Testlauf 26330317351 erfolgreich in 11m27s:
+
+1. **`download_audio.py`** (f221b17): Fast-fail bei anhaltendem 429 — bricht Download-Schleife
+   sofort ab statt 60 s × N-Dateien zu warten (verhindert 6h-Timeout)
+2. **Workflow Publish** (33501a8): `softprops/action-gh-release@v2` durch `gh release create`
+   ersetzt — funktioniert zuverlässig bei `workflow_dispatch`-Triggern
+3. **gh CLI Syntax** (d4362ee): Tag ist Positions-Argument, nicht `--tag`-Flag; Dateien ans Ende
+
+Releases live:
+- https://github.com/Vorlesefreund/wissensfreund/releases/tag/image-licenses
+- https://github.com/Vorlesefreund/wissensfreund/releases/tag/wissensfreund-audio
+
+**Nächster Schritt:** Voll-Lauf (alle 3.500 Artikel) — Audio-Downloads funktionieren wenn
+das Wikimedia-Rate-Limit abgelaufen ist (~1h nach den API-intensiven Schritten).
+
+---
+
 ## ⚠️ PROBLEM — GH Actions Run 26315426127: Download-Timeout (Stand 2026-05-23)
 
 ### Was passierte
