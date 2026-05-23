@@ -2,6 +2,35 @@
 
 ---
 
+## ⚠️ PROBLEM — GH Actions Run 26315426127: Download-Timeout (Stand 2026-05-23)
+
+### Was passierte
+
+Der Produktionslauf (Nacht 22./23. Mai) ist nach ~5h noch nicht fertig und droht am
+6-Stunden-Timeout von GitHub zu scheitern. Ursache: `download_audio.py` wartet bei jedem
+429-Rate-Limit-Fehler 60 Sekunden und versucht es dann erneut. Da das Rate-Limit-Fenster
+von Wikimedia deutlich länger als 5 Minuten ist (der `time.sleep(300)` reicht nicht aus),
+erhalten ALLE Dateien einen 429 — und das Script schläft 60 s × N-Dateien lang.
+
+### Fix (bereits commitet)
+
+`scripts/download_audio.py`: Beim zweiten 429 pro Datei nicht mehr `continue` (nächste Datei),
+sondern `break` (komplette Download-Schleife abbrechen). Begründung: Wenn eine Datei nach 60 s
+immer noch 429 liefert, liefern alle anderen Dateien das auch — weitermachen ist sinnlos.
+
+**Vorher:** N Dateien × 60 s Wartezeit = mehrere Stunden Timeout-Risiko
+**Nachher:** 1 Datei × 60 s Wartezeit → break → Download-Schritt fertig in ~10 min
+
+### Nächste Schritte (nach Aufwachen)
+
+1. Prüfen ob Run 26315426127 erfolgreich abgeschlossen oder getimeout ist
+2. Falls getimeout: neuen Run manuell triggern (der neue Fix greift sofort)
+3. Falls erfolgreich mit 0 Downloads: ebenfalls neuen Run für Audios nötig
+4. Langfristig: `download_audio.py` als separaten Workflow-Job mit 1h Pause nach
+   den API-intensiven Schritten ausführen, damit das Rate-Limit garantiert abläuft
+
+---
+
 ## ✅ FERTIG — GitHub Actions: Wikipedia-Audio-Pipeline (Stand 2026-05-22)
 
 ### Feature

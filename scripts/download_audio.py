@@ -166,12 +166,13 @@ def main() -> None:
                     headers={"User-Agent": UA},
                 )
             if r.status_code == 429:
-                print("SKIP (429)")
+                # Rate-Limit hält an — alle weiteren Downloads sind ebenfalls betroffen.
+                # Sofort abbrechen statt pro Datei 60 s zu warten (verhindert Timeout).
+                print("SKIP (429) — Rate-Limit aktiv, breche alle Downloads ab")
                 file_info[fn]["allowed"] = False
                 file_info[fn]["reason"]  = "rate_limited"
                 rate_limited += 1
-                time.sleep(REQUEST_DELAY)
-                continue
+                break
             r.raise_for_status()
 
             buf  = bytearray()
