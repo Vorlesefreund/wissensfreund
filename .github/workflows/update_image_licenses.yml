@@ -5,6 +5,13 @@ name: Update Media Assets
 # Wikimedia Commons for license info, downloads permitted audio files,
 # and publishes the results as GitHub Release Assets.
 #
+# Two-job design to avoid Wikimedia rate limits:
+#   Job 1 (prepare):  ZIM download + license generation + audio discovery
+#                     → publishes media_licenses.json immediately
+#                     → uploads wikipedia_audio_refs.json as artifact
+#   Job 2 (download): waits 3600 s for rate-limit reset, then downloads
+#                     and publishes the audio package
+#
 # Manual test run with limited articles:
 #   Go to Actions → Update Media Assets → Run workflow
 #   Set "max_articles" to e.g. 10
@@ -24,7 +31,8 @@ env:
   ZIM_URL: https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim
 
 jobs:
-  generate:
+  # ── Job 1: API-intensive steps ───────────────────────────────────────────────
+  prepare:
     runs-on: ubuntu-latest
     permissions:
       contents: write   # required to create/update GitHub Releases
@@ -77,14 +85,15 @@ jobs:
           MAX_ARTICLES:  ${{ inputs.max_articles || '0' }}
           LICENSES_FILE: media_licenses.json
 
-      # ── Step 3+4: License check, download, ZIP + index ──────────────────────
-      - name: Download audio files and build package
-        run: python scripts/download_audio.py
-        env:
-          ZIM_VERSION: ${{ env.ZIM_VERSION }}
-          REFS_FILE:   wikipedia_audio_refs.json
+      # ── Pass refs to download job via artifact ───────────────────────────────
+      - name: Upload audio refs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: audio-refs
+          path: wikipedia_audio_refs.json
+          retention-days: 1
 
-      # ── Publish: image license data ──────────────────────────────────────────
+      # ── Publish: image license data (available immediately) ──────────────────
       - name: Publish image license data
         run: |
           gh release delete image-licenses --yes 2>/dev/null || true
@@ -100,6 +109,41 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ZIM_VERSION: ${{ env.ZIM_VERSION }}
+
+  # ── Job 2: Download audio (after rate-limit reset) ───────────────────────────
+  download:
+    runs-on: ubuntu-latest
+    needs: prepare
+    permissions:
+      contents: write   # required to create/update GitHub Releases
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install Python dependencies
+        run: pip install requests
+
+      - name: Download audio refs artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: audio-refs
+
+      # ── 3600 s pause so Wikimedia rate-limit resets after Job 1 ─────────────
+      - name: Wait for Wikimedia rate-limit reset
+        run: |
+          echo "Warte 3600 s damit das Wikimedia-Rate-Limit nach Job 1 zurueckgesetzt wird..."
+          sleep 3600
+
+      # ── Step 3+4: License check, download, ZIP + index ──────────────────────
+      - name: Download audio files and build package
+        run: python scripts/download_audio.py
+        env:
+          ZIM_VERSION: ${{ env.ZIM_VERSION }}
+          REFS_FILE:   wikipedia_audio_refs.json
 
       # ── Publish: audio package ───────────────────────────────────────────────
       - name: Publish audio package

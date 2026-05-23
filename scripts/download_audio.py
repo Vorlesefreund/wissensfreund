@@ -129,13 +129,6 @@ def main() -> None:
     ]
     print(f"\nAllowed: {len(allowed)} / {len(filenames)} files. Downloading...")
 
-    # Initial pause: generate_license_json.py und find_wikipedia_audio.py haben
-    # die Wikimedia-Commons-Rate-Limits ausgeschöpft. 5 Minuten warten damit
-    # das Limit-Fenster zurückgesetzt wird, bevor wir upload.wikimedia.org anfragen.
-    if allowed:
-        print(f"  Warte 300 s vor Download-Start (Rate-Limit-Reset nach API-Intensive)...")
-        time.sleep(300)
-
     download_dir = Path("audio_downloads")
     download_dir.mkdir(exist_ok=True)
 
