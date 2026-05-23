@@ -2,6 +2,36 @@
 
 ---
 
+## ✅ FERTIG — Voll-Produktionslauf (alle ~3.500 Artikel) (Stand 2026-05-23)
+
+Run 26330677982 erfolgreich in **1h28m** abgeschlossen.
+
+### Ergebnisse
+
+- **find_wikipedia_audio.py**: 373 erlaubte Audio-Dateien in 259 Artikeln gefunden
+- **download_audio.py**: 368 eindeutige Dateien geprüft — alle 368/368 lizenziert (CC0/BY/BY-SA)
+  - Downloads: 0 Dateien (Rate-Limit von Wikimedia aktiv nach API-intensiven Schritten)
+  - Fast-fail nach erster persistenter 429 — kein Timeout mehr
+- **media_licenses.json**: Vollständig (alle ~3.500 Artikel) publiziert ✓
+- **audio_index.json + wissensfreund_audio.zip**: Publiziert, aber leer (0 Dateien wegen Rate-Limit)
+
+### Releases
+
+- https://github.com/Vorlesefreund/wissensfreund/releases/tag/image-licenses
+- https://github.com/Vorlesefreund/wissensfreund/releases/tag/wissensfreund-audio
+
+### Bekannte Einschränkung: Audio-Downloads
+
+Das Wikimedia-Rate-Limit wird durch `generate_license_json.py` + `find_wikipedia_audio.py`
+erschöpft. `download_audio.py` erhält auf den ersten Versuch sofort 429. Die Audio-Dateien
+werden erst beim nächsten monatlichen Cron-Run (1. Juni) heruntergeladen, wenn das
+Rate-Limit-Fenster frisch ist.
+
+**Langfristige Lösung:** `download_audio.py` als separaten Workflow-Job mit `needs:` und
+mindestens 1h Pause nach den API-intensiven Schritten ausführen.
+
+---
+
 ## ✅ FERTIG — GitHub Actions: Audio-Pipeline Publish-Fix (Stand 2026-05-23)
 
 Drei Bugs behoben, Testlauf 26330317351 erfolgreich in 11m27s:
@@ -11,13 +41,6 @@ Drei Bugs behoben, Testlauf 26330317351 erfolgreich in 11m27s:
 2. **Workflow Publish** (33501a8): `softprops/action-gh-release@v2` durch `gh release create`
    ersetzt — funktioniert zuverlässig bei `workflow_dispatch`-Triggern
 3. **gh CLI Syntax** (d4362ee): Tag ist Positions-Argument, nicht `--tag`-Flag; Dateien ans Ende
-
-Releases live:
-- https://github.com/Vorlesefreund/wissensfreund/releases/tag/image-licenses
-- https://github.com/Vorlesefreund/wissensfreund/releases/tag/wissensfreund-audio
-
-**Nächster Schritt:** Voll-Lauf (alle 3.500 Artikel) — Audio-Downloads funktionieren wenn
-das Wikimedia-Rate-Limit abgelaufen ist (~1h nach den API-intensiven Schritten).
 
 ---
 
