@@ -88,15 +88,15 @@ jobs:
       - name: Publish image license data
         run: |
           gh release delete image-licenses --yes 2>/dev/null || true
-          gh release create image-licenses media_licenses.json \
-            --tag image-licenses \
+          gh release create image-licenses \
             --title "Image License Data ($ZIM_VERSION)" \
             --notes "Auto-generated Wikimedia Commons license data for \`$ZIM_VERSION\`.
 
           The Wissensfreund app downloads this file on first start to check which images may be displayed (CC0 / CC BY / CC BY-SA only).
 
           Updated automatically on the 1st of every month." \
-            --latest=false
+            --latest=false \
+            media_licenses.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ZIM_VERSION: ${{ env.ZIM_VERSION }}
@@ -105,15 +105,15 @@ jobs:
       - name: Publish audio package
         run: |
           gh release delete wissensfreund-audio --yes 2>/dev/null || true
-          gh release create wissensfreund-audio wissensfreund_audio.zip audio_index.json \
-            --tag wissensfreund-audio \
+          gh release create wissensfreund-audio \
             --title "Audio Package ($ZIM_VERSION)" \
             --notes "Wikimedia Commons audio files linked in Klexikon articles (\`$ZIM_VERSION\`).
 
           Files: wissensfreund_audio.zip (CC0/CC BY/CC BY-SA, max 5 MB each, max 50 MB total) and audio_index.json (article to audio file mapping).
 
           The Wissensfreund app downloads this package on first start for offline audio playback. Updated automatically on the 1st of every month." \
-            --latest
+            --latest \
+            wissensfreund_audio.zip audio_index.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ZIM_VERSION: ${{ env.ZIM_VERSION }}
