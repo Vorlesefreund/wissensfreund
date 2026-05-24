@@ -61,11 +61,13 @@
 - **`.github/workflows/update_image_licenses.yml`**: Neuer Step `Create zim_version.json`
   (enthält Version, ZIM-URL, Dateigröße, Datum), Upload zu R2 mit `max-age=3600`.
 
-### Offene Android-Arbeit (Kotlin)
+### Android (Kotlin)
 
-- `wissensfreund/zim` → `swapZim({path})` Platform-Channel muss im Android-Code implementiert werden,
-  damit die App nach einem ZIM-Download ohne Neustart wechseln kann.
-  Derzeit wirft der Channel `MissingPluginException` → App zeigt "Neustart erforderlich".
+- **`MainActivity.kt`**: `swapZim`-Handler im ZIM-Channel implementiert.
+  Schließt alten `ZimReader`, verschiebt Download-Datei per `renameTo` in Standard-ZIM-Pfad
+  (Fallback: `copyTo` + delete bei Cross-Filesystem). Öffnet neuen `ZimReader` ohne Progress-Callback.
+  Gibt `{"articleCount": N}` zurück. Fehlerfall: `result.error(...)`.
+  Nach erfolgreichem Swap zeigt Flutter-Dialog "Neustart erforderlich" (für saubere Provider-State-Synchronisation).
 
 ---
 

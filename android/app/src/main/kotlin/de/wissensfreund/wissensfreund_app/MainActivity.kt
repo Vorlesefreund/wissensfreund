@@ -157,6 +157,11 @@ class MainActivity : FlutterFragmentActivity() {
                         val filename = call.argument<String>("filename") ?: ""
                         zimGetAudioBytes(filename, result)
                     }
+                    "swapZim" -> {
+                        val path = call.argument<String>("path") ?: ""
+                        if (path.isEmpty()) result.error("INVALID_ARG", "path required", null)
+                        else swapZim(path, result)
+                    }
                     else -> result.notImplemented()
                 }
             }
@@ -518,6 +523,73 @@ class MainActivity : FlutterFragmentActivity() {
         } else {
             result.success(false)
         }
+    }
+
+    // ── ZIM hot-swap ──────────────────────────────────────────────────────────
+
+    // Closes the current ZimReader, moves the downloaded file to the standard
+    // ZIM location, and opens a new ZimReader from that location.
+    // All file I/O runs on zimExecutor; result is delivered on the main thread.
+    private fun swapZim(newPath: String, result: MethodChannel.Result) {
+        zimExecutor.execute {
+            try {
+                val newFile = File(newPath)
+                if (!newFile.exists()) {
+                    Handler(Looper.getMainLooper()).post {
+                        result.error("FILE_NOT_FOUND", "Downloaded ZIM not found: $newPath", null)
+                    }
+                    return@execute
+                }
+
+                // Close old reader first so the target file is not locked.
+                zimReader?.close()
+                zimReader = null
+
+                // Move the downloaded file to the standard ZIM location.
+                val targetFile = findZimTargetFile()
+                val effectivePath: String
+                if (newFile.renameTo(targetFile)) {
+                    effectivePath = targetFile.absolutePath
+                    Log.d("ZimReader", "swapZim: renamed → ${targetFile.absolutePath}")
+                } else {
+                    // Cross-filesystem (e.g. internal storage → SD card): copy then delete.
+                    try {
+                        newFile.copyTo(targetFile, overwrite = true)
+                        newFile.delete()
+                        effectivePath = targetFile.absolutePath
+                        Log.d("ZimReader", "swapZim: copied → ${targetFile.absolutePath}")
+                    } catch (e: Exception) {
+                        Log.w("ZimReader", "swapZim: copy failed, opening from download path: $e")
+                        effectivePath = newPath
+                    }
+                }
+
+                // Open the new reader (no progress callback — this is a background swap).
+                val newReader = ZimReader(effectivePath)
+                val ok = newReader.open()
+                if (ok) {
+                    zimReader = newReader
+                    Handler(Looper.getMainLooper()).post {
+                        result.success(mapOf("articleCount" to newReader.allTitles.size))
+                    }
+                } else {
+                    Handler(Looper.getMainLooper()).post {
+                        result.error("OPEN_FAILED", "Failed to open new ZIM: $effectivePath", null)
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("ZimReader", "swapZim failed: ${e.message}", e)
+                Handler(Looper.getMainLooper()).post {
+                    result.error("SWAP_FAILED", e.message, null)
+                }
+            }
+        }
+    }
+
+    // Returns the File object for the standard ZIM location (external preferred).
+    private fun findZimTargetFile(): File {
+        getExternalFilesDir(null)?.let { return File(it, ZIM_FILENAME) }
+        return File(filesDir, ZIM_FILENAME)
     }
 
     override fun onDestroy() {

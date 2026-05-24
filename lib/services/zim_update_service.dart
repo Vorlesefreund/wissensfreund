@@ -110,10 +110,9 @@ class ZimUpdateService {
 
     // Ask the Kotlin side to hot-swap the ZIM reader.
     try {
-      await _zimChannel.invokeMethod<void>('swapZim', {'path': destPath});
+      await _zimChannel.invokeMethod<Object>('swapZim', {'path': destPath});
     } on MissingPluginException {
-      // Android channel not yet implemented — cold-restart required.
-      // The download succeeded; caller shows a restart prompt.
+      // Channel not implemented — download succeeded, restart required.
       return true;
     } catch (_) {
       return false;
