@@ -2,6 +2,54 @@
 
 ---
 
+## ✅ FERTIG — Bildqualität-System & On-Demand-HiRes (Stand 2026-05-24)
+
+### Neue Services
+
+- **`lib/services/image_library_service.dart`** (NEU): Offline-Bilderbibliothek (800px).
+  `downloadLibrary(onProgress)` lädt `images_medium.zip` von R2, extrahiert per `archive_io`-Streaming.
+  `getImage(filename)`, `hasImage(filename)`, `totalSizeBytes`, `clear()`.
+
+- **`lib/services/hires_image_service.dart`** (NEU): On-Demand-HiRes (1600px).
+  Singleton, ein Download gleichzeitig (`_loading`-Flag). WiFi-only.
+  Wikimedia REST API: `https://api.wikimedia.org/core/v1/commons/file/File:[filename]`.
+  `preferred.url?width=1600`, max 3 MB, 8 s Timeout. SQLite-Index (LRU).
+  Neu: `cacheSizeBytes()`, `clearCache()` für Storage-Dialog.
+
+- **`lib/services/license_cache_db.dart`**: Schema auf v4 — `image_cache_index`-Tabelle
+  für HiRes-LRU-Cache-Tracking. Neue Methoden: `upsertImageCache`, `touchImageCache`,
+  `imageCacheTotalBytes`, `clearImageCacheIndex`.
+
+- **`lib/services/storage_manager.dart`**: `image_library/` + `image_cache/` (500 MB LRU, 30 d).
+
+### Provider
+
+- **`lib/providers/wissensfreund_provider.dart`**: `getImageBytes()` prüft jetzt zuerst
+  `ImageLibraryService.instance.getImage(filename)`, dann ZIM-Fallback.
+
+### Vollbild-Galerie (`article_screen.dart`)
+
+- `_FullscreenGalleryState` lädt beim Öffnen + bei jedem Wischen das HiRes-Bild via
+  `HiResImageService.instance.getHiResImage()` (WiFi-only, non-blocking).
+- HiRes-Bild blendet sich mit 300ms-Crossfade (`AnimatedSwitcher`) über das Basisbild ein.
+- Nur ein Download gleichzeitig; fehlendes WiFi / Fehler → kein Overlay, Basisqualität bleibt.
+
+### Onboarding & Settings (`home_screen.dart`)
+
+- Nach Kinderschutz-Onboarding: `_ImageQualityDialog` (einmalig, SharedPreferences-Flag).
+  Wahl zwischen Standard (ZIM-Bilder) und Gut (~2 GB Offline-Bibliothek).
+  Bei Download: Live-Fortschrittsanzeige + ETA.
+- Neuer Menüpunkt "Speicher & Qualität": `_StorageDialog` zeigt Bibliotheks- und
+  HiRes-Cache-Größe, ermöglicht gezieltes Löschen und nachträglichen Bibliotheks-Download.
+
+### Offen (nächste Session)
+
+- `scripts/download_images.py`: Inkrementeller 800px-Download von Wikimedia Commons,
+  MD5-Manifest, `images_medium.zip` bauen, auf R2 hochladen.
+- Workflow (`.github/workflows/update_image_licenses.yml`): `images`-Job hinzufügen.
+
+---
+
 ## ✅ FERTIG — Cloudflare R2 Asset-Infrastruktur (Stand 2026-05-24)
 
 Alle Asset-Downloads von GitHub Release Assets auf Cloudflare R2 umgestellt.

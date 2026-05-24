@@ -54,7 +54,7 @@ class LicenseCacheDb {
     final dbPath = join(await getDatabasesPath(), 'license_cache.db');
     return openDatabase(
       dbPath,
-      version: 3,
+      version: 4,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE license_cache (
@@ -84,6 +84,14 @@ class LicenseCacheDb {
             zim_version TEXT NOT NULL
           )
         ''');
+        await db.execute('''
+          CREATE TABLE image_cache_index (
+            filename      TEXT PRIMARY KEY,
+            local_path    TEXT NOT NULL,
+            last_accessed INTEGER NOT NULL,
+            file_size     INTEGER NOT NULL
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -105,6 +113,16 @@ class LicenseCacheDb {
               caption        TEXT,
               erlaubt        INTEGER NOT NULL,
               checked_at     INTEGER NOT NULL
+            )
+          ''');
+        }
+        if (oldVersion < 4) {
+          await db.execute('''
+            CREATE TABLE IF NOT EXISTS image_cache_index (
+              filename      TEXT PRIMARY KEY,
+              local_path    TEXT NOT NULL,
+              last_accessed INTEGER NOT NULL,
+              file_size     INTEGER NOT NULL
             )
           ''');
         }
@@ -193,6 +211,44 @@ class LicenseCacheDb {
       'sync_date': syncDate,
       'zim_version': zimVersion,
     });
+  }
+
+  // ── Image cache index ────────────────────────────────────────────────────────
+
+  Future<void> upsertImageCache({
+    required String filename,
+    required String localPath,
+    required int fileSize,
+  }) async {
+    await (await _database).insert(
+      'image_cache_index',
+      {
+        'filename':      filename,
+        'local_path':    localPath,
+        'last_accessed': DateTime.now().millisecondsSinceEpoch,
+        'file_size':     fileSize,
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  Future<void> touchImageCache(String filename) async {
+    await (await _database).update(
+      'image_cache_index',
+      {'last_accessed': DateTime.now().millisecondsSinceEpoch},
+      where: 'filename = ?',
+      whereArgs: [filename],
+    );
+  }
+
+  Future<int> imageCacheTotalBytes() async {
+    final result = await (await _database)
+        .rawQuery('SELECT SUM(file_size) as total FROM image_cache_index');
+    return (result.first['total'] as int?) ?? 0;
+  }
+
+  Future<void> clearImageCacheIndex() async {
+    await (await _database).delete('image_cache_index');
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────

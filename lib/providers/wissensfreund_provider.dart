@@ -9,6 +9,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/audio_package_service.dart';
+import '../services/image_library_service.dart';
 import '../services/professor_response_service.dart';
 import '../services/wikimedia_license_checker.dart';
 
@@ -906,6 +907,16 @@ class WissensfreundProvider extends ChangeNotifier {
   Future<Uint8List?> getImageBytes(String filename) async {
     if (_imageBytesCache.containsKey(filename)) return _imageBytesCache[filename];
     try {
+      // Prefer offline library (medium quality 800px) over ZIM bytes.
+      final libraryBytes = await ImageLibraryService.instance.getImage(filename);
+      if (libraryBytes != null) {
+        if (libraryBytes.length <= 2 * 1024 * 1024) {
+          _imageBytesCache[filename] = libraryBytes;
+        }
+        return libraryBytes;
+      }
+
+      // Fall back to native ZIM extraction.
       final bytes =
           await _zimChannel.invokeMethod<Uint8List>('getImageBytes', {'filename': filename});
       if (bytes != null && bytes.length <= 2 * 1024 * 1024) {

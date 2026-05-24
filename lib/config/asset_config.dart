@@ -12,7 +12,12 @@ class AssetConfig {
   static const String r2BaseUrl =
       'https://pub-07f0107be14b48fd8652e5318441c7c2.r2.dev';
 
-  static String get mediaLicensesUrl => '$r2BaseUrl/media_licenses.json';
-  static String get audioIndexUrl    => '$r2BaseUrl/audio_index.json';
-  static String get audioZipUrl      => '$r2BaseUrl/wissensfreund_audio.zip';
+  static String get mediaLicensesUrl  => '$r2BaseUrl/media_licenses.json';
+  static String get audioIndexUrl     => '$r2BaseUrl/audio_index.json';
+  static String get audioZipUrl       => '$r2BaseUrl/wissensfreund_audio.zip';
+  static String get imageLibraryUrl   => '$r2BaseUrl/images_medium.zip';
+  static String get imageManifestUrl  => '$r2BaseUrl/images_medium_manifest.json';
+
+  /// Approximate size of images_medium.zip for ETA estimation (bytes).
+  static const int imageLibrarySizeBytes = 2 * 1024 * 1024 * 1024; // ~2 GB
 }

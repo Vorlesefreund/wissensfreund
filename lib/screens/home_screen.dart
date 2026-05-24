@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../providers/wissensfreund_provider.dart';
+import '../services/hires_image_service.dart';
+import '../services/image_library_service.dart';
 import '../services/parental_lock_service.dart';
 import '../widgets/professor_widget.dart';
 import 'article_screen.dart';
@@ -43,7 +46,10 @@ class _HomeScreenState extends State<HomeScreen>
     _breathScale = Tween<double>(begin: 1.0, end: 1.04).animate(
       CurvedAnimation(parent: _breathCtrl, curve: Curves.easeInOut),
     );
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkOnboarding());
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _checkOnboarding();
+      if (mounted) await _checkImageQuality();
+    });
   }
 
   @override
@@ -68,6 +74,20 @@ class _HomeScreenState extends State<HomeScreen>
     );
     // Accessibility-Status nach Rückkehr aus Einstellungen aktualisieren
     if (mounted) await ps.refreshAdminStatus();
+  }
+
+  Future<void> _checkImageQuality() async {
+    if (!mounted) return;
+    if (ImageLibraryService.instance.totalSizeBytes > 0) return;
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool('image_quality_offered') ?? false) return;
+    await prefs.setBool('image_quality_offered', true);
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const _ImageQualityDialog(),
+    );
   }
 
   Future<void> _onBackPressed(bool didPop, dynamic result) async {
@@ -727,10 +747,12 @@ class _AppMenu extends StatelessWidget {
           ),
           const Divider(height: 1, indent: 24, endIndent: 24),
           _MenuItem(
-            icon: Icons.settings_rounded,
-            label: 'Einstellungen',
-            onTap: () => Navigator.pop(context),
-            comingSoon: true,
+            icon: Icons.storage_rounded,
+            label: 'Speicher & Qualität',
+            onTap: () {
+              Navigator.pop(context);
+              _showStorageDialog(outerContext);
+            },
           ),
           const Divider(height: 1, indent: 24, endIndent: 24),
           _MenuItem(
@@ -889,6 +911,13 @@ class _AppMenu extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showStorageDialog(BuildContext ctx) {
+    showDialog(
+      context: ctx,
+      builder: (_) => const _StorageDialog(),
     );
   }
 
@@ -1403,6 +1432,368 @@ class _ParentalOnboardingDialogState extends State<_ParentalOnboardingDialog>
         onPressed: _dismiss,
         child: const Text('Alles klar!', style: TextStyle(fontSize: 16)),
       ),
+    );
+  }
+}
+
+// ── Image Quality Dialog ───────────────────────────────────────────────────────
+
+class _ImageQualityDialog extends StatefulWidget {
+  const _ImageQualityDialog();
+
+  @override
+  State<_ImageQualityDialog> createState() => _ImageQualityDialogState();
+}
+
+class _ImageQualityDialogState extends State<_ImageQualityDialog> {
+  bool _downloading = false;
+  double _progress = 0;
+  Duration? _eta;
+  String? _error;
+
+  Future<void> _startDownload() async {
+    setState(() { _downloading = true; _error = null; });
+    final ok = await ImageLibraryService.instance.downloadLibrary(
+      onProgress: (received, total, eta) {
+        if (mounted) setState(() {
+          _progress = total > 0 ? received / total : 0;
+          _eta = eta;
+        });
+      },
+    );
+    if (!mounted) return;
+    if (ok) {
+      Navigator.pop(context);
+    } else {
+      setState(() { _downloading = false; _error = 'Download fehlgeschlagen. Bitte WLAN prüfen.'; });
+    }
+  }
+
+  String _fmtEta(Duration d) =>
+      d.inMinutes >= 1 ? '~${d.inMinutes} min' : '~${d.inSeconds}s';
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: !_downloading,
+      child: AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Row(children: [
+          Text('🖼️', style: TextStyle(fontSize: 22)),
+          SizedBox(width: 8),
+          Text('Bildqualität wählen'),
+        ]),
+        content: _downloading
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LinearProgressIndicator(
+                    value: _progress > 0 ? _progress : null,
+                    backgroundColor: const Color(0xFFE8F5E9),
+                    valueColor: const AlwaysStoppedAnimation(Color(0xFF2E7D32)),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    _progress > 0
+                        ? '${(_progress * 100).round()} %'
+                            '${_eta != null ? "  —  ${_fmtEta(_eta!)}" : ""}'
+                        : 'Verbinde…',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _QualityRow(
+                    icon: Icons.image_outlined,
+                    title: 'Standard',
+                    subtitle: 'Bilder aus dem Wissensspeicher',
+                  ),
+                  const SizedBox(height: 12),
+                  _QualityRow(
+                    icon: Icons.hd_outlined,
+                    title: 'Gut  (~2 GB)',
+                    subtitle: 'Offline-Bilderbibliothek · ca. 3–5 min im WLAN',
+                    highlight: true,
+                  ),
+                  if (_error != null) ...[
+                    const SizedBox(height: 10),
+                    Text(
+                      _error!,
+                      style: TextStyle(color: Colors.red.shade700, fontSize: 13),
+                    ),
+                  ],
+                ],
+              ),
+        actions: _downloading
+            ? null
+            : [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text('Standard',
+                      style: TextStyle(color: Colors.grey.shade600)),
+                ),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF2E7D32)),
+                  onPressed: _startDownload,
+                  child: const Text('Gut herunterladen'),
+                ),
+              ],
+      ),
+    );
+  }
+}
+
+class _QualityRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final bool highlight;
+  const _QualityRow({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.highlight = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: highlight
+            ? const Color(0xFFE8F5E9)
+            : const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(12),
+        border: highlight
+            ? Border.all(color: const Color(0xFF2E7D32), width: 1.5)
+            : null,
+      ),
+      child: Row(
+        children: [
+          Icon(icon,
+              color: highlight ? const Color(0xFF2E7D32) : Colors.grey.shade600,
+              size: 22),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      color: highlight
+                          ? const Color(0xFF1B5E20)
+                          : const Color(0xFF333333),
+                    )),
+                Text(subtitle,
+                    style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade600,
+                        height: 1.3)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Storage Dialog ─────────────────────────────────────────────────────────────
+
+class _StorageDialog extends StatefulWidget {
+  const _StorageDialog();
+
+  @override
+  State<_StorageDialog> createState() => _StorageDialogState();
+}
+
+class _StorageDialogState extends State<_StorageDialog> {
+  int _libraryBytes = 0;
+  int _cacheBytes = 0;
+  bool _loadingLibrary = false;
+  bool _loadingCache = false;
+  bool _loadingStats = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    setState(() => _loadingStats = true);
+    final cacheBytes = await HiResImageService.instance.cacheSizeBytes();
+    if (!mounted) return;
+    setState(() {
+      _libraryBytes = ImageLibraryService.instance.totalSizeBytes;
+      _cacheBytes = cacheBytes;
+      _loadingStats = false;
+    });
+  }
+
+  Future<void> _clearLibrary() async {
+    setState(() => _loadingLibrary = true);
+    await ImageLibraryService.instance.clear();
+    if (!mounted) return;
+    setState(() {
+      _libraryBytes = 0;
+      _loadingLibrary = false;
+    });
+  }
+
+  Future<void> _clearCache() async {
+    setState(() => _loadingCache = true);
+    await HiResImageService.instance.clearCache();
+    if (!mounted) return;
+    setState(() {
+      _cacheBytes = 0;
+      _loadingCache = false;
+    });
+  }
+
+  Future<void> _downloadLibrary() async {
+    Navigator.pop(context);
+    // Reset the offered flag so dialog shows again with download option
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('image_quality_offered');
+  }
+
+  String _fmtSize(int bytes) {
+    if (bytes <= 0) return '0 MB';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).round()} KB';
+    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).round()} MB';
+    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: const Row(children: [
+        Icon(Icons.storage_rounded, color: Color(0xFF2E7D32), size: 22),
+        SizedBox(width: 8),
+        Text('Speicher & Qualität'),
+      ]),
+      content: _loadingStats
+          ? const SizedBox(
+              height: 60,
+              child: Center(child: CircularProgressIndicator()))
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // ── Offline-Bilderbibliothek ─────────────────────────
+                _StorageRow(
+                  label: 'Offline-Bilderbibliothek',
+                  value: _fmtSize(_libraryBytes),
+                  emptyHint: _libraryBytes == 0 ? 'Nicht heruntergeladen' : null,
+                  onClear: _libraryBytes > 0 ? _clearLibrary : null,
+                  clearing: _loadingLibrary,
+                ),
+                const SizedBox(height: 12),
+                // ── HiRes-Cache ──────────────────────────────────────
+                _StorageRow(
+                  label: 'Hochauflösungs-Cache',
+                  value: _fmtSize(_cacheBytes),
+                  emptyHint: _cacheBytes == 0 ? 'Leer' : null,
+                  onClear: _cacheBytes > 0 ? _clearCache : null,
+                  clearing: _loadingCache,
+                ),
+                if (_libraryBytes == 0) ...[
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.download_rounded, size: 18),
+                      label: const Text('Bilderbibliothek herunterladen (~2 GB)'),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFF2E7D32),
+                        side: const BorderSide(color: Color(0xFF2E7D32)),
+                        textStyle: const TextStyle(fontSize: 13),
+                      ),
+                      onPressed: _downloadLibrary,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Schließen'),
+        ),
+      ],
+    );
+  }
+}
+
+class _StorageRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final String? emptyHint;
+  final VoidCallback? onClear;
+  final bool clearing;
+  const _StorageRow({
+    required this.label,
+    required this.value,
+    this.emptyHint,
+    this.onClear,
+    this.clearing = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, fontSize: 14)),
+              Text(
+                emptyHint ?? value,
+                style: TextStyle(
+                    fontSize: 12,
+                    color: emptyHint != null
+                        ? Colors.grey.shade400
+                        : const Color(0xFF2E7D32),
+                    fontWeight: emptyHint != null
+                        ? FontWeight.normal
+                        : FontWeight.w500),
+              ),
+            ],
+          ),
+        ),
+        if (onClear != null)
+          SizedBox(
+            height: 32,
+            child: clearing
+                ? const Padding(
+                    padding: EdgeInsets.all(6),
+                    child: SizedBox(
+                      width: 20, height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ))
+                : TextButton(
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.red.shade700,
+                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                      textStyle: const TextStyle(fontSize: 12),
+                    ),
+                    onPressed: onClear,
+                    child: const Text('Löschen'),
+                  ),
+          ),
+      ],
     );
   }
 }

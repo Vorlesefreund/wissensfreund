@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/wissensfreund_provider.dart';
 import '../services/parental_lock_service.dart';
+import '../services/hires_image_service.dart';
 import '../services/wikimedia_license_checker.dart';
 import '../widgets/professor_widget.dart';
 
@@ -972,10 +973,9 @@ class _FullscreenGallery extends StatefulWidget {
 
 class _FullscreenGalleryState extends State<_FullscreenGallery> {
   late int _currentIndex;
-  final _futures = <String, Future<Uint8List?>>{};
+  final _futures    = <String, Future<Uint8List?>>{};
+  final _hiResBytes = <String, Uint8List?>{};   // null = loading, value = done
   Timer? _swipeSettleTimer;
-  // Nur true wenn Nutzer auf diesem Bild auf 🔊 getippt hat.
-  // Nach Wischen auf nächstes Bild übertragen → Auto-Vorlesen aktivieren.
   bool _speakerWasUsed = false;
 
   @override
@@ -983,6 +983,11 @@ class _FullscreenGalleryState extends State<_FullscreenGallery> {
     super.initState();
     _currentIndex = widget.initialIndex;
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    // HiRes-Download für das erste Bild starten sobald Provider verfügbar.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final images = context.read<WissensfreundProvider>().articleImages;
+      if (images.isNotEmpty) _loadHiRes(images[_currentIndex].filename);
+    });
   }
 
   @override
@@ -994,6 +999,14 @@ class _FullscreenGalleryState extends State<_FullscreenGallery> {
 
   Future<Uint8List?> _futureFor(String fn, WissensfreundProvider p) =>
       _futures.putIfAbsent(fn, () => p.getImageBytes(fn));
+
+  void _loadHiRes(String filename) {
+    if (_hiResBytes.containsKey(filename)) return;
+    _hiResBytes[filename] = null; // mark as in-flight
+    HiResImageService.instance.getHiResImage(filename).then((bytes) {
+      if (mounted && bytes != null) setState(() => _hiResBytes[filename] = bytes);
+    });
+  }
 
   void _swipe(DragEndDetails d) {
     final v = d.primaryVelocity ?? 0;
@@ -1009,6 +1022,7 @@ class _FullscreenGalleryState extends State<_FullscreenGallery> {
 
     provider.onThumbnailTap(next);
     setState(() => _currentIndex = next);
+    _loadHiRes(images[next].filename);
     _swipeSettleTimer?.cancel();
     _swipeSettleTimer = Timer(const Duration(milliseconds: 2500), () {
       if (!mounted) return;
@@ -1078,10 +1092,11 @@ class _FullscreenGalleryState extends State<_FullscreenGallery> {
                                       future: future,
                                       builder: (_, snap) {
                                         final bytes = snap.data;
+                                        final hiRes = fn != null ? _hiResBytes[fn] : null;
                                         return Stack(
                                           fit: StackFit.expand,
                                           children: [
-                                            // Image — füllt gesamten Expanded-Bereich
+                                            // Base image layer
                                             bytes == null
                                                 ? const Center(
                                                     child: CircularProgressIndicator(
@@ -1097,7 +1112,27 @@ class _FullscreenGalleryState extends State<_FullscreenGallery> {
                                                       ),
                                                     ),
                                                   ),
-                                            // Speaker-Button wurde unter das Bild verschoben
+                                            // HiRes overlay — crossfade 300ms when loaded
+                                            if (bytes != null)
+                                              AnimatedSwitcher(
+                                                duration: const Duration(milliseconds: 300),
+                                                child: hiRes != null
+                                                    ? SizedBox.expand(
+                                                        key: ValueKey('hires_$fn'),
+                                                        child: InteractiveViewer(
+                                                          minScale: 1.0,
+                                                          maxScale: 4.0,
+                                                          clipBehavior: Clip.none,
+                                                          child: Image.memory(
+                                                            hiRes,
+                                                            fit: BoxFit.contain,
+                                                          ),
+                                                        ),
+                                                      )
+                                                    : const SizedBox.shrink(
+                                                        key: ValueKey('no_hires'),
+                                                      ),
+                                              ),
                                             // ⓘ Lizenz
                                             if (fn != null)
                                               Positioned(

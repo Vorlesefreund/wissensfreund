@@ -31,6 +31,14 @@ class AssetDownloadService {
   AssetDownloadService._();
   static final AssetDownloadService instance = AssetDownloadService._();
 
+  /// Estimates download time given [totalBytes] and an assumed WiFi speed.
+  static Duration estimateEta(
+    int totalBytes, {
+    double assumedSpeedBytesPerSec = 10 * 1024 * 1024, // 10 MB/s default
+  }) {
+    return Duration(seconds: (totalBytes / assumedSpeedBytesPerSec).ceil());
+  }
+
   static const _maxAttempts    = 3;
   static const _wifiCheckEvery = Duration(seconds: 3);
   static const _requestTimeout = Duration(minutes: 10);
