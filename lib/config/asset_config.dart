@@ -10,7 +10,7 @@ class AssetConfig {
   AssetConfig._();
 
   static const String r2BaseUrl =
-      'https://pub-PLACEHOLDER.r2.dev'; // TODO: replace after bucket setup
+      'https://pub-07f0107be14b48fd8652e5318441c7c2.r2.dev';
 
   static String get mediaLicensesUrl => '$r2BaseUrl/media_licenses.json';
   static String get audioIndexUrl    => '$r2BaseUrl/audio_index.json';

@@ -98,7 +98,7 @@ jobs:
         run: |
           aws s3 cp media_licenses.json \
             s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/media_licenses.json \
-            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com \
+            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
             --content-type application/json \
             --cache-control "public, max-age=86400"
         env:
@@ -163,12 +163,12 @@ jobs:
         run: |
           aws s3 cp audio_index.json \
             s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/audio_index.json \
-            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com \
+            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
             --content-type application/json \
             --cache-control "public, max-age=86400"
           aws s3 cp wissensfreund_audio.zip \
             s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/wissensfreund_audio.zip \
-            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com \
+            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
             --content-type application/zip \
             --cache-control "public, max-age=86400"
         env:
