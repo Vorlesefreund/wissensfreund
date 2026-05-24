@@ -85,12 +85,19 @@ jobs:
           MAX_ARTICLES:  ${{ inputs.max_articles || '0' }}
           LICENSES_FILE: media_licenses.json
 
-      # ── Pass refs to download job via artifact ───────────────────────────────
+      # ── Pass refs + licenses to downstream jobs via artifacts ───────────────
       - name: Upload audio refs artifact
         uses: actions/upload-artifact@v5
         with:
           name: audio-refs
           path: wikipedia_audio_refs.json
+          retention-days: 1
+
+      - name: Upload licenses artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: media-licenses
+          path: media_licenses.json
           retention-days: 1
 
       # ── Upload: image license data → Cloudflare R2 ──────────────────────────
@@ -192,3 +199,56 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ZIM_VERSION: ${{ env.ZIM_VERSION }}
+
+  # ── Job 3: Build 800px image library (parallel to download, after prepare) ───
+  images:
+    runs-on: ubuntu-latest
+    needs: prepare
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install Python dependencies
+        run: pip install requests
+
+      - name: Download licenses artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: media-licenses
+
+      # ── Same 3600 s pause as the download job ─────────────────────────────
+      - name: Wait for Wikimedia rate-limit reset
+        run: |
+          echo "Warte 3600 s damit das Wikimedia-Rate-Limit nach Job 1 zurueckgesetzt wird..."
+          sleep 3600
+
+      # ── Incremental 800px image download and ZIP rebuild ──────────────────
+      - name: Build image library (incremental)
+        run: python scripts/download_images.py
+        env:
+          LICENSES_FILE: media_licenses.json
+          ZIM_VERSION:   ${{ env.ZIM_VERSION }}
+          R2_BASE_URL:   https://pub-07f0107be14b48fd8652e5318441c7c2.r2.dev
+          MAX_IMAGES:    ${{ inputs.max_articles || '0' }}
+
+      # ── Upload: image library → Cloudflare R2 ────────────────────────────
+      - name: Upload image library to Cloudflare R2
+        run: |
+          aws s3 cp images_medium.zip \
+            s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/images_medium.zip \
+            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
+            --content-type application/zip \
+            --cache-control "public, max-age=86400"
+          aws s3 cp images_medium_manifest.json \
+            s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/images_medium_manifest.json \
+            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
+            --content-type application/json \
+            --cache-control "public, max-age=86400"
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION:    auto

@@ -42,11 +42,24 @@
 - Neuer Menüpunkt "Speicher & Qualität": `_StorageDialog` zeigt Bibliotheks- und
   HiRes-Cache-Größe, ermöglicht gezieltes Löschen und nachträglichen Bibliotheks-Download.
 
-### Offen (nächste Session)
+### Workflow & Pipeline
 
-- `scripts/download_images.py`: Inkrementeller 800px-Download von Wikimedia Commons,
-  MD5-Manifest, `images_medium.zip` bauen, auf R2 hochladen.
-- Workflow (`.github/workflows/update_image_licenses.yml`): `images`-Job hinzufügen.
+- **`scripts/download_images.py`** (NEU): Inkrementeller 800px-Download von Wikimedia Commons.
+  - Liest `media_licenses.json` für erlaubte Bilder
+  - Lädt `images_medium_manifest.json` von R2 (JSON-Tracking welche Bilder bereits gecacht sind)
+  - Batched-API-Query für Thumbnail-URLs (50er-Batches, 1,5 s Pause)
+  - Lädt nur neue/fehlende Bilder herunter (max 3 MB/Bild)
+  - Holt vorhandenes `images_medium.zip` von R2, fügt neue Bilder hinzu, packt neu (ZIP_STORED)
+  - Max 2 GB gesamt; Rate-Limit-Detection mit Abort-Signal
+  - Schreibt aktualisiertes Manifest
+
+- **`.github/workflows/update_image_licenses.yml`**: Neuer `images`-Job (parallel zu `download`):
+  - `needs: prepare` — startet gleichzeitig mit `download`-Job nach prepare
+  - Lädt `media_licenses.json` per Artifact von prepare
+  - Wartet 3600 s (gleicher Rate-Limit-Reset wie `download`-Job)
+  - Führt `download_images.py` aus
+  - Lädt `images_medium.zip` + `images_medium_manifest.json` auf R2 hoch
+  - `MAX_IMAGES` = `max_articles` aus Workflow-Input (Testmodus)
 
 ---
 
