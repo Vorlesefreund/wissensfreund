@@ -2,6 +2,32 @@
 
 ---
 
+## ✅ FERTIG — Workflow: Zwei-Job-Split + Node.js 24 (Stand 2026-05-24)
+
+### Zwei-Job-Workflow (fece876, c3ce4f4)
+
+Workflow aufgeteilt um Wikimedia-Rate-Limit dauerhaft zu umgehen:
+
+- **Job `prepare`** (~1,5h): ZIM → generate_license_json → extract_article_audio →
+  find_wikipedia_audio → `media_licenses.json` publizieren → `wikipedia_audio_refs.json`
+  als GitHub-Actions-Artifact hochladen
+- **Job `download`** (startet nach `prepare`): Artifact herunterladen → **3600 s warten**
+  (Rate-Limit-Reset) → download_audio.py → Audio-Package publizieren
+
+`download_audio.py`: 300-s-Sleep entfernt (jetzt im Workflow gesteuert).
+
+### Node.js 24 (c3ce4f4)
+
+`actions/checkout@v4 → v5` und `actions/setup-python@v5 → v6` in beiden Jobs aktualisiert.
+Verhindert Fehler ab dem erzwungenen Wechsel auf Node.js 24 (2. Juni 2026).
+
+### Nächste Audio-Dateien
+
+373 lizenzierte Audio-Dateien (259 Artikel) werden beim **Cron-Lauf am 1. Juni**
+automatisch heruntergeladen. Sound-Thumbnails in der App warten auf diese Daten.
+
+---
+
 ## ✅ FERTIG — Voll-Produktionslauf (alle ~3.500 Artikel) (Stand 2026-05-23)
 
 Run 26330677982 erfolgreich in **1h28m** abgeschlossen.
