@@ -87,7 +87,7 @@ jobs:
 
       # ── Pass refs to download job via artifact ───────────────────────────────
       - name: Upload audio refs artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: audio-refs
           path: wikipedia_audio_refs.json
@@ -141,7 +141,7 @@ jobs:
         run: pip install requests
 
       - name: Download audio refs artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: audio-refs
 
