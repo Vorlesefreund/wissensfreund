@@ -93,7 +93,20 @@ jobs:
           path: wikipedia_audio_refs.json
           retention-days: 1
 
-      # ── Publish: image license data (available immediately) ──────────────────
+      # ── Upload: image license data → Cloudflare R2 ──────────────────────────
+      - name: Upload media_licenses.json to Cloudflare R2
+        run: |
+          aws s3 cp media_licenses.json \
+            s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/media_licenses.json \
+            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com \
+            --content-type application/json \
+            --cache-control "public, max-age=86400"
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION:    auto
+
+      # ── Publish: image license data (GitHub Release — backup) ────────────────
       - name: Publish image license data
         run: |
           gh release delete image-licenses --yes 2>/dev/null || true
@@ -145,7 +158,25 @@ jobs:
           ZIM_VERSION: ${{ env.ZIM_VERSION }}
           REFS_FILE:   wikipedia_audio_refs.json
 
-      # ── Publish: audio package ───────────────────────────────────────────────
+      # ── Upload: audio package → Cloudflare R2 ───────────────────────────────
+      - name: Upload audio package to Cloudflare R2
+        run: |
+          aws s3 cp audio_index.json \
+            s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/audio_index.json \
+            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com \
+            --content-type application/json \
+            --cache-control "public, max-age=86400"
+          aws s3 cp wissensfreund_audio.zip \
+            s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/wissensfreund_audio.zip \
+            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.r2.cloudflarestorage.com \
+            --content-type application/zip \
+            --cache-control "public, max-age=86400"
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION:    auto
+
+      # ── Publish: audio package (GitHub Release — backup) ─────────────────────
       - name: Publish audio package
         run: |
           gh release delete wissensfreund-audio --yes 2>/dev/null || true

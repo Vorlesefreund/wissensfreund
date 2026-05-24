@@ -1,20 +1,20 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'license_cache_db.dart';
+import 'dart:io';
 
-const _mediaJsonUrl =
-    'https://github.com/Vorlesefreund/wissensfreund/releases/latest/download/media_licenses.json';
+import 'package:path_provider/path_provider.dart';
+
+import '../config/asset_config.dart';
+import 'asset_download_service.dart';
+import 'license_cache_db.dart';
 
 class WikimediaLicenseChecker {
   WikimediaLicenseChecker._();
   static final WikimediaLicenseChecker instance = WikimediaLicenseChecker._();
 
-  static const _timeout = Duration(seconds: 20);
-
   // ── Images ──────────────────────────────────────────────────────────────────
 
   /// Returns true if this image may be displayed.
-  /// Only reads from the local SQLite cache — never makes API calls.
+  /// Only reads from the local SQLite cache — never makes network calls.
   Future<bool> isAllowed(String imageFilename) async {
     final entry = await LicenseCacheDb.instance.get(imageFilename);
     return entry?.erlaubt ?? false;
@@ -41,32 +41,38 @@ class WikimediaLicenseChecker {
   /// True if the media license JSON has been downloaded and cached at least once.
   Future<bool> isSynced() => LicenseCacheDb.instance.isSynced();
 
-  /// Downloads media_licenses.json from the GitHub release and populates the
+  /// Downloads media_licenses.json from Cloudflare R2 and populates the
   /// local SQLite cache (images + audio).
   /// Call once on app start when isSynced() returns false.
   /// Returns true on success, false if offline or the download failed.
   Future<bool> syncLicenses() async {
-    try {
-      final response = await http
-          .get(Uri.parse(_mediaJsonUrl))
-          .timeout(_timeout);
-      if (response.statusCode != 200) return false;
+    final tmpDir  = await getTemporaryDirectory();
+    final tmpPath = '${tmpDir.path}/media_licenses.json';
 
-      final data       = jsonDecode(response.body) as Map<String, dynamic>;
-      final images     = data['images'] as Map<String, dynamic>? ?? {};
-      final audio      = data['audio']  as Map<String, dynamic>? ?? {};
+    try {
+      final result = await AssetDownloadService.instance.downloadAsset(
+        url:             AssetConfig.mediaLicensesUrl,
+        destinationPath: tmpPath,
+      );
+      if (!result.success) return false;
+
+      final body = await File(tmpPath).readAsString();
+      final data = jsonDecode(body) as Map<String, dynamic>;
+
+      final images     = data['images']      as Map<String, dynamic>? ?? {};
+      final audio      = data['audio']       as Map<String, dynamic>? ?? {};
       final generated  = data['generated']   as String? ?? '';
-      final zimVersion = data['zim_version']  as String? ?? '';
+      final zimVersion = data['zim_version'] as String? ?? '';
 
       final imageEntries = <LicenseEntry>[];
       for (final kv in images.entries) {
         final info = kv.value as Map<String, dynamic>;
         imageEntries.add(LicenseEntry(
           imageFilename: kv.key,
-          urheber: info['author']      as String?,
-          lizenz:  info['license']     as String?,
+          urheber:   info['author']      as String?,
+          lizenz:    info['license']     as String?,
           lizenzUrl: info['license_url'] as String?,
-          erlaubt: (info['allowed'] as bool?) ?? false,
+          erlaubt:   (info['allowed'] as bool?) ?? false,
           checkedAt: DateTime.now(),
         ));
       }
@@ -91,6 +97,8 @@ class WikimediaLicenseChecker {
       return true;
     } catch (_) {
       return false;
+    } finally {
+      try { File(tmpPath).deleteSync(); } catch (_) {}
     }
   }
 }

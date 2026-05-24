@@ -2,15 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:archive/archive.dart';
+import 'package:archive/archive_io.dart';
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
-const _indexUrl =
-    'https://github.com/Vorlesefreund/wissensfreund/releases/download/wissensfreund-audio/audio_index.json';
-const _zipUrl =
-    'https://github.com/Vorlesefreund/wissensfreund/releases/download/wissensfreund-audio/wissensfreund_audio.zip';
+import '../config/asset_config.dart';
+import 'asset_download_service.dart';
 
 class AudioRef {
   final String filename;
@@ -26,7 +23,7 @@ class AudioRef {
   });
 }
 
-/// Downloads the Wissensfreund audio package from the GitHub release,
+/// Downloads the Wissensfreund audio package from Cloudflare R2,
 /// extracts it, and provides per-article audio refs for offline playback.
 class AudioPackageService {
   AudioPackageService._();
@@ -35,9 +32,6 @@ class AudioPackageService {
   Map<String, List<AudioRef>> _index = {};
   String? _audioDir;
   bool _initialized = false;
-
-  static const _httpTimeout = Duration(seconds: 20);
-  static const _zipTimeout  = Duration(minutes: 5);
 
   // ── Public API ──────────────────────────────────────────────────────────────
 
@@ -48,7 +42,7 @@ class AudioPackageService {
     _initialized = true;
 
     final appDir = await getApplicationDocumentsDirectory();
-    _audioDir = '${appDir.path}/audio';
+    _audioDir    = '${appDir.path}/audio';
 
     final indexFile = File('${appDir.path}/audio_index.json');
     if (indexFile.existsSync()) {
@@ -81,7 +75,7 @@ class AudioPackageService {
   }
 
   Map<String, List<AudioRef>> _parseIndex(Map<String, dynamic> data) {
-    final result = <String, List<AudioRef>>{};
+    final result  = <String, List<AudioRef>>{};
     final audioMap = data['audio'] as Map<String, dynamic>? ?? {};
     for (final entry in audioMap.entries) {
       final items = (entry.value as List).cast<Map<String, dynamic>>();
@@ -100,16 +94,23 @@ class AudioPackageService {
 
   Future<void> _syncIfNeeded(File indexFile) async {
     try {
-      // Fetch the small index file to check version.
-      final idxResponse = await http
-          .get(Uri.parse(_indexUrl))
-          .timeout(_httpTimeout);
-      if (idxResponse.statusCode != 200) return;
+      final appDir    = await getApplicationDocumentsDirectory();
+      final tmpIndex  = '${appDir.path}/audio_index.json.tmp_check';
 
-      final remoteData      = jsonDecode(idxResponse.body) as Map<String, dynamic>;
+      // Download index to check version (small file).
+      final idxResult = await AssetDownloadService.instance.downloadAsset(
+        url:             AssetConfig.audioIndexUrl,
+        destinationPath: tmpIndex,
+      );
+      if (!idxResult.success) {
+        debugPrint('AudioPackage: index fetch skipped (${idxResult.error})');
+        return;
+      }
+
+      final remoteBody      = await File(tmpIndex).readAsString();
+      final remoteData      = jsonDecode(remoteBody) as Map<String, dynamic>;
       final remoteGenerated = remoteData['generated'] as String? ?? '';
 
-      // Compare with locally stored version.
       String? localGenerated;
       if (indexFile.existsSync()) {
         try {
@@ -117,41 +118,63 @@ class AudioPackageService {
           localGenerated = local['generated'] as String?;
         } catch (_) {}
       }
+
       if (remoteGenerated == localGenerated && indexFile.existsSync()) {
         debugPrint('AudioPackage: already up to date ($remoteGenerated)');
+        try { File(tmpIndex).deleteSync(); } catch (_) {}
         return;
       }
 
       debugPrint('AudioPackage: updating to $remoteGenerated ...');
 
-      // Download ZIP.
-      final zipResponse = await http
-          .get(Uri.parse(_zipUrl))
-          .timeout(_zipTimeout);
-      if (zipResponse.statusCode != 200) {
-        debugPrint('AudioPackage: ZIP download failed (${zipResponse.statusCode})');
+      // Download ZIP to a temp file — streams to disk, no memory spike.
+      final tmpZip = '${appDir.path}/audio_package.zip.tmp';
+      final zipResult = await AssetDownloadService.instance.downloadAsset(
+        url:             AssetConfig.audioZipUrl,
+        destinationPath: tmpZip,
+        onProgress: (received, total, eta) {
+          if (total > 0) {
+            final pct = (received / total * 100).round();
+            debugPrint('AudioPackage: $pct% (ETA ${eta.inSeconds}s)');
+          }
+        },
+      );
+
+      if (!zipResult.success) {
+        debugPrint('AudioPackage: ZIP download failed (${zipResult.error})');
+        try { File(tmpIndex).deleteSync(); } catch (_) {}
         return;
       }
 
-      // Extract.
+      // Extract ZIP from file — streaming via InputFileStream avoids loading
+      // the entire archive into RAM (important for files up to 50 MB).
       final audioDir = Directory(_audioDir!);
       if (!audioDir.existsSync()) audioDir.createSync(recursive: true);
 
-      final archive = ZipDecoder().decodeBytes(zipResponse.bodyBytes);
-      for (final entry in archive) {
+      final inputStream = InputFileStream(tmpZip);
+      final archive     = ZipDecoder().decodeStream(inputStream);
+      var extracted     = 0;
+
+      for (final entry in archive.files) {
         if (!entry.isFile) continue;
-        // Paths inside ZIP: "audio/Beethoven_Moonlight.ogg"
         final filename = entry.name.replaceFirst(RegExp(r'^audio/'), '');
         if (filename.isEmpty) continue;
-        final outFile = File('${_audioDir!}/$filename');
-        outFile.writeAsBytesSync(entry.content as List<int>);
+        final outStream = OutputFileStream('${_audioDir!}/$filename');
+        entry.writeContent(outStream);
+        outStream.close();
+        extracted++;
       }
-      debugPrint('AudioPackage: extracted ${archive.length} files');
+      inputStream.close();
+      debugPrint('AudioPackage: extracted $extracted files');
 
-      // Save index and reload.
-      indexFile.writeAsStringSync(idxResponse.body);
+      try { zipFile.deleteSync(); } catch (_) {}
+
+      // Persist index and update in-memory map.
+      indexFile.writeAsStringSync(remoteBody);
       _index = _parseIndex(remoteData);
       debugPrint('AudioPackage: sync done — ${_index.length} articles with audio');
+
+      try { File(tmpIndex).deleteSync(); } catch (_) {}
     } catch (e) {
       debugPrint('AudioPackage: sync error: $e');
     }
