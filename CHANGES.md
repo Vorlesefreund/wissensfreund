@@ -2,6 +2,73 @@
 
 ---
 
+## ✅ FERTIG — Internet-Einstellungen, Datenlimit & ZIM-Update (Stand 2026-05-24)
+
+### Neue Services
+
+- **`lib/services/network_settings_service.dart`** (NEU): SharedPreferences-Wrapper für WLAN/Mobilfunk-Datenlimit-Einstellungen.
+  Felder: `wifiUnlimited`, `wifiDailyLimitMb`, `wifiMonthlyLimitMb`, `mobileAllowed`, `mobileDailyLimitMb`, `mobileMonthlyLimitMb`, `networkSettingsOffered`.
+
+- **`lib/services/data_usage_service.dart`** (NEU): Tägliches/monatliches Datenverbrauch-Tracking.
+  `LimitWarningLevel` Enum (warning80/warning90/limitReached).
+  Schwellenwert-Check mit Tages-Deduplizierung (SharedPreferences).
+
+- **`lib/services/network_service.dart`** (NEU): Zentraler Netzwerk-Gate für alle Downloads.
+  `canUseNetwork({estimatedBytes, trackUsage})` prüft Verbindung, Mobilfunk-Erlaubnis, Datenlimits.
+  `consumePendingWarning()` drains ausstehende 80/90%-Warnungen für die UI.
+  `recordUsage(bytes)` bucht Verbrauch nach erfolgreichem Download.
+
+- **`lib/services/zim_update_service.dart`** (NEU): ZIM-Update-Mechanismus.
+  `checkForUpdate()` holt `zim_version.json` von R2, vergleicht mit gespeicherter Version.
+  30-Tage-Überspringen per SharedPreferences.
+  `downloadAndSwap()` nutzt `AssetDownloadService` mit `trackUsage: false`.
+  Android-Platform-Channel `swapZim` (pending Kotlin-Implementierung).
+
+### Geänderte Services
+
+- **`lib/services/license_cache_db.dart`**: Schema v4 → v5, neue `data_usage`-Tabelle
+  `(date, connection_type, bytes_used PRIMARY KEY)`.
+  Neue Methoden: `recordDataUsage`, `getDailyUsage`, `getMonthlyUsage`, `getStoredZimVersion`.
+
+- **`lib/services/asset_download_service.dart`**: `downloadAsset()` erhält `trackUsage: bool = true`.
+  Delegiert Netzwerk-Check an `NetworkService.canUseNetwork()` statt direkt Connectivity zu prüfen.
+  Bucht Verbrauch nach Erfolg via `NetworkService.recordUsage()`.
+  WiFi-Lost-Check prüft jetzt `ConnectionType.none` statt `ConnectivityResult.wifi`.
+
+- **`lib/services/hires_image_service.dart`**: WiFi-Check durch `NetworkService.canUseNetwork()` ersetzt.
+  Bucht Verbrauch nach erfolgreichem HiRes-Download.
+
+- **`lib/services/storage_manager.dart`**: Neues `zimUpdateDir` für ZIM-Download-Staging.
+
+- **`lib/config/asset_config.dart`**: `zimVersionUrl` hinzugefügt.
+
+### Provider
+
+- **`lib/providers/wissensfreund_provider.dart`**: `ZimVersionInfo? pendingZimUpdate` + `clearPendingZimUpdate()`.
+  `_initLicenseCache()` startet `_checkZimUpdateInBackground()` im Hintergrund.
+
+### UI (`home_screen.dart`)
+
+- Onboarding-Kette erweitert: nach Image-Quality-Dialog → `_checkNetworkSettings()`
+  (BiometricPrompt + `_NetworkSettingsOnboardingDialog`, einmalig).
+- `_onProviderChanged()` zeigt SnackBar bei 80/90%-Limit, triggert `_ZimUpdateDialog` wenn Update verfügbar.
+- Neuer Menüpunkt "Internet & Daten" (Icons.wifi_rounded, immer BiometricPrompt zuerst).
+- Neue Dialoge: `_NetworkSettingsOnboardingDialog`, `_InternetDataDialog`, `_ZimUpdateDialog`.
+- Neue Hilfswidgets: `_SectionHeader`, `_LimitDropdown`, `_UsageRow`.
+
+### Workflow
+
+- **`.github/workflows/update_image_licenses.yml`**: Neuer Step `Create zim_version.json`
+  (enthält Version, ZIM-URL, Dateigröße, Datum), Upload zu R2 mit `max-age=3600`.
+
+### Offene Android-Arbeit (Kotlin)
+
+- `wissensfreund/zim` → `swapZim({path})` Platform-Channel muss im Android-Code implementiert werden,
+  damit die App nach einem ZIM-Download ohne Neustart wechseln kann.
+  Derzeit wirft der Channel `MissingPluginException` → App zeigt "Neustart erforderlich".
+
+---
+
 ## ✅ FERTIG — Bildqualität-System & On-Demand-HiRes (Stand 2026-05-24)
 
 ### Neue Services

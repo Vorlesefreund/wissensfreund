@@ -12,6 +12,7 @@ import '../services/audio_package_service.dart';
 import '../services/image_library_service.dart';
 import '../services/professor_response_service.dart';
 import '../services/wikimedia_license_checker.dart';
+import '../services/zim_update_service.dart';
 
 class ArticleImageInfo {
   final String filename;
@@ -175,6 +176,9 @@ class WissensfreundProvider extends ChangeNotifier {
   // Rest mode — professor goes to sleep after extended idle
   bool   _isRestMode  = false;
 
+  // ZIM update — set in background after license-cache sync
+  ZimVersionInfo? _pendingZimUpdate;
+
   // Pause timers — k6 sequence (30s → 60s → 90s → rest)
   Timer? _idleTimer;
   int    _pausePhase = 0; // 1=k6_s1 in TTS, 2=k6_s2, 3=k6_s3
@@ -207,6 +211,7 @@ class WissensfreundProvider extends ChangeNotifier {
   bool                   get isPlayingAudio    => _isPlayingAudio;
   int                    get activeAudioIndex  => _activeAudioIndex;
   bool                   get isRestMode        => _isRestMode;
+  ZimVersionInfo?        get pendingZimUpdate  => _pendingZimUpdate;
 
   WissensfreundProvider() {
     _initTts();
@@ -222,6 +227,20 @@ class WissensfreundProvider extends ChangeNotifier {
     if (!await WikimediaLicenseChecker.instance.isSynced()) {
       await WikimediaLicenseChecker.instance.syncLicenses();
     }
+    unawaited(_checkZimUpdateInBackground());
+  }
+
+  Future<void> _checkZimUpdateInBackground() async {
+    final info = await ZimUpdateService.instance.checkForUpdate();
+    if (info != null) {
+      _pendingZimUpdate = info;
+      notifyListeners();
+    }
+  }
+
+  void clearPendingZimUpdate() {
+    _pendingZimUpdate = null;
+    notifyListeners();
   }
 
   // ── ZIM initialisation ────────────────────────────────────────────────────

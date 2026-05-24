@@ -54,7 +54,7 @@ class LicenseCacheDb {
     final dbPath = join(await getDatabasesPath(), 'license_cache.db');
     return openDatabase(
       dbPath,
-      version: 4,
+      version: 5,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE license_cache (
@@ -92,6 +92,14 @@ class LicenseCacheDb {
             file_size     INTEGER NOT NULL
           )
         ''');
+        await db.execute('''
+          CREATE TABLE data_usage (
+            date             TEXT NOT NULL,
+            connection_type  TEXT NOT NULL,
+            bytes_used       INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY (date, connection_type)
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -123,6 +131,16 @@ class LicenseCacheDb {
               local_path    TEXT NOT NULL,
               last_accessed INTEGER NOT NULL,
               file_size     INTEGER NOT NULL
+            )
+          ''');
+        }
+        if (oldVersion < 5) {
+          await db.execute('''
+            CREATE TABLE IF NOT EXISTS data_usage (
+              date             TEXT NOT NULL,
+              connection_type  TEXT NOT NULL,
+              bytes_used       INTEGER NOT NULL DEFAULT 0,
+              PRIMARY KEY (date, connection_type)
             )
           ''');
         }
@@ -249,6 +267,48 @@ class LicenseCacheDb {
 
   Future<void> clearImageCacheIndex() async {
     await (await _database).delete('image_cache_index');
+  }
+
+  // ── ZIM version ─────────────────────────────────────────────────────────────
+
+  Future<String?> getStoredZimVersion() async {
+    final rows = await (await _database).query('sync_info', limit: 1);
+    if (rows.isEmpty) return null;
+    return rows.first['zim_version'] as String?;
+  }
+
+  // ── Data usage ───────────────────────────────────────────────────────────────
+
+  Future<void> recordDataUsage({
+    required String date,
+    required String connectionType,
+    required int bytes,
+  }) async {
+    final db = await _database;
+    await db.rawInsert('''
+      INSERT INTO data_usage (date, connection_type, bytes_used) VALUES (?, ?, ?)
+      ON CONFLICT(date, connection_type) DO UPDATE SET bytes_used = bytes_used + excluded.bytes_used
+    ''', [date, connectionType, bytes]);
+  }
+
+  Future<int> getDailyUsage(String date, String connectionType) async {
+    final rows = await (await _database).query(
+      'data_usage',
+      columns: ['bytes_used'],
+      where: 'date = ? AND connection_type = ?',
+      whereArgs: [date, connectionType],
+    );
+    if (rows.isEmpty) return 0;
+    return (rows.first['bytes_used'] as int?) ?? 0;
+  }
+
+  Future<int> getMonthlyUsage(String monthPrefix, String connectionType) async {
+    final result = await (await _database).rawQuery(
+      'SELECT SUM(bytes_used) as total FROM data_usage '
+      "WHERE date LIKE ? AND connection_type = ?",
+      ['$monthPrefix%', connectionType],
+    );
+    return (result.first['total'] as int?) ?? 0;
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────

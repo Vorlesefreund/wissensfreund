@@ -2,11 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'license_cache_db.dart';
+import 'network_service.dart';
 import 'storage_manager.dart';
 
 const _wikimediaApiBase = 'https://api.wikimedia.org/core/v1/commons/file';
@@ -39,9 +39,10 @@ class HiResImageService {
     // Only one concurrent download.
     if (_loading) return null;
 
-    // WiFi required.
-    final conn = await Connectivity().checkConnectivity();
-    if (!conn.contains(ConnectivityResult.wifi)) return null;
+    // Network gate — enforces WiFi/mobile settings and data limits.
+    final check = await NetworkService.instance
+        .canUseNetwork(estimatedBytes: _maxBytes);
+    if (!check.allowed) return null;
 
     _loading = true;
     try {
@@ -102,8 +103,9 @@ class HiResImageService {
         return null;
       }
 
-      // Step 3: save to cache.
+      // Step 3: save to cache and record network usage.
       await _saveToCache(filename, bytes);
+      await NetworkService.instance.recordUsage(bytes.length);
       debugPrint('HiRes: cached $filename (${bytes.length ~/ 1024} KB)');
       return bytes;
     } finally {

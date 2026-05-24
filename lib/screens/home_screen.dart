@@ -5,10 +5,15 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../config/asset_config.dart';
 import '../providers/wissensfreund_provider.dart';
 import '../services/hires_image_service.dart';
 import '../services/image_library_service.dart';
+import '../services/license_cache_db.dart';
+import '../services/network_service.dart';
+import '../services/network_settings_service.dart';
 import '../services/parental_lock_service.dart';
+import '../services/zim_update_service.dart';
 import '../widgets/professor_widget.dart';
 import 'article_screen.dart';
 
@@ -36,6 +41,8 @@ class _HomeScreenState extends State<HomeScreen>
   bool _zimStatusFading     = false; // true while fading out
   Timer? _zimFadeTimer;
 
+  bool _zimUpdateDialogShown = false;
+
   @override
   void initState() {
     super.initState();
@@ -49,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen>
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _checkOnboarding();
       if (mounted) await _checkImageQuality();
+      if (mounted) await _checkNetworkSettings();
     });
   }
 
@@ -87,6 +95,26 @@ class _HomeScreenState extends State<HomeScreen>
       context: context,
       barrierDismissible: false,
       builder: (_) => const _ImageQualityDialog(),
+    );
+  }
+
+  Future<void> _checkNetworkSettings() async {
+    if (!mounted) return;
+    final settings = NetworkSettingsService.instance;
+    if (await settings.networkSettingsOffered) return;
+    await settings.setNetworkSettingsOffered(true);
+
+    final ps = context.read<ParentalLockService>();
+    final ok = await ps.authenticate(
+      'Eltern: Bitte bestätigen um Internet-Einstellungen einzurichten.',
+    );
+    if (!mounted) return;
+    if (!ok) return; // skip silently if auth fails
+
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const _NetworkSettingsOnboardingDialog(),
     );
   }
 
@@ -159,6 +187,31 @@ class _HomeScreenState extends State<HomeScreen>
       });
     }
 
+    // ZIM update available → show dialog once
+    if (_provider!.pendingZimUpdate != null && !_zimUpdateDialogShown) {
+      _zimUpdateDialogShown = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        final info = _provider!.pendingZimUpdate;
+        if (info == null) return;
+        _showZimUpdateDialog(info);
+      });
+    }
+
+    // Limit warning (80% / 90%) → SnackBar
+    final warning = NetworkService.instance.consumePendingWarning();
+    if (warning != null &&
+        warning != LimitWarningLevel.limitReached &&
+        mounted) {
+      final pct = warning == LimitWarningLevel.warning80 ? '80 %' : '90 %';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('$pct des Datenlimits erreicht!'),
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    }
+
     final newState = _provider!.state;
 
     // Navigate to ArticleScreenA when speaking starts (only once per article)
@@ -195,6 +248,16 @@ class _HomeScreenState extends State<HomeScreen>
     }
 
     _lastState = newState;
+  }
+
+  void _showZimUpdateDialog(ZimVersionInfo info) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => _ZimUpdateDialog(
+        info: info,
+        onDone: () => context.read<WissensfreundProvider>().clearPendingZimUpdate(),
+      ),
+    );
   }
 
   @override
@@ -756,6 +819,15 @@ class _AppMenu extends StatelessWidget {
           ),
           const Divider(height: 1, indent: 24, endIndent: 24),
           _MenuItem(
+            icon: Icons.wifi_rounded,
+            label: 'Internet & Daten',
+            onTap: () {
+              Navigator.pop(context);
+              _authenticateAndShowInternetData(outerContext);
+            },
+          ),
+          const Divider(height: 1, indent: 24, endIndent: 24),
+          _MenuItem(
             icon: Icons.shield_rounded,
             label: 'Kinderschutz',
             onTap: () {
@@ -766,6 +838,18 @@ class _AppMenu extends StatelessWidget {
           const SizedBox(height: 16),
         ],
       ),
+    );
+  }
+
+  void _authenticateAndShowInternetData(BuildContext ctx) async {
+    final ps = ctx.read<ParentalLockService>();
+    final ok = await ps.authenticate(
+      'Bitte authentifizieren um Internet-Einstellungen zu öffnen.',
+    );
+    if (!ok || !ctx.mounted) return;
+    showDialog<void>(
+      context: ctx,
+      builder: (_) => const _InternetDataDialog(),
     );
   }
 
@@ -1730,6 +1814,605 @@ class _StorageDialogState extends State<_StorageDialog> {
           child: const Text('Schließen'),
         ),
       ],
+    );
+  }
+}
+
+// ── Network Settings Onboarding Dialog ────────────────────────────────────────
+
+class _NetworkSettingsOnboardingDialog extends StatefulWidget {
+  const _NetworkSettingsOnboardingDialog();
+
+  @override
+  State<_NetworkSettingsOnboardingDialog> createState() =>
+      _NetworkSettingsOnboardingDialogState();
+}
+
+class _NetworkSettingsOnboardingDialogState
+    extends State<_NetworkSettingsOnboardingDialog> {
+  final _settings = NetworkSettingsService.instance;
+
+  bool _wifiUnlimited  = true;
+  int  _wifiDailyMb    = 0;
+  int  _wifiMonthlyMb  = 0;
+  bool _mobileAllowed  = false;
+  int  _mobileDailyMb  = 100;
+  int  _mobileMonthlyMb = 500;
+  bool _loading = true;
+  bool _saving  = false;
+
+  static const _wifiDailyOptions    = [0, 250, 500, 1024, 2048];
+  static const _wifiMonthlyOptions  = [0, 1024, 5120, 10240, 51200];
+  static const _mobileDailyOptions  = [25, 50, 100, 250, 500];
+  static const _mobileMonthlyOptions = [100, 250, 500, 1024, 5120];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    _wifiUnlimited   = await _settings.wifiUnlimited;
+    _wifiDailyMb     = await _settings.wifiDailyLimitMb;
+    _wifiMonthlyMb   = await _settings.wifiMonthlyLimitMb;
+    _mobileAllowed   = await _settings.mobileAllowed;
+    _mobileDailyMb   = await _settings.mobileDailyLimitMb;
+    _mobileMonthlyMb = await _settings.mobileMonthlyLimitMb;
+    if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    await _settings.setWifiUnlimited(_wifiUnlimited);
+    await _settings.setWifiDailyLimitMb(_wifiDailyMb);
+    await _settings.setWifiMonthlyLimitMb(_wifiMonthlyMb);
+    await _settings.setMobileAllowed(_mobileAllowed);
+    await _settings.setMobileDailyLimitMb(_mobileDailyMb);
+    await _settings.setMobileMonthlyLimitMb(_mobileMonthlyMb);
+    if (mounted) Navigator.pop(context);
+  }
+
+  String _mbLabel(int mb) {
+    if (mb == 0) return 'Unbegrenzt';
+    if (mb >= 1024) return '${(mb / 1024).round()} GB';
+    return '$mb MB';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: const Row(children: [
+        Icon(Icons.wifi_rounded, color: Color(0xFF2E7D32), size: 22),
+        SizedBox(width: 8),
+        Text('Internet-Einstellungen'),
+      ]),
+      content: _loading
+          ? const SizedBox(
+              height: 60, child: Center(child: CircularProgressIndicator()))
+          : SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Lege fest, wann und wie viele Daten Wissensfreund '
+                    'herunterladen darf.',
+                    style: TextStyle(fontSize: 13, height: 1.45),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ── WiFi ─────────────────────────────────────────────
+                  _SectionHeader('WLAN'),
+                  SwitchListTile(
+                    value: _wifiUnlimited,
+                    onChanged: (v) => setState(() => _wifiUnlimited = v),
+                    title: const Text('Unbegrenzt',
+                        style: TextStyle(fontSize: 14)),
+                    subtitle: const Text('Kein Datenlimit im WLAN',
+                        style: TextStyle(fontSize: 12)),
+                    dense: true,
+                    activeColor: const Color(0xFF2E7D32),
+                  ),
+                  if (!_wifiUnlimited) ...[
+                    _LimitDropdown(
+                      label: 'Tageslimit',
+                      value: _wifiDailyMb,
+                      options: _wifiDailyOptions,
+                      fmt: _mbLabel,
+                      onChanged: (v) => setState(() => _wifiDailyMb = v),
+                    ),
+                    _LimitDropdown(
+                      label: 'Monatslimit',
+                      value: _wifiMonthlyMb,
+                      options: _wifiMonthlyOptions,
+                      fmt: _mbLabel,
+                      onChanged: (v) => setState(() => _wifiMonthlyMb = v),
+                    ),
+                  ],
+                  const SizedBox(height: 12),
+
+                  // ── Mobile ───────────────────────────────────────────
+                  _SectionHeader('Mobilfunk'),
+                  SwitchListTile(
+                    value: _mobileAllowed,
+                    onChanged: (v) => setState(() => _mobileAllowed = v),
+                    title: const Text('Downloads erlaubt',
+                        style: TextStyle(fontSize: 14)),
+                    subtitle: const Text('Standardmäßig deaktiviert',
+                        style: TextStyle(fontSize: 12)),
+                    dense: true,
+                    activeColor: const Color(0xFF2E7D32),
+                  ),
+                  if (_mobileAllowed) ...[
+                    _LimitDropdown(
+                      label: 'Tageslimit',
+                      value: _mobileDailyMb,
+                      options: _mobileDailyOptions,
+                      fmt: _mbLabel,
+                      onChanged: (v) => setState(() => _mobileDailyMb = v),
+                    ),
+                    _LimitDropdown(
+                      label: 'Monatslimit',
+                      value: _mobileMonthlyMb,
+                      options: _mobileMonthlyOptions,
+                      fmt: _mbLabel,
+                      onChanged: (v) => setState(() => _mobileMonthlyMb = v),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Überspringen'),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
+          onPressed: _saving || _loading ? null : _save,
+          child: _saving
+              ? const SizedBox(
+                  width: 16, height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              : const Text('Speichern'),
+        ),
+      ],
+    );
+  }
+}
+
+// ── Internet & Daten Settings Dialog (from menu) ───────────────────────────────
+
+class _InternetDataDialog extends StatefulWidget {
+  const _InternetDataDialog();
+
+  @override
+  State<_InternetDataDialog> createState() => _InternetDataDialogState();
+}
+
+class _InternetDataDialogState extends State<_InternetDataDialog> {
+  final _settings = NetworkSettingsService.instance;
+
+  bool _wifiUnlimited   = true;
+  int  _wifiDailyMb     = 0;
+  int  _wifiMonthlyMb   = 0;
+  bool _mobileAllowed   = false;
+  int  _mobileDailyMb   = 100;
+  int  _mobileMonthlyMb = 500;
+  bool _loading = true;
+  bool _saving  = false;
+
+  int _wifiDailyUsed    = 0;
+  int _wifiMonthlyUsed  = 0;
+  int _mobileDailyUsed  = 0;
+  int _mobileMonthlyUsed = 0;
+
+  static const _wifiDailyOptions    = [0, 250, 500, 1024, 2048];
+  static const _wifiMonthlyOptions  = [0, 1024, 5120, 10240, 51200];
+  static const _mobileDailyOptions  = [25, 50, 100, 250, 500];
+  static const _mobileMonthlyOptions = [100, 250, 500, 1024, 5120];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    _wifiUnlimited    = await _settings.wifiUnlimited;
+    _wifiDailyMb      = await _settings.wifiDailyLimitMb;
+    _wifiMonthlyMb    = await _settings.wifiMonthlyLimitMb;
+    _mobileAllowed    = await _settings.mobileAllowed;
+    _mobileDailyMb    = await _settings.mobileDailyLimitMb;
+    _mobileMonthlyMb  = await _settings.mobileMonthlyLimitMb;
+
+    final today       = DateTime.now().toIso8601String().substring(0, 10);
+    final monthPrefix = DateTime.now().toIso8601String().substring(0, 7);
+    final db          = LicenseCacheDb.instance;
+    _wifiDailyUsed    = await db.getDailyUsage(today, 'wifi');
+    _wifiMonthlyUsed  = await db.getMonthlyUsage(monthPrefix, 'wifi');
+    _mobileDailyUsed  = await db.getDailyUsage(today, 'mobile');
+    _mobileMonthlyUsed = await db.getMonthlyUsage(monthPrefix, 'mobile');
+
+    if (mounted) setState(() => _loading = false);
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    await _settings.setWifiUnlimited(_wifiUnlimited);
+    await _settings.setWifiDailyLimitMb(_wifiDailyMb);
+    await _settings.setWifiMonthlyLimitMb(_wifiMonthlyMb);
+    await _settings.setMobileAllowed(_mobileAllowed);
+    await _settings.setMobileDailyLimitMb(_mobileDailyMb);
+    await _settings.setMobileMonthlyLimitMb(_mobileMonthlyMb);
+    if (mounted) Navigator.pop(context);
+  }
+
+  String _mbLabel(int mb) {
+    if (mb == 0) return 'Unbegrenzt';
+    if (mb >= 1024) return '${(mb / 1024).round()} GB';
+    return '$mb MB';
+  }
+
+  String _bytesLabel(int bytes) {
+    if (bytes <= 0) return '0 MB';
+    if (bytes < 1024 * 1024) return '${(bytes / 1024).round()} KB';
+    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).round()} MB';
+    return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: const Row(children: [
+        Icon(Icons.wifi_rounded, color: Color(0xFF2E7D32), size: 22),
+        SizedBox(width: 8),
+        Text('Internet & Daten'),
+      ]),
+      content: _loading
+          ? const SizedBox(
+              height: 60, child: Center(child: CircularProgressIndicator()))
+          : SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── WiFi ─────────────────────────────────────────────
+                  _SectionHeader('WLAN'),
+                  SwitchListTile(
+                    value: _wifiUnlimited,
+                    onChanged: (v) => setState(() => _wifiUnlimited = v),
+                    title: const Text('Unbegrenzt',
+                        style: TextStyle(fontSize: 14)),
+                    dense: true,
+                    activeColor: const Color(0xFF2E7D32),
+                  ),
+                  if (!_wifiUnlimited) ...[
+                    _LimitDropdown(
+                      label: 'Tageslimit',
+                      value: _wifiDailyMb,
+                      options: _wifiDailyOptions,
+                      fmt: _mbLabel,
+                      onChanged: (v) => setState(() => _wifiDailyMb = v),
+                    ),
+                    _LimitDropdown(
+                      label: 'Monatslimit',
+                      value: _wifiMonthlyMb,
+                      options: _wifiMonthlyOptions,
+                      fmt: _mbLabel,
+                      onChanged: (v) => setState(() => _wifiMonthlyMb = v),
+                    ),
+                  ],
+                  _UsageRow('Heute:', _bytesLabel(_wifiDailyUsed)),
+                  _UsageRow('Diesen Monat:', _bytesLabel(_wifiMonthlyUsed)),
+                  const SizedBox(height: 16),
+
+                  // ── Mobile ───────────────────────────────────────────
+                  _SectionHeader('Mobilfunk'),
+                  SwitchListTile(
+                    value: _mobileAllowed,
+                    onChanged: (v) => setState(() => _mobileAllowed = v),
+                    title: const Text('Downloads erlaubt',
+                        style: TextStyle(fontSize: 14)),
+                    dense: true,
+                    activeColor: const Color(0xFF2E7D32),
+                  ),
+                  if (_mobileAllowed) ...[
+                    _LimitDropdown(
+                      label: 'Tageslimit',
+                      value: _mobileDailyMb,
+                      options: _mobileDailyOptions,
+                      fmt: _mbLabel,
+                      onChanged: (v) => setState(() => _mobileDailyMb = v),
+                    ),
+                    _LimitDropdown(
+                      label: 'Monatslimit',
+                      value: _mobileMonthlyMb,
+                      options: _mobileMonthlyOptions,
+                      fmt: _mbLabel,
+                      onChanged: (v) => setState(() => _mobileMonthlyMb = v),
+                    ),
+                  ],
+                  _UsageRow('Heute:', _bytesLabel(_mobileDailyUsed)),
+                  _UsageRow('Diesen Monat:', _bytesLabel(_mobileMonthlyUsed)),
+                  const SizedBox(height: 16),
+
+                  // ── ZIM-Version ──────────────────────────────────────
+                  _SectionHeader('Wissensspeicher'),
+                  FutureBuilder<String?>(
+                    future: LicenseCacheDb.instance.getStoredZimVersion(),
+                    builder: (_, snap) => _UsageRow(
+                      'Aktuelle Version:',
+                      snap.data ?? '—',
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'R2: ${AssetConfig.zimVersionUrl}',
+                    style: TextStyle(fontSize: 10, color: Colors.grey.shade400),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Schließen'),
+        ),
+        FilledButton(
+          style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
+          onPressed: _saving || _loading ? null : _save,
+          child: _saving
+              ? const SizedBox(
+                  width: 16, height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+              : const Text('Speichern'),
+        ),
+      ],
+    );
+  }
+}
+
+// ── ZIM Update Dialog ─────────────────────────────────────────────────────────
+
+class _ZimUpdateDialog extends StatefulWidget {
+  final ZimVersionInfo info;
+  final VoidCallback onDone;
+  const _ZimUpdateDialog({required this.info, required this.onDone});
+
+  @override
+  State<_ZimUpdateDialog> createState() => _ZimUpdateDialogState();
+}
+
+class _ZimUpdateDialogState extends State<_ZimUpdateDialog> {
+  bool _downloading = false;
+  double _progress = 0;
+  Duration? _eta;
+  String? _error;
+  bool _needsRestart = false;
+
+  String _fmtEta(Duration d) =>
+      d.inMinutes >= 1 ? '~${d.inMinutes} min' : '~${d.inSeconds}s';
+
+  Future<void> _startDownload() async {
+    setState(() { _downloading = true; _error = null; });
+    final ok = await ZimUpdateService.instance.downloadAndSwap(
+      widget.info,
+      onProgress: (recv, total, eta) {
+        if (mounted) setState(() {
+          _progress = total > 0 ? recv / total : 0;
+          _eta = eta;
+        });
+      },
+    );
+    if (!mounted) return;
+    if (ok) {
+      setState(() { _downloading = false; _needsRestart = true; });
+    } else {
+      setState(() { _downloading = false; _error = 'Download fehlgeschlagen.'; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: !_downloading,
+      child: AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        title: const Row(children: [
+          Icon(Icons.system_update_rounded, color: Color(0xFF2E7D32), size: 22),
+          SizedBox(width: 8),
+          Text('Wissensspeicher-Update'),
+        ]),
+        content: _downloading
+            ? Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  LinearProgressIndicator(
+                    value: _progress > 0 ? _progress : null,
+                    backgroundColor: const Color(0xFFE8F5E9),
+                    valueColor: const AlwaysStoppedAnimation(Color(0xFF2E7D32)),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    _progress > 0
+                        ? '${(_progress * 100).round()} %'
+                            '${_eta != null ? "  —  ${_fmtEta(_eta!)}" : ""}'
+                        : 'Verbinde…',
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ],
+              )
+            : _needsRestart
+            ? const Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('✅', style: TextStyle(fontSize: 36)),
+                  SizedBox(height: 8),
+                  Text(
+                    'Update heruntergeladen! Bitte starte die App neu.',
+                    style: TextStyle(fontSize: 14, height: 1.45),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              )
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Eine neue Version des Wissens­speichers ist verfügbar.',
+                    style: const TextStyle(fontSize: 14, height: 1.45),
+                  ),
+                  const SizedBox(height: 12),
+                  _UsageRow('Neue Version:', widget.info.version),
+                  _UsageRow('Größe:', widget.info.sizeMb),
+                  _UsageRow('Veröffentlicht:', widget.info.updated),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Das Update wird im WLAN ohne Datenlimit heruntergeladen.',
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                  ),
+                  if (_error != null) ...[
+                    const SizedBox(height: 8),
+                    Text(_error!,
+                        style: TextStyle(
+                            color: Colors.red.shade700, fontSize: 13)),
+                  ],
+                ],
+              ),
+        actions: _downloading
+            ? null
+            : _needsRestart
+            ? [
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF2E7D32)),
+                  onPressed: () {
+                    widget.onDone();
+                    Navigator.pop(context);
+                  },
+                  child: const Text('OK'),
+                ),
+              ]
+            : [
+                TextButton(
+                  onPressed: () async {
+                    await ZimUpdateService.instance.skipFor30Days();
+                    widget.onDone();
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  child: Text('30 Tage überspringen',
+                      style: TextStyle(color: Colors.grey.shade600)),
+                ),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF2E7D32)),
+                  onPressed: _startDownload,
+                  child: const Text('Jetzt aktualisieren'),
+                ),
+              ],
+      ),
+    );
+  }
+}
+
+// ── Shared small widgets ───────────────────────────────────────────────────────
+
+class _SectionHeader extends StatelessWidget {
+  final String label;
+  const _SectionHeader(this.label);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: Colors.grey.shade500,
+          letterSpacing: 1.0,
+        ),
+      ),
+    );
+  }
+}
+
+class _LimitDropdown extends StatelessWidget {
+  final String label;
+  final int value;
+  final List<int> options;
+  final String Function(int) fmt;
+  final ValueChanged<int> onChanged;
+
+  const _LimitDropdown({
+    required this.label,
+    required this.value,
+    required this.options,
+    required this.fmt,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final safeValue = options.contains(value) ? value : options.first;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(label, style: const TextStyle(fontSize: 13)),
+          ),
+          DropdownButton<int>(
+            value: safeValue,
+            items: options
+                .map((o) => DropdownMenuItem(value: o, child: Text(fmt(o))))
+                .toList(),
+            onChanged: (v) { if (v != null) onChanged(v); },
+            underline: const SizedBox(),
+            style: const TextStyle(
+                fontSize: 13, color: Color(0xFF2E7D32),
+                fontWeight: FontWeight.w600),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UsageRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _UsageRow(this.label, this.value);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Text(label,
+              style:
+                  const TextStyle(fontSize: 12, color: Color(0xFF666666))),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2E7D32)),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

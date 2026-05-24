@@ -100,6 +100,35 @@ jobs:
           path: media_licenses.json
           retention-days: 1
 
+      # ── Step 0b: Create zim_version.json for app update checks ────────────
+      - name: Create zim_version.json
+        run: |
+          ZIM_SIZE=$(stat -c%s klexikon.zim 2>/dev/null || echo 0)
+          TODAY=$(date -u +%Y-%m-%d)
+          cat > zim_version.json <<EOF
+          {
+            "version": "$ZIM_VERSION",
+            "zim_url": "$ZIM_URL",
+            "size_bytes": $ZIM_SIZE,
+            "updated": "$TODAY"
+          }
+          EOF
+          echo "zim_version.json:"
+          cat zim_version.json
+
+      # ── Upload: zim_version.json → Cloudflare R2 ────────────────────────────
+      - name: Upload zim_version.json to Cloudflare R2
+        run: |
+          aws s3 cp zim_version.json \
+            s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/zim_version.json \
+            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
+            --content-type application/json \
+            --cache-control "public, max-age=3600"
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION:    auto
+
       # ── Upload: image license data → Cloudflare R2 ──────────────────────────
       - name: Upload media_licenses.json to Cloudflare R2
         run: |

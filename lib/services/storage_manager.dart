@@ -45,6 +45,12 @@ class StorageManager {
     return Directory('$_basePath/image_cache');
   }
 
+  /// Staging directory for ZIM update downloads.
+  Directory get zimUpdateDir {
+    assert(_initialized, 'StorageManager not initialized');
+    return Directory('$_basePath/zim_update');
+  }
+
   // ── Cache eviction ───────────────────────────────────────────────────────────
 
   /// Removes files older than 30 days, then LRU-evicts until cache is

@@ -17,6 +17,7 @@ class AssetConfig {
   static String get audioZipUrl       => '$r2BaseUrl/wissensfreund_audio.zip';
   static String get imageLibraryUrl   => '$r2BaseUrl/images_medium.zip';
   static String get imageManifestUrl  => '$r2BaseUrl/images_medium_manifest.json';
+  static String get zimVersionUrl     => '$r2BaseUrl/zim_version.json';
 
   /// Approximate size of images_medium.zip for ETA estimation (bytes).
   static const int imageLibrarySizeBytes = 2 * 1024 * 1024 * 1024; // ~2 GB
