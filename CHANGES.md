@@ -2,6 +2,34 @@
 
 ---
 
+## ✅ FERTIG — Cloudflare R2 Asset-Infrastruktur (Stand 2026-05-24)
+
+Alle Asset-Downloads von GitHub Release Assets auf Cloudflare R2 umgestellt.
+
+### Was gebaut wurde
+
+- **`lib/config/asset_config.dart`**: Zentrale R2-URL-Konfiguration
+- **`lib/services/asset_download_service.dart`**: WiFi-only, Streaming to disk, Retry ×3 Exponential Backoff, ETA-Berechnung (5s Rolling Window)
+- **`lib/services/storage_manager.dart`**: `image_library/` + `image_cache/` (500 MB LRU, 30-Tage-TTL), External Storage bevorzugt
+- **`WikimediaLicenseChecker`**: R2-URL + AssetDownloadService
+- **`AudioPackageService`**: R2-URLs + Streaming-ZIP-Extraktion via `archive_io`
+- **Workflow**: R2-Upload für alle 3 Assets (aws s3 cp, EU-Endpoint)
+- **Manifest**: `ACCESS_NETWORK_STATE` für `connectivity_plus`
+
+### R2 Bucket
+
+- Bucket: `wissensfreund-assets` (EU, Public Access aktiv)
+- Public URL: `https://pub-07f0107be14b48fd8652e5318441c7c2.r2.dev`
+- GitHub Secrets gesetzt: `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_R2_ACCESS_KEY_ID`, `CLOUDFLARE_R2_SECRET_ACCESS_KEY`, `CLOUDFLARE_R2_BUCKET_NAME`
+
+### Testlauf 26362328051 — alles grün
+
+- `media_licenses.json`: ✅ 909 KB auf R2 abrufbar
+- `audio_index.json`: ✅ auf R2 (Testlauf leer, wird am 1. Juni befüllt)
+- `wissensfreund_audio.zip`: ✅ auf R2 (Testlauf leer, wird am 1. Juni befüllt)
+
+---
+
 ## ✅ FERTIG — Workflow: Zwei-Job-Split + Node.js 24 (Stand 2026-05-24)
 
 ### Zwei-Job-Workflow (fece876, c3ce4f4)
