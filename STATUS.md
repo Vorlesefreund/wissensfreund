@@ -1,7 +1,46 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-25T11:05:41Z -->
+<!-- updated: 2026-05-25T13:00:53Z -->
 
-## Zuletzt erledigt (Session 2026-05-25)
+## Zuletzt erledigt (Session 2026-05-25 — nachmittags)
+
+### Multi-User-System + Bottom-Sheet-Menü (komplett)
+
+#### Schritt 1 — SQLite Schema v6 → v7
+- `profiles` Tabelle (id, name, birth_year, avatar_id, language_level, created_at, last_used_at)
+- `article_history` Tabelle (profile_id FK, article_title, opened_at) — max. 200 Einträge/Profil
+- `favorites` Tabelle (profile_id FK, article_title, added_at)
+- Alle CRUD-Methoden in `LicenseCacheDb`
+
+#### Schritt 2 — Profilerstellungs-Wizard (5 Schritte)
+- `lib/screens/profile_creation_screen.dart`
+- Schritte: Name → Geburtsjahr (Slider) → Avatar (20 Tiere) → Sprachniveau → Fertig + Konfetti
+- Kein Back-Button auf Schritt 1 wenn erstes Profil
+
+#### Schritt 3 — Profilauswahl-Screen
+- `lib/screens/profile_selection_screen.dart`
+- "Wer bist du heute?" mit Karten-Grid (Avatar, Name, Alter)
+- "+" Karte für neues Profil
+- Beim Start: kein Profil → direkt Erstellungs-Wizard; sonst → Grid
+
+#### Schritt 4 — Bottom-Sheet-Menü neu
+- Profil-Header (Avatar, Name, Alter, Sprachniveau, "Wechseln"-Button)
+- Kinder-Sektion: Hauptmenü, Texteingabe, Verlauf, Favoriten (ohne Auth)
+- Eltern-Sektion: gesichert mit BiometricPrompt (einmalig pro Menü-Öffnung)
+  → Internet & Daten, Kinderschutz, Speicher & Qualität, Profile verwalten, Plus & Premium
+
+#### Schritt 5 — Profilverwaltung für Eltern
+- `lib/screens/profile_management_screen.dart`
+- Liste aller Profile; aktives markiert
+- Bearbeiten-Dialog (Avatar, Name, Alter, Sprachniveau)
+- Löschen mit Bestätigungs-Dialog (nur wenn > 1 Profil)
+
+#### `ProfileService` + `main.dart`
+- `lib/services/profile_service.dart` — CRUD, setActiveProfile, Verlauf, Favoriten
+- `main.dart`: ProfileService.initialize() beim Start; Route → ProfileSelectionScreen wenn kein Profil
+
+---
+
+## Zuletzt erledigt (Session 2026-05-25 — vormittags)
 
 ### Freemium-Modell
 - `SubscriptionService` (Free / Plus / Premium) mit SharedPreferences-Cache
@@ -33,8 +72,9 @@
 ## Offen / Nächste Schritte
 
 ### Dringend
-- **images_medium.zip**: GitHub Actions Workflow läuft gerade (gestartet 2026-05-25 ~09:10 UTC).
-  Fertig in ca. 1h 20 min. Danach ist "Gut"-Bildqualität in der App downloadbar.
+- **images_medium.zip**: GitHub Actions Workflow #31 fehlgeschlagen (images-Job, exit code 255).
+  Ursache unbekannt — Logs des Steps "Build image library (incremental)" nötig.
+  Bitte in GH Actions → Run #31 → images-Job → Step öffnen und Ausgabe teilen.
 
 ### Fehlende Features (aus Prompt-Checkliste)
 - **100% Datenlimit-Overlay mit BiometricPrompt**: Limit-reached → aktuell nur stiller Fehler.

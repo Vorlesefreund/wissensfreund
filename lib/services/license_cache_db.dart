@@ -1,6 +1,8 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import 'profile_service.dart';
+
 class LicenseEntry {
   final String imageFilename;
   final String? urheber;
@@ -54,7 +56,7 @@ class LicenseCacheDb {
     final dbPath = join(await getDatabasesPath(), 'license_cache.db');
     return openDatabase(
       dbPath,
-      version: 6,
+      version: 7,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE license_cache (
@@ -114,6 +116,7 @@ class LicenseCacheDb {
             session_minutes   INTEGER NOT NULL DEFAULT 0
           )
         ''');
+        await _createProfileTables(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -173,6 +176,9 @@ class LicenseCacheDb {
               session_minutes   INTEGER NOT NULL DEFAULT 0
             )
           ''');
+        }
+        if (oldVersion < 7) {
+          await _createProfileTables(db);
         }
       },
     );
@@ -395,6 +401,188 @@ class LicenseCacheDb {
       whereArgs: [cutoffStr],
       orderBy: 'date DESC',
     );
+  }
+
+  // ── Profile tables (v7) ──────────────────────────────────────────────────────
+
+  static Future<void> _createProfileTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS profiles (
+        id             INTEGER PRIMARY KEY AUTOINCREMENT,
+        name           TEXT NOT NULL,
+        birth_year     INTEGER NOT NULL,
+        avatar_id      TEXT NOT NULL,
+        language_level TEXT NOT NULL,
+        created_at     TEXT,
+        last_used_at   TEXT
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS article_history (
+        id            INTEGER PRIMARY KEY AUTOINCREMENT,
+        profile_id    INTEGER NOT NULL,
+        article_title TEXT NOT NULL,
+        opened_at     TEXT NOT NULL,
+        FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_history_profile ON article_history(profile_id, opened_at DESC)',
+    );
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS favorites (
+        profile_id    INTEGER NOT NULL,
+        article_title TEXT NOT NULL,
+        added_at      TEXT NOT NULL,
+        PRIMARY KEY (profile_id, article_title),
+        FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+      )
+    ''');
+  }
+
+  // ── Profile CRUD ──────────────────────────────────────────────────────────────
+
+  Future<List<UserProfile>> getAllProfiles() async {
+    final rows = await (await _database).query(
+      'profiles',
+      orderBy: 'last_used_at DESC, id ASC',
+    );
+    return rows.map(UserProfile.fromMap).toList();
+  }
+
+  Future<UserProfile> insertProfile({
+    required String name,
+    required int birthYear,
+    required String avatarId,
+    required String languageLevel,
+  }) async {
+    final now = DateTime.now().toIso8601String();
+    final id = await (await _database).insert('profiles', {
+      'name':           name,
+      'birth_year':     birthYear,
+      'avatar_id':      avatarId,
+      'language_level': languageLevel,
+      'created_at':     now,
+      'last_used_at':   now,
+    });
+    return UserProfile(
+      id:            id,
+      name:          name,
+      birthYear:     birthYear,
+      avatarId:      avatarId,
+      languageLevel: languageLevel,
+      createdAt:     DateTime.parse(now),
+      lastUsedAt:    DateTime.parse(now),
+    );
+  }
+
+  Future<void> updateProfile(UserProfile profile) async {
+    await (await _database).update(
+      'profiles',
+      profile.toMap(),
+      where: 'id = ?',
+      whereArgs: [profile.id],
+    );
+  }
+
+  Future<void> deleteProfile(int profileId) async {
+    await (await _database).delete(
+      'profiles',
+      where: 'id = ?',
+      whereArgs: [profileId],
+    );
+    // Cascade handles article_history and favorites.
+  }
+
+  // ── Article history ───────────────────────────────────────────────────────────
+
+  Future<void> recordArticleHistory({
+    required int profileId,
+    required String articleTitle,
+  }) async {
+    final db = await _database;
+    await db.insert('article_history', {
+      'profile_id':    profileId,
+      'article_title': articleTitle,
+      'opened_at':     DateTime.now().toIso8601String(),
+    });
+    // Keep only the 200 most recent entries per profile.
+    await db.rawDelete('''
+      DELETE FROM article_history
+      WHERE profile_id = ?
+        AND id NOT IN (
+          SELECT id FROM article_history
+          WHERE profile_id = ?
+          ORDER BY opened_at DESC
+          LIMIT 200
+        )
+    ''', [profileId, profileId]);
+  }
+
+  Future<List<String>> getArticleHistory({
+    required int profileId,
+    int limit = 20,
+  }) async {
+    final rows = await (await _database).rawQuery('''
+      SELECT DISTINCT article_title
+      FROM article_history
+      WHERE profile_id = ?
+      ORDER BY opened_at DESC
+      LIMIT ?
+    ''', [profileId, limit]);
+    return rows.map((r) => r['article_title'] as String).toList();
+  }
+
+  // ── Favorites ─────────────────────────────────────────────────────────────────
+
+  Future<bool> isFavorite({
+    required int profileId,
+    required String articleTitle,
+  }) async {
+    final rows = await (await _database).query(
+      'favorites',
+      where: 'profile_id = ? AND article_title = ?',
+      whereArgs: [profileId, articleTitle],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
+  }
+
+  Future<void> addFavorite({
+    required int profileId,
+    required String articleTitle,
+  }) async {
+    await (await _database).insert(
+      'favorites',
+      {
+        'profile_id':    profileId,
+        'article_title': articleTitle,
+        'added_at':      DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
+  }
+
+  Future<void> removeFavorite({
+    required int profileId,
+    required String articleTitle,
+  }) async {
+    await (await _database).delete(
+      'favorites',
+      where: 'profile_id = ? AND article_title = ?',
+      whereArgs: [profileId, articleTitle],
+    );
+  }
+
+  Future<List<String>> getFavorites({required int profileId}) async {
+    final rows = await (await _database).query(
+      'favorites',
+      columns: ['article_title'],
+      where: 'profile_id = ?',
+      whereArgs: [profileId],
+      orderBy: 'added_at DESC',
+    );
+    return rows.map((r) => r['article_title'] as String).toList();
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────

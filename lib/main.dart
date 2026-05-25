@@ -3,11 +3,14 @@ import 'package:provider/provider.dart';
 
 import 'providers/wissensfreund_provider.dart';
 import 'services/parental_lock_service.dart';
+import 'services/profile_service.dart';
 import 'screens/home_screen.dart';
+import 'screens/profile_selection_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ParentalLockService.instance.init();
+  await ProfileService.instance.initialize();
   // Kiosk-Modus nach erstem Frame automatisch reaktivieren (falls zuvor aktiviert)
   WidgetsBinding.instance.addPostFrameCallback((_) {
     ParentalLockService.instance.tryAutoStartKiosk();
@@ -17,6 +20,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => WissensfreundProvider()),
         ChangeNotifierProvider.value(value: ParentalLockService.instance),
+        ChangeNotifierProvider.value(value: ProfileService.instance),
       ],
       child: const WissensfreundApp(),
     ),
@@ -76,7 +80,9 @@ class _WissensfreundAppState extends State<WissensfreundApp>
         ),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      home: ProfileService.instance.hasProfiles
+          ? const HomeScreen()
+          : const ProfileSelectionScreen(),
       builder: (context, child) => _AppShell(child: child!),
     );
   }

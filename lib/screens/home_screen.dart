@@ -13,11 +13,14 @@ import '../services/license_cache_db.dart';
 import '../services/network_service.dart';
 import '../services/network_settings_service.dart';
 import '../services/parental_lock_service.dart';
+import '../services/profile_service.dart';
 import '../services/storage_manager.dart';
 import '../services/subscription_service.dart';
 import '../services/zim_update_service.dart';
 import '../widgets/professor_widget.dart';
 import 'article_screen.dart';
+import 'profile_management_screen.dart';
+import 'profile_selection_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -668,13 +671,7 @@ class _BottomBar extends StatelessWidget {
   final WissensfreundProvider provider;
   const _BottomBar({required this.provider});
 
-  void _openMenu(BuildContext context) async {
-    final ps = context.read<ParentalLockService>();
-    // Menü ist gesichert wenn Kinderschutz aktiv — einmalige Auth für alle Punkte.
-    final parentalUnlocked = ps.isKioskMode
-        ? await ps.authenticate('Bitte authentifizieren um das Menü zu öffnen.')
-        : true;
-    if (!parentalUnlocked || !context.mounted) return;
+  void _openMenu(BuildContext context) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -682,7 +679,6 @@ class _BottomBar extends StatelessWidget {
       builder: (_) => _AppMenu(
         provider: provider,
         outerContext: context,
-        parentalUnlocked: parentalUnlocked,
       ),
     );
   }
@@ -773,20 +769,29 @@ class _MenuIconButton extends StatelessWidget {
 
 // ── App Menu (Bottom Sheet) ────────────────────────────────────────────────────
 
-class _AppMenu extends StatelessWidget {
+class _AppMenu extends StatefulWidget {
   final WissensfreundProvider provider;
   final BuildContext outerContext;
-  final bool parentalUnlocked; // true = BiometricPrompt already passed at menu entry
   const _AppMenu({
     required this.provider,
     required this.outerContext,
-    this.parentalUnlocked = false,
   });
 
   @override
+  State<_AppMenu> createState() => _AppMenuState();
+}
+
+class _AppMenuState extends State<_AppMenu> {
+  bool _parentUnlocked = false;
+
+  WissensfreundProvider get provider => widget.provider;
+  BuildContext get outerContext => widget.outerContext;
+
+  @override
   Widget build(BuildContext context) {
-    // viewPadding aus dem outerContext — zuverlässig auch innerhalb eines BottomSheets
     final bottomInset = MediaQuery.of(outerContext).viewPadding.bottom;
+    final profile = context.watch<ProfileService>().activeProfile;
+
     return Container(
       margin: EdgeInsets.fromLTRB(16, 0, 16, 16 + bottomInset),
       decoration: BoxDecoration(
@@ -796,6 +801,7 @@ class _AppMenu extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          // ── Drag handle ─────────────────────────────────────────────
           const SizedBox(height: 12),
           Container(
             width: 40,
@@ -805,13 +811,80 @@ class _AppMenu extends StatelessWidget {
               borderRadius: BorderRadius.circular(2),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
+
+          // ── Profile header ───────────────────────────────────────────
+          if (profile != null)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFE8F5E9),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Center(
+                      child: Text(
+                        profile.avatarId,
+                        style: const TextStyle(fontSize: 26),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          profile.name,
+                          style: const TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xFF1B5E20),
+                          ),
+                        ),
+                        Text(
+                          '${profile.age} Jahre · ${_levelLabel(profile.languageLevel)}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF888888),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      Navigator.of(outerContext).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ProfileSelectionScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      'Wechseln',
+                      style: TextStyle(
+                        color: Color(0xFF4CAF50),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          const Divider(height: 1, indent: 20, endIndent: 20),
+
+          // ── Für Kinder ───────────────────────────────────────────────
+          const _MenuSectionHeader(label: 'Für Kinder'),
           _MenuItem(
             icon: Icons.home_rounded,
             label: 'Hauptmenü',
             onTap: () => Navigator.pop(context),
           ),
-          const Divider(height: 1, indent: 24, endIndent: 24),
           _MenuItem(
             icon: Icons.keyboard_rounded,
             label: 'Texteingabe',
@@ -820,84 +893,149 @@ class _AppMenu extends StatelessWidget {
               _showTextInput(outerContext);
             },
           ),
-          const Divider(height: 1, indent: 24, endIndent: 24),
           _MenuItem(
             icon: Icons.history_rounded,
             label: 'Verlauf',
-            onTap: () => Navigator.pop(context),
-            comingSoon: true,
+            onTap: () {
+              Navigator.pop(context);
+              _showHistory(outerContext);
+            },
           ),
-          const Divider(height: 1, indent: 24, endIndent: 24),
           _MenuItem(
             icon: Icons.star_rounded,
-            label: 'Plus & Premium',
+            label: 'Favoriten',
             onTap: () {
               Navigator.pop(context);
-              showDialog<void>(
-                context: outerContext,
-                builder: (_) => const _SubscriptionDialog(),
-              );
+              _showFavorites(outerContext);
             },
           ),
-          const Divider(height: 1, indent: 24, endIndent: 24),
-          _MenuItem(
-            icon: Icons.storage_rounded,
-            label: 'Speicher & Qualität',
-            onTap: () {
-              Navigator.pop(context);
-              _showStorageDialog(outerContext);
-            },
+          const Divider(height: 1, indent: 20, endIndent: 20),
+
+          // ── Für Eltern ───────────────────────────────────────────────
+          _MenuSectionHeader(
+            label: 'Für Eltern',
+            locked: !_parentUnlocked,
           ),
-          const Divider(height: 1, indent: 24, endIndent: 24),
-          _MenuItem(
-            icon: Icons.wifi_rounded,
-            label: 'Internet & Daten',
-            onTap: () {
-              Navigator.pop(context);
-              _authenticateAndShowInternetData(outerContext);
-            },
-          ),
-          const Divider(height: 1, indent: 24, endIndent: 24),
-          _MenuItem(
-            icon: Icons.shield_rounded,
-            label: 'Kinderschutz',
-            onTap: () {
-              Navigator.pop(context);
-              _authenticateAndShowDashboard(outerContext);
-            },
-          ),
+          if (_parentUnlocked) ...[
+            _MenuItem(
+              icon: Icons.wifi_rounded,
+              label: 'Internet & Daten',
+              onTap: () {
+                Navigator.pop(context);
+                showDialog<void>(
+                  context: outerContext,
+                  builder: (_) => const _InternetDataDialog(),
+                );
+              },
+            ),
+            _MenuItem(
+              icon: Icons.shield_rounded,
+              label: 'Kinderschutz',
+              onTap: () {
+                Navigator.pop(context);
+                _showParentalDashboard(outerContext);
+              },
+            ),
+            _MenuItem(
+              icon: Icons.storage_rounded,
+              label: 'Speicher & Qualität',
+              onTap: () {
+                Navigator.pop(context);
+                _showStorageDialog(outerContext);
+              },
+            ),
+            _MenuItem(
+              icon: Icons.people_rounded,
+              label: 'Profile verwalten',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(outerContext).push(
+                  MaterialPageRoute(
+                    builder: (_) => const ProfileManagementScreen(),
+                    fullscreenDialog: true,
+                  ),
+                );
+              },
+            ),
+            _MenuItem(
+              icon: Icons.workspace_premium_rounded,
+              label: 'Plus & Premium',
+              onTap: () {
+                Navigator.pop(context);
+                showDialog<void>(
+                  context: outerContext,
+                  builder: (_) => const _SubscriptionDialog(),
+                );
+              },
+            ),
+          ] else
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.fingerprint_rounded, size: 20),
+                label: const Text('Mit Fingerabdruck / PIN entsperren'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFF2E7D32),
+                  side: const BorderSide(color: Color(0xFF4CAF50)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                ),
+                onPressed: _unlockParentSection,
+              ),
+            ),
           const SizedBox(height: 16),
         ],
       ),
     );
   }
 
-  void _authenticateAndShowInternetData(BuildContext ctx) async {
-    if (!parentalUnlocked) {
-      final ps = ctx.read<ParentalLockService>();
-      final ok = await ps.authenticate(
-        'Bitte authentifizieren um Internet-Einstellungen zu öffnen.',
-      );
-      if (!ok || !ctx.mounted) return;
-    }
+  Future<void> _unlockParentSection() async {
+    final ps = outerContext.read<ParentalLockService>();
+    final ok = await ps.authenticate(
+      'Bitte authentifizieren um die Eltern-Einstellungen zu öffnen.',
+    );
+    if (ok && mounted) setState(() => _parentUnlocked = true);
+  }
+
+  static String _levelLabel(String level) => switch (level) {
+    'easy'     => 'Einfach',
+    'advanced' => 'Fortgeschritten',
+    _          => 'Mittel',
+  };
+
+  void _showHistory(BuildContext ctx) async {
+    final ps = ctx.read<ProfileService>();
+    final articles = await ps.getRecentArticles(limit: 30);
     if (!ctx.mounted) return;
     showDialog<void>(
       context: ctx,
-      builder: (_) => const _InternetDataDialog(),
+      builder: (_) => _ArticleListDialog(
+        title: 'Verlauf',
+        icon: Icons.history_rounded,
+        articles: articles,
+        emptyMessage: 'Noch keine Artikel angeschaut.',
+        onTap: (title) => ctx.read<WissensfreundProvider>().submitText(title),
+      ),
     );
   }
 
-  void _authenticateAndShowDashboard(BuildContext ctx) async {
-    if (!parentalUnlocked) {
-      final ps = ctx.read<ParentalLockService>();
-      final ok = await ps.authenticate(
-        'Bitte authentifizieren um die Kinderschutz-Einstellungen zu öffnen.',
-      );
-      if (!ok || !ctx.mounted) return;
-    }
+  void _showFavorites(BuildContext ctx) async {
+    final ps = ctx.read<ProfileService>();
+    final articles = await ps.getFavorites();
     if (!ctx.mounted) return;
-    _showParentalDashboard(ctx);
+    showDialog<void>(
+      context: ctx,
+      builder: (_) => _ArticleListDialog(
+        title: 'Favoriten',
+        icon: Icons.star_rounded,
+        articles: articles,
+        emptyMessage: 'Noch keine Favoriten gespeichert.',
+        onTap: (title) => ctx.read<WissensfreundProvider>().submitText(title),
+      ),
+    );
   }
+
 
   void _showParentalDashboard(BuildContext stableCtx) {
     showDialog(
@@ -1136,6 +1274,100 @@ class _MenuItem extends StatelessWidget {
               style: TextStyle(fontSize: 12, color: Colors.grey.shade400))
           : null,
       onTap: comingSoon ? null : onTap,
+    );
+  }
+}
+
+// ── Menu Section Header ────────────────────────────────────────────────────────
+
+class _MenuSectionHeader extends StatelessWidget {
+  final String label;
+  final bool locked;
+  const _MenuSectionHeader({required this.label, this.locked = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 2),
+      child: Row(
+        children: [
+          Text(
+            label.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF888888),
+              letterSpacing: 0.8,
+            ),
+          ),
+          if (locked) ...[
+            const SizedBox(width: 6),
+            const Icon(Icons.lock_rounded, size: 13, color: Color(0xFF888888)),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+// ── Article List Dialog (History / Favorites) ──────────────────────────────────
+
+class _ArticleListDialog extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final List<String> articles;
+  final String emptyMessage;
+  final void Function(String title) onTap;
+
+  const _ArticleListDialog({
+    required this.title,
+    required this.icon,
+    required this.articles,
+    required this.emptyMessage,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      title: Row(children: [
+        Icon(icon, color: const Color(0xFF2E7D32), size: 22),
+        const SizedBox(width: 8),
+        Text(title),
+      ]),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: articles.isEmpty
+            ? Text(
+                emptyMessage,
+                style: const TextStyle(color: Color(0xFF888888), fontSize: 15),
+              )
+            : ListView.separated(
+                shrinkWrap: true,
+                itemCount: articles.length,
+                separatorBuilder: (_, __) => const Divider(height: 1),
+                itemBuilder: (_, i) => ListTile(
+                  dense: true,
+                  title: Text(
+                    articles[i],
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                  trailing: const Icon(Icons.play_arrow_rounded,
+                      color: Color(0xFF4CAF50), size: 20),
+                  onTap: () {
+                    Navigator.pop(context);
+                    onTap(articles[i]);
+                  },
+                ),
+              ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Schließen'),
+        ),
+      ],
     );
   }
 }
