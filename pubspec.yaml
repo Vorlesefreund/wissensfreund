@@ -19,7 +19,7 @@ dependencies:
   path: ^1.9.0
   http: ^1.2.0
   provider: ^6.1.0
-  shared_preferences: ^2.3.0
+  shared_preferences: ^2.5.5
   url_launcher: ^6.3.0
   local_auth: ^2.3.0
   archive: ^3.4.0
