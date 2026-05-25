@@ -1,3 +1,4 @@
+<!-- updated: 2026-05-25T08:53:34Z -->
 # Changelog — Wissensfreund App
 
 ---
