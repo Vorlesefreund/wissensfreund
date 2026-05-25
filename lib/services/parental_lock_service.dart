@@ -139,10 +139,7 @@ class ParentalLockService extends ChangeNotifier {
       if (!supported) return true; // kein Sperrbildschirm eingerichtet → erlauben
       return await _localAuth.authenticate(
         localizedReason: reason,
-        options: const AuthenticationOptions(
-          biometricOnly: false, // BIOMETRIC_STRONG | DEVICE_CREDENTIAL
-          stickyAuth: true,
-        ),
+        persistAcrossBackgrounding: true,
       );
     } catch (_) {
       return false;

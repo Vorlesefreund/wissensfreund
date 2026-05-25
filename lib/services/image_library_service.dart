@@ -99,7 +99,7 @@ class ImageLibraryService {
     if (!dir.existsSync()) await dir.create(recursive: true);
 
     final stream  = InputFileStream(zipPath);
-    final archive = ZipDecoder().decodeBuffer(stream);
+    final archive = ZipDecoder().decodeStream(stream);
 
     for (final entry in archive.files) {
       if (!entry.isFile) continue;

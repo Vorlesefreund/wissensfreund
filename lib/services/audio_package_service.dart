@@ -152,7 +152,7 @@ class AudioPackageService {
       if (!audioDir.existsSync()) audioDir.createSync(recursive: true);
 
       final inputStream = InputFileStream(tmpZip);
-      final archive     = ZipDecoder().decodeBuffer(inputStream);
+      final archive     = ZipDecoder().decodeStream(inputStream);
       var extracted     = 0;
 
       for (final entry in archive.files) {
