@@ -13,6 +13,7 @@ import '../services/license_cache_db.dart';
 import '../services/network_service.dart';
 import '../services/network_settings_service.dart';
 import '../services/parental_lock_service.dart';
+import '../services/subscription_service.dart';
 import '../services/zim_update_service.dart';
 import '../widgets/professor_widget.dart';
 import 'article_screen.dart';
@@ -807,6 +808,18 @@ class _AppMenu extends StatelessWidget {
             label: 'Verlauf',
             onTap: () => Navigator.pop(context),
             comingSoon: true,
+          ),
+          const Divider(height: 1, indent: 24, endIndent: 24),
+          _MenuItem(
+            icon: Icons.star_rounded,
+            label: 'Plus & Premium',
+            onTap: () {
+              Navigator.pop(context);
+              showDialog<void>(
+                context: outerContext,
+                builder: (_) => const _SubscriptionDialog(),
+              );
+            },
           ),
           const Divider(height: 1, indent: 24, endIndent: 24),
           _MenuItem(
@@ -1792,6 +1805,53 @@ class _StorageDialogState extends State<_StorageDialog> {
                   const SizedBox(height: 16),
                   const Divider(),
                   const SizedBox(height: 8),
+                  if (!SubscriptionService.instance.canDownloadMediumQuality) ...[
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF8E1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFFFCC02)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Bessere Bildqualität mit Wissensfreund Plus',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                              color: Color(0xFF5D4037),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Die Offline-Bilderbibliothek (~2 GB, 800px) ist im Plus-Paket enthalten.',
+                            style: TextStyle(fontSize: 12, color: Color(0xFF795548)),
+                          ),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: const Color(0xFF2E7D32),
+                                foregroundColor: Colors.white,
+                                textStyle: const TextStyle(fontSize: 13),
+                              ),
+                              onPressed: () {
+                                Navigator.pop(context);
+                                showDialog<void>(
+                                  context: context,
+                                  builder: (_) => const _SubscriptionDialog(),
+                                );
+                              },
+                              child: const Text('Mehr erfahren'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ] else ...[
                   SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
@@ -1805,6 +1865,7 @@ class _StorageDialogState extends State<_StorageDialog> {
                       onPressed: _downloadLibrary,
                     ),
                   ),
+                  ],
                 ],
               ],
             ),
@@ -2508,6 +2569,416 @@ class _RestModeBadge extends StatelessWidget {
               color: Colors.white,
               fontSize: 14,
               fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Plus & Premium Dialog ────────────────────────────────────────────────────
+
+class _SubscriptionDialog extends StatefulWidget {
+  const _SubscriptionDialog();
+
+  @override
+  State<_SubscriptionDialog> createState() => _SubscriptionDialogState();
+}
+
+class _SubscriptionDialogState extends State<_SubscriptionDialog> {
+  final _sub = SubscriptionService.instance;
+  bool _loading = false;
+  String? _message;
+
+  Future<void> _purchasePlus() async {
+    setState(() { _loading = true; _message = null; });
+    try {
+      final tier = await _sub.purchasePlus();
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _message = tier == SubscriptionTier.plus || tier == SubscriptionTier.premium
+            ? 'Plus erfolgreich freigeschaltet!'
+            : null;
+      });
+    } on PlatformException {
+      if (mounted) setState(() { _loading = false; _message = null; });
+    } catch (_) {
+      if (mounted) setState(() { _loading = false; _message = 'Kauf fehlgeschlagen. Bitte versuche es erneut.'; });
+    }
+  }
+
+  Future<void> _subscribePremium() async {
+    setState(() { _loading = true; _message = null; });
+    try {
+      final tier = await _sub.subscribePremium();
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _message = tier == SubscriptionTier.premium
+            ? 'Premium erfolgreich aktiviert!'
+            : null;
+      });
+    } on PlatformException {
+      if (mounted) setState(() { _loading = false; _message = null; });
+    } catch (_) {
+      if (mounted) setState(() { _loading = false; _message = 'Kauf fehlgeschlagen. Bitte versuche es erneut.'; });
+    }
+  }
+
+  Future<void> _restore() async {
+    setState(() { _loading = true; _message = null; });
+    try {
+      final tier = await _sub.restorePurchases();
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _message = tier == SubscriptionTier.free
+            ? 'Kein aktiver Kauf gefunden.'
+            : 'Kauf wiederhergestellt: ${_sub.tierName}';
+      });
+    } catch (_) {
+      if (mounted) setState(() { _loading = false; _message = 'Wiederherstellung fehlgeschlagen.'; });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tier = _sub.tier;
+    return AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      title: const Row(children: [
+        Icon(Icons.star_rounded, color: Color(0xFF2E7D32), size: 22),
+        SizedBox(width: 8),
+        Text('Plus & Premium'),
+      ]),
+      content: _loading
+          ? const SizedBox(
+              height: 80,
+              child: Center(child: CircularProgressIndicator()))
+          : SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Aktueller Status ─────────────────────────────────
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF0F7F2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _sub.tierName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                            color: Color(0xFF1B5E20),
+                          ),
+                        ),
+                        if (tier == SubscriptionTier.free)
+                          const Text(
+                            'Alle Artikel kostenlos vorlesen — unbegrenzt.',
+                            style: TextStyle(fontSize: 12, color: Color(0xFF555555)),
+                          ),
+                        if (tier == SubscriptionTier.plus)
+                          const Text(
+                            'Einmaliger Kauf — danke!',
+                            style: TextStyle(fontSize: 12, color: Color(0xFF555555)),
+                          ),
+                        if (tier == SubscriptionTier.premium)
+                          const Text(
+                            'Abo aktiv — danke!',
+                            style: TextStyle(fontSize: 12, color: Color(0xFF555555)),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+
+                  // ── Upgrade-Optionen ──────────────────────────────────
+                  if (tier == SubscriptionTier.free) ...[
+                    _UpgradeCard(
+                      title: 'Wissensfreund Plus',
+                      subtitle: 'Einmaliger Kauf',
+                      price: '2–4 €',
+                      features: const [
+                        'Bessere Bilder offline (~800px)',
+                        'Hochauflösende Bilder bei WLAN',
+                      ],
+                      onTap: _purchasePlus,
+                    ),
+                    const SizedBox(height: 12),
+                    _UpgradeCard(
+                      title: 'Wissensfreund Premium',
+                      subtitle: 'Monatliches Abo',
+                      price: '1–2 €/Monat',
+                      features: const [
+                        'Alles aus Plus',
+                        'Rückfragen an Professor (Gemini)',
+                        'Statistiken im Eltern-Dashboard',
+                      ],
+                      onTap: _subscribePremium,
+                    ),
+                  ] else if (tier == SubscriptionTier.plus) ...[
+                    _UpgradeCard(
+                      title: 'Wissensfreund Premium',
+                      subtitle: 'Monatliches Abo',
+                      price: '1–2 €/Monat',
+                      features: const [
+                        'Alles aus Plus',
+                        'Rückfragen an Professor (Gemini)',
+                        'Statistiken im Eltern-Dashboard',
+                      ],
+                      onTap: _subscribePremium,
+                    ),
+                  ] else ...[
+                    // Premium aktiv — Rückfragen-Counter + Abo verwalten
+                    FutureBuilder<int>(
+                      future: context.read<WissensfreundProvider>().questionCountThisMonth(),
+                      builder: (ctx, snap) {
+                        final count = snap.data ?? 0;
+                        const limit = WissensfreundProvider.kMonthlyQuestionLimit;
+                        return Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF0F7F2),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Rückfragen diesen Monat:',
+                                  style: TextStyle(fontSize: 13)),
+                              Text('$count / $limit',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: Color(0xFF2E7D32),
+                                  )),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    // ── Statistiken ──────────────────────────────────────
+                    FutureBuilder<List<Map<String, dynamic>>>(
+                      future: context.read<WissensfreundProvider>().recentStats(7),
+                      builder: (ctx, snap) {
+                        if (!snap.hasData || snap.data!.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+                        final rows = snap.data!;
+                        final totalArticles = rows.fold(0, (s, r) =>
+                            s + ((r['articles_listened'] as int?) ?? 0));
+                        final totalQuestions = rows.fold(0, (s, r) =>
+                            s + ((r['questions_asked'] as int?) ?? 0));
+                        final totalMin = rows.fold(0, (s, r) =>
+                            s + ((r['session_minutes'] as int?) ?? 0));
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('Diese Woche',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: Color(0xFF1B5E20),
+                                )),
+                            const SizedBox(height: 6),
+                            _StatRow(label: 'Artikel gehört', value: '$totalArticles'),
+                            _StatRow(label: 'Rückfragen gestellt', value: '$totalQuestions'),
+                            _StatRow(label: 'Lernzeit', value: '${totalMin} min'),
+                          ],
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        icon: const Icon(Icons.open_in_new_rounded, size: 16),
+                        label: const Text('Abo im Play Store verwalten'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFF2E7D32),
+                          side: const BorderSide(color: Color(0xFF2E7D32)),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                      ),
+                    ),
+                  ],
+
+                  // ── Feedback-Meldung ─────────────────────────────────
+                  if (_message != null) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: _message!.contains('fehlgeschlagen')
+                            ? const Color(0xFFFFEBEE)
+                            : const Color(0xFFE8F5E9),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        _message!,
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: _message!.contains('fehlgeschlagen')
+                              ? const Color(0xFFC62828)
+                              : const Color(0xFF1B5E20),
+                        ),
+                      ),
+                    ),
+                  ],
+
+                  // ── Käufe wiederherstellen ───────────────────────────
+                  const SizedBox(height: 12),
+                  Center(
+                    child: TextButton(
+                      onPressed: _restore,
+                      child: const Text(
+                        'Käufe wiederherstellen',
+                        style: TextStyle(fontSize: 12, color: Color(0xFF757575)),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Schließen'),
+        ),
+      ],
+    );
+  }
+}
+
+class _StatRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _StatRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFF555555))),
+          Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+}
+
+class _UpgradeCard extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final String price;
+  final List<String> features;
+  final VoidCallback onTap;
+
+  const _UpgradeCard({
+    required this.title,
+    required this.subtitle,
+    required this.price,
+    required this.features,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: const Color(0xFF2E7D32)),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
+          Container(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 8),
+            decoration: const BoxDecoration(
+              color: Color(0xFF2E7D32),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(13)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        )),
+                    Text(subtitle,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                        )),
+                  ],
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(price,
+                      style: const TextStyle(
+                        color: Color(0xFF2E7D32),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      )),
+                ),
+              ],
+            ),
+          ),
+          // Features
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 10, 14, 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: features
+                  .map((f) => Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: Row(children: [
+                          const Icon(Icons.check_circle_rounded,
+                              size: 14, color: Color(0xFF2E7D32)),
+                          const SizedBox(width: 6),
+                          Text(f, style: const TextStyle(fontSize: 12)),
+                        ]),
+                      ))
+                  .toList(),
+            ),
+          ),
+          // CTA Button
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 4, 14, 12),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2E7D32),
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(fontSize: 13),
+                ),
+                onPressed: onTap,
+                child: Text('Jetzt freischalten — $price'),
+              ),
             ),
           ),
         ],

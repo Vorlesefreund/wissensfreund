@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 
 import '../config/asset_config.dart';
 import 'asset_download_service.dart';
-import 'license_cache_db.dart';
 import 'storage_manager.dart';
 
 /// Manages the offline image library (medium quality, ~800px wide).
@@ -99,7 +98,7 @@ class ImageLibraryService {
     if (!dir.existsSync()) await dir.create(recursive: true);
 
     final stream  = InputFileStream(zipPath);
-    final archive = ZipDecoder().decodeStream(stream);
+    final archive = ZipDecoder().decodeBuffer(stream);
 
     for (final entry in archive.files) {
       if (!entry.isFile) continue;

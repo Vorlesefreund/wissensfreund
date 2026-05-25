@@ -54,7 +54,7 @@ class LicenseCacheDb {
     final dbPath = join(await getDatabasesPath(), 'license_cache.db');
     return openDatabase(
       dbPath,
-      version: 5,
+      version: 6,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE license_cache (
@@ -100,6 +100,20 @@ class LicenseCacheDb {
             PRIMARY KEY (date, connection_type)
           )
         ''');
+        await db.execute('''
+          CREATE TABLE question_usage (
+            month TEXT PRIMARY KEY,
+            count INTEGER NOT NULL DEFAULT 0
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE usage_stats (
+            date              TEXT PRIMARY KEY,
+            articles_listened INTEGER NOT NULL DEFAULT 0,
+            questions_asked   INTEGER NOT NULL DEFAULT 0,
+            session_minutes   INTEGER NOT NULL DEFAULT 0
+          )
+        ''');
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -141,6 +155,22 @@ class LicenseCacheDb {
               connection_type  TEXT NOT NULL,
               bytes_used       INTEGER NOT NULL DEFAULT 0,
               PRIMARY KEY (date, connection_type)
+            )
+          ''');
+        }
+        if (oldVersion < 6) {
+          await db.execute('''
+            CREATE TABLE IF NOT EXISTS question_usage (
+              month TEXT PRIMARY KEY,
+              count INTEGER NOT NULL DEFAULT 0
+            )
+          ''');
+          await db.execute('''
+            CREATE TABLE IF NOT EXISTS usage_stats (
+              date              TEXT PRIMARY KEY,
+              articles_listened INTEGER NOT NULL DEFAULT 0,
+              questions_asked   INTEGER NOT NULL DEFAULT 0,
+              session_minutes   INTEGER NOT NULL DEFAULT 0
             )
           ''');
         }
@@ -309,6 +339,62 @@ class LicenseCacheDb {
       ['$monthPrefix%', connectionType],
     );
     return (result.first['total'] as int?) ?? 0;
+  }
+
+  // ── Question usage (Premium monthly limit) ───────────────────────────────────
+
+  Future<int> getQuestionCount(String month) async {
+    final rows = await (await _database).query(
+      'question_usage',
+      columns: ['count'],
+      where: 'month = ?',
+      whereArgs: [month],
+    );
+    if (rows.isEmpty) return 0;
+    return (rows.first['count'] as int?) ?? 0;
+  }
+
+  Future<void> incrementQuestionCount(String month) async {
+    await (await _database).rawInsert('''
+      INSERT INTO question_usage (month, count) VALUES (?, 1)
+      ON CONFLICT(month) DO UPDATE SET count = count + 1
+    ''', [month]);
+  }
+
+  // ── Usage statistics (Premium dashboard) ─────────────────────────────────────
+
+  Future<void> recordArticleListened(String date) async {
+    await (await _database).rawInsert('''
+      INSERT INTO usage_stats (date, articles_listened) VALUES (?, 1)
+      ON CONFLICT(date) DO UPDATE SET articles_listened = articles_listened + 1
+    ''', [date]);
+  }
+
+  Future<void> recordQuestionAsked(String date) async {
+    await (await _database).rawInsert('''
+      INSERT INTO usage_stats (date, questions_asked) VALUES (?, 1)
+      ON CONFLICT(date) DO UPDATE SET questions_asked = questions_asked + 1
+    ''', [date]);
+  }
+
+  Future<void> addSessionMinutes(String date, int minutes) async {
+    if (minutes <= 0) return;
+    await (await _database).rawInsert('''
+      INSERT INTO usage_stats (date, session_minutes) VALUES (?, ?)
+      ON CONFLICT(date) DO UPDATE SET session_minutes = session_minutes + ?
+    ''', [date, minutes, minutes]);
+  }
+
+  /// Returns stats for the past [days] days, most recent first.
+  Future<List<Map<String, dynamic>>> getRecentStats(int days) async {
+    final cutoff = DateTime.now().subtract(Duration(days: days));
+    final cutoffStr = cutoff.toIso8601String().substring(0, 10);
+    return (await _database).query(
+      'usage_stats',
+      where: 'date >= ?',
+      whereArgs: [cutoffStr],
+      orderBy: 'date DESC',
+    );
   }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────

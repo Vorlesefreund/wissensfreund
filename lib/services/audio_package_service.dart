@@ -152,7 +152,7 @@ class AudioPackageService {
       if (!audioDir.existsSync()) audioDir.createSync(recursive: true);
 
       final inputStream = InputFileStream(tmpZip);
-      final archive     = ZipDecoder().decodeStream(inputStream);
+      final archive     = ZipDecoder().decodeBuffer(inputStream);
       var extracted     = 0;
 
       for (final entry in archive.files) {
@@ -167,7 +167,7 @@ class AudioPackageService {
       inputStream.close();
       debugPrint('AudioPackage: extracted $extracted files');
 
-      try { zipFile.deleteSync(); } catch (_) {}
+      try { File(tmpZip).deleteSync(); } catch (_) {}
 
       // Persist index and update in-memory map.
       indexFile.writeAsStringSync(remoteBody);

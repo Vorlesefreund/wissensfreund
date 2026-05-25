@@ -10,7 +10,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/audio_package_service.dart';
 import '../services/image_library_service.dart';
+import '../services/license_cache_db.dart';
 import '../services/professor_response_service.dart';
+import '../services/subscription_service.dart';
 import '../services/wikimedia_license_checker.dart';
 import '../services/zim_update_service.dart';
 
@@ -219,6 +221,7 @@ class WissensfreundProvider extends ChangeNotifier {
     _initZim();
     _initLicenseCache();
     unawaited(ProfessorResponseService.instance.initialize());
+    unawaited(SubscriptionService.instance.initialize());
   }
 
   // ── License cache initialisation ─────────────────────────────────────────
@@ -645,6 +648,7 @@ class WissensfreundProvider extends ChangeNotifier {
       _isPaused     = false;
       _startSpeakingFrom(0);
       loadMedia(urlIndex); // fire-and-forget — updates UI via notifyListeners
+      _trackArticleListened();
     } on PlatformException catch (e) {
       debugPrint('ZIM article error: ${e.message}');
       _technischZaehler++;
@@ -908,6 +912,36 @@ class WissensfreundProvider extends ChangeNotifier {
     try { await _audioPlayer.stop(); } catch (_) {}
     notifyListeners();
   }
+
+  // ── Usage tracking ───────────────────────────────────────────────────────────
+
+  void _trackArticleListened() {
+    final date = DateTime.now().toIso8601String().substring(0, 10);
+    unawaited(LicenseCacheDb.instance.recordArticleListened(date));
+  }
+
+  static const int kMonthlyQuestionLimit = 5000;
+
+  String get _currentMonth => DateTime.now().toIso8601String().substring(0, 7);
+
+  /// Returns true if a Premium question can be sent, false if limit reached.
+  Future<bool> canSendPremiumQuestion() async {
+    if (!SubscriptionService.instance.canAskQuestions) return false;
+    final count = await LicenseCacheDb.instance.getQuestionCount(_currentMonth);
+    return count < kMonthlyQuestionLimit;
+  }
+
+  Future<void> trackQuestionAsked() async {
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    await LicenseCacheDb.instance.incrementQuestionCount(_currentMonth);
+    await LicenseCacheDb.instance.recordQuestionAsked(today);
+  }
+
+  Future<int> questionCountThisMonth() =>
+      LicenseCacheDb.instance.getQuestionCount(_currentMonth);
+
+  Future<List<Map<String, dynamic>>> recentStats(int days) =>
+      LicenseCacheDb.instance.getRecentStats(days);
 
   final Map<String, Uint8List> _audioBytesCache = {};
 

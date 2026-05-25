@@ -35,6 +35,7 @@ class MainActivity : FlutterFragmentActivity() {
     private val zimChannelName = "wissensfreund/zim"
     private val zimProgressChannelName = "wissensfreund/zim_progress"
     private val parentalChannelName = "wissensfreund/parental"
+    private val billingChannelName = "wissensfreund/billing"
 
     private var recognizer: SpeechRecognizer? = null
     private var pendingResult: MethodChannel.Result? = null
@@ -46,6 +47,7 @@ class MainActivity : FlutterFragmentActivity() {
     private var zimLoadStarted = false
 
     private var suppressRestoreOnce = false
+    private lateinit var billingService: BillingService
 
     companion object {
         private const val MIC_PERMISSION_CODE = 1001
@@ -79,6 +81,18 @@ class MainActivity : FlutterFragmentActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
+
+        billingService = BillingService(this) { this }
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, billingChannelName)
+            .setMethodCallHandler { call, result ->
+                when (call.method) {
+                    "getStatus"        -> billingService.getStatus(result)
+                    "purchasePlus"     -> billingService.purchasePlus(result)
+                    "subscribePremium" -> billingService.subscribePremium(result)
+                    "restorePurchases" -> billingService.restorePurchases(result)
+                    else               -> result.notImplemented()
+                }
+            }
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, channelName)
             .setMethodCallHandler { call, result ->
@@ -547,20 +561,19 @@ class MainActivity : FlutterFragmentActivity() {
 
                 // Move the downloaded file to the standard ZIM location.
                 val targetFile = findZimTargetFile()
-                val effectivePath: String
-                if (newFile.renameTo(targetFile)) {
-                    effectivePath = targetFile.absolutePath
+                val effectivePath: String = if (newFile.renameTo(targetFile)) {
                     Log.d("ZimReader", "swapZim: renamed → ${targetFile.absolutePath}")
+                    targetFile.absolutePath
                 } else {
                     // Cross-filesystem (e.g. internal storage → SD card): copy then delete.
                     try {
                         newFile.copyTo(targetFile, overwrite = true)
                         newFile.delete()
-                        effectivePath = targetFile.absolutePath
                         Log.d("ZimReader", "swapZim: copied → ${targetFile.absolutePath}")
+                        targetFile.absolutePath
                     } catch (e: Exception) {
                         Log.w("ZimReader", "swapZim: copy failed, opening from download path: $e")
-                        effectivePath = newPath
+                        newPath
                     }
                 }
 
@@ -597,6 +610,7 @@ class MainActivity : FlutterFragmentActivity() {
         recognizer = null
         zimExecutor.execute { zimReader?.close(); zimReader = null }
         zimExecutor.shutdown()
+        if (::billingService.isInitialized) billingService.destroy()
         super.onDestroy()
     }
 }

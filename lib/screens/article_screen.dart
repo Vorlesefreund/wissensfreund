@@ -694,46 +694,6 @@ class _ZimImageTileState extends State<_ZimImageTile> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Caption strip below main image (Mode A)
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _ImageCaption extends StatelessWidget {
-  const _ImageCaption();
-
-  @override
-  Widget build(BuildContext context) {
-    return Consumer<WissensfreundProvider>(
-      builder: (ctx, provider, _) {
-        final images = provider.articleImages;
-        if (images.isEmpty) return const SizedBox.shrink();
-        final idx = provider.selectedImageIndex < 0
-            ? 0
-            : provider.selectedImageIndex.clamp(0, images.length - 1);
-        final caption = images[idx].caption;
-        if (caption == null || caption.isEmpty) return const SizedBox.shrink();
-        return Container(
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            color: Color(0xFFF0F7F2),
-            border: Border(top: BorderSide(color: Color(0xFFB2DFBF), width: 1)),
-          ),
-          padding: const EdgeInsets.fromLTRB(10, 5, 10, 6),
-          child: Text(
-            caption,
-            style: const TextStyle(
-              fontSize: 11.5,
-              height: 1.4,
-              color: Color(0xFF3D7A52),
-              fontStyle: FontStyle.italic,
-            ),
-            maxLines: 3,
-            overflow: TextOverflow.ellipsis,
-          ),
-        );
-      },
-    );
-  }
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // ⓘ button — shows license dialog on tap
@@ -2211,7 +2171,7 @@ class _ModeCContent extends StatelessWidget {
                       child: hasCaption
                           ? GestureDetector(
                               behavior: HitTestBehavior.opaque,
-                              onTap: () => provider.interruptForCaption(caption!),
+                              onTap: () => provider.interruptForCaption(caption),
                               child: Container(
                                 width: 48,
                                 height: 48,

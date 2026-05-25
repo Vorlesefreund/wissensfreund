@@ -2,6 +2,78 @@
 
 ---
 
+## ✅ FERTIG — Freemium-Modell (Stand 2026-05-25)
+
+### Neue Services
+
+- **`lib/services/subscription_service.dart`** (NEU): Zentrale Feature-Gates für Free/Plus/Premium.
+  Feature-Gates: `canAskQuestions`, `canDownloadMediumQuality`, `canUseHighResOnDemand`.
+  SharedPreferences-Cache (offline verfügbar), Verifikation mit Play Store im Hintergrund.
+  Methoden: `purchasePlus()`, `subscribePremium()`, `restorePurchases()`.
+
+### Android (Kotlin)
+
+- **`android/app/src/main/kotlin/.../BillingService.kt`** (NEU):
+  Google Play Billing Library 6.2.1 Integration.
+  Produkte: `wissensfreund_plus` (einmalig, INAPP), `wissensfreund_premium` (monatlich, SUBS).
+  Callback-basiertes `queryProductDetailsAsync`, Coroutine-basiertes `queryPurchasesAsync`.
+  `getStatus`, `purchasePlus`, `subscribePremium`, `restorePurchases` über Channel `wissensfreund/billing`.
+  Automatisches Acknowledgement nach Kauf.
+
+- **`MainActivity.kt`**: Billing-Channel `wissensfreund/billing` registriert. `BillingService` in
+  `configureFlutterEngine` initialisiert, `destroy()` in `onDestroy`.
+
+- **`android/app/build.gradle`**: `billing:6.2.1` + `billing-ktx:6.2.1` hinzugefügt.
+
+### Datenbank
+
+- **`lib/services/license_cache_db.dart`**: Schema v5 → v6, zwei neue Tabellen:
+  - `question_usage (month TEXT PRIMARY KEY, count INTEGER)` — monatliches Rückfragen-Limit
+  - `usage_stats (date TEXT PRIMARY KEY, articles_listened, questions_asked, session_minutes)` — Statistiken
+  Neue Methoden: `getQuestionCount`, `incrementQuestionCount`, `recordArticleListened`,
+  `recordQuestionAsked`, `addSessionMinutes`, `getRecentStats`.
+
+### Provider
+
+- **`lib/providers/wissensfreund_provider.dart`**: `SubscriptionService.initialize()` im Konstruktor.
+  `_trackArticleListened()` beim Artikel-Start. Öffentliche API:
+  `canSendPremiumQuestion()`, `trackQuestionAsked()`, `questionCountThisMonth()`, `recentStats(days)`.
+  Konstante `kMonthlyQuestionLimit = 5000`.
+
+### Feature-Gates
+
+- **`lib/services/hires_image_service.dart`**: Prüft `SubscriptionService.instance.canUseHighResOnDemand`
+  vor HiRes-Download. Free-User sehen ZIM-Qualität, kein Download.
+
+### UI (`home_screen.dart`)
+
+- Neuer Menüpunkt "Plus & Premium" (Icons.star_rounded, kein BiometricPrompt — Elternaktion).
+- **`_SubscriptionDialog`**: Zeigt aktuellen Tier-Status, Upgrade-Cards für Plus/Premium (je mit Features,
+  Preis und CTA-Button), Rückfragen-Counter + Wochens-Statistiken für Premium, "Käufe wiederherstellen".
+- **`_UpgradeCard`**: Grüne Karte mit Header (Titel, Preis-Badge), Feature-Liste, Kauf-Button.
+- **`_StatRow`**: Label/Value-Zeile für Statistiken.
+- **`_StorageDialog`**: Download-Button für Bilderbibliothek für Free-User durch Hinweis-Card ersetzt
+  ("Bessere Bildqualität mit Wissensfreund Plus" + "Mehr erfahren"-Button → öffnet Subscription-Dialog).
+
+### Bugs gefixed (diese Session)
+
+- `audio_package_service.dart`: `zipFile.deleteSync()` → `File(tmpZip).deleteSync()`
+- `audio_package_service.dart` + `image_library_service.dart`: `decodeStream()` → `decodeBuffer()` (archive 3.4 API)
+- `image_library_service.dart`: Ungenutzter Import `license_cache_db.dart` entfernt
+- `article_screen.dart`: Ungenutztes `_ImageCaption`-Widget entfernt, überflüssiges `!` entfernt
+- `test/widget_test.dart`: Veralteten `MyApp`-Test ersetzt
+- `MainActivity.kt` (`swapZim`): `val effectivePath` → als Ausdruck initialisiert (Kotlin-Semantik)
+
+### Nicht implementiert (Vorbereitung vorhanden)
+
+- Gemini-Rückfragen für Premium: Infrastruktur fertig (`canSendPremiumQuestion`, `trackQuestionAsked`,
+  `question_usage`-Tabelle). Upgrade-Prompt (Professor-Nachricht + BiometricPrompt + Subscription-Dialog)
+  wird eingebaut wenn Gemini-API integriert wird.
+- Session-Minuten-Tracking: `addSessionMinutes()` in DB vorhanden, aber noch nicht getriggert.
+  Aktivierung wenn Session-Start/-End-Events implementiert sind.
+
+---
+
 ## ✅ FERTIG — Internet-Einstellungen, Datenlimit & ZIM-Update (Stand 2026-05-24)
 
 ### Neue Services

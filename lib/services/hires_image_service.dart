@@ -8,6 +8,7 @@ import 'package:http/http.dart' as http;
 import 'license_cache_db.dart';
 import 'network_service.dart';
 import 'storage_manager.dart';
+import 'subscription_service.dart';
 
 const _wikimediaApiBase = 'https://api.wikimedia.org/core/v1/commons/file';
 const _ua               = 'Wissensfreund/1.0';
@@ -35,6 +36,9 @@ class HiResImageService {
     // Local cache hit.
     final cached = await _fromCache(filename);
     if (cached != null) return cached;
+
+    // Feature gate — Plus or Premium only.
+    if (!SubscriptionService.instance.canUseHighResOnDemand) return null;
 
     // Only one concurrent download.
     if (_loading) return null;
