@@ -2,6 +2,30 @@
 
 ---
 
+## ✅ FERTIG — Bugfixes & fehlende Features (Stand 2026-05-25)
+
+### Onboarding-Chain-Fix
+- **`home_screen.dart`**: `StorageManager.instance.initialize()` wird jetzt vor der Onboarding-Kette
+  aufgerufen — verhinderte zuvor `AssertionError` (Bildqualitäts-Dialog + Netzwerk-Dialog
+  wurden nie gezeigt).
+
+### evictOldCache
+- **`home_screen.dart`**: `StorageManager.instance.evictOldCache()` wird jetzt beim App-Start
+  im Hintergrund aufgerufen (war implementiert, aber nirgendwo getriggert).
+
+### Speicher-Prüfung im Bildqualitäts-Dialog
+- **`storage_manager.dart`**: `getFreeStorageBytes()` neu — fragt via `wissensfreund/zim`-Channel
+  `StatFs.availableBlocksLong * blockSizeLong` ab.
+- **`MainActivity.kt`**: `getFreeStorageBytes`-Handler im ZIM-Channel registriert.
+- **`home_screen.dart`**: `_ImageQualityDialogState` lädt Speicherplatz in `initState`.
+  Bei < 2 GB frei: "Standard" hervorgehoben, Orange-Warnung, "Gut herunterladen"-Button deaktiviert.
+  Bei ≥ 2 GB (oder Fehler): "Gut" hervorgehoben wie bisher.
+
+### Crossfade
+- **`article_screen.dart`**: `AnimatedSwitcher` Dauer 200 ms → 300 ms.
+
+---
+
 ## ✅ FERTIG — Freemium-Modell (Stand 2026-05-25)
 
 ### Neue Services

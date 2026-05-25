@@ -588,7 +588,7 @@ class _MainArticleImageState extends State<_MainArticleImage> {
         final fn     = _loadedFilename;
 
         return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 300),
           child: future == null
               ? _ArticleImage(
                   key: const ValueKey('fallback'),

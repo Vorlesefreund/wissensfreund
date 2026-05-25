@@ -176,6 +176,11 @@ class MainActivity : FlutterFragmentActivity() {
                         if (path.isEmpty()) result.error("INVALID_ARG", "path required", null)
                         else swapZim(path, result)
                     }
+                    "getFreeStorageBytes" -> {
+                        val dir = getExternalFilesDir(null) ?: filesDir
+                        val stat = android.os.StatFs(dir.path)
+                        result.success(stat.availableBlocksLong * stat.blockSizeLong)
+                    }
                     else -> result.notImplemented()
                 }
             }

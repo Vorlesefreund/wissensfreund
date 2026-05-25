@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -49,6 +50,20 @@ class StorageManager {
   Directory get zimUpdateDir {
     assert(_initialized, 'StorageManager not initialized');
     return Directory('$_basePath/zim_update');
+  }
+
+  // ── Free space ───────────────────────────────────────────────────────────────
+
+  /// Returns available bytes on the storage partition used by this app.
+  /// Returns 0 on error (platform channel unavailable).
+  Future<int> getFreeStorageBytes() async {
+    try {
+      final bytes = await const MethodChannel('wissensfreund/zim')
+          .invokeMethod<int>('getFreeStorageBytes');
+      return bytes ?? 0;
+    } catch (_) {
+      return 0;
+    }
   }
 
   // ── Cache eviction ───────────────────────────────────────────────────────────

@@ -13,6 +13,7 @@ import '../services/license_cache_db.dart';
 import '../services/network_service.dart';
 import '../services/network_settings_service.dart';
 import '../services/parental_lock_service.dart';
+import '../services/storage_manager.dart';
 import '../services/subscription_service.dart';
 import '../services/zim_update_service.dart';
 import '../widgets/professor_widget.dart';
@@ -55,6 +56,8 @@ class _HomeScreenState extends State<HomeScreen>
       CurvedAnimation(parent: _breathCtrl, curve: Curves.easeInOut),
     );
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await StorageManager.instance.initialize();
+      unawaited(StorageManager.instance.evictOldCache());
       await _checkOnboarding();
       if (mounted) await _checkImageQuality();
       if (mounted) await _checkNetworkSettings();
@@ -665,14 +668,22 @@ class _BottomBar extends StatelessWidget {
   final WissensfreundProvider provider;
   const _BottomBar({required this.provider});
 
-  void _openMenu(BuildContext context) {
-    // context (HomeScreen-Ebene) wird als outerContext weitergegeben,
-    // damit Dialoge aus _AppMenu nach dem Schließen des BottomSheets
-    // noch einen gültigen BuildContext haben.
+  void _openMenu(BuildContext context) async {
+    final ps = context.read<ParentalLockService>();
+    // Menü ist gesichert wenn Kinderschutz aktiv — einmalige Auth für alle Punkte.
+    final parentalUnlocked = ps.isKioskMode
+        ? await ps.authenticate('Bitte authentifizieren um das Menü zu öffnen.')
+        : true;
+    if (!parentalUnlocked || !context.mounted) return;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (_) => _AppMenu(provider: provider, outerContext: context),
+      isScrollControlled: true,
+      builder: (_) => _AppMenu(
+        provider: provider,
+        outerContext: context,
+        parentalUnlocked: parentalUnlocked,
+      ),
     );
   }
 
@@ -764,13 +775,20 @@ class _MenuIconButton extends StatelessWidget {
 
 class _AppMenu extends StatelessWidget {
   final WissensfreundProvider provider;
-  final BuildContext outerContext; // HomeScreen-Ebene — bleibt nach BottomSheet-Pop gültig
-  const _AppMenu({required this.provider, required this.outerContext});
+  final BuildContext outerContext;
+  final bool parentalUnlocked; // true = BiometricPrompt already passed at menu entry
+  const _AppMenu({
+    required this.provider,
+    required this.outerContext,
+    this.parentalUnlocked = false,
+  });
 
   @override
   Widget build(BuildContext context) {
+    // viewPadding aus dem outerContext — zuverlässig auch innerhalb eines BottomSheets
+    final bottomInset = MediaQuery.of(outerContext).viewPadding.bottom;
     return Container(
-      margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      margin: EdgeInsets.fromLTRB(16, 0, 16, 16 + bottomInset),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF8EE),
         borderRadius: BorderRadius.circular(24),
@@ -855,11 +873,14 @@ class _AppMenu extends StatelessWidget {
   }
 
   void _authenticateAndShowInternetData(BuildContext ctx) async {
-    final ps = ctx.read<ParentalLockService>();
-    final ok = await ps.authenticate(
-      'Bitte authentifizieren um Internet-Einstellungen zu öffnen.',
-    );
-    if (!ok || !ctx.mounted) return;
+    if (!parentalUnlocked) {
+      final ps = ctx.read<ParentalLockService>();
+      final ok = await ps.authenticate(
+        'Bitte authentifizieren um Internet-Einstellungen zu öffnen.',
+      );
+      if (!ok || !ctx.mounted) return;
+    }
+    if (!ctx.mounted) return;
     showDialog<void>(
       context: ctx,
       builder: (_) => const _InternetDataDialog(),
@@ -867,11 +888,14 @@ class _AppMenu extends StatelessWidget {
   }
 
   void _authenticateAndShowDashboard(BuildContext ctx) async {
-    final ps = ctx.read<ParentalLockService>();
-    final ok = await ps.authenticate(
-      'Bitte authentifizieren um die Kinderschutz-Einstellungen zu öffnen.',
-    );
-    if (!ok || !ctx.mounted) return;
+    if (!parentalUnlocked) {
+      final ps = ctx.read<ParentalLockService>();
+      final ok = await ps.authenticate(
+        'Bitte authentifizieren um die Kinderschutz-Einstellungen zu öffnen.',
+      );
+      if (!ok || !ctx.mounted) return;
+    }
+    if (!ctx.mounted) return;
     _showParentalDashboard(ctx);
   }
 
@@ -1547,6 +1571,19 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
   double _progress = 0;
   Duration? _eta;
   String? _error;
+  int _freeBytes = -1; // -1 = noch nicht geladen
+
+  static const int _requiredBytes = 2 * 1024 * 1024 * 1024; // 2 GB
+
+  @override
+  void initState() {
+    super.initState();
+    StorageManager.instance.getFreeStorageBytes().then((b) {
+      if (mounted) setState(() => _freeBytes = b);
+    });
+  }
+
+  bool get _hasEnoughSpace => _freeBytes < 0 || _freeBytes >= _requiredBytes;
 
   Future<void> _startDownload() async {
     setState(() { _downloading = true; _error = null; });
@@ -1607,14 +1644,31 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
                     icon: Icons.image_outlined,
                     title: 'Standard',
                     subtitle: 'Bilder aus dem Wissensspeicher',
+                    highlight: !_hasEnoughSpace,
                   ),
                   const SizedBox(height: 12),
                   _QualityRow(
                     icon: Icons.hd_outlined,
                     title: 'Gut  (~2 GB)',
                     subtitle: 'Offline-Bilderbibliothek · ca. 3–5 min im WLAN',
-                    highlight: true,
+                    highlight: _hasEnoughSpace,
                   ),
+                  if (_freeBytes >= 0 && !_hasEnoughSpace) ...[
+                    const SizedBox(height: 10),
+                    Row(children: [
+                      Icon(Icons.warning_amber_rounded,
+                          size: 15, color: Colors.orange.shade700),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Wenig Speicherplatz (${(_freeBytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB frei). '
+                          'Standard empfohlen.',
+                          style: TextStyle(
+                              fontSize: 12, color: Colors.orange.shade800),
+                        ),
+                      ),
+                    ]),
+                  ],
                   if (_error != null) ...[
                     const SizedBox(height: 10),
                     Text(
@@ -1635,7 +1689,7 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
                 FilledButton(
                   style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF2E7D32)),
-                  onPressed: _startDownload,
+                  onPressed: _hasEnoughSpace ? _startDownload : null,
                   child: const Text('Gut herunterladen'),
                 ),
               ],
@@ -1725,13 +1779,19 @@ class _StorageDialogState extends State<_StorageDialog> {
 
   Future<void> _loadStats() async {
     setState(() => _loadingStats = true);
-    final cacheBytes = await HiResImageService.instance.cacheSizeBytes();
-    if (!mounted) return;
-    setState(() {
-      _libraryBytes = ImageLibraryService.instance.totalSizeBytes;
-      _cacheBytes = cacheBytes;
-      _loadingStats = false;
-    });
+    try {
+      await StorageManager.instance.initialize();
+      final cacheBytes = await HiResImageService.instance.cacheSizeBytes();
+      if (!mounted) return;
+      setState(() {
+        _libraryBytes = ImageLibraryService.instance.totalSizeBytes;
+        _cacheBytes = cacheBytes;
+      });
+    } catch (_) {
+      // Fehler bei Storage-Zugriff — 0 anzeigen, kein Crash
+    } finally {
+      if (mounted) setState(() => _loadingStats = false);
+    }
   }
 
   Future<void> _clearLibrary() async {
