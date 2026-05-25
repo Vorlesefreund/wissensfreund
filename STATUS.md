@@ -1,5 +1,5 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-25T19:53:39Z -->
+<!-- updated: 2026-05-25T20:08:31Z -->
 
 ## Zuletzt erledigt (Session 2026-05-25 — abends)
 
@@ -141,9 +141,9 @@
 ## Offen / Nächste Schritte
 
 ### Dringend
-- **images_medium.zip**: Workflow #31 fehlgeschlagen (exit code 255, transient).
-  Neuer Workflow lief bei letztem Check bei 2h 40m+ noch aktiv.
-  Sobald grün: `images_medium.zip` auf R2 und "Gut"-Bildqualität downloadbar.
+- **images_medium.zip**: Neuer Workflow läuft (Stand 20:08 UTC):
+  `prepare` ✅ 1h 14m, `download` ✅ 1h 2m, `images` ⏳ seit 7h 30m noch aktiv.
+  Sobald `images`-Job grün: `images_medium.zip` auf R2 → "Gut"-Bildqualität downloadbar.
 
 ### Fehlende Features
 - **Gemini-Integration**: Frage-Typ-Erkennung (5 Typen) muss vor Gemini verdrahtet werden.
