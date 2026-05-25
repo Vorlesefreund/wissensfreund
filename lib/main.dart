@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'providers/wissensfreund_provider.dart';
+import 'services/data_limit_overlay_service.dart';
 import 'services/parental_lock_service.dart';
 import 'services/profile_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/profile_selection_screen.dart';
+import 'widgets/data_limit_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +23,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => WissensfreundProvider()),
         ChangeNotifierProvider.value(value: ParentalLockService.instance),
         ChangeNotifierProvider.value(value: ProfileService.instance),
+        ChangeNotifierProvider.value(value: DataLimitOverlayService.instance),
       ],
       child: const WissensfreundApp(),
     ),
@@ -100,6 +103,7 @@ class _AppShell extends StatelessWidget {
       builder: (ctx, ps, _) => Stack(
         children: [
           child,
+          const DataLimitOverlay(),
           if (ps.showOverlay) _ParentalOverlay(ps: ps),
         ],
       ),

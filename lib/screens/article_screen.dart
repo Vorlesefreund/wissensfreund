@@ -7,8 +7,10 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/wissensfreund_provider.dart';
-import '../services/parental_lock_service.dart';
+import '../services/data_limit_overlay_service.dart';
 import '../services/hires_image_service.dart';
+import '../services/network_service.dart';
+import '../services/parental_lock_service.dart';
 import '../services/profile_service.dart';
 import '../services/wikimedia_license_checker.dart';
 import '../widgets/professor_widget.dart';
@@ -1035,9 +1037,45 @@ class _FullscreenGalleryState extends State<_FullscreenGallery> {
   void _loadHiRes(String filename) {
     if (_hiResBytes.containsKey(filename)) return;
     _hiResBytes[filename] = null; // mark as in-flight
-    HiResImageService.instance.getHiResImage(filename).then((bytes) {
-      if (mounted && bytes != null) setState(() => _hiResBytes[filename] = bytes);
+
+    // Pre-check data limit so we can show the overlay instead of silently failing.
+    NetworkService.instance
+        .canUseNetwork(estimatedBytes: 3 * 1024 * 1024)
+        .then((check) async {
+      if (!check.allowed && check.reason == 'limit_reached') {
+        if (mounted) unawaited(_triggerDataLimitOverlay(filename));
+        return;
+      }
+      HiResImageService.instance.getHiResImage(filename).then((bytes) {
+        if (mounted && bytes != null) {
+          setState(() => _hiResBytes[filename] = bytes);
+        }
+      });
     });
+  }
+
+  Future<void> _triggerDataLimitOverlay(String filename) async {
+    final provider = context.read<WissensfreundProvider>();
+
+    // Professor finishes current state and speaks handoff phrase.
+    await provider.pauseForDataLimit();
+    if (!mounted) return;
+
+    final conn    = await NetworkService.instance.getCurrentConnectionType();
+    final connStr = conn == ConnectionType.wifi ? 'wifi' : 'mobile';
+
+    DataLimitOverlayService.instance.show(
+      connectionType: connStr,
+      onRetry: () {
+        _hiResBytes.remove(filename); // allow retry
+        if (mounted) _loadHiRes(filename);
+        provider.resumeAfterDataLimit();
+      },
+      onCancel: () {
+        _hiResBytes.remove(filename); // clear in-flight marker
+        provider.speakDataLimitCancelled();
+      },
+    );
   }
 
   void _swipe(DragEndDetails d) {

@@ -2478,8 +2478,22 @@ class _InternetDataDialogState extends State<_InternetDataDialog> {
                       onChanged: (v) => setState(() => _wifiMonthlyMb = v),
                     ),
                   ],
-                  _UsageRow('Heute:', _bytesLabel(_wifiDailyUsed)),
-                  _UsageRow('Diesen Monat:', _bytesLabel(_wifiMonthlyUsed)),
+                  _UsageProgressRow(
+                    label: 'Heute',
+                    used: _bytesLabel(_wifiDailyUsed),
+                    limit: _wifiUnlimited || _wifiDailyMb == 0
+                        ? null : _mbLabel(_wifiDailyMb),
+                    pct: _wifiDailyMb == 0 ? 0 :
+                        (_wifiDailyUsed / (_wifiDailyMb * 1024 * 1024)).clamp(0.0, 1.0),
+                  ),
+                  _UsageProgressRow(
+                    label: 'Dieser Monat',
+                    used: _bytesLabel(_wifiMonthlyUsed),
+                    limit: _wifiUnlimited || _wifiMonthlyMb == 0
+                        ? null : _mbLabel(_wifiMonthlyMb),
+                    pct: _wifiMonthlyMb == 0 ? 0 :
+                        (_wifiMonthlyUsed / (_wifiMonthlyMb * 1024 * 1024)).clamp(0.0, 1.0),
+                  ),
                   const SizedBox(height: 16),
 
                   // ── Mobile ───────────────────────────────────────────
@@ -2508,8 +2522,22 @@ class _InternetDataDialogState extends State<_InternetDataDialog> {
                       onChanged: (v) => setState(() => _mobileMonthlyMb = v),
                     ),
                   ],
-                  _UsageRow('Heute:', _bytesLabel(_mobileDailyUsed)),
-                  _UsageRow('Diesen Monat:', _bytesLabel(_mobileMonthlyUsed)),
+                  _UsageProgressRow(
+                    label: 'Heute',
+                    used: _bytesLabel(_mobileDailyUsed),
+                    limit: _mobileDailyMb == 0
+                        ? null : _mbLabel(_mobileDailyMb),
+                    pct: _mobileDailyMb == 0 ? 0 :
+                        (_mobileDailyUsed / (_mobileDailyMb * 1024 * 1024)).clamp(0.0, 1.0),
+                  ),
+                  _UsageProgressRow(
+                    label: 'Dieser Monat',
+                    used: _bytesLabel(_mobileMonthlyUsed),
+                    limit: _mobileMonthlyMb == 0
+                        ? null : _mbLabel(_mobileMonthlyMb),
+                    pct: _mobileMonthlyMb == 0 ? 0 :
+                        (_mobileMonthlyUsed / (_mobileMonthlyMb * 1024 * 1024)).clamp(0.0, 1.0),
+                  ),
                   const SizedBox(height: 16),
 
                   // ── ZIM-Version ──────────────────────────────────────
@@ -2752,6 +2780,68 @@ class _LimitDropdown extends StatelessWidget {
                 fontSize: 13, color: Color(0xFF2E7D32),
                 fontWeight: FontWeight.w600),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Usage row with optional progress bar (shown when [limit] != null).
+class _UsageProgressRow extends StatelessWidget {
+  final String  label;
+  final String  used;
+  final String? limit;  // null → unlimited (no bar)
+  final double  pct;    // 0.0–1.0
+
+  const _UsageProgressRow({
+    required this.label,
+    required this.used,
+    this.limit,
+    required this.pct,
+  });
+
+  Color get _barColor {
+    if (pct >= 1.0) return Colors.red.shade600;
+    if (pct >= 0.8) return Colors.orange.shade600;
+    return const Color(0xFF4CAF50);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF666666))),
+              Text(
+                limit != null
+                    ? '$used / $limit  (${(pct * 100).round()}%)'
+                    : used,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: limit != null ? _barColor : const Color(0xFF2E7D32),
+                ),
+              ),
+            ],
+          ),
+          if (limit != null) ...[
+            const SizedBox(height: 4),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: LinearProgressIndicator(
+                value: pct,
+                minHeight: 5,
+                backgroundColor: const Color(0xFFE8F5E9),
+                valueColor: AlwaysStoppedAnimation(_barColor),
+              ),
+            ),
+          ],
         ],
       ),
     );

@@ -11,6 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/audio_package_service.dart';
 import '../services/image_library_service.dart';
 import '../services/license_cache_db.dart';
+import '../services/network_service.dart';
 import '../services/professor_response_service.dart';
 import '../services/profile_service.dart';
 import '../services/subscription_service.dart';
@@ -182,6 +183,13 @@ class WissensfreundProvider extends ChangeNotifier {
   // ZIM update — set in background after license-cache sync
   ZimVersionInfo? _pendingZimUpdate;
 
+  // Data-limit overlay: completer for awaiting the handoff phrase
+  Completer<void>? _handoffCompleter;
+  // Warning phrase interleaving: article chunk deferred until warning phrase is done
+  String? _deferredArticleChunk;
+  // After "Kein Problem" cancel phrase: resume article automatically
+  bool _resumeAfterHandoff = false;
+
   // Pause timers — k6 sequence (30s → 60s → 90s → rest)
   Timer? _idleTimer;
   int    _pausePhase = 0; // 1=k6_s1 in TTS, 2=k6_s2, 3=k6_s3
@@ -282,6 +290,13 @@ class WissensfreundProvider extends ChangeNotifier {
     await _tts.setVolume(1.0);
     await _tts.setPitch(1.0);
     _tts.setCompletionHandler(() {
+      // Deferred article chunk after a limit-warning phrase — resume article reading.
+      if (_deferredArticleChunk != null) {
+        final chunk = _deferredArticleChunk!;
+        _deferredArticleChunk = null;
+        _tts.speak(chunk);
+        return;
+      }
       // Caption fertig → 5s Pause → "Soll ich weiterlesen?" → weitere 5s → Auto-Resume
       if (_isCaptionPlaying) {
         _isCaptionPlaying = false;
@@ -349,10 +364,28 @@ class WissensfreundProvider extends ChangeNotifier {
       if (_state != AppState.speaking || _isPaused) {
         // A non-article TTS (k1, k2, k7, k8, …) just completed — start idle timer.
         _checkStartIdleTimer();
+        // Drain data-limit handoff completer (professor phrase just finished).
+        final completer = _handoffCompleter;
+        if (completer != null) {
+          _handoffCompleter = null;
+          completer.complete();
+        }
+        // Resume article after "Kein Problem" cancel phrase.
+        if (_resumeAfterHandoff) {
+          _resumeAfterHandoff = false;
+          if (_isPaused && _articleText.isNotEmpty) unawaited(resumeSpeaking());
+        }
         return;
       }
       _currentChunk++;
       if (_currentChunk < _speechChunks.length) {
+        // Check for a pending 80%/90% limit warning between chunks.
+        final warning = NetworkService.instance.consumePendingWarning();
+        if (warning != null && warning != LimitWarningLevel.limitReached) {
+          _deferredArticleChunk = _speechChunks[_currentChunk];
+          _tts.speak(_randomLimitWarningPhrase(warning));
+          return;
+        }
         _tts.speak(_speechChunks[_currentChunk]);
       } else {
         _speechChunks  = [];
@@ -1227,6 +1260,64 @@ class WissensfreundProvider extends ChangeNotifier {
     notifyListeners();
     final msg = await _catalogOrFallback('k6_wake', 'Oh, da bist du ja wieder!');
     _tts.speak(msg);
+  }
+
+  // ── Data-limit overlay support ────────────────────────────────────────────
+
+  static const _kHandoffPhrases = [
+    'Ich brauche kurz Hilfe von Mama oder Papa!',
+    'Dafür brauche ich kurz die Erlaubnis deiner Eltern!',
+    'Moment — das müssen kurz deine Eltern freigeben!',
+  ];
+
+  static const _kWarning80Phrases = [
+    'Übrigens — ich habe heute schon viel geladen. Deine Eltern können mir mehr erlauben!',
+    'Ich merke, ich habe heute schon einiges heruntergeladen. Frag deine Eltern falls du mehr möchtest!',
+    'Psst — ich habe heute fast mein Limit erreicht. Deine Eltern können das anpassen!',
+  ];
+
+  static const _kWarning90Phrases = [
+    'Ich kann heute nur noch wenige Bilder laden. Deine Eltern können mir mehr erlauben!',
+    'Fast am Limit — deine Eltern können mir mehr Spielraum geben!',
+    'Noch ein bisschen — dann brauche ich Hilfe von Mama oder Papa!',
+  ];
+
+  String _randomLimitWarningPhrase(LimitWarningLevel level) {
+    final idx = DateTime.now().millisecond % 3;
+    return level == LimitWarningLevel.warning80
+        ? _kWarning80Phrases[idx]
+        : _kWarning90Phrases[idx];
+  }
+
+  /// Pauses article reading, speaks a random handoff phrase, and returns a
+  /// Future that completes when the phrase finishes.
+  /// Call this before showing the data-limit overlay.
+  Future<void> pauseForDataLimit() async {
+    if (_state == AppState.speaking) {
+      _resumeOffset = _sentenceStartOffset();
+      _isPaused     = true;
+      _state        = AppState.idle;
+      await _tts.stop();
+    }
+    // Set completer before speaking so the completion handler can drain it.
+    _handoffCompleter = Completer<void>();
+    final phrase = _kHandoffPhrases[DateTime.now().millisecond % 3];
+    unawaited(_tts.speak(phrase));
+    return _handoffCompleter!.future;
+  }
+
+  /// Resumes article reading after the data-limit overlay was dismissed (retry).
+  void resumeAfterDataLimit() {
+    if (_isPaused && _articleText.isNotEmpty) {
+      unawaited(resumeSpeaking());
+    }
+  }
+
+  /// Speaks "Kein Problem" and then automatically resumes article reading.
+  /// Call this when the user cancels the data-limit overlay.
+  void speakDataLimitCancelled() {
+    _resumeAfterHandoff = _isPaused && _articleText.isNotEmpty;
+    unawaited(_tts.speak('Kein Problem — wir machen einfach weiter!'));
   }
 
   @override
