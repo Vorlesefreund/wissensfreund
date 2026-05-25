@@ -12,6 +12,7 @@ import '../services/audio_package_service.dart';
 import '../services/image_library_service.dart';
 import '../services/license_cache_db.dart';
 import '../services/professor_response_service.dart';
+import '../services/profile_service.dart';
 import '../services/subscription_service.dart';
 import '../services/wikimedia_license_checker.dart';
 import '../services/zim_update_service.dart';
@@ -918,6 +919,9 @@ class WissensfreundProvider extends ChangeNotifier {
   void _trackArticleListened() {
     final date = DateTime.now().toIso8601String().substring(0, 10);
     unawaited(LicenseCacheDb.instance.recordArticleListened(date));
+    if (_articleTitle.isNotEmpty) {
+      unawaited(ProfileService.instance.recordArticleOpened(_articleTitle));
+    }
   }
 
   static const int kMonthlyQuestionLimit = 5000;

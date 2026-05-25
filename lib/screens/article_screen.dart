@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../providers/wissensfreund_provider.dart';
 import '../services/parental_lock_service.dart';
 import '../services/hires_image_service.dart';
+import '../services/profile_service.dart';
 import '../services/wikimedia_license_checker.dart';
 import '../widgets/professor_widget.dart';
 
@@ -424,6 +425,14 @@ class _ArticleHeader extends StatelessWidget {
             ),
           ),
           const Spacer(),
+          // Favorite
+          if (provider.articleTitle.isNotEmpty)
+            _FavoriteBtn(
+              articleTitle: provider.articleTitle,
+              btnBg: _btnBg,
+              fgColor: _fgColor,
+            ),
+          const SizedBox(width: 8),
           // Mode toggle
           _HeaderBtn(
             bg: _btnBg,
@@ -471,6 +480,69 @@ class _HeaderBtn extends StatelessWidget {
         ),
         alignment: Alignment.center,
         child: child,
+      ),
+    );
+  }
+}
+
+class _FavoriteBtn extends StatefulWidget {
+  final String articleTitle;
+  final Color btnBg;
+  final Color fgColor;
+  const _FavoriteBtn({
+    required this.articleTitle,
+    required this.btnBg,
+    required this.fgColor,
+  });
+
+  @override
+  State<_FavoriteBtn> createState() => _FavoriteBtnState();
+}
+
+class _FavoriteBtnState extends State<_FavoriteBtn> {
+  bool _isFavorite = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  @override
+  void didUpdateWidget(_FavoriteBtn old) {
+    super.didUpdateWidget(old);
+    if (old.articleTitle != widget.articleTitle) _load();
+  }
+
+  Future<void> _load() async {
+    final fav = await ProfileService.instance.isFavorite(widget.articleTitle);
+    if (mounted) setState(() => _isFavorite = fav);
+  }
+
+  Future<void> _toggle() async {
+    await ProfileService.instance.toggleFavorite(widget.articleTitle);
+    if (mounted) setState(() => _isFavorite = !_isFavorite);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: _toggle,
+      child: Container(
+        width: 34,
+        height: 34,
+        decoration: BoxDecoration(
+          color: _isFavorite
+              ? const Color(0xFFFFC107).withValues(alpha: 0.25)
+              : widget.btnBg,
+          borderRadius: BorderRadius.circular(9),
+        ),
+        alignment: Alignment.center,
+        child: Icon(
+          _isFavorite ? Icons.star_rounded : Icons.star_outline_rounded,
+          size: 20,
+          color: _isFavorite ? const Color(0xFFFFC107) : widget.fgColor,
+        ),
       ),
     );
   }

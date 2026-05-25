@@ -1,5 +1,5 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-25T13:00:53Z -->
+<!-- updated: 2026-05-25T13:12:27Z -->
 
 ## Zuletzt erledigt (Session 2026-05-25 — nachmittags)
 
@@ -37,6 +37,12 @@
 #### `ProfileService` + `main.dart`
 - `lib/services/profile_service.dart` — CRUD, setActiveProfile, Verlauf, Favoriten
 - `main.dart`: ProfileService.initialize() beim Start; Route → ProfileSelectionScreen wenn kein Profil
+
+#### Nachträglich ergänzt (vollständig verdrahtet)
+- `_trackArticleListened()` in `wissensfreund_provider.dart` ruft jetzt auch
+  `ProfileService.instance.recordArticleOpened(title)` auf → Verlauf füllt sich automatisch
+- `_FavoriteBtn` (⭐) im Artikel-Screen-Header — prüft und togglet Favorit per Tap
+  (gelber Stern wenn aktiv, Outline wenn nicht); Zustand aus DB geladen
 
 ---
 
