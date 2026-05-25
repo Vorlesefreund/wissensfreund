@@ -1,5 +1,5 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-25T13:12:27Z -->
+<!-- updated: 2026-05-25T13:14:12Z -->
 
 ## Zuletzt erledigt (Session 2026-05-25 — nachmittags)
 
@@ -78,9 +78,9 @@
 ## Offen / Nächste Schritte
 
 ### Dringend
-- **images_medium.zip**: GitHub Actions Workflow #31 fehlgeschlagen (images-Job, exit code 255).
-  Ursache unbekannt — Logs des Steps "Build image library (incremental)" nötig.
-  Bitte in GH Actions → Run #31 → images-Job → Step öffnen und Ausgabe teilen.
+- **images_medium.zip**: Workflow #31 fehlgeschlagen (exit code 255, transient).
+  Neuer Workflow läuft gerade — images-Job bei 2h 40m+ und noch aktiv (gutes Zeichen).
+  Sobald dieser Run grün wird, ist `images_medium.zip` auf R2 und "Gut"-Bildqualität downloadbar.
 
 ### Fehlende Features (aus Prompt-Checkliste)
 - **100% Datenlimit-Overlay mit BiometricPrompt**: Limit-reached → aktuell nur stiller Fehler.
