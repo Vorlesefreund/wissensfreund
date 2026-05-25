@@ -48,6 +48,9 @@ class _HomeScreenState extends State<HomeScreen>
 
   bool _zimUpdateDialogShown = false;
 
+  // Weiterhören state
+  ({String title, int offset})? _lastArticle;
+
   @override
   void initState() {
     super.initState();
@@ -58,7 +61,9 @@ class _HomeScreenState extends State<HomeScreen>
     _breathScale = Tween<double>(begin: 1.0, end: 1.04).animate(
       CurvedAnimation(parent: _breathCtrl, curve: Curves.easeInOut),
     );
+    ProfileService.instance.addListener(_onProfileChanged);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _loadLastArticle();
       await StorageManager.instance.initialize();
       unawaited(StorageManager.instance.evictOldCache());
       await _checkOnboarding();
@@ -66,6 +71,13 @@ class _HomeScreenState extends State<HomeScreen>
       if (mounted) await _checkNetworkSettings();
     });
   }
+
+  Future<void> _loadLastArticle() async {
+    final last = await ProfileService.instance.getLastArticle();
+    if (mounted) setState(() => _lastArticle = last);
+  }
+
+  void _onProfileChanged() => _loadLastArticle();
 
   @override
   void didChangeDependencies() {
@@ -272,6 +284,7 @@ class _HomeScreenState extends State<HomeScreen>
     _breathCtrl.dispose();
     _zimFadeTimer?.cancel();
     _provider?.removeListener(_onProviderChanged);
+    ProfileService.instance.removeListener(_onProfileChanged);
     _scrollController.dispose();
     super.dispose();
   }
@@ -340,6 +353,17 @@ class _HomeScreenState extends State<HomeScreen>
                               ),
                               _StateLabel(state: provider.state),
                               const SizedBox(height: 12),
+                              if (_lastArticle != null &&
+                                  provider.state == AppState.idle &&
+                                  provider.articleText.isEmpty)
+                                _WeiterhoerenCard(
+                                  title: _lastArticle!.title,
+                                  onTap: () {
+                                    final last = _lastArticle!;
+                                    setState(() => _lastArticle = null);
+                                    provider.resumeLastArticle(last.title, last.offset);
+                                  },
+                                ),
                               if (provider.recognizedText.isNotEmpty &&
                                   provider.articleText.isEmpty)
                                 _RecognizedText(text: provider.recognizedText),
@@ -583,6 +607,80 @@ class _StateLabel extends StatelessWidget {
           color: color,
         ),
         textAlign: TextAlign.center,
+      ),
+    );
+  }
+}
+
+// ── Weiterhören Card ──────────────────────────────────────────────────────────
+
+class _WeiterhoerenCard extends StatelessWidget {
+  final String title;
+  final VoidCallback onTap;
+  const _WeiterhoerenCard({required this.title, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF2D6A4F),
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              const Icon(Icons.play_circle_fill_rounded,
+                  color: Colors.white, size: 36),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Weiterhören',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    const Text(
+                      'Weitermachen wo du aufgehört hast',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

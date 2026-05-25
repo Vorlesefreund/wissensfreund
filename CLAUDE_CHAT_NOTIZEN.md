@@ -118,5 +118,5 @@ erweitern.
 
 **Priorität:** hoch — vor Gemini-Integration umsetzen
 
-**Erledigt:** [ ]
+**Erledigt:** [x] Umgesetzt am 2026-05-25 (nacht) — _detectQueryType auf 5 Typen erweitert, _processQuery verdrahtet, _handleGeminiPlaceholder implementiert, Weiterhören-Feature komplett
 ---

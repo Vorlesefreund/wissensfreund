@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -64,8 +66,10 @@ class _WissensfreundAppState extends State<WissensfreundApp>
 
     if (state == AppLifecycleState.paused) {
       _wentToBackground = true;
-      // Professor pausieren (nicht stoppen) — Position bleibt erhalten
-      context.read<WissensfreundProvider>().pauseSpeaking();
+      // Position speichern, dann pausieren — Position bleibt erhalten
+      final provider = context.read<WissensfreundProvider>();
+      unawaited(provider.saveCurrentArticlePosition());
+      provider.pauseSpeaking();
     } else if (state == AppLifecycleState.resumed && _wentToBackground) {
       _wentToBackground = false;
       // Status aktualisieren und Professor weiterlesen lassen.

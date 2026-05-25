@@ -71,7 +71,7 @@ enum AppState { idle, listening, thinking, speaking }
 enum ArticleViewMode { a, b, c }
 
 // ── Frage-Typ-Erkennung (Keyword-Matching, keine KI) ──────────────────────────
-enum _QueryType { fullRead, targeted }
+enum _QueryType { fullRead, targeted, comparison, followUp, unknown }
 
 const _kFullReadPrefixes = [
   'was ist', 'was sind', 'erzähl mir', 'erzähl', 'erkläre', 'erkläre mir',
@@ -80,6 +80,11 @@ const _kFullReadPrefixes = [
 const _kTargetedPrefixes = [
   'warum', 'wie', 'wann', 'wo ', 'woher', 'wohin', 'wozu',
   'ist es wahr', 'stimmt es', 'wieso', 'weshalb', 'welche', 'welcher',
+];
+const _kCompareWords = [
+  'größer', 'kleiner', 'schneller', 'langsamer', 'schwerer', 'leichter',
+  'stärker', 'schwächer', 'älter', 'jünger', 'länger', 'kürzer',
+  'gefährlicher', 'sicherer', 'schlauer', 'schöner', 'oder ', 'versus', 'verglichen',
 ];
 
 _QueryType _detectQueryType(String query) {
@@ -90,7 +95,7 @@ _QueryType _detectQueryType(String query) {
   for (final p in _kTargetedPrefixes) {
     if (q.startsWith(p)) return _QueryType.targeted;
   }
-  return _QueryType.fullRead; // default: Artikel vorlesen
+  return _QueryType.unknown; // default: Typ 5
 }
 
 // ── Mindest-Score damit ein Artikel akzeptiert wird ───────────────────────────
@@ -394,6 +399,7 @@ class WissensfreundProvider extends ChangeNotifier {
         _isPaused      = false;
         _resumeOffset  = 0;
         _ttsCursor     = 0;
+        unawaited(ProfileService.instance.clearLastArticle());
         _state         = AppState.idle;
         notifyListeners();
       }
@@ -578,11 +584,23 @@ class WissensfreundProvider extends ChangeNotifier {
   // ── Core query processing ─────────────────────────────────────────────────
 
   Future<void> _processQuery(String query) async {
+    // Capture followUp context BEFORE state changes clear article
+    final isFollowUp = _hasInterruptedForMic && _savedArticleTextForMic.isNotEmpty;
+    final queryType  = _detectQueryType(query);
+
     _state = AppState.thinking;
     notifyListeners();
 
     if (!_zimReady) {
       await _speakAndIdle(_zimNotReadyMessage);
+      return;
+    }
+
+    // Typ 4: Folgefrage — Artikel bereits geladen, Gemini-Platzhalter
+    if (isFollowUp && queryType != _QueryType.fullRead) {
+      _state = AppState.idle;
+      notifyListeners();
+      await _handleGeminiPlaceholder(query);
       return;
     }
 
@@ -598,6 +616,13 @@ class WissensfreundProvider extends ChangeNotifier {
 
       // No match at all
       if (results.isEmpty || (results.first['score'] as int) < _kMinScore) {
+        if (queryType != _QueryType.fullRead) {
+          // Typen 2, 3, 5 ohne Artikel → Eltern-Verweis (eiserne Regel)
+          _state = AppState.idle;
+          notifyListeners();
+          unawaited(_tts.speak(_parentReferralMessage));
+          return;
+        }
         _misserfolgZaehler++;
         final nq = query.toLowerCase().trim();
         final isRepeat = nq.isNotEmpty && nq == _lastFailedQuery;
@@ -616,7 +641,26 @@ class WissensfreundProvider extends ChangeNotifier {
       final bestScore   = best['score']   as int;
       final secondScore = second != null ? second['score'] as int : 0;
 
-      // Two equally good results → ask once
+      // Typ 3: Vergleichsfrage — zwei gute Treffer + Vergleichswort → Gemini-Platzhalter
+      if (queryType != _QueryType.fullRead &&
+          second != null &&
+          secondScore >= _kMinScore &&
+          _kCompareWords.any((w) => query.toLowerCase().contains(w))) {
+        _state = AppState.idle;
+        notifyListeners();
+        await _handleGeminiPlaceholder(query);
+        return;
+      }
+
+      // Typ 2: targeted → Gemini-Platzhalter (Artikel gefunden, aber Gemini antwortet)
+      if (queryType == _QueryType.targeted) {
+        _state = AppState.idle;
+        notifyListeners();
+        await _handleGeminiPlaceholder(query);
+        return;
+      }
+
+      // Two equally good results → ask once (fullRead + unknown)
       if (second != null &&
           bestScore - secondScore <= _kAmbiguityDelta &&
           !_awaitingDisambiguation) {
@@ -644,6 +688,7 @@ class WissensfreundProvider extends ChangeNotifier {
         );
         return;
       }
+      // Typ 1 (fullRead) + Typ 5 (unknown, Artikel gefunden) → Artikel vorlesen
       await _loadAndSpeak(best['urlIndex'] as int, best['title'] as String);
     } on PlatformException catch (e) {
       debugPrint('ZIM search error: ${e.message}');
@@ -680,6 +725,7 @@ class WissensfreundProvider extends ChangeNotifier {
       _ttsCursor    = 0;
       _resumeOffset = 0;
       _isPaused     = false;
+      unawaited(ProfileService.instance.clearLastArticle());
       _startSpeakingFrom(0);
       loadMedia(urlIndex); // fire-and-forget — updates UI via notifyListeners
       _trackArticleListened();
@@ -727,6 +773,110 @@ class WissensfreundProvider extends ChangeNotifier {
       }
     }
     return 0;
+  }
+
+  /// Saves current reading position for "Weiterhören" (back button / background).
+  Future<void> saveCurrentArticlePosition() async {
+    if (_articleTitle.isEmpty) return;
+    final offset = _state == AppState.speaking
+        ? _sentenceStartOffset()
+        : (_isPaused ? _resumeOffset : _ttsCursor);
+    await ProfileService.instance.saveLastArticle(_articleTitle, offset);
+  }
+
+  /// Clears the saved "Weiterhören" position for the active profile.
+  Future<void> clearLastArticle() async {
+    await ProfileService.instance.clearLastArticle();
+  }
+
+  /// Resumes a previously saved article from [charOffset] with an intro phrase.
+  Future<void> resumeLastArticle(String title, int charOffset) async {
+    if (!_zimReady) return;
+    _state = AppState.thinking;
+    notifyListeners();
+    try {
+      final rawResults = await _zimChannel.invokeMethod<List>('search', {
+        'query': title,
+        'maxResults': 1,
+      });
+      final results = (rawResults ?? [])
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+      if (results.isEmpty) {
+        await ProfileService.instance.clearLastArticle();
+        _state = AppState.idle;
+        notifyListeners();
+        return;
+      }
+      await _loadAndSpeakFrom(results.first['urlIndex'] as int, title, charOffset);
+    } catch (_) {
+      _state = AppState.idle;
+      notifyListeners();
+    }
+  }
+
+  /// Loads an article and starts reading from [charOffset] after an intro phrase.
+  Future<void> _loadAndSpeakFrom(int urlIndex, String title, int charOffset) async {
+    try {
+      final raw = await _zimChannel.invokeMethod<Map>('article', {'urlIndex': urlIndex});
+      if (raw == null) {
+        await ProfileService.instance.clearLastArticle();
+        _state = AppState.idle;
+        notifyListeners();
+        return;
+      }
+      _awaitingDisambiguation = false;
+      _pendingCandidates      = [];
+      _hasInterruptedForMic   = false;
+      _savedArticleTextForMic = '';
+      _misserfolgZaehler      = 0;
+      _technischZaehler       = 0;
+      _lastFailedQuery        = '';
+      _cancelIdleTimers();
+      _articleTitle = raw['title'] as String? ?? title;
+      _articleText  = raw['text']  as String? ?? '';
+      _articlePath  = raw['url']   as String? ?? '';
+      _articleImages      = [];
+      _selectedImageIndex = -1;
+      _imageBytesCache.clear();
+      final safeOffset = charOffset.clamp(0, _articleText.length);
+      _ttsCursor      = safeOffset;
+      _resumeOffset   = safeOffset;
+      _isPaused       = true;
+      _resumeAfterHandoff = true;
+      _state = AppState.idle;
+      notifyListeners();
+      loadMedia(urlIndex);
+      unawaited(_tts.speak('Weiter mit $_articleTitle!'));
+      // TTS completion → non-article branch → _resumeAfterHandoff → resumeSpeaking()
+    } on PlatformException catch (e) {
+      debugPrint('ZIM article error (resume): ${e.message}');
+      _state = AppState.idle;
+      notifyListeners();
+    }
+  }
+
+  // ── Gemini-Platzhalter (Typen 2, 3, 4) ────────────────────────────────────
+
+  static const _kGeminiUpgradePhrases = [
+    'Das ist eine kluge Frage! Für solche Antworten brauche ich einen Premium-Pass — frag deine Eltern darum!',
+    'Ooh, gute Frage! Das kann ich mit Premium-Zugang beantworten — frag Mama oder Papa!',
+    'Interessante Frage! Mit einem Premium-Pass könnte ich dir das erklären — deine Eltern wissen wie!',
+  ];
+  static const _kGeminiPlaceholderPhrases = [
+    'Gute Frage! Diese Fähigkeit lerne ich gerade noch — frag mich bald nochmal!',
+    'Hmm, lass mich überlegen ... das kann ich dir bald beantworten. Bleib gespannt!',
+    'Das ist spannend! Ich arbeite daran, solche Fragen zu beantworten — frag mich später nochmal!',
+  ];
+
+  Future<void> _handleGeminiPlaceholder(String query) async {
+    final idx = DateTime.now().millisecondsSinceEpoch % 3;
+    if (!SubscriptionService.instance.canAskQuestions) {
+      unawaited(_tts.speak(_kGeminiUpgradePhrases[idx]));
+      return;
+    }
+    // Premium: Platzhalter-Phrase (TODO: hier Gemini-API-Aufruf einsetzen)
+    unawaited(_tts.speak(_kGeminiPlaceholderPhrases[idx]));
   }
 
   /// Professor unterbricht sich, liest Caption vor, fragt danach "Soll ich weiterlesen?".

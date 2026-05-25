@@ -332,6 +332,7 @@ class _ArticleControlsState extends State<_ArticleControls>
               icon: Icons.arrow_back_rounded,
               bg: const Color(0xFF37474F),
               onTap: () async {
+                await provider.saveCurrentArticlePosition();
                 await provider.stopSpeaking();
                 if (context.mounted) Navigator.pop(context);
               },
@@ -355,9 +356,10 @@ class _ArticleControlsState extends State<_ArticleControls>
     final isDark = provider.viewMode != ArticleViewMode.a;
     return Center(
       child: GestureDetector(
-        onTap: () {
-          provider.stopSpeaking();
-          Navigator.pop(context);
+        onTap: () async {
+          await provider.saveCurrentArticlePosition();
+          await provider.stopSpeaking();
+          if (context.mounted) Navigator.pop(context);
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
@@ -923,10 +925,11 @@ class _ArticleMenu extends StatelessWidget {
             leading:
                 const Icon(Icons.stop_circle_rounded, color: Color(0xFF2D6A4F)),
             title: const Text('Vorlesen beenden'),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              provider.stopSpeaking();
-              Navigator.pop(context);
+              await provider.clearLastArticle();
+              await provider.stopSpeaking();
+              if (context.mounted) Navigator.pop(context);
             },
           ),
           const Divider(height: 1, indent: 24, endIndent: 24),
@@ -934,10 +937,11 @@ class _ArticleMenu extends StatelessWidget {
             leading:
                 const Icon(Icons.home_rounded, color: Color(0xFF2D6A4F)),
             title: const Text('Zum Hauptmenü'),
-            onTap: () {
+            onTap: () async {
               Navigator.pop(context);
-              provider.stopSpeaking();
-              Navigator.pop(context);
+              await provider.clearLastArticle();
+              await provider.stopSpeaking();
+              if (context.mounted) Navigator.pop(context);
             },
           ),
           const SizedBox(height: 16),

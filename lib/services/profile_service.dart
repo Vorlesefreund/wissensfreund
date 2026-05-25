@@ -153,9 +153,12 @@ class ProfileService extends ChangeNotifier {
   Future<void> deleteProfile(int profileId) async {
     await LicenseCacheDb.instance.deleteProfile(profileId);
     _profiles.removeWhere((p) => p.id == profileId);
+    final prefs = await SharedPreferences.getInstance();
+    // Clear last_article keys for deleted profile
+    await prefs.remove(_lastTitleKey(profileId));
+    await prefs.remove(_lastOffsetKey(profileId));
     if (_activeProfile?.id == profileId) {
       _activeProfile = _profiles.isNotEmpty ? _profiles.first : null;
-      final prefs = await SharedPreferences.getInstance();
       if (_activeProfile != null) {
         await prefs.setInt(_prefKey, _activeProfile!.id);
       } else {
@@ -180,6 +183,36 @@ class ProfileService extends ChangeNotifier {
     final pid = _activeProfile?.id;
     if (pid == null) return [];
     return LicenseCacheDb.instance.getArticleHistory(profileId: pid, limit: limit);
+  }
+
+  // ── Last Article ─────────────────────────────────────────────────────────────
+
+  static String _lastTitleKey(int id) => 'last_article_title_$id';
+  static String _lastOffsetKey(int id) => 'last_article_offset_$id';
+
+  Future<void> saveLastArticle(String title, int charOffset) async {
+    final pid = _activeProfile?.id;
+    if (pid == null || title.isEmpty) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_lastTitleKey(pid), title);
+    await prefs.setInt(_lastOffsetKey(pid), charOffset);
+  }
+
+  Future<({String title, int offset})?> getLastArticle() async {
+    final pid = _activeProfile?.id;
+    if (pid == null) return null;
+    final prefs = await SharedPreferences.getInstance();
+    final title = prefs.getString(_lastTitleKey(pid));
+    if (title == null || title.isEmpty) return null;
+    return (title: title, offset: prefs.getInt(_lastOffsetKey(pid)) ?? 0);
+  }
+
+  Future<void> clearLastArticle() async {
+    final pid = _activeProfile?.id;
+    if (pid == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_lastTitleKey(pid));
+    await prefs.remove(_lastOffsetKey(pid));
   }
 
   // ── Favorites ─────────────────────────────────────────────────────────────────

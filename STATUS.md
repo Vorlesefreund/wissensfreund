@@ -1,5 +1,42 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-25T20:08:31Z -->
+<!-- updated: 2026-05-25T18:36:38Z -->
+
+## Zuletzt erledigt (Session 2026-05-25 — nacht)
+
+### "Weiterhören" + Gemini-Platzhalter (komplett implementiert)
+
+#### Weiterhören (Home-Screen)
+- `ProfileService`: `saveLastArticle(title, charOffset)` / `getLastArticle()` / `clearLastArticle()` hinzugefügt
+- `ProfileService.deleteProfile()`: löscht jetzt auch `last_article_title_{id}` + `last_article_offset_{id}`
+- `WissensfreundProvider`:
+  - `saveCurrentArticlePosition()` — speichert aktuellen Satzanfang-Offset
+  - `clearLastArticle()` — delegiert an ProfileService
+  - `resumeLastArticle(title, offset)` — ZIM-Suche → `_loadAndSpeakFrom()` → spricht "Weiter mit [Titel]!" → Resume
+  - `_loadAndSpeakFrom()` — lädt Artikel, setzt `_resumeAfterHandoff=true`, spielt Intro-Phrase
+  - `_loadAndSpeak()`: ruft jetzt `clearLastArticle()` bevor `_startSpeakingFrom(0)` (neuer Artikel = Weiterhören löschen)
+  - TTS completion (Artikel-Ende): ruft `clearLastArticle()` auf
+- `article_screen.dart`: ← Button (sprechend + idle) speichert Position vor `stopSpeaking()`
+- `article_screen.dart`: "Vorlesen beenden" + "Zum Hauptmenü" rufen `clearLastArticle()` auf
+- `main.dart`: Background-Pause speichert Position (`saveCurrentArticlePosition()`) vor `pauseSpeaking()`
+- `home_screen.dart`:
+  - `_lastArticle` State, `_loadLastArticle()`, `_onProfileChanged()` Listener
+  - `_WeiterhoerenCard` Widget (grüne Karte mit ▶, Titel, Untertitel)
+  - Karte erscheint nur wenn idle + kein Artikel geladen + letzter Artikel gespeichert
+
+#### Gemini-Platzhalter (5 Frage-Typen verdrahtet)
+- `_QueryType` Enum: `{ fullRead, targeted, comparison, followUp, unknown }`
+- `_kCompareWords` Konstante (19 Vergleichswörter)
+- `_detectQueryType()`: gibt jetzt `unknown` als Default zurück (war `fullRead`)
+- `_processQuery()` komplett überarbeitet — 5 Typen:
+  - Typ 1 (fullRead): wie bisher → Artikel vorlesen
+  - Typ 2 (targeted): `_handleGeminiPlaceholder()` nach ZIM-Suche mit Treffer
+  - Typ 3 (comparison): erkannt nach ZIM (2 Treffer ≥ kMinScore + Vergleichswort) → Platzhalter
+  - Typ 4 (followUp): erkannt via `_hasInterruptedForMic` → Platzhalter, kein ZIM-Download
+  - Typ 5 (unknown): kein Treffer → Eltern-Verweis; Treffer → Artikel vorlesen (wie Typ 1)
+  - Typen 2/3/5 ohne Treffer: immer Eltern-Verweis (eiserne Regel)
+- `_handleGeminiPlaceholder()`: Free → Upgrade-Phrase (3 Varianten); Premium → Platzhalter-Phrase (3 Varianten)
+
+---
 
 ## Zuletzt erledigt (Session 2026-05-25 — abends)
 
