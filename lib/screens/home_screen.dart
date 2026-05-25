@@ -248,7 +248,10 @@ class _HomeScreenState extends State<HomeScreen>
           context,
           MaterialPageRoute(builder: (_) => const ArticleScreen()),
         ).then((_) {
-          if (mounted) _navigatingToArticle = false;
+          if (mounted) {
+            _navigatingToArticle = false;
+            _loadLastArticle(); // reload Weiterhören card after returning
+          }
         });
       });
     }
