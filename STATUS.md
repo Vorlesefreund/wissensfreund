@@ -1,5 +1,36 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-25T13:42:54Z -->
+<!-- updated: 2026-05-25T19:53:39Z -->
+
+## Zuletzt erledigt (Session 2026-05-25 — abends)
+
+### Onboarding-Flow (FirstRunScreen) — komplett implementiert
+
+#### Neue Dateien
+- `lib/screens/first_run_screen.dart` — 4-seitiger Willkommens-Wizard:
+  - Seite 0: Welcome — Begrüßung, Beschreibung, "~3 Minuten"-Badge, Übersicht der 4 Schritte
+  - Seite 1: Internet & Daten — identische Logik wie `_NetworkSettingsOnboardingDialog` (WLAN-Unlimited, Tageslimit, Monatslimit, Mobilfunk-Toggle)
+  - Seite 2: Bildqualität — Standard vs. Gut (~2 GB), Speicherplatz-Prüfung, Download mit Fortschrittsanzeige
+  - Seite 3: Kinderschutz — `requestOverlayPermission` flow (intro → warten → erteilt/verweigert → fertig)
+  - Nach Seite 3: `onboarding_complete = true` setzen, alle Onboarding-Flags schreiben, → `ProfileCreationScreen(isFirstProfile: true)`
+
+#### Geänderte Dateien
+- `lib/main.dart`:
+  - `SharedPreferences.getBool('onboarding_complete')` beim Start
+  - Neues Pflichtargument `onboardingComplete` für `WissensfreundApp`
+  - Routing: `!onboardingComplete` → `FirstRunScreen`, sonst bekannte Logik
+
+#### Ablauf (wie vom User spezifiziert)
+1. Erstinstallation → `FirstRunScreen` mit Fortschrittspunkten
+2. Eltern richten Internet-Limits, Bildqualität und Kinderschutz ein
+3. → `ProfileCreationScreen` (Name, Alter, Avatar, Sprachniveau, Fertig+Konfetti)
+4. → `HomeScreen` (normaler App-Start)
+5. Alle Folgestarts: `onboarding_complete = true` → direkt zum normalen Start-Screen
+
+#### Fixes (Slider, Back-Button aus letzter Session)
+- Slider-Bug in Profil-Wizard (Schritt 2 ohne sichtbaren Regler) → `FocusScope.unfocus()` in `_next()`
+- Back-Button-Spinner-Loop → `PopScope(canPop: !widget.isFirstProfile)` in `ProfileCreationScreen`
+
+---
 
 ## Zuletzt erledigt (Session 2026-05-25 — nachmittags 2)
 
@@ -115,6 +146,9 @@
   Sobald grün: `images_medium.zip` auf R2 und "Gut"-Bildqualität downloadbar.
 
 ### Fehlende Features
+- **Gemini-Integration**: Frage-Typ-Erkennung (5 Typen) muss vor Gemini verdrahtet werden.
+  Logik dokumentiert in CLAUDE_CHAT_NOTIZEN.md (2026-05-25).
+  `_detectQueryType()` vorhanden aber nicht aktiv. Typ 3 (Vergleichsfrage) und Typ 5 (Fallback) fehlen noch.
 - **Upgrade-Flow bei Rückfrage (Free-User)**: `canAskQuestions`-Gate vorhanden,
   aber kein Dialog wenn Free-User fragt. Wartet auf Gemini-Integration.
 - **Download-Größe dynamisch**: Wird noch statisch ("~2 GB") angezeigt, nicht aus Manifest gelesen.
@@ -126,6 +160,5 @@
 ### Technische Schulden
 - `kMonthlyQuestionLimit = 5000` und `addSessionMinutes()` vorhanden aber inaktiv
   (aktivieren wenn Gemini läuft).
-- Bottom-Navigation-Bar-Abstand: Fix installiert, aber vom User noch nicht final bestätigt.
 - RadioListTile groupValue/onChanged deprecated in Flutter 3.32+ (data_limit_overlay.dart) —
   kein Fehler, nur Info-Warnung; bei Gelegenheit auf RadioGroup umstellen.

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'providers/wissensfreund_provider.dart';
 import 'services/data_limit_overlay_service.dart';
 import 'services/parental_lock_service.dart';
 import 'services/profile_service.dart';
+import 'screens/first_run_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/profile_selection_screen.dart';
 import 'widgets/data_limit_overlay.dart';
@@ -13,6 +15,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ParentalLockService.instance.init();
   await ProfileService.instance.initialize();
+  final prefs = await SharedPreferences.getInstance();
+  final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
   // Kiosk-Modus nach erstem Frame automatisch reaktivieren (falls zuvor aktiviert)
   WidgetsBinding.instance.addPostFrameCallback((_) {
     ParentalLockService.instance.tryAutoStartKiosk();
@@ -25,13 +29,14 @@ void main() async {
         ChangeNotifierProvider.value(value: ProfileService.instance),
         ChangeNotifierProvider.value(value: DataLimitOverlayService.instance),
       ],
-      child: const WissensfreundApp(),
+      child: WissensfreundApp(onboardingComplete: onboardingComplete),
     ),
   );
 }
 
 class WissensfreundApp extends StatefulWidget {
-  const WissensfreundApp({super.key});
+  final bool onboardingComplete;
+  const WissensfreundApp({super.key, required this.onboardingComplete});
   @override
   State<WissensfreundApp> createState() => _WissensfreundAppState();
 }
@@ -83,9 +88,11 @@ class _WissensfreundAppState extends State<WissensfreundApp>
         ),
         useMaterial3: true,
       ),
-      home: ProfileService.instance.hasProfiles
-          ? const HomeScreen()
-          : const ProfileSelectionScreen(),
+      home: !widget.onboardingComplete
+          ? const FirstRunScreen()
+          : ProfileService.instance.hasProfiles
+              ? const HomeScreen()
+              : const ProfileSelectionScreen(),
       builder: (context, child) => _AppShell(child: child!),
     );
   }

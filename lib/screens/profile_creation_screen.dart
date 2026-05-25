@@ -123,6 +123,8 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
 
   void _next() {
     if (_step < 4) {
+      // Dismiss keyboard before transitioning (step 1 has an autofocus TextField).
+      FocusScope.of(context).unfocus();
       setState(() => _step++);
       _pageController.animateToPage(
         _step,
@@ -162,7 +164,10 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      // Block Android back-button on first-profile creation — no way out until done.
+      canPop: !widget.isFirstProfile,
+      child: Scaffold(
       backgroundColor: const Color(0xFFFFF8EE),
       body: Stack(
         children: [
@@ -211,7 +216,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
             ),
         ],
       ),
-    );
+    ));
   }
 
   Widget _buildHeader() {
