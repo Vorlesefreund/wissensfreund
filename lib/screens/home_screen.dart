@@ -1587,7 +1587,7 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
 
   Future<void> _startDownload() async {
     setState(() { _downloading = true; _error = null; });
-    final ok = await ImageLibraryService.instance.downloadLibrary(
+    final error = await ImageLibraryService.instance.downloadLibrary(
       onProgress: (received, total, eta) {
         if (mounted) setState(() {
           _progress = total > 0 ? received / total : 0;
@@ -1596,11 +1596,30 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
       },
     );
     if (!mounted) return;
-    if (ok) {
+    if (error == null) {
       Navigator.pop(context);
     } else {
-      setState(() { _downloading = false; _error = 'Download fehlgeschlagen. Bitte WLAN prüfen.'; });
+      setState(() {
+        _downloading = false;
+        _error = _downloadErrorMessage(error);
+      });
     }
+  }
+
+  static String _downloadErrorMessage(String code) {
+    if (code.startsWith('http_404')) {
+      return 'Bildpaket noch nicht verfügbar — bitte in einigen Tagen erneut versuchen.';
+    }
+    if (code == 'no_network' || code == 'wifi_lost') {
+      return 'Keine WLAN-Verbindung. Bitte WLAN prüfen.';
+    }
+    if (code == 'mobile_not_allowed') {
+      return 'Mobile Daten nicht erlaubt. Bitte WLAN verwenden.';
+    }
+    if (code == 'limit_reached') {
+      return 'Datenlimit erreicht. Bitte Internet-Einstellungen prüfen.';
+    }
+    return 'Download fehlgeschlagen ($code). Bitte WLAN prüfen.';
   }
 
   String _fmtEta(Duration d) =>

@@ -48,11 +48,12 @@ class ImageLibraryService {
   bool get isDownloading => _downloading;
 
   /// Downloads images_medium.zip from R2, extracts it into image_library/.
-  /// Returns true on success. No-op if already downloading.
-  Future<bool> downloadLibrary({
+  /// Returns null on success, or an error code string on failure.
+  /// No-op (returns 'already_downloading') if already downloading.
+  Future<String?> downloadLibrary({
     void Function(int received, int total, Duration eta)? onProgress,
   }) async {
-    if (_downloading) return false;
+    if (_downloading) return 'already_downloading';
     _downloading = true;
 
     try {
@@ -66,14 +67,14 @@ class ImageLibraryService {
 
       if (!result.success) {
         debugPrint('ImageLibrary: download failed (${result.error})');
-        return false;
+        return result.error ?? 'unknown';
       }
 
       await _extractZip(tmpZip);
       try { File(tmpZip).deleteSync(); } catch (_) {}
 
       debugPrint('ImageLibrary: ready (${totalSizeBytes ~/ 1024} KB)');
-      return true;
+      return null; // success
     } finally {
       _downloading = false;
     }

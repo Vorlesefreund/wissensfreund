@@ -1,9 +1,19 @@
-<!-- last-updated: 2026-05-25T08:58:23Z -->
+<!-- last-updated: 2026-05-25T09:01:27Z -->
 # Changelog — Wissensfreund App
 
 ---
 
 ## ✅ FERTIG — Bugfixes & fehlende Features (Stand 2026-05-25)
+
+### Bildpaket-Download: sprechende Fehlermeldungen
+- **`image_library_service.dart`**: `downloadLibrary()` gibt jetzt `String? error` zurück
+  statt `bool` — Fehlercode wird an die UI weitergegeben.
+- **`home_screen.dart`**: `_downloadErrorMessage()` übersetzt Fehlercode in Klartext:
+  HTTP 404 → "Bildpaket noch nicht verfügbar", kein WLAN → "Keine WLAN-Verbindung", etc.
+  Ursache: `images_medium.zip` existiert noch nicht auf R2 — GitHub-Workflow muss einmalig
+  manuell gestartet werden.
+
+
 
 ### Onboarding-Chain-Fix
 - **`home_screen.dart`**: `StorageManager.instance.initialize()` wird jetzt vor der Onboarding-Kette
