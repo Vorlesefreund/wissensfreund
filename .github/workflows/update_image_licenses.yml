@@ -163,6 +163,7 @@ jobs:
   download:
     runs-on: ubuntu-latest
     needs: prepare
+    timeout-minutes: 180   # audio package is small; 3 h is plenty
     permissions:
       contents: write   # required to create/update GitHub Releases
 
@@ -233,6 +234,7 @@ jobs:
   images:
     runs-on: ubuntu-latest
     needs: prepare
+    timeout-minutes: 360   # 6 h hard cap; script stops gracefully at 4h30m
 
     steps:
       - uses: actions/checkout@v5
@@ -259,10 +261,13 @@ jobs:
       - name: Build image library (incremental)
         run: python scripts/download_images.py
         env:
-          LICENSES_FILE: media_licenses.json
-          ZIM_VERSION:   ${{ env.ZIM_VERSION }}
-          R2_BASE_URL:   https://pub-07f0107be14b48fd8652e5318441c7c2.r2.dev
-          MAX_IMAGES:    ${{ inputs.max_articles || '0' }}
+          LICENSES_FILE:       media_licenses.json
+          ZIM_VERSION:         ${{ env.ZIM_VERSION }}
+          R2_BASE_URL:         https://pub-07f0107be14b48fd8652e5318441c7c2.r2.dev
+          MAX_IMAGES:          ${{ inputs.max_articles || '0' }}
+          # Stop 90 min before the 6 h job timeout so ZIP + upload still finish.
+          # sleep 3600 runs first, so Python has at most ~5 h → budget = 4 h 30 m.
+          MAX_RUNTIME_SECONDS: '16200'
 
       # ── Upload: image library → Cloudflare R2 ────────────────────────────
       - name: Upload image library to Cloudflare R2

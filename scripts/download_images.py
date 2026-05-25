@@ -29,6 +29,8 @@ import zipfile
 from datetime import date
 from pathlib import Path
 
+_START_TIME = time.monotonic()
+
 try:
     import requests
 except ImportError:
@@ -49,11 +51,14 @@ MAX_IMAGES     = int(os.environ.get("MAX_IMAGES", "0"))  # 0 = all
 COMMONS_API    = "https://commons.wikimedia.org/w/api.php"
 UA             = "WissensfreundApp/1.0 (image-downloader; github.com/Vorlesefreund/wissensfreund)"
 
-BATCH_SIZE     = 50
-API_DELAY      = 1.5    # seconds between API batches
-DOWNLOAD_DELAY = 0.5    # seconds between file downloads
-MAX_ZIP_BYTES  = 2 * 1024 * 1024 * 1024   # 2 GB
-MAX_IMG_BYTES  = 3 * 1024 * 1024           # 3 MB per image
+BATCH_SIZE        = 50
+API_DELAY         = 1.5    # seconds between API batches
+DOWNLOAD_DELAY    = 0.5    # seconds between file downloads
+MAX_ZIP_BYTES     = 2 * 1024 * 1024 * 1024   # 2 GB
+MAX_IMG_BYTES     = 3 * 1024 * 1024           # 3 MB per image
+# Stop downloading gracefully before the GitHub Actions job timeout (6 h).
+# Default: 16 200 s = 4 h 30 min (leaves ~90 min for ZIP rebuild + upload).
+MAX_RUNTIME_SECS  = int(os.environ.get("MAX_RUNTIME_SECONDS", "16200"))
 
 IMAGE_EXTS     = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"}
 
@@ -193,8 +198,14 @@ def main() -> None:
     downloaded: dict[str, Path] = {}
     rate_abort = False
 
+    time_abort = False
     for fn, url in new_urls.items():
         if rate_abort:
+            break
+        elapsed = time.monotonic() - _START_TIME
+        if elapsed > MAX_RUNTIME_SECS:
+            time_abort = True
+            print(f"\nTime budget reached ({elapsed/3600:.1f} h) — saving partial progress for next run")
             break
         dest = DOWNLOAD_DIR / fn
         print(f"  {fn}...", end=" ", flush=True)
@@ -211,8 +222,11 @@ def main() -> None:
         time.sleep(DOWNLOAD_DELAY)
 
     print(f"\nDownloaded {len(downloaded)} new images")
-    if rate_abort:
-        print("  Note: downloads aborted early due to rate-limit; rest will be fetched next run")
+    remaining = len(new_urls) - len(downloaded)
+    if time_abort:
+        print(f"  Note: {remaining} images deferred — will be fetched on next run (incremental)")
+    elif rate_abort:
+        print(f"  Note: {remaining} images deferred due to rate-limit — will be fetched on next run")
 
     # ── 6. Fetch existing ZIP from R2 (only if we have changes to add) ────────
     if R2_BASE_URL and (downloaded or not OUTPUT_ZIP.exists()):
