@@ -87,14 +87,14 @@ jobs:
 
       # ── Pass refs + licenses to downstream jobs via artifacts ───────────────
       - name: Upload audio refs artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v4
         with:
           name: audio-refs
           path: wikipedia_audio_refs.json
           retention-days: 1
 
       - name: Upload licenses artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v4
         with:
           name: media-licenses
           path: media_licenses.json
@@ -177,7 +177,7 @@ jobs:
         run: pip install requests
 
       - name: Download audio refs artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v4
         with:
           name: audio-refs
 
@@ -245,7 +245,7 @@ jobs:
         run: pip install requests
 
       - name: Download licenses artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v4
         with:
           name: media-licenses
 
