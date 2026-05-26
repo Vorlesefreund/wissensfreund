@@ -1,168 +1,208 @@
 #!/usr/bin/env python3
 """
-Builds images_medium.zip: 800px-wide versions of all licensed Klexikon images.
+Builds images_medium.zip by extracting images directly from the Klexikon ZIM.
+
+The images in the ZIM use content-hashed filenames (e.g. "Assets /abc123.jpg")
+that do not exist on Wikimedia Commons, so they must be read from the ZIM binary.
 
 Steps:
   1. Read media_licenses.json for permitted image filenames
-  2. Fetch images_medium_manifest.json from R2 to see what's already cached
-  3. Query Wikimedia Commons for 800px thumbnail URLs (batched, rate-limited)
-  4. Download only new/missing images
-  5. Fetch the existing images_medium.zip from R2, add new images, re-pack
-  6. Write updated manifest; workflow uploads both to R2
+  2. Scan the ZIM entry table to locate each image (cluster_num, blob_num)
+  3. Group images by cluster; decompress each cluster once (zstandard)
+  4. Write extracted images directly to images_medium.zip
+  5. Write images_medium_manifest.json
 
 Output:
-  images_medium.zip          — ZIP with entries images/{filename} (max 2 GB)
-  images_medium_manifest.json — {filename: {size, downloaded}} tracking dict
+  images_medium.zip           — ZIP with entries images/{filename}
+  images_medium_manifest.json — {filename: {size, extracted}} tracking dict
 
 Run locally:
-  LICENSES_FILE=media_licenses.json python scripts/download_images.py
+  ZIM_FILE=klexikon.zim LICENSES_FILE=media_licenses.json python scripts/download_images.py
 
 GitHub Actions: see .github/workflows/update_image_licenses.yml (images job)
-Requires: pip install requests
+Requires: pip install zstandard
 """
 
 import json
 import os
+import struct
 import sys
 import time
 import zipfile
+from collections import defaultdict
 from datetime import date
 from pathlib import Path
+from urllib.parse import unquote
 
 _START_TIME = time.monotonic()
 
 try:
-    import requests
+    import zstandard
 except ImportError:
-    print("ERROR: pip install requests", file=sys.stderr)
+    print("ERROR: pip install zstandard", file=sys.stderr)
     sys.exit(1)
 
 # ── Configuration ──────────────────────────────────────────────────────────────
 
-LICENSES_FILE  = Path(os.environ.get("LICENSES_FILE", "media_licenses.json"))
-MANIFEST_FILE  = Path("images_medium_manifest.json")
-OUTPUT_ZIP     = Path("images_medium.zip")
-EXISTING_ZIP   = Path("images_medium_existing.zip")
-DOWNLOAD_DIR   = Path("image_downloads")
-ZIM_VERSION    = os.environ.get("ZIM_VERSION", "unknown")
-R2_BASE_URL    = os.environ.get("R2_BASE_URL", "").rstrip("/")
-MAX_IMAGES     = int(os.environ.get("MAX_IMAGES", "0"))  # 0 = all
+LICENSES_FILE    = Path(os.environ.get("LICENSES_FILE", "media_licenses.json"))
+ZIM_FILE         = Path(os.environ.get("ZIM_FILE", "klexikon.zim"))
+MANIFEST_FILE    = Path("images_medium_manifest.json")
+OUTPUT_ZIP       = Path("images_medium.zip")
+ZIM_VERSION      = os.environ.get("ZIM_VERSION", "unknown")
+MAX_IMAGES       = int(os.environ.get("MAX_IMAGES", "0"))
+MAX_RUNTIME_SECS = int(os.environ.get("MAX_RUNTIME_SECONDS", "7200"))
 
-COMMONS_API    = "https://commons.wikimedia.org/w/api.php"
-UA             = "WissensfreundApp/1.0 (image-downloader; github.com/Vorlesefreund/wissensfreund)"
+MAX_ZIP_BYTES = 2 * 1024 * 1024 * 1024   # 2 GB hard cap
+MAX_IMG_BYTES = 5 * 1024 * 1024           # 5 MB per image
 
-BATCH_SIZE        = 50
-API_DELAY         = 1.5    # seconds between API batches
-DOWNLOAD_DELAY    = 0.5    # seconds between file downloads
-MAX_ZIP_BYTES     = 2 * 1024 * 1024 * 1024   # 2 GB
-MAX_IMG_BYTES     = 3 * 1024 * 1024           # 3 MB per image
-# Stop downloading gracefully before the GitHub Actions job timeout (6 h).
-# Default: 16 200 s = 4 h 30 min (leaves ~90 min for ZIP rebuild + upload).
-MAX_RUNTIME_SECS  = int(os.environ.get("MAX_RUNTIME_SECONDS", "16200"))
-
-IMAGE_EXTS     = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"}
+ZIM_MAGIC  = 0x044d495a
+IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
 
-# ── Helpers ────────────────────────────────────────────────────────────────────
+# ── ZIM binary reading ─────────────────────────────────────────────────────────
 
-def fetch_json(url: str) -> dict | None:
-    """GET url, return parsed JSON or None on error/404."""
-    try:
-        r = requests.get(url, headers={"User-Agent": UA}, timeout=30)
-        if r.status_code == 404:
-            return None
-        r.raise_for_status()
-        return r.json()
-    except Exception as e:
-        print(f"  [warn] fetch_json({url}): {e}")
-        return None
+def _read_cstr(f) -> str:
+    buf = bytearray()
+    while True:
+        b = f.read(1)
+        if not b or b == b'\x00':
+            break
+        buf.extend(b)
+    return buf.decode("utf-8", errors="replace")
 
 
-def query_thumbnail_urls(filenames: list[str]) -> dict[str, str]:
+def _read_header(zim_path: Path) -> dict:
+    with open(zim_path, "rb") as f:
+        hdr = f.read(80)
+    if len(hdr) < 80:
+        raise ValueError("ZIM file too small")
+    magic, = struct.unpack_from("<I", hdr, 0)
+    if magic != ZIM_MAGIC:
+        raise ValueError(f"Not a ZIM file (magic={hex(magic)})")
+    return {
+        "entry_count":     struct.unpack_from("<I", hdr, 24)[0],
+        "cluster_count":   struct.unpack_from("<I", hdr, 28)[0],
+        "url_ptr_pos":     struct.unpack_from("<Q", hdr, 32)[0],
+        "cluster_ptr_pos": struct.unpack_from("<Q", hdr, 48)[0],
+    }
+
+
+def scan_image_entries(zim_path: Path, wanted: set[str]) -> dict[str, tuple[int, int]]:
     """
-    Query Wikimedia Commons for 800px thumbnail URLs.
-    Returns {bare_filename: url}.  Files not on Commons are omitted.
+    Walk the ZIM URL-pointer table; return {filename: (cluster_num, blob_num)}
+    for every entry whose decoded URL is in `wanted`.
+    Exits early once all wanted images are found.
     """
-    result: dict[str, str] = {}
-    batches = [filenames[i:i + BATCH_SIZE] for i in range(0, len(filenames), BATCH_SIZE)]
-    for idx, batch in enumerate(batches, 1):
-        print(f"  URL batch {idx}/{len(batches)} ({len(batch)} files)...", end=" ", flush=True)
-        try:
-            r = requests.get(
-                COMMONS_API,
-                params={
-                    "action":     "query",
-                    "titles":     "|".join(f"File:{f}" for f in batch),
-                    "prop":       "imageinfo",
-                    "iiprop":     "url",
-                    "iiurlwidth": 800,
-                    "format":     "json",
-                },
-                headers={"User-Agent": UA},
-                timeout=30,
-            )
-            r.raise_for_status()
-            pages = r.json().get("query", {}).get("pages", {})
-            found = 0
-            for page in pages.values():
-                title = page.get("title", "").removeprefix("File:")
-                infos = page.get("imageinfo") or []
-                if infos:
-                    url = infos[0].get("thumburl") or infos[0].get("url") or ""
-                    if url:
-                        result[title] = url
-                        found += 1
-            print(f"ok ({found} URLs, {len(result)} total)")
-        except Exception as e:
-            print(f"ERROR: {e}")
-        time.sleep(API_DELAY)
-    return result
+    h = _read_header(zim_path)
+    entry_count = h["entry_count"]
+    url_ptr_pos = h["url_ptr_pos"]
+    found: dict[str, tuple[int, int]] = {}
+    remaining = set(wanted)
+
+    with open(zim_path, "rb") as f:
+        for i in range(entry_count):
+            if not remaining:
+                break
+            f.seek(url_ptr_pos + i * 8)
+            raw = f.read(8)
+            if len(raw) < 8:
+                break
+            ptr, = struct.unpack_from("<Q", raw)
+
+            f.seek(ptr)
+            hdr4 = f.read(4)
+            if len(hdr4) < 4:
+                continue
+            mime_idx, param_len, _ns = struct.unpack_from("<HBc", hdr4)
+            f.read(4)  # revision
+
+            if mime_idx == 0xFFFF:
+                f.read(4)       # redirect index
+                _read_cstr(f)   # url
+                _read_cstr(f)   # title
+                if param_len:
+                    f.read(param_len)
+                continue
+
+            cluster_num, blob_num = struct.unpack("<II", f.read(8))
+            url = _read_cstr(f)
+            _read_cstr(f)  # title
+            if param_len:
+                f.read(param_len)
+
+            decoded = unquote(url)
+            if decoded in remaining:
+                found[decoded] = (cluster_num, blob_num)
+                remaining.discard(decoded)
+
+    return found
 
 
-def download_image(url: str, dest: Path) -> int:
+def _read_cluster_offsets(zim_path: Path, cluster_ptr_pos: int, cluster_count: int) -> list[int]:
+    """Read all cluster start offsets from the cluster pointer table."""
+    with open(zim_path, "rb") as f:
+        f.seek(cluster_ptr_pos)
+        data = f.read(cluster_count * 8)
+    return [struct.unpack_from("<Q", data, i * 8)[0] for i in range(cluster_count)]
+
+
+def decompress_cluster(
+    zim_path: Path,
+    cluster_offsets: list[int],
+    cluster_num: int,
+    zim_size: int,
+) -> tuple[bytes, bool]:
     """
-    Download url to dest.  Returns byte count on success, 0 on skip,
-    or -1 as a signal to abort all further downloads (rate-limited).
+    Read and decompress one ZIM cluster.
+    Returns (raw_data, extended) where extended=True means 8-byte blob offsets.
     """
-    try:
-        r = requests.get(url, headers={"User-Agent": UA}, timeout=30, stream=True)
-        if r.status_code == 429:
-            print("429 — warte 60 s...", end=" ", flush=True)
-            time.sleep(60)
-            r = requests.get(url, headers={"User-Agent": UA}, timeout=30, stream=True)
-        if r.status_code == 429:
-            print("ABORT (429 anhaeltend — Rate-Limit aktiv)")
-            return -1
-        r.raise_for_status()
+    offset = cluster_offsets[cluster_num]
+    end    = cluster_offsets[cluster_num + 1] if cluster_num + 1 < len(cluster_offsets) else zim_size
 
-        buf = bytearray()
-        for chunk in r.iter_content(65536):
-            buf.extend(chunk)
-            if len(buf) > MAX_IMG_BYTES:
-                print(f"SKIP (>{MAX_IMG_BYTES // 1_048_576} MB)", end=" ")
-                return 0
+    with open(zim_path, "rb") as f:
+        f.seek(offset)
+        info_byte, = struct.unpack("<B", f.read(1))
+        payload = f.read(end - offset - 1)
 
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        dest.write_bytes(bytes(buf))
-        return len(buf)
-    except Exception as e:
-        print(f"ERROR: {e}", end=" ")
-        return 0
+    compression = info_byte & 0x0F
+    extended    = bool(info_byte & 0x10)
+
+    if compression in (0, 1):
+        raw = payload
+    elif compression == 4:
+        dctx = zstandard.ZstdDecompressor()
+        raw = dctx.decompress(payload, max_output_size=256 * 1024 * 1024)
+    else:
+        raise ValueError(f"Unsupported cluster compression: {compression}")
+
+    return raw, extended
+
+
+def extract_blob(raw: bytes, blob_num: int, extended: bool) -> bytes:
+    """Extract one blob from decompressed cluster data."""
+    offset_size = 8 if extended else 4
+    fmt = "<Q" if extended else "<I"
+    first_offset, = struct.unpack_from(fmt, raw, 0)
+    blob_count = first_offset // offset_size - 1
+    if blob_num > blob_count:
+        raise IndexError(f"blob {blob_num} > cluster blob_count {blob_count}")
+    start, = struct.unpack_from(fmt, raw, blob_num * offset_size)
+    end,   = struct.unpack_from(fmt, raw, (blob_num + 1) * offset_size)
+    return raw[start:end]
 
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    if not LICENSES_FILE.exists():
-        print(f"ERROR: {LICENSES_FILE} not found — run generate_license_json.py first",
-              file=sys.stderr)
-        sys.exit(1)
+    for path, label in [(LICENSES_FILE, "LICENSES_FILE"), (ZIM_FILE, "ZIM_FILE")]:
+        if not path.exists():
+            print(f"ERROR: {label}={path} not found", file=sys.stderr)
+            sys.exit(1)
 
-    # ── 1. Load permitted image list ──────────────────────────────────────────
-    license_data   = json.loads(LICENSES_FILE.read_text(encoding="utf-8"))
-    images_section = license_data.get("images", {})
+    # ── 1. Permitted image list ───────────────────────────────────────────────
+    license_data = json.loads(LICENSES_FILE.read_text(encoding="utf-8"))
     permitted = [
-        fn for fn, info in images_section.items()
+        fn for fn, info in license_data.get("images", {}).items()
         if info.get("allowed") and Path(fn).suffix.lower() in IMAGE_EXTS
     ]
     if MAX_IMAGES > 0:
@@ -170,125 +210,90 @@ def main() -> None:
         print(f"[test mode] Limiting to {MAX_IMAGES} images")
     print(f"Permitted images: {len(permitted)}")
 
-    # ── 2. Load existing manifest from R2 ────────────────────────────────────
-    cached: dict[str, dict] = {}
-    if R2_BASE_URL:
-        manifest_url = f"{R2_BASE_URL}/images_medium_manifest.json"
-        print(f"Fetching manifest: {manifest_url}")
-        remote = fetch_json(manifest_url)
-        if remote:
-            cached = remote.get("images", {})
-            print(f"  Manifest: {len(cached)} cached images")
-        else:
-            print("  Manifest not found — first run, rebuilding from scratch")
+    # ── 2. Locate images in ZIM entry table ───────────────────────────────────
+    print(f"\nScanning ZIM ({ZIM_FILE.stat().st_size // 1_048_576} MB)...")
+    zim_entries = scan_image_entries(ZIM_FILE, set(permitted))
+    not_found   = len(permitted) - len(zim_entries)
+    print(f"Located in ZIM: {len(zim_entries)} / {len(permitted)}"
+          + (f"  ({not_found} not in ZIM — skipped)" if not_found else ""))
 
-    # ── 3. Determine new / missing images ────────────────────────────────────
-    new_filenames = [fn for fn in permitted if fn not in cached]
-    print(f"New images: {len(new_filenames)} of {len(permitted)}")
-
-    # ── 4. Resolve 800px URLs from Wikimedia Commons ──────────────────────────
-    new_urls: dict[str, str] = {}
-    if new_filenames:
-        print(f"Querying Wikimedia Commons for {len(new_filenames)} thumbnail URLs...")
-        new_urls = query_thumbnail_urls(new_filenames)
-        print(f"Resolved {len(new_urls)} URLs")
-
-    # ── 5. Download new images ────────────────────────────────────────────────
-    DOWNLOAD_DIR.mkdir(exist_ok=True)
-    downloaded: dict[str, Path] = {}
-    rate_abort = False
-
-    time_abort = False
-    for fn, url in new_urls.items():
-        if rate_abort:
-            break
-        elapsed = time.monotonic() - _START_TIME
-        if elapsed > MAX_RUNTIME_SECS:
-            time_abort = True
-            print(f"\nTime budget reached ({elapsed/3600:.1f} h) — saving partial progress for next run")
-            break
-        dest = DOWNLOAD_DIR / fn
-        print(f"  {fn}...", end=" ", flush=True)
-        size = download_image(url, dest)
-        if size == -1:
-            rate_abort = True
-            break
-        if size > 0:
-            downloaded[fn] = dest
-            cached[fn] = {"size": size, "downloaded": date.today().isoformat()}
-            print(f"ok ({size // 1024} KB)")
-        else:
-            print("skipped")
-        time.sleep(DOWNLOAD_DELAY)
-
-    print(f"\nDownloaded {len(downloaded)} new images")
-    remaining = len(new_urls) - len(downloaded)
-    if time_abort:
-        print(f"  Note: {remaining} images deferred — will be fetched on next run (incremental)")
-    elif rate_abort:
-        print(f"  Note: {remaining} images deferred due to rate-limit — will be fetched on next run")
-
-    # ── 6. Fetch existing ZIP from R2 (only if we have changes to add) ────────
-    if R2_BASE_URL and (downloaded or not OUTPUT_ZIP.exists()):
-        zip_url = f"{R2_BASE_URL}/images_medium.zip"
-        print(f"Fetching existing ZIP from R2...")
-        try:
-            r = requests.get(zip_url, headers={"User-Agent": UA}, stream=True, timeout=600)
-            if r.status_code == 200:
-                with open(EXISTING_ZIP, "wb") as f:
-                    for chunk in r.iter_content(1024 * 1024):
-                        f.write(chunk)
-                print(f"  Got {EXISTING_ZIP.stat().st_size // 1_048_576} MB")
-            elif r.status_code == 404:
-                print("  No ZIP on R2 yet (first run)")
-            else:
-                print(f"  HTTP {r.status_code} — skip")
-        except Exception as e:
-            print(f"  ERROR: {e} — continuing without old zip")
-
-    if not downloaded and not EXISTING_ZIP.exists():
-        print("\nNothing to do — ZIP is up to date.")
-        _write_manifest(cached)  # always write so manifest is uploaded even on no-op runs
+    if not zim_entries:
+        print("Nothing to extract.")
+        _write_manifest({})
         return
 
-    # ── 7. Rebuild ZIP: existing entries + new images ─────────────────────────
-    total_uncompressed = 0
-    entry_count = 0
-    skipped_count = 0
+    # ── 3. Load cluster pointer table ─────────────────────────────────────────
+    h = _read_header(ZIM_FILE)
+    zim_size = ZIM_FILE.stat().st_size
+    cluster_offsets = _read_cluster_offsets(ZIM_FILE, h["cluster_ptr_pos"], h["cluster_count"])
 
-    with zipfile.ZipFile(OUTPUT_ZIP, "w", zipfile.ZIP_STORED) as zf_out:
-        # Copy existing entries (skip any that we just re-downloaded)
-        if EXISTING_ZIP.exists():
-            with zipfile.ZipFile(EXISTING_ZIP, "r") as zf_in:
-                for info in zf_in.infolist():
-                    bare = info.filename.removeprefix("images/")
-                    if bare in downloaded:
-                        continue  # will be added fresh below
-                    data = zf_in.read(info.filename)
-                    if total_uncompressed + len(data) > MAX_ZIP_BYTES:
-                        skipped_count += 1
+    # Group by cluster so each cluster is decompressed only once
+    by_cluster: dict[int, list[tuple[str, int]]] = defaultdict(list)
+    for fn, (cn, bn) in zim_entries.items():
+        by_cluster[cn].append((fn, bn))
+
+    print(f"Clusters to decompress: {len(by_cluster)} (of {h['cluster_count']} total)")
+
+    # ── 4. Extract images → ZIP ───────────────────────────────────────────────
+    manifest:     dict[str, dict] = {}
+    total_bytes   = 0
+    entry_count   = 0
+    skip_count    = 0
+    cluster_done  = 0
+    time_abort    = False
+
+    print()
+    with zipfile.ZipFile(OUTPUT_ZIP, "w", zipfile.ZIP_STORED) as zf:
+        for cluster_num in sorted(by_cluster.keys()):
+            elapsed = time.monotonic() - _START_TIME
+            if elapsed > MAX_RUNTIME_SECS:
+                time_abort = True
+                print(f"Time budget reached ({elapsed / 3600:.1f} h) — stopping early")
+                break
+
+            items = by_cluster[cluster_num]
+            try:
+                raw, extended = decompress_cluster(ZIM_FILE, cluster_offsets, cluster_num, zim_size)
+                for fn, blob_num in items:
+                    try:
+                        data = extract_blob(raw, blob_num, extended)
+                    except Exception as e:
+                        print(f"  SKIP {fn}: {e}")
+                        skip_count += 1
                         continue
-                    zf_out.writestr(f"images/{bare}", data)
-                    total_uncompressed += len(data)
+                    if len(data) == 0 or len(data) > MAX_IMG_BYTES:
+                        skip_count += 1
+                        continue
+                    if total_bytes + len(data) > MAX_ZIP_BYTES:
+                        print("2 GB cap reached — stopping")
+                        skip_count += len(items)
+                        break
+                    zf.writestr(f"images/{fn}", data)
+                    manifest[fn] = {"size": len(data), "extracted": date.today().isoformat()}
+                    total_bytes += len(data)
                     entry_count += 1
+            except Exception as e:
+                print(f"  SKIP cluster {cluster_num}: {e}")
+                skip_count += len(items)
 
-        # Add freshly downloaded images
-        for fn, path in downloaded.items():
-            data = path.read_bytes()
-            if total_uncompressed + len(data) > MAX_ZIP_BYTES:
-                skipped_count += 1
-                continue
-            zf_out.writestr(f"images/{fn}", data)
-            total_uncompressed += len(data)
-            entry_count += 1
+            cluster_done += 1
+            if cluster_done % 100 == 0 or cluster_done == len(by_cluster):
+                pct = cluster_done / len(by_cluster) * 100
+                elapsed = time.monotonic() - _START_TIME
+                print(f"  {cluster_done}/{len(by_cluster)} clusters ({pct:.0f}%)"
+                      f" — {entry_count} images, {total_bytes // 1_048_576} MB"
+                      f" — {elapsed:.0f}s elapsed")
 
     zip_mb = OUTPUT_ZIP.stat().st_size // 1_048_576
-    print(f"\nZIP: {entry_count} images, {zip_mb} MB")
-    if skipped_count:
-        print(f"  Skipped {skipped_count} images (2 GB limit reached)")
+    print(f"\nResult: {entry_count} images → {zip_mb} MB ZIP")
+    if skip_count:
+        print(f"  Skipped: {skip_count}")
+    if time_abort:
+        deferred = len(zim_entries) - entry_count - skip_count
+        print(f"  Deferred to next run: {deferred}")
 
-    # ── 8. Write updated manifest ──────────────────────────────────────────────
-    _write_manifest(cached)
+    # ── 5. Manifest ───────────────────────────────────────────────────────────
+    _write_manifest(manifest)
 
 
 def _write_manifest(images: dict) -> None:
