@@ -38,7 +38,7 @@ jobs:
       contents: write   # required to create/update GitHub Releases
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-python@v6
         with:
@@ -168,7 +168,7 @@ jobs:
       contents: write   # required to create/update GitHub Releases
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-python@v6
         with:
@@ -237,7 +237,7 @@ jobs:
     timeout-minutes: 120   # ZIM download ~3 min + scan ~2 min + extraction ~20 min
 
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
 
       - uses: actions/setup-python@v6
         with:
