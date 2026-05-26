@@ -1214,8 +1214,16 @@ class WissensfreundProvider extends ChangeNotifier {
     _isPromptPlaying  = false;
     _showCaptionResumePrompt = false;
     await _tts.stop();
-    _isPaused = false;
+    _isPaused     = false;
     _resumeOffset = 0;
+    _ttsCursor    = 0;
+    _articleText  = '';
+    _articleTitle = '';
+    _articlePath  = '';
+    _articleImages      = [];
+    _selectedImageIndex = -1;
+    _mediaItems         = [];
+    _selectedMediaIndex = -1;
     _state = AppState.idle;
     notifyListeners();
   }
