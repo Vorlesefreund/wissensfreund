@@ -248,9 +248,7 @@ def main() -> None:
 
     if not downloaded and not EXISTING_ZIP.exists():
         print("\nNothing to do — ZIP is up to date.")
-        # Still write an updated manifest if we have one
-        if cached:
-            _write_manifest(cached)
+        _write_manifest(cached)  # always write so manifest is uploaded even on no-op runs
         return
 
     # ── 7. Rebuild ZIP: existing entries + new images ─────────────────────────

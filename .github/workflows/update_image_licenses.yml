@@ -272,16 +272,24 @@ jobs:
       # ── Upload: image library → Cloudflare R2 ────────────────────────────
       - name: Upload image library to Cloudflare R2
         run: |
-          aws s3 cp images_medium.zip \
-            s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/images_medium.zip \
-            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
-            --content-type application/zip \
-            --cache-control "public, max-age=86400"
-          aws s3 cp images_medium_manifest.json \
-            s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/images_medium_manifest.json \
-            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
-            --content-type application/json \
-            --cache-control "public, max-age=86400"
+          if [ -f images_medium_manifest.json ]; then
+            aws s3 cp images_medium_manifest.json \
+              s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/images_medium_manifest.json \
+              --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
+              --content-type application/json \
+              --cache-control "public, max-age=86400"
+          else
+            echo "images_medium_manifest.json not found — skipping"
+          fi
+          if [ -f images_medium.zip ]; then
+            aws s3 cp images_medium.zip \
+              s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/images_medium.zip \
+              --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
+              --content-type application/zip \
+              --cache-control "public, max-age=86400"
+          else
+            echo "images_medium.zip not produced — ZIP already up to date on R2 or no images downloaded"
+          fi
         env:
           AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
