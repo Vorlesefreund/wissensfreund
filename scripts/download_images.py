@@ -50,6 +50,8 @@ ZIM_FILE      = Path(os.environ.get("ZIM_FILE", "klexikon.zim"))
 ZIM_VERSION   = os.environ.get("ZIM_VERSION", "unknown")
 MAX_IMAGES    = int(os.environ.get("MAX_IMAGES", "0"))
 COMMONS_DELAY = float(os.environ.get("COMMONS_DELAY", "0.15"))
+SHARD_INDEX   = int(os.environ.get("SHARD_INDEX", "0"))
+SHARD_COUNT   = int(os.environ.get("SHARD_COUNT", "1"))
 
 # Quality tiers: (name, width_px)
 SIZES = [
@@ -267,7 +269,12 @@ def main() -> None:
         zim_only     = zim_only[:max(0, MAX_IMAGES - len(commons_list))]
         print(f"[test mode] Limiting to {MAX_IMAGES} images")
 
-    print(f"Commons images: {len(commons_list)}  |  ZIM-only: {len(zim_only)}")
+    if SHARD_COUNT > 1:
+        commons_list = [x for i, x in enumerate(commons_list) if i % SHARD_COUNT == SHARD_INDEX]
+        zim_only     = [x for i, x in enumerate(zim_only)     if i % SHARD_COUNT == SHARD_INDEX]
+        print(f"[shard {SHARD_INDEX}/{SHARD_COUNT}] {len(commons_list)} Commons + {len(zim_only)} ZIM-only")
+    else:
+        print(f"Commons images: {len(commons_list)}  |  ZIM-only: {len(zim_only)}")
 
     # 2. Open ZIP files ────────────────────────────────────────────────────────
     zips      = {name: zipfile.ZipFile(f"images_{name}.zip", "w", zipfile.ZIP_STORED)

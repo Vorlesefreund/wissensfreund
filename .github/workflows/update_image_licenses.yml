@@ -239,11 +239,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ZIM_VERSION: ${{ env.ZIM_VERSION }}
 
-  # ── Job 3: Build image library from Wikimedia Commons (3 quality tiers) ──────
+  # ── Job 3: Download image shards in parallel (3 × 1/3 of all images) ──────────
+  #
+  # Three jobs run simultaneously, each processing every 3rd image (round-robin).
+  # Each shard uploads its partial ZIPs as a GitHub artifact.
+  # The images-merge job then combines them and uploads to R2.
   images:
     runs-on: ubuntu-latest
     needs: prepare
-    timeout-minutes: 360   # ~3500 articles × multiple images × 3 tiers; ZIM reused from artifact
+    timeout-minutes: 180   # 1/3 of images + ZIM artifact download; well within limit
+    strategy:
+      fail-fast: false     # keep other shards running if one fails
+      matrix:
+        shard: [0, 1, 2]
 
     steps:
       - uses: actions/checkout@v5
@@ -266,8 +274,8 @@ jobs:
         with:
           name: klexikon-zim
 
-      # ── Download 3 quality tiers from Wikimedia Commons ──────────────────
-      - name: Download image tiers (thumb / standard / pro)
+      # ── Download this shard's 1/3 of images ──────────────────────────────
+      - name: Download image tiers — shard ${{ matrix.shard }}/3
         run: python scripts/download_images.py
         env:
           ZIM_FILE:      klexikon.zim
@@ -275,8 +283,64 @@ jobs:
           ZIM_VERSION:   ${{ env.ZIM_VERSION }}
           MAX_IMAGES:    ${{ inputs.max_articles || '0' }}
           COMMONS_DELAY: '0.15'
+          SHARD_INDEX:   ${{ matrix.shard }}
+          SHARD_COUNT:   '3'
 
-      # ── Upload all tiers → Cloudflare R2 ─────────────────────────────────
+      # ── Upload shard output as artifact for merge job ─────────────────────
+      - name: Upload shard ${{ matrix.shard }} artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: images-shard-${{ matrix.shard }}
+          retention-days: 1
+          path: |
+            images_thumb.zip
+            images_standard.zip
+            images_pro.zip
+            images_thumb_manifest.json
+            images_standard_manifest.json
+            images_pro_manifest.json
+
+  # ── Job 4: Merge shards and upload to Cloudflare R2 ───────────────────────────
+  images-merge:
+    runs-on: ubuntu-latest
+    needs: images
+    timeout-minutes: 90   # download 3 × ~600 MB artifacts + merge + R2 upload
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Download shard 0
+        uses: actions/download-artifact@v4
+        with:
+          name: images-shard-0
+          path: shard-0/
+
+      - name: Download shard 1
+        uses: actions/download-artifact@v4
+        with:
+          name: images-shard-1
+          path: shard-1/
+
+      - name: Download shard 2
+        uses: actions/download-artifact@v4
+        with:
+          name: images-shard-2
+          path: shard-2/
+
+      # ── Merge all shards into final ZIPs + manifests ──────────────────────
+      - name: Merge image shards
+        run: python scripts/merge_image_shards.py
+        env:
+          SHARD_COUNT: '3'
+          ZIM_VERSION: ${{ env.ZIM_VERSION }}
+
+      # ── Upload merged ZIPs → Cloudflare R2 ───────────────────────────────
       - name: Upload image tiers to Cloudflare R2
         run: |
           R2_BASE="s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}"
