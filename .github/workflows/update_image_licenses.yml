@@ -271,23 +271,25 @@ jobs:
       # ── Upload all tiers → Cloudflare R2 ─────────────────────────────────
       - name: Upload image tiers to Cloudflare R2
         run: |
-          R2="s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}"
-          EP="--endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com"
-          CC_JSON="--content-type application/json --cache-control public, max-age=86400"
-          CC_ZIP="--content-type application/zip  --cache-control public, max-age=86400"
+          R2_BASE="s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}"
+          ENDPOINT="https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com"
 
           for TIER in thumb standard pro; do
             if [ -f "images_${TIER}_manifest.json" ]; then
-              aws s3 cp "images_${TIER}_manifest.json" "$R2/images_${TIER}_manifest.json" $EP $CC_JSON
+              aws s3 cp "images_${TIER}_manifest.json" \
+                "${R2_BASE}/images_${TIER}_manifest.json" \
+                --endpoint-url "$ENDPOINT" \
+                --content-type application/json \
+                --cache-control "public, max-age=86400"
               echo "Uploaded images_${TIER}_manifest.json"
-            else
-              echo "images_${TIER}_manifest.json not found — skipping"
             fi
             if [ -f "images_${TIER}.zip" ]; then
-              aws s3 cp "images_${TIER}.zip" "$R2/images_${TIER}.zip" $EP $CC_ZIP
+              aws s3 cp "images_${TIER}.zip" \
+                "${R2_BASE}/images_${TIER}.zip" \
+                --endpoint-url "$ENDPOINT" \
+                --content-type application/zip \
+                --cache-control "public, max-age=86400"
               echo "Uploaded images_${TIER}.zip"
-            else
-              echo "images_${TIER}.zip not found — skipping"
             fi
           done
         env:
