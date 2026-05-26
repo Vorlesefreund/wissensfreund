@@ -63,12 +63,23 @@ jobs:
           ARTICLE: Beethoven
           CONTEXT: '1500'
 
+      # ── Step 0b: Build hash→Commons filename map from article HTML ───────────
+      # The 2026+ Klexikon ZIM stores images as _assets_/<sha1hash>.jpg.
+      # Article HTML wraps them in <a href="...Datei:OriginalName.jpg"> links,
+      # so we can recover the original Commons filename from there.
+      - name: Build image map (hash → Commons filename)
+        run: python scripts/build_image_map.py
+        env:
+          ZIM_FILE:     klexikon.zim
+          MAX_ARTICLES: ${{ inputs.max_articles || '0' }}
+
       # ── Step 1: Image + audio metadata from ZIM binary ──────────────────────
       - name: Generate media_licenses.json
         run: python scripts/generate_license_json.py
         env:
-          ZIM_FILE: klexikon.zim
-          ZIM_VERSION: ${{ env.ZIM_VERSION }}
+          ZIM_FILE:       klexikon.zim
+          ZIM_VERSION:    ${{ env.ZIM_VERSION }}
+          IMAGE_MAP_FILE: image_map.json
 
       # ── Step 2: Audio links from article HTML (wpDestFile= pattern) ─────────
       - name: Extract audio refs from article HTML

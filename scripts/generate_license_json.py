@@ -29,9 +29,10 @@ except ImportError:
     print("Missing dependencies. Run: pip install requests")
     sys.exit(1)
 
-ZIM_FILE    = os.environ.get("ZIM_FILE", "klexikon.zim")
-ZIM_VERSION = os.environ.get("ZIM_VERSION", "klexikon_de_all_maxi_2026-05")
-OUTPUT_FILE = Path("media_licenses.json")
+ZIM_FILE       = os.environ.get("ZIM_FILE", "klexikon.zim")
+ZIM_VERSION    = os.environ.get("ZIM_VERSION", "klexikon_de_all_maxi_2026-05")
+IMAGE_MAP_FILE = Path(os.environ.get("IMAGE_MAP_FILE", "image_map.json"))
+OUTPUT_FILE    = Path("media_licenses.json")
 
 COMMONS_API   = "https://commons.wikimedia.org/w/api.php"
 IMAGE_EXTS    = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
@@ -230,11 +231,20 @@ def main():
     image_filenames, audio_filenames = extract_media_filenames(zim_path)
     print(f"Found {len(image_filenames)} images, {len(audio_filenames)} audio files")
 
+    # Load image_map.json if present (maps content-hashed ZIM filenames to Commons originals).
+    # Produced by build_image_map.py — needed for ZIMs that use _assets_/<hash>.jpg storage.
+    image_map: dict[str, str] = {}
+    if IMAGE_MAP_FILE.exists():
+        image_map = json.loads(IMAGE_MAP_FILE.read_text(encoding="utf-8"))
+        print(f"Loaded image_map: {len(image_map)} hash→original entries")
+    else:
+        print(f"Note: {IMAGE_MAP_FILE} not found — content-hashed images will have no Commons mapping")
+
     # Build ZIM-filename → Commons-filename mapping.
     # Query Commons using the real filenames so we get actual license data.
     zim_to_commons: dict[str, str] = {}
     for fn in image_filenames:
-        cf = extract_commons_filename(fn)
+        cf = extract_commons_filename(fn) or image_map.get(fn)
         if cf:
             zim_to_commons[fn] = cf
 
