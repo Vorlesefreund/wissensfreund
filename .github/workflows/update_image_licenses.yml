@@ -101,6 +101,14 @@ jobs:
           path: media_licenses.json
           retention-days: 1
 
+      # Upload ZIM so images-job can reuse it without re-downloading (~60 min saved)
+      - name: Upload ZIM artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: klexikon-zim
+          path: klexikon.zim
+          retention-days: 1
+
       # ── Step 0b: Create zim_version.json for app update checks ────────────
       - name: Create zim_version.json
         run: |
@@ -235,7 +243,7 @@ jobs:
   images:
     runs-on: ubuntu-latest
     needs: prepare
-    timeout-minutes: 180   # Commons downloads: ~2000 images × 3 tiers × 0.15s + transfer
+    timeout-minutes: 360   # ~3500 articles × multiple images × 3 tiers; ZIM reused from artifact
 
     steps:
       - uses: actions/checkout@v5
@@ -252,12 +260,11 @@ jobs:
         with:
           name: media-licenses
 
-      # ZIM only needed for fallback (Klexikon-specific images without Commons equivalent)
-      - name: Download ZIM file
-        run: |
-          echo "Downloading $ZIM_URL"
-          curl -fsSL -o klexikon.zim "$ZIM_URL"
-          ls -lh klexikon.zim
+      # Reuse ZIM from prepare-job artifact (saves ~60 min vs. re-downloading)
+      - name: Download ZIM artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: klexikon-zim
 
       # ── Download 3 quality tiers from Wikimedia Commons ──────────────────
       - name: Download image tiers (thumb / standard / pro)
