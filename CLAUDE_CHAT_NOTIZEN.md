@@ -120,3 +120,63 @@ erweitern.
 
 **Erledigt:** [x] Umgesetzt am 2026-05-25 (nacht) — _detectQueryType auf 5 Typen erweitert, _processQuery verdrahtet, _handleGeminiPlaceholder implementiert, Weiterhören-Feature komplett
 ---
+
+---
+## 2026-05-26 Offene Prompts — bereit zur Umsetzung
+
+**Auftrag 1 — Interne Links + Navigation (KOMPLETT)**
+Folgende Punkte implementieren:
+
+1. Links aus Klexikon-HTML extrahieren (ZimReader)
+   Nur interne Links, keine externen URLs
+   In SQLite cachen: article_links Tabelle
+
+2. Tippbare Links nur in Modus A (nicht B/C,
+   nicht Mini-Klexikon)
+   RichText mit Akzentfarbe + unterstrichen
+
+3. Link-Tap-Logik:
+   Professor liest Satz zu Ende → fragt
+   "Soll ich mehr über [Begriff] erzählen?"
+   → Ja: Artikel wechseln, Position in Stack
+   → Nein/nichts: nach 5 Sek weiterlesen
+
+4. Zwei-Ebenen Zurück-Stack (max. 2 Einträge)
+   Stack speichert Artikel + Position
+
+5. Nach Artikel-Ende — je nach Stack:
+   Stack leer:
+   "Was möchtest du als nächstes hören?"
+   → Mikrofon nach 2 Sek automatisch
+
+   Stack 1 Eintrag (z.B. Savanne):
+   "Soll ich mit der Savanne weitermachen
+    oder möchtest du etwas anderes hören?"
+   → Kind nennt Artikel oder neues Thema
+   → nichts: nach 5 Sek Mikrofon öffnet sich
+
+   Stack 2 Einträge (z.B. Savanne + Afrika):
+   "Soll ich mit der Savanne, mit Afrika
+    weitermachen oder etwas anderes erzählen?"
+   → Kind nennt Artikel oder neues Thema
+   → nichts: nach 5 Sek Mikrofon öffnet sich
+
+6. Quellübergreifende Link-Auflösung:
+   Zuerst eigene Artikel suchen, dann ZIM
+
+7. Mini-Klexikon (3-5 Jahre): KEINE Links
+
+**Auftrag 2 — Bildqualität je Stufe (Flutter-App)**
+Flutter-App Bildanzeige je nach Freemium-Stufe:
+- Free: 300px (thumb) aus ZIM/image_thumb.zip
+- Plus+Premium ohne Download: 300px lokal,
+  1200px on-demand bei WLAN (Cache 500 MB LRU)
+- Plus+Premium mit Download: 600px lokal,
+  1200px on-demand bei WLAN (Cache 500 MB LRU)
+Upgrade-Hinweis im Vollbild für Free-Nutzer:
+"Schärfere Bilder mit Wissensfreund Plus"
+
+**Priorität:** Auftrag 1 zuerst, dann Auftrag 2
+
+**Erledigt:** [ ]
+---
