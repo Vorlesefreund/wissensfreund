@@ -25,6 +25,7 @@ on:
         description: 'Max HTML articles to scan for audio (0 = all, 10 = quick test)'
         required: false
         default: '0'
+        type: string
 
 env:
   ZIM_VERSION: klexikon_de_all_maxi_2026-05
