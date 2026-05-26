@@ -1,5 +1,9 @@
-package de.wissensfreund.wissensfreund_app
+﻿package de.wissensfreund.wissensfreund_app
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.util.Log
 import org.tukaani.xz.XZInputStream
 import java.io.ByteArrayInputStream
@@ -76,6 +80,10 @@ class ZimReader(private val filePath: String) {
     // title-sorted list: Pair(urlIndex, title) — loaded once at open
     val allTitles = mutableListOf<Pair<Int, String>>()
 
+    // Maps a main-image filename → (overlayFilename, leftPct, topPct).
+    // Populated by extractImageRefsFromHtml; consumed by getImageBytes to composite map + dot.
+    private val overlayInfoMap = mutableMapOf<String, Triple<String, Float, Float>>()
+
     // ── Public API ─────────────────────────────────────────────────────────────
 
     fun open(onProgress: ((Double) -> Unit)? = null): Boolean {
@@ -124,16 +132,19 @@ class ZimReader(private val filePath: String) {
             for (term in terms) {
                 val termN = normalizeUmlauts(term)
                 val pts = when {
-                    tl == term                                    -> 5  // exact
-                    tl.length >= 4 && term.startsWith(tl)        -> 4  // inflection (hunde→hund)
-                    tl.startsWith(term)                           -> 3  // title prefix
-                    tlN == termN                                  -> 5  // exact after umlaut fold
-                    tlN.length >= 4 && termN.startsWith(tlN)     -> 4  // inflection after fold
-                    tlN.startsWith(termN)                         -> 3  // prefix after fold (mäuse→maus)
-                    tl.contains(term)                             -> 1  // compound
-                    tl.length >= 4 && term.contains(tl)          -> 1  // reverse substring
-                    tlN.contains(termN)                           -> 1  // compound after fold
-                    else                                          -> 0
+                    tl == term                                                               -> 5  // exact
+                    tl.length >= 4 && term.startsWith(tl)                                   -> 4  // inflection (hunde→hund)
+                    tl.startsWith(term)                                                      -> 3  // title prefix
+                    tlN == termN                                                             -> 5  // exact after umlaut fold
+                    tlN.length >= 4 && termN.startsWith(tlN)                               -> 4  // inflection after fold
+                    tlN.startsWith(termN)                                                    -> 3  // prefix after fold (mäuse→maus)
+                    // STT drops first 1–2 chars: "üsseldorf" → "Düsseldorf", "amburg" → "Hamburg"
+                    tl.endsWith(term) && term.length >= 4 && term.length >= tl.length - 2  -> 4
+                    tlN.endsWith(termN) && termN.length >= 4 && termN.length >= tlN.length - 2 -> 4
+                    tl.contains(term)                                                        -> 1  // compound
+                    tl.length >= 4 && term.contains(tl)                                     -> 1  // reverse substring
+                    tlN.contains(termN)                                                      -> 1  // compound after fold
+                    else                                                                     -> 0
                 }
                 if (pts > 0) { score += pts; hits++ }
             }
@@ -212,6 +223,7 @@ class ZimReader(private val filePath: String) {
     )
 
     fun getImageRefs(articleUrlIndex: Int): List<ImageRef> {
+        overlayInfoMap.clear()          // reset per-article overlay state
         var cur = readDirEntry(articleUrlIndex) ?: return emptyList()
         for (i in 0 until 5) {
             if (cur.mimeType != MIME_REDIRECT) break
@@ -229,12 +241,19 @@ class ZimReader(private val filePath: String) {
     }
 
     fun getImageBytes(filename: String): ByteArray? {
-        Log.d(TAG, "getImageBytes: '$filename'")
+        val raw = fetchRawImageBytes(filename) ?: return null
+        val overlay = overlayInfoMap[filename] ?: return raw
+        Log.d(TAG, "getImageBytes: compositing overlay '${overlay.first}' at ${overlay.second}%,${overlay.third}%")
+        val dotRaw = fetchRawImageBytes(overlay.first) ?: return raw
+        return compositeImages(raw, dotRaw, overlay.second, overlay.third) ?: raw
+    }
+
+    private fun fetchRawImageBytes(filename: String): ByteArray? {
+        Log.d(TAG, "fetchRawImageBytes: '$filename'")
         val urlIdx = findByFilename(filename) ?: run {
-            Log.w(TAG, "getImageBytes: not found: '$filename'")
+            Log.w(TAG, "fetchRawImageBytes: not found: '$filename'")
             return null
         }
-        Log.d(TAG, "getImageBytes: found at urlIndex=$urlIdx")
         return try {
             var cur = readDirEntry(urlIdx) ?: return null
             for (i in 0 until 5) {
@@ -245,7 +264,43 @@ class ZimReader(private val filePath: String) {
             val (data, ext) = readCluster(cur.clusterNumber)
             extractBlob(data, cur.blobNumber, ext)
         } catch (e: Exception) {
-            Log.e(TAG, "getImageBytes($filename) failed: ${e.message}")
+            Log.e(TAG, "fetchRawImageBytes($filename) failed: ${e.message}")
+            null
+        }
+    }
+
+    // Draws dotBytes on top of mapBytes at (leftPct%, topPct%) of the map dimensions.
+    // Scales the dot up to min(map_width/8, 24dp) so it's visible on any screen density.
+    private fun compositeImages(mapBytes: ByteArray, dotBytes: ByteArray, leftPct: Float, topPct: Float): ByteArray? {
+        return try {
+            val map = BitmapFactory.decodeByteArray(mapBytes, 0, mapBytes.size) ?: return null
+            val dot = BitmapFactory.decodeByteArray(dotBytes, 0, dotBytes.size) ?: return mapBytes
+
+            val out = map.copy(Bitmap.Config.ARGB_8888, true)
+            val canvas = Canvas(out)
+            val paint  = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+
+            // Target ~3% of map width; never upscale the dot (upscaling causes blur).
+            val targetSize = minOf((out.width / 30).coerceAtLeast(6), dot.width)
+            val scaled = if (targetSize < dot.width)
+                Bitmap.createScaledBitmap(dot, targetSize, targetSize, true)
+            else
+                dot
+
+            val x = out.width  * leftPct / 100f - scaled.width  / 2f
+            val y = out.height * topPct  / 100f - scaled.height / 2f
+            canvas.drawBitmap(scaled, x, y, paint)
+
+            if (scaled !== dot) scaled.recycle()
+            dot.recycle()
+            map.recycle()
+
+            val baos = ByteArrayOutputStream()
+            out.compress(Bitmap.CompressFormat.JPEG, 90, baos)
+            out.recycle()
+            baos.toByteArray()
+        } catch (e: Exception) {
+            Log.e(TAG, "compositeImages failed: ${e.message}")
             null
         }
     }
@@ -267,31 +322,208 @@ class ZimReader(private val filePath: String) {
     }
 
     private fun extractImageRefsFromHtml(html: String): List<ImageRef> {
-        // Only search the article body — excludes logo/nav images in the page header.
         val body = extractArticleBody(html)
+        val seen   = mutableSetOf<String>()
         val result = mutableListOf<ImageRef>()
-        val seen = mutableSetOf<String>()
-        val imgRegex = Regex("""<img\b[^>]*?\bsrc="([^"]+)"[^>]*>""", RegexOption.IGNORE_CASE)
+
+        // Map of all table regions in the body: Pair(startIdx, endIdx).
+        // Used to distinguish "inside a table" (Steckbrief) from "outside" (article figures).
+        val tableRegions = findTableRegions(body)
+
+        val imgRegex      = Regex("""<img\b[^>]*?\bsrc="([^"]+)"[^>]*>""", RegexOption.IGNORE_CASE)
+        val altPattern    = Regex("""alt="([^"]*)"""",                      RegexOption.IGNORE_CASE)
+        val widthPattern  = Regex("""width="(\d+)"""",                      RegexOption.IGNORE_CASE)
+        val stylePattern  = Regex("""style="([^"]*)"""",                    RegexOption.IGNORE_CASE)
+        val leftPctRegex  = Regex("""left\s*:\s*([\d.]+)%""",              RegexOption.IGNORE_CASE)
+        val topPctRegex   = Regex("""top\s*:\s*([\d.]+)%""",               RegexOption.IGNORE_CASE)
+
+        // Last non-overlay table image filename — used to associate an overlay with its map.
+        var lastTableFilename: String? = null
+
         for (match in imgRegex.findAll(body)) {
-            val src = match.groupValues[1]
-            val filename = extractImageFilename(src)
-            if (filename == null) continue
+            val filename = extractImageFilename(match.groupValues[1]) ?: continue
             if (filename in seen) continue
             val ext = filename.substringAfterLast('.', "").lowercase()
             if (ext !in setOf("jpg", "jpeg", "png", "webp", "gif")) continue
-            val mimeType = when (ext) {
-                "jpg", "jpeg" -> "image/jpeg"
-                "png"  -> "image/png"
-                "webp" -> "image/webp"
-                "gif"  -> "image/gif"
-                else   -> "image/jpeg"
+
+            val pos    = match.range.first
+            val imgTag = match.value
+            val region = tableRegions.find { pos >= it.first && pos < it.second }
+
+            val caption: String?
+            if (region != null) {
+                // ── Inside a table (Steckbrief) ─────────────────────────────
+                val styleVal = stylePattern.find(imgTag)?.groupValues?.get(1) ?: ""
+
+                // Also check if the img is inside a position:absolute wrapper by scanning ALL
+                // style attributes within 400 chars before the img. The Klexikon red dot has:
+                //   <div style="position:absolute; top:49%; left:12.7%">  ← grandparent
+                //     <div style="position:relative; left:-4px; top:-4px"> ← immediate parent
+                //       <img src="Red_pog..." />
+                // The LAST style before img is the immediate parent (position:relative);
+                // we must check ALL ancestors for position:absolute.
+                val contextBefore = body.substring(maxOf(0, pos - 400), pos)
+                val allParentStyles = stylePattern.findAll(contextBefore).toList()
+                val absParentStyleMatch = allParentStyles.lastOrNull { m ->
+                    m.groupValues[1].contains("absolute", ignoreCase = true)
+                }
+                val parentAbsStyle = absParentStyleMatch?.groupValues?.get(1) ?: ""
+                val isOverlay = styleVal.contains("absolute", ignoreCase = true) ||
+                    parentAbsStyle.isNotEmpty()
+
+                Log.d(TAG, "TABLE IMG: '$filename' overlay=$isOverlay imgStyle='${styleVal.take(60)}' absParent='${parentAbsStyle.take(60)}'")
+
+                if (isOverlay) {
+                    // CSS-positioned overlay (location dot) — composite onto previous table image
+                    val mainFn = lastTableFilename
+                    if (mainFn != null) {
+                        val coordSource = if (styleVal.contains("absolute", ignoreCase = true)) styleVal else parentAbsStyle
+                        val left = leftPctRegex.find(coordSource)?.groupValues?.get(1)?.toFloatOrNull() ?: 50f
+                        val top  = topPctRegex.find(coordSource)?.groupValues?.get(1)?.toFloatOrNull() ?: 50f
+                        overlayInfoMap[mainFn] = Triple(filename, left, top)
+                        Log.d(TAG, "overlay: $filename → $mainFn at left=$left% top=$top%")
+                        // Caption: the locator map has no human-readable caption in the HTML —
+                        // update the previously-added map ImageRef with a descriptive label.
+                        val mapIdx = result.indexOfLast { it.filename == mainFn }
+                        if (mapIdx >= 0) {
+                            result[mapIdx] = result[mapIdx].copy(caption = "Wo die Stadt in Deutschland liegt")
+                        }
+                    } else {
+                        Log.w(TAG, "overlay: $filename has no preceding map image to attach to")
+                    }
+                    seen.add(filename)
+                    continue
+                }
+
+                val width = widthPattern.find(imgTag)?.groupValues?.get(1)?.toIntOrNull() ?: 100
+                if (width < 30) { seen.add(filename); continue }   // tiny decorative images
+                if (filename.contains("Klexikon_K", ignoreCase = true)) { seen.add(filename); continue }
+
+                val cellText = extractCellCaption(body, pos, region)
+                val altText  = altPattern.find(imgTag)?.groupValues?.get(1)?.trim()?.ifEmpty { null }
+                Log.d(TAG, "TABLE IMG '$filename': cellCaption='$cellText' alt='${altText?.take(60)}'")
+                caption = cellText ?: altText
+                if (caption == null) continue
+
+                lastTableFilename = filename
+            } else {
+                // ── Outside tables (article figures, floated thumbnails) ─────
+                caption = findNearbyCaption(body, match.range.last)
+                lastTableFilename = null
             }
-            val caption = findNearbyCaption(body, match.range.last)
+
             seen.add(filename)
-            result.add(ImageRef(filename, mimeType, caption, match.range.first))
+            result.add(ImageRef(filename, mimeTypeFor(ext), caption, pos))
         }
+
         Log.d(TAG, "imgExtract: returning ${result.size} images")
         return result
+    }
+
+    // Returns all top-level <table>…</table> regions as (startIdx, endIdx) pairs,
+    // correctly handling nested tables via a depth counter.
+    private fun findTableRegions(html: String): List<Pair<Int, Int>> {
+        val regions = mutableListOf<Pair<Int, Int>>()
+        var i = 0
+        while (i < html.length) {
+            val nextOpen = html.indexOf("<table", i, ignoreCase = true)
+            if (nextOpen < 0) break
+            val ch = html.getOrElse(nextOpen + 6) { ' ' }
+            if (ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r' && ch != '>') {
+                i = nextOpen + 6; continue
+            }
+            var depth = 1; var pos = nextOpen + 6
+            while (pos < html.length && depth > 0) {
+                val nO = html.indexOf("<table", pos, ignoreCase = true)
+                val nC = html.indexOf("</table>", pos, ignoreCase = true)
+                when {
+                    nC < 0 -> { pos = html.length; depth = 0 }
+                    nO >= 0 && nO < nC -> {
+                        val ca = html.getOrElse(nO + 6) { ' ' }
+                        if (ca == ' ' || ca == '\t' || ca == '\n' || ca == '\r' || ca == '>') depth++
+                        pos = nO + 6
+                    }
+                    else -> { pos = nC + 8; depth-- }
+                }
+            }
+            regions.add(nextOpen to pos)
+            i = pos
+        }
+        return regions
+    }
+
+    // Extracts visible caption for a table image.
+    //
+    // Strategy: look at the text appearing AFTER all images in the same cell block.
+    // The Klexikon Steckbrief places the caption text below the image(s) in the same <td>:
+    //   <td> <img map> <img reddot> Wo die Stadt liegt </td>
+    //
+    // We scan a 700-char window after the image in raw HTML; find the nearest row/table
+    // boundary (</td>, </tr>, </table>, <tr>); extract only the text segment that follows
+    // the LAST <img> tag in that window — this skips overlay-dot images and captures only
+    // the human-readable caption text below them.
+    private fun extractCellCaption(html: String, imgPos: Int, region: Pair<Int, Int>): String? {
+        val tableContent = html.substring(region.first, region.second)
+        val localPos     = imgPos - region.first
+
+        // 3000-char window — the red-dot overlay img has a 500+ char alt attribute (raw
+        // MediaWiki wikitext), so 700 chars was not enough to reach the closing '>'.
+        val winEnd    = minOf(localPos + 3000, tableContent.length)
+        val window    = tableContent.substring(localPos, winEnd)
+
+        // Find the first cell/row boundary in the window
+        val boundary  = listOf("</td>", "</th>", "</tr>", "</table>", "<tr", "<td", "<th")
+            .mapNotNull { tag -> window.indexOf(tag, ignoreCase = true).takeIf { it >= 0 } }
+            .minOrNull() ?: window.length
+        val cellSuffix = window.substring(0, boundary)
+
+        // Find the position of the last <img> tag inside cellSuffix (overlay dots etc.)
+        val lastImgInCell = run {
+            val imgPat = Regex("""<img\b[^>]*>""", RegexOption.IGNORE_CASE)
+            imgPat.findAll(cellSuffix).lastOrNull()?.range?.last?.plus(1) ?: 0
+        }
+
+        // Caption = text that follows the last image in the cell (tags stripped)
+        val captionHtml = cellSuffix.substring(lastImgInCell)
+        val caption = captionHtml.replace(Regex("<[^>]+>"), " ")
+            .replace(Regex("\\s+"), " ").trim()
+
+        Log.d(TAG, "extractCellCaption: boundary=$boundary lastImgEnd=$lastImgInCell caption='$caption'")
+        Log.d(TAG, "extractCellCaption: window[0..300]='${window.take(300).replace('\n',' ')}'")
+
+        if (caption.isNotEmpty()) return caption
+
+        // Try text AFTER the last inner </table> — handles the case where the image (and its
+        // wrapper div) is inside a nested table, but the real caption sits OUTSIDE that inner
+        // table in the enclosing cell (e.g. "Wo die Stadt in Deutschland liegt").
+        val innerTableEnd = window.lastIndexOf("</table>", ignoreCase = true)
+        if (innerTableEnd >= 0) {
+            val afterInnerTable = window.substring(innerTableEnd + 8)
+            val outerBound = listOf("</td>", "</th>", "</tr>", "<tr", "<td", "<th")
+                .mapNotNull { tag -> afterInnerTable.indexOf(tag, ignoreCase = true).takeIf { it >= 0 } }
+                .minOrNull() ?: afterInnerTable.length
+            val captionCandidate = afterInnerTable.substring(0, outerBound)
+                .replace(Regex("""<img\b[^>]*>""", RegexOption.IGNORE_CASE), " ")
+                .replace(Regex("<[^>]+>"), " ")
+                .replace(Regex("\\s+"), " ").trim()
+            Log.d(TAG, "extractCellCaption: afterInnerTable='$captionCandidate'")
+            if (captionCandidate.isNotEmpty()) return captionCandidate
+        }
+
+        // Fallback: visible text anywhere in the cell window (before boundary), minus images
+        val fallback = cellSuffix
+            .replace(Regex("""<img\b[^>]*>""", RegexOption.IGNORE_CASE), " ")
+            .replace(Regex("<[^>]+>"), " ")
+            .replace(Regex("\\s+"), " ").trim()
+        return fallback.ifEmpty { null }
+    }
+
+    private fun mimeTypeFor(ext: String) = when (ext) {
+        "jpg", "jpeg" -> "image/jpeg"
+        "png"         -> "image/png"
+        "webp"        -> "image/webp"
+        "gif"         -> "image/gif"
+        else          -> "image/jpeg"
     }
 
     fun getAudioRefs(articleUrlIndex: Int): List<AudioRef> {
@@ -470,6 +702,7 @@ class ZimReader(private val filePath: String) {
             .replace("&Auml;", "Ä").replace("&Ouml;", "Ö").replace("&Uuml;", "Ü")
             .replace("&szlig;", "ß").replace("&ndash;", "–").replace("&mdash;", "—")
             .replace("&quot;", "\"").replace("&apos;", "'")
+            .replace("­", "")  // strip soft hyphens (&shy; = U+00AD) that cause word-split artefacts
             .replace(Regex("\\s+"), " ").trim()
             .ifEmpty { null }
 
@@ -870,6 +1103,14 @@ class ZimReader(private val filePath: String) {
         // 5. Remove table of contents
         s = removeNestedDivsByClass(s, "toc")
 
+        // 5b. Remove leading <table> blocks that appear before the first <p> paragraph.
+        //     These are always Steckbrief/infobox tables (floated right in MediaWiki HTML).
+        //     Tables embedded in article paragraphs (rare in Klexikon) are left intact.
+        //     Uses a depth counter so nested tables (e.g. map inside infobox) are handled.
+        //     The simple regex in htmlToText() fails because non-greedy *? stops at the first
+        //     </figure> inside the table, leaving the rest of the infobox as plain text.
+        s = removeLeadingTables(s)
+
         // 6. Remove <figure> blocks (image + figcaption)
         s = s.replace(Regex("<figure\\b[^>]*>[\\s\\S]*?</figure>", RegexOption.IGNORE_CASE), "")
 
@@ -915,13 +1156,87 @@ class ZimReader(private val filePath: String) {
         return result.toString()
     }
 
+    // Remove <table> blocks that appear before the first <p> paragraph (infoboxes/Steckbrief).
+    // Tables inside the article body are left for removeNestedTables() in htmlToText().
+    private fun removeLeadingTables(html: String): String {
+        val sb = StringBuilder()
+        var remaining = html
+        while (true) {
+            val nextTable = remaining.indexOf("<table", ignoreCase = true)
+            if (nextTable < 0) { sb.append(remaining); break }
+            val ch = remaining.getOrElse(nextTable + 6) { ' ' }
+            if (ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r' && ch != '>') {
+                sb.append(remaining.substring(0, nextTable + 6))
+                remaining = remaining.substring(nextTable + 6); continue
+            }
+            // Stop if the first <p> appears before this table → table is in article body
+            val firstPara = remaining.indexOf("<p", ignoreCase = true)
+            if (firstPara >= 0 && firstPara < nextTable) { sb.append(remaining); break }
+            sb.append(remaining.substring(0, nextTable))
+            var depth = 1; var pos = nextTable + 6
+            while (pos < remaining.length && depth > 0) {
+                val nO = remaining.indexOf("<table", pos, ignoreCase = true)
+                val nC = remaining.indexOf("</table>", pos, ignoreCase = true)
+                when {
+                    nC < 0 -> { pos = remaining.length; depth = 0 }
+                    nO >= 0 && nO < nC -> {
+                        val ca = remaining.getOrElse(nO + 6) { ' ' }
+                        if (ca == ' ' || ca == '\t' || ca == '\n' || ca == '\r' || ca == '>') depth++
+                        pos = nO + 6
+                    }
+                    else -> { pos = nC + 8; depth-- }
+                }
+            }
+            remaining = remaining.substring(pos)
+        }
+        return sb.toString()
+    }
+
+    // Remove all <table>...</table> blocks, correctly handling nested tables.
+    private fun removeNestedTables(html: String): String {
+        val sb = StringBuilder()
+        var i = 0
+        while (i < html.length) {
+            val nextOpen = html.indexOf("<table", i, ignoreCase = true)
+            if (nextOpen < 0) { sb.append(html.substring(i)); break }
+            // Verify tag boundary: must be followed by whitespace or '>'
+            val ch = html.getOrElse(nextOpen + 6) { ' ' }
+            if (ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r' && ch != '>') {
+                sb.append(html.substring(i, nextOpen + 6))
+                i = nextOpen + 6
+                continue
+            }
+            sb.append(html.substring(i, nextOpen))
+            // Walk to the matching </table>, counting nested <table> opens
+            var depth = 1
+            var pos = nextOpen + 6
+            while (pos < html.length && depth > 0) {
+                val nextO = html.indexOf("<table", pos, ignoreCase = true)
+                val nextC = html.indexOf("</table>", pos, ignoreCase = true)
+                when {
+                    nextC < 0 -> { pos = html.length; depth = 0 }
+                    nextO >= 0 && nextO < nextC -> {
+                        val ca = html.getOrElse(nextO + 6) { ' ' }
+                        if (ca == ' ' || ca == '\t' || ca == '\n' || ca == '\r' || ca == '>') depth++
+                        pos = nextO + 6
+                    }
+                    else -> { pos = nextC + 8; depth-- }
+                }
+            }
+            i = pos
+        }
+        return sb.toString()
+    }
+
     private fun htmlToText(html: String): String {
         var s = preClean(html)
         // Drop script / style blocks
         s = s.replace(Regex("<script[\\s\\S]*?</script>", RegexOption.IGNORE_CASE), "")
         s = s.replace(Regex("<style[\\s\\S]*?</style>", RegexOption.IGNORE_CASE), "")
-        // Drop nav, header, footer, table, figure blocks
-        s = s.replace(Regex("<(nav|header|footer|table|figure|figcaption)[\\s\\S]*?</(nav|header|footer|table|figure|figcaption)>", RegexOption.IGNORE_CASE), "")
+        // Drop nav, header, footer, figure blocks (non-greedy regex is fine here — no nesting issues)
+        s = s.replace(Regex("<(nav|header|footer|figure|figcaption)[\\s\\S]*?</(nav|header|footer|figure|figcaption)>", RegexOption.IGNORE_CASE), "")
+        // Drop remaining tables (stack-based so nested tables inside content are handled correctly)
+        s = removeNestedTables(s)
         // Block → newline
         s = s.replace(Regex("</(p|div|h[1-6]|li|tr)>", RegexOption.IGNORE_CASE), "\n")
         s = s.replace(Regex("<br\\s*/?>", RegexOption.IGNORE_CASE), "\n")
@@ -977,3 +1292,4 @@ class ZimReader(private val filePath: String) {
 // Minimal stand-in if zlib is needed without the full Inflater setup
 private fun InflaterInputStream(input: ByteArrayInputStream) =
     java.util.zip.InflaterInputStream(input)
+

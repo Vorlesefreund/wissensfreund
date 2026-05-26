@@ -597,7 +597,9 @@ class WissensfreundProvider extends ChangeNotifier {
     }
 
     // Typ 4: Folgefrage — Artikel bereits geladen, Gemini-Platzhalter
-    if (isFollowUp && queryType != _QueryType.fullRead) {
+    // Only genuine questions (targeted prefix: Warum/Wie/Wann/...) count as follow-ups.
+    // Plain nouns/names (unknown type) are always a new article search, never a follow-up.
+    if (isFollowUp && queryType == _QueryType.targeted) {
       _state = AppState.idle;
       notifyListeners();
       await _handleGeminiPlaceholder(query);

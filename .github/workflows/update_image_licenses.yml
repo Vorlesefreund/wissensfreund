@@ -230,11 +230,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ZIM_VERSION: ${{ env.ZIM_VERSION }}
 
-  # ── Job 3: Build image library from ZIM (parallel to download, after prepare) ──
+  # ── Job 3: Build image library from Wikimedia Commons (3 quality tiers) ──────
   images:
     runs-on: ubuntu-latest
     needs: prepare
-    timeout-minutes: 120   # ZIM download ~3 min + scan ~2 min + extraction ~20 min
+    timeout-minutes: 180   # Commons downloads: ~2000 images × 3 tiers × 0.15s + transfer
 
     steps:
       - uses: actions/checkout@v5
@@ -244,49 +244,52 @@ jobs:
           python-version: '3.10'
 
       - name: Install Python dependencies
-        run: pip install zstandard
+        run: pip install requests zstandard
 
       - name: Download licenses artifact
         uses: actions/download-artifact@v4
         with:
           name: media-licenses
 
+      # ZIM only needed for fallback (Klexikon-specific images without Commons equivalent)
       - name: Download ZIM file
         run: |
           echo "Downloading $ZIM_URL"
           curl -fsSL -o klexikon.zim "$ZIM_URL"
           ls -lh klexikon.zim
 
-      # ── Extract images directly from ZIM (no Wikimedia API needed) ────────
-      - name: Extract image library from ZIM
+      # ── Download 3 quality tiers from Wikimedia Commons ──────────────────
+      - name: Download image tiers (thumb / standard / pro)
         run: python scripts/download_images.py
         env:
           ZIM_FILE:      klexikon.zim
           LICENSES_FILE: media_licenses.json
           ZIM_VERSION:   ${{ env.ZIM_VERSION }}
           MAX_IMAGES:    ${{ inputs.max_articles || '0' }}
+          COMMONS_DELAY: '0.15'
 
-      # ── Upload: image library → Cloudflare R2 ────────────────────────────
-      - name: Upload image library to Cloudflare R2
+      # ── Upload all tiers → Cloudflare R2 ─────────────────────────────────
+      - name: Upload image tiers to Cloudflare R2
         run: |
-          if [ -f images_medium_manifest.json ]; then
-            aws s3 cp images_medium_manifest.json \
-              s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/images_medium_manifest.json \
-              --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
-              --content-type application/json \
-              --cache-control "public, max-age=86400"
-          else
-            echo "images_medium_manifest.json not found — skipping"
-          fi
-          if [ -f images_medium.zip ]; then
-            aws s3 cp images_medium.zip \
-              s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/images_medium.zip \
-              --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
-              --content-type application/zip \
-              --cache-control "public, max-age=86400"
-          else
-            echo "images_medium.zip not produced — ZIP already up to date on R2 or no images downloaded"
-          fi
+          R2="s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}"
+          EP="--endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com"
+          CC_JSON="--content-type application/json --cache-control public, max-age=86400"
+          CC_ZIP="--content-type application/zip  --cache-control public, max-age=86400"
+
+          for TIER in thumb standard pro; do
+            if [ -f "images_${TIER}_manifest.json" ]; then
+              aws s3 cp "images_${TIER}_manifest.json" "$R2/images_${TIER}_manifest.json" $EP $CC_JSON
+              echo "Uploaded images_${TIER}_manifest.json"
+            else
+              echo "images_${TIER}_manifest.json not found — skipping"
+            fi
+            if [ -f "images_${TIER}.zip" ]; then
+              aws s3 cp "images_${TIER}.zip" "$R2/images_${TIER}.zip" $EP $CC_ZIP
+              echo "Uploaded images_${TIER}.zip"
+            else
+              echo "images_${TIER}.zip not found — skipping"
+            fi
+          done
         env:
           AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}

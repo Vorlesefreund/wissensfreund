@@ -1,5 +1,28 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-25T18:36:38Z -->
+<!-- updated: 2026-05-26T11:33:22Z -->
+
+## Zuletzt erledigt (Session 2026-05-26)
+
+### Bildgalerie & Bild-Pipeline (ZimReader + Workflow)
+
+#### ZimReader.kt
+- `removeLeadingTables()`: entfernt Steckbrief-Tabellen vor erstem `<p>` (TTS liest keine Tabellen mehr)
+- Overlay-Erkennung: prüft ALLE Parent-Styles in 400 Zeichen vor `<img>` auf `position:absolute` (Grandparent-Fix für Klexikon-Kartenstruktur)
+- Overlay-Caption: bei erkanntem Marker wird Caption automatisch auf "Wo die Stadt in Deutschland liegt" gesetzt
+- Karten-Kompositing: roter Standortpunkt wird bei `getImageBytes()` auf die Deutschlandkarte gezeichnet, Punktgröße `min(width/30, dot.width)` (kein Hochskalieren → kein Blur)
+- Klexikon-Logo-Filter: `Klexikon_K*` wird aus Bildergalerie herausgefiltert
+- STT-Folgequery-Fix: nur `queryType == targeted` wird als Follow-up behandelt (nicht `unknown`)
+
+#### Bild-Pipeline (scripts + workflow)
+- `generate_license_json.py`: `extract_commons_filename()` extrahiert echten Commons-Dateinamen aus ZIM-Pfaden (`langde-250px-{original}` → `{original}`); Commons-API wird nun mit korrekten Dateinamen abgefragt; `commons_file` Feld in media_licenses.json hinzugefügt
+- `download_images.py`: Komplettumbau — primäre Quelle Wikimedia Commons, ZIM als Fallback; produziert 3 Qualitätsstufen: `images_thumb.zip` (300px), `images_standard.zip` (600px), `images_pro.zip` (1200px)
+- Workflow (`update_image_licenses.yml`): images-Job updated, lädt alle 3 ZIPs + Manifeste zu Cloudflare R2 hoch
+
+### Offen / Nächste Schritte
+- Flutter-App: Bildanzeige je nach Nutzerstufe (Standard/Pro/Premium) aus passendem ZIP laden
+- Workflow-Testlauf mit `max_articles=10` empfohlen
+
+---
 
 ## Zuletzt erledigt (Session 2026-05-25 — nacht)
 

@@ -59,6 +59,29 @@ def strip_html(s: str) -> str:
     return re.sub(r"<[^>]+>", "", s or "").strip()
 
 
+def extract_commons_filename(zim_url: str) -> str | None:
+    """Return the original Wikimedia Commons filename from a ZIM thumbnail path.
+
+    Klexikon ZIM stores MediaWiki thumbnails as:
+      {lang}-{size}px-{original_commons_filename}
+    Examples:
+      langde-250px-DEU_Düsseldorf_COA.svg.png → DEU_Düsseldorf_COA.svg
+      langde-220px-African_Bush_Elephant.jpg   → African_Bush_Elephant.jpg
+      langde-20px-Red_pog.svg.png              → Red_pog.svg
+    Returns None for content-hashed filenames with no Commons equivalent.
+    """
+    basename = zim_url.rsplit("/", 1)[-1]
+    m = re.match(r"^[a-z]+-\d+px-(.+)", basename, re.IGNORECASE)
+    if not m:
+        return None
+    original = m.group(1)
+    # SVGs are rendered to PNG in the ZIM, producing a double extension (.svg.png).
+    # Strip the trailing .png to recover the original .svg filename.
+    if original.lower().endswith(".svg.png"):
+        original = original[:-4]
+    return original
+
+
 def _read_cstr(f) -> str:
     buf = bytearray()
     while True:
@@ -187,7 +210,8 @@ def process_in_batches(filenames: list[str], process_fn, label: str) -> dict[str
         try:
             pages = query_batch(batch)
             for page in pages.values():
-                fname = page.get("title", "").removeprefix("File:")
+                # Normalize to underscores — Commons returns titles with spaces.
+                fname = page.get("title", "").removeprefix("File:").replace(" ", "_")
                 results[fname] = process_fn(page)
             print("ok")
         except Exception as e:
@@ -206,8 +230,37 @@ def main():
     image_filenames, audio_filenames = extract_media_filenames(zim_path)
     print(f"Found {len(image_filenames)} images, {len(audio_filenames)} audio files")
 
-    image_results = process_in_batches(image_filenames, process_image_page, "image")
-    audio_results = process_in_batches(audio_filenames, process_audio_page, "audio")
+    # Build ZIM-filename → Commons-filename mapping.
+    # Query Commons using the real filenames so we get actual license data.
+    zim_to_commons: dict[str, str] = {}
+    for fn in image_filenames:
+        cf = extract_commons_filename(fn)
+        if cf:
+            zim_to_commons[fn] = cf
+
+    unique_commons = list({cf for cf in zim_to_commons.values()})
+    print(f"  {len(unique_commons)} unique Commons filenames extracted from {len(image_filenames)} ZIM entries")
+
+    commons_license_data = process_in_batches(unique_commons, process_image_page, "image")
+    audio_results        = process_in_batches(audio_filenames, process_audio_page,  "audio")
+
+    # Assemble final image results keyed by ZIM filename.
+    image_results: dict[str, dict] = {}
+    for fn in image_filenames:
+        cf = zim_to_commons.get(fn)
+        if cf:
+            data = commons_license_data.get(cf) or commons_license_data.get(cf.replace("_", " "))
+            if data:
+                result = {**data, "commons_file": cf}
+            else:
+                # Commons returned nothing — trust Klexikon curation.
+                result = {"allowed": True, "license": None, "author": None,
+                          "license_url": None, "commons_file": cf}
+        else:
+            # Content-hashed or unknown format — no Commons mapping available.
+            result = {"allowed": True, "license": None, "author": None,
+                      "license_url": None, "commons_file": None}
+        image_results[fn] = result
 
     output = {
         "generated":   date.today().isoformat(),
