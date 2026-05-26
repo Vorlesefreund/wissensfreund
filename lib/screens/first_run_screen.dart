@@ -6,6 +6,7 @@ import '../services/image_library_service.dart';
 import '../services/network_settings_service.dart';
 import '../services/parental_lock_service.dart';
 import '../services/storage_manager.dart';
+import '../services/subscription_service.dart';
 import 'profile_creation_screen.dart';
 
 class FirstRunScreen extends StatefulWidget {
@@ -43,7 +44,8 @@ class _FirstRunScreenState extends State<FirstRunScreen>
   String?   _imgError;
   int       _freeBytes      = -1;
 
-  static const int _kRequiredBytes = 2 * 1024 * 1024 * 1024;
+  // Need ~1 GB free: ZIP (600 MB) + extracted files overlap during extraction.
+  static const int _kRequiredBytes = 1024 * 1024 * 1024;
 
   // ─── Kiosk / child safety ──────────────────────────────────────────────────
   int  _kioskPhase  = 0; // 0 = intro, 1 = waiting for permission, 2 = done
@@ -105,13 +107,18 @@ class _FirstRunScreenState extends State<FirstRunScreen>
     await s.setNetworkSettingsOffered(true);
     if (mounted) {
       setState(() => _netSaving = false);
-      _goTo(2);
+      _goToAfterNetwork();
     }
   }
 
   Future<void> _skipNetworkAndNext() async {
     await NetworkSettingsService.instance.setNetworkSettingsOffered(true);
-    _goTo(2);
+    _goToAfterNetwork();
+  }
+
+  void _goToAfterNetwork() {
+    // Image quality page is only relevant for Plus/Premium users.
+    _goTo(SubscriptionService.instance.isPlus ? 2 : 3);
   }
 
   Future<void> _downloadImage() async {
@@ -412,7 +419,7 @@ class _FirstRunScreenState extends State<FirstRunScreen>
     );
   }
 
-  // ─── Page 2: Image Quality ─────────────────────────────────────────────────
+  // ─── Page 2: Image Quality (Plus/Premium only) ────────────────────────────
 
   Widget _buildImagePage() {
     final hasEnoughSpace = _freeBytes < 0 || _freeBytes >= _kRequiredBytes;
@@ -426,28 +433,29 @@ class _FirstRunScreenState extends State<FirstRunScreen>
             Icon(Icons.image_outlined, color: Color(0xFF2E7D32), size: 28),
             SizedBox(width: 12),
             Text(
-              'Bildqualität',
+              'Bessere Bilder',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Color(0xFF1B5E20)),
             ),
           ]),
           const SizedBox(height: 8),
           const Text(
-            'Wähle, welche Bilder Wissensfreund verwenden soll.',
+            'Möchtest du bessere Bilder lokal speichern?\n'
+            'Das macht Bilder auch offline schärfer.',
             style: TextStyle(fontSize: 14, color: Color(0xFF666666), height: 1.45),
           ),
           const SizedBox(height: 24),
           _QualityCard(
-            icon: Icons.image_outlined,
-            title: 'Standard',
-            subtitle: 'Bilder aus dem Wissensspeicher — sofort verfügbar',
-            highlight: !hasEnoughSpace,
+            icon: Icons.hd_outlined,
+            title: 'Ja, bessere Bilder speichern (~600 MB)',
+            subtitle: 'Offline-Bibliothek (600px) · ca. 3–5 min im WLAN',
+            highlight: hasEnoughSpace,
           ),
           const SizedBox(height: 12),
           _QualityCard(
-            icon: Icons.hd_outlined,
-            title: 'Gut  (~2 GB)',
-            subtitle: 'Offline-Bilderbibliothek · ca. 3–5 min im WLAN',
-            highlight: hasEnoughSpace,
+            icon: Icons.wifi_rounded,
+            title: 'Nein, nur bei WLAN laden',
+            subtitle: 'Kein Download — beste Qualität automatisch bei WLAN',
+            highlight: !hasEnoughSpace,
           ),
           if (_freeBytes >= 0 && !hasEnoughSpace) ...[
             const SizedBox(height: 10),
@@ -457,7 +465,7 @@ class _FirstRunScreenState extends State<FirstRunScreen>
               Expanded(
                 child: Text(
                   'Wenig Speicherplatz (${(_freeBytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB frei). '
-                  'Standard empfohlen.',
+                  'Download nicht empfohlen.',
                   style: TextStyle(fontSize: 12, color: Colors.orange.shade800),
                 ),
               ),
@@ -486,7 +494,7 @@ class _FirstRunScreenState extends State<FirstRunScreen>
             ),
           ] else ...[
             _BigButton(
-              label: 'Gut herunterladen',
+              label: 'Ja, herunterladen',
               icon: Icons.download_rounded,
               onPressed: hasEnoughSpace ? _downloadImage : null,
             ),
@@ -494,7 +502,7 @@ class _FirstRunScreenState extends State<FirstRunScreen>
             Center(
               child: TextButton(
                 onPressed: _skipImageAndNext,
-                child: Text('Standard — weiter', style: TextStyle(color: Colors.grey.shade600)),
+                child: Text('Nein, nur bei WLAN laden', style: TextStyle(color: Colors.grey.shade600)),
               ),
             ),
           ],

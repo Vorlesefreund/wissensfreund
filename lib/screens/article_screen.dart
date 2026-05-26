@@ -11,6 +11,7 @@ import '../services/data_limit_overlay_service.dart';
 import '../services/hires_image_service.dart';
 import '../services/network_service.dart';
 import '../services/parental_lock_service.dart';
+import '../services/subscription_service.dart';
 import '../services/profile_service.dart';
 import '../services/wikimedia_license_checker.dart';
 import '../widgets/professor_widget.dart';
@@ -772,6 +773,64 @@ class _ZimImageTileState extends State<_ZimImageTile> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 // ─────────────────────────────────────────────────────────────────────────────
+// 🔍 Upgrade hint — shown to Free users in fullscreen (not during TTS)
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _UpgradeHint extends StatelessWidget {
+  const _UpgradeHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        showDialog<void>(
+          context: context,
+          builder: (_) => AlertDialog(
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+            title: const Text('Wissensfreund Plus'),
+            content: const Text(
+              'Mit Wissensfreund Plus lädst du bei WLAN automatisch '
+              'schärfere Bilder (bis 1200px) — für eine viel bessere Bildergalerie.\n\n'
+              'Wissensfreund Plus lässt sich im Menü freischalten.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Schließen'),
+              ),
+            ],
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.black.withValues(alpha: 0.65),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.search_rounded, color: Colors.white70, size: 15),
+            SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                'Schärfere Bilder mit Wissensfreund Plus',
+                style: TextStyle(
+                  color: Colors.white70,
+                  fontSize: 12,
+                  height: 1.3,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // ⓘ button — shows license dialog on tap
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1039,6 +1098,9 @@ class _FullscreenGalleryState extends State<_FullscreenGallery> {
       _futures.putIfAbsent(fn, () => p.getImageBytes(fn));
 
   void _loadHiRes(String filename) {
+    // Free users never get on-demand hires.
+    if (!SubscriptionService.instance.canUseHighResOnDemand) return;
+
     if (_hiResBytes.containsKey(filename)) return;
     _hiResBytes[filename] = null; // mark as in-flight
 
@@ -1206,6 +1268,15 @@ class _FullscreenGalleryState extends State<_FullscreenGallery> {
                                                     : const SizedBox.shrink(
                                                         key: ValueKey('no_hires'),
                                                       ),
+                                              ),
+                                            // 🔍 Upgrade-Hinweis für Free-Nutzer
+                                            if (SubscriptionService.instance.isFree &&
+                                                provider.state != AppState.speaking)
+                                              Positioned(
+                                                bottom: 16,
+                                                left: 16,
+                                                right: 48,
+                                                child: _UpgradeHint(),
                                               ),
                                             // ⓘ Lizenz
                                             if (fn != null)
@@ -1402,7 +1473,9 @@ class _CaptionResumeOverlayState extends State<_CaptionResumeOverlay> {
 
 List<String> _splitSentences(String text) {
   if (text.isEmpty) return [];
-  final matches = RegExp(r'[^.!?]+[.!?]+\s*').allMatches(text);
+  // \d+(?:[.,]\d+)+ matches German numbers (1.000, 1.000.000, 1,5) as one unit
+  // so the period/comma inside them is not treated as a sentence boundary.
+  final matches = RegExp(r'(?:\d+(?:[.,]\d+)+|[^.!?])+[.!?]+\s*').allMatches(text);
   final result = matches.map((m) => m.group(0)!.trim()).toList();
   return result.isEmpty ? [text] : result;
 }

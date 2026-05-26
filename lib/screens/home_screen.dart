@@ -2123,6 +2123,12 @@ class _StorageDialogState extends State<_StorageDialog> {
   bool _loadingCache = false;
   bool _loadingStats = true;
 
+  // Download state
+  bool _downloading = false;
+  double _dlProgress = 0;
+  Duration? _dlEta;
+  String? _dlError;
+
   @override
   void initState() {
     super.initState();
@@ -2167,10 +2173,36 @@ class _StorageDialogState extends State<_StorageDialog> {
   }
 
   Future<void> _downloadLibrary() async {
-    Navigator.pop(context);
-    // Reset the offered flag so dialog shows again with download option
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('image_quality_offered');
+    setState(() { _downloading = true; _dlError = null; _dlProgress = 0; });
+    final error = await ImageLibraryService.instance.downloadLibrary(
+      onProgress: (received, total, eta) {
+        if (mounted) {
+          setState(() {
+            _dlProgress = total > 0 ? received / total : 0;
+            _dlEta = eta;
+          });
+        }
+      },
+    );
+    if (!mounted) return;
+    if (error == null) {
+      setState(() {
+        _downloading = false;
+        _libraryBytes = ImageLibraryService.instance.totalSizeBytes;
+      });
+    } else {
+      setState(() {
+        _downloading = false;
+        _dlError = _mapDlError(error);
+      });
+    }
+  }
+
+  String _mapDlError(String code) {
+    if (code.startsWith('http_404')) return 'Bildpaket noch nicht verfügbar.';
+    if (code == 'no_network' || code == 'wifi_lost') return 'Keine WLAN-Verbindung.';
+    if (code == 'limit_reached') return 'Datenlimit erreicht.';
+    return 'Download fehlgeschlagen ($code).';
   }
 
   String _fmtSize(int bytes) {
@@ -2180,8 +2212,15 @@ class _StorageDialogState extends State<_StorageDialog> {
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 
+  String _fmtEta(Duration d) =>
+      d.inMinutes >= 1 ? '~${d.inMinutes} min' : '~${d.inSeconds}s';
+
   @override
   Widget build(BuildContext context) {
+    final sub     = SubscriptionService.instance;
+    final isPlus  = sub.isPlus;
+    final hasLib  = _libraryBytes > 0;
+
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
       title: const Row(children: [
@@ -2193,99 +2232,159 @@ class _StorageDialogState extends State<_StorageDialog> {
           ? const SizedBox(
               height: 60,
               child: Center(child: CircularProgressIndicator()))
-          : Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // ── Offline-Bilderbibliothek ─────────────────────────
-                _StorageRow(
-                  label: 'Offline-Bilderbibliothek',
-                  value: _fmtSize(_libraryBytes),
-                  emptyHint: _libraryBytes == 0 ? 'Nicht heruntergeladen' : null,
-                  onClear: _libraryBytes > 0 ? _clearLibrary : null,
-                  clearing: _loadingLibrary,
-                ),
-                const SizedBox(height: 12),
-                // ── HiRes-Cache ──────────────────────────────────────
-                _StorageRow(
-                  label: 'Hochauflösungs-Cache',
-                  value: _fmtSize(_cacheBytes),
-                  emptyHint: _cacheBytes == 0 ? 'Leer' : null,
-                  onClear: _cacheBytes > 0 ? _clearCache : null,
-                  clearing: _loadingCache,
-                ),
-                if (_libraryBytes == 0) ...[
-                  const SizedBox(height: 16),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  if (!SubscriptionService.instance.canDownloadMediumQuality) ...[
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFF8E1),
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFFFCC02)),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Bessere Bildqualität mit Wissensfreund Plus',
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 13,
-                              color: Color(0xFF5D4037),
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          const Text(
-                            'Die Offline-Bilderbibliothek (~2 GB, 800px) ist im Plus-Paket enthalten.',
-                            style: TextStyle(fontSize: 12, color: Color(0xFF795548)),
-                          ),
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF2E7D32),
-                                foregroundColor: Colors.white,
-                                textStyle: const TextStyle(fontSize: 13),
-                              ),
-                              onPressed: () {
-                                Navigator.pop(context);
-                                showDialog<void>(
-                                  context: context,
-                                  builder: (_) => const _SubscriptionDialog(),
-                                );
-                              },
-                              child: const Text('Mehr erfahren'),
-                            ),
-                          ),
-                        ],
+          : SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── Bildqualität-Status ──────────────────────────────
+                  if (!isPlus) ...[
+                    // Free: Info-Text + Upsell
+                    _InfoRow(
+                      label: 'Bildqualität',
+                      value: 'Standard (300px)',
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Mit Wissensfreund Plus: deutlich schärfere Bilder',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF2E7D32),
+                          foregroundColor: Colors.white,
+                          textStyle: const TextStyle(fontSize: 13),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(context);
+                          showDialog<void>(
+                            context: context,
+                            builder: (_) => const _SubscriptionDialog(),
+                          );
+                        },
+                        child: const Text('Plus freischalten'),
                       ),
                     ),
+                  ] else if (!hasLib) ...[
+                    // Plus/Premium — kein lokaler Download
+                    _InfoRow(
+                      label: 'Bildqualität',
+                      value: 'Gut bei WLAN (bis 1200px)',
+                    ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Lokal speichern für offline (~600 MB)',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
+                    ),
+                    const SizedBox(height: 12),
+                    if (_downloading) ...[
+                      LinearProgressIndicator(
+                        value: _dlProgress > 0 ? _dlProgress : null,
+                        backgroundColor: const Color(0xFFE8F5E9),
+                        valueColor: const AlwaysStoppedAnimation(Color(0xFF2E7D32)),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        _dlProgress > 0
+                            ? '${(_dlProgress * 100).round()} %'
+                              '${_dlEta != null ? "  —  ${_fmtEta(_dlEta!)}" : ""}'
+                            : 'Verbinde…',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ] else ...[
+                      if (_dlError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(_dlError!,
+                              style: TextStyle(fontSize: 12, color: Colors.red.shade700)),
+                        ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.download_rounded, size: 18),
+                          label: const Text('Jetzt herunterladen'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF2E7D32),
+                            side: const BorderSide(color: Color(0xFF2E7D32)),
+                            textStyle: const TextStyle(fontSize: 13),
+                          ),
+                          onPressed: _downloadLibrary,
+                        ),
+                      ),
+                    ],
                   ] else ...[
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton.icon(
-                      icon: const Icon(Icons.download_rounded, size: 18),
-                      label: const Text('Bilderbibliothek herunterladen (~2 GB)'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF2E7D32),
-                        side: const BorderSide(color: Color(0xFF2E7D32)),
-                        textStyle: const TextStyle(fontSize: 13),
-                      ),
-                      onPressed: _downloadLibrary,
+                    // Plus/Premium — mit lokalem Download
+                    _InfoRow(
+                      label: 'Offline-Bilder',
+                      value: 'Gut (600px) — ${_fmtSize(_libraryBytes)}',
                     ),
-                  ),
+                    const SizedBox(height: 4),
+                    const Text(
+                      'Bei WLAN: Automatisch beste Qualität (1200px)',
+                      style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        icon: _loadingLibrary
+                            ? const SizedBox(
+                                width: 16, height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.delete_outline_rounded, size: 18),
+                        label: const Text('Offline-Bilder löschen'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red.shade700,
+                          side: BorderSide(color: Colors.red.shade300),
+                          textStyle: const TextStyle(fontSize: 13),
+                        ),
+                        onPressed: _loadingLibrary ? null : _clearLibrary,
+                      ),
+                    ),
+                  ],
+
+                  // ── 1200px-Cache (nur für Plus/Premium) ────────────
+                  if (isPlus) ...[
+                    const SizedBox(height: 16),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    _StorageRow(
+                      label: '1200px-Cache (bei WLAN geladen)',
+                      value: _fmtSize(_cacheBytes),
+                      emptyHint: _cacheBytes == 0 ? 'Leer' : null,
+                      onClear: _cacheBytes > 0 ? _clearCache : null,
+                      clearing: _loadingCache,
+                    ),
                   ],
                 ],
-              ],
+              ),
             ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: const Text('Schließen'),
         ),
+      ],
+    );
+  }
+}
+
+// Kleine Hilfwidgets für den Storage-Dialog
+class _InfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+  const _InfoRow({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 13, color: Color(0xFF555555))),
+        Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
       ],
     );
   }

@@ -48,7 +48,7 @@ class _ArticleScreenAState extends State<ArticleScreenA>
   }
 
   List<String> _splitSentences(String text) {
-    final matches = RegExp(r'[^.!?]+[.!?]+\s*').allMatches(text);
+    final matches = RegExp(r'(?:\d+(?:[.,]\d+)+|[^.!?])+[.!?]+\s*').allMatches(text);
     final result = matches.map((m) => m.group(0)!.trim()).toList();
     return result.isEmpty ? [text] : result;
   }

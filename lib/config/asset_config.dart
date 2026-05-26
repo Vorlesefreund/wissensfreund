@@ -15,10 +15,17 @@ class AssetConfig {
   static String get mediaLicensesUrl  => '$r2BaseUrl/media_licenses.json';
   static String get audioIndexUrl     => '$r2BaseUrl/audio_index.json';
   static String get audioZipUrl       => '$r2BaseUrl/wissensfreund_audio.zip';
-  static String get imageLibraryUrl   => '$r2BaseUrl/images_medium.zip';
-  static String get imageManifestUrl  => '$r2BaseUrl/images_medium_manifest.json';
   static String get zimVersionUrl     => '$r2BaseUrl/zim_version.json';
 
-  /// Approximate size of images_medium.zip for ETA estimation (bytes).
-  static const int imageLibrarySizeBytes = 2 * 1024 * 1024 * 1024; // ~2 GB
+  // ── Image tiers ─────────────────────────────────────────────────────────────
+  // thumb (300px)    — Free tier, sourced from ZIM
+  // standard (600px) — Plus/Premium offline download
+  // pro (1200px)     — Plus/Premium on-demand at WiFi (downloaded individually)
+
+  /// Offline image library for Plus/Premium users (600px, ~600 MB).
+  static String get imageLibraryUrl      => '$r2BaseUrl/images_standard.zip';
+  static String get imageManifestUrl     => '$r2BaseUrl/images_standard_manifest.json';
+
+  /// Approximate size of images_standard.zip for ETA estimation (bytes).
+  static const int imageLibrarySizeBytes = 600 * 1024 * 1024; // ~600 MB
 }

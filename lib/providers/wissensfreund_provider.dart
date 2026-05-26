@@ -768,7 +768,14 @@ class WissensfreundProvider extends ChangeNotifier {
     if (_articleText.isEmpty) return 0;
     final pos = _ttsCursor.clamp(0, _articleText.length - 1);
     for (int i = pos - 1; i >= 0; i--) {
-      if ('.!?'.contains(_articleText[i])) {
+      final ch = _articleText[i];
+      if ('.!?'.contains(ch)) {
+        // Skip period between digits (German thousands separator: 1.000, 1.000.000)
+        if (ch == '.' && i > 0 && i + 1 < _articleText.length) {
+          final before = _articleText.codeUnitAt(i - 1);
+          final after  = _articleText.codeUnitAt(i + 1);
+          if (before >= 48 && before <= 57 && after >= 48 && after <= 57) continue;
+        }
         int start = i + 1;
         while (start < _articleText.length && _articleText[start] == ' ') start++;
         return start;

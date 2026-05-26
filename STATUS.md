@@ -1,26 +1,48 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-26T11:33:22Z -->
+<!-- updated: 2026-05-26T13:03:20Z -->
 
 ## Zuletzt erledigt (Session 2026-05-26)
 
-### Bildgalerie & Bild-Pipeline (ZimReader + Workflow)
+### Bildqualitäts-System (Freemium-Umbau)
 
-#### ZimReader.kt
-- `removeLeadingTables()`: entfernt Steckbrief-Tabellen vor erstem `<p>` (TTS liest keine Tabellen mehr)
-- Overlay-Erkennung: prüft ALLE Parent-Styles in 400 Zeichen vor `<img>` auf `position:absolute` (Grandparent-Fix für Klexikon-Kartenstruktur)
-- Overlay-Caption: bei erkanntem Marker wird Caption automatisch auf "Wo die Stadt in Deutschland liegt" gesetzt
-- Karten-Kompositing: roter Standortpunkt wird bei `getImageBytes()` auf die Deutschlandkarte gezeichnet, Punktgröße `min(width/30, dot.width)` (kein Hochskalieren → kein Blur)
-- Klexikon-Logo-Filter: `Klexikon_K*` wird aus Bildergalerie herausgefiltert
-- STT-Folgequery-Fix: nur `queryType == targeted` wird als Follow-up behandelt (nicht `unknown`)
+#### Neue Stufen-Logik (300px / 600px / 1200px)
+- **Free**: 300px aus ZIM — kein on-demand, kein Download nötig
+- **Plus/Premium ohne lokalen Download**: 300px sofort, 1200px on-demand bei WLAN (Crossfade 300ms)
+- **Plus/Premium mit lokalem Download**: 600px aus `image_library/`, 1200px on-demand bei WLAN
 
-#### Bild-Pipeline (scripts + workflow)
-- `generate_license_json.py`: `extract_commons_filename()` extrahiert echten Commons-Dateinamen aus ZIM-Pfaden (`langde-250px-{original}` → `{original}`); Commons-API wird nun mit korrekten Dateinamen abgefragt; `commons_file` Feld in media_licenses.json hinzugefügt
-- `download_images.py`: Komplettumbau — primäre Quelle Wikimedia Commons, ZIM als Fallback; produziert 3 Qualitätsstufen: `images_thumb.zip` (300px), `images_standard.zip` (600px), `images_pro.zip` (1200px)
-- Workflow (`update_image_licenses.yml`): images-Job updated, lädt alle 3 ZIPs + Manifeste zu Cloudflare R2 hoch
+#### Geänderte Dateien
+- `lib/config/asset_config.dart`: URL auf `images_standard.zip` (600px) umgestellt; `imageLibrarySizeBytes` → 600 MB; alte `images_medium.zip`-Referenzen entfernt
+- `lib/services/hires_image_service.dart`: Komplettumbau:
+  - Commons-Dateiname wird aus ZIM-Pfad extrahiert (`langde-{size}px-{original}` → `{original}`)
+  - Download via `Special:FilePath/{commons_fn}?width=1200` (ein HTTP-Request statt vorher zwei)
+  - LRU-Cache: max 500 MB, evict auf 400 MB wenn überschritten
+  - Free-User-Gate: `canUseHighResOnDemand` — liefert sofort null
+- `lib/screens/article_screen.dart`:
+  - `_loadHiRes()`: früher Ausstieg für Free-User (kein Netz-Check, kein Download)
+  - Upgrade-Hinweis `_UpgradeHint` im Vollbild (Free-User, nicht während Vorlesen): "Schärfere Bilder mit Wissensfreund Plus" → tippt auf Alert-Dialog
+- `lib/screens/first_run_screen.dart`:
+  - Image-Quality-Seite wird für Free-User übersprungen (`_goToAfterNetwork()`)
+  - Neue Texte: "Ja, bessere Bilder speichern (~600 MB)" / "Nein, nur bei WLAN laden"
+  - `_kRequiredBytes` → 1 GB (600 MB ZIP + Extraktions-Overhead)
+- `lib/screens/home_screen.dart` — `_StorageDialog` komplett überarbeitet:
+  - **Free**: "Standard (300px)" + "Mit Plus: deutlich schärfere Bilder" + Upgrade-Button
+  - **Plus/Premium ohne Download**: "Gut bei WLAN (bis 1200px)" + Inline-Download mit Fortschrittsanzeige
+  - **Plus/Premium mit Download**: "Offline-Bilder: Gut (600px) — X MB" + "Löschen"-Button + "Bei WLAN: 1200px"
+  - 1200px-Cache-Zeile nur für Plus/Premium sichtbar
+
+#### Satzerkennung (Zahlen-Fix)
+- `_splitSentences()` (article_screen.dart + article_screen_a.dart): neue Regex erkennt `1.000`, `1.000.000`, `1,5` als eine Einheit → kein falsches Satzende bei deutschen Zahlenformaten
+- `_sentenceStartOffset()` (provider): überspringe Punkt zwischen zwei Ziffern beim Rückwärts-Scan
+
+#### GitHub Actions (Workflow-Trigger)
+- `update_image_licenses.yml`: `type: string` zu `workflow_dispatch` input hinzugefügt
+- GitHub hatte zum Zeitpunkt der letzten Trigger-Versuche einen Major Outage (10:57–13:xx UTC); Testlauf mit `max_articles=10` sobald GitHub wieder grün ist
 
 ### Offen / Nächste Schritte
-- Flutter-App: Bildanzeige je nach Nutzerstufe (Standard/Pro/Premium) aus passendem ZIP laden
-- Workflow-Testlauf mit `max_articles=10` empfohlen
+- **Workflow-Testlauf**: `max_articles=10` starten sobald GitHub Actions wieder stabil (githubstatus.com prüfen)
+- **images_standard.zip**: tatsächliche Größe nach erstem Lauf bekannt — `imageLibrarySizeBytes` ggf. anpassen
+- **Gemini-Integration**: Frage-Typ-Erkennung Typ 3 (Vergleich) + Typ 5 (Fallback) noch ausstehend
+- **Download-Größe dynamisch**: "~600 MB" noch statisch; nach erstem Workflow-Run aus Manifest lesen
 
 ---
 
