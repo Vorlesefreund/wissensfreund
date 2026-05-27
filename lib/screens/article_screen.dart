@@ -1511,6 +1511,18 @@ class _ModeAContentState extends State<_ModeAContent> {
   void initState() {
     super.initState();
     _scrollCtrl.addListener(_onScroll);
+    // On mode switch (e.g. C→A) jump instantly to the sentence being read.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final provider = context.read<WissensfreundProvider>();
+      final sentences = _splitSentences(provider.articleText);
+      final idx = _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
+      if (idx <= 0) return;
+      _lastActiveIdx = idx;
+      final ctx = _sentenceKeys[idx]?.currentContext;
+      if (ctx == null) return;
+      Scrollable.ensureVisible(ctx, duration: Duration.zero, alignment: 0.15);
+    });
   }
 
   void _onScroll() {
@@ -1593,39 +1605,27 @@ class _ModeAContentState extends State<_ModeAContent> {
     ];
   }
 
-  // Professor: width=178, right=0, height=218, bottom=6.
-  // Professor top from SafeArea bottom = 14+218 = 232px.
-  // Zone = bottom 245px of viewport (with buffer). Right pad = 178+4+8=190px.
+  // Reads actual render positions (not TextPainter estimates) so accuracy is
+  // maintained even for long articles. One-frame lag is fine — self-correcting.
   List<bool> _computeProfessorZone({
-    required List<String> sentences,
-    required int activeIdx,
+    required int count,
     required double viewportH,
-    required double contentWidth,
   }) {
-    final scrollOffset = _scrollCtrl.hasClients ? _scrollCtrl.offset : 0.0;
-    final professorTop = scrollOffset + viewportH - _kProfZone;
-
-    double runH = 10.0 + 16.0 * 1.5 + 8.0; // top pad + title + gap
-    final result = List<bool>.filled(sentences.length, false);
-
-    for (int i = 0; i < sentences.length; i++) {
-      final tp = TextPainter(
-        text: TextSpan(
-          text: sentences[i],
-          style: TextStyle(
-            fontSize: 14,
-            height: 1.85,
-            fontWeight: i == activeIdx ? FontWeight.bold : FontWeight.normal,
-          ),
-        ),
-        textDirection: TextDirection.ltr,
-      )..layout(maxWidth: contentWidth);
-
-      final sentBottom = runH + tp.height;
-      if (sentBottom > professorTop && runH < scrollOffset + viewportH) {
-        result[i] = true;
-      }
-      runH = sentBottom + 4;
+    if (count == 0) return const [];
+    final result = List<bool>.filled(count, false);
+    if (!_scrollCtrl.hasClients) return result;
+    final profTopVp = viewportH - _kProfZone;
+    RenderBox? vpBox;
+    for (int i = 0; i < count; i++) {
+      final ctx = _sentenceKeys[i]?.currentContext;
+      if (ctx == null) continue;
+      final box = ctx.findRenderObject() as RenderBox?;
+      if (box == null || !box.attached) continue;
+      vpBox ??= Scrollable.maybeOf(ctx)?.context.findRenderObject() as RenderBox?;
+      if (vpBox == null || !vpBox.attached) break;
+      final topInVp = vpBox.globalToLocal(box.localToGlobal(Offset.zero)).dy;
+      final bottomInVp = topInVp + box.size.height;
+      result[i] = bottomInVp > profTopVp && topInVp < viewportH;
     }
     return result;
   }
@@ -1662,12 +1662,9 @@ class _ModeAContentState extends State<_ModeAContent> {
             Expanded(
               child: LayoutBuilder(
                 builder: (ctx, constraints) {
-                  final contentWidth = constraints.maxWidth - 12 - 8;
                   final inZone = _computeProfessorZone(
-                    sentences: sentences,
-                    activeIdx: activeIdx,
+                    count: sentences.length,
                     viewportH: constraints.maxHeight,
-                    contentWidth: contentWidth,
                   );
                   return SingleChildScrollView(
                     controller: _scrollCtrl,
