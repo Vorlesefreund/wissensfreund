@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -100,11 +101,13 @@ class _ArticleScreenAState extends State<ArticleScreenA>
                           title: provider.articleTitle,
                           currentSentence: sentence,
                           fullText: provider.articleText,
+                          links: provider.articleLinks,
                           isSpeaking: isSpeaking,
                           expanded: _expanded,
                           panelH: constraints.maxHeight,
                           onExpandToggle: () =>
                               setState(() => _expanded = !_expanded),
+                          onLinkTap: provider.onLinkTapped,
                         ),
                       ),
                     ),
@@ -213,19 +216,23 @@ class _ArticlePanel extends StatelessWidget {
   final String title;
   final String currentSentence;
   final String fullText;
+  final List<Map<String, dynamic>> links;
   final bool isSpeaking;
   final bool expanded;
   final double panelH;
   final VoidCallback onExpandToggle;
+  final void Function(String target) onLinkTap;
 
   const _ArticlePanel({
     required this.title,
     required this.currentSentence,
     required this.fullText,
+    required this.links,
     required this.isSpeaking,
     required this.expanded,
     required this.panelH,
     required this.onExpandToggle,
+    required this.onLinkTap,
   });
 
   @override
@@ -285,45 +292,145 @@ class _ArticlePanel extends StatelessWidget {
                 ),
               ),
             ),
-            if (!isSpeaking) ...[
-              const SizedBox(height: 20),
-              GestureDetector(
-                onTap: onExpandToggle,
-                child: Text(
-                  expanded ? 'Weniger anzeigen ↑' : 'Mehr entdecken ↓',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Color(0xFF2E7D32),
-                  ),
+            const SizedBox(height: 20),
+            GestureDetector(
+              onTap: onExpandToggle,
+              child: Text(
+                expanded ? 'Weniger anzeigen ↑' : 'Mehr entdecken ↓',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF2E7D32),
                 ),
               ),
-              if (expanded) ...[
-                const SizedBox(height: 16),
-                Text(
-                  fullText,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    height: 1.65,
-                    color: Color(0xFF333333),
-                  ),
+            ),
+            if (expanded) ...[
+              const SizedBox(height: 16),
+              _LinkedArticleText(
+                text: fullText,
+                links: links,
+                onLinkTap: onLinkTap,
+              ),
+              const SizedBox(height: 28),
+              const Text(
+                'Weitere Bilder',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF333333),
                 ),
-                const SizedBox(height: 28),
-                const Text(
-                  'Weitere Bilder',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF333333),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _ImageGallery(title: title),
-              ],
+              ),
+              const SizedBox(height: 12),
+              _ImageGallery(title: title),
             ],
           ],
         ),
       ),
+    );
+  }
+}
+
+// ── Article text with tappable internal links ──────────────────────────────────
+
+class _LinkedArticleText extends StatefulWidget {
+  final String text;
+  final List<Map<String, dynamic>> links;
+  final void Function(String target) onLinkTap;
+
+  const _LinkedArticleText({
+    required this.text,
+    required this.links,
+    required this.onLinkTap,
+  });
+
+  @override
+  State<_LinkedArticleText> createState() => _LinkedArticleTextState();
+}
+
+class _LinkedArticleTextState extends State<_LinkedArticleText> {
+  final List<TapGestureRecognizer> _recognizers = [];
+  List<InlineSpan> _spans = const [];
+  String? _cachedText;
+  int _cachedLinksLen = -1;
+
+  static const _bodyStyle = TextStyle(
+    fontSize: 16,
+    height: 1.65,
+    color: Color(0xFF333333),
+  );
+
+  static const _linkStyle = TextStyle(
+    fontSize: 16,
+    height: 1.65,
+    color: Color(0xFF1565C0),
+    decoration: TextDecoration.underline,
+    decorationColor: Color(0xFF1565C0),
+  );
+
+  @override
+  void dispose() {
+    _clearRecognizers();
+    super.dispose();
+  }
+
+  void _clearRecognizers() {
+    for (final r in _recognizers) {
+      r.dispose();
+    }
+    _recognizers.clear();
+  }
+
+  void _rebuild() {
+    _clearRecognizers();
+    _cachedText = widget.text;
+    _cachedLinksLen = widget.links.length;
+
+    if (widget.links.isEmpty || widget.text.isEmpty) {
+      _spans = const [];
+      return;
+    }
+
+    final spans = <InlineSpan>[];
+    int cursor = 0;
+
+    for (final link in widget.links) {
+      final start = (link['startChar'] as int?) ?? 0;
+      final end   = (link['endChar']   as int?) ?? 0;
+      final target    = link['target'] as String? ?? '';
+      final linkText  = link['text']   as String? ?? '';
+
+      if (start < cursor || start >= widget.text.length ||
+          end > widget.text.length || linkText.isEmpty) continue;
+
+      if (start > cursor) {
+        spans.add(TextSpan(text: widget.text.substring(cursor, start)));
+      }
+
+      final rec = TapGestureRecognizer()
+        ..onTap = () => widget.onLinkTap(target);
+      _recognizers.add(rec);
+
+      spans.add(TextSpan(text: linkText, style: _linkStyle, recognizer: rec));
+      cursor = end;
+    }
+
+    if (cursor < widget.text.length) {
+      spans.add(TextSpan(text: widget.text.substring(cursor)));
+    }
+
+    _spans = spans;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.text != _cachedText || widget.links.length != _cachedLinksLen) {
+      _rebuild();
+    }
+    if (_spans.isEmpty) {
+      return Text(widget.text, style: _bodyStyle);
+    }
+    return RichText(
+      text: TextSpan(style: _bodyStyle, children: _spans),
     );
   }
 }

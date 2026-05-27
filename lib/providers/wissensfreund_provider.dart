@@ -195,6 +195,14 @@ class WissensfreundProvider extends ChangeNotifier {
   // After "Kein Problem" cancel phrase: resume article automatically
   bool _resumeAfterHandoff = false;
 
+  // Internal link navigation
+  List<Map<String, dynamic>> _articleLinks = [];
+  final _navStack = <({String title, int charOffset})>[];
+  bool _awaitingLinkConfirmation = false;
+  String? _pendingLinkTarget;
+  bool _isLinkNavigation = false;
+  bool _awaitingNavStackResume = false;
+
   // Pause timers — k6 sequence (30s → 60s → 90s → rest)
   Timer? _idleTimer;
   int    _pausePhase = 0; // 1=k6_s1 in TTS, 2=k6_s2, 3=k6_s3
@@ -228,6 +236,7 @@ class WissensfreundProvider extends ChangeNotifier {
   int                    get activeAudioIndex  => _activeAudioIndex;
   bool                   get isRestMode        => _isRestMode;
   ZimVersionInfo?        get pendingZimUpdate  => _pendingZimUpdate;
+  List<Map<String, dynamic>> get articleLinks  => List.unmodifiable(_articleLinks);
 
   WissensfreundProvider() {
     _initTts();
@@ -339,6 +348,22 @@ class WissensfreundProvider extends ChangeNotifier {
         );
         return;
       }
+      // After link-tap confirmation question, auto-start listening.
+      if (_awaitingLinkConfirmation && _state == AppState.idle) {
+        Future.delayed(
+          const Duration(milliseconds: 80),
+          () => startListening(skipLeadDelay: true),
+        );
+        return;
+      }
+      // After article-end nav-stack prompt, auto-start listening.
+      if (_awaitingNavStackResume && _state == AppState.idle) {
+        Future.delayed(
+          const Duration(milliseconds: 80),
+          () => startListening(skipLeadDelay: true),
+        );
+        return;
+      }
       // Mid-article mic interrupt: restore saved article + show resume prompt.
       // Fires after any TTS (error msg, no-match, etc.) when flag is still set.
       // _handleArticleSwitchConfirmation clears the flag when user confirms switch.
@@ -402,6 +427,7 @@ class WissensfreundProvider extends ChangeNotifier {
         unawaited(ProfileService.instance.clearLastArticle());
         _state         = AppState.idle;
         notifyListeners();
+        _onArticleEnd();
       }
     });
     _tts.setProgressHandler((_, start, __, ___) {
@@ -502,6 +528,10 @@ class WissensfreundProvider extends ChangeNotifier {
         notifyListeners();
         if (_awaitingArticleSwitch) {
           await _handleArticleSwitchConfirmation(text);
+        } else if (_awaitingLinkConfirmation) {
+          await _handleLinkConfirmation(text);
+        } else if (_awaitingNavStackResume) {
+          await _handleNavStackResume(text);
         } else if (!_awaitingDisambiguation && !_hasInterruptedForMic &&
                    _isGoodbyeKeyword(text)) {
           await _handleKeyword('k8');
@@ -527,6 +557,22 @@ class WissensfreundProvider extends ChangeNotifier {
       _state = AppState.idle;
       notifyListeners();
       _tts.speak('Ok, ich lese weiter.');
+      return;
+    }
+    if (_awaitingLinkConfirmation) {
+      _awaitingLinkConfirmation = false;
+      _pendingLinkTarget = null;
+      _state = AppState.idle;
+      notifyListeners();
+      _resumeAfterHandoff = _isPaused;
+      _tts.speak('Ok, ich lese weiter.');
+      return;
+    }
+    if (_awaitingNavStackResume) {
+      _awaitingNavStackResume = false;
+      _navStack.clear();
+      _state = AppState.idle;
+      notifyListeners();
       return;
     }
     if (_hasInterruptedForMic) {
@@ -710,6 +756,10 @@ class WissensfreundProvider extends ChangeNotifier {
       });
       if (raw == null) { await _speakAndIdle(_noArticleMessage); return; }
 
+      // Clear nav stack for user-initiated searches; preserve for link navigation.
+      if (!_isLinkNavigation) _navStack.clear();
+      _isLinkNavigation = false;
+
       _awaitingDisambiguation = false;
       _pendingCandidates = [];
       _hasInterruptedForMic    = false;
@@ -721,6 +771,7 @@ class WissensfreundProvider extends ChangeNotifier {
       _articleTitle = raw['title'] as String? ?? title;
       _articleText  = raw['text']  as String? ?? '';
       _articlePath  = raw['url']   as String? ?? '';
+      _articleLinks = [];
       _articleImages = [];
       _selectedImageIndex = -1;
       _imageBytesCache.clear();
@@ -730,6 +781,7 @@ class WissensfreundProvider extends ChangeNotifier {
       unawaited(ProfileService.instance.clearLastArticle());
       _startSpeakingFrom(0);
       loadMedia(urlIndex); // fire-and-forget — updates UI via notifyListeners
+      unawaited(_loadLinks(urlIndex));
       _trackArticleListened();
     } on PlatformException catch (e) {
       debugPrint('ZIM article error: ${e.message}');
@@ -886,6 +938,166 @@ class WissensfreundProvider extends ChangeNotifier {
     }
     // Premium: Platzhalter-Phrase (TODO: hier Gemini-API-Aufruf einsetzen)
     unawaited(_tts.speak(_kGeminiPlaceholderPhrases[idx]));
+  }
+
+  // ── Internal link navigation ─────────────────────────────────────────────
+
+  Future<void> onLinkTapped(String target) async {
+    if (_state == AppState.speaking || _isPaused) {
+      // Save position, pause professor, ask for confirmation.
+      final saveOffset = _state == AppState.speaking ? _sentenceStartOffset() : _resumeOffset;
+      if (_state == AppState.speaking) {
+        _isPaused = true;
+        _state    = AppState.idle;
+        notifyListeners();
+        await _tts.stop();
+      }
+      _resumeOffset = saveOffset;
+      _pendingLinkTarget = target;
+      _awaitingLinkConfirmation = true;
+      await _tts.speak('Soll ich mehr über $target erzählen?');
+      // TTS completion → auto-start listening (via _awaitingLinkConfirmation check)
+    } else {
+      // Professor idle → navigate directly.
+      await _followLink(target);
+    }
+  }
+
+  Future<void> _handleLinkConfirmation(String text) async {
+    _awaitingLinkConfirmation = false;
+    final lc = text.toLowerCase();
+    final isYes = lc.contains('ja') || lc.contains('yes') || lc.contains('okay') ||
+                  lc.contains('ok') || lc.contains('klar') || lc.contains('gerne') ||
+                  lc.contains('natürlich') || lc.contains('erzähl') || lc.contains('bitte') ||
+                  lc.contains('weiter');
+    if (isYes && _pendingLinkTarget != null) {
+      final target = _pendingLinkTarget!;
+      _pendingLinkTarget = null;
+      await _followLink(target);
+    } else {
+      _pendingLinkTarget = null;
+      _resumeAfterHandoff = _isPaused;
+      _state = AppState.idle;
+      notifyListeners();
+      await _tts.speak('Ok, ich lese weiter.');
+    }
+  }
+
+  Future<void> _followLink(String target) async {
+    _state = AppState.thinking;
+    notifyListeners();
+    try {
+      final rawResults = await _zimChannel.invokeMethod<List>('search', {
+        'query': target,
+        'maxResults': 1,
+      });
+      final results = (rawResults ?? [])
+          .map((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+      if (results.isEmpty || (results.first['score'] as int) < _kMinScore) {
+        _state = AppState.idle;
+        notifyListeners();
+        _resumeAfterHandoff = _isPaused;
+        await _tts.speak('Dazu habe ich leider noch keinen Artikel.');
+        return;
+      }
+      // Push current article context to nav stack before switching.
+      if (_articleTitle.isNotEmpty && _articleText.isNotEmpty) {
+        _navStack.add((title: _articleTitle, charOffset: _isPaused ? _resumeOffset : 0));
+        if (_navStack.length > 2) _navStack.removeAt(0);
+      }
+      _isLinkNavigation = true;
+      final best = results.first;
+      await _loadAndSpeak(best['urlIndex'] as int, best['title'] as String);
+    } on PlatformException catch (e) {
+      debugPrint('_followLink error: ${e.message}');
+      _state = AppState.idle;
+      notifyListeners();
+      _resumeAfterHandoff = _isPaused;
+      await _tts.speak('Da ist leider etwas schiefgelaufen.');
+    }
+  }
+
+  void _onArticleEnd() {
+    if (_navStack.isNotEmpty) {
+      unawaited(_speakArticleEndWithStack());
+    } else {
+      // No back stack: ask what's next, auto-open mic after 2 s.
+      unawaited(_tts.speak('Was möchtest du als nächstes hören?'));
+      Future.delayed(const Duration(seconds: 2), () {
+        if (_state == AppState.idle && !_isRestMode) {
+          unawaited(startListening());
+        }
+      });
+    }
+  }
+
+  Future<void> _speakArticleEndWithStack() async {
+    _awaitingNavStackResume = true;
+    final String msg;
+    if (_navStack.length == 1) {
+      msg = 'Soll ich mit ${_navStack[0].title} weitermachen oder möchtest du etwas anderes hören?';
+    } else {
+      msg = 'Soll ich mit ${_navStack.last.title} oder mit ${_navStack[0].title} weitermachen oder etwas anderes erzählen?';
+    }
+    await _tts.speak(msg);
+    // TTS completion → auto-start listening (via _awaitingNavStackResume check)
+  }
+
+  Future<void> _handleNavStackResume(String text) async {
+    _awaitingNavStackResume = false;
+    final lc = text.toLowerCase();
+
+    // Check if user mentioned one of the nav stack titles (most recent first).
+    for (int i = _navStack.length - 1; i >= 0; i--) {
+      final entry = _navStack[i];
+      if (lc.contains(entry.title.toLowerCase())) {
+        final title  = entry.title;
+        final offset = entry.charOffset;
+        _navStack.removeRange(i, _navStack.length);
+        _isLinkNavigation = true;
+        _state = AppState.thinking;
+        notifyListeners();
+        try {
+          final rawResults = await _zimChannel.invokeMethod<List>('search', {
+            'query': title,
+            'maxResults': 1,
+          });
+          final results = (rawResults ?? [])
+              .map((e) => Map<String, dynamic>.from(e as Map))
+              .toList();
+          if (results.isNotEmpty) {
+            await _loadAndSpeakFrom(results.first['urlIndex'] as int, title, offset);
+          } else {
+            _navStack.clear();
+            _isLinkNavigation = false;
+            _state = AppState.idle;
+            notifyListeners();
+          }
+        } catch (_) {
+          _navStack.clear();
+          _isLinkNavigation = false;
+          _state = AppState.idle;
+          notifyListeners();
+        }
+        return;
+      }
+    }
+
+    // No nav stack title matched → treat as a new query, clear stack.
+    _navStack.clear();
+    await _processQuery(text);
+  }
+
+  Future<void> _loadLinks(int urlIndex) async {
+    try {
+      final rawList = await _zimChannel.invokeMethod<List>('listLinks', {'urlIndex': urlIndex});
+      _articleLinks = (rawList ?? []).cast<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
+    } catch (e) {
+      debugPrint('_loadLinks error: $e');
+      _articleLinks = [];
+    }
+    notifyListeners();
   }
 
   /// Professor unterbricht sich, liest Caption vor, fragt danach "Soll ich weiterlesen?".

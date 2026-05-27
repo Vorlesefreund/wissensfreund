@@ -159,6 +159,10 @@ class MainActivity : FlutterFragmentActivity() {
                         val urlIndex = call.argument<Int>("urlIndex") ?: -1
                         zimListImages(urlIndex, result)
                     }
+                    "listLinks" -> {
+                        val urlIndex = call.argument<Int>("urlIndex") ?: -1
+                        zimListLinks(urlIndex, result)
+                    }
                     "getImageBytes" -> {
                         val filename = call.argument<String>("filename") ?: ""
                         zimGetImageBytes(filename, result)
@@ -245,7 +249,20 @@ class MainActivity : FlutterFragmentActivity() {
         zimExecutor.execute {
             val refs = reader.getImageRefs(urlIndex)
             val mapped = refs.map {
-                mapOf("filename" to it.filename, "mimeType" to it.mimeType, "caption" to it.caption)
+                mapOf("filename" to it.filename, "mimeType" to it.mimeType, "caption" to it.caption, "posInHtml" to it.posInHtml)
+            }
+            Handler(Looper.getMainLooper()).post { result.success(mapped) }
+        }
+    }
+
+    private fun zimListLinks(urlIndex: Int, result: MethodChannel.Result) {
+        val reader = zimReader
+        if (reader == null || urlIndex < 0) { result.success(emptyList<Any>()); return }
+        zimExecutor.execute {
+            val refs = reader.getLinkRefs(urlIndex)
+            val mapped = refs.map {
+                mapOf("text" to it.text, "target" to it.target,
+                      "startChar" to it.startChar, "endChar" to it.endChar)
             }
             Handler(Looper.getMainLooper()).post { result.success(mapped) }
         }

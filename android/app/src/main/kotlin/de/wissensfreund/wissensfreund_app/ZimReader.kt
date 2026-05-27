@@ -526,6 +526,88 @@ class ZimReader(private val filePath: String) {
         else          -> "image/jpeg"
     }
 
+    // ── Internal link extraction ────────────────────────────────────────────────
+
+    data class LinkRef(
+        val text: String,
+        val target: String,
+        val startChar: Int,
+        val endChar: Int,
+    )
+
+    fun getLinkRefs(articleUrlIndex: Int): List<LinkRef> {
+        var cur = readDirEntry(articleUrlIndex) ?: return emptyList()
+        for (i in 0 until 5) {
+            if (cur.mimeType != MIME_REDIRECT) break
+            cur = readDirEntry(cur.redirectIndex) ?: return emptyList()
+        }
+        if (cur.mimeType == MIME_REDIRECT) return emptyList()
+        return try {
+            val (data, ext) = readCluster(cur.clusterNumber)
+            val html = extractBlob(data, cur.blobNumber, ext).toString(Charsets.UTF_8)
+            val plainText = htmlToText(html)
+            extractLinkRefsFromHtml(html, plainText)
+        } catch (e: Exception) {
+            Log.e(TAG, "getLinkRefs($articleUrlIndex) failed: ${e.message}")
+            emptyList()
+        }
+    }
+
+    private fun extractLinkRefsFromHtml(html: String, plainText: String): List<LinkRef> {
+        val body = extractArticleBody(html)
+        val links = mutableListOf<LinkRef>()
+        val linkRegex  = Regex("""<a\b([^>]*?)>([\s\S]*?)</a>""", RegexOption.IGNORE_CASE)
+        val hrefRegex  = Regex("""href="([^"]+)"""", RegexOption.IGNORE_CASE)
+        var searchFrom = 0
+
+        for (m in linkRegex.findAll(body)) {
+            val attrs     = m.groupValues[1]
+            val innerHtml = m.groupValues[2]
+            val rawHref   = hrefRegex.find(attrs)?.groupValues?.get(1) ?: continue
+
+            // Skip external URLs, fragments, and mailto
+            if (rawHref.startsWith("http://") || rawHref.startsWith("https://") ||
+                rawHref.startsWith("//") || rawHref.startsWith("mailto:") ||
+                rawHref.startsWith("#")) continue
+
+            // Decode and clean target
+            var target = rawHref
+                .removePrefix("../").removePrefix("../").removePrefix("./").removePrefix("/")
+            try { target = java.net.URLDecoder.decode(target, "UTF-8") } catch (_: Exception) {}
+            target = target.substringBefore('#')
+            if (target.contains('/') && !target.startsWith("_assets_")) {
+                target = target.substringAfterLast('/')
+            }
+            if (target.isEmpty()) continue
+
+            // Skip namespace links (File:, Kategorie:, Datei:, etc.)
+            if (target.contains(':')) {
+                val ns = target.substringBefore(':')
+                if (ns.length <= 20 && !ns.contains(' ')) continue
+            }
+
+            // Extract visible anchor text
+            val anchorText = innerHtml
+                .replace(Regex("<[^>]+>"), "")
+                .replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
+                .replace("&quot;", "\"").replace("&apos;", "'")
+                .replace("&nbsp;", " ").replace("&#160;", " ")
+                .replace("&ndash;", "–").replace("&mdash;", "—")
+                .replace(Regex("\\s+"), " ").trim()
+            if (anchorText.isEmpty() || anchorText.length > 80) continue
+
+            // Locate this text in plain-text article (in document order)
+            val pos = plainText.indexOf(anchorText, searchFrom)
+            if (pos < 0) continue
+
+            links.add(LinkRef(anchorText, target, pos, pos + anchorText.length))
+            searchFrom = pos + anchorText.length
+        }
+
+        Log.d(TAG, "linkExtract: ${links.size} internal links")
+        return links
+    }
+
     fun getAudioRefs(articleUrlIndex: Int): List<AudioRef> {
         var cur = readDirEntry(articleUrlIndex) ?: return emptyList()
         for (i in 0 until 5) {

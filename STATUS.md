@@ -1,5 +1,32 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-26T13:03:20Z -->
+<!-- updated: 2026-05-27T06:18:14Z -->
+
+## Zuletzt erledigt (Session 2026-05-27)
+
+### Interne Klexikon-Links im Artikel-Screen (Modus A)
+
+**ZimReader.kt** — `LinkRef` data class + `getLinkRefs()` + `extractLinkRefsFromHtml()`:
+- Scannt Artikel-HTML nach internen `<a href>` Links (keine externen URLs, keine Namespace-Links)
+- Ordnet jeden Link einem Zeichen-Offset im Plain-Text zu (sequential `indexOf`-Suche)
+- Liefert `List<LinkRef>` mit `{text, target, startChar, endChar}`
+
+**MainActivity.kt** — `"listLinks"` Channel-Handler + `zimListLinks()`:
+- Neuer ZIM-Channel-Aufruf: `{urlIndex}` → `[{text, target, startChar, endChar}]`
+- Bugfix: `zimListImages` liefert jetzt auch `"posInHtml"` (war vorher vergessen)
+
+**wissensfreund_provider.dart** — Link-Navigations-System:
+- Neue State-Felder: `_articleLinks`, `_navStack` (max 2), `_awaitingLinkConfirmation`, `_awaitingNavStackResume`, `_isLinkNavigation`
+- `onLinkTapped(target)`: während Vorlesen → Pause + Rückfrage; im Idle → direkt navigieren
+- `_followLink(target)`: sucht Artikel, schiebt aktuellen Artikel auf Nav-Stack, lädt neuen
+- `_onArticleEnd()`: bei leerem Stack → "Was möchtest du als nächstes hören?" + Auto-Mic 2s; bei Einträgen → Stack-Prompt + Auto-Mic
+- `_handleNavStackResume(text)`: erkennt genannte Artikel-Titel, lädt von gespeicherter Position
+- `_loadLinks(urlIndex)`: lädt Links fire-and-forget nach Artikel-Load
+- `_loadAndSpeak()`: räumt Nav-Stack bei neuen User-Suchen, bewahrt ihn bei Link-Navigation
+
+**article_screen_a.dart** — `_LinkedArticleText` Widget:
+- `StatefulWidget` mit `TapGestureRecognizer`-Lifecycle (dispose on rebuild)
+- Rendert Artikel-Text als `RichText` mit blauen unterstrichenen Links (Color 0xFF1565C0)
+- Expand-Toggle jetzt auch während Vorlesen sichtbar (früher: nur im Idle)
 
 ## Zuletzt erledigt (Session 2026-05-26)
 
