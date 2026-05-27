@@ -1,5 +1,20 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-27T13:10:22Z -->
+<!-- updated: 2026-05-27T13:27:27Z -->
+
+## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 4)
+
+### Interne Links in Modus-A-Satzansicht (article_screen.dart)
+
+**Problem**: Links waren nur im `ArticleScreenA`-Expanded-Bereich sichtbar (nach Tippen
+auf „Mehr entdecken"), nicht in der eigentlichen `_ModeAContent`-Satzansicht.
+
+**Fix** in `article_screen.dart`:
+- `_SentenceWidget`: `StatelessWidget` → `StatefulWidget` mit `TapGestureRecognizer`-Lifecycle
+- Inaktive Sätze werden jetzt mit `Text.rich` + blau unterstrichenen tippbaren Links gerendert
+- Aktive Sätze (Fenster-Highlight / Vollsatz-Highlight) bleiben unverändert (kein Link-Tap während Vorlesen)
+- `_buildSentenceWidgets`: berechnet per-Satz-Links via `fullText.indexOf(sentText, searchFrom)`,
+  verschiebt `startChar`/`endChar` relativ zum Satz-Start
+- Aufruf in `build()`: `provider.articleLinks`, `provider.articleText`, `provider.onLinkTapped` übergeben
 
 ## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 3)
 

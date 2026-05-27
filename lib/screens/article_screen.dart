@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -1590,9 +1591,10 @@ class _ModeAContentState extends State<_ModeAContent> {
     required int ttsCursor,
     required bool isSpeaking,
     required bool isPaused,
+    required String fullText,
+    required List<Map<String, dynamic>> links,
+    required void Function(String) onLinkTap,
   }) {
-    // Show window highlight while speaking OR while paused (cursor saved at
-    // pause position). Full-sentence highlight only when idle before playback.
     int activeCursorInSent = -1;
     if ((isSpeaking || isPaused) && sentences.isNotEmpty) {
       int sentStart = 0;
@@ -1603,17 +1605,41 @@ class _ModeAContentState extends State<_ModeAContent> {
           (ttsCursor - sentStart).clamp(0, sentences[activeIdx].length);
     }
 
-    return [
-      for (int i = 0; i < sentences.length; i++)
-        _SentenceWidget(
-          key: _keyFor(i),
-          text: sentences[i],
-          isActive: i == activeIdx,
-          // Active sentence always at full width so top lines are never narrow.
-          extraRightPad: i == activeIdx ? 0.0 : (inZone[i] ? _kProfPad : 0.0),
-          cursorInSent: i == activeIdx ? activeCursorInSent : -1,
-        ),
-    ];
+    final result = <Widget>[];
+    int searchFrom = 0;
+    for (int i = 0; i < sentences.length; i++) {
+      final sentText = sentences[i];
+      final actualStart = fullText.indexOf(sentText, searchFrom);
+
+      List<Map<String, dynamic>> sentLinks = const [];
+      if (actualStart >= 0 && links.isNotEmpty) {
+        final actualEnd = actualStart + sentText.length;
+        sentLinks = links.where((l) {
+          final s = (l['startChar'] as int?) ?? 0;
+          final e = (l['endChar'] as int?) ?? 0;
+          return s >= actualStart && e <= actualEnd;
+        }).map((l) => <String, dynamic>{
+          'text': l['text'],
+          'target': l['target'],
+          'startChar': (l['startChar'] as int) - actualStart,
+          'endChar': (l['endChar'] as int) - actualStart,
+        }).toList();
+        searchFrom = actualEnd;
+      } else if (actualStart >= 0) {
+        searchFrom = actualStart + sentText.length;
+      }
+
+      result.add(_SentenceWidget(
+        key: _keyFor(i),
+        text: sentText,
+        isActive: i == activeIdx,
+        extraRightPad: i == activeIdx ? 0.0 : (inZone[i] ? _kProfPad : 0.0),
+        cursorInSent: i == activeIdx ? activeCursorInSent : -1,
+        links: sentLinks,
+        onLinkTap: onLinkTap,
+      ));
+    }
+    return result;
   }
 
   // Snapshot each sentence's top position (in scroll-content coordinates) while
@@ -1725,6 +1751,9 @@ class _ModeAContentState extends State<_ModeAContent> {
                           ttsCursor: provider.ttsCursor,
                           isSpeaking: provider.state == AppState.speaking,
                           isPaused: provider.isPaused,
+                          fullText: provider.articleText,
+                          links: provider.articleLinks,
+                          onLinkTap: provider.onLinkTapped,
                         ),
                         // ── Thumbnails at end of article ──────────────────
                         if (sentences.isNotEmpty) ...[
@@ -1756,13 +1785,13 @@ class _ModeAContentState extends State<_ModeAContent> {
   }
 }
 
-class _SentenceWidget extends StatelessWidget {
+class _SentenceWidget extends StatefulWidget {
   final String text;
   final bool isActive;
   final double extraRightPad;
-  // ≥ 0 while speaking → show window highlight around current word.
-  // -1 → show full-sentence highlight (paused / idle) or no highlight.
   final int cursorInSent;
+  final List<Map<String, dynamic>> links;
+  final void Function(String) onLinkTap;
 
   const _SentenceWidget({
     super.key,
@@ -1770,68 +1799,123 @@ class _SentenceWidget extends StatelessWidget {
     required this.isActive,
     required this.extraRightPad,
     this.cursorInSent = -1,
+    this.links = const [],
+    required this.onLinkTap,
   });
 
+  @override
+  State<_SentenceWidget> createState() => _SentenceWidgetState();
+}
+
+class _SentenceWidgetState extends State<_SentenceWidget> {
+  final _recognizers = <TapGestureRecognizer>[];
+  List<InlineSpan>? _cachedSpans;
+  String? _cachedText;
+  int _cachedLinksLen = -1;
+
   static const _base = TextStyle(fontSize: 14, height: 1.85);
+  static const _linkStyle = TextStyle(
+    fontSize: 14,
+    height: 1.85,
+    color: Color(0xFF1565C0),
+    decoration: TextDecoration.underline,
+    decorationColor: Color(0xFF1565C0),
+  );
+
+  @override
+  void dispose() {
+    _clearRecognizers();
+    super.dispose();
+  }
+
+  void _clearRecognizers() {
+    for (final r in _recognizers) r.dispose();
+    _recognizers.clear();
+  }
+
+  List<InlineSpan> _inactiveSpans() {
+    if (widget.text == _cachedText && widget.links.length == _cachedLinksLen) {
+      return _cachedSpans!;
+    }
+    _clearRecognizers();
+    _cachedText = widget.text;
+    _cachedLinksLen = widget.links.length;
+
+    final baseStyle = _base.copyWith(color: const Color(0xFF333333));
+    if (widget.links.isEmpty) {
+      _cachedSpans = [TextSpan(text: widget.text, style: baseStyle)];
+      return _cachedSpans!;
+    }
+
+    final spans = <InlineSpan>[];
+    int cursor = 0;
+    for (final link in widget.links) {
+      final start  = (link['startChar'] as int?) ?? 0;
+      final end    = (link['endChar']   as int?) ?? 0;
+      final target = link['target']  as String? ?? '';
+      final lText  = link['text']    as String? ?? '';
+      if (start < cursor || start >= widget.text.length ||
+          end > widget.text.length || lText.isEmpty) continue;
+      if (start > cursor) {
+        spans.add(TextSpan(text: widget.text.substring(cursor, start), style: baseStyle));
+      }
+      final rec = TapGestureRecognizer()..onTap = () => widget.onLinkTap(target);
+      _recognizers.add(rec);
+      spans.add(TextSpan(text: lText, style: _linkStyle, recognizer: rec));
+      cursor = end;
+    }
+    if (cursor < widget.text.length) {
+      spans.add(TextSpan(text: widget.text.substring(cursor), style: baseStyle));
+    }
+    _cachedSpans = spans;
+    return spans;
+  }
 
   @override
   Widget build(BuildContext context) {
     // ── Window highlight: stable at punctuation boundaries ────────────────
-    if (isActive && cursorInSent >= 0 && text.isNotEmpty) {
-      final pos = cursorInSent.clamp(0, text.length);
-
-      // Window start: back to the previous punctuation mark (., , ! ? ; :)
+    if (widget.isActive && widget.cursorInSent >= 0 && widget.text.isNotEmpty) {
+      final pos = widget.cursorInSent.clamp(0, widget.text.length);
       int baseStart = 0;
       for (int i = pos - 1; i >= 0; i--) {
-        if ('.,:!?;'.contains(text[i])) {
+        if ('.,:!?;'.contains(widget.text[i])) {
           baseStart = i + 1;
-          // Skip leading whitespace after the punctuation
-          while (baseStart < text.length && text[baseStart] == ' ') baseStart++;
+          while (baseStart < widget.text.length && widget.text[baseStart] == ' ') baseStart++;
           break;
         }
       }
-
-      // Window end: forward to the next punctuation mark (inclusive)
-      int baseEnd = text.length;
-      for (int i = pos; i < text.length; i++) {
-        if ('.,:!?;'.contains(text[i])) {
-          baseEnd = i + 1;
-          break;
-        }
+      int baseEnd = widget.text.length;
+      for (int i = pos; i < widget.text.length; i++) {
+        if ('.,:!?;'.contains(widget.text[i])) { baseEnd = i + 1; break; }
       }
-
-      // Guarantee at least 20 chars before and after cursor
-      final wStart =
-          (baseStart < pos - 20 ? baseStart : pos - 20).clamp(0, pos);
-      final wEnd =
-          (baseEnd > pos + 20 ? baseEnd : pos + 20).clamp(pos, text.length);
-
+      final wStart = (baseStart < pos - 20 ? baseStart : pos - 20).clamp(0, pos);
+      final wEnd   = (baseEnd > pos + 20 ? baseEnd : pos + 20).clamp(pos, widget.text.length);
       return Padding(
-        padding: EdgeInsets.only(right: extraRightPad, bottom: 4),
+        padding: EdgeInsets.only(right: widget.extraRightPad, bottom: 4),
         child: Text.rich(
           TextSpan(
             style: _base.copyWith(color: const Color(0xFF333333)),
             children: [
-              if (wStart > 0) TextSpan(text: text.substring(0, wStart)),
+              if (wStart > 0) TextSpan(text: widget.text.substring(0, wStart)),
               TextSpan(
-                text: text.substring(wStart, wEnd),
+                text: widget.text.substring(wStart, wEnd),
                 style: _base.copyWith(
                   color: const Color(0xFF1B4332),
                   fontWeight: FontWeight.bold,
                   backgroundColor: const Color(0xFFC8EDDA),
                 ),
               ),
-              if (wEnd < text.length) TextSpan(text: text.substring(wEnd)),
+              if (wEnd < widget.text.length) TextSpan(text: widget.text.substring(wEnd)),
             ],
           ),
         ),
       );
     }
 
-    // ── Full-sentence highlight (paused / idle / before first word) ────────
-    if (isActive) {
+    // ── Full-sentence highlight (active, paused / idle) ────────────────────
+    if (widget.isActive) {
       return Padding(
-        padding: EdgeInsets.only(right: extraRightPad, bottom: 4),
+        padding: EdgeInsets.only(right: widget.extraRightPad, bottom: 4),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
           decoration: BoxDecoration(
@@ -1840,7 +1924,7 @@ class _SentenceWidget extends StatelessWidget {
             border: Border.all(color: const Color(0xFF2D6A4F), width: 2),
           ),
           child: Text(
-            text,
+            widget.text,
             style: _base.copyWith(
               fontWeight: FontWeight.bold,
               color: const Color(0xFF1B4332),
@@ -1850,13 +1934,10 @@ class _SentenceWidget extends StatelessWidget {
       );
     }
 
-    // ── Inactive sentence ──────────────────────────────────────────────────
+    // ── Inactive sentence — with tappable links ────────────────────────────
     return Padding(
-      padding: EdgeInsets.only(right: extraRightPad, bottom: 4),
-      child: Text(
-        text,
-        style: _base.copyWith(color: const Color(0xFF333333)),
-      ),
+      padding: EdgeInsets.only(right: widget.extraRightPad, bottom: 4),
+      child: Text.rich(TextSpan(children: _inactiveSpans())),
     );
   }
 }
