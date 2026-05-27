@@ -1511,9 +1511,11 @@ class _ModeAContentState extends State<_ModeAContent> {
   void initState() {
     super.initState();
     _scrollCtrl.addListener(_onScroll);
-    // On mode switch (e.g. C→A) jump instantly to the sentence being read.
+    // After the first frame: render objects exist → recompute professor zone,
+    // then jump instantly to the active sentence (handles B→A and C→A switch).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
+      setState(() {}); // render objects now available → zone recomputes correctly
       final provider = context.read<WissensfreundProvider>();
       final sentences = _splitSentences(provider.articleText);
       final idx = _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
@@ -1638,11 +1640,14 @@ class _ModeAContentState extends State<_ModeAContent> {
         final activeIdx =
             _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
 
-        // Reset keys when article changes
+        // Reset keys when article changes; schedule zone recompute for next frame.
         if (provider.articleText != _lastArticleText) {
           _lastArticleText = provider.articleText;
           _sentenceKeys.clear();
           _lastActiveIdx = -1;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) setState(() {});
+          });
         }
 
         // Auto-scroll: pull active sentence to near top when speaking
