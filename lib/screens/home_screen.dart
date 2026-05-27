@@ -186,9 +186,8 @@ class _HomeScreenState extends State<HomeScreen>
       return;
     }
 
-    // Auth erfolgreich → Kiosk-Modus beenden, dann Gerät sperren, dann App beenden
+    // Auth erfolgreich → Kiosk-Modus beenden, App beenden
     if (ps.isKioskMode) await ps.stopKioskMode();
-    if (ps.isAdminActive) await ps.lockDevice();
     SystemNavigator.pop();
   }
 

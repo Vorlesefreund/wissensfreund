@@ -1,5 +1,23 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-27T12:50:25Z -->
+<!-- updated: 2026-05-27T13:10:22Z -->
+
+## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 3)
+
+### Biometrie-Deaktivierung nach App-Beenden behoben
+
+**Ursache**: `DevicePolicyManager.lockNow()` (aufgerufen in `home_screen.dart:191` nach
+erfolgreichem BiometricPrompt beim App-Beenden) versetzt Android in den „Strong Auth Required"-
+Zustand. Standardverhalten Android: Nach programmatischem Lock via Device Admin ist Biometrie
+bis zur nächsten PIN-Eingabe deaktiviert. Kein Samsung-Bug, kein Timing-Problem.
+
+**Fix**: `if (ps.isAdminActive) await ps.lockDevice();` aus dem Beenden-Flow entfernt
+(`home_screen.dart:191`). Die Methode `lockDevice()` selbst bleibt bestehen.
+
+**Neuer Ablauf**: BiometricPrompt bestätigen → App beendet sich → Homescreen, Biometrie normal.
+
+**Nicht geändert**: `lockDevice()`-Methode in `parental_lock_service.dart` und `MainActivity.kt`
+(könnte an anderer Stelle noch benötigt werden). `ParentalUnlockActivity.kt` war bereits sauber
+(BiometricPrompt + finishAffinity, kein requestDismissKeyguard).
 
 ## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 2)
 
