@@ -228,14 +228,14 @@ class WissensfreundForegroundService : Service() {
     // Entsperren: Overlay ausblenden, transparente BiometricPrompt-Activity starten.
     // Bei Abbruch stellt ParentalUnlockActivity das Overlay wieder her.
     private fun onUnlockTapped() {
-        // released=true VOR startActivity setzen, damit MainActivity.onStop()
-        // das Overlay nicht sofort wieder einblendet, wenn FLAG_ACTIVITY_NEW_TASK
-        // MainActivity in den Stop-Zustand versetzt.
         released = true
-        hideOverlayInternal()
+        // startActivity VOR hideOverlayInternal: Das sichtbare Overlay-Fenster ist
+        // auf Android 10+ die Ausnahme für Background-Activity-Starts. Erst danach
+        // das Overlay entfernen.
         val intent = Intent(this, ParentalUnlockActivity::class.java)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         startActivity(intent)
+        hideOverlayInternal()
     }
 
     // Kind kehrt zurück: Overlay ausblenden, Wissensfreund in Vordergrund.

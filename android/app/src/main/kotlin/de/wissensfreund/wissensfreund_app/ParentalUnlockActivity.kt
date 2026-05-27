@@ -49,10 +49,13 @@ class ParentalUnlockActivity : FragmentActivity() {
             km.requestDismissKeyguard(this, object : KeyguardManager.KeyguardDismissCallback() {
 
                 override fun onDismissSucceeded() {
-                    // Schritt 2: Kiosk-Freigabe erst NACH erfolgreicher Auth
                     WissensfreundForegroundService.released = true
-                    // Schritt 3+4: 150 ms warten, dann zum Homescreen
-                    mainHandler.postDelayed({ goHome() }, 150)
+                    // 2-Sekunden-Fenster öffnen: verhindert dass MainActivity.onStart/onStop
+                    // released zurücksetzt falls Samsung die App während des Keyguard-Dismissals
+                    // kurz in den Vordergrund bringt.
+                    MainActivity.signalUnlockCompleted()
+                    // 300 ms Delay: Samsung braucht länger für die Entsperr-Animation
+                    mainHandler.postDelayed({ goHome() }, 300)
                 }
 
                 override fun onDismissError() {
