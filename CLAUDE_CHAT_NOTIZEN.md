@@ -178,5 +178,7 @@ Upgrade-Hinweis im Vollbild für Free-Nutzer:
 
 **Priorität:** Auftrag 1 zuerst, dann Auftrag 2
 
-**Erledigt:** [ ]
+**Erledigt:**
+- [x] Auftrag 1: Interne Links + Navigation — umgesetzt am 2026-05-27 (commit a073f86: ZimReader getLinkRefs, MainActivity listLinks, Provider Nav-Stack, ArticleScreenA _LinkedArticleText)
+- [ ] Auftrag 2: Bildqualität je Stufe (Flutter-App)
 ---
