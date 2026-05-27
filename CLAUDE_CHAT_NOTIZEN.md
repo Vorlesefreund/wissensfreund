@@ -180,5 +180,5 @@ Upgrade-Hinweis im Vollbild für Free-Nutzer:
 
 **Erledigt:**
 - [x] Auftrag 1: Interne Links + Navigation — umgesetzt am 2026-05-27 (commit a073f86: ZimReader getLinkRefs, MainActivity listLinks, Provider Nav-Stack, ArticleScreenA _LinkedArticleText)
-- [ ] Auftrag 2: Bildqualität je Stufe (Flutter-App)
+- [x] Auftrag 2: Bildqualität je Stufe — umgesetzt am 2026-05-26 (HiResImageService 1200px on-demand, ImageLibraryService 600px offline, 300px Free-Fallback, Upgrade-Hint Vollbild)
 ---
