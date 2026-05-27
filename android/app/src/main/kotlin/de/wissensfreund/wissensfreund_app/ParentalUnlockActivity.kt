@@ -1,67 +1,85 @@
 package de.wissensfreund.wissensfreund_app
 
+import android.app.KeyguardManager
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import androidx.biometric.BiometricManager
-import androidx.biometric.BiometricPrompt
-import androidx.core.content.ContextCompat
+import android.os.Handler
+import android.os.Looper
+import android.view.WindowManager
 import androidx.fragment.app.FragmentActivity
 
 /**
- * Transparente Activity, die direkt nach dem Tippen auf "Entsperren"
- * im nativen Overlay gestartet wird. Zeigt den System-BiometricPrompt
- * (Fingerabdruck / PIN / Muster) — kein eigenes Flutter-UI nötig.
+ * Transparente Activity für den Eltern-Entsperrfluss.
  *
- * FragmentActivity (statt AppCompatActivity) — benötigt kein AppCompat-Theme,
- * kompatibel mit dem transparenten Android-Basis-Theme.
+ * Reihenfolge (wichtig):
+ *  1. requestDismissKeyguard() — Keyguard läuft noch
+ *  2. Erst im onDismissSucceeded-Callback: released = true (Kiosk freigeben)
+ *  3. 150 ms warten, damit Android die Entsperr-Animation abschließt
+ *  4. Home-Intent mit FLAG_ACTIVITY_NEW_TASK + finish()
  *
- * Erfolg  → released = true, Overlay bleibt weg, Activity schließt sich →
- *            Android kehrt zur vorherigen Aufgabe (Recents / Homescreen) zurück.
- * Abbruch → Overlay wird wieder eingeblendet, Activity schließt sich.
+ * setShowWhenLocked(true) sorgt dafür, dass der Entsperr-Dialog auch über
+ * dem Sperrbildschirm sichtbar ist.
  */
 class ParentalUnlockActivity : FragmentActivity() {
 
+    private val mainHandler = Handler(Looper.getMainLooper())
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        showBiometricPrompt()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        } else {
+            @Suppress("DEPRECATION")
+            window.addFlags(
+                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            )
+        }
+
+        requestKeyguardDismiss()
     }
 
-    private fun showBiometricPrompt() {
-        val executor = ContextCompat.getMainExecutor(this)
+    private fun requestKeyguardDismiss() {
+        val km = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
 
-        val callback = object : BiometricPrompt.AuthenticationCallback() {
-            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                WissensfreundForegroundService.released = true
-                finish()
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            km.requestDismissKeyguard(this, object : KeyguardManager.KeyguardDismissCallback() {
 
-            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                // Abbruch oder nicht behebarer Fehler → Overlay wieder einblenden
-                WissensfreundForegroundService.showOverlay()
-                finish()
-            }
+                override fun onDismissSucceeded() {
+                    // Schritt 2: Kiosk-Freigabe erst NACH erfolgreicher Auth
+                    WissensfreundForegroundService.released = true
+                    // Schritt 3+4: 150 ms warten, dann zum Homescreen
+                    mainHandler.postDelayed({ goHome() }, 150)
+                }
 
-            override fun onAuthenticationFailed() {
-                // Einzelner Fehlversuch — BiometricPrompt zeigt eigene Fehlermeldung
-            }
-        }
+                override fun onDismissError() {
+                    WissensfreundForegroundService.showOverlay()
+                    finish()
+                }
 
-        // BIOMETRIC_WEAK (Frontkamera-Gesichtserkennung) erst ab API 30 mit DEVICE_CREDENTIAL kombinierbar
-        val authenticators = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                BiometricManager.Authenticators.BIOMETRIC_WEAK or
-                BiometricManager.Authenticators.DEVICE_CREDENTIAL
+                override fun onDismissCancelled() {
+                    WissensfreundForegroundService.released = false
+                    WissensfreundForegroundService.showOverlay()
+                    finish()
+                }
+            })
         } else {
-            BiometricManager.Authenticators.BIOMETRIC_STRONG or
-                BiometricManager.Authenticators.DEVICE_CREDENTIAL
+            // API < 26: kein requestDismissKeyguard → direkt freigeben
+            WissensfreundForegroundService.released = true
+            mainHandler.postDelayed({ goHome() }, 150)
         }
+    }
 
-        val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Wissensfreund")
-            .setSubtitle("Entsperren")
-            .setAllowedAuthenticators(authenticators)
-            .build()
-
-        BiometricPrompt(this, executor, callback).authenticate(promptInfo)
+    private fun goHome() {
+        if (!isFinishing) {
+            startActivity(Intent(Intent.ACTION_MAIN).apply {
+                addCategory(Intent.CATEGORY_HOME)
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            })
+            finish()
+        }
     }
 }

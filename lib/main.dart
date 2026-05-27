@@ -66,17 +66,16 @@ class _WissensfreundAppState extends State<WissensfreundApp>
 
     if (state == AppLifecycleState.paused) {
       _wentToBackground = true;
-      // Position speichern, dann pausieren — Position bleibt erhalten
       final provider = context.read<WissensfreundProvider>();
       unawaited(provider.saveCurrentArticlePosition());
-      provider.pauseSpeaking();
+      // enterBackground: Timer stoppen + TTS beenden (auch Idle-Ansagen)
+      unawaited(provider.enterBackground());
     } else if (state == AppLifecycleState.resumed && _wentToBackground) {
       _wentToBackground = false;
-      // Status aktualisieren und Professor weiterlesen lassen.
-      // Der Kinderschutz läuft vollständig über das native Overlay
-      // (WissensfreundForegroundService) — kein Flutter-Overlay nötig.
       ps.refreshAdminStatus();
-      context.read<WissensfreundProvider>().resumeSpeaking();
+      final provider = context.read<WissensfreundProvider>();
+      provider.exitBackground();
+      unawaited(provider.resumeSpeaking());
     }
   }
 

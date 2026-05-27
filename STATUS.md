@@ -1,5 +1,23 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-27T07:13:51Z -->
+<!-- updated: 2026-05-27T12:20:56Z -->
+
+## Zuletzt erledigt (Session 2026-05-27 Abend)
+
+### Drei Bugfixes: Professor-Zone, Kiosk-Auth, Idle-TTS im Hintergrund
+
+**Professor-Zone-Fix (artikel_screen.dart)**
+- Ursache: RenderBox-Positionen änderten sich durch Zone-Padding → Feedback-Loop / Oszillation
+- Fix: Positionen beim ersten Frame cachen (`_sentenceTopCache`, `_sentenceHeightCache`, `_cacheBuilt`); alle Scroll-Berechnungen nutzen stabile Document-Koordinaten
+- Zusätzlich: `_kProfPad` 182→160 (Text läuft weiter rechts), `_kProfZone` 245→220 (eine Zeile mehr sichtbar)
+
+**Kiosk-Entsperr-Flow (ParentalUnlockActivity.kt)**
+- Ursache 1: `BiometricPrompt` ist nur App-Level-Auth, entsperrt den Gerät-Keyguard nicht
+- Ursache 2: `goHome()` wurde sofort nach `onDismissSucceeded` aufgerufen ohne 150ms Delay
+- Fix: `BiometricPrompt` durch `requestDismissKeyguard()` ersetzt; `released=true` erst im Callback; 150ms Delay vor Home-Intent; `FLAG_ACTIVITY_NEW_TASK` explizit gesetzt; `setShowWhenLocked(true)` + `setTurnScreenOn(true)`
+
+**Idle-TTS im Hintergrund (wissensfreund_provider.dart + main.dart)**
+- Ursache: `pauseSpeaking()` prüfte `_state==speaking` — bei Idle-Zustand passierte nichts, Idle-Timer liefen weiter
+- Fix: `_isInBackground`-Flag; `enterBackground()` cancelt Timer + stoppt TTS sofort; Guard in `_fireK6S1/2/3`; `main.dart` nutzt `enterBackground()`/`exitBackground()` statt `pauseSpeaking()`/`resumeSpeaking()`
 
 ## Zuletzt erledigt (Session 2026-05-27 Nachmittag)
 

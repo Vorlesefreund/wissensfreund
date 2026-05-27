@@ -24,9 +24,9 @@ const double _kProfRight  = -12.0;
 const double _kProfBottom =   6.0;
 const double _kMicSize    =  52.0;
 const double _kMicBottom  =  14.0;
-const double _kProfPad    = _kProfW + 4.0;               // 182 — right text indent beside professor
+const double _kProfPad    = _kProfW - 18.0;              // 160 — right text indent beside professor
 const double _kMicClear   = _kMicSize + _kMicBottom * 2; //  80 — scroll bottom clearance
-const double _kProfZone   = _kProfH + _kProfBottom + 21; // 245 — viewport bottom covered by professor
+const double _kProfZone   = _kProfH + _kProfBottom - 4;  // 220 — viewport bottom covered by professor
 const double _kThumbRight = _kProfW + 2.0;               // 180 — thumbnail row right padding
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1507,6 +1507,14 @@ class _ModeAContentState extends State<_ModeAContent> {
   int _lastActiveIdx = -1;
   String _lastArticleText = '';
   bool _scrollPending = false;
+
+  // Cached full-width document positions (in scroll-content coordinates).
+  // Built once after the first render when all sentences are at full width.
+  // Stable across scroll events → no feedback-loop oscillation.
+  final _sentenceTopCache = <int, double>{};
+  final _sentenceHeightCache = <int, double>{};
+  bool _cacheBuilt = false;
+
   @override
   void initState() {
     super.initState();
@@ -1515,7 +1523,8 @@ class _ModeAContentState extends State<_ModeAContent> {
     // then jump instantly to the active sentence (handles B→A and C→A switch).
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      setState(() {}); // render objects now available → zone recomputes correctly
+      _buildCache(); // snapshot full-width positions BEFORE zone padding applied
+      setState(() {}); // now zone uses stable cached positions
       final provider = context.read<WissensfreundProvider>();
       final sentences = _splitSentences(provider.articleText);
       final idx = _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
@@ -1607,18 +1616,16 @@ class _ModeAContentState extends State<_ModeAContent> {
     ];
   }
 
-  // Reads actual render positions (not TextPainter estimates) so accuracy is
-  // maintained even for long articles. One-frame lag is fine — self-correcting.
-  List<bool> _computeProfessorZone({
-    required int count,
-    required double viewportH,
-  }) {
-    if (count == 0) return const [];
-    final result = List<bool>.filled(count, false);
-    if (!_scrollCtrl.hasClients) return result;
-    final profTopVp = viewportH - _kProfZone;
+  // Snapshot each sentence's top position (in scroll-content coordinates) while
+  // all sentences are still at full width (before zone padding is applied).
+  // Called once per article from the first-frame post-frame callback.
+  void _buildCache() {
+    if (_cacheBuilt || !_scrollCtrl.hasClients) return;
+    _sentenceTopCache.clear();
+    _sentenceHeightCache.clear();
+    final scrollOffset = _scrollCtrl.offset;
     RenderBox? vpBox;
-    for (int i = 0; i < count; i++) {
+    for (int i = 0; i < _sentenceKeys.length; i++) {
       final ctx = _sentenceKeys[i]?.currentContext;
       if (ctx == null) continue;
       final box = ctx.findRenderObject() as RenderBox?;
@@ -1626,10 +1633,30 @@ class _ModeAContentState extends State<_ModeAContent> {
       vpBox ??= Scrollable.maybeOf(ctx)?.context.findRenderObject() as RenderBox?;
       if (vpBox == null || !vpBox.attached) break;
       final topInVp = vpBox.globalToLocal(box.localToGlobal(Offset.zero)).dy;
-      final bottomInVp = topInVp + box.size.height;
-      result[i] = bottomInVp > profTopVp && topInVp < viewportH;
+      _sentenceTopCache[i] = topInVp + scrollOffset;
+      _sentenceHeightCache[i] = box.size.height;
     }
-    return result;
+    if (_sentenceTopCache.isNotEmpty) _cacheBuilt = true;
+  }
+
+  // Uses stable cached document positions so zone membership never oscillates:
+  // applying zone padding shifts sentences down, but cached docY values don't
+  // change → no feedback loop between zone assignment and position measurement.
+  List<bool> _computeProfessorZone({
+    required int count,
+    required double viewportH,
+  }) {
+    if (count == 0) return const [];
+    if (!_cacheBuilt || !_scrollCtrl.hasClients) return List.filled(count, false);
+    final scrollOffset = _scrollCtrl.offset;
+    final profTopDoc = scrollOffset + viewportH - _kProfZone;
+    final profBottomDoc = scrollOffset + viewportH;
+    return List.generate(count, (i) {
+      final docY = _sentenceTopCache[i];
+      if (docY == null) return false;
+      final h = _sentenceHeightCache[i] ?? 24.0;
+      return (docY + h) > profTopDoc && docY < profBottomDoc;
+    });
   }
 
   @override
@@ -1640,13 +1667,18 @@ class _ModeAContentState extends State<_ModeAContent> {
         final activeIdx =
             _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
 
-        // Reset keys when article changes; schedule zone recompute for next frame.
+        // Reset keys + cache when article changes; rebuild after full-width render.
         if (provider.articleText != _lastArticleText) {
           _lastArticleText = provider.articleText;
           _sentenceKeys.clear();
+          _sentenceTopCache.clear();
+          _sentenceHeightCache.clear();
+          _cacheBuilt = false;
           _lastActiveIdx = -1;
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) setState(() {});
+            if (!mounted) return;
+            _buildCache();
+            setState(() {});
           });
         }
 

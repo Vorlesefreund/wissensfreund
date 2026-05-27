@@ -206,6 +206,7 @@ class WissensfreundProvider extends ChangeNotifier {
   // Pause timers — k6 sequence (30s → 60s → 90s → rest)
   Timer? _idleTimer;
   int    _pausePhase = 0; // 1=k6_s1 in TTS, 2=k6_s2, 3=k6_s3
+  bool   _isInBackground = false; // app is paused/backgrounded
 
   AppState get state          => _state;
   String get recognizedText   => _recognizedText;
@@ -1413,6 +1414,24 @@ class WissensfreundProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// App geht in den Hintergrund: Timer stoppen, TTS sofort beenden.
+  Future<void> enterBackground() async {
+    _isInBackground = true;
+    _cancelIdleTimers();
+    if (_state == AppState.speaking) {
+      _resumeOffset = _ttsCursor;
+      _isPaused = true;
+      _state = AppState.idle;
+      notifyListeners();
+    }
+    await _tts.stop(); // auch laufende Idle-Ansagen abbrechen
+  }
+
+  /// App kommt in den Vordergrund zurück.
+  void exitBackground() {
+    _isInBackground = false;
+  }
+
   Future<void> resumeSpeaking() async {
     if (!_isPaused || _articleText.isEmpty) return;
     final offset = _resumeOffset;
@@ -1589,7 +1608,7 @@ class WissensfreundProvider extends ChangeNotifier {
 
   Future<void> _fireK6S1() async {
     _idleTimer = null;
-    if (_state != AppState.idle || _articleText.isNotEmpty || _isRestMode) return;
+    if (_isInBackground || _state != AppState.idle || _articleText.isNotEmpty || _isRestMode) return;
     _pausePhase = 1;
     final msg = await _catalogOrFallback('k6_s1', 'Ich bin noch da!');
     if (_pausePhase == 1 && _state == AppState.idle && !_isRestMode) {
@@ -1601,7 +1620,7 @@ class WissensfreundProvider extends ChangeNotifier {
 
   Future<void> _fireK6S2() async {
     _idleTimer = null;
-    if (_state != AppState.idle || _articleText.isNotEmpty || _isRestMode) return;
+    if (_isInBackground || _state != AppState.idle || _articleText.isNotEmpty || _isRestMode) return;
     _pausePhase = 2;
     final msg = await _catalogOrFallback('k6_s2', 'Ich bin noch hier!');
     if (_pausePhase == 2 && _state == AppState.idle && !_isRestMode) {
@@ -1613,7 +1632,7 @@ class WissensfreundProvider extends ChangeNotifier {
 
   Future<void> _fireK6S3() async {
     _idleTimer = null;
-    if (_state != AppState.idle || _articleText.isNotEmpty || _isRestMode) return;
+    if (_isInBackground || _state != AppState.idle || _articleText.isNotEmpty || _isRestMode) return;
     _pausePhase = 3;
     final msg = await _catalogOrFallback('k6_s3', 'Tippe mich an wenn du weitermachen möchtest!');
     if (_pausePhase == 3 && _state == AppState.idle && !_isRestMode) {
