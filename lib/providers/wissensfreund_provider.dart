@@ -194,10 +194,12 @@ class WissensfreundProvider extends ChangeNotifier {
   String? _deferredArticleChunk;
   // After "Kein Problem" cancel phrase: resume article automatically
   bool _resumeAfterHandoff = false;
+  bool _ttsStopPending = false; // guard against stop()-induced onDone race
 
   // Internal link navigation
   List<Map<String, dynamic>> _articleLinks = [];
-  final _navStack = <({String title, int charOffset})>[];
+  int _currentUrlIndex = -1;
+  final _navStack = <({String title, int urlIndex, int charOffset})>[];
   bool _awaitingLinkConfirmation = false;
   String? _pendingLinkTarget;
   bool _isLinkNavigation = false;
@@ -238,6 +240,7 @@ class WissensfreundProvider extends ChangeNotifier {
   bool                   get isRestMode        => _isRestMode;
   ZimVersionInfo?        get pendingZimUpdate  => _pendingZimUpdate;
   List<Map<String, dynamic>> get articleLinks  => List.unmodifiable(_articleLinks);
+  bool get canGoBack => _navStack.isNotEmpty;
 
   WissensfreundProvider() {
     _initTts();
@@ -305,6 +308,8 @@ class WissensfreundProvider extends ChangeNotifier {
     await _tts.setVolume(1.0);
     await _tts.setPitch(1.0);
     _tts.setCompletionHandler(() {
+      // Discard onDone that was triggered by an explicit stop() call.
+      if (_ttsStopPending) { _ttsStopPending = false; return; }
       // Deferred article chunk after a limit-warning phrase — resume article reading.
       if (_deferredArticleChunk != null) {
         final chunk = _deferredArticleChunk!;
@@ -506,14 +511,16 @@ class WissensfreundProvider extends ChangeNotifier {
     _showCaptionResumePrompt = false;
     _state = AppState.listening;
     _recognizedText = '';
-    _articleText = '';
-    _articleTitle = '';
-    _articlePath = '';
-    _articleImages = [];
-    _selectedImageIndex = -1;
-    _imageBytesCache.clear();
-    _isPaused = false;
-    _resumeOffset = 0;
+    if (!_awaitingLinkConfirmation) {
+      _articleText = '';
+      _articleTitle = '';
+      _articlePath = '';
+      _articleImages = [];
+      _selectedImageIndex = -1;
+      _imageBytesCache.clear();
+      _isPaused = false;
+      _resumeOffset = 0;
+    }
     notifyListeners();
 
     await _tts.stop();
@@ -760,6 +767,7 @@ class WissensfreundProvider extends ChangeNotifier {
       // Clear nav stack for user-initiated searches; preserve for link navigation.
       if (!_isLinkNavigation) _navStack.clear();
       _isLinkNavigation = false;
+      _currentUrlIndex = urlIndex;
 
       _awaitingDisambiguation = false;
       _pendingCandidates = [];
@@ -895,6 +903,7 @@ class WissensfreundProvider extends ChangeNotifier {
       _technischZaehler       = 0;
       _lastFailedQuery        = '';
       _cancelIdleTimers();
+      _currentUrlIndex = urlIndex;
       _articleTitle = raw['title'] as String? ?? title;
       _articleText  = raw['text']  as String? ?? '';
       _articlePath  = raw['url']   as String? ?? '';
@@ -909,6 +918,7 @@ class WissensfreundProvider extends ChangeNotifier {
       _state = AppState.idle;
       notifyListeners();
       loadMedia(urlIndex);
+      unawaited(_loadLinks(urlIndex));
       unawaited(_tts.speak('Weiter mit $_articleTitle!'));
       // TTS completion → non-article branch → _resumeAfterHandoff → resumeSpeaking()
     } on PlatformException catch (e) {
@@ -985,6 +995,11 @@ class WissensfreundProvider extends ChangeNotifier {
   }
 
   Future<void> _followLink(String target) async {
+    // Capture article context before any await — preserved even when _awaitingLinkConfirmation is set.
+    final savedTitle    = _articleTitle;
+    final savedUrlIndex = _currentUrlIndex;
+    final savedOffset   = _isPaused ? _resumeOffset : 0;
+
     _state = AppState.thinking;
     notifyListeners();
     try {
@@ -1003,8 +1018,8 @@ class WissensfreundProvider extends ChangeNotifier {
         return;
       }
       // Push current article context to nav stack before switching.
-      if (_articleTitle.isNotEmpty && _articleText.isNotEmpty) {
-        _navStack.add((title: _articleTitle, charOffset: _isPaused ? _resumeOffset : 0));
+      if (savedTitle.isNotEmpty && savedUrlIndex >= 0) {
+        _navStack.add((title: savedTitle, urlIndex: savedUrlIndex, charOffset: savedOffset));
         if (_navStack.length > 2) _navStack.removeAt(0);
       }
       _isLinkNavigation = true;
@@ -1016,6 +1031,62 @@ class WissensfreundProvider extends ChangeNotifier {
       notifyListeners();
       _resumeAfterHandoff = _isPaused;
       await _tts.speak('Da ist leider etwas schiefgelaufen.');
+    }
+  }
+
+  Future<void> goBack() async {
+    if (_navStack.isEmpty) return;
+    _awaitingNavStackResume = false;
+    _awaitingLinkConfirmation = false;
+    final entry = _navStack.removeLast();
+
+    _state = AppState.thinking;
+    _isPaused = false;
+    _resumeAfterHandoff = false;
+    notifyListeners();
+
+    _ttsStopPending = true;
+    unawaited(_tts.stop());
+
+    try {
+      final raw = await _zimChannel.invokeMethod<Map>('article', {'urlIndex': entry.urlIndex});
+      if (raw == null) {
+        _ttsStopPending = false;
+        _state = AppState.idle;
+        notifyListeners();
+        return;
+      }
+
+      _currentUrlIndex      = entry.urlIndex;
+      _articleTitle         = raw['title'] as String? ?? entry.title;
+      _articleText          = raw['text']  as String? ?? '';
+      _articlePath          = raw['url']   as String? ?? '';
+      _articleLinks         = [];
+      _articleImages        = [];
+      _selectedImageIndex   = -1;
+      _imageBytesCache.clear();
+      _awaitingDisambiguation = false;
+      _pendingCandidates    = [];
+      _hasInterruptedForMic  = false;
+      _savedArticleTextForMic = '';
+      _misserfolgZaehler    = 0;
+      _technischZaehler     = 0;
+      _lastFailedQuery      = '';
+      _cancelIdleTimers();
+      _resumeAfterHandoff   = false;
+
+      notifyListeners();
+      loadMedia(entry.urlIndex);
+      unawaited(_loadLinks(entry.urlIndex));
+
+      final safeOffset = entry.charOffset.clamp(0, _articleText.length);
+      _startSpeakingFrom(safeOffset);
+
+    } on PlatformException catch (e) {
+      _ttsStopPending = false;
+      debugPrint('goBack: ${e.message}');
+      _state = AppState.idle;
+      notifyListeners();
     }
   }
 
@@ -1059,28 +1130,7 @@ class WissensfreundProvider extends ChangeNotifier {
         _isLinkNavigation = true;
         _state = AppState.thinking;
         notifyListeners();
-        try {
-          final rawResults = await _zimChannel.invokeMethod<List>('search', {
-            'query': title,
-            'maxResults': 1,
-          });
-          final results = (rawResults ?? [])
-              .map((e) => Map<String, dynamic>.from(e as Map))
-              .toList();
-          if (results.isNotEmpty) {
-            await _loadAndSpeakFrom(results.first['urlIndex'] as int, title, offset);
-          } else {
-            _navStack.clear();
-            _isLinkNavigation = false;
-            _state = AppState.idle;
-            notifyListeners();
-          }
-        } catch (_) {
-          _navStack.clear();
-          _isLinkNavigation = false;
-          _state = AppState.idle;
-          notifyListeners();
-        }
+        await _loadAndSpeakFrom(entry.urlIndex, title, offset);
         return;
       }
     }
@@ -1093,9 +1143,11 @@ class WissensfreundProvider extends ChangeNotifier {
   Future<void> _loadLinks(int urlIndex) async {
     try {
       final rawList = await _zimChannel.invokeMethod<List>('listLinks', {'urlIndex': urlIndex});
+      if (_currentUrlIndex != urlIndex) return; // stale — article changed while loading
       _articleLinks = (rawList ?? []).cast<Map>().map((m) => Map<String, dynamic>.from(m)).toList();
     } catch (e) {
       debugPrint('_loadLinks error: $e');
+      if (_currentUrlIndex != urlIndex) return;
       _articleLinks = [];
     }
     notifyListeners();

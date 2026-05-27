@@ -334,9 +334,13 @@ class _ArticleControlsState extends State<_ArticleControls>
               icon: Icons.arrow_back_rounded,
               bg: const Color(0xFF37474F),
               onTap: () async {
-                await provider.saveCurrentArticlePosition();
-                await provider.stopSpeaking();
-                if (context.mounted) Navigator.pop(context);
+                if (provider.canGoBack) {
+                  provider.goBack();
+                } else {
+                  await provider.saveCurrentArticlePosition();
+                  await provider.stopSpeaking();
+                  if (context.mounted) Navigator.pop(context);
+                }
               },
             ),
             const SizedBox(width: 24),
@@ -359,9 +363,13 @@ class _ArticleControlsState extends State<_ArticleControls>
     return Center(
       child: GestureDetector(
         onTap: () async {
-          await provider.saveCurrentArticlePosition();
-          await provider.stopSpeaking();
-          if (context.mounted) Navigator.pop(context);
+          if (provider.canGoBack) {
+            provider.goBack();
+          } else {
+            await provider.saveCurrentArticlePosition();
+            await provider.stopSpeaking();
+            if (context.mounted) Navigator.pop(context);
+          }
         },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 250),
@@ -420,17 +428,30 @@ class _ArticleHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12),
       child: Row(
         children: [
+          // Back button — shown when there's a nav stack entry to return to
+          if (provider.canGoBack) ...[
+            _HeaderBtn(
+              bg: _btnBg,
+              child: Icon(Icons.arrow_back_rounded, size: 19, color: _fgColor),
+              onTap: () => provider.goBack(),
+            ),
+            const SizedBox(width: 8),
+          ],
           const Text('🎓', style: TextStyle(fontSize: 20)),
           const SizedBox(width: 6),
-          Text(
-            'Wissensfreund',
-            style: TextStyle(
-              fontSize: 17,
-              fontWeight: FontWeight.w700,
-              color: _fgColor,
+          Expanded(
+            child: Text(
+              provider.canGoBack
+                  ? provider.articleTitle
+                  : 'Wissensfreund',
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+                color: _fgColor,
+              ),
             ),
           ),
-          const Spacer(),
           // Favorite
           if (provider.articleTitle.isNotEmpty)
             _FavoriteBtn(
@@ -1605,37 +1626,57 @@ class _ModeAContentState extends State<_ModeAContent> {
           (ttsCursor - sentStart).clamp(0, sentences[activeIdx].length);
     }
 
-    final result = <Widget>[];
-    int searchFrom = 0;
-    for (int i = 0; i < sentences.length; i++) {
-      final sentText = sentences[i];
-      final actualStart = fullText.indexOf(sentText, searchFrom);
-
-      List<Map<String, dynamic>> sentLinks = const [];
-      if (actualStart >= 0 && links.isNotEmpty) {
-        final actualEnd = actualStart + sentText.length;
-        sentLinks = links.where((l) {
-          final s = (l['startChar'] as int?) ?? 0;
-          final e = (l['endChar'] as int?) ?? 0;
-          return s >= actualStart && e <= actualEnd;
-        }).map((l) => <String, dynamic>{
-          'text': l['text'],
-          'target': l['target'],
-          'startChar': (l['startChar'] as int) - actualStart,
-          'endChar': (l['endChar'] as int) - actualStart,
-        }).toList();
-        searchFrom = actualEnd;
-      } else if (actualStart >= 0) {
-        searchFrom = actualStart + sentText.length;
+    // Pass 1: locate each sentence in fullText (in order).
+    final sentStarts = <int>[];
+    int scanPos = 0;
+    for (final sent in sentences) {
+      final idx = fullText.indexOf(sent, scanPos);
+      if (idx >= 0) {
+        sentStarts.add(idx);
+        scanPos = idx + sent.length;
+      } else {
+        sentStarts.add(scanPos);
       }
+    }
 
+    // Pass 2: assign every link to the sentence whose start immediately precedes
+    // the link's startChar (half-open interval sentStarts[i] <= s < sentStarts[i+1]).
+    // This covers links in inter-sentence whitespace gaps that strict end-boundary
+    // checks would miss.
+    final sentLinks = List<List<Map<String, dynamic>>>.generate(sentences.length, (_) => []);
+    if (links.isNotEmpty && sentStarts.isNotEmpty) {
+      for (final link in links) {
+        final s = (link['startChar'] as int?) ?? 0;
+        final e = (link['endChar']   as int?) ?? 0;
+        // Find rightmost sentence whose start is <= link start.
+        int assigned = -1;
+        for (int i = sentStarts.length - 1; i >= 0; i--) {
+          if (s >= sentStarts[i]) { assigned = i; break; }
+        }
+        if (assigned < 0) continue;
+        final base     = sentStarts[assigned];
+        final maxLen   = sentences[assigned].length;
+        final localS   = s - base;
+        final localE   = (e - base).clamp(0, maxLen);
+        if (localS < 0 || localS >= maxLen || localS >= localE) continue;
+        sentLinks[assigned].add(<String, dynamic>{
+          'text':      link['text'],
+          'target':    link['target'],
+          'startChar': localS,
+          'endChar':   localE,
+        });
+      }
+    }
+
+    final result = <Widget>[];
+    for (int i = 0; i < sentences.length; i++) {
       result.add(_SentenceWidget(
         key: _keyFor(i),
-        text: sentText,
+        text: sentences[i],
         isActive: i == activeIdx,
         extraRightPad: i == activeIdx ? 0.0 : (inZone[i] ? _kProfPad : 0.0),
         cursorInSent: i == activeIdx ? activeCursorInSent : -1,
-        links: sentLinks,
+        links: sentLinks[i],
         onLinkTap: onLinkTap,
       ));
     }

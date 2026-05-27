@@ -1,5 +1,46 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-27T13:27:27Z -->
+<!-- updated: 2026-05-27T20:30:52Z -->
+
+## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 5)
+
+### Zurück-Button: Artikel-Navigation fertig
+
+**Problem**: Zurück-Button nach Link-Navigation (z.B. Elefant → Säugetiere) landete
+immer wieder bei Säugetieren statt bei Elefanten.
+
+**Root Cause 1** (navStack-Push wurde übersprungen):
+`startListening()` löschte `_articleTitle`/`_articleText` unbedingt. Wenn es während
+`_awaitingLinkConfirmation` aufgerufen wurde (automatisch nach TTS-Frage), war
+`_articleTitle` beim späteren navStack-Push in `_followLink` bereits leer.
+
+**Fix**: Guard in `startListening()` — Artikel-Kontext bleibt erhalten wenn
+`_awaitingLinkConfirmation` gesetzt ist:
+```dart
+if (!_awaitingLinkConfirmation) {
+  _articleText = ''; _articleTitle = ''; ...
+}
+```
+
+**Root Cause 2** (falscher Button):
+Der `_ArticleControls`-Back-Button (während Vorlesen sichtbar) rief `Navigator.pop(context)`
+auf, nicht `provider.goBack()`. Nur der `_ArticleHeader`-Button war korrekt verdrahtet.
+
+**Fix**: Beide Back-Buttons in `_ArticleControls` (speaking/paused/listening + idle)
+prüfen jetzt `provider.canGoBack` — wenn true → `provider.goBack()`, sonst → `Navigator.pop`.
+
+**Root Cause 3** (falsche Links nach Zurück-Sprung):
+`_articleLinks` wurde in `goBack()` nicht geleert. Beim `notifyListeners()`-Aufruf
+nach ZIM-Load waren noch die Säugetiere-Links sichtbar. Außerdem Race Condition:
+laufender `_loadLinks(säugetiereIdx)` überschrieb evtl. die frisch geladenen Elefant-Links.
+
+**Fix**:
+- `_articleLinks = []` in `goBack()` vor `notifyListeners()` ergänzt
+- `_loadLinks()` verwirft Ergebnis wenn `_currentUrlIndex != urlIndex` (stale guard)
+
+**Debug-Prints entfernt**: alle `GO_BACK:`, `NAV_PUSH:`, `NAV_FOLLOW:`, `COMPLETION:`
+Logs aus `wissensfreund_provider.dart` bereinigt.
+
+---
 
 ## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 4)
 
