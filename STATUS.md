@@ -1,7 +1,37 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-27T12:20:56Z -->
+<!-- updated: 2026-05-27T12:50:25Z -->
 
-## Zuletzt erledigt (Session 2026-05-27 Abend)
+## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 2)
+
+### Kiosk-Entsperr-Flow: Kompletter Neuansatz mit BiometricPrompt (APK installiert)
+
+**Problem**: `requestDismissKeyguard()` ist herstellerspezifisch (Samsung One UI, Xiaomi etc.
+implementieren Keyguard unterschiedlich) → nach Auth landete Nutzer am Sperrbildschirm statt Homescreen;
+nur Kennwort-Entsperrung möglich, kein PIN/Biometrie.
+
+**Lösung** — 3 Dateien geändert:
+
+`ParentalUnlockActivity.kt` — komplett neu:
+- `requestDismissKeyguard` + alle Handler/Delays entfernt
+- `BiometricPrompt` (BIOMETRIC_STRONG | BIOMETRIC_WEAK | DEVICE_CREDENTIAL) direkt in `onCreate`
+- Bei Auth-Erfolg: `released=true` → `setShowWhenLocked(false)` → `startActivity(HOME_INTENT)` → `finishAffinity()`
+- `finishAffinity()` schließt den gesamten Wissensfreund-Task-Stack (MainActivity + ParentalUnlockActivity),
+  verhindert Samsung "App in Vordergrund nach Keyguard-Dismiss"-Lifecycle-Event
+
+`MainActivity.kt` — vereinfacht:
+- `unlockCompletedAt` + `signalUnlockCompleted()` entfernt
+- `onStart()`: einfach `released=false` + `hideOverlay()`
+- `onStop()`: einfach Kiosk-Check ohne Timestamp-Fenster
+
+`AndroidManifest.xml` — `showWhenLocked="true"` + `turnScreenOn="true"` für ParentalUnlockActivity
+
+**Warum `setShowWhenLocked(false)` statt Navigation mit aktivem Lock?**
+Das Signal teilt dem System synchron mit, dass die Activity fertig ist. Der anschließende
+HOME_INTENT landet direkt am Homescreen — System übernimmt die Entsperranimation.
+
+**APK**: debug-Build erstellt und per `adb install -r` installiert (ZIM-Datei bleibt erhalten).
+
+## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 1)
 
 ### Drei Bugfixes: Professor-Zone, Kiosk-Auth, Idle-TTS im Hintergrund
 
@@ -10,10 +40,8 @@
 - Fix: Positionen beim ersten Frame cachen (`_sentenceTopCache`, `_sentenceHeightCache`, `_cacheBuilt`); alle Scroll-Berechnungen nutzen stabile Document-Koordinaten
 - Zusätzlich: `_kProfPad` 182→160 (Text läuft weiter rechts), `_kProfZone` 245→220 (eine Zeile mehr sichtbar)
 
-**Kiosk-Entsperr-Flow (ParentalUnlockActivity.kt)**
-- Ursache 1: `BiometricPrompt` ist nur App-Level-Auth, entsperrt den Gerät-Keyguard nicht
-- Ursache 2: `goHome()` wurde sofort nach `onDismissSucceeded` aufgerufen ohne 150ms Delay
-- Fix: `BiometricPrompt` durch `requestDismissKeyguard()` ersetzt; `released=true` erst im Callback; 150ms Delay vor Home-Intent; `FLAG_ACTIVITY_NEW_TASK` explizit gesetzt; `setShowWhenLocked(true)` + `setTurnScreenOn(true)`
+**Kiosk-Entsperr-Flow (ParentalUnlockActivity.kt) — älterer Versuch (ersetzt durch Teil 2)**
+- Ansatz war `requestDismissKeyguard()` — herstellerspezifisch, hat nicht funktioniert
 
 **Idle-TTS im Hintergrund (wissensfreund_provider.dart + main.dart)**
 - Ursache: `pauseSpeaking()` prüfte `_state==speaking` — bei Idle-Zustand passierte nichts, Idle-Timer liefen weiter

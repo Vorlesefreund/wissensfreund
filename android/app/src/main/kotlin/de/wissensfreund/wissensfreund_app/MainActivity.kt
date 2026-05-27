@@ -54,37 +54,21 @@ class MainActivity : FlutterFragmentActivity() {
         private const val ZIM_FILENAME = "klexikon.zim"
 
         @Volatile var kioskEnabled = false
-
-        // Timestamp (ms) set by ParentalUnlockActivity after successful auth.
-        // onStart/onStop ignore kiosk-restore for 2 seconds after unlock so that
-        // Samsung's "resume previous app after keyguard dismiss" doesn't re-show
-        // the overlay and doesn't reset released=true prematurely.
-        @Volatile var unlockCompletedAt = 0L
-
-        fun signalUnlockCompleted() { unlockCompletedAt = System.currentTimeMillis() }
     }
 
     // onStop: feuert für ALLE Navigationsarten (Home-Button, Recents, Wischgesten)
     override fun onStop() {
         super.onStop()
-        val msSinceUnlock = System.currentTimeMillis() - unlockCompletedAt
-        val inUnlockWindow = msSinceUnlock < 2000
-        if (kioskEnabled && !suppressRestoreOnce && !WissensfreundForegroundService.released
-                && !inUnlockWindow) {
+        if (kioskEnabled && !suppressRestoreOnce && !WissensfreundForegroundService.released) {
             WissensfreundForegroundService.showOverlay()
         }
         suppressRestoreOnce = false
     }
 
     // onStart: App kommt zurück in den Vordergrund — Overlay ausblenden, released zurücksetzen.
-    // Innerhalb von 2 s nach Eltern-Entsperrung released NICHT zurücksetzen (Samsung bringt
-    // die App kurzzeitig in den Vordergrund während des Keyguard-Dismissals).
     override fun onStart() {
         super.onStart()
-        val msSinceUnlock = System.currentTimeMillis() - unlockCompletedAt
-        if (msSinceUnlock >= 2000) {
-            WissensfreundForegroundService.released = false
-        }
+        WissensfreundForegroundService.released = false
         WissensfreundForegroundService.hideOverlay()
     }
 

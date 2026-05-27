@@ -1,29 +1,15 @@
 package de.wissensfreund.wissensfreund_app
 
-import android.app.KeyguardManager
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.WindowManager
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricPrompt
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 
-/**
- * Transparente Activity für den Eltern-Entsperrfluss.
- *
- * Reihenfolge (wichtig):
- *  1. requestDismissKeyguard() — Keyguard läuft noch
- *  2. Erst im onDismissSucceeded-Callback: released = true (Kiosk freigeben)
- *  3. 150 ms warten, damit Android die Entsperr-Animation abschließt
- *  4. Home-Intent mit FLAG_ACTIVITY_NEW_TASK + finish()
- *
- * setShowWhenLocked(true) sorgt dafür, dass der Entsperr-Dialog auch über
- * dem Sperrbildschirm sichtbar ist.
- */
 class ParentalUnlockActivity : FragmentActivity() {
-
-    private val mainHandler = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,50 +25,46 @@ class ParentalUnlockActivity : FragmentActivity() {
             )
         }
 
-        requestKeyguardDismiss()
+        showBiometricPrompt()
     }
 
-    private fun requestKeyguardDismiss() {
-        val km = getSystemService(KEYGUARD_SERVICE) as KeyguardManager
+    private fun showBiometricPrompt() {
+        val executor = ContextCompat.getMainExecutor(this)
+        val prompt = BiometricPrompt(this, executor, object : BiometricPrompt.AuthenticationCallback() {
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            km.requestDismissKeyguard(this, object : KeyguardManager.KeyguardDismissCallback() {
-
-                override fun onDismissSucceeded() {
-                    WissensfreundForegroundService.released = true
-                    // 2-Sekunden-Fenster öffnen: verhindert dass MainActivity.onStart/onStop
-                    // released zurücksetzt falls Samsung die App während des Keyguard-Dismissals
-                    // kurz in den Vordergrund bringt.
-                    MainActivity.signalUnlockCompleted()
-                    // 300 ms Delay: Samsung braucht länger für die Entsperr-Animation
-                    mainHandler.postDelayed({ goHome() }, 300)
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                WissensfreundForegroundService.released = true
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                    setShowWhenLocked(false)
                 }
+                startActivity(Intent(Intent.ACTION_MAIN).apply {
+                    addCategory(Intent.CATEGORY_HOME)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                })
+                finishAffinity()
+            }
 
-                override fun onDismissError() {
-                    WissensfreundForegroundService.showOverlay()
-                    finish()
-                }
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                WissensfreundForegroundService.released = false
+                WissensfreundForegroundService.showOverlay()
+                finish()
+            }
 
-                override fun onDismissCancelled() {
-                    WissensfreundForegroundService.released = false
-                    WissensfreundForegroundService.showOverlay()
-                    finish()
-                }
-            })
-        } else {
-            // API < 26: kein requestDismissKeyguard → direkt freigeben
-            WissensfreundForegroundService.released = true
-            mainHandler.postDelayed({ goHome() }, 150)
-        }
-    }
+            override fun onAuthenticationFailed() {
+                // Falscher Fingerabdruck — Prompt bleibt offen
+            }
+        })
 
-    private fun goHome() {
-        if (!isFinishing) {
-            startActivity(Intent(Intent.ACTION_MAIN).apply {
-                addCategory(Intent.CATEGORY_HOME)
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            })
-            finish()
-        }
+        val info = BiometricPrompt.PromptInfo.Builder()
+            .setTitle("Kinderschutz")
+            .setSubtitle("Bitte Eltern-Biometrie oder PIN bestätigen")
+            .setAllowedAuthenticators(
+                BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                BiometricManager.Authenticators.DEVICE_CREDENTIAL
+            )
+            .build()
+
+        prompt.authenticate(info)
     }
 }
