@@ -1,7 +1,31 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-27T06:18:14Z -->
+<!-- updated: 2026-05-27T07:13:51Z -->
 
-## Zuletzt erledigt (Session 2026-05-27)
+## Zuletzt erledigt (Session 2026-05-27 Nachmittag)
+
+### Bild-Pipeline: Root-Cause-Analyse + Fix (commit 55d703c)
+
+**Problem**: Alle 3 Image-ZIPs (thumb/standard/pro) waren identisch (136 MB, 21039 ZIM-Bilder,
+0 Commons-Bilder). Ursache: Der 2026-05 Klexikon-ZIM hat **keine** `<a href="Datei:...">` Wrapper
+um `<img>` Tags — Kiwix hat diese Links beim Bauen des ZIM entfernt. Die alte FILE_LINK_RE-Strategie
+in `build_image_map.py` produzierte daher immer 0 Mappings.
+
+**Fix in `build_image_map.py`** — 3 Strategien (werden der Reihe nach versucht):
+1. **alt-as-filename** (offline): Wenn `<img alt="Name.jpg">` wie ein Dateiname aussieht (hat Bild-Extension), direkt verwenden. Deckt Icons, Logos, un-captioned Images ab.
+2. **Datei-Link** (offline, Fallback für ältere ZIMs): `<a href="...Datei:...">` in 1200 Zeichen vor dem img-Tag suchen.
+3. **MediaWiki API** (online, Production-only): Für verbleibende unmappte Bilder live-HTML von klexikon.zum.de holen (action=parse), daraus Datei:-Links in Reihenfolge extrahieren, per Position mit ZIM-img-Tags matchen. Wird bei MAX_ARTICLES (Testmodus) übersprungen.
+
+**Fix im Workflow** — `actions/upload-artifact@v4` → `@v5` und `download-artifact@v4` → `@v5`:
+Node.js 20 wird ab 2. Juni 2026 deprecated. Alle 7 Artifact-Action-Aufrufe geupdated.
+
+**Test-Run ausgelöst**: Run #26496624714 (max_articles=50) läuft gerade, prüft ob alt-as-filename greift.
+
+**Nächster Schritt**: Nach Test-Run → Ergebnis prüfen → Full-Run starten (max_articles=0).
+Full-Run wird Strategy 3 (MediaWiki API, ~3600 API-Calls à 0.4s ≈ +25 min) nutzen.
+
+## Zuletzt erledigt (Session 2026-05-27 Früh)
+
+### Interne Klexikon-Links im Artikel-Screen (Modus A)
 
 ### Interne Klexikon-Links im Artikel-Screen (Modus A)
 
