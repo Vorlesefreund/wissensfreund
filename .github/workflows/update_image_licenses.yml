@@ -99,14 +99,14 @@ jobs:
 
       # ── Pass refs + licenses to downstream jobs via artifacts ───────────────
       - name: Upload audio refs artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: audio-refs
           path: wikipedia_audio_refs.json
           retention-days: 1
 
       - name: Upload licenses artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: media-licenses
           path: media_licenses.json
@@ -114,7 +114,7 @@ jobs:
 
       # Upload ZIM so images-job can reuse it without re-downloading (~60 min saved)
       - name: Upload ZIM artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: klexikon-zim
           path: klexikon.zim
@@ -198,7 +198,7 @@ jobs:
         run: pip install requests
 
       - name: Download audio refs artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: audio-refs
 
@@ -275,13 +275,13 @@ jobs:
         run: pip install requests zstandard
 
       - name: Download licenses artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: media-licenses
 
       # Reuse ZIM from prepare-job artifact (saves ~60 min vs. re-downloading)
       - name: Download ZIM artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: klexikon-zim
 
@@ -299,7 +299,7 @@ jobs:
 
       # ── Upload shard output as artifact for merge job ─────────────────────
       - name: Upload shard ${{ matrix.shard }} artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: images-shard-${{ matrix.shard }}
           retention-days: 1
@@ -327,19 +327,19 @@ jobs:
           python-version: '3.10'
 
       - name: Download shard 0
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: images-shard-0
           path: shard-0/
 
       - name: Download shard 1
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: images-shard-1
           path: shard-1/
 
       - name: Download shard 2
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: images-shard-2
           path: shard-2/
