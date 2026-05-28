@@ -43,3 +43,9 @@ jobs:
         env:
           ZIM_FILE: klexikon.zim
           MAX_ARTICLES: ${{ inputs.max_articles || '50' }}
+
+      - name: Run deduplication + size analysis
+        run: python scripts/diagnose_zim.py
+        env:
+          ZIM_FILE: klexikon.zim
+          MODE: dedup

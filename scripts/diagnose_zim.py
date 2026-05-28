@@ -366,5 +366,132 @@ def main():
             print(f"  Projected images if fully extracted: {sum(img_counts)/len(img_counts) * len(html_entries):.0f}")
 
 
+def main_dedup():
+    """
+    Count unique image hashes and size distribution.
+    Run with: ZIM_FILE=klexikon.zim MODE=dedup python scripts/diagnose_zim.py
+    """
+    import hashlib
+    zim_path = Path(ZIM_FILE)
+    if not zim_path.exists():
+        print(f"ERROR: ZIM not found: {zim_path}", file=sys.stderr)
+        sys.exit(1)
+
+    zim_size_bytes = zim_path.stat().st_size
+    print(f"ZIM: {zim_path} ({zim_size_bytes // 1_048_576} MB)")
+
+    with open(zim_path, 'rb') as f:
+        header = f.read(80)
+        entry_count,   = struct.unpack_from('<I', header, 24)
+        cluster_count, = struct.unpack_from('<I', header, 28)
+        url_ptr_pos,   = struct.unpack_from('<Q', header, 32)
+        cluster_ptr_pos, = struct.unpack_from('<Q', header, 48)
+        mime_list_pos, = struct.unpack_from('<Q', header, 56)
+        checksum_pos,  = struct.unpack_from('<Q', header, 72)
+
+        mime_types = _read_mime_types(f, mime_list_pos)
+
+        f.seek(cluster_ptr_pos)
+        cluster_ptrs: list[int] = []
+        for _ in range(cluster_count):
+            raw = f.read(8)
+            if len(raw) < 8:
+                break
+            cluster_ptrs.append(struct.unpack_from('<Q', raw)[0])
+
+        # Collect all image entries
+        print(f"Scanning {entry_count} entries for images...")
+        image_entries: list[tuple[str, int, int]] = []  # (url, cluster, blob)
+        for i in range(entry_count):
+            f.seek(url_ptr_pos + i * 8)
+            raw = f.read(8)
+            if len(raw) < 8:
+                break
+            ptr, = struct.unpack_from('<Q', raw)
+            f.seek(ptr)
+            hdr4 = f.read(4)
+            if len(hdr4) < 4:
+                continue
+            mime_idx, param_len, _ = struct.unpack_from('<HBc', hdr4)
+            f.read(4)
+            if mime_idx == 0xFFFF:
+                f.read(4)
+                continue
+            cluster_num, blob_num = struct.unpack('<II', f.read(8))
+            url = _read_cstr(f)
+            decoded = unquote(url)
+            ext = Path(decoded).suffix.lower()
+            if ext in IMAGE_EXTS:
+                image_entries.append((decoded, cluster_num, blob_num))
+
+        print(f"Found {len(image_entries)} image entries\n")
+
+        # 1. Filename-hash uniqueness (MD5 in filename)
+        filename_hashes: list[str] = []
+        for url, _, _ in image_entries:
+            stem = Path(url).stem  # e.g. "000535254c33a74347bae18d72f22d2e"
+            filename_hashes.append(stem)
+        unique_fn_hashes = len(set(filename_hashes))
+        print(f"Filename-hash uniqueness:")
+        print(f"  Total image entries:      {len(image_entries)}")
+        print(f"  Unique filename stems:    {unique_fn_hashes}")
+        print(f"  Duplicates by filename:   {len(image_entries) - unique_fn_hashes}")
+
+        # 2. Extract a sample and measure actual blob sizes
+        print(f"\nExtracting blob sizes (sample of up to 3000 images)...")
+        blob_sizes: list[int] = []
+        size_errors = 0
+        sample = image_entries[:3000]
+
+        cur_cluster_idx = -1
+        cur_data = None
+        cur_extended = False
+        sorted_sample = sorted(sample, key=lambda e: (e[1], e[2]))
+
+        for url, cluster_num, blob_num in sorted_sample:
+            if cluster_num != cur_cluster_idx:
+                cur_cluster_idx = cluster_num
+                cur_data, cur_extended, _ = _read_cluster_raw(
+                    f, cluster_ptrs, cluster_num, checksum_pos
+                )
+            if cur_data is None:
+                size_errors += 1
+                continue
+            blob = _extract_blob(cur_data, blob_num, cur_extended)
+            if blob is None:
+                size_errors += 1
+            else:
+                blob_sizes.append(len(blob))
+
+        if blob_sizes:
+            blob_sizes.sort()
+            total = len(blob_sizes)
+            print(f"\nBlob size distribution ({total} extracted, {size_errors} errors):")
+            print(f"  min:    {blob_sizes[0]:>10,} bytes  ({blob_sizes[0]//1024} KB)")
+            print(f"  p10:    {blob_sizes[total//10]:>10,} bytes  ({blob_sizes[total//10]//1024} KB)")
+            print(f"  p25:    {blob_sizes[total//4]:>10,} bytes  ({blob_sizes[total//4]//1024} KB)")
+            print(f"  median: {blob_sizes[total//2]:>10,} bytes  ({blob_sizes[total//2]//1024} KB)")
+            print(f"  p75:    {blob_sizes[3*total//4]:>10,} bytes  ({blob_sizes[3*total//4]//1024} KB)")
+            print(f"  p90:    {blob_sizes[9*total//10]:>10,} bytes  ({blob_sizes[9*total//10]//1024} KB)")
+            print(f"  max:    {blob_sizes[-1]:>10,} bytes  ({blob_sizes[-1]//1024} KB)")
+            total_mb = sum(blob_sizes) // 1_048_576
+            projected_mb = total_mb * len(image_entries) // total
+            print(f"\n  Sample total: {total_mb} MB")
+            print(f"  Projected for all {len(image_entries)} images: ~{projected_mb} MB")
+            print(f"\nSize buckets:")
+            buckets = [(0,5*1024,"<5KB (icon/logo)"), (5*1024,50*1024,"5–50KB (small)"),
+                       (50*1024,200*1024,"50–200KB (medium)"), (200*1024,10**9,"≥200KB (large)")]
+            for lo, hi, label in buckets:
+                count = sum(1 for s in blob_sizes if lo <= s < hi)
+                pct = count * 100 // total
+                print(f"  {label:25s}: {count:5d} ({pct}%)")
+
+        print("\nDone.")
+
+
 if __name__ == "__main__":
-    main()
+    import os as _os
+    if _os.environ.get("MODE") == "dedup":
+        main_dedup()
+    else:
+        main()
