@@ -2008,6 +2008,7 @@ class _StorageScreenState extends State<_StorageScreen> {
   double _dlProgress = 0;
   Duration? _dlEta;
   String? _dlError;
+  bool? _downloadingThumbTier; // tier being downloaded: true=300px, false=600px
 
   @override
   void initState() {
@@ -2032,6 +2033,7 @@ class _StorageScreenState extends State<_StorageScreen> {
         if (bgDl) {
           _dlProgress = ImageLibraryService.instance.downloadProgress;
           _dlEta = ImageLibraryService.instance.downloadEta;
+          _downloadingThumbTier = !SubscriptionService.instance.isPlus;
         }
       });
       if (bgDl) {
@@ -2056,13 +2058,14 @@ class _StorageScreenState extends State<_StorageScreen> {
   }
 
   Future<void> _downloadLibrary() async {
+    final thumbTier = !SubscriptionService.instance.isPlus;
     setState(() {
       _downloading = true;
       _bgDownloading = false;
       _dlError = null;
       _dlProgress = 0;
+      _downloadingThumbTier = thumbTier;
     });
-    final thumbTier = !SubscriptionService.instance.isPlus;
     final error = await ImageLibraryService.instance.downloadLibrary(
       thumbTier: thumbTier,
       onProgress: (received, total, eta) {
@@ -2151,9 +2154,19 @@ class _StorageScreenState extends State<_StorageScreen> {
   }
 
   Widget _buildProgressBar() {
+    final tierLabel = _downloadingThumbTier == true
+        ? '300px (Free-Qualität)'
+        : _downloadingThumbTier == false
+            ? '600px (Plus-Qualität)'
+            : 'Bilder';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        Text(
+          '$tierLabel wird heruntergeladen…',
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF2E7D32)),
+        ),
+        const SizedBox(height: 4),
         LinearProgressIndicator(
           value: _dlProgress > 0 ? _dlProgress : null,
           backgroundColor: const Color(0xFFE8F5E9),
@@ -2166,7 +2179,7 @@ class _StorageScreenState extends State<_StorageScreen> {
               child: Text(
                 _dlProgress > 0
                     ? '${(_dlProgress * 100).round()} %${_dlEta != null ? "  —  noch ${_fmtEta(_dlEta!)}" : ""}'
-                    : 'Download läuft…',
+                    : 'Verbindung wird aufgebaut…',
                 style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
               ),
             ),

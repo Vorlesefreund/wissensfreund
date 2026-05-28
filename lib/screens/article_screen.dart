@@ -103,6 +103,15 @@ class _ArticleScreenState extends State<ArticleScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Re-apply when a dialog/overlay above this route is dismissed.
+    if (ModalRoute.of(context)?.isCurrent == true) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    }
+  }
+
+  @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();

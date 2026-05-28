@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,6 +16,7 @@ import 'widgets/data_limit_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   await ParentalLockService.instance.init();
   await ProfileService.instance.initialize();
   final prefs = await SharedPreferences.getInstance();
@@ -72,6 +74,7 @@ class _WissensfreundAppState extends State<WissensfreundApp>
       unawaited(provider.enterBackground());
     } else if (state == AppLifecycleState.resumed && _wentToBackground) {
       _wentToBackground = false;
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
       ps.refreshAdminStatus();
       final provider = context.read<WissensfreundProvider>();
       provider.exitBackground();
@@ -84,6 +87,7 @@ class _WissensfreundAppState extends State<WissensfreundApp>
     return MaterialApp(
       title: 'Wissensfreund',
       debugShowCheckedModeBanner: false,
+      navigatorObservers: [_EdgeToEdgeObserver()],
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF4CAF50),
@@ -99,6 +103,29 @@ class _WissensfreundAppState extends State<WissensfreundApp>
       builder: (context, child) => _AppShell(child: child!),
     );
   }
+}
+
+// Stellt edgeToEdge bei jedem Route-Wechsel wieder her.
+// article_screen überschreibt danach mit immersiveSticky (korrekt).
+class _EdgeToEdgeObserver extends NavigatorObserver {
+  static void _restore() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.dark,
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.dark,
+    ));
+  }
+
+  @override
+  void didPush(Route route, Route? previousRoute) => _restore();
+  @override
+  void didPop(Route route, Route? previousRoute) => _restore();
+  @override
+  void didReplace({Route? newRoute, Route? oldRoute}) => _restore();
+  @override
+  void didRemove(Route route, Route? previousRoute) => _restore();
 }
 
 // ── App-Shell: hält den Eltern-Overlay über allem anderen ──────────────────
