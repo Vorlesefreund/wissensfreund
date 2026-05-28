@@ -73,13 +73,13 @@ class ProfileCreationScreen extends StatefulWidget {
 class _ProfileCreationScreenState extends State<ProfileCreationScreen>
     with TickerProviderStateMixin {
   final _pageController = PageController();
-  int _step = 0; // 0–4
+  int _step = 0; // 0–3
 
   // Form state
   final _nameController = TextEditingController();
   int _birthYear = DateTime.now().year - 8;
   String _avatarId = _avatars[0];
-  String _languageLevel = 'medium';
+  static const _languageLevel = 'medium';
 
   // Confetti
   late AnimationController _confettiCtrl;
@@ -122,7 +122,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
   }
 
   void _next() {
-    if (_step < 4) {
+    if (_step < 3) {
       // Dismiss keyboard before transitioning (step 1 has an autofocus TextField).
       FocusScope.of(context).unfocus();
       setState(() => _step++);
@@ -131,7 +131,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOut,
       );
-      if (_step == 4) _startConfetti();
+      if (_step == 3) _startConfetti();
     }
   }
 
@@ -190,10 +190,6 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
                         selected: _avatarId,
                         onChange: (v) => setState(() => _avatarId = v),
                       ),
-                      _LevelStep(
-                        selected: _languageLevel,
-                        onChange: (v) => setState(() => _languageLevel = v),
-                      ),
                       _DoneStep(name: _nameController.text.trim(), avatar: _avatarId),
                     ],
                   ),
@@ -204,7 +200,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
             ),
           ),
           // Confetti overlay
-          if (_step == 4)
+          if (_step == 3)
             IgnorePointer(
               child: AnimatedBuilder(
                 animation: _confettiCtrl,
@@ -224,7 +220,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
       child: Row(
         children: [
-          if (_step > 0 && _step < 4)
+          if (_step > 0 && _step < 3)
             IconButton(
               icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF2E7D32)),
               onPressed: () {
@@ -249,7 +245,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
               ),
             ),
           ),
-          if (!widget.isFirstProfile && _step < 4)
+          if (!widget.isFirstProfile && _step < 3)
             IconButton(
               icon: const Icon(Icons.close_rounded, color: Color(0xFF888888)),
               onPressed: () => Navigator.of(context).pop(),
@@ -266,7 +262,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
       padding: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: List.generate(5, (i) {
+        children: List.generate(4, (i) {
           final active = i == _step;
           final done   = i < _step;
           return AnimatedContainer(
@@ -287,7 +283,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
   }
 
   Widget _buildButtons() {
-    if (_step == 4) {
+    if (_step == 3) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 32),
         child: FilledButton.icon(
@@ -316,7 +312,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
         ),
         onPressed: _canProceed ? _next : null,
         child: Text(
-          _step == 3 ? 'Fertig' : 'Weiter',
+          _step == 2 ? 'Fertig' : 'Weiter',
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
         ),
       ),
@@ -410,20 +406,20 @@ class _BirthYearStep extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Slider(
-            value: value.toDouble(),
-            min: (now - 18).toDouble(),
-            max: (now - 3).toDouble(),
+            value: age.toDouble(),
+            min: 3,
+            max: 18,
             divisions: 15,
             activeColor: const Color(0xFF4CAF50),
-            onChanged: (v) => onChange(v.round()),
+            onChanged: (v) => onChange(now - v.round()),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text('3 Jahre', style: const TextStyle(color: Color(0xFF888888), fontSize: 13)),
-                Text('18 Jahre', style: const TextStyle(color: Color(0xFF888888), fontSize: 13)),
+                const Text('3 Jahre',  style: TextStyle(color: Color(0xFF888888), fontSize: 13)),
+                const Text('18 Jahre', style: TextStyle(color: Color(0xFF888888), fontSize: 13)),
               ],
             ),
           ),

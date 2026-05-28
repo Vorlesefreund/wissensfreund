@@ -1,0 +1,53 @@
+name: Inspect ZIM Image Entries
+
+# Phase 1: Prüft ob ZIM-Bildeinträge in entry.title den Originaldateinamen enthalten.
+# Ergebnis: zim_image_entries.json als Workflow-Artifact.
+#
+# Run: Actions → Inspect ZIM Image Entries → Run workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_entries:
+        description: 'Max image entries to save in JSON (0 = all, default: 2000)'
+        required: false
+        default: '2000'
+        type: string
+
+env:
+  ZIM_URL: https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install zstandard
+
+      - name: Download ZIM
+        run: |
+          echo "Downloading $ZIM_URL"
+          curl -fsSL -o klexikon.zim "$ZIM_URL"
+          ls -lh klexikon.zim
+
+      - name: Inspect ZIM image entries (Phase 1)
+        run: python scripts/inspect_zim_images.py
+        env:
+          ZIM_FILE:    klexikon.zim
+          OUTPUT_FILE: zim_image_entries.json
+          MAX_ENTRIES: ${{ inputs.max_entries || '2000' }}
+
+      - name: Upload result
+        uses: actions/upload-artifact@v5
+        with:
+          name: zim-image-entries
+          path: zim_image_entries.json
+          retention-days: 7

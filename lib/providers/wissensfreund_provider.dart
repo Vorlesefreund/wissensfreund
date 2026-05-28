@@ -212,9 +212,6 @@ class WissensfreundProvider extends ChangeNotifier {
   bool _isLinkNavigation = false;
   bool _awaitingNavStackResume = false;
 
-  // Pause timers — k6 sequence (30s → 60s → 90s → rest)
-  Timer? _idleTimer;
-  int    _pausePhase = 0; // 1=k6_s1 in TTS, 2=k6_s2, 3=k6_s3
   bool   _isInBackground = false; // app is paused/backgrounded
 
   AppState get state          => _state;
@@ -375,30 +372,8 @@ class WissensfreundProvider extends ChangeNotifier {
         _restoreInterruptedArticle();
         return;
       }
-      // Pause phase — k6 prompt just finished; schedule next prompt or enter rest mode.
-      if (_pausePhase == 1) {
-        _pausePhase = 0;
-        if (_state == AppState.idle && _articleText.isEmpty && !_isRestMode) {
-          _idleTimer = Timer(const Duration(seconds: 60), _fireK6S2);
-        }
-        return;
-      }
-      if (_pausePhase == 2) {
-        _pausePhase = 0;
-        if (_state == AppState.idle && _articleText.isEmpty && !_isRestMode) {
-          _idleTimer = Timer(const Duration(seconds: 90), _fireK6S3);
-        }
-        return;
-      }
-      if (_pausePhase == 3) {
-        _pausePhase = 0;
-        _enterRestMode();
-        return;
-      }
       if (_state != AppState.speaking || _isPaused) {
-        // A non-article TTS (k1, k2, k7, k8, …) just completed — start idle timer.
         resetScreenTimer();
-        _checkStartIdleTimer();
         // Drain data-limit handoff completer (professor phrase just finished).
         final completer = _handoffCompleter;
         if (completer != null) {
@@ -1649,77 +1624,13 @@ class WissensfreundProvider extends ChangeNotifier {
 
   // ── Idle / pause / rest mode ──────────────────────────────────────────────
 
-  void _checkStartIdleTimer() {
-    if (_state != AppState.idle) return;
-    if (_articleText.isNotEmpty) return;
-    if (_isRestMode) return;
-    if (_awaitingDisambiguation) return;
-    if (_awaitingArticleSwitch) return;
-    if (_hasInterruptedForMic) return;
-    if (_pausePhase != 0) return;
-    if (_idleTimer != null) return;
-    _idleTimer = Timer(const Duration(seconds: 30), _fireK6S1);
-  }
+  void _checkStartIdleTimer() {}
 
-  void _cancelIdleTimers() {
-    _idleTimer?.cancel();
-    _idleTimer = null;
-    _pausePhase = 0;
-  }
+  void _cancelIdleTimers() {}
 
-  Future<void> _fireK6S1() async {
-    _idleTimer = null;
-    if (_isInBackground || _state != AppState.idle || _articleText.isNotEmpty || _isRestMode) return;
-    _pausePhase = 1;
-    final msg = await _catalogOrFallback('k6_s1', 'Ich bin noch da!');
-    if (_pausePhase == 1 && _state == AppState.idle && !_isRestMode) {
-      _tts.speak(msg);
-    } else {
-      _pausePhase = 0;
-    }
-  }
+  void _enterRestMode() {}
 
-  Future<void> _fireK6S2() async {
-    _idleTimer = null;
-    if (_isInBackground || _state != AppState.idle || _articleText.isNotEmpty || _isRestMode) return;
-    _pausePhase = 2;
-    final msg = await _catalogOrFallback('k6_s2', 'Ich bin noch hier!');
-    if (_pausePhase == 2 && _state == AppState.idle && !_isRestMode) {
-      _tts.speak(msg);
-    } else {
-      _pausePhase = 0;
-    }
-  }
-
-  Future<void> _fireK6S3() async {
-    _idleTimer = null;
-    if (_isInBackground || _state != AppState.idle || _articleText.isNotEmpty || _isRestMode) return;
-    _pausePhase = 3;
-    final msg = await _catalogOrFallback('k6_s3', 'Tippe mich an wenn du weitermachen möchtest!');
-    if (_pausePhase == 3 && _state == AppState.idle && !_isRestMode) {
-      _tts.speak(msg);
-    } else {
-      _pausePhase = 0;
-    }
-  }
-
-  void _enterRestMode() {
-    if (_isRestMode) return;
-    _isRestMode = true;
-    _cancelIdleTimers();
-    notifyListeners();
-  }
-
-  Future<void> wakeFromRest() async {
-    if (!_isRestMode) return;
-    _isRestMode = false;
-    _misserfolgZaehler = 0;
-    _technischZaehler  = 0;
-    _lastFailedQuery   = '';
-    notifyListeners();
-    final msg = await _catalogOrFallback('k6_wake', 'Oh, da bist du ja wieder!');
-    _tts.speak(msg);
-  }
+  Future<void> wakeFromRest() async {}
 
   // ── Data-limit overlay support ────────────────────────────────────────────
 

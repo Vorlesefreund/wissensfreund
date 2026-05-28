@@ -26,13 +26,25 @@ dumpstate*.zip
 *.json
 *.csv
 *.zip
+*.zim
+
+# Nicht-Android-Plattformen (App ist Android-only)
+ios/
+linux/
+macos/
+web/
+windows/
 
 # Binäre Assets
 assets/
 
-# iOS/macOS/Windows build cache
-ios/Pods/
-ios/.symlinks/
-macos/Pods/
-windows/flutter/
-linux/flutter/
+# Dart-generierter Code
+*.g.dart
+*.freezed.dart
+*.mocks.dart
+
+# Pubspec-Lock (kein Quellcode)
+pubspec.lock
+
+# Screenshots
+screenshots/
