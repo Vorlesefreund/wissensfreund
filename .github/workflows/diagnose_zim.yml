@@ -49,3 +49,19 @@ jobs:
         env:
           ZIM_FILE: klexikon.zim
           MODE: dedup
+
+      - name: Download media_licenses.json from GitHub Release
+        run: |
+          gh release download image-licenses \
+            --repo ${{ github.repository }} \
+            --pattern "media_licenses.json" \
+            --clobber
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Inspect Elefant article images
+        run: python scripts/inspect_article_images.py
+        env:
+          ZIM_FILE: klexikon.zim
+          LICENSES_FILE: media_licenses.json
+          ARTICLE: Elefant
