@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/asset_config.dart';
 import '../providers/wissensfreund_provider.dart';
-import '../services/hires_image_service.dart';
 import '../services/image_library_service.dart';
 import '../services/license_cache_db.dart';
 import '../services/network_service.dart';
@@ -324,6 +324,7 @@ class _HomeScreenState extends State<HomeScreen>
         return Scaffold(
           backgroundColor: const Color(0xFFFFF8EE),
           body: SafeArea(
+            minimum: const EdgeInsets.only(bottom: 8),
             child: Column(
               children: [
                 _AppHeader(),
@@ -772,6 +773,7 @@ class _BottomBar extends StatelessWidget {
   const _BottomBar({required this.provider});
 
   void _openMenu(BuildContext context) {
+    final navBarHeight = MediaQuery.of(context).viewPadding.bottom;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -779,6 +781,7 @@ class _BottomBar extends StatelessWidget {
       builder: (_) => _AppMenu(
         provider: provider,
         outerContext: context,
+        navBarHeight: navBarHeight,
       ),
     );
   }
@@ -872,9 +875,11 @@ class _MenuIconButton extends StatelessWidget {
 class _AppMenu extends StatefulWidget {
   final WissensfreundProvider provider;
   final BuildContext outerContext;
+  final double navBarHeight;
   const _AppMenu({
     required this.provider,
     required this.outerContext,
+    required this.navBarHeight,
   });
 
   @override
@@ -889,11 +894,10 @@ class _AppMenuState extends State<_AppMenu> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(outerContext).viewPadding.bottom;
     final profile = context.watch<ProfileService>().activeProfile;
 
     return Container(
-      margin: EdgeInsets.fromLTRB(16, 0, 16, 16 + bottomInset),
+      margin: EdgeInsets.fromLTRB(16, 0, 16, 16 + widget.navBarHeight + 8),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF8EE),
         borderRadius: BorderRadius.circular(24),
@@ -1020,53 +1024,47 @@ class _AppMenuState extends State<_AppMenu> {
             _MenuItem(
               icon: Icons.wifi_rounded,
               label: 'Internet & Daten',
-              onTap: () {
-                Navigator.pop(context);
-                showDialog<void>(
-                  context: outerContext,
-                  builder: (_) => const _InternetDataDialog(),
-                );
-              },
+              onTap: () => Navigator.of(outerContext).push(
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (_) => const _InternetDataScreen(),
+                ),
+              ),
             ),
             _MenuItem(
               icon: Icons.shield_rounded,
               label: 'Kinderschutz',
-              onTap: () {
-                Navigator.pop(context);
-                _showParentalDashboard(outerContext);
-              },
+              onTap: () => Navigator.of(outerContext).push(
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (_) => const _ParentalScreen(),
+                ),
+              ),
             ),
             _MenuItem(
               icon: Icons.storage_rounded,
               label: 'Speicher & Qualität',
-              onTap: () {
-                Navigator.pop(context);
-                _showStorageDialog(outerContext);
-              },
+              onTap: () => _showStorageDialog(outerContext),
             ),
             _MenuItem(
               icon: Icons.people_rounded,
               label: 'Profile verwalten',
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.of(outerContext).push(
-                  MaterialPageRoute(
-                    builder: (_) => const ProfileManagementScreen(),
-                    fullscreenDialog: true,
-                  ),
-                );
-              },
+              onTap: () => Navigator.of(outerContext).push(
+                MaterialPageRoute(
+                  builder: (_) => const ProfileManagementScreen(),
+                  fullscreenDialog: true,
+                ),
+              ),
             ),
             _MenuItem(
               icon: Icons.workspace_premium_rounded,
               label: 'Plus & Premium',
-              onTap: () {
-                Navigator.pop(context);
-                showDialog<void>(
-                  context: outerContext,
-                  builder: (_) => const _SubscriptionDialog(),
-                );
-              },
+              onTap: () => Navigator.of(outerContext).push(
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (_) => const _SubscriptionScreen(),
+                ),
+              ),
             ),
           ] else
             Padding(
@@ -1137,146 +1135,21 @@ class _AppMenuState extends State<_AppMenu> {
   }
 
 
-  void _showParentalDashboard(BuildContext stableCtx) {
-    showDialog(
-      context: stableCtx,
-      builder: (ctx) => Consumer<ParentalLockService>(
-        builder: (ctx, ps, _) => AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          title: const Row(children: [
-            Icon(Icons.shield_rounded, color: Color(0xFF2E7D32), size: 22),
-            SizedBox(width: 8),
-            Text('Kinderschutz'),
-          ]),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ── Overlay-Berechtigung ──────────────────────────────
-                _DashboardRow(
-                  icon: ps.hasOverlayPermission
-                      ? Icons.layers_rounded
-                      : Icons.layers_clear_rounded,
-                  color: ps.hasOverlayPermission
-                      ? const Color(0xFF2E7D32)
-                      : Colors.red.shade700,
-                  label: ps.hasOverlayPermission
-                      ? 'Overlay-Berechtigung erteilt'
-                      : 'Overlay-Berechtigung fehlt',
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  ps.hasOverlayPermission
-                      ? 'Wissensfreund kann ein Sperr-Bildschirm über anderen Apps anzeigen.'
-                      : 'Ohne diese Berechtigung kann kein Overlay erscheinen. Bitte unten einrichten.',
-                  style: const TextStyle(fontSize: 13, height: 1.45),
-                ),
-                const SizedBox(height: 16),
-
-                // ── Kindersicherung (Kiosk) ──────────────────────────
-                _DashboardRow(
-                  icon: ps.isKioskMode
-                      ? Icons.lock_outline_rounded
-                      : Icons.lock_open_rounded,
-                  color: ps.isKioskMode
-                      ? const Color(0xFF2E7D32)
-                      : Colors.orange.shade700,
-                  label: ps.isKioskMode
-                      ? 'Kindermodus aktiv'
-                      : 'Kindermodus inaktiv',
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  ps.isKioskMode
-                      ? 'Home- und Recents-Taste führen direkt zum Eltern-Bildschirm. Das Kind kann nicht frei surfen.'
-                      : 'Wenn aktiviert, kehrt das Gerät bei Home- oder Recents-Taste sofort zum Eltern-Bildschirm zurück.',
-                  style: const TextStyle(fontSize: 13, height: 1.45),
-                ),
-                const SizedBox(height: 16),
-
-                // ── Eltern-Entsperrung ──────────────────────────────────
-                _DashboardRow(
-                  icon: ps.isAdminActive
-                      ? Icons.verified_rounded
-                      : Icons.info_outline_rounded,
-                  color: ps.isAdminActive
-                      ? const Color(0xFF2E7D32)
-                      : Colors.orange.shade700,
-                  label: ps.isAdminActive
-                      ? 'Gerätesperre beim Beenden'
-                      : 'Eltern-Bildschirm (Fallback)',
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  ps.isAdminActive
-                      ? 'Beim Verlassen der App über die Zurück-Taste sperrt sich das Gerät.'
-                      : 'Beim Zurückkehren zur App erscheint der Eltern-Bildschirm mit Fingerabdruck/PIN.',
-                  style: const TextStyle(fontSize: 13, height: 1.45),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Schließen'),
-            ),
-            if (!ps.hasOverlayPermission)
-              FilledButton(
-                style: FilledButton.styleFrom(
-                    backgroundColor: Colors.red.shade700),
-                onPressed: () async {
-                  Navigator.pop(ctx);
-                  await ps.requestOverlayPermission();
-                  await ps.refreshAdminStatus();
-                },
-                child: const Text('Overlay-Berechtigung einrichten'),
-              ),
-            if (!ps.isAdminActive)
-              OutlinedButton(
-                onPressed: () async {
-                  Navigator.pop(ctx);
-                  await ps.requestDeviceAdmin();
-                  await ps.refreshAdminStatus();
-                },
-                child: const Text('Gerätesperre aktivieren'),
-              ),
-            if (!ps.isKioskMode)
-              FilledButton(
-                style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF2E7D32)),
-                onPressed: () async {
-                  await ps.startKioskMode();
-                  if (ctx.mounted) Navigator.pop(ctx);
-                },
-                child: const Text('Kindermodus aktivieren'),
-              )
-            else
-              FilledButton(
-                style: FilledButton.styleFrom(
-                    backgroundColor: Colors.grey.shade600),
-                onPressed: () async {
-                  final authenticated = await ps.authenticate(
-                    'Kindersicherung deaktivieren — bitte authentifizieren.',
-                  );
-                  if (authenticated) {
-                    await ps.stopKioskMode();
-                    if (ctx.mounted) Navigator.pop(ctx);
-                  }
-                },
-                child: const Text('Kindersicherung deaktivieren'),
-              ),
-          ],
-        ),
+  void _showParentalDashboard(BuildContext ctx) {
+    Navigator.of(ctx).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => const _ParentalScreen(),
       ),
     );
   }
 
   void _showStorageDialog(BuildContext ctx) {
-    showDialog(
-      context: ctx,
-      builder: (_) => const _StorageDialog(),
+    Navigator.of(ctx).push(
+      MaterialPageRoute(
+        fullscreenDialog: true,
+        builder: (_) => const _StorageScreen(),
+      ),
     );
   }
 
@@ -1905,7 +1778,10 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
   String? _error;
   int _freeBytes = -1; // -1 = noch nicht geladen
 
-  static const int _requiredBytes = 2 * 1024 * 1024 * 1024; // 2 GB
+  // thumb: ~400 MB peak (141 MB ZIP + extraction); standard: ~600 MB peak
+  static int get _requiredBytes => SubscriptionService.instance.isPlus
+      ? 600 * 1024 * 1024
+      : 400 * 1024 * 1024;
 
   @override
   void initState() {
@@ -1919,7 +1795,9 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
 
   Future<void> _startDownload() async {
     setState(() { _downloading = true; _error = null; });
+    final thumbTier = !SubscriptionService.instance.isPlus;
     final error = await ImageLibraryService.instance.downloadLibrary(
+      thumbTier: thumbTier,
       onProgress: (received, total, eta) {
         if (mounted) setState(() {
           _progress = total > 0 ? received / total : 0;
@@ -1993,17 +1871,20 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
                 children: [
                   _QualityRow(
                     icon: Icons.image_outlined,
-                    title: 'Standard',
-                    subtitle: 'Bilder aus dem Wissensspeicher',
+                    title: 'Variabel (aus Wissensspeicher)',
+                    subtitle: 'Kein Download — Qualität je nach Artikel',
                     highlight: !_hasEnoughSpace,
                   ),
                   const SizedBox(height: 12),
-                  _QualityRow(
-                    icon: Icons.hd_outlined,
-                    title: 'Gut  (~2 GB)',
-                    subtitle: 'Offline-Bilderbibliothek · ca. 3–5 min im WLAN',
-                    highlight: _hasEnoughSpace,
-                  ),
+                  Builder(builder: (ctx) {
+                    final isPlus = SubscriptionService.instance.isPlus;
+                    return _QualityRow(
+                      icon: Icons.hd_outlined,
+                      title: isPlus ? 'Gut  (~218 MB)' : 'Einheitlich 300px  (~141 MB)',
+                      subtitle: 'Offline-Bilderbibliothek · ca. 1–3 min im WLAN',
+                      highlight: _hasEnoughSpace,
+                    );
+                  }),
                   if (_freeBytes >= 0 && !_hasEnoughSpace) ...[
                     const SizedBox(height: 10),
                     Row(children: [
@@ -2013,7 +1894,7 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
                       Expanded(
                         child: Text(
                           'Wenig Speicherplatz (${(_freeBytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB frei). '
-                          'Standard empfohlen.',
+                          'Download nicht empfohlen.',
                           style: TextStyle(
                               fontSize: 12, color: Colors.orange.shade800),
                         ),
@@ -2106,24 +1987,24 @@ class _QualityRow extends StatelessWidget {
   }
 }
 
-// ── Storage Dialog ─────────────────────────────────────────────────────────────
+// ── Storage Screen ─────────────────────────────────────────────────────────────
 
-class _StorageDialog extends StatefulWidget {
-  const _StorageDialog();
+class _StorageScreen extends StatefulWidget {
+  const _StorageScreen();
 
   @override
-  State<_StorageDialog> createState() => _StorageDialogState();
+  State<_StorageScreen> createState() => _StorageScreenState();
 }
 
-class _StorageDialogState extends State<_StorageDialog> {
+class _StorageScreenState extends State<_StorageScreen> {
   int _libraryBytes = 0;
-  int _cacheBytes = 0;
+  bool? _libraryIsThumb; // true=300px, false=600px, null=unbekannt
   bool _loadingLibrary = false;
-  bool _loadingCache = false;
   bool _loadingStats = true;
 
   // Download state
   bool _downloading = false;
+  bool _bgDownloading = false; // ongoing background download from onboarding
   double _dlProgress = 0;
   Duration? _dlEta;
   String? _dlError;
@@ -2131,23 +2012,36 @@ class _StorageDialogState extends State<_StorageDialog> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _loadStats();
   }
 
-  Future<void> _loadStats() async {
-    setState(() => _loadingStats = true);
+  Future<void> _loadStats({bool silent = false}) async {
+    if (!mounted) return;
+    if (!silent) setState(() => _loadingStats = true);
     try {
       await StorageManager.instance.initialize();
-      final cacheBytes = await HiResImageService.instance.cacheSizeBytes();
+      final bgDl = ImageLibraryService.instance.isDownloading && !_downloading;
+      if (!mounted) return;
+      final tier = await ImageLibraryService.getStoredTier();
       if (!mounted) return;
       setState(() {
         _libraryBytes = ImageLibraryService.instance.totalSizeBytes;
-        _cacheBytes = cacheBytes;
+        _libraryIsThumb = tier;
+        _bgDownloading = bgDl;
+        if (bgDl) {
+          _dlProgress = ImageLibraryService.instance.downloadProgress;
+          _dlEta = ImageLibraryService.instance.downloadEta;
+        }
       });
+      if (bgDl) {
+        Future.delayed(const Duration(seconds: 3), () {
+          if (mounted && _bgDownloading) _loadStats(silent: true);
+        });
+      }
     } catch (_) {
-      // Fehler bei Storage-Zugriff — 0 anzeigen, kein Crash
     } finally {
-      if (mounted) setState(() => _loadingStats = false);
+      if (!silent && mounted) setState(() => _loadingStats = false);
     }
   }
 
@@ -2161,19 +2055,16 @@ class _StorageDialogState extends State<_StorageDialog> {
     });
   }
 
-  Future<void> _clearCache() async {
-    setState(() => _loadingCache = true);
-    await HiResImageService.instance.clearCache();
-    if (!mounted) return;
-    setState(() {
-      _cacheBytes = 0;
-      _loadingCache = false;
-    });
-  }
-
   Future<void> _downloadLibrary() async {
-    setState(() { _downloading = true; _dlError = null; _dlProgress = 0; });
+    setState(() {
+      _downloading = true;
+      _bgDownloading = false;
+      _dlError = null;
+      _dlProgress = 0;
+    });
+    final thumbTier = !SubscriptionService.instance.isPlus;
     final error = await ImageLibraryService.instance.downloadLibrary(
+      thumbTier: thumbTier,
       onProgress: (received, total, eta) {
         if (mounted) {
           setState(() {
@@ -2214,86 +2105,134 @@ class _StorageDialogState extends State<_StorageDialog> {
   String _fmtEta(Duration d) =>
       d.inMinutes >= 1 ? '~${d.inMinutes} min' : '~${d.inSeconds}s';
 
+  Widget _buildUpgradeTeaser(BuildContext ctx) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F7F2),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFA5D6A7)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(children: [
+            Icon(Icons.star_rounded, color: Color(0xFF2E7D32), size: 18),
+            SizedBox(width: 6),
+            Text('Mit Plus: Bilder in 600px',
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                    color: Color(0xFF1B5E20))),
+          ]),
+          const SizedBox(height: 6),
+          const Text(
+            'Bessere Bildqualität offline (~218 MB) und automatisch beste Qualität bei WLAN.',
+            style: TextStyle(fontSize: 12, color: Color(0xFF555555)),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF2E7D32)),
+              onPressed: () => Navigator.of(ctx).push(
+                MaterialPageRoute(
+                  fullscreenDialog: true,
+                  builder: (_) => const _SubscriptionScreen(),
+                ),
+              ),
+              child: const Text('Zu Plus upgraden'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressBar() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        LinearProgressIndicator(
+          value: _dlProgress > 0 ? _dlProgress : null,
+          backgroundColor: const Color(0xFFE8F5E9),
+          valueColor: const AlwaysStoppedAnimation(Color(0xFF2E7D32)),
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                _dlProgress > 0
+                    ? '${(_dlProgress * 100).round()} %${_dlEta != null ? "  —  noch ${_fmtEta(_dlEta!)}" : ""}'
+                    : 'Download läuft…',
+                style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
+              ),
+            ),
+            if (_bgDownloading)
+              TextButton(
+                onPressed: () => setState(() {
+                  _bgDownloading = false;
+                }),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  foregroundColor: Colors.grey.shade600,
+                  textStyle: const TextStyle(fontSize: 12),
+                ),
+                child: const Text('Ausblenden'),
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final sub     = SubscriptionService.instance;
-    final isPlus  = sub.isPlus;
-    final hasLib  = _libraryBytes > 0;
+    final isPlus = SubscriptionService.instance.isPlus;
+    final hasLib = _libraryBytes > 0;
+    final isDl   = _downloading || _bgDownloading;
 
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: const Row(children: [
-        Icon(Icons.storage_rounded, color: Color(0xFF2E7D32), size: 22),
-        SizedBox(width: 8),
-        Text('Speicher & Qualität'),
-      ]),
-      content: _loadingStats
-          ? const SizedBox(
-              height: 60,
-              child: Center(child: CircularProgressIndicator()))
-          : SingleChildScrollView(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Speicher & Qualität'),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF2E7D32),
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(height: 1, color: Colors.grey.shade200),
+        ),
+      ),
+      body: _loadingStats
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50)))
+          : SafeArea(
+              top: false,
+              minimum: const EdgeInsets.only(bottom: 8),
+              child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── Bildqualität-Status ──────────────────────────────
-                  if (!isPlus) ...[
-                    // Free: Info-Text + Upsell
+                  if (!isPlus && !hasLib) ...[
                     _InfoRow(
                       label: 'Bildqualität',
-                      value: 'Standard (300px)',
+                      value: isDl ? 'Wird heruntergeladen…' : 'Variabel (aus ZIM)',
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Mit Wissensfreund Plus: deutlich schärfere Bilder',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
-                    ),
+                    if (!isDl)
+                      const Text(
+                        'Lokal speichern für einheitlich 300px (~141 MB)',
+                        style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
+                      ),
                     const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF2E7D32),
-                          foregroundColor: Colors.white,
-                          textStyle: const TextStyle(fontSize: 13),
-                        ),
-                        onPressed: () {
-                          Navigator.pop(context);
-                          showDialog<void>(
-                            context: context,
-                            builder: (_) => const _SubscriptionDialog(),
-                          );
-                        },
-                        child: const Text('Plus freischalten'),
-                      ),
-                    ),
-                  ] else if (!hasLib) ...[
-                    // Plus/Premium — kein lokaler Download
-                    _InfoRow(
-                      label: 'Bildqualität',
-                      value: 'Gut bei WLAN (bis 1200px)',
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Lokal speichern für offline (~600 MB)',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
-                    ),
-                    const SizedBox(height: 12),
-                    if (_downloading) ...[
-                      LinearProgressIndicator(
-                        value: _dlProgress > 0 ? _dlProgress : null,
-                        backgroundColor: const Color(0xFFE8F5E9),
-                        valueColor: const AlwaysStoppedAnimation(Color(0xFF2E7D32)),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        _dlProgress > 0
-                            ? '${(_dlProgress * 100).round()} %'
-                              '${_dlEta != null ? "  —  ${_fmtEta(_dlEta!)}" : ""}'
-                            : 'Verbinde…',
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ] else ...[
+                    if (isDl)
+                      _buildProgressBar()
+                    else ...[
                       if (_dlError != null)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
@@ -2304,7 +2243,7 @@ class _StorageDialogState extends State<_StorageDialog> {
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.download_rounded, size: 18),
-                          label: const Text('Jetzt herunterladen'),
+                          label: const Text('Bilder herunterladen (300px, ~141 MB)'),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF2E7D32),
                             side: const BorderSide(color: Color(0xFF2E7D32)),
@@ -2313,17 +2252,13 @@ class _StorageDialogState extends State<_StorageDialog> {
                           onPressed: _downloadLibrary,
                         ),
                       ),
+                      const SizedBox(height: 16),
+                      _buildUpgradeTeaser(context),
                     ],
-                  ] else ...[
-                    // Plus/Premium — mit lokalem Download
+                  ] else if (!isPlus && hasLib) ...[
                     _InfoRow(
                       label: 'Offline-Bilder',
-                      value: 'Gut (600px) — ${_fmtSize(_libraryBytes)}',
-                    ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      'Bei WLAN: Automatisch beste Qualität (1200px)',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
+                      value: '300px — ${_fmtSize(_libraryBytes)}',
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
@@ -2343,35 +2278,101 @@ class _StorageDialogState extends State<_StorageDialog> {
                         onPressed: _loadingLibrary ? null : _clearLibrary,
                       ),
                     ),
-                  ],
-
-                  // ── 1200px-Cache (nur für Plus/Premium) ────────────
-                  if (isPlus) ...[
                     const SizedBox(height: 16),
-                    const Divider(),
-                    const SizedBox(height: 8),
-                    _StorageRow(
-                      label: '1200px-Cache (bei WLAN geladen)',
-                      value: _fmtSize(_cacheBytes),
-                      emptyHint: _cacheBytes == 0 ? 'Leer' : null,
-                      onClear: _cacheBytes > 0 ? _clearCache : null,
-                      clearing: _loadingCache,
+                    _buildUpgradeTeaser(context),
+                  ] else if (!hasLib) ...[
+                    _InfoRow(
+                      label: 'Offline-Bibliothek',
+                      value: isDl ? 'Wird heruntergeladen…' : 'Nicht heruntergeladen',
+                    ),
+                    const SizedBox(height: 4),
+                    if (!isDl)
+                      const Text(
+                        'Lade alle Bilder für schnelle Offline-Anzeige (~218 MB)',
+                        style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
+                      ),
+                    const SizedBox(height: 12),
+                    if (isDl)
+                      _buildProgressBar()
+                    else ...[
+                      if (_dlError != null)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Text(_dlError!,
+                              style: TextStyle(fontSize: 12, color: Colors.red.shade700)),
+                        ),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          icon: const Icon(Icons.download_rounded, size: 18),
+                          label: const Text('Bilder herunterladen (600px, ~218 MB)'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: const Color(0xFF2E7D32),
+                            side: const BorderSide(color: Color(0xFF2E7D32)),
+                            textStyle: const TextStyle(fontSize: 13),
+                          ),
+                          onPressed: _downloadLibrary,
+                        ),
+                      ),
+                    ],
+                  ] else ...[
+                    _InfoRow(
+                      label: 'Offline-Bilder',
+                      value: '${_libraryIsThumb == true ? "300px (Free-Qualität)" : _libraryIsThumb == false ? "600px" : "Unbekannte Qualität"} — ${_fmtSize(_libraryBytes)}',
+                    ),
+                    if (_libraryIsThumb != false) ...[
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Mit Plus kannst du auf 600px upgraden (~218 MB)',
+                        style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
+                      ),
+                      const SizedBox(height: 12),
+                      if (isDl)
+                        _buildProgressBar()
+                      else ...[
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton.icon(
+                            icon: const Icon(Icons.upgrade_rounded, size: 18),
+                            label: const Text('Auf 600px upgraden (~218 MB)'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: const Color(0xFF2E7D32),
+                              side: const BorderSide(color: Color(0xFF2E7D32)),
+                              textStyle: const TextStyle(fontSize: 13),
+                            ),
+                            onPressed: _downloadLibrary,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ] else
+                      const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton.icon(
+                        icon: _loadingLibrary
+                            ? const SizedBox(
+                                width: 16, height: 16,
+                                child: CircularProgressIndicator(strokeWidth: 2))
+                            : const Icon(Icons.delete_outline_rounded, size: 18),
+                        label: const Text('Offline-Bilder löschen'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red.shade700,
+                          side: BorderSide(color: Colors.red.shade300),
+                          textStyle: const TextStyle(fontSize: 13),
+                        ),
+                        onPressed: _loadingLibrary ? null : _clearLibrary,
+                      ),
                     ),
                   ],
                 ],
               ),
             ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Schließen'),
-        ),
-      ],
+            ),
     );
   }
 }
 
-// Kleine Hilfwidgets für den Storage-Dialog
 class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
@@ -2383,7 +2384,13 @@ class _InfoRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label, style: const TextStyle(fontSize: 13, color: Color(0xFF555555))),
-        Text(value, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+        Flexible(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+            textAlign: TextAlign.end,
+          ),
+        ),
       ],
     );
   }
@@ -2556,14 +2563,155 @@ class _NetworkSettingsOnboardingDialogState
 
 // ── Internet & Daten Settings Dialog (from menu) ───────────────────────────────
 
-class _InternetDataDialog extends StatefulWidget {
-  const _InternetDataDialog();
+// ── Parental Screen ────────────────────────────────────────────────────────────
+
+class _ParentalScreen extends StatelessWidget {
+  const _ParentalScreen();
+
+  static AppBar _appBar(BuildContext context) => AppBar(
+        title: const Text('Kinderschutz'),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF2E7D32),
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(height: 1, color: Colors.grey.shade200),
+        ),
+      );
 
   @override
-  State<_InternetDataDialog> createState() => _InternetDataDialogState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: _appBar(context),
+      body: Consumer<ParentalLockService>(
+        builder: (ctx, ps, _) => SingleChildScrollView(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _DashboardRow(
+                icon: ps.hasOverlayPermission
+                    ? Icons.layers_rounded
+                    : Icons.layers_clear_rounded,
+                color: ps.hasOverlayPermission
+                    ? const Color(0xFF2E7D32)
+                    : Colors.red.shade700,
+                label: ps.hasOverlayPermission
+                    ? 'Overlay-Berechtigung erteilt'
+                    : 'Overlay-Berechtigung fehlt',
+              ),
+              const SizedBox(height: 6),
+              Text(
+                ps.hasOverlayPermission
+                    ? 'Wissensfreund kann ein Sperr-Bildschirm über anderen Apps anzeigen.'
+                    : 'Ohne diese Berechtigung kann kein Overlay erscheinen. Bitte unten einrichten.',
+                style: const TextStyle(fontSize: 13, height: 1.45),
+              ),
+              const SizedBox(height: 20),
+              _DashboardRow(
+                icon: ps.isKioskMode
+                    ? Icons.lock_outline_rounded
+                    : Icons.lock_open_rounded,
+                color: ps.isKioskMode
+                    ? const Color(0xFF2E7D32)
+                    : Colors.orange.shade700,
+                label: ps.isKioskMode ? 'Kindermodus aktiv' : 'Kindermodus inaktiv',
+              ),
+              const SizedBox(height: 6),
+              Text(
+                ps.isKioskMode
+                    ? 'Home- und Recents-Taste führen direkt zum Eltern-Bildschirm.'
+                    : 'Wenn aktiviert, kehrt das Gerät bei Home- oder Recents-Taste sofort zurück.',
+                style: const TextStyle(fontSize: 13, height: 1.45),
+              ),
+              const SizedBox(height: 20),
+              _DashboardRow(
+                icon: ps.isAdminActive
+                    ? Icons.verified_rounded
+                    : Icons.info_outline_rounded,
+                color: ps.isAdminActive
+                    ? const Color(0xFF2E7D32)
+                    : Colors.orange.shade700,
+                label: ps.isAdminActive
+                    ? 'Gerätesperre beim Beenden'
+                    : 'Eltern-Bildschirm (Fallback)',
+              ),
+              const SizedBox(height: 6),
+              Text(
+                ps.isAdminActive
+                    ? 'Beim Verlassen der App sperrt sich das Gerät.'
+                    : 'Beim Zurückkehren zur App erscheint der Eltern-Bildschirm.',
+                style: const TextStyle(fontSize: 13, height: 1.45),
+              ),
+              const SizedBox(height: 28),
+              if (!ps.hasOverlayPermission) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
+                    onPressed: () async {
+                      await ps.requestOverlayPermission();
+                      await ps.refreshAdminStatus();
+                    },
+                    child: const Text('Overlay-Berechtigung einrichten'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+              if (!ps.isAdminActive) ...[
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      await ps.requestDeviceAdmin();
+                      await ps.refreshAdminStatus();
+                    },
+                    child: const Text('Gerätesperre aktivieren'),
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
+              SizedBox(
+                width: double.infinity,
+                child: ps.isKioskMode
+                    ? FilledButton(
+                        style: FilledButton.styleFrom(
+                            backgroundColor: Colors.grey.shade600),
+                        onPressed: () async {
+                          final ok = await ps.authenticate(
+                            'Kindersicherung deaktivieren — bitte authentifizieren.',
+                          );
+                          if (ok) await ps.stopKioskMode();
+                        },
+                        child: const Text('Kindersicherung deaktivieren'),
+                      )
+                    : FilledButton(
+                        style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF2E7D32)),
+                        onPressed: () async => ps.startKioskMode(),
+                        child: const Text('Kindermodus aktivieren'),
+                      ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-class _InternetDataDialogState extends State<_InternetDataDialog> {
+// ── Internet & Daten Screen ────────────────────────────────────────────────────
+
+class _InternetDataScreen extends StatefulWidget {
+  const _InternetDataScreen();
+
+  @override
+  State<_InternetDataScreen> createState() => _InternetDataScreenState();
+}
+
+class _InternetDataScreenState extends State<_InternetDataScreen> {
   final _settings = NetworkSettingsService.instance;
 
   bool _wifiUnlimited   = true;
@@ -2588,6 +2736,7 @@ class _InternetDataDialogState extends State<_InternetDataDialog> {
   @override
   void initState() {
     super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _load();
   }
 
@@ -2636,142 +2785,158 @@ class _InternetDataDialogState extends State<_InternetDataDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: const Row(children: [
-        Icon(Icons.wifi_rounded, color: Color(0xFF2E7D32), size: 22),
-        SizedBox(width: 8),
-        Text('Internet & Daten'),
-      ]),
-      content: _loading
-          ? const SizedBox(
-              height: 60, child: Center(child: CircularProgressIndicator()))
-          : SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // ── WiFi ─────────────────────────────────────────────
-                  _SectionHeader('WLAN'),
-                  SwitchListTile(
-                    value: _wifiUnlimited,
-                    onChanged: (v) => setState(() => _wifiUnlimited = v),
-                    title: const Text('Unbegrenzt',
-                        style: TextStyle(fontSize: 14)),
-                    dense: true,
-                    activeColor: const Color(0xFF2E7D32),
-                  ),
-                  if (!_wifiUnlimited) ...[
-                    _LimitDropdown(
-                      label: 'Tageslimit',
-                      value: _wifiDailyMb,
-                      options: _wifiDailyOptions,
-                      fmt: _mbLabel,
-                      onChanged: (v) => setState(() => _wifiDailyMb = v),
-                    ),
-                    _LimitDropdown(
-                      label: 'Monatslimit',
-                      value: _wifiMonthlyMb,
-                      options: _wifiMonthlyOptions,
-                      fmt: _mbLabel,
-                      onChanged: (v) => setState(() => _wifiMonthlyMb = v),
-                    ),
-                  ],
-                  _UsageProgressRow(
-                    label: 'Heute',
-                    used: _bytesLabel(_wifiDailyUsed),
-                    limit: _wifiUnlimited || _wifiDailyMb == 0
-                        ? null : _mbLabel(_wifiDailyMb),
-                    pct: _wifiDailyMb == 0 ? 0 :
-                        (_wifiDailyUsed / (_wifiDailyMb * 1024 * 1024)).clamp(0.0, 1.0),
-                  ),
-                  _UsageProgressRow(
-                    label: 'Dieser Monat',
-                    used: _bytesLabel(_wifiMonthlyUsed),
-                    limit: _wifiUnlimited || _wifiMonthlyMb == 0
-                        ? null : _mbLabel(_wifiMonthlyMb),
-                    pct: _wifiMonthlyMb == 0 ? 0 :
-                        (_wifiMonthlyUsed / (_wifiMonthlyMb * 1024 * 1024)).clamp(0.0, 1.0),
-                  ),
-                  const SizedBox(height: 16),
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Internet & Daten'),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF2E7D32),
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(height: 1, color: Colors.grey.shade200),
+        ),
+      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50)))
+          : Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // ── WiFi ─────────────────────────────────────────────
+                        _SectionHeader('WLAN'),
+                        SwitchListTile(
+                          value: _wifiUnlimited,
+                          onChanged: (v) => setState(() => _wifiUnlimited = v),
+                          title: const Text('Unbegrenzt',
+                              style: TextStyle(fontSize: 14)),
+                          dense: true,
+                          activeColor: const Color(0xFF2E7D32),
+                        ),
+                        if (!_wifiUnlimited) ...[
+                          _LimitDropdown(
+                            label: 'Tageslimit',
+                            value: _wifiDailyMb,
+                            options: _wifiDailyOptions,
+                            fmt: _mbLabel,
+                            onChanged: (v) => setState(() => _wifiDailyMb = v),
+                          ),
+                          _LimitDropdown(
+                            label: 'Monatslimit',
+                            value: _wifiMonthlyMb,
+                            options: _wifiMonthlyOptions,
+                            fmt: _mbLabel,
+                            onChanged: (v) => setState(() => _wifiMonthlyMb = v),
+                          ),
+                        ],
+                        _UsageProgressRow(
+                          label: 'Heute',
+                          used: _bytesLabel(_wifiDailyUsed),
+                          limit: _wifiUnlimited || _wifiDailyMb == 0
+                              ? null : _mbLabel(_wifiDailyMb),
+                          pct: _wifiDailyMb == 0 ? 0 :
+                              (_wifiDailyUsed / (_wifiDailyMb * 1024 * 1024)).clamp(0.0, 1.0),
+                        ),
+                        _UsageProgressRow(
+                          label: 'Dieser Monat',
+                          used: _bytesLabel(_wifiMonthlyUsed),
+                          limit: _wifiUnlimited || _wifiMonthlyMb == 0
+                              ? null : _mbLabel(_wifiMonthlyMb),
+                          pct: _wifiMonthlyMb == 0 ? 0 :
+                              (_wifiMonthlyUsed / (_wifiMonthlyMb * 1024 * 1024)).clamp(0.0, 1.0),
+                        ),
+                        const SizedBox(height: 16),
 
-                  // ── Mobile ───────────────────────────────────────────
-                  _SectionHeader('Mobilfunk'),
-                  SwitchListTile(
-                    value: _mobileAllowed,
-                    onChanged: (v) => setState(() => _mobileAllowed = v),
-                    title: const Text('Downloads erlaubt',
-                        style: TextStyle(fontSize: 14)),
-                    dense: true,
-                    activeColor: const Color(0xFF2E7D32),
-                  ),
-                  if (_mobileAllowed) ...[
-                    _LimitDropdown(
-                      label: 'Tageslimit',
-                      value: _mobileDailyMb,
-                      options: _mobileDailyOptions,
-                      fmt: _mbLabel,
-                      onChanged: (v) => setState(() => _mobileDailyMb = v),
-                    ),
-                    _LimitDropdown(
-                      label: 'Monatslimit',
-                      value: _mobileMonthlyMb,
-                      options: _mobileMonthlyOptions,
-                      fmt: _mbLabel,
-                      onChanged: (v) => setState(() => _mobileMonthlyMb = v),
-                    ),
-                  ],
-                  _UsageProgressRow(
-                    label: 'Heute',
-                    used: _bytesLabel(_mobileDailyUsed),
-                    limit: _mobileDailyMb == 0
-                        ? null : _mbLabel(_mobileDailyMb),
-                    pct: _mobileDailyMb == 0 ? 0 :
-                        (_mobileDailyUsed / (_mobileDailyMb * 1024 * 1024)).clamp(0.0, 1.0),
-                  ),
-                  _UsageProgressRow(
-                    label: 'Dieser Monat',
-                    used: _bytesLabel(_mobileMonthlyUsed),
-                    limit: _mobileMonthlyMb == 0
-                        ? null : _mbLabel(_mobileMonthlyMb),
-                    pct: _mobileMonthlyMb == 0 ? 0 :
-                        (_mobileMonthlyUsed / (_mobileMonthlyMb * 1024 * 1024)).clamp(0.0, 1.0),
-                  ),
-                  const SizedBox(height: 16),
+                        // ── Mobile ───────────────────────────────────────────
+                        _SectionHeader('Mobilfunk'),
+                        SwitchListTile(
+                          value: _mobileAllowed,
+                          onChanged: (v) => setState(() => _mobileAllowed = v),
+                          title: const Text('Downloads erlaubt',
+                              style: TextStyle(fontSize: 14)),
+                          dense: true,
+                          activeColor: const Color(0xFF2E7D32),
+                        ),
+                        if (_mobileAllowed) ...[
+                          _LimitDropdown(
+                            label: 'Tageslimit',
+                            value: _mobileDailyMb,
+                            options: _mobileDailyOptions,
+                            fmt: _mbLabel,
+                            onChanged: (v) => setState(() => _mobileDailyMb = v),
+                          ),
+                          _LimitDropdown(
+                            label: 'Monatslimit',
+                            value: _mobileMonthlyMb,
+                            options: _mobileMonthlyOptions,
+                            fmt: _mbLabel,
+                            onChanged: (v) => setState(() => _mobileMonthlyMb = v),
+                          ),
+                        ],
+                        _UsageProgressRow(
+                          label: 'Heute',
+                          used: _bytesLabel(_mobileDailyUsed),
+                          limit: _mobileDailyMb == 0
+                              ? null : _mbLabel(_mobileDailyMb),
+                          pct: _mobileDailyMb == 0 ? 0 :
+                              (_mobileDailyUsed / (_mobileDailyMb * 1024 * 1024)).clamp(0.0, 1.0),
+                        ),
+                        _UsageProgressRow(
+                          label: 'Dieser Monat',
+                          used: _bytesLabel(_mobileMonthlyUsed),
+                          limit: _mobileMonthlyMb == 0
+                              ? null : _mbLabel(_mobileMonthlyMb),
+                          pct: _mobileMonthlyMb == 0 ? 0 :
+                              (_mobileMonthlyUsed / (_mobileMonthlyMb * 1024 * 1024)).clamp(0.0, 1.0),
+                        ),
+                        const SizedBox(height: 16),
 
-                  // ── ZIM-Version ──────────────────────────────────────
-                  _SectionHeader('Wissensspeicher'),
-                  FutureBuilder<String?>(
-                    future: LicenseCacheDb.instance.getStoredZimVersion(),
-                    builder: (_, snap) => _UsageRow(
-                      'Aktuelle Version:',
-                      snap.data ?? '—',
+                        // ── ZIM-Version ──────────────────────────────────────
+                        _SectionHeader('Wissensspeicher'),
+                        FutureBuilder<String?>(
+                          future: LicenseCacheDb.instance.getStoredZimVersion(),
+                          builder: (_, snap) => _UsageRow(
+                            'Aktuelle Version:',
+                            snap.data ?? '—',
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          'R2: ${AssetConfig.zimVersionUrl}',
+                          style: TextStyle(fontSize: 10, color: Colors.grey.shade400),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'R2: ${AssetConfig.zimVersionUrl}',
-                    style: TextStyle(fontSize: 10, color: Colors.grey.shade400),
-                    overflow: TextOverflow.ellipsis,
+                ),
+                SafeArea(
+                  minimum: const EdgeInsets.only(bottom: 8),
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        style: FilledButton.styleFrom(
+                            backgroundColor: const Color(0xFF2E7D32)),
+                        onPressed: _saving ? null : _save,
+                        child: _saving
+                            ? const SizedBox(
+                                width: 16, height: 16,
+                                child: CircularProgressIndicator(
+                                    strokeWidth: 2, color: Colors.white))
+                            : const Text('Speichern'),
+                      ),
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Schließen'),
-        ),
-        FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
-          onPressed: _saving || _loading ? null : _save,
-          child: _saving
-              ? const SizedBox(
-                  width: 16, height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-              : const Text('Speichern'),
-        ),
-      ],
     );
   }
 }
@@ -3179,29 +3344,40 @@ class _RestModeBadge extends StatelessWidget {
 
 // ── Plus & Premium Dialog ────────────────────────────────────────────────────
 
-class _SubscriptionDialog extends StatefulWidget {
-  const _SubscriptionDialog();
+// ── Subscription Screen ────────────────────────────────────────────────────────
+
+class _SubscriptionScreen extends StatefulWidget {
+  const _SubscriptionScreen();
 
   @override
-  State<_SubscriptionDialog> createState() => _SubscriptionDialogState();
+  State<_SubscriptionScreen> createState() => _SubscriptionScreenState();
 }
 
-class _SubscriptionDialogState extends State<_SubscriptionDialog> {
+class _SubscriptionScreenState extends State<_SubscriptionScreen> {
   final _sub = SubscriptionService.instance;
   bool _loading = false;
   String? _message;
+
+  @override
+  void initState() {
+    super.initState();
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  }
 
   Future<void> _purchasePlus() async {
     setState(() { _loading = true; _message = null; });
     try {
       final tier = await _sub.purchasePlus();
       if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _message = tier == SubscriptionTier.plus || tier == SubscriptionTier.premium
-            ? 'Plus erfolgreich freigeschaltet!'
-            : null;
-      });
+      if (tier == SubscriptionTier.plus || tier == SubscriptionTier.premium) {
+        unawaited(ImageLibraryService.instance.downloadLibrary(thumbTier: false));
+        setState(() {
+          _loading = false;
+          _message = 'Plus freigeschaltet! Bilder werden im Hintergrund geladen…';
+        });
+      } else {
+        setState(() { _loading = false; });
+      }
     } on PlatformException {
       if (mounted) setState(() { _loading = false; _message = null; });
     } catch (_) {
@@ -3214,12 +3390,15 @@ class _SubscriptionDialogState extends State<_SubscriptionDialog> {
     try {
       final tier = await _sub.subscribePremium();
       if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _message = tier == SubscriptionTier.premium
-            ? 'Premium erfolgreich aktiviert!'
-            : null;
-      });
+      if (tier == SubscriptionTier.premium) {
+        unawaited(ImageLibraryService.instance.downloadLibrary(thumbTier: false));
+        setState(() {
+          _loading = false;
+          _message = 'Premium aktiviert! Bilder werden im Hintergrund geladen…';
+        });
+      } else {
+        setState(() { _loading = false; });
+      }
     } on PlatformException {
       if (mounted) setState(() { _loading = false; _message = null; });
     } catch (_) {
@@ -3246,20 +3425,27 @@ class _SubscriptionDialogState extends State<_SubscriptionDialog> {
   @override
   Widget build(BuildContext context) {
     final tier = _sub.tier;
-    return AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: const Row(children: [
-        Icon(Icons.star_rounded, color: Color(0xFF2E7D32), size: 22),
-        SizedBox(width: 8),
-        Text('Plus & Premium'),
-      ]),
-      content: _loading
-          ? const SizedBox(
-              height: 80,
-              child: Center(child: CircularProgressIndicator()))
-          : SingleChildScrollView(
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text('Plus & Premium'),
+        backgroundColor: Colors.white,
+        foregroundColor: const Color(0xFF2E7D32),
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Divider(height: 1, color: Colors.grey.shade200),
+        ),
+      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50)))
+          : SafeArea(
+              top: false,
+              minimum: const EdgeInsets.only(bottom: 8),
+              child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20),
               child: Column(
-                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // ── Aktueller Status ─────────────────────────────────
@@ -3308,7 +3494,7 @@ class _SubscriptionDialogState extends State<_SubscriptionDialog> {
                       subtitle: 'Einmaliger Kauf',
                       price: '2–4 €',
                       features: const [
-                        'Bessere Bilder offline (~800px)',
+                        'Bessere Bilder offline (~600px)',
                         'Hochauflösende Bilder bei WLAN',
                       ],
                       onTap: _purchasePlus,
@@ -3447,15 +3633,79 @@ class _SubscriptionDialogState extends State<_SubscriptionDialog> {
                       ),
                     ),
                   ),
+
+                  // ── Debug-Tier-Umschalter (nur Debug-Build) ──────────
+                  if (kDebugMode) ...[
+                    const SizedBox(height: 24),
+                    const Divider(),
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8),
+                      child: Text('Debug: Tier direkt wechseln',
+                          style: TextStyle(fontSize: 12, color: Color(0xFF888888))),
+                    ),
+                    Row(children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: tier == SubscriptionTier.free
+                                ? const Color(0xFF2E7D32) : Colors.grey,
+                            side: BorderSide(
+                              color: tier == SubscriptionTier.free
+                                  ? const Color(0xFF2E7D32) : Colors.grey.shade300,
+                            ),
+                          ),
+                          onPressed: () async {
+                            await SubscriptionService.instance
+                                .setTierForTesting(SubscriptionTier.free);
+                            if (mounted) setState(() {});
+                          },
+                          child: const Text('Free', style: TextStyle(fontSize: 12)),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: tier == SubscriptionTier.plus
+                                ? const Color(0xFF2E7D32) : Colors.grey,
+                            side: BorderSide(
+                              color: tier == SubscriptionTier.plus
+                                  ? const Color(0xFF2E7D32) : Colors.grey.shade300,
+                            ),
+                          ),
+                          onPressed: () async {
+                            await SubscriptionService.instance
+                                .setTierForTesting(SubscriptionTier.plus);
+                            if (mounted) setState(() {});
+                          },
+                          child: const Text('Plus', style: TextStyle(fontSize: 12)),
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: tier == SubscriptionTier.premium
+                                ? const Color(0xFF2E7D32) : Colors.grey,
+                            side: BorderSide(
+                              color: tier == SubscriptionTier.premium
+                                  ? const Color(0xFF2E7D32) : Colors.grey.shade300,
+                            ),
+                          ),
+                          onPressed: () async {
+                            await SubscriptionService.instance
+                                .setTierForTesting(SubscriptionTier.premium);
+                            if (mounted) setState(() {});
+                          },
+                          child: const Text('Premium', style: TextStyle(fontSize: 12)),
+                        ),
+                      ),
+                    ]),
+                  ],
                 ],
               ),
             ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Schließen'),
-        ),
-      ],
+            ),
     );
   }
 }
@@ -3515,21 +3765,23 @@ class _UpgradeCard extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        )),
-                    Text(subtitle,
-                        style: const TextStyle(
-                          color: Colors.white70,
-                          fontSize: 11,
-                        )),
-                  ],
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          )),
+                      Text(subtitle,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 11,
+                          )),
+                    ],
+                  ),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),

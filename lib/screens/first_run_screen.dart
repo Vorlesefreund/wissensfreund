@@ -39,13 +39,17 @@ class _FirstRunScreenState extends State<FirstRunScreen>
 
   // ─── Image quality ─────────────────────────────────────────────────────────
   bool      _imgDownloading = false;
+  bool      _imgDone        = false;
   double    _imgProgress    = 0;
+  int       _imgReceived    = 0;
   Duration? _imgEta;
   String?   _imgError;
   int       _freeBytes      = -1;
 
-  // Need ~1 GB free: ZIP (600 MB) + extracted files overlap during extraction.
-  static const int _kRequiredBytes = 1024 * 1024 * 1024;
+  // Need ~400 MB free for thumb (141 MB ZIP + extraction peak).
+  // Need ~600 MB free for standard (218 MB ZIP + extraction peak).
+  static const int _kRequiredBytesThumb    = 400 * 1024 * 1024;
+  static const int _kRequiredBytesStandard = 600 * 1024 * 1024;
 
   // ─── Kiosk / child safety ──────────────────────────────────────────────────
   int  _kioskPhase  = 0; // 0 = intro, 1 = waiting for permission, 2 = done
@@ -117,33 +121,39 @@ class _FirstRunScreenState extends State<FirstRunScreen>
   }
 
   void _goToAfterNetwork() {
-    // Image quality page is only relevant for Plus/Premium users.
-    _goTo(SubscriptionService.instance.isPlus ? 2 : 3);
+    _goTo(2); // Bildseite für alle User
   }
 
   Future<void> _downloadImage() async {
-    setState(() { _imgDownloading = true; _imgError = null; });
+    setState(() {
+      _imgDownloading = true;
+      _imgDone        = false;
+      _imgError       = null;
+      _imgReceived    = 0;
+      _imgProgress    = 0;
+    });
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('image_quality_offered', true);
+    _goTo(3); // sofort weiter — Download läuft im Hintergrund
+
     final error = await ImageLibraryService.instance.downloadLibrary(
+      thumbTier: true,
       onProgress: (received, total, eta) {
-        if (mounted) {
-          setState(() {
-            _imgProgress = total > 0 ? received / total : 0;
-            _imgEta = eta;
-          });
-        }
+        if (mounted) setState(() {
+          _imgReceived = received;
+          _imgProgress = total > 0 ? received / total : 0;
+          _imgEta      = eta;
+        });
       },
     );
     if (!mounted) return;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('image_quality_offered', true);
     if (error == null) {
-      setState(() => _imgDownloading = false);
-      _goTo(3);
-    } else {
-      setState(() {
-        _imgDownloading = false;
-        _imgError = _mapImgError(error);
+      setState(() { _imgDownloading = false; _imgDone = true; });
+      Future.delayed(const Duration(seconds: 4), () {
+        if (mounted) setState(() => _imgDone = false);
       });
+    } else {
+      setState(() { _imgDownloading = false; _imgError = _mapImgError(error); });
     }
   }
 
@@ -199,8 +209,9 @@ class _FirstRunScreenState extends State<FirstRunScreen>
     return '$mb MB';
   }
 
-  String _fmtEta(Duration d) =>
-      d.inMinutes >= 1 ? '~${d.inMinutes} min' : '~${d.inSeconds}s';
+  String _fmtEta(Duration d) => d.inMinutes >= 1
+      ? 'noch ca. ${d.inMinutes} min'
+      : 'noch ca. ${d.inSeconds} Sek.';
 
   @override
   Widget build(BuildContext context) {
@@ -212,6 +223,7 @@ class _FirstRunScreenState extends State<FirstRunScreen>
           child: Column(
             children: [
               _buildTopBar(),
+              _buildDownloadBanner(),
               Expanded(
                 child: PageView(
                   controller: _pageCtrl,
@@ -260,54 +272,53 @@ class _FirstRunScreenState extends State<FirstRunScreen>
 
   Widget _buildWelcomePage() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(32, 32, 32, 32),
+      padding: const EdgeInsets.fromLTRB(28, 16, 28, 16),
       child: Column(
         children: [
-          const Text('🎓', style: TextStyle(fontSize: 72)),
-          const SizedBox(height: 20),
+          const Text('🎓', style: TextStyle(fontSize: 52)),
+          const SizedBox(height: 10),
           const Text(
             'Willkommen beim\nWissensfreund!',
             style: TextStyle(
-              fontSize: 28,
+              fontSize: 24,
               fontWeight: FontWeight.w900,
               color: Color(0xFF1B5E20),
-              height: 1.25,
+              height: 1.2,
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
           const Text(
-            'Bevor wir starten, richten wir kurz die wichtigsten '
-            'Einstellungen ein und legen ein Profil an.',
-            style: TextStyle(fontSize: 16, color: Color(0xFF555555), height: 1.6),
+            'Kurze Einrichtung — dann kann es losgehen.',
+            style: TextStyle(fontSize: 14, color: Color(0xFF555555), height: 1.5),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 8),
           Container(
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            margin: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
             decoration: BoxDecoration(
               color: const Color(0xFFE8F5E9),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.timer_outlined, size: 16, color: Color(0xFF2E7D32)),
-                SizedBox(width: 6),
+                Icon(Icons.timer_outlined, size: 14, color: Color(0xFF2E7D32)),
+                SizedBox(width: 5),
                 Text(
                   'Dauert nur ca. 3 Minuten',
-                  style: TextStyle(fontSize: 14, color: Color(0xFF2E7D32), fontWeight: FontWeight.w600),
+                  style: TextStyle(fontSize: 13, color: Color(0xFF2E7D32), fontWeight: FontWeight.w600),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 14),
           _InfoRow(icon: Icons.wifi_rounded,        text: 'Internet & Datennutzung festlegen'),
           _InfoRow(icon: Icons.image_outlined,      text: 'Bildqualität wählen'),
           _InfoRow(icon: Icons.security_rounded,    text: 'Kinderschutz einrichten'),
           _InfoRow(icon: Icons.person_add_rounded,  text: 'Profil erstellen'),
-          const SizedBox(height: 40),
+          const SizedBox(height: 20),
           _BigButton(
             label: 'Los geht\'s!',
             icon: Icons.arrow_forward_rounded,
@@ -421,8 +432,69 @@ class _FirstRunScreenState extends State<FirstRunScreen>
 
   // ─── Page 2: Image Quality (Plus/Premium only) ────────────────────────────
 
+  Widget _buildDownloadBanner() {
+    if (!_imgDownloading && !_imgDone && _imgError == null) return const SizedBox.shrink();
+
+    final Color bg     = _imgError != null ? const Color(0xFFFFF3E0) : const Color(0xFFE8F5E9);
+    final Color barClr = _imgError != null ? Colors.orange        : const Color(0xFF2E7D32);
+    final IconData icon = _imgDone
+        ? Icons.check_circle_rounded
+        : _imgError != null
+            ? Icons.warning_amber_rounded
+            : Icons.download_rounded;
+    final Color iconClr = _imgDone
+        ? const Color(0xFF2E7D32)
+        : _imgError != null
+            ? Colors.orange.shade700
+            : const Color(0xFF388E3C);
+
+    String label;
+    if (_imgDone) {
+      label = 'Bilder erfolgreich gespeichert';
+    } else if (_imgError != null) {
+      label = _imgError!;
+    } else if (_imgProgress > 0) {
+      final pct = '${(_imgProgress * 100).round()} %';
+      label = _imgEta != null ? 'Bilder: $pct  ·  ${_fmtEta(_imgEta!)}' : 'Bilder: $pct';
+    } else {
+      label = _imgReceived > 0
+          ? 'Bilder: ${(_imgReceived / (1024 * 1024)).toStringAsFixed(1)} MB geladen…'
+          : 'Bilder werden geladen…';
+    }
+
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      color: bg,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (_imgDownloading)
+            LinearProgressIndicator(
+              value: _imgProgress > 0 ? _imgProgress : null,
+              minHeight: 3,
+              backgroundColor: const Color(0xFFC8E6C9),
+              valueColor: AlwaysStoppedAnimation(barClr),
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
+            child: Row(
+              children: [
+                Icon(icon, size: 16, color: iconClr),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(label,
+                      style: TextStyle(fontSize: 12, color: iconClr, fontWeight: FontWeight.w500)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildImagePage() {
-    final hasEnoughSpace = _freeBytes < 0 || _freeBytes >= _kRequiredBytes;
+    final hasEnoughSpace = _freeBytes < 0 || _freeBytes >= _kRequiredBytesThumb;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(24, 28, 24, 32),
@@ -433,29 +505,28 @@ class _FirstRunScreenState extends State<FirstRunScreen>
             Icon(Icons.image_outlined, color: Color(0xFF2E7D32), size: 28),
             SizedBox(width: 12),
             Text(
-              'Bessere Bilder',
+              'Bilder einrichten',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Color(0xFF1B5E20)),
             ),
           ]),
           const SizedBox(height: 8),
           const Text(
-            'Möchtest du bessere Bilder lokal speichern?\n'
-            'Das macht Bilder auch offline schärfer.',
+            'Wie soll Wissensfreund Bilder laden?',
             style: TextStyle(fontSize: 14, color: Color(0xFF666666), height: 1.45),
           ),
           const SizedBox(height: 24),
           _QualityCard(
-            icon: Icons.hd_outlined,
-            title: 'Ja, bessere Bilder speichern (~600 MB)',
-            subtitle: 'Offline-Bibliothek (600px) · ca. 3–5 min im WLAN',
-            highlight: hasEnoughSpace,
+            icon: Icons.wifi_rounded,
+            title: 'Nur WLAN (Standard)',
+            subtitle: 'Bilder werden per WLAN geladen, 300px, kein Download nötig',
+            highlight: !hasEnoughSpace,
           ),
           const SizedBox(height: 12),
           _QualityCard(
-            icon: Icons.wifi_rounded,
-            title: 'Nein, nur bei WLAN laden',
-            subtitle: 'Kein Download — beste Qualität automatisch bei WLAN',
-            highlight: !hasEnoughSpace,
+            icon: Icons.download_rounded,
+            title: 'Einfacher Download',
+            subtitle: '300px-Paket (~150 MB) herunterladen, offline verfügbar',
+            highlight: hasEnoughSpace,
           ),
           if (_freeBytes >= 0 && !hasEnoughSpace) ...[
             const SizedBox(height: 10),
@@ -465,47 +536,39 @@ class _FirstRunScreenState extends State<FirstRunScreen>
               Expanded(
                 child: Text(
                   'Wenig Speicherplatz (${(_freeBytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB frei). '
-                  'Download nicht empfohlen.',
+                  'WLAN-Modus empfohlen.',
                   style: TextStyle(fontSize: 12, color: Colors.orange.shade800),
                 ),
               ),
             ]),
           ],
-          if (_imgError != null) ...[
-            const SizedBox(height: 10),
-            Text(_imgError!, style: TextStyle(color: Colors.red.shade700, fontSize: 13)),
-          ],
           const SizedBox(height: 32),
-          if (_imgDownloading) ...[
-            LinearProgressIndicator(
-              value: _imgProgress > 0 ? _imgProgress : null,
-              backgroundColor: const Color(0xFFE8F5E9),
-              valueColor: const AlwaysStoppedAnimation(Color(0xFF2E7D32)),
+          _BigButton(
+            label: 'Herunterladen & weiter',
+            icon: Icons.download_rounded,
+            onPressed: hasEnoughSpace ? _downloadImage : null,
+          ),
+          const SizedBox(height: 12),
+          Center(
+            child: TextButton(
+              onPressed: _skipImageAndNext,
+              child: Text('Nein danke, nur per WLAN', style: TextStyle(color: Colors.grey.shade600)),
             ),
-            const SizedBox(height: 10),
-            Center(
-              child: Text(
-                _imgProgress > 0
-                    ? '${(_imgProgress * 100).round()} %'
-                      '${_imgEta != null ? "  —  ${_fmtEta(_imgEta!)}" : ""}'
-                    : 'Verbinde…',
-                style: const TextStyle(fontSize: 13),
-              ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF1F8E9),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: const Color(0xFFC8E6C9)),
             ),
-          ] else ...[
-            _BigButton(
-              label: 'Ja, herunterladen',
-              icon: Icons.download_rounded,
-              onPressed: hasEnoughSpace ? _downloadImage : null,
+            child: const Text(
+              'Mit Wissensfreund Plus gibt es Bilder in besserer Qualität (600px). '
+              'Du kannst das jederzeit in den Einstellungen freischalten.',
+              style: TextStyle(fontSize: 12, color: Color(0xFF558B2F), height: 1.4),
             ),
-            const SizedBox(height: 12),
-            Center(
-              child: TextButton(
-                onPressed: _skipImageAndNext,
-                child: Text('Nein, nur bei WLAN laden', style: TextStyle(color: Colors.grey.shade600)),
-              ),
-            ),
-          ],
+          ),
         ],
       ),
     );
@@ -666,12 +729,12 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 5),
+      padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
           Icon(icon, color: const Color(0xFF4CAF50), size: 20),
           const SizedBox(width: 12),
-          Text(text, style: const TextStyle(fontSize: 15, color: Color(0xFF444444))),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 15, color: Color(0xFF444444)))),
         ],
       ),
     );
