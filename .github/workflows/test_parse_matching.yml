@@ -1,0 +1,60 @@
+name: Test action=parse Positional Matching
+
+# Vergleicht ZIM-Bilder vs. action=parse für 5 Artikel.
+# Zeigt: Pos-Match-Rate, Caption-Bestätigungsrate, ZIM-vs-API-Bildanzahl.
+#
+# Run: Actions → Test action=parse Positional Matching → Run workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_articles:
+        description: 'Kommagetrennte Artikelnamen'
+        required: false
+        default: 'Elefant,Beethoven,Berlin,Fußball,Dinosaurier'
+        type: string
+      caption_threshold:
+        description: 'difflib-Schwellwert für Caption-Bestätigung (default: 0.25)'
+        required: false
+        default: '0.25'
+        type: string
+
+env:
+  ZIM_URL: https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install zstandard requests
+
+      - name: Download ZIM
+        run: |
+          echo "Downloading $ZIM_URL"
+          curl -fsSL -o klexikon.zim "$ZIM_URL"
+          ls -lh klexikon.zim
+
+      - name: Run positional matching test
+        run: python scripts/test_parse_matching.py
+        env:
+          ZIM_FILE:          klexikon.zim
+          OUTPUT_FILE:       parse_matching_test.json
+          TEST_ARTICLES:     ${{ inputs.test_articles || 'Elefant,Beethoven,Berlin,Fußball,Dinosaurier' }}
+          API_DELAY:         '0.5'
+          CAPTION_THRESHOLD: ${{ inputs.caption_threshold || '0.25' }}
+
+      - name: Upload result
+        uses: actions/upload-artifact@v5
+        with:
+          name: parse-matching-test
+          path: parse_matching_test.json
+          retention-days: 7
