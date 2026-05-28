@@ -109,12 +109,24 @@ class ImageLibraryService {
       final stagingDir = Directory('${libDir.path}.new');
       if (stagingDir.existsSync()) await stagingDir.delete(recursive: true);
 
-      await _extractZipTo(tmpZip, stagingDir);
+      await _extractZipTo(tmpZip, stagingDir, onExtractProgress: (done, total) {
+        _downloadProgress = 1.0 + (done / total); // >1.0 signals extraction phase
+        onProgress?.call(_downloadedBytes, _downloadTotalBytes, Duration.zero);
+      });
       try { File(tmpZip).deleteSync(); } catch (_) {}
 
-      // Atomic swap: only now replace old library (takes milliseconds)
+      // Swap: ersetze alte Library durch neue.
+      // Directory.rename() schlägt auf Android external storage fehl →
+      // stattdessen alte Library löschen und Staging-Dir umbenennen mit
+      // Fallback auf manuelles Kopieren.
       if (libDir.existsSync()) await libDir.delete(recursive: true);
-      await stagingDir.rename(libDir.path);
+      try {
+        await stagingDir.rename(libDir.path);
+      } catch (_) {
+        // Fallback: manuell kopieren wenn rename fehlschlägt
+        await _copyDir(stagingDir, libDir);
+        await stagingDir.delete(recursive: true);
+      }
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool('image_library_thumb_tier', thumbTier);
@@ -155,20 +167,39 @@ class ImageLibraryService {
   File _fileFor(String filename) =>
       File('${StorageManager.instance.imageLibraryDir.path}/$filename');
 
-  Future<void> _extractZipTo(String zipPath, Directory dir) async {
+  Future<void> _extractZipTo(String zipPath, Directory dir,
+      {void Function(int done, int total)? onExtractProgress}) async {
     if (!dir.existsSync()) await dir.create(recursive: true);
 
     final stream  = InputFileStream(zipPath);
     final archive = ZipDecoder().decodeStream(stream);
 
-    for (final entry in archive.files) {
-      if (!entry.isFile) continue;
+    final files = archive.files.where((e) => e.isFile).toList();
+    int done = 0;
+    for (final entry in files) {
       final filename = entry.name.replaceFirst(RegExp(r'^images/'), '');
       if (filename.isEmpty) continue;
-      final out = OutputFileStream('${dir.path}/$filename');
+      final outPath = '${dir.path}/$filename';
+      final parent = File(outPath).parent;
+      if (!parent.existsSync()) await parent.create(recursive: true);
+      final out = OutputFileStream(outPath);
       entry.writeContent(out);
       out.close();
+      done++;
+      onExtractProgress?.call(done, files.length);
     }
     stream.close();
+  }
+
+  Future<void> _copyDir(Directory src, Directory dst) async {
+    await dst.create(recursive: true);
+    await for (final entity in src.list(recursive: false)) {
+      final name = entity.path.split(RegExp(r'[\\/]')).last;
+      if (entity is Directory) {
+        await _copyDir(entity, Directory('${dst.path}/$name'));
+      } else if (entity is File) {
+        await entity.copy('${dst.path}/$name');
+      }
+    }
   }
 }

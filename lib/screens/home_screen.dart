@@ -2006,10 +2006,11 @@ class _StorageScreenState extends State<_StorageScreen> {
   // Download state
   bool _downloading = false;
   bool _bgDownloading = false; // ongoing background download from onboarding
-  double _dlProgress = 0;
+  double _dlProgress = 0;   // 0..1 = download; >1 = extraction phase
   Duration? _dlEta;
   String? _dlError;
   bool? _downloadingThumbTier; // tier being downloaded: true=300px, false=600px
+  bool _downloadComplete = false;
 
   @override
   void initState() {
@@ -2081,10 +2082,12 @@ class _StorageScreenState extends State<_StorageScreen> {
     if (error == null) {
       setState(() {
         _downloading = false;
+        _dlProgress = 0;
         _libraryBytes = ImageLibraryService.instance.totalSizeBytes;
+        _downloadComplete = true;
       });
     } else if (error == 'cancelled') {
-      setState(() { _downloading = false; _dlProgress = 0; });
+      setState(() { _downloading = false; _dlProgress = 0; _downloadComplete = false; });
     } else {
       setState(() {
         _downloading = false;
@@ -2156,21 +2159,47 @@ class _StorageScreenState extends State<_StorageScreen> {
   }
 
   Widget _buildProgressBar() {
+    if (_downloadComplete) {
+      final tierLabel = _downloadingThumbTier == true ? '300px' : '600px';
+      return Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: const Color(0xFFE8F5E9),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.check_circle_rounded, color: Color(0xFF2E7D32), size: 24),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                'Fertig! $tierLabel-Bilder sind jetzt verfügbar.',
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF2E7D32)),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final extracting = _dlProgress > 1.0;
     final tierLabel = _downloadingThumbTier == true
         ? '300px (Free-Qualität)'
         : _downloadingThumbTier == false
             ? '600px (Plus-Qualität)'
             : 'Bilder';
+    final extractPct = extracting ? ((_dlProgress - 1.0) * 100).round() : 0;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '$tierLabel wird heruntergeladen…',
+          extracting ? 'Bilder werden entpackt…' : '$tierLabel wird heruntergeladen…',
           style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF2E7D32)),
         ),
         const SizedBox(height: 8),
         LinearProgressIndicator(
-          value: _dlProgress > 0 ? _dlProgress : null,
+          value: extracting ? (_dlProgress - 1.0) : (_dlProgress > 0 ? _dlProgress : null),
           minHeight: 8,
           borderRadius: BorderRadius.circular(4),
           backgroundColor: const Color(0xFFE8F5E9),
@@ -2181,24 +2210,27 @@ class _StorageScreenState extends State<_StorageScreen> {
           children: [
             Expanded(
               child: Text(
-                _dlProgress > 0
-                    ? '${(_dlProgress * 100).round()} %${_dlEta != null ? "  —  noch ${_fmtEta(_dlEta!)}" : ""}'
-                    : 'Verbindung wird aufgebaut…',
+                extracting
+                    ? '$extractPct % entpackt'
+                    : _dlProgress > 0
+                        ? '${(_dlProgress * 100).round()} %${_dlEta != null ? "  —  noch ${_fmtEta(_dlEta!)}" : ""}'
+                        : 'Verbindung wird aufgebaut…',
                 style: const TextStyle(fontSize: 14, color: Color(0xFF555555)),
               ),
             ),
-            TextButton(
-              onPressed: () {
-                ImageLibraryService.instance.cancel();
-                setState(() { _downloading = false; _bgDownloading = false; _dlProgress = 0; });
-              },
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.zero,
-                foregroundColor: Colors.red.shade600,
-                textStyle: const TextStyle(fontSize: 12),
+            if (!extracting)
+              TextButton(
+                onPressed: () {
+                  ImageLibraryService.instance.cancel();
+                  setState(() { _downloading = false; _bgDownloading = false; _dlProgress = 0; });
+                },
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  foregroundColor: Colors.red.shade600,
+                  textStyle: const TextStyle(fontSize: 12),
+                ),
+                child: const Text('Abbrechen'),
               ),
-              child: const Text('Abbrechen'),
-            ),
           ],
         ),
       ],
