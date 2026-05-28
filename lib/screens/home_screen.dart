@@ -171,23 +171,24 @@ class _HomeScreenState extends State<HomeScreen>
     );
 
     if (exit != true) {
-      // Kind bleibt → Professor weiterlesen lassen
       provider.resumeSpeaking();
       return;
     }
 
     if (!mounted) return;
-    final authenticated = await ps.authenticate(
-      'Zum Beenden der App bitte authentifizieren.',
-    );
 
-    if (!authenticated) {
-      provider.resumeSpeaking();
-      return;
+    // Biometrie nur wenn Kinderschutz (Kiosk) aktiv ist
+    if (ps.isKioskMode) {
+      final authenticated = await ps.authenticate(
+        'Zum Beenden der App bitte authentifizieren.',
+      );
+      if (!authenticated) {
+        provider.resumeSpeaking();
+        return;
+      }
+      await ps.stopKioskMode();
     }
 
-    // Auth erfolgreich → Kiosk-Modus beenden, App beenden
-    if (ps.isKioskMode) await ps.stopKioskMode();
     SystemNavigator.pop();
   }
 
@@ -2214,6 +2215,17 @@ class _StorageScreenState extends State<_StorageScreen> {
         foregroundColor: const Color(0xFF2E7D32),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
+        actions: [
+          TextButton(
+            onPressed: isDl ? null : () => Navigator.pop(context),
+            child: Text(
+              'Schließen',
+              style: TextStyle(
+                color: isDl ? Colors.grey : const Color(0xFF2E7D32),
+              ),
+            ),
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Divider(height: 1, color: Colors.grey.shade200),
