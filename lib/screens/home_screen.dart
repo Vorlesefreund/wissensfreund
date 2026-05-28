@@ -2013,7 +2013,6 @@ class _StorageScreenState extends State<_StorageScreen> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _loadStats();
   }
 
@@ -2749,7 +2748,6 @@ class _InternetDataScreenState extends State<_InternetDataScreen> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _load();
   }
 
@@ -3374,7 +3372,6 @@ class _SubscriptionScreenState extends State<_SubscriptionScreen> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
   }
 
   Future<void> _purchasePlus() async {

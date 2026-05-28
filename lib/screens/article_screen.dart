@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../providers/wissensfreund_provider.dart';
+import '../utils/system_ui.dart';
 import '../services/data_limit_overlay_service.dart';
 import '../services/hires_image_service.dart';
 import '../services/network_service.dart';
@@ -105,7 +106,6 @@ class _ArticleScreenState extends State<ArticleScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Re-apply when a dialog/overlay above this route is dismissed.
     if (ModalRoute.of(context)?.isCurrent == true) {
       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
     }
@@ -113,7 +113,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
 
   @override
   void dispose() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    restoreSystemUI();
     super.dispose();
   }
 
@@ -1123,7 +1123,7 @@ class _FullscreenGalleryState extends State<_FullscreenGallery> {
   @override
   void dispose() {
     _swipeSettleTimer?.cancel();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    restoreSystemUI();
     super.dispose();
   }
 

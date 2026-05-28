@@ -12,11 +12,12 @@ import 'services/profile_service.dart';
 import 'screens/first_run_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/profile_selection_screen.dart';
+import 'utils/system_ui.dart';
 import 'widgets/data_limit_overlay.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  restoreSystemUI();
   await ParentalLockService.instance.init();
   await ProfileService.instance.initialize();
   final prefs = await SharedPreferences.getInstance();
@@ -74,7 +75,7 @@ class _WissensfreundAppState extends State<WissensfreundApp>
       unawaited(provider.enterBackground());
     } else if (state == AppLifecycleState.resumed && _wentToBackground) {
       _wentToBackground = false;
-      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+      restoreSystemUI();
       ps.refreshAdminStatus();
       final provider = context.read<WissensfreundProvider>();
       provider.exitBackground();
@@ -87,7 +88,7 @@ class _WissensfreundAppState extends State<WissensfreundApp>
     return MaterialApp(
       title: 'Wissensfreund',
       debugShowCheckedModeBanner: false,
-      navigatorObservers: [_EdgeToEdgeObserver()],
+      navigatorObservers: [_NavBarVisibleObserver()],
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF4CAF50),
@@ -105,27 +106,17 @@ class _WissensfreundAppState extends State<WissensfreundApp>
   }
 }
 
-// Stellt edgeToEdge bei jedem Route-Wechsel wieder her.
+// Stellt die Android-Leiste bei jedem Route-Wechsel sicher sichtbar.
 // article_screen überschreibt danach mit immersiveSticky (korrekt).
-class _EdgeToEdgeObserver extends NavigatorObserver {
-  static void _restore() {
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.transparent,
-      systemNavigationBarIconBrightness: Brightness.dark,
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-    ));
-  }
-
+class _NavBarVisibleObserver extends NavigatorObserver {
   @override
-  void didPush(Route route, Route? previousRoute) => _restore();
+  void didPush(Route route, Route? previousRoute) => restoreSystemUI();
   @override
-  void didPop(Route route, Route? previousRoute) => _restore();
+  void didPop(Route route, Route? previousRoute) => restoreSystemUI();
   @override
-  void didReplace({Route? newRoute, Route? oldRoute}) => _restore();
+  void didReplace({Route? newRoute, Route? oldRoute}) => restoreSystemUI();
   @override
-  void didRemove(Route route, Route? previousRoute) => _restore();
+  void didRemove(Route route, Route? previousRoute) => restoreSystemUI();
 }
 
 // ── App-Shell: hält den Eltern-Overlay über allem anderen ──────────────────
