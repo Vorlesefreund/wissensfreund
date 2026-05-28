@@ -1,16 +1,20 @@
 #!/usr/bin/env python3
 """
-Downloads Klexikon article images at three quality tiers:
+Downloads Klexikon article images at three quality tiers.
 
-  thumb    (300 px)  — gallery strip / thumbnail view
-  standard (600 px)  — fullscreen for standard users
-  pro      (1200 px) — fullscreen for pro / premium users
+Strategy: download the full-resolution original from Wikimedia Commons once
+per image (Special:FilePath without ?width=, follows redirect to CDN origin),
+then resize locally with Pillow. This guarantees genuine size differences
+across tiers — unlike server-side width scaling, which returns the original
+when the image is already smaller than the requested width.
 
-Primary source: Wikimedia Commons via Special:FilePath (requires commons_file in
-media_licenses.json, produced by generate_license_json.py).
+  thumb    (max 300×300 px, JPEG quality 70)  — gallery strip / thumbnail
+  standard (max 800×800 px, JPEG quality 80)  — fullscreen standard users
+  pro      (max 1600×1600 px, JPEG quality 85) — fullscreen pro / premium
+
 Fallback: ZIM binary extraction for Klexikon-specific images without a Commons
-equivalent (content-hashed entries). These are written to all three ZIPs at their
-native ZIM resolution.
+equivalent. These are also resized with Pillow; raw bytes used only when Pillow
+cannot decode the format (e.g. SVG).
 
 Output:
   images_thumb.zip          images_thumb_manifest.json
@@ -21,9 +25,10 @@ Run locally:
   ZIM_FILE=klexikon.zim LICENSES_FILE=media_licenses.json python scripts/download_images.py
 
 GitHub Actions: see .github/workflows/update_image_licenses.yml (images job)
-Requires: pip install requests zstandard
+Requires: pip install requests zstandard Pillow
 """
 
+import io
 import json
 import lzma
 import os
@@ -37,6 +42,7 @@ from pathlib import Path
 from urllib.parse import unquote, quote
 
 import requests
+from PIL import Image
 
 try:
     import zstandard
@@ -54,32 +60,55 @@ COMMONS_DELAY = float(os.environ.get("COMMONS_DELAY", "0.15"))
 SHARD_INDEX   = int(os.environ.get("SHARD_INDEX", "0"))
 SHARD_COUNT   = int(os.environ.get("SHARD_COUNT", "1"))
 
-# Quality tiers: (name, width_px)
+# Quality tiers: (name, max_px, jpeg_quality)
 SIZES = [
-    ("thumb",    300),
-    ("standard", 600),
-    ("pro",     1200),
+    ("thumb",    300, 70),
+    ("standard", 800, 80),
+    ("pro",     1600, 85),
 ]
 
 MAX_ZIP_BYTES = 2 * 1024 * 1024 * 1024  # 2 GB hard cap per ZIP
-MAX_IMG_BYTES = 15 * 1024 * 1024        # 15 MB per image
+MAX_IMG_BYTES = 25 * 1024 * 1024        # 25 MB per original download
 
-COMMONS_URL = "https://commons.wikimedia.org/wiki/Special:FilePath/{fn}?width={w}"
+# No ?width= — we want the full-resolution original; redirect followed automatically
+COMMONS_URL = "https://commons.wikimedia.org/wiki/Special:FilePath/{fn}"
 IMAGE_EXTS  = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 ZIM_MAGIC   = 0x044D495A
 
 _session = requests.Session()
-_session.headers["User-Agent"] = "WissensfreundApp/1.0 (image-downloader)"
+_session.headers["User-Agent"] = "WissensfreundApp/1.0 (az@expansionssupport.de)"
 _start = time.monotonic()
+
+
+# ── Image resizing with Pillow ─────────────────────────────────────────────────
+
+def resize_for_tier(data: bytes, max_px: int, quality: int) -> bytes | None:
+    """Resize image to fit within max_px×max_px; return JPEG bytes. Never upscales."""
+    try:
+        img = Image.open(io.BytesIO(data))
+        # Convert to RGB for JPEG output (handles RGBA, P, L, etc.)
+        if img.mode == "RGBA":
+            bg = Image.new("RGB", img.size, (255, 255, 255))
+            bg.paste(img.convert("RGB"), mask=img.split()[3])
+            img = bg
+        elif img.mode != "RGB":
+            img = img.convert("RGB")
+        # thumbnail() shrinks to fit, never upscales
+        img.thumbnail((max_px, max_px), Image.LANCZOS)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG", quality=quality, optimize=True)
+        return buf.getvalue()
+    except Exception:
+        return None
 
 
 # ── Wikimedia Commons download ─────────────────────────────────────────────────
 
-def download_commons(commons_fn: str, width: int) -> bytes | None:
-    """Download a single image from Wikimedia Commons at the given width."""
-    url = COMMONS_URL.format(fn=quote(commons_fn, safe=""), w=width)
+def download_commons_original(commons_fn: str) -> bytes | None:
+    """Download the full-resolution original from Wikimedia Commons."""
+    url = COMMONS_URL.format(fn=quote(commons_fn, safe=""))
     try:
-        r = _session.get(url, timeout=45, allow_redirects=True)
+        r = _session.get(url, timeout=60, allow_redirects=True)
         if r.status_code == 404:
             return None
         r.raise_for_status()
@@ -88,7 +117,7 @@ def download_commons(commons_fn: str, width: int) -> bytes | None:
             return None
         return data
     except Exception as e:
-        print(f"    WARN {commons_fn}@{width}px: {e}")
+        print(f"    WARN {commons_fn}: {e}")
         return None
 
 
@@ -254,14 +283,13 @@ def write_manifest(name: str, images: dict) -> None:
 # ── Main ───────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    for path, label in [(LICENSES_FILE, "LICENSES_FILE")]:
-        if not path.exists():
-            print(f"ERROR: {label}={path} not found", file=sys.stderr)
-            sys.exit(1)
+    if not LICENSES_FILE.exists():
+        print(f"ERROR: LICENSES_FILE={LICENSES_FILE} not found", file=sys.stderr)
+        sys.exit(1)
 
     # 1. Load permitted image list ─────────────────────────────────────────────
-    license_data  = json.loads(LICENSES_FILE.read_text(encoding="utf-8"))
-    all_images    = license_data.get("images", {})
+    license_data = json.loads(LICENSES_FILE.read_text(encoding="utf-8"))
+    all_images   = license_data.get("images", {})
 
     commons_list: list[tuple[str, str]] = []  # (zim_fn, commons_fn)
     zim_only:     list[str]             = []  # zim_fn (no Commons equivalent)
@@ -291,47 +319,41 @@ def main() -> None:
 
     # 2. Open ZIP files ────────────────────────────────────────────────────────
     zips      = {name: zipfile.ZipFile(f"images_{name}.zip", "w", zipfile.ZIP_STORED)
-                 for name, _ in SIZES}
-    manifests = {name: {} for name, _ in SIZES}
-    zip_bytes = {name: 0   for name, _ in SIZES}
-    counts    = {name: 0   for name, _ in SIZES}
+                 for name, _, _ in SIZES}
+    manifests = {name: {} for name, _, _ in SIZES}
+    zip_bytes = {name: 0   for name, _, _ in SIZES}
+    counts    = {name: 0   for name, _, _ in SIZES}
 
-    # 3. Download from Wikimedia Commons ──────────────────────────────────────
-    print(f"\nDownloading from Wikimedia Commons ({len(commons_list)} images × {len(SIZES)} tiers)...")
-    skip_count = 0
+    # 3. Download originals from Wikimedia Commons, resize locally ─────────────
+    print(f"\nDownloading {len(commons_list)} originals from Wikimedia Commons...")
+    skip_count   = 0
+    resize_fails = 0
 
     for i, (zim_fn, commons_fn) in enumerate(commons_list, 1):
-        fallback_data: bytes | None = None  # smallest size that succeeded
+        original = download_commons_original(commons_fn)
+        if original is None:
+            skip_count += 1
+            time.sleep(COMMONS_DELAY)
+            continue
 
-        for tier_name, width in SIZES:
-            data = download_commons(commons_fn, width)
-
-            if data is None:
-                # Use a smaller tier's data if Commons can't serve this size
-                if fallback_data is not None:
-                    data = fallback_data
-                else:
-                    skip_count += 1
-                    continue
-
-            if fallback_data is None:
-                fallback_data = data
-
-            if zip_bytes[tier_name] + len(data) > MAX_ZIP_BYTES:
+        for tier_name, max_px, quality in SIZES:
+            resized = resize_for_tier(original, max_px, quality)
+            if resized is None:
+                resize_fails += 1
+                continue
+            if zip_bytes[tier_name] + len(resized) > MAX_ZIP_BYTES:
                 print(f"  {tier_name}: 2 GB cap reached — stopping")
                 continue
-
-            zips[tier_name].writestr(f"images/{zim_fn}", data)
+            zips[tier_name].writestr(f"images/{zim_fn}", resized)
             manifests[tier_name][zim_fn] = {
-                "size":       len(data),
-                "width":      width,
+                "size":       len(resized),
+                "max_px":     max_px,
                 "source":     "commons",
                 "downloaded": date.today().isoformat(),
             }
-            zip_bytes[tier_name] += len(data)
+            zip_bytes[tier_name] += len(resized)
             counts[tier_name]    += 1
 
-        # One delay per image (3 HTTP requests already happened above, CDN is fast)
         time.sleep(COMMONS_DELAY)
 
         if i % 100 == 0 or i == len(commons_list):
@@ -348,23 +370,26 @@ def main() -> None:
         else:
             extracted = extract_from_zim(zim_only)
             for fn, data in extracted.items():
-                for tier_name, width in SIZES:
-                    if zip_bytes[tier_name] + len(data) > MAX_ZIP_BYTES:
+                for tier_name, max_px, quality in SIZES:
+                    resized = resize_for_tier(data, max_px, quality)
+                    if resized is None:
+                        resized = data  # keep raw bytes if Pillow can't decode (e.g. SVG)
+                    if zip_bytes[tier_name] + len(resized) > MAX_ZIP_BYTES:
                         continue
-                    zips[tier_name].writestr(f"images/{fn}", data)
+                    zips[tier_name].writestr(f"images/{fn}", resized)
                     manifests[tier_name][fn] = {
-                        "size":       len(data),
-                        "width":      None,   # native ZIM resolution
+                        "size":       len(resized),
+                        "max_px":     max_px,
                         "source":     "zim",
                         "downloaded": date.today().isoformat(),
                     }
-                    zip_bytes[tier_name] += len(data)
+                    zip_bytes[tier_name] += len(resized)
                     counts[tier_name]    += 1
             print(f"  Extracted {len(extracted)} / {len(zim_only)} ZIM-only images")
 
     # 5. Close ZIPs + write manifests ─────────────────────────────────────────
     print()
-    for name, _ in SIZES:
+    for name, _, _ in SIZES:
         zips[name].close()
         write_manifest(name, manifests[name])
         zip_mb = Path(f"images_{name}.zip").stat().st_size // 1_048_576
@@ -374,6 +399,8 @@ def main() -> None:
     print(f"\nDone in {elapsed:.0f}s")
     if skip_count:
         print(f"  Skipped (Commons unavailable): {skip_count}")
+    if resize_fails:
+        print(f"  Resize failures (Pillow): {resize_fails}")
 
 
 if __name__ == "__main__":
