@@ -25,6 +25,7 @@ Requires: pip install requests zstandard
 """
 
 import json
+import lzma
 import os
 import struct
 import sys
@@ -177,6 +178,8 @@ def decompress_cluster(zim_path: Path, cluster_offsets: list[int],
     if compression in (0, 1):
         raw = payload
     elif compression == 4:
+        raw = lzma.decompress(payload)
+    elif compression in (5, 8):
         raw = zstandard.ZstdDecompressor().decompress(payload, max_output_size=256 * 1024 * 1024)
     else:
         raise ValueError(f"Unsupported cluster compression: {compression}")
@@ -209,6 +212,8 @@ def extract_from_zim(filenames: list[str]) -> dict[str, bytes]:
         by_cluster[cn].append((fn, bn))
 
     result: dict[str, bytes] = {}
+    cluster_errors = 0
+    blob_errors    = 0
     for cluster_num, items in by_cluster.items():
         try:
             raw, extended = decompress_cluster(ZIM_FILE, cluster_offsets, cluster_num, zim_size)
@@ -217,10 +222,18 @@ def extract_from_zim(filenames: list[str]) -> dict[str, bytes]:
                     data = extract_blob(raw, blob_num, extended)
                     if 0 < len(data) <= MAX_IMG_BYTES:
                         result[fn] = data
-                except Exception:
-                    pass
-        except Exception:
-            pass
+                    else:
+                        blob_errors += 1
+                except Exception as e:
+                    blob_errors += 1
+                    if blob_errors <= 3:
+                        print(f"    WARN blob extract cluster={cluster_num} blob={blob_num}: {e}")
+        except Exception as e:
+            cluster_errors += 1
+            if cluster_errors <= 5:
+                print(f"    WARN cluster {cluster_num} decompress failed: {e}")
+    if cluster_errors or blob_errors:
+        print(f"  ZIM extract: {len(result)} ok, {cluster_errors} cluster errors, {blob_errors} blob errors")
     return result
 
 

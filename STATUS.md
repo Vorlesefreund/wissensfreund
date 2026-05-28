@@ -1,5 +1,47 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-27T20:30:52Z -->
+<!-- updated: 2026-05-28T06:16:11Z -->
+
+## Zuletzt erledigt (Session 2026-05-28 — Bild-Pipeline Root Cause gefunden + Fix)
+
+### Root Cause: Nur ~800 statt 21.000 Bilder in der Pipeline
+
+**Diagnose-Script** `scripts/diagnose_zim.py` + Workflow `diagnose_zim.yml` erstellt
+und auf dem 2026-05 ZIM ausgeführt.
+
+**Befunde:**
+- ZIM hat **21.100 Bilder** im Verzeichnis (nicht ~1.000 — frühere Schätzung war falsch)
+- `media_licenses.json` korrekt mit **21.039 Einträgen** befüllt ✓
+- Cluster-Kompression: 69× Typ 1 (unkomprimiert) + 23× Typ 5 (Zstandard) = 92 gesamt
+- Avg. Bilder pro HTML-Artikel (Stichprobe): **6,1** → projiziert **22.202 Bilder** total
+
+**Root Cause in `download_images.py`:**
+```python
+# ALT (fehlerhaft):
+elif compression == 4:
+    raw = zstandard.ZstdDecompressor().decompress(...)  # 4 = LZMA, nicht Zstandard!
+else:
+    raise ValueError(...)  # Fängt Typ 5 (Zstandard) → stille Fehler
+```
+
+Kompressionstyp 5 (Zstandard) trifft die `else`-Verzweigung und wirft `ValueError`.
+Bilder in Zstandard-Clustern (vermutlich Großteil aller Bilder) wurden nie extrahiert.
+
+**Fix:**
+```python
+elif compression == 4:
+    raw = lzma.decompress(payload)        # korrekt: LZMA
+elif compression in (5, 8):
+    raw = zstandard.ZstdDecompressor().decompress(payload, ...)  # korrekt: Zstandard
+else:
+    raise ValueError(...)
+```
+
+Außerdem: `extract_from_zim()` gibt jetzt Fehler-Counts aus statt sie still zu verschlucken.
+
+**Status**: Fix committed + gepusht. `update_image_licenses`-Workflow muss neu getriggert
+werden um alle ~21.000 Bilder zu laden.
+
+---
 
 ## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 5)
 
