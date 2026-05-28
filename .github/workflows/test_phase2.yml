@@ -1,0 +1,84 @@
+name: Test Phase 2 (prop=images + difflib + Commons)
+
+# Testet den vollständigen Phase-2-Pipeline auf 5 Artikel.
+# Zeigt: Klexikon API Dateilisten, Caption-Matching-Ratio, Commons-Lizenzinfo.
+# Ergebnis: image_map.json als Artifact.
+#
+# Run: Actions → Test Phase 2 → Run workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      test_articles:
+        description: 'Kommagetrennte Artikelnamen (leer = erste 5 Artikel mit Bildern)'
+        required: false
+        default: 'Elefant,Beethoven,Dinosaurier,Fußball,Berlin'
+        type: string
+      confidence_threshold:
+        description: 'difflib-Schwellwert (0.0–1.0, default 0.4)'
+        required: false
+        default: '0.4'
+        type: string
+      max_articles:
+        description: 'Max Artikel wenn keine TEST_ARTICLES gesetzt (default: 5)'
+        required: false
+        default: '5'
+        type: string
+
+env:
+  ZIM_URL: https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install zstandard requests
+
+      - name: Download ZIM
+        run: |
+          echo "Downloading $ZIM_URL"
+          curl -fsSL -o klexikon.zim "$ZIM_URL"
+          ls -lh klexikon.zim
+
+      - name: Run Phase-2-Test (5 Artikel)
+        run: python scripts/test_phase2.py
+        env:
+          ZIM_FILE:              klexikon.zim
+          OUTPUT_FILE:           image_map.json
+          TEST_ARTICLES:         ${{ inputs.test_articles || 'Elefant,Beethoven,Dinosaurier,Fußball,Berlin' }}
+          MAX_ARTICLES:          ${{ inputs.max_articles || '5' }}
+          API_DELAY:             '0.3'
+          COMMONS_DELAY:         '0.4'
+          CONFIDENCE_THRESHOLD:  ${{ inputs.confidence_threshold || '0.4' }}
+
+      - name: Show result summary
+        run: |
+          python3 -c "
+          import json
+          data = json.load(open('image_map.json'))
+          print(f'Total entries: {len(data)}')
+          conf = [v for v in data.values() if not v.get('low_confidence')]
+          low  = [v for v in data.values() if v.get('low_confidence')]
+          print(f'Confident: {len(conf)}  Low-confidence: {len(low)}')
+          print()
+          print('All entries:')
+          for h, v in data.items():
+              flag = '✓' if not v.get('low_confidence') else '~'
+              print(f'  {flag} {h[:16]}… → {v[\"filename\"]} (ratio={v[\"ratio\"]}, license={v[\"license\"]!r})')
+          "
+
+      - name: Upload result
+        uses: actions/upload-artifact@v5
+        with:
+          name: image-map-phase2-test
+          path: image_map.json
+          retention-days: 7
