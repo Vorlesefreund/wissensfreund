@@ -631,10 +631,12 @@ class _MainArticleImage extends StatefulWidget {
   final String fallbackTitle;
   final VoidCallback? onTap;
   final bool enableFullscreenTap;
+  final BoxFit fit;
   const _MainArticleImage({
     required this.fallbackTitle,
     this.onTap,
     this.enableFullscreenTap = true,
+    this.fit = BoxFit.cover,
   });
 
   @override
@@ -708,7 +710,7 @@ class _MainArticleImageState extends State<_MainArticleImage> {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          Image.memory(bytes, fit: BoxFit.cover),
+                          Image.memory(bytes, fit: widget.fit),
                           Positioned(
                             right: 8,
                             bottom: 8,
@@ -1562,6 +1564,27 @@ class _ModeAContentState extends State<_ModeAContent> {
     if (mounted) setState(() {});
   }
 
+  void _swipeImage(DragEndDetails d, WissensfreundProvider provider) {
+    final v = d.primaryVelocity ?? 0;
+    if (v.abs() < 200) return;
+    final images     = provider.articleImages;
+    final mediaItems = provider.mediaItems;
+    if (images.isEmpty) return;
+    final curImgIdx  = provider.selectedImageIndex.clamp(0, images.length - 1);
+    final nextImgIdx = v < 0 ? curImgIdx + 1 : curImgIdx - 1;
+    if (nextImgIdx < 0 || nextImgIdx >= images.length) return;
+    int imgCount = 0;
+    for (int i = 0; i < mediaItems.length; i++) {
+      if (!mediaItems[i].isAudio) {
+        if (imgCount == nextImgIdx) {
+          provider.onMediaTap(i);
+          return;
+        }
+        imgCount++;
+      }
+    }
+  }
+
   @override
   void dispose() {
     _scrollCtrl.removeListener(_onScroll);
@@ -1744,6 +1767,7 @@ class _ModeAContentState extends State<_ModeAContent> {
           _lastActiveIdx = -1;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
+            if (_scrollCtrl.hasClients) _scrollCtrl.jumpTo(0);
             _buildCache();
             setState(() {});
           });
@@ -1758,10 +1782,14 @@ class _ModeAContentState extends State<_ModeAContent> {
         return Column(
           children: [
             _ArticleHeader(provider: provider),
-            SizedBox(
-              height: (MediaQuery.of(context).size.height * 0.25).clamp(150.0, 260.0),
-              width: double.infinity,
-              child: _MainArticleImage(fallbackTitle: provider.articleTitle),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onHorizontalDragEnd: (d) => _swipeImage(d, provider),
+              child: SizedBox(
+                height: (MediaQuery.of(context).size.height * 0.25).clamp(150.0, 260.0),
+                width: double.infinity,
+                child: _MainArticleImage(fallbackTitle: provider.articleTitle),
+              ),
             ),
             Expanded(
               child: LayoutBuilder(
@@ -2044,6 +2072,27 @@ class _ModeBContentState extends State<_ModeBContent> {
     });
   }
 
+  void _swipeImage(DragEndDetails d, WissensfreundProvider provider) {
+    final v = d.primaryVelocity ?? 0;
+    if (v.abs() < 200) return;
+    final images     = provider.articleImages;
+    final mediaItems = provider.mediaItems;
+    if (images.isEmpty) return;
+    final curImgIdx  = provider.selectedImageIndex.clamp(0, images.length - 1);
+    final nextImgIdx = v < 0 ? curImgIdx + 1 : curImgIdx - 1;
+    if (nextImgIdx < 0 || nextImgIdx >= images.length) return;
+    int imgCount = 0;
+    for (int i = 0; i < mediaItems.length; i++) {
+      if (!mediaItems[i].isAudio) {
+        if (imgCount == nextImgIdx) {
+          provider.onMediaTap(i);
+          return;
+        }
+        imgCount++;
+      }
+    }
+  }
+
   @override
   void dispose() {
     _scrollCtrl.dispose();
@@ -2125,10 +2174,14 @@ class _ModeBContentState extends State<_ModeBContent> {
               _ArticleHeader(provider: provider, dark: true),
 
               // ── Hauptbild ─────────────────────────────────────────────────
-              SizedBox(
-                height: (MediaQuery.of(context).size.height * 0.29).clamp(170.0, 300.0),
-                width: double.infinity,
-                child: _MainArticleImage(fallbackTitle: provider.articleTitle),
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onHorizontalDragEnd: (d) => _swipeImage(d, provider),
+                child: SizedBox(
+                  height: (MediaQuery.of(context).size.height * 0.29).clamp(170.0, 300.0),
+                  width: double.infinity,
+                  child: _MainArticleImage(fallbackTitle: provider.articleTitle),
+                ),
               ),
 
               // ── Fortschrittsleiste ────────────────────────────────────────
@@ -2454,6 +2507,7 @@ class _ModeCContent extends StatelessWidget {
                       child: _MainArticleImage(
                         fallbackTitle: provider.articleTitle,
                         enableFullscreenTap: false,
+                        fit: BoxFit.contain,
                       ),
                     ),
 

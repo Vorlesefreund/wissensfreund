@@ -182,6 +182,35 @@ class ZimReader(private val filePath: String) {
             .map { mapOf("urlIndex" to it.urlIndex, "title" to it.title, "score" to it.score) }
     }
 
+    /**
+     * Sucht einen Artikel direkt per URL-Name (ohne Namespace-Präfix) und folgt Weiterleitungen.
+     * Gibt null zurück wenn kein Eintrag gefunden. Kein Fuzzy-Matching — exakter Treffer oder nichts.
+     */
+    fun findArticleByName(name: String): Map<String, Any>? {
+        val urlIndex = findUrlIndexByPath("A/$name") ?: findUrlIndexByPath("C/$name") ?: return null
+        var cur = readDirEntry(urlIndex) ?: return null
+        for (i in 0 until 5) {
+            if (cur.mimeType != MIME_REDIRECT) break
+            cur = readDirEntry(cur.redirectIndex) ?: return null
+        }
+        if (cur.mimeType == MIME_REDIRECT) return null
+        return try {
+            val (clusterData, extOffsets) = readCluster(cur.clusterNumber)
+            val blob = extractBlob(clusterData, cur.blobNumber, extOffsets)
+            val html = blob.toString(Charsets.UTF_8)
+            val text = htmlToText(html)
+            val firstPara = extractFirstParagraph(html)
+            val title = cur.title.ifEmpty { cur.url }
+            val zimUrl = cur.url.removePrefix("A/").removePrefix("C/").trim()
+            val resolvedUrlIndex = findUrlIndexByPath("A/${cur.url}") ?: findUrlIndexByPath("C/${cur.url}") ?: urlIndex
+            mapOf("urlIndex" to resolvedUrlIndex, "title" to title, "text" to text,
+                  "firstParagraph" to firstPara, "url" to zimUrl)
+        } catch (e: Exception) {
+            Log.e(TAG, "findArticleByName($name) failed: ${e.message}")
+            null
+        }
+    }
+
     fun getArticleByUrlIndex(urlIndex: Int): Map<String, String> {
         val entry = readDirEntry(urlIndex)
             ?: throw IllegalStateException("No entry at $urlIndex")
@@ -555,22 +584,29 @@ class ZimReader(private val filePath: String) {
 
     private fun extractLinkRefsFromHtml(html: String, plainText: String): List<LinkRef> {
         val body = extractArticleBody(html)
-        val links = mutableListOf<LinkRef>()
-        val linkRegex  = Regex("""<a\b([^>]*?)>([\s\S]*?)</a>""", RegexOption.IGNORE_CASE)
-        val hrefRegex  = Regex("""href="([^"]+)"""", RegexOption.IGNORE_CASE)
-        var searchFrom = 0
+        val result = mutableListOf<LinkRef>()
+        val linkRegex = Regex("""<a\b([^>]*?)>([\s\S]*?)</a>""", RegexOption.IGNORE_CASE)
+        val hrefRegex = Regex("""href="([^"]+)"""", RegexOption.IGNORE_CASE)
+
+        // Table regions are removed by htmlToText — skip their links entirely.
+        val tableRegions = findTableRegions(body)
+
+        // Collect all valid (anchorText, target) candidates from the HTML body.
+        data class Candidate(val text: String, val target: String)
+        val candidates = mutableListOf<Candidate>()
 
         for (m in linkRegex.findAll(body)) {
+            val matchStart = m.range.first
+            if (tableRegions.any { matchStart >= it.first && matchStart < it.second }) continue
+
             val attrs     = m.groupValues[1]
             val innerHtml = m.groupValues[2]
             val rawHref   = hrefRegex.find(attrs)?.groupValues?.get(1) ?: continue
 
-            // Skip external URLs, fragments, and mailto
             if (rawHref.startsWith("http://") || rawHref.startsWith("https://") ||
                 rawHref.startsWith("//") || rawHref.startsWith("mailto:") ||
                 rawHref.startsWith("#")) continue
 
-            // Decode and clean target
             var target = rawHref
                 .removePrefix("../").removePrefix("../").removePrefix("./").removePrefix("/")
             try { target = java.net.URLDecoder.decode(target, "UTF-8") } catch (_: Exception) {}
@@ -580,13 +616,11 @@ class ZimReader(private val filePath: String) {
             }
             if (target.isEmpty()) continue
 
-            // Skip namespace links (File:, Kategorie:, Datei:, etc.)
             if (target.contains(':')) {
                 val ns = target.substringBefore(':')
                 if (ns.length <= 20 && !ns.contains(' ')) continue
             }
 
-            // Extract visible anchor text
             val anchorText = innerHtml
                 .replace(Regex("<[^>]+>"), "")
                 .replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")
@@ -596,16 +630,31 @@ class ZimReader(private val filePath: String) {
                 .replace(Regex("\\s+"), " ").trim()
             if (anchorText.isEmpty() || anchorText.length > 80) continue
 
-            // Locate this text in plain-text article (in document order)
-            val pos = plainText.indexOf(anchorText, searchFrom)
-            if (pos < 0) continue
-
-            links.add(LinkRef(anchorText, target, pos, pos + anchorText.length))
-            searchFrom = pos + anchorText.length
+            candidates.add(Candidate(anchorText, target))
         }
 
-        Log.d(TAG, "linkExtract: ${links.size} internal links")
-        return links
+        // Locate each candidate in plainText independently (no sequential searchFrom).
+        // HTML link order and plain-text order can differ (e.g. figure captions, asides),
+        // so a sequential cursor would skip links whose text appears earlier in the plain text.
+        // We track claimed positions to avoid two links claiming the same occurrence.
+        val claimedStarts = mutableSetOf<Int>()
+        for ((anchorText, target) in candidates) {
+            var scanFrom = 0
+            var pos: Int
+            while (true) {
+                pos = plainText.indexOf(anchorText, scanFrom)
+                if (pos < 0 || pos !in claimedStarts) break
+                scanFrom = pos + 1
+            }
+            if (pos < 0) continue
+            claimedStarts.add(pos)
+            result.add(LinkRef(anchorText, target, pos, pos + anchorText.length))
+        }
+
+        // Return sorted by plain-text position so the Dart side receives them in reading order.
+        result.sortBy { it.startChar }
+        Log.d(TAG, "linkExtract: ${result.size} links from ${candidates.size} candidates")
+        return result
     }
 
     fun getAudioRefs(articleUrlIndex: Int): List<AudioRef> {
@@ -1065,11 +1114,36 @@ class ZimReader(private val filePath: String) {
             }
         }
 
+        // 1b. Remove mid-article navigation boxes and cross-reference paragraphs.
+        //     These appear anywhere in the article body and cannot be read aloud meaningfully.
+        //     Patterns: MediaWiki hatnote/rellink divs, Klexikon "Übersicht" cross-refs.
+        val navBoxClasses = arrayOf("rellink", "hatnote", "dablink", "sistersitebox",
+                                    "navbox", "portal", "noprint", "mw-empty-elt")
+        for (cls in navBoxClasses) {
+            // Remove <div class="...cls...">...</div> blocks (depth-aware)
+            s = removeTagByClass(s, "div", cls)
+            s = removeTagByClass(s, "p",   cls)
+            s = removeTagByClass(s, "ul",  cls)
+        }
+        // Remove <p> or <div> blocks that contain Klexikon cross-reference text
+        val crossRefPatterns = arrayOf(
+            "Hier gibt es eine Übersicht",
+            "Übersicht mit allen Klexikon-Artikel",
+            "weitere Klexikon-Artikel",
+            "Klexikon:Übersicht",
+            "Klexikon-Übersicht",
+        )
+        for (pattern in crossRefPatterns) {
+            for (tag in arrayOf("p", "div", "li")) {
+                s = removeTagContaining(s, tag, pattern)
+            }
+        }
+
         // 2. Cut at MediaWiki footer/category markers
         for (marker in arrayOf(
             "id=\"mw-footer\"", "id=\"footer\"", "class=\"printfooter\"",
             "id=\"catlinks\"", "id=\"mw-data-after-content\"", "id=\"mw-navigation\"",
-            "class=\"noprint\"", "id=\"oer-award\"", "id=\"oer-logo\"", "id=\"cc-logo\""
+            "id=\"oer-award\"", "id=\"oer-logo\"", "id=\"cc-logo\""
         )) {
             val idx = s.indexOf(marker, ignoreCase = true)
             if (idx > 0) {
@@ -1275,6 +1349,77 @@ class ZimReader(private val filePath: String) {
     }
 
     // Remove all <table>...</table> blocks, correctly handling nested tables.
+    /** Removes all <tag class="...cls...">...</tag> blocks (simple depth-aware, not full parser). */
+    private fun removeTagByClass(html: String, tag: String, cls: String): String {
+        val open  = "<$tag"
+        val close = "</$tag>"
+        val sb = StringBuilder()
+        var i = 0
+        while (i < html.length) {
+            val nextOpen = html.indexOf(open, i, ignoreCase = true)
+            if (nextOpen < 0) { sb.append(html.substring(i)); break }
+            val tagEnd = html.indexOf('>', nextOpen)
+            if (tagEnd < 0) { sb.append(html.substring(i)); break }
+            val attrs = html.substring(nextOpen + open.length, tagEnd)
+            if (!attrs.contains(cls, ignoreCase = true)) {
+                sb.append(html.substring(i, nextOpen + open.length))
+                i = nextOpen + open.length
+                continue
+            }
+            // Found matching class — skip to matching close tag (depth-aware)
+            sb.append(html.substring(i, nextOpen))
+            var depth = 1
+            var pos = tagEnd + 1
+            while (pos < html.length && depth > 0) {
+                val nO = html.indexOf(open,  pos, ignoreCase = true)
+                val nC = html.indexOf(close, pos, ignoreCase = true)
+                when {
+                    nC < 0               -> { pos = html.length; depth = 0 }
+                    nO >= 0 && nO < nC   -> { depth++; pos = nO + open.length }
+                    else                 -> { depth--; pos = nC + close.length }
+                }
+            }
+            i = pos
+        }
+        return sb.toString()
+    }
+
+    /** Removes all <tag>...</tag> blocks whose text content contains [needle]. */
+    private fun removeTagContaining(html: String, tag: String, needle: String): String {
+        val open  = "<$tag"
+        val close = "</$tag>"
+        val sb = StringBuilder()
+        var i = 0
+        while (i < html.length) {
+            val nextOpen = html.indexOf(open, i, ignoreCase = true)
+            if (nextOpen < 0) { sb.append(html.substring(i)); break }
+            val tagEnd = html.indexOf('>', nextOpen)
+            if (tagEnd < 0) { sb.append(html.substring(i)); break }
+            // Find matching close (depth-aware)
+            var depth = 1
+            var pos = tagEnd + 1
+            while (pos < html.length && depth > 0) {
+                val nO = html.indexOf(open,  pos, ignoreCase = true)
+                val nC = html.indexOf(close, pos, ignoreCase = true)
+                when {
+                    nC < 0               -> { pos = html.length; depth = 0 }
+                    nO >= 0 && nO < nC   -> { depth++; pos = nO + open.length }
+                    else                 -> { depth--; pos = nC + close.length }
+                }
+            }
+            val block = html.substring(nextOpen, pos)
+            if (block.contains(needle, ignoreCase = true)) {
+                sb.append(html.substring(i, nextOpen)) // skip block
+            } else {
+                sb.append(html.substring(i, nextOpen + open.length))
+                i = nextOpen + open.length
+                continue
+            }
+            i = pos
+        }
+        return sb.toString()
+    }
+
     private fun removeNestedTables(html: String): String {
         val sb = StringBuilder()
         var i = 0
@@ -1333,7 +1478,22 @@ class ZimReader(private val filePath: String) {
         s = s.replace(Regex("[ \t]+"), " ")
         s = s.replace(Regex("\n[ \t]+"), "\n")
         s = s.replace(Regex("\n{3,}"), "\n\n")
-        return s.trim()
+        s = s.trim()
+
+        // Final safety net: if "Klexikon" appears in the last 600 chars, cut at the paragraph
+        // boundary just before it. Catches any footer variant not matched by the HTML-level markers.
+        if (s.length > 200) {
+            val tail = s.takeLast(600)
+            val idx  = tail.indexOf("Klexikon", ignoreCase = true)
+            if (idx >= 0) {
+                val absIdx  = s.length - 600 + idx
+                val cutAt   = s.lastIndexOf('\n', absIdx).takeIf { it > s.length - 600 } ?: absIdx
+                val trimmed = s.substring(0, cutAt).trimEnd()
+                if (trimmed.length > 100) s = trimmed
+            }
+        }
+
+        return s
     }
 
     private fun extractFirstParagraph(html: String): String {

@@ -1,7 +1,42 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-28T06:16:11Z -->
+<!-- updated: 2026-05-28T12:21:40Z -->
 
-## Zuletzt erledigt (Session 2026-05-28 — Bild-Pipeline Root Cause gefunden + Fix)
+## Zuletzt erledigt (Session 2026-05-28 Nachmittag — App-Fixes + Token-Optimierung)
+
+### App-Fixes (wissensfreund_provider.dart, article_screen.dart)
+
+**Lupe-Cursor-Sync (Chunk-Boundary-Fix):**
+- Problem: Nach Vollbild-Wechsel und zurück eilte Satz-Highlighting dem TTS leicht voraus
+- Root Cause: Bei Chunk-Wechsel blieb `_ttsCursor` auf Endposition von Chunk N; Rebuild durch
+  Mode-Switch zeigte falschen Satz
+- Fix: `_ttsCursor = _chunkOffsets[_currentChunk]` sofort nach `_currentChunk++` setzen —
+  Cursor snappt auf Anfang des neuen Chunks, kein Stale-Wert mehr
+
+**Caption/Bildtext-Verhalten:**
+- "Weiterlesen"-Button nach Bildtext-Vorlesen entfernt
+- Caption beendet → Professor bleibt immer pausiert (egal ob vorher lesend oder pausiert)
+- Nutzer resumt manuell über Play-Button — kein Auto-Resume, kein Prompt, kein Timer
+
+### Token-Optimierung (alle Repos)
+
+**.claudeignore erstellt in:**
+- `wissensfreund_app/` — build/ (3,2 GB), .dart_tool/, *.json, assets/ ausgeschlossen
+- `Wissensfreund/` — *.zim (149 MB), *.docx, *.pdf ausgeschlossen
+- `wissensfreund_repo/` — build/, .dart_tool/, *.json, *.png ausgeschlossen
+- `vorlesefreund_testbed/` — build/, .dart_tool/, *.json ausgeschlossen
+
+**CLAUDE.md aktualisiert/erstellt:**
+- `Wissensfreund/CLAUDE.md` — auf 40 Zeilen komprimiert + Token/Compaction-Regeln
+- `wissensfreund_repo/CLAUDE.md` — neu erstellt
+- `vorlesefreund_testbed/CLAUDE.md` — neu erstellt
+
+**Claude Web:** Projekt "Wissensfreund" angelegt, Project Instructions eingefügt
+
+### Offen
+- **Bild-Pipeline Full-Run** noch ausstehend (max_articles=0 triggern!)
+  Alle Fixes committed: Zstandard-Bug, build_image_map.py 3 Strategien, Pillow-Resize
+
+## Zuletzt erledigt (Session 2026-05-28 Früh — Bild-Pipeline Root Cause gefunden + Fix)
 
 ### Root Cause: Nur ~800 statt 21.000 Bilder in der Pipeline
 

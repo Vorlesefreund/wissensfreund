@@ -159,10 +159,17 @@ class WissensfreundProvider extends ChangeNotifier {
   bool _isPlayingAudio = false;
   int _activeAudioIndex = -1; // index in _mediaItems
 
+  // Screen idle management
+  Timer? _screenDimTimer;
+  Timer? _screenOffTimer;
+  static const _dimAfter = Duration(minutes: 1);
+  static const _offAfter = Duration(minutes: 5);
+
   // Caption-resume state (Vollbild-Modus: Lautsprecher-Tap oder Wisch-Settle)
   bool   _isCaptionPlaying        = false;
   bool   _isPromptPlaying         = false;
   bool   _showCaptionResumePrompt = false;
+  bool   _wasPlayingBeforeCaption = false; // true nur wenn Professor beim Caption-Tap aktiv sprach
   Timer? _captionResumeTimer;
   Timer? _captionPromptDelayTimer;
 
@@ -317,19 +324,10 @@ class WissensfreundProvider extends ChangeNotifier {
         _tts.speak(chunk);
         return;
       }
-      // Caption fertig → 5s Pause → "Soll ich weiterlesen?" → weitere 5s → Auto-Resume
+      // Caption fertig → Professor bleibt pausiert; Nutzer resumt manuell über Play.
       if (_isCaptionPlaying) {
         _isCaptionPlaying = false;
-        _showCaptionResumePrompt = true;
         notifyListeners();
-        _captionPromptDelayTimer?.cancel();
-        _captionPromptDelayTimer = Timer(const Duration(seconds: 5), () {
-          if (!_showCaptionResumePrompt) return;
-          _isPromptPlaying = true;
-          _captionResumeTimer?.cancel();
-          _captionResumeTimer = Timer(const Duration(seconds: 5), resumeAfterCaption);
-          _tts.speak('Soll ich weiterlesen?');
-        });
         return;
       }
       // Prompt finished → timer is already running, nothing more to do
@@ -399,6 +397,7 @@ class WissensfreundProvider extends ChangeNotifier {
       }
       if (_state != AppState.speaking || _isPaused) {
         // A non-article TTS (k1, k2, k7, k8, …) just completed — start idle timer.
+        resetScreenTimer();
         _checkStartIdleTimer();
         // Drain data-limit handoff completer (professor phrase just finished).
         final completer = _handoffCompleter;
@@ -415,6 +414,10 @@ class WissensfreundProvider extends ChangeNotifier {
       }
       _currentChunk++;
       if (_currentChunk < _speechChunks.length) {
+        // Snap cursor to start of new chunk so any rebuild triggered between
+        // chunks (e.g. mode switch) highlights the correct sentence rather
+        // than the stale end-of-previous-chunk position.
+        _ttsCursor = _chunkOffsets[_currentChunk];
         // Check for a pending 80%/90% limit warning between chunks.
         final warning = NetworkService.instance.consumePendingWarning();
         if (warning != null && warning != LimitWarningLevel.limitReached) {
@@ -433,6 +436,7 @@ class WissensfreundProvider extends ChangeNotifier {
         unawaited(ProfileService.instance.clearLastArticle());
         _state         = AppState.idle;
         notifyListeners();
+        resetScreenTimer(); // Artikel fertig → Idle-Timer starten
         _onArticleEnd();
       }
     });
@@ -474,6 +478,7 @@ class WissensfreundProvider extends ChangeNotifier {
     _currentChunk = 0;
     _state = AppState.speaking;
     notifyListeners();
+    _pauseScreenTimer(); // Während Vorlesen kein Idle-Timeout
     if (_speechChunks.isNotEmpty) {
       _tts.speak(_speechChunks[0]);
     }
@@ -730,21 +735,7 @@ class WissensfreundProvider extends ChangeNotifier {
         return;
       }
 
-      // Clear winner → if mid-article, ask before switching; otherwise load immediately.
-      if (_hasInterruptedForMic) {
-        _pendingArticleCandidate = best;
-        _awaitingArticleSwitch   = true;
-        _state = AppState.idle;
-        notifyListeners();
-        final newTitle   = best['title'] as String;
-        final savedTitle = _savedArticleTitleForMic;
-        await _tts.speak(
-          'Soll ich aufhören, über $savedTitle zu lesen, '
-          'und dir stattdessen von $newTitle erzählen?',
-        );
-        return;
-      }
-      // Typ 1 (fullRead) + Typ 5 (unknown, Artikel gefunden) → Artikel vorlesen
+      // Clear winner → direkt laden, ohne Rückfrage (auch bei Mic-Interrupt)
       await _loadAndSpeak(best['urlIndex'] as int, best['title'] as String);
     } on PlatformException catch (e) {
       debugPrint('ZIM search error: ${e.message}');
@@ -954,24 +945,14 @@ class WissensfreundProvider extends ChangeNotifier {
   // ── Internal link navigation ─────────────────────────────────────────────
 
   Future<void> onLinkTapped(String target) async {
-    if (_state == AppState.speaking || _isPaused) {
-      // Save position, pause professor, ask for confirmation.
-      final saveOffset = _state == AppState.speaking ? _sentenceStartOffset() : _resumeOffset;
-      if (_state == AppState.speaking) {
-        _isPaused = true;
-        _state    = AppState.idle;
-        notifyListeners();
-        await _tts.stop();
-      }
-      _resumeOffset = saveOffset;
-      _pendingLinkTarget = target;
-      _awaitingLinkConfirmation = true;
-      await _tts.speak('Soll ich mehr über $target erzählen?');
-      // TTS completion → auto-start listening (via _awaitingLinkConfirmation check)
-    } else {
-      // Professor idle → navigate directly.
-      await _followLink(target);
+    if (_state == AppState.speaking) {
+      _resumeOffset = _sentenceStartOffset(); // snap to sentence start before state changes
+      _isPaused = true;
+      _state    = AppState.idle;
+      notifyListeners();
+      await _tts.stop();
     }
+    await _followLink(target);
   }
 
   Future<void> _handleLinkConfirmation(String text) async {
@@ -995,14 +976,28 @@ class WissensfreundProvider extends ChangeNotifier {
   }
 
   Future<void> _followLink(String target) async {
-    // Capture article context before any await — preserved even when _awaitingLinkConfirmation is set.
     final savedTitle    = _articleTitle;
     final savedUrlIndex = _currentUrlIndex;
-    final savedOffset   = _isPaused ? _resumeOffset : 0;
+    final savedOffset   = _state == AppState.speaking
+        ? _sentenceStartOffset()
+        : (_isPaused ? _resumeOffset : _ttsCursor);
 
     _state = AppState.thinking;
     notifyListeners();
     try {
+      // 1. Direkter URL-Lookup — folgt Weiterleitungen (z.B. Stausee → Staudamm).
+      final direct = await _zimChannel.invokeMethod<Map>('articleByName', {'name': target});
+      if (direct != null) {
+        if (savedTitle.isNotEmpty && savedUrlIndex >= 0) {
+          _navStack.add((title: savedTitle, urlIndex: savedUrlIndex, charOffset: savedOffset));
+          if (_navStack.length > 2) _navStack.removeAt(0);
+        }
+        _isLinkNavigation = true;
+        await _loadAndSpeak(direct['urlIndex'] as int, direct['title'] as String);
+        return;
+      }
+
+      // 2. Fallback: Fuzzy-Suche (falls URL-Lookup nichts findet)
       final rawResults = await _zimChannel.invokeMethod<List>('search', {
         'query': target,
         'maxResults': 1,
@@ -1017,7 +1012,6 @@ class WissensfreundProvider extends ChangeNotifier {
         await _tts.speak('Dazu habe ich leider noch keinen Artikel.');
         return;
       }
-      // Push current article context to nav stack before switching.
       if (savedTitle.isNotEmpty && savedUrlIndex >= 0) {
         _navStack.add((title: savedTitle, urlIndex: savedUrlIndex, charOffset: savedOffset));
         if (_navStack.length > 2) _navStack.removeAt(0);
@@ -1091,17 +1085,9 @@ class WissensfreundProvider extends ChangeNotifier {
   }
 
   void _onArticleEnd() {
-    if (_navStack.isNotEmpty) {
-      unawaited(_speakArticleEndWithStack());
-    } else {
-      // No back stack: ask what's next, auto-open mic after 2 s.
-      unawaited(_tts.speak('Was möchtest du als nächstes hören?'));
-      Future.delayed(const Duration(seconds: 2), () {
-        if (_state == AppState.idle && !_isRestMode) {
-          unawaited(startListening());
-        }
-      });
-    }
+    // Article stays displayed; screen timer (started in caller) handles dim/off.
+    // No prompt, no mic, no k6 — user reads/swipes at their own pace.
+    _navStack.clear();
   }
 
   Future<void> _speakArticleEndWithStack() async {
@@ -1166,7 +1152,8 @@ class WissensfreundProvider extends ChangeNotifier {
     // Immer zum Satzanfang zurückspringen — gilt sowohl für sprechenden als auch pausierten Professor
     final sentStart = _sentenceStartOffset();
 
-    if (_state == AppState.speaking) {
+    _wasPlayingBeforeCaption = (_state == AppState.speaking);
+    if (_wasPlayingBeforeCaption) {
       _isPaused = true;
       _state    = AppState.idle;
       await _tts.stop();
@@ -1482,6 +1469,28 @@ class WissensfreundProvider extends ChangeNotifier {
   /// App kommt in den Vordergrund zurück.
   void exitBackground() {
     _isInBackground = false;
+  }
+
+  // ── Screen idle management ────────────────────────────────────────────────
+
+  /// Startet/resettet den Idle-Timer. Wird bei jedem Touch und bei Sprechbeginn aufgerufen.
+  void resetScreenTimer() {
+    _screenDimTimer?.cancel();
+    _screenOffTimer?.cancel();
+    _zimChannel.invokeMethod<void>('setScreenMode', {'mode': 'awake'});
+    _screenDimTimer = Timer(_dimAfter, () {
+      _zimChannel.invokeMethod<void>('setScreenMode', {'mode': 'dim'});
+      _screenOffTimer = Timer(_offAfter - _dimAfter, () {
+        _zimChannel.invokeMethod<void>('setScreenMode', {'mode': 'off'});
+      });
+    });
+  }
+
+  /// Pausiert den Idle-Timer während der Professor spricht.
+  void _pauseScreenTimer() {
+    _screenDimTimer?.cancel();
+    _screenOffTimer?.cancel();
+    _zimChannel.invokeMethod<void>('setScreenMode', {'mode': 'awake'});
   }
 
   Future<void> resumeSpeaking() async {

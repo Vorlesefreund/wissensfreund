@@ -17,6 +17,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.WindowManager
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
@@ -151,6 +152,15 @@ class MainActivity : FlutterFragmentActivity() {
                         val maxResults = call.argument<Int>("maxResults") ?: 5
                         zimSearch(query, maxResults, result)
                     }
+                    "articleByName" -> {
+                        val name = call.argument<String>("name") ?: ""
+                        zimFindArticleByName(name, result)
+                    }
+                    "setScreenMode" -> {
+                        val mode = call.argument<String>("mode") ?: "awake"
+                        setScreenMode(mode)
+                        result.success(null)
+                    }
                     "article" -> {
                         val urlIndex = call.argument<Int>("urlIndex") ?: -1
                         zimGetArticle(urlIndex, result)
@@ -240,6 +250,37 @@ class MainActivity : FlutterFragmentActivity() {
         zimExecutor.execute {
             val results = reader.search(query, maxResults)
             Handler(Looper.getMainLooper()).post { result.success(results) }
+        }
+    }
+
+    private fun setScreenMode(mode: String) {
+        runOnUiThread {
+            val win = window ?: return@runOnUiThread
+            val lp = win.attributes
+            when (mode) {
+                "awake" -> {
+                    win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    lp.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                }
+                "dim" -> {
+                    win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    lp.screenBrightness = 0.04f
+                }
+                "off" -> {
+                    win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    lp.screenBrightness = 0.0f
+                }
+            }
+            win.attributes = lp
+        }
+    }
+
+    private fun zimFindArticleByName(name: String, result: MethodChannel.Result) {
+        val reader = zimReader
+        if (reader == null) { result.success(null); return }
+        zimExecutor.execute {
+            val article = reader.findArticleByName(name)
+            Handler(Looper.getMainLooper()).post { result.success(article) }
         }
     }
 

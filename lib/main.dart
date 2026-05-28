@@ -109,13 +109,18 @@ class _AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ParentalLockService>(
-      builder: (ctx, ps, _) => Stack(
-        children: [
-          child,
-          const DataLimitOverlay(),
-          if (ps.showOverlay) _ParentalOverlay(ps: ps),
-        ],
+    final provider = context.read<WissensfreundProvider>();
+    return Listener(
+      behavior: HitTestBehavior.translucent,
+      onPointerDown: (_) => provider.resetScreenTimer(),
+      child: Consumer<ParentalLockService>(
+        builder: (ctx, ps, _) => Stack(
+          children: [
+            child,
+            const DataLimitOverlay(),
+            if (ps.showOverlay) _ParentalOverlay(ps: ps),
+          ],
+        ),
       ),
     );
   }

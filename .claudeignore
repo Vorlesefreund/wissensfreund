@@ -1,0 +1,38 @@
+# Build artifacts
+build/
+*.apk
+*.aab
+*.ipa
+
+# Dart/Flutter toolchain cache
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Gradle
+.gradle/
+android/.gradle/
+android/build/
+
+# IDE
+.idea/
+*.iml
+
+# Logs & debug dumps
+*.log
+dumpstate*.zip
+
+# Große Datensätze (nie im Kontext benötigt)
+*.json
+*.csv
+*.zip
+
+# Binäre Assets
+assets/
+
+# iOS/macOS/Windows build cache
+ios/Pods/
+ios/.symlinks/
+macos/Pods/
+windows/flutter/
+linux/flutter/

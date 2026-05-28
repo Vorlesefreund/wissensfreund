@@ -122,6 +122,62 @@ erweitern.
 ---
 
 ---
+## 2026-05-28 Token-Optimierung — abgeschlossen
+
+**Entscheidung / Auftrag:**
+Alle Projekt-Repos für hybride Claude Code / Claude Chat Nutzung optimiert.
+
+**Was umgesetzt wurde:**
+- `wissensfreund_app/.claudeignore` — schließt build/ (3,2 GB), .dart_tool/, *.json, assets/ aus
+- `Wissensfreund/.claudeignore` — schließt *.zim (149 MB!), *.docx, *.pdf, Screenshots aus
+- `wissensfreund_repo/.claudeignore` — schließt build/, .dart_tool/, *.json, *.png, *.zim aus
+- `vorlesefreund_testbed/.claudeignore` — schließt build/, .dart_tool/, *.json aus
+- `Wissensfreund/CLAUDE.md` — auf 40 Zeilen komprimiert + Token/Compaction-Regeln ergänzt
+- `wissensfreund_repo/CLAUDE.md` — neu erstellt
+- `vorlesefreund_testbed/CLAUDE.md` — neu erstellt
+- Claude Web Projekt "Wissensfreund" angelegt + Project Instructions eingefügt
+
+**Priorität:** erledigt
+
+**Erledigt:** [x] Umgesetzt am 2026-05-28
+
+---
+
+---
+## 2026-05-28 Bild-Pipeline — aktueller Stand
+
+**Entscheidung / Auftrag:**
+Übersicht über alle Fixes in der Bild-Pipeline (für Claude Chat sichtbar).
+
+**Was bisher gefixt wurde (chronologisch):**
+
+1. `build_image_map.py` — 3 Strategien (Session 2026-05-27):
+   - alt-as-filename: `<img alt="Name.jpg">` direkt als Dateiname nutzen
+   - Datei-Link: `<a href="...Datei:...">` in 1200 Zeichen vor img-Tag (Fallback ältere ZIMs)
+   - MediaWiki API: live HTML von klexikon.zum.de holen, Datei:-Links extrahieren (Production-only)
+
+2. `download_images.py` — Zstandard-Kompression (Session 2026-05-28 früh):
+   - Bug: compression==5 (Zstandard) landete im else-Zweig → ValueError → Bilder nie extrahiert
+   - Fix: `elif compression in (5, 8): raw = zstandard.ZstdDecompressor().decompress(...)`
+
+3. `download_images.py` — Pillow lokaler Resize (Session 2026-05-28):
+   - Problem: `Special:FilePath?width=X` gibt Original zurück wenn Bild kleiner als X → alle 3 Tiers identisch
+   - Fix: Original einmal herunterladen (ohne ?width=), dann lokal mit Pillow LANCZOS auf 3 Tiers resizen
+   - Tiers: thumb 300px/Q70, standard 800px/Q80, pro 1600px/Q85
+   - `pip install Pillow` in Workflow-Job ergänzt
+
+**Aktueller Stand:**
+- Alle Fixes committed + gepusht
+- Workflow `update_image_licenses` wurde noch NICHT neu getriggert
+- **Nächster Schritt: Full-Run starten** (max_articles=0) um alle ~21.000 Bilder zu verarbeiten
+
+**Priorität:** hoch — Full-Run starten!
+
+**Erledigt:** [ ] Full-Run noch ausstehend
+
+---
+
+---
 ## 2026-05-26 Offene Prompts — bereit zur Umsetzung
 
 **Auftrag 1 — Interne Links + Navigation (KOMPLETT)**
