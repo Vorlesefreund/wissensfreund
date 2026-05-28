@@ -2166,15 +2166,17 @@ class _StorageScreenState extends State<_StorageScreen> {
       children: [
         Text(
           '$tierLabel wird heruntergeladen…',
-          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF2E7D32)),
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF2E7D32)),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         LinearProgressIndicator(
           value: _dlProgress > 0 ? _dlProgress : null,
+          minHeight: 8,
+          borderRadius: BorderRadius.circular(4),
           backgroundColor: const Color(0xFFE8F5E9),
           valueColor: const AlwaysStoppedAnimation(Color(0xFF2E7D32)),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: 8),
         Row(
           children: [
             Expanded(
@@ -2182,7 +2184,7 @@ class _StorageScreenState extends State<_StorageScreen> {
                 _dlProgress > 0
                     ? '${(_dlProgress * 100).round()} %${_dlEta != null ? "  —  noch ${_fmtEta(_dlEta!)}" : ""}'
                     : 'Verbindung wird aufgebaut…',
-                style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
+                style: const TextStyle(fontSize: 14, color: Color(0xFF555555)),
               ),
             ),
             TextButton(
@@ -2217,13 +2219,6 @@ class _StorageScreenState extends State<_StorageScreen> {
         foregroundColor: const Color(0xFF2E7D32),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Schließen',
-                style: TextStyle(color: Color(0xFF2E7D32))),
-          ),
-        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
           child: Divider(height: 1, color: Colors.grey.shade200),
