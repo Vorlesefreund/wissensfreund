@@ -359,24 +359,26 @@ def main() -> None:
     articles_scanned   = 0
     articles_with_imgs = 0
 
-    # Articles that need Strategy 3 API lookup: {title: [unmapped (hash, alt) pairs]}
-    needs_api: dict[str, list[tuple[str, str]]] = {}
+    # Articles that need Strategy 3 API lookup.
+    # Stores (all_imgs, unmapped_imgs) so Strategy 3 can compare against the
+    # full image count of the article — not just the unmapped subset.
+    # all_imgs:    ALL [(hash_fn, alt)] in appearance order
+    # unmapped_imgs: only those Strategy 1+2 could not resolve
+    needs_api: dict[str, tuple[list[tuple[str, str]], list[tuple[str, str]]]] = {}
 
     for title, html in iter_html_content(zim_path):
         articles_scanned += 1
         if MAX_ARTICLES and articles_scanned > MAX_ARTICLES:
             break
 
+        all_imgs = extract_zim_imgs(html)        # all images, in appearance order
         unmapped = try_offline_mapping(html, image_map)
-        has_any  = unmapped or any(
-            f"_assets_/{h}" in image_map
-            for h, _ in extract_zim_imgs(html)
-        )
-        if has_any:
+
+        if all_imgs:
             articles_with_imgs += 1
 
         if unmapped:
-            needs_api[title] = unmapped
+            needs_api[title] = (all_imgs, unmapped)
 
         if articles_scanned % 500 == 0:
             print(f"  {articles_scanned} articles, {len(image_map)} mappings, "
@@ -388,10 +390,14 @@ def main() -> None:
     # Strategy 3: MediaWiki API for remaining unmapped images
     # Skipped in test mode (MAX_ARTICLES set) and when requests is unavailable.
     if needs_api and HAS_REQUESTS and not MAX_ARTICLES:
+        total_unmapped = sum(len(v[1]) for v in needs_api.values())
         print(f"\nMediaWiki API lookup for {len(needs_api)} articles "
-              f"({sum(len(v) for v in needs_api.values())} images)...")
-        api_hits = 0
-        for i, (title, unmapped_imgs) in enumerate(needs_api.items(), 1):
+              f"({total_unmapped} unmapped images)...")
+        api_hits  = 0
+        count_match_total   = 0
+        count_match_fallback = 0
+
+        for i, (title, (all_imgs, unmapped_imgs)) in enumerate(needs_api.items(), 1):
             rendered = fetch_parsed_html(title)
             if not rendered:
                 time.sleep(API_DELAY)
@@ -399,8 +405,20 @@ def main() -> None:
 
             api_fns = api_filenames_in_order(rendered)
 
-            # Position-match only when both sides have the same count
-            if len(unmapped_imgs) == len(api_fns):
+            if len(all_imgs) == len(api_fns):
+                # Best case: API Datei: count equals total ZIM image count.
+                # Map positionally across all images; skip already-mapped ones.
+                count_match_total += 1
+                for (hash_fn, _), commons_fn in zip(all_imgs, api_fns):
+                    key = f"_assets_/{hash_fn}"
+                    if key not in image_map and commons_fn:
+                        image_map[key] = commons_fn
+                        api_hits += 1
+
+            elif len(unmapped_imgs) == len(api_fns):
+                # Fallback: Strategy 1+2 mapped nothing (all images are unmapped),
+                # so unmapped count also equals the API count.
+                count_match_fallback += 1
                 for (hash_fn, _), commons_fn in zip(unmapped_imgs, api_fns):
                     key = f"_assets_/{hash_fn}"
                     if key not in image_map and commons_fn:
@@ -412,7 +430,8 @@ def main() -> None:
             if i % 200 == 0:
                 print(f"  {i}/{len(needs_api)} API calls, {api_hits} new mappings...")
 
-        print(f"  Strategy 3: {api_hits} additional mappings from MediaWiki API")
+        print(f"  Strategy 3: {api_hits} mappings "
+              f"({count_match_total} full-match, {count_match_fallback} fallback articles)")
     elif needs_api and MAX_ARTICLES:
         print("  (Skipping MediaWiki API in test mode — run without MAX_ARTICLES for full lookup)")
 
