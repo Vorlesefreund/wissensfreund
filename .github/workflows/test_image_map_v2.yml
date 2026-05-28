@@ -1,0 +1,79 @@
+name: Test Image Map v2 (prop=images + Caption-Matching)
+
+# Testet den neuen Phase-2-Mapper mit einer kleinen Artikelauswahl.
+# Zeigt: Wie viele Bilder werden offline gemappt? Wie viele per Caption?
+# Ergebnis: image_map_v2_test.json als Artifact.
+#
+# Run: Actions → Test Image Map v2 → Run workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_articles:
+        description: 'Artikel-Limit für Testlauf (0 = alle, 50 = schneller Test)'
+        required: false
+        default: '50'
+        type: string
+      sample_article:
+        description: 'Artikel für Debug-Ausgabe (zeigt captions + matching)'
+        required: false
+        default: 'Elefant'
+        type: string
+
+env:
+  ZIM_URL: https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install zstandard requests
+
+      - name: Download ZIM
+        run: |
+          echo "Downloading $ZIM_URL"
+          curl -fsSL -o klexikon.zim "$ZIM_URL"
+          ls -lh klexikon.zim
+
+      - name: Run Phase-2-Test
+        run: python scripts/build_image_map_v2.py
+        env:
+          ZIM_FILE:       klexikon.zim
+          OUTPUT_FILE:    image_map_v2_test.json
+          MAX_ARTICLES:   ${{ inputs.max_articles || '50' }}
+          API_DELAY:      '0.3'
+          SAMPLE_ARTICLE: ${{ inputs.sample_article || 'Elefant' }}
+
+      - name: Show mapping statistics
+        run: |
+          echo "=== Mapping stats ==="
+          python3 -c "
+          import json
+          data = json.load(open('image_map_v2_test.json'))
+          print(f'Total mappings: {len(data)}')
+          exts = {}
+          for v in data.values():
+              ext = v.rsplit(\".\",1)[-1].lower()
+              exts[ext] = exts.get(ext, 0) + 1
+          for ext, cnt in sorted(exts.items(), key=lambda x: -x[1]):
+              print(f'  .{ext}: {cnt}')
+          print('First 10 mappings:')
+          for k, v in list(data.items())[:10]:
+              print(f'  {k} → {v}')
+          "
+
+      - name: Upload result
+        uses: actions/upload-artifact@v5
+        with:
+          name: image-map-v2-test
+          path: image_map_v2_test.json
+          retention-days: 7
