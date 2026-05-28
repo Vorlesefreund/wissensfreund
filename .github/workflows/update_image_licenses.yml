@@ -86,14 +86,14 @@ jobs:
 
       # ── Upload artifacts for downstream image jobs ────────────────────────
       - name: Upload ZIM artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: klexikon-zim
           path: klexikon.zim
           retention-days: 1
 
       - name: Upload licenses artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: media-licenses
           path: media_licenses.json
@@ -198,7 +198,7 @@ jobs:
           SHARD_COUNT:   '3'
 
       - name: Upload shard ${{ matrix.shard }} artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: images-shard-${{ matrix.shard }}
           retention-days: 1
@@ -320,7 +320,7 @@ jobs:
           LICENSES_FILE: media_licenses.json
 
       - name: Upload audio refs artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7
         with:
           name: audio-refs
           path: wikipedia_audio_refs.json
