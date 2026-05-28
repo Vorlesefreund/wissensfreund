@@ -1,16 +1,17 @@
 name: Update Media Assets
 
 # Runs on the 1st of every month at 03:00 UTC, and on manual trigger.
-# Downloads the Klexikon ZIM, extracts all media metadata, queries
-# Wikimedia Commons for license info, downloads permitted audio files,
-# and publishes the results as GitHub Release Assets.
 #
-# Two-job design to avoid Wikimedia rate limits:
-#   Job 1 (prepare):  ZIM download + license generation + audio discovery
-#                     → publishes media_licenses.json immediately
-#                     → uploads wikipedia_audio_refs.json as artifact
-#   Job 2 (download): waits 3600 s for rate-limit reset, then downloads
-#                     and publishes the audio package
+# Two independent pipelines run in parallel:
+#
+#   Image pipeline (fast, ~30 min total):
+#     prepare-images → images (3 shards) → images-merge
+#
+#   Audio pipeline (slow, up to 90 min):
+#     prepare-audio  → download
+#
+# Image jobs never wait for audio.
+# If audio discovery times out, images still complete successfully.
 #
 # Manual test run with limited articles:
 #   Go to Actions → Update Media Assets → Run workflow
@@ -32,11 +33,16 @@ env:
   ZIM_URL: https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim
 
 jobs:
-  # ── Job 1: API-intensive steps ───────────────────────────────────────────────
-  prepare:
+  # ── IMAGE PIPELINE ─────────────────────────────────────────────────────────────
+  #
+  # prepare-images: ZIM download + image map + media_licenses.json + publish
+  # Runtime: ~20 min (ZIM download ~5 min, image map ~10 min, rest <5 min)
+
+  prepare-images:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
-      contents: write   # required to create/update GitHub Releases
+      contents: write
 
     steps:
       - uses: actions/checkout@v5
@@ -54,7 +60,7 @@ jobs:
           curl -fsSL -o klexikon.zim "$ZIM_URL"
           ls -lh klexikon.zim
 
-      # ── Step 0 (optional): Dump article HTML for caption debugging ─────────
+      # ── Optional diagnostic (only on test runs) ───────────────────────────
       - name: Dump article HTML structure (diagnostic)
         if: ${{ inputs.max_articles != '0' }}
         run: python scripts/dump_article_html.py
@@ -63,17 +69,14 @@ jobs:
           ARTICLE: Beethoven
           CONTEXT: '1500'
 
-      # ── Step 0b: Build hash→Commons filename map from article HTML ───────────
-      # The 2026+ Klexikon ZIM stores images as _assets_/<sha1hash>.jpg.
-      # Article HTML wraps them in <a href="...Datei:OriginalName.jpg"> links,
-      # so we can recover the original Commons filename from there.
+      # ── Build hash→Commons filename map ──────────────────────────────────
       - name: Build image map (hash → Commons filename)
         run: python scripts/build_image_map.py
         env:
           ZIM_FILE:     klexikon.zim
           MAX_ARTICLES: ${{ inputs.max_articles || '0' }}
 
-      # ── Step 1: Image + audio metadata from ZIM binary ──────────────────────
+      # ── Generate media_licenses.json ──────────────────────────────────────
       - name: Generate media_licenses.json
         run: python scripts/generate_license_json.py
         env:
@@ -81,28 +84,12 @@ jobs:
           ZIM_VERSION:    ${{ env.ZIM_VERSION }}
           IMAGE_MAP_FILE: image_map.json
 
-      # ── Step 2: Audio links from article HTML (wpDestFile= pattern) ─────────
-      - name: Extract audio refs from article HTML
-        run: python scripts/extract_article_audio.py
-        env:
-          ZIM_FILE: klexikon.zim
-          MAX_ARTICLES: ${{ inputs.max_articles || '0' }}
-
-      # ── Step 2b: Wikipedia-Audio-Dateien suchen (Tierlaute, Musik, etc.) ───
-      - name: Find Wikipedia audio files
-        run: python scripts/find_wikipedia_audio.py
-        env:
-          ZIM_FILE:      klexikon.zim
-          ZIM_VERSION:   ${{ env.ZIM_VERSION }}
-          MAX_ARTICLES:  ${{ inputs.max_articles || '0' }}
-          LICENSES_FILE: media_licenses.json
-
-      # ── Pass refs + licenses to downstream jobs via artifacts ───────────────
-      - name: Upload audio refs artifact
+      # ── Upload artifacts for downstream image jobs ────────────────────────
+      - name: Upload ZIM artifact
         uses: actions/upload-artifact@v5
         with:
-          name: audio-refs
-          path: wikipedia_audio_refs.json
+          name: klexikon-zim
+          path: klexikon.zim
           retention-days: 1
 
       - name: Upload licenses artifact
@@ -112,15 +99,7 @@ jobs:
           path: media_licenses.json
           retention-days: 1
 
-      # Upload ZIM so images-job can reuse it without re-downloading (~60 min saved)
-      - name: Upload ZIM artifact
-        uses: actions/upload-artifact@v5
-        with:
-          name: klexikon-zim
-          path: klexikon.zim
-          retention-days: 1
-
-      # ── Step 0b: Create zim_version.json for app update checks ────────────
+      # ── Publish image data to R2 and GitHub Release ───────────────────────
       - name: Create zim_version.json
         run: |
           ZIM_SIZE=$(stat -c%s klexikon.zim 2>/dev/null || echo 0)
@@ -136,7 +115,6 @@ jobs:
           echo "zim_version.json:"
           cat zim_version.json
 
-      # ── Upload: zim_version.json → Cloudflare R2 ────────────────────────────
       - name: Upload zim_version.json to Cloudflare R2
         run: |
           aws s3 cp zim_version.json \
@@ -149,7 +127,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION:    auto
 
-      # ── Upload: image license data → Cloudflare R2 ──────────────────────────
       - name: Upload media_licenses.json to Cloudflare R2
         run: |
           aws s3 cp media_licenses.json \
@@ -162,7 +139,6 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION:    auto
 
-      # ── Publish: image license data (GitHub Release — backup) ────────────────
       - name: Publish image license data
         run: |
           gh release delete image-licenses --yes 2>/dev/null || true
@@ -179,88 +155,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ZIM_VERSION: ${{ env.ZIM_VERSION }}
 
-  # ── Job 2: Download audio (after rate-limit reset) ───────────────────────────
-  download:
-    runs-on: ubuntu-latest
-    needs: prepare
-    timeout-minutes: 180   # audio package is small; 3 h is plenty
-    permissions:
-      contents: write   # required to create/update GitHub Releases
 
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: actions/setup-python@v6
-        with:
-          python-version: '3.10'
-
-      - name: Install Python dependencies
-        run: pip install requests
-
-      - name: Download audio refs artifact
-        uses: actions/download-artifact@v5
-        with:
-          name: audio-refs
-
-      # ── 3600 s pause so Wikimedia rate-limit resets after Job 1 ─────────────
-      - name: Wait for Wikimedia rate-limit reset
-        run: |
-          echo "Warte 3600 s damit das Wikimedia-Rate-Limit nach Job 1 zurueckgesetzt wird..."
-          sleep 3600
-
-      # ── Step 3+4: License check, download, ZIP + index ──────────────────────
-      - name: Download audio files and build package
-        run: python scripts/download_audio.py
-        env:
-          ZIM_VERSION: ${{ env.ZIM_VERSION }}
-          REFS_FILE:   wikipedia_audio_refs.json
-
-      # ── Upload: audio package → Cloudflare R2 ───────────────────────────────
-      - name: Upload audio package to Cloudflare R2
-        run: |
-          aws s3 cp audio_index.json \
-            s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/audio_index.json \
-            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
-            --content-type application/json \
-            --cache-control "public, max-age=86400"
-          aws s3 cp wissensfreund_audio.zip \
-            s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/wissensfreund_audio.zip \
-            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
-            --content-type application/zip \
-            --cache-control "public, max-age=86400"
-        env:
-          AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION:    auto
-
-      # ── Publish: audio package (GitHub Release — backup) ─────────────────────
-      - name: Publish audio package
-        run: |
-          gh release delete wissensfreund-audio --yes 2>/dev/null || true
-          gh release create wissensfreund-audio \
-            --title "Audio Package ($ZIM_VERSION)" \
-            --notes "Wikimedia Commons audio files linked in Klexikon articles (\`$ZIM_VERSION\`).
-
-          Files: wissensfreund_audio.zip (CC0/CC BY/CC BY-SA, max 5 MB each, max 50 MB total) and audio_index.json (article to audio file mapping).
-
-          The Wissensfreund app downloads this package on first start for offline audio playback. Updated automatically on the 1st of every month." \
-            --latest \
-            wissensfreund_audio.zip audio_index.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ZIM_VERSION: ${{ env.ZIM_VERSION }}
-
-  # ── Job 3: Download image shards in parallel (3 × 1/3 of all images) ──────────
-  #
-  # Three jobs run simultaneously, each processing every 3rd image (round-robin).
-  # Each shard uploads its partial ZIPs as a GitHub artifact.
-  # The images-merge job then combines them and uploads to R2.
+  # ── Job: Download image shards in parallel (3 × 1/3 of all images) ───────────
   images:
     runs-on: ubuntu-latest
-    needs: prepare
-    timeout-minutes: 180   # 1/3 of images + ZIM artifact download; well within limit
+    needs: prepare-images
+    timeout-minutes: 180
     strategy:
-      fail-fast: false     # keep other shards running if one fails
+      fail-fast: false
       matrix:
         shard: [0, 1, 2]
 
@@ -279,13 +181,11 @@ jobs:
         with:
           name: media-licenses
 
-      # Reuse ZIM from prepare-job artifact (saves ~60 min vs. re-downloading)
       - name: Download ZIM artifact
         uses: actions/download-artifact@v5
         with:
           name: klexikon-zim
 
-      # ── Download this shard's 1/3 of images ──────────────────────────────
       - name: Download image tiers — shard ${{ matrix.shard }}/3
         run: python scripts/download_images.py
         env:
@@ -297,7 +197,6 @@ jobs:
           SHARD_INDEX:   ${{ matrix.shard }}
           SHARD_COUNT:   '3'
 
-      # ── Upload shard output as artifact for merge job ─────────────────────
       - name: Upload shard ${{ matrix.shard }} artifacts
         uses: actions/upload-artifact@v5
         with:
@@ -311,11 +210,12 @@ jobs:
             images_standard_manifest.json
             images_pro_manifest.json
 
-  # ── Job 4: Merge shards and upload to Cloudflare R2 ───────────────────────────
+
+  # ── Job: Merge shards and upload to Cloudflare R2 ────────────────────────────
   images-merge:
     runs-on: ubuntu-latest
     needs: images
-    timeout-minutes: 90   # download 3 × ~600 MB artifacts + merge + R2 upload
+    timeout-minutes: 90
     permissions:
       contents: write
 
@@ -344,14 +244,12 @@ jobs:
           name: images-shard-2
           path: shard-2/
 
-      # ── Merge all shards into final ZIPs + manifests ──────────────────────
       - name: Merge image shards
         run: python scripts/merge_image_shards.py
         env:
           SHARD_COUNT: '3'
           ZIM_VERSION: ${{ env.ZIM_VERSION }}
 
-      # ── Upload merged ZIPs → Cloudflare R2 ───────────────────────────────
       - name: Upload image tiers to Cloudflare R2
         run: |
           R2_BASE="s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}"
@@ -379,3 +277,119 @@ jobs:
           AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION:    auto
+
+
+  # ── AUDIO PIPELINE ─────────────────────────────────────────────────────────────
+  #
+  # prepare-audio: ZIM download + audio refs + Wikipedia discovery
+  # Runtime: up to 90 min (Wikipedia API + Commons license checks)
+  # Timeout ensures image pipeline is never blocked by audio.
+
+  prepare-audio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install Python dependencies
+        run: pip install requests zstandard
+
+      - name: Download ZIM file
+        run: |
+          echo "Downloading $ZIM_URL"
+          curl -fsSL -o klexikon.zim "$ZIM_URL"
+          ls -lh klexikon.zim
+
+      - name: Extract audio refs from article HTML
+        run: python scripts/extract_article_audio.py
+        env:
+          ZIM_FILE: klexikon.zim
+          MAX_ARTICLES: ${{ inputs.max_articles || '0' }}
+
+      - name: Find Wikipedia audio files
+        run: python scripts/find_wikipedia_audio.py
+        env:
+          ZIM_FILE:      klexikon.zim
+          ZIM_VERSION:   ${{ env.ZIM_VERSION }}
+          MAX_ARTICLES:  ${{ inputs.max_articles || '0' }}
+          LICENSES_FILE: media_licenses.json
+
+      - name: Upload audio refs artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: audio-refs
+          path: wikipedia_audio_refs.json
+          retention-days: 1
+
+
+  # ── Job: Download audio (after rate-limit reset) ──────────────────────────────
+  download:
+    runs-on: ubuntu-latest
+    needs: prepare-audio
+    timeout-minutes: 180
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install Python dependencies
+        run: pip install requests
+
+      - name: Download audio refs artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: audio-refs
+
+      - name: Wait for Wikimedia rate-limit reset
+        run: |
+          echo "Warte 3600 s damit das Wikimedia-Rate-Limit nach prepare-audio zurueckgesetzt wird..."
+          sleep 3600
+
+      - name: Download audio files and build package
+        run: python scripts/download_audio.py
+        env:
+          ZIM_VERSION: ${{ env.ZIM_VERSION }}
+          REFS_FILE:   wikipedia_audio_refs.json
+
+      - name: Upload audio package to Cloudflare R2
+        run: |
+          aws s3 cp audio_index.json \
+            s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/audio_index.json \
+            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
+            --content-type application/json \
+            --cache-control "public, max-age=86400"
+          aws s3 cp wissensfreund_audio.zip \
+            s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/wissensfreund_audio.zip \
+            --endpoint-url https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com \
+            --content-type application/zip \
+            --cache-control "public, max-age=86400"
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION:    auto
+
+      - name: Publish audio package
+        run: |
+          gh release delete wissensfreund-audio --yes 2>/dev/null || true
+          gh release create wissensfreund-audio \
+            --title "Audio Package ($ZIM_VERSION)" \
+            --notes "Wikimedia Commons audio files linked in Klexikon articles (\`$ZIM_VERSION\`).
+
+          Files: wissensfreund_audio.zip (CC0/CC BY/CC BY-SA, max 5 MB each, max 50 MB total) and audio_index.json (article to audio file mapping).
+
+          The Wissensfreund app downloads this package on first start for offline audio playback. Updated automatically on the 1st of every month." \
+            --latest \
+            wissensfreund_audio.zip audio_index.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ZIM_VERSION: ${{ env.ZIM_VERSION }}
