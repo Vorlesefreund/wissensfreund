@@ -2083,6 +2083,8 @@ class _StorageScreenState extends State<_StorageScreen> {
         _downloading = false;
         _libraryBytes = ImageLibraryService.instance.totalSizeBytes;
       });
+    } else if (error == 'cancelled') {
+      setState(() { _downloading = false; _dlProgress = 0; });
     } else {
       setState(() {
         _downloading = false;
@@ -2183,18 +2185,18 @@ class _StorageScreenState extends State<_StorageScreen> {
                 style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
               ),
             ),
-            if (_bgDownloading)
-              TextButton(
-                onPressed: () => setState(() {
-                  _bgDownloading = false;
-                }),
-                style: TextButton.styleFrom(
-                  padding: EdgeInsets.zero,
-                  foregroundColor: Colors.grey.shade600,
-                  textStyle: const TextStyle(fontSize: 12),
-                ),
-                child: const Text('Ausblenden'),
+            TextButton(
+              onPressed: () {
+                ImageLibraryService.instance.cancel();
+                setState(() { _downloading = false; _bgDownloading = false; _dlProgress = 0; });
+              },
+              style: TextButton.styleFrom(
+                padding: EdgeInsets.zero,
+                foregroundColor: Colors.red.shade600,
+                textStyle: const TextStyle(fontSize: 12),
               ),
+              child: const Text('Abbrechen'),
+            ),
           ],
         ),
       ],
@@ -2217,13 +2219,9 @@ class _StorageScreenState extends State<_StorageScreen> {
         surfaceTintColor: Colors.transparent,
         actions: [
           TextButton(
-            onPressed: isDl ? null : () => Navigator.pop(context),
-            child: Text(
-              'Schließen',
-              style: TextStyle(
-                color: isDl ? Colors.grey : const Color(0xFF2E7D32),
-              ),
-            ),
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Schließen',
+                style: TextStyle(color: Color(0xFF2E7D32))),
           ),
         ],
         bottom: PreferredSize(

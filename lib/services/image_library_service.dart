@@ -9,6 +9,10 @@ import '../config/asset_config.dart';
 import 'asset_download_service.dart';
 import 'storage_manager.dart';
 
+class _CancelledException implements Exception {
+  const _CancelledException();
+}
+
 /// Manages the offline image library (medium quality, ~800px wide).
 ///
 /// Images are stored in StorageManager.imageLibraryDir.
@@ -18,6 +22,7 @@ class ImageLibraryService {
   static final ImageLibraryService instance = ImageLibraryService._();
 
   bool _downloading = false;
+  bool _cancelRequested = false;
   double _downloadProgress = 0;
   int _downloadedBytes = 0;
   int _downloadTotalBytes = 0;
@@ -51,6 +56,9 @@ class ImageLibraryService {
   }
 
   bool get isDownloading => _downloading;
+
+  /// Bricht einen laufenden Download ab. Keine Wirkung wenn kein Download läuft.
+  void cancel() => _cancelRequested = true;
   double get downloadProgress => _downloadProgress;
   int get downloadedBytes => _downloadedBytes;
   int get downloadTotalBytes => _downloadTotalBytes;
@@ -72,15 +80,18 @@ class ImageLibraryService {
   }) async {
     if (_downloading) return 'already_downloading';
     _downloading = true;
+    _cancelRequested = false;
 
     try {
       await StorageManager.instance.initialize();
-      final tmpZip = '${StorageManager.instance.imageLibraryDir.path}.zip.tmp';
+      final libDir = StorageManager.instance.imageLibraryDir;
+      final tmpZip = '${libDir.path}.zip.tmp';
 
       final result = await AssetDownloadService.instance.downloadAsset(
         url:             thumbTier ? AssetConfig.imageThumbLibraryUrl : AssetConfig.imageLibraryUrl,
         destinationPath: tmpZip,
         onProgress: (received, total, eta) {
+          if (_cancelRequested) throw const _CancelledException();
           _downloadedBytes = received;
           _downloadTotalBytes = total;
           _downloadProgress = total > 0 ? received / total : 0;
@@ -95,7 +106,6 @@ class ImageLibraryService {
       }
 
       // Extract into staging dir — old library stays intact and usable during extraction
-      final libDir = StorageManager.instance.imageLibraryDir;
       final stagingDir = Directory('${libDir.path}.new');
       if (stagingDir.existsSync()) await stagingDir.delete(recursive: true);
 
@@ -111,8 +121,17 @@ class ImageLibraryService {
 
       debugPrint('ImageLibrary: ready (${totalSizeBytes ~/ 1024} KB)');
       return null; // success
+    } on _CancelledException {
+      // Staging-Dir aufräumen falls Extraktion schon begonnen hatte
+      try {
+        final stagingDir = Directory('${StorageManager.instance.imageLibraryDir.path}.new');
+        if (stagingDir.existsSync()) await stagingDir.delete(recursive: true);
+      } catch (_) {}
+      debugPrint('ImageLibrary: download cancelled');
+      return 'cancelled';
     } finally {
       _downloading = false;
+      _cancelRequested = false;
       _downloadProgress = 0;
       _downloadedBytes = 0;
       _downloadTotalBytes = 0;
