@@ -233,18 +233,26 @@ def main():
 
     # Load image_map.json if present (maps content-hashed ZIM filenames to Commons originals).
     # Produced by build_image_map.py — needed for ZIMs that use _assets_/<hash>.jpg storage.
-    image_map: dict[str, str] = {}
+    # Supports both old format {hash: filename} and new format {hash: {filename, source_url, ...}}.
+    image_map: dict[str, str | dict] = {}
     if IMAGE_MAP_FILE.exists():
         image_map = json.loads(IMAGE_MAP_FILE.read_text(encoding="utf-8"))
         print(f"Loaded image_map: {len(image_map)} hash→original entries")
     else:
         print(f"Note: {IMAGE_MAP_FILE} not found — content-hashed images will have no Commons mapping")
 
+    def _get_commons_fn(entry: str | dict | None) -> str | None:
+        if entry is None:
+            return None
+        if isinstance(entry, dict):
+            return entry.get("filename") or None
+        return entry or None
+
     # Build ZIM-filename → Commons-filename mapping.
     # Query Commons using the real filenames so we get actual license data.
     zim_to_commons: dict[str, str] = {}
     for fn in image_filenames:
-        cf = extract_commons_filename(fn) or image_map.get(fn)
+        cf = extract_commons_filename(fn) or _get_commons_fn(image_map.get(fn))
         if cf:
             zim_to_commons[fn] = cf
 

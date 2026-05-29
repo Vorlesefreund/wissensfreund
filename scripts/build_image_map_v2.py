@@ -55,8 +55,15 @@ API_DELAY     = float(os.environ.get("API_DELAY", "0.4"))
 SAMPLE_ARTICLE = os.environ.get("SAMPLE_ARTICLE", "Elefant")
 
 KLEXIKON_API  = "https://klexikon.zum.de/api.php"
+COMMONS_API   = "https://commons.wikimedia.org/w/api.php"
 ZIM_MAGIC     = 0x044d495a
 IMAGE_EXTS    = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".svg"}
+
+if HAS_REQUESTS:
+    _commons = _requests.Session()
+    _commons.headers["User-Agent"] = "WissensfreundBot/1.0 (image-mapper)"
+else:
+    _commons = None
 
 # ── Regex ────────────────────────────────────────────────────────────────────
 
@@ -363,6 +370,54 @@ def caption_match(alt_text: str, caption: str, commons_fns: list[str]) -> tuple[
     return None, 'no_match'
 
 
+# ── Commons API: imageinfo ────────────────────────────────────────────────────
+
+def _strip_html(text: str) -> str:
+    """Entfernt HTML-Tags (Wikimedia sendet oft Links im Artist-Feld)."""
+    return re.sub(r'<[^>]+>', '', text).strip()
+
+
+def fetch_commons_info(filename: str) -> dict:
+    """
+    Holt url_600, source_url, author, license von Wikimedia Commons.
+
+    API-Call:
+      prop=imageinfo&iiprop=url|descriptionurl|extmetadata
+      &iiurlwidth=600&iiextmetadatafilter=Artist|LicenseShortName
+
+    Gibt immer ein Dict zurück (leer bei Fehler/nicht gefunden).
+    """
+    if not _commons:
+        return {}
+    try:
+        r = _commons.get(COMMONS_API, params={
+            "action":              "query",
+            "prop":                "imageinfo",
+            "iiprop":              "url|descriptionurl|extmetadata",
+            "iiurlwidth":          "600",
+            "iiextmetadatafilter": "Artist|LicenseShortName",
+            "titles":              f"File:{filename}",
+            "format":              "json",
+        }, timeout=30)
+        r.raise_for_status()
+        pages = r.json().get("query", {}).get("pages", {})
+        for page in pages.values():
+            info_list = page.get("imageinfo", [])
+            if not info_list:
+                return {}
+            info = info_list[0]
+            meta = info.get("extmetadata", {})
+            return {
+                "url_600":    info.get("thumburl") or info.get("url", ""),
+                "source_url": info.get("descriptionurl", ""),
+                "author":     _strip_html(meta.get("Artist",           {}).get("value", "")),
+                "license":    meta.get("LicenseShortName", {}).get("value", ""),
+            }
+    except Exception as e:
+        print(f"  Commons error ({filename}): {e}", file=sys.stderr)
+    return {}
+
+
 # ── MediaWiki API: prop=images ────────────────────────────────────────────────
 
 def fetch_images_list(title: str) -> list[str]:
@@ -511,13 +566,27 @@ def main() -> None:
         print(f"  No API result:                 {no_api_result}")
         print(f"  Total new via API:             {api_hits}")
 
+    # ── Commons-Enrichment ────────────────────────────────────────────────────
+    # Für jedes gemappte Bild: url_600 + source_url + author + license holen.
+    # Läuft als separater Pass damit die Mapping-Phase offline bleibt.
+
+    print(f"\nEnriching {len(image_map)} mappings with Commons metadata …")
+    enriched_map: dict[str, dict] = {}
+    for idx, (key, filename) in enumerate(image_map.items()):
+        if idx % 200 == 0:
+            print(f"  [{idx:5d}/{len(image_map)}]")
+        info = fetch_commons_info(filename)
+        enriched_map[key] = {"filename": filename, **info}
+        time.sleep(API_DELAY)
+    print(f"  Enrichment complete: {len(enriched_map)} entries")
+
     # ── Save result ───────────────────────────────────────────────────────────
 
     OUTPUT_FILE.write_text(
-        json.dumps(image_map, indent=2, ensure_ascii=False, sort_keys=True),
+        json.dumps(enriched_map, indent=2, ensure_ascii=False, sort_keys=True),
         encoding="utf-8",
     )
-    print(f"\nDone: {articles_scanned} articles, {len(image_map)} mappings → {OUTPUT_FILE}")
+    print(f"\nDone: {articles_scanned} articles, {len(enriched_map)} mappings → {OUTPUT_FILE}")
 
     # Coverage estimate
     total_imgs_found = sum(len(v[0]) for v in needs_api.values()) + len(image_map) - sum(

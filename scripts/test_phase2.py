@@ -6,7 +6,7 @@ Für jeden Artikel:
   1. Klexikon prop=images → gefilterte Dateiliste
   2. ZIM-HTML → <figure>-Blöcke (md5hash + figcaption) + img/alt-Fallback
   3. difflib.SequenceMatcher Caption-Matching (threshold 0.4)
-  4. Commons imageinfo → url_600 + artist + license
+  4. Commons imageinfo → url_600 + source_url + author + license
 
 Output: image_map.json
   {
@@ -382,19 +382,25 @@ def best_match(caption: str, filenames: list[str]) -> tuple[str | None, float]:
 
 def fetch_commons_info(filename: str) -> dict:
     """
-    Fetch url_600, artist, license from Wikimedia Commons.
-    Returns dict with keys: url_600, artist, license (all may be empty).
+    Fetch url_600, source_url, author, license from Wikimedia Commons.
+
+    API-Call:
+      prop=imageinfo&iiprop=url|descriptionurl|extmetadata
+      &iiurlwidth=600&iiextmetadatafilter=Artist|LicenseShortName
+
+    Gibt immer ein Dict zurück (leer bei Fehler/nicht gefunden).
     """
     if not HAS_REQUESTS:
         return {}
     try:
         r = _commons.get(COMMONS_API, params={
-            "action":    "query",
-            "prop":      "imageinfo",
-            "iiprop":    "url|extmetadata",
-            "iiurlwidth": "600",
-            "titles":    f"File:{filename}",
-            "format":    "json",
+            "action":              "query",
+            "prop":                "imageinfo",
+            "iiprop":              "url|descriptionurl|extmetadata",
+            "iiurlwidth":          "600",
+            "iiextmetadatafilter": "Artist|LicenseShortName",
+            "titles":              f"File:{filename}",
+            "format":              "json",
         }, timeout=30)
         r.raise_for_status()
         pages = r.json().get("query", {}).get("pages", {})
@@ -404,14 +410,12 @@ def fetch_commons_info(filename: str) -> dict:
                 return {}
             info = info_list[0]
             meta = info.get("extmetadata", {})
-
-            def _meta(key: str) -> str:
-                return re.sub(r'<[^>]+>', '', meta.get(key, {}).get("value", "")).strip()
-
-            url_600 = info.get("thumburl", "") or info.get("url", "")
-            artist  = _meta("Artist") or _meta("Credit")
-            license_ = _meta("LicenseShortName") or _meta("License")
-            return {"url_600": url_600, "artist": artist, "license": license_}
+            return {
+                "url_600":    info.get("thumburl") or info.get("url", ""),
+                "source_url": info.get("descriptionurl", ""),
+                "author":     re.sub(r'<[^>]+>', '', meta.get("Artist",           {}).get("value", "")).strip(),
+                "license":    meta.get("LicenseShortName", {}).get("value", ""),
+            }
     except Exception as e:
         print(f"  Commons API error ({filename}): {e}", file=sys.stderr)
     return {}
@@ -492,7 +496,8 @@ def main() -> None:
                 "ratio":          round(ratio, 3),
                 "low_confidence": low_confidence,
                 "url_600":        "",
-                "artist":         "",
+                "source_url":     "",
+                "author":         "",
                 "license":        "",
             }
 
@@ -503,7 +508,7 @@ def main() -> None:
                 if commons_info:
                     entry.update(commons_info)
                     total_commons_ok += 1
-                    print(f"  Commons: {commons_info.get('license','?')}  {commons_info.get('url_600','')[:60]}")
+                    print(f"  Commons: {commons_info.get('license','?')}  {commons_info.get('source_url','')[:60]}")
 
             image_map[hash_fn] = entry
 
