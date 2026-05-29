@@ -1,0 +1,70 @@
+name: Test scrape_klexikon_images
+
+# Testet scrape_klexikon_images.py mit 3 Artikeln und dem echten ZIM.
+# Run: Actions → Test scrape_klexikon_images → Run workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      articles:
+        description: 'Komma-getrennte Artikel-Titel'
+        required: false
+        default: 'Elefanten,Fußball,Berlin'
+        type: string
+
+env:
+  ZIM_URL: https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install deps
+        run: pip install zstandard
+
+      - name: Download ZIM
+        run: |
+          curl -fsSL -o klexikon.zim "$ZIM_URL"
+          ls -lh klexikon.zim
+
+      - name: Run scrape_klexikon_images
+        run: python scripts/scrape_klexikon_images.py
+        env:
+          ZIM_FILE:  klexikon.zim
+          ARTICLES:  ${{ inputs.articles || 'Elefanten,Fußball,Berlin' }}
+          DELAY:     '1.0'
+          OUTPUT:    scrape_image_results.json
+
+      - name: Show JSON-Ergebnis
+        if: always()
+        run: |
+          echo "=== scrape_image_results.json ==="
+          cat scrape_image_results.json | python3 -c "
+          import json, sys
+          results = json.load(sys.stdin)
+          for art in results:
+              print(f\"\\n{'='*60}\")
+              print(f\"Artikel: {art['article']}  live={art.get('live_count',0)}  zim={art.get('zim_count','?')}  mapped={art.get('mapped','?')}  status={art['status']}\")
+              for r in art.get('data', []):
+                  h = r.get('hash', r.get('zim_named', r.get('zim_unknown', '—')))
+                  cu = (r.get('commons_url') or '(kein Link)')[:70]
+                  print(f\"  [{r['position']}] {r['filename'][:55]}\")
+                  print(f\"       hash/ref: {h}\")
+                  print(f\"       commons:  {cu}\")
+          "
+
+      - name: Upload Ergebnis
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: scrape-klexikon-results
+          path: scrape_image_results.json
+          retention-days: 14
