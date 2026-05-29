@@ -81,14 +81,18 @@ def _get(url: str) -> str:
 
 # ── SCHRITT 1: Live-Seite → Datei-Namen ─────────────────────────────────────────
 
-def scrape_article_filenames(article: str) -> list[dict]:
+def scrape_article_filenames(article: str) -> list[dict] | None:
     """
-    Gibt Liste von {filename, caption} in Reihenfolge des ersten Auftretens zurück.
+    Gibt Liste von {filename, caption} zurück, oder None bei HTTP-Fehler (404 etc.).
     Jeder Dateiname wird dedupliziert (Thumb- + Magnify-Link = selbe Datei).
     Caption wird aus thumbcaption/figcaption/gallerytext extrahiert.
     """
-    url  = f"{KLEXIKON}/wiki/{quote(article.replace(' ', '_'))}"
-    html = _get(url)
+    url = f"{KLEXIKON}/wiki/{quote(article.replace(' ', '_'))}"
+    try:
+        html = _get(url)
+    except Exception as e:
+        print(f"  WARN Seite nicht abrufbar ({type(e).__name__}): {url} — {e}", file=sys.stderr)
+        return None
     time.sleep(DELAY)
 
     seen:   set[str]   = set()
@@ -359,6 +363,10 @@ def process_article(
     # ── Schritt 1 ────────────────────────────────────────────────
     print("Schritt 1 — Scrape live Klexikon-Seite …")
     live_files = scrape_article_filenames(article)
+    if live_files is None:
+        return {"article": article, "status": "WARN_404",
+                "has_gallery": False, "live_count": 0, "zim_count": 0,
+                "mapped": 0, "no_commons": 0, "data": []}
     n_live = len(live_files)
     print(f"  Datei-Links (dedupliziert, gefiltert): {n_live}")
 
@@ -540,8 +548,8 @@ def main():
                     print(f"\n[{i}/{len(articles)}]", end="")
                 r = process_article(article, zim_index, cluster_ptrs, eof, zim_f)
                 all_results.append(r)
-                # Periodisch speichern (alle 100 Artikel) damit Teilergebnisse verfügbar sind
-                if ALL_ARTICLES and i % 100 == 0:
+                # Periodisch speichern (alle 50 Artikel) damit Teilergebnisse verfügbar sind
+                if ALL_ARTICLES and i % 50 == 0:
                     OUTPUT.write_text(json.dumps(all_results, indent=2, ensure_ascii=False),
                                       encoding="utf-8")
                     print(f"  [Zwischenspeichern: {i} Artikel]")
