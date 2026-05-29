@@ -465,15 +465,22 @@ def process_article(
             print(f"       Bildtext: {cap[:100]}{'…' if len(cap)>100 else ''}")
         print(f"       {cu_short}{extra}")
 
-    if zim_refs and len(zim_refs) != n_live:
-        print(f"\n  INFO: live={n_live} zim={len(zim_refs)} → nur {n_map} Paare gemappt")
+    # Gallery-Erkennung: live >> zim deutet auf MediaWiki-<gallery>-Block hin,
+    # den Kiwix nicht als _assets_/-img rendert.
+    zim_n      = len(zim_refs)
+    has_gallery = zim_index is not None and n_live > zim_n + 3
+    if has_gallery:
+        print(f"\n  INFO: has_gallery=true  live={n_live} zim={zim_n} → Gallery-Lücke {n_live - zim_n} Bilder")
+    elif zim_refs and zim_n != n_live:
+        print(f"\n  INFO: live={n_live} zim={zim_n} → nur {n_map} Paare gemappt")
 
     status = "OK" if plausibility_ok else "WARN_count"
     return {
         "article":     article,
         "status":      status,
+        "has_gallery": has_gallery,
         "live_count":  n_live,
-        "zim_count":   len(zim_refs),
+        "zim_count":   zim_n,
         "mapped":      n_map,
         "no_commons":  no_commons,
         "data":        mapped,
@@ -546,30 +553,87 @@ def main():
     OUTPUT.write_text(json.dumps(all_results, indent=2, ensure_ascii=False), encoding="utf-8")
     print(f"\n\nGespeichert → {OUTPUT}")
 
-    # Zusammenfassung
-    print(f"\n{'='*65}")
-    print("ZUSAMMENFASSUNG")
-    print(f"{'='*65}")
+    # ── Statistik berechnen ───────────────────────────────────────────────────
+    total         = len(all_results)
     total_mapped  = sum(r.get("mapped", 0)     for r in all_results)
     total_live    = sum(r.get("live_count", 0) for r in all_results)
     stops         = [r["article"] for r in all_results if r["status"].startswith("STOP")]
-    ok            = sum(1 for r in all_results if r["status"] == "OK")
-    warn          = sum(1 for r in all_results if r["status"].startswith("WARN"))
-    print(f"  Gesamt: {len(all_results)} Artikel")
-    print(f"  OK:     {ok}")
-    print(f"  WARN:   {warn}")
-    print(f"  STOP:   {len(stops)}")
-    print(f"  Live-Bilder gesamt:  {total_live}")
-    print(f"  Gemappte Hash-Paare: {total_mapped}")
+
+    # perfect_match: live_count == mapped (inkl. Artikel ohne Bilder)
+    perfect_match  = sum(1 for r in all_results if r.get("live_count", 0) == r.get("mapped", 0))
+    small_mismatch = sum(1 for r in all_results
+                         if 0 < r.get("live_count", 0) - r.get("mapped", 0) <= 3
+                         and not r.get("has_gallery"))
+    large_mismatch = sum(1 for r in all_results
+                         if r.get("live_count", 0) - r.get("mapped", 0) > 3
+                         and not r.get("has_gallery"))
+    gallery_arts   = [r for r in all_results if r.get("has_gallery")]
+
+    # ── gallery_articles.json ─────────────────────────────────────────────────
+    gallery_path = OUTPUT.with_name("gallery_articles.json")
+    gallery_out  = [
+        {
+            "article":    r["article"],
+            "live_count": r.get("live_count", 0),
+            "zim_count":  r.get("zim_count", 0),
+            "mapped":     r.get("mapped", 0),
+            "gap":        r.get("live_count", 0) - r.get("mapped", 0),
+            "filenames":  [d["filename"] for d in r.get("data", [])
+                           if "hash" not in d and "zim_named" not in d],
+        }
+        for r in gallery_arts
+    ]
+    gallery_path.write_text(json.dumps(gallery_out, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(f"Gallery-Artikel → {gallery_path}  ({len(gallery_out)} Einträge)")
+
+    # ── run_summary.json ──────────────────────────────────────────────────────
+    pct_perfect = perfect_match * 100 // max(total, 1)
+    summary = {
+        "total_articles":     total,
+        "perfect_match":      perfect_match,
+        "perfect_match_pct":  pct_perfect,
+        "small_mismatch":     small_mismatch,
+        "large_mismatch":     large_mismatch,
+        "gallery_count":      len(gallery_arts),
+        "total_images_live":  total_live,
+        "total_images_mapped": total_mapped,
+        "stops":              len(stops),
+        "plausibility":       "OK" if pct_perfect >= 70 else "FAIL",
+    }
+    summary_path = OUTPUT.with_name("run_summary.json")
+    summary_path.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
+
+    # ── Zusammenfassung ───────────────────────────────────────────────────────
+    print(f"\n{'='*65}")
+    print("ZUSAMMENFASSUNG")
+    print(f"{'='*65}")
+    print(f"  Artikel gesamt:       {total}")
+    print(f"  Perfect match:        {perfect_match}  ({pct_perfect}%)")
+    print(f"  Small mismatch (1-3): {small_mismatch}")
+    print(f"  Large mismatch (>3):  {large_mismatch}")
+    print(f"  Gallery-Artikel:      {len(gallery_arts)}")
+    print(f"  Live-Bilder gesamt:   {total_live}")
+    print(f"  Gemappte Hash-Paare:  {total_mapped}")
+    print(f"  STOP-Artikel:         {len(stops)}")
+    print(f"  Plausibilität:        {summary['plausibility']}")
+
     if not ALL_ARTICLES:
         for r in all_results:
+            gal = " [GALLERY]" if r.get("has_gallery") else ""
             print(f"  {r['article']:20s}  live={r.get('live_count',0):2d}  "
                   f"zim={r.get('zim_count','—'):>2}  mapped={r.get('mapped','—'):>2}  "
-                  f"no_commons={r.get('no_commons',0)}  [{r['status']}]")
-    if stops:
+                  f"no_commons={r.get('no_commons',0)}  [{r['status']}]{gal}")
+
+    # ── Plausibilitätsprüfung ─────────────────────────────────────────────────
+    if pct_perfect < 70:
+        print(f"\n⚠️  PLAUSIBILITÄT FEHLGESCHLAGEN: perfect_match={pct_perfect}% < 70%")
+        print(f"   Erwartet: ~84% (~2.950 von ~3.500 Artikeln)")
+        print(f"   → Vollrun-Ergebnis NICHT verwenden — Ursache prüfen!")
+        sys.exit(1)
+
+    if stops and not ALL_ARTICLES:
         print(f"\nSTOP-Artikel ({len(stops)}): {stops[:10]}")
-        if not ALL_ARTICLES:
-            sys.exit(1)
+        sys.exit(1)
 
 
 if __name__ == "__main__":

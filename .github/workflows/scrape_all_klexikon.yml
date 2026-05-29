@@ -54,36 +54,28 @@ jobs:
       - name: Zusammenfassung
         if: always()
         run: |
-          echo "=== Letzte 30 Zeilen ==="
-          tail -30 article_image_map.json 2>/dev/null || echo "(keine Ausgabe)"
+          echo "=== run_summary.json ==="
+          cat run_summary.json 2>/dev/null || echo "(nicht vorhanden)"
           echo ""
-          echo "=== Statistik ==="
+          echo "=== Gallery-Artikel (erste 20) ==="
           python3 -c "
           import json, sys
           try:
-              data = json.load(open('article_image_map.json', encoding='utf-8'))
+              data = json.load(open('gallery_articles.json', encoding='utf-8'))
           except Exception as e:
               print(f'Fehler: {e}'); sys.exit(0)
-          ok   = sum(1 for r in data if r['status'] == 'OK')
-          warn = sum(1 for r in data if r['status'].startswith('WARN'))
-          stop = sum(1 for r in data if r['status'].startswith('STOP'))
-          imgs = sum(r.get('live_count', 0) for r in data)
-          maps = sum(r.get('mapped', 0) for r in data)
-          print(f'Artikel gesamt: {len(data)}')
-          print(f'OK:     {ok}')
-          print(f'WARN:   {warn}')
-          print(f'STOP:   {stop}')
-          print(f'Bilder (live):  {imgs}')
-          print(f'Hash-Mappings:  {maps}')
-          no_imgs = [r[\"article\"] for r in data if r.get(\"live_count\",0)==0]
-          if no_imgs:
-              print(f'Ohne Bilder ({len(no_imgs)}): {no_imgs[:10]}')
+          print(f'Gallery-Artikel gesamt: {len(data)}')
+          for r in data[:20]:
+              print(f'  {r[\"article\"]:25s}  live={r[\"live_count\"]}  zim={r[\"zim_count\"]}  gap={r[\"gap\"]}')
           " 2>/dev/null || true
 
-      - name: Upload article_image_map
+      - name: Upload Ergebnisse
         uses: actions/upload-artifact@v5
         if: always()
         with:
           name: article-image-map
-          path: article_image_map.json
+          path: |
+            article_image_map.json
+            gallery_articles.json
+            run_summary.json
           retention-days: 30
