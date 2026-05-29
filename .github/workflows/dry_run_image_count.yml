@@ -1,0 +1,122 @@
+name: Dry-Run Image Count
+
+# Schritt 1: Title-Map mit apfilterredir=nonredirects bauen + prüfen
+# Schritt 2: Für alle gematchten Artikel ZIM- vs. API-Bildanzahl vergleichen
+#            KEIN Commons-Download
+#
+# Run: Actions → Dry-Run Image Count → Run workflow
+# Dauer: ~35 Min (ZIM-Download + Title-Map + 3.600 API-Abfragen)
+
+on:
+  workflow_dispatch:
+
+env:
+  ZIM_URL: https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install zstandard requests
+
+      - name: Download ZIM
+        run: |
+          echo "Downloading $ZIM_URL"
+          curl -fsSL -o klexikon.zim "$ZIM_URL"
+          ls -lh klexikon.zim
+
+      # ── SCHRITT 1: Title-Map ───────────────────────────────────────────────
+
+      - name: 'Step 1 — Build Title Map (apfilterredir=nonredirects)'
+        run: python scripts/build_title_map.py
+        env:
+          ZIM_FILE:        klexikon.zim
+          OUTPUT_FILE:     title_map.json
+          API_DELAY:       '0.3'
+          RATIO_THRESHOLD: '0.85'
+
+      - name: 'Step 1 — Plausibilitätscheck'
+        run: |
+          python3 -c "
+          import json, sys
+          d = json.load(open('title_map.json'))
+          s = d['stats']
+          print('=== Title-Map Ergebnis ===')
+          print(f'API-Artikel (gefiltert): {s[\"api_total\"]}')
+          print(f'ZIM-Artikel:             {s[\"zim_total\"]}')
+          print(f'Exact matches:           {s[\"exact\"]}')
+          print(f'Fuzzy matches:           {s[\"fuzzy\"]}')
+          print(f'ZIM-only:                {s[\"zim_only\"]}')
+          print(f'API-only (neu):          {s[\"api_only\"]}')
+
+          ok = True
+          if not (3300 <= s['api_total'] <= 3900):
+              print(f'⚠️  NICHT VERIFIZIERT: api_total={s[\"api_total\"]} außerhalb 3300-3900')
+              ok = False
+          if not (3300 <= s['exact'] <= 3900):
+              print(f'⚠️  NICHT VERIFIZIERT: exact={s[\"exact\"]} außerhalb 3300-3900')
+              ok = False
+          if s['api_only'] > 100:
+              print(f'⚠️  NICHT VERIFIZIERT: api_only={s[\"api_only\"]} > 100 (Redirects noch drin?)')
+              ok = False
+          if not ok:
+              print()
+              print('Schritt 2 wird NICHT gestartet.')
+              sys.exit(1)
+          print()
+          print('✓ Step 1 plausibel — starte Step 2')
+          "
+
+      # ── SCHRITT 2: Dry-Run Image Count ────────────────────────────────────
+
+      - name: 'Step 2 — Dry-Run Image Count (kein Commons-Download)'
+        run: python scripts/dry_run_image_count.py
+        env:
+          ZIM_FILE:       klexikon.zim
+          TITLE_MAP_FILE: title_map.json
+          OUTPUT_FILE:    dry_run_report.json
+          API_DELAY:      '0.3'
+          MAX_ARTICLES:   '0'
+
+      - name: 'Step 2 — Zusammenfassung'
+        run: |
+          python3 -c "
+          import json, sys
+          d = json.load(open('dry_run_report.json'))
+          s = d['summary']
+          print('=== Dry-Run Ergebnis ===')
+          print(f'count_match:         {s[\"count_match\"]:5d}  (ZIM-count == API-count)')
+          print(f'count_mismatch:      {s[\"count_mismatch\"]:5d}')
+          print(f'  davon ZIM > API:   {s[\"mismatch_zim_more\"]:5d}  ← Bilder entfernt')
+          print(f'  davon ZIM < API:   {s[\"mismatch_api_more\"]:5d}  ← Bilder hinzugekommen')
+          print(f'api_no_images:       {s[\"api_no_images\"]:5d}')
+          print(f'zim_not_found:       {s[\"zim_not_found\"]:5d}')
+          print(f'api_errors:          {s[\"api_errors\"]:5d}')
+          if d.get('plausibility_warnings'):
+              print()
+              for w in d['plausibility_warnings']:
+                  print(w)
+          else:
+              print()
+              print('✓ Plausibilitätscheck bestanden')
+          "
+        if: success()
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: dry-run-results
+          path: |
+            title_map.json
+            dry_run_report.json
+          retention-days: 14

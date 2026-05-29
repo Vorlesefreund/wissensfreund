@@ -128,11 +128,12 @@ def load_api_titles() -> list[str]:
 
     while True:
         params = {
-            "action":  "query",
-            "list":    "allpages",
-            "aplimit": "500",
-            "apnamespace": "0",   # Hauptnamespace (Artikel)
-            "format":  "json",
+            "action":        "query",
+            "list":          "allpages",
+            "aplimit":       "500",
+            "apnamespace":   "0",              # Hauptnamespace (Artikel)
+            "apfilterredir": "nonredirects",   # nur echte Artikel, keine Weiterleitungen
+            "format":        "json",
         }
         if apcontinue:
             params["apcontinue"] = apcontinue
