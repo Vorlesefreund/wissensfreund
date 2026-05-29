@@ -190,38 +190,63 @@ def read_blob(f, cluster_ptrs: list, eof: int, cn: int, bn: int) -> bytes | None
 # ── Image-Zähler ─────────────────────────────────────────────────────────────
 
 def count_zim_images(html: str) -> int:
-    """<figure>-Elemente mit <img>; Fallback: .thumbinner-Divs mit <img>."""
-    figures = re.findall(r"<figure[^>]*>.*?</figure>", html, re.DOTALL | re.IGNORECASE)
-    n = sum(1 for fig in figures if "<img" in fig.lower())
-    if n == 0:
-        thumbs = re.findall(
-            r'class=["\']thumbinner["\'][^>]*>.*?</div>', html, re.DOTALL | re.IGNORECASE
-        )
-        n = sum(1 for t in thumbs if "<img" in t.lower())
+    """
+    Zählt Artikel-Bilder im ZIM-HTML über alle drei Klexikon-Container:
+      1. <figure> … </figure>          (modernes MediaWiki)
+      2. <div class="thumbinner">       (schwimmende Einzelbilder)
+      3. <li class="gallerybox"> … </li>(MediaWiki-Galerie)
+    Alle drei werden ADDIERT (kein Fallback-Muster mehr).
+    """
+    n = 0
+
+    # 1. <figure> (modernes MediaWiki)
+    for m in re.finditer(r"<figure[^>]*>.*?</figure>", html, re.DOTALL | re.IGNORECASE):
+        if "<img" in m.group(0).lower():
+            n += 1
+
+    # 2. <div class="thumbinner"> — Wortgrenze, damit "notthumbinner" nicht matcht
+    for m in re.finditer(
+        r'<div[^>]+class=["\'][^"\']*\bthumbinner\b[^"\']*["\'][^>]*>.*?</div>',
+        html, re.DOTALL | re.IGNORECASE,
+    ):
+        if "<img" in m.group(0).lower():
+            n += 1
+
+    # 3. <li class="gallerybox"> — eine <li> = ein Galerie-Bild
+    for m in re.finditer(
+        r'<li[^>]+class=["\'][^"\']*\bgallerybox\b[^"\']*["\'][^>]*>.*?</li>',
+        html, re.DOTALL | re.IGNORECASE,
+    ):
+        if "<img" in m.group(0).lower():
+            n += 1
+
     return n
 
 
-def count_api_images(api_title: str) -> int | None:
-    """Anzahl gefilterter Bilder aus API prop=images."""
-    params = {
-        "action":  "query",
-        "prop":    "images",
-        "titles":  api_title,
-        "imlimit": "100",
-        "format":  "json",
-    }
+def count_parse_images(api_title: str) -> int | None:
+    """
+    Zählt gerenderte Bilder via action=parse&prop=images.
+    Gibt Bilder in Erscheinungsreihenfolge zurück (nicht alphabetisch wie prop=images),
+    vergleichbar mit der ZIM-Renderung.
+    Boilerplate-Icons/Logos werden herausgefiltert.
+    """
     try:
-        r = _session.get(KLEXIKON_API, params=params, timeout=30)
+        r = _session.get(KLEXIKON_API, params={
+            "action": "parse",
+            "page":   api_title,
+            "prop":   "images",
+            "format": "json",
+        }, timeout=30)
         r.raise_for_status()
         data = r.json()
-        pages = data.get("query", {}).get("pages", {})
-        for page in pages.values():
-            images = page.get("images", [])
-            filtered = [img for img in images if not _should_filter(img["title"])]
-            return len(filtered)
-        return 0
+        if "error" in data:
+            return None
+        images = data.get("parse", {}).get("images", [])
+        # images sind reine Dateinamen ohne Namespace-Präfix
+        filtered = [fn for fn in images if not _should_filter("Datei:" + fn)]
+        return len(filtered)
     except Exception as e:
-        print(f"  API-Fehler '{api_title}': {e}", file=sys.stderr)
+        print(f"  parse-API-Fehler '{api_title}': {e}", file=sys.stderr)
         return None
 
 
@@ -270,9 +295,9 @@ def main():
             html      = blob.decode("utf-8", errors="replace")
             zim_count = count_zim_images(html)
 
-            # API-Bild zählen
+            # API-Bild zählen (action=parse — gerenderte Bilder in Erscheinungsreihenfolge)
             time.sleep(API_DELAY)
-            api_count = count_api_images(api_title)
+            api_count = count_parse_images(api_title)
             if api_count is None:
                 api_errors.append(api_title)
                 continue
@@ -303,8 +328,12 @@ def main():
 
     # Plausibilitätscheck
     warnings: list[str] = []
-    if not (2000 <= summary["count_match"] <= 3200):
-        warnings.append(f"⚠️ NICHT VERIFIZIERT: count_match={summary['count_match']} außerhalb 2000–3200")
+    min_match = total // 2   # ≥50% der verarbeiteten Artikel müssen übereinstimmen
+    if summary["count_match"] < min_match:
+        warnings.append(
+            f"⚠️ NICHT VERIFIZIERT: count_match={summary['count_match']}"
+            f" < 50% ({min_match}) von {total} verarbeiteten Artikeln"
+        )
     if summary["api_no_images"] >= 200:
         warnings.append(f"⚠️ NICHT VERIFIZIERT: api_no_images={summary['api_no_images']} ≥ 200")
 
