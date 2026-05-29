@@ -78,26 +78,28 @@ def _get(url: str) -> str:
 
 # ── SCHRITT 1: Live-Seite → Datei-Namen ─────────────────────────────────────────
 
-def scrape_article_filenames(article: str) -> list[str]:
+def scrape_article_filenames(article: str) -> list[dict]:
     """
-    Gibt Datei-Namen in Reihenfolge des ersten Auftretens zurück.
+    Gibt Liste von {filename, caption} in Reihenfolge des ersten Auftretens zurück.
     Jeder Dateiname wird dedupliziert (Thumb- + Magnify-Link = selbe Datei).
+    Caption wird aus thumbcaption/figcaption/gallerytext extrahiert.
     """
     url  = f"{KLEXIKON}/wiki/{quote(article.replace(' ', '_'))}"
     html = _get(url)
     time.sleep(DELAY)
 
-    seen:   set[str]  = set()
-    result: list[str] = []
+    seen:   set[str]   = set()
+    result: list[dict] = []
     for m in re.finditer(r'href="/wiki/Datei:([^"#]+)"', html, re.IGNORECASE):
-        fn = unquote(m.group(1)).replace("_", " ")   # kanonisch mit Leerzeichen
+        fn  = unquote(m.group(1)).replace("_", " ")
         key = fn.lower()
         if key in seen:
             continue
         seen.add(key)
         if _should_filter(fn):
             continue
-        result.append(fn)
+        caption = _extract_caption(html[m.end():])
+        result.append({"filename": fn, "caption": caption or None})
     return result
 
 
@@ -259,6 +261,43 @@ _BOILERPLATE = re.compile(
     re.IGNORECASE
 )
 
+_STRIP_TAGS = re.compile(r'<[^>]+>')
+
+def _extract_caption(html_from_here: str) -> str:
+    """
+    Extrahiert den deutschen Bildtext aus den drei Klexikon-Container-Formaten.
+    Sucht im Fenster von 3000 Zeichen nach dem Datei:-Link.
+    """
+    chunk = html_from_here[:3000]
+
+    # Format 1: <div class="thumbcaption"> — enthält zuerst ein Magnify-Div,
+    # dann den eigentlichen Text. Das erste </div> schließt das Magnify-Div,
+    # danach folgt der Caption-Text bis zum schließenden </div>.
+    m = re.search(
+        r'class="thumbcaption"[^>]*>.*?</div>\s*(.*?)\s*</div>',
+        chunk, re.DOTALL | re.IGNORECASE
+    )
+    if m:
+        t = re.sub(r'\s+', ' ', _STRIP_TAGS.sub('', m.group(1))).strip()
+        if t:
+            return t
+
+    # Format 2: <figcaption> (modernes MediaWiki / figure-Elemente)
+    m = re.search(r'<figcaption[^>]*>(.*?)</figcaption>', chunk, re.DOTALL | re.IGNORECASE)
+    if m:
+        t = re.sub(r'\s+', ' ', _STRIP_TAGS.sub('', m.group(1))).strip()
+        if t:
+            return t
+
+    # Format 3: <div class="gallerytext"> (MediaWiki-Galerien)
+    m = re.search(r'class="gallerytext"[^>]*>(.*?)</div>', chunk, re.DOTALL | re.IGNORECASE)
+    if m:
+        t = re.sub(r'\s+', ' ', _STRIP_TAGS.sub('', m.group(1))).strip()
+        if t:
+            return t
+
+    return ''
+
 
 def _classify_src(src: str) -> dict:
     """Klassifiziert einen ZIM img src-Wert."""
@@ -329,12 +368,17 @@ def process_article(
     print("Schritt 2 — Datei-Seiten → Commons-URLs …")
     commons_entries: list[dict] = []
     no_commons = 0
-    for fn in live_files:
+    for item in live_files:
+        fn = item["filename"]
         cu = scrape_commons_url(fn)
         if cu is None:
             no_commons += 1
             print(f"  WARN keine Commons-URL: {fn}")
-        commons_entries.append({"filename": fn, "commons_url": cu})
+        commons_entries.append({
+            "filename":   fn,
+            "caption":    item["caption"],
+            "commons_url": cu,
+        })
 
     if live_files and no_commons / n_live > 0.5:
         print(f"  STOP: {no_commons}/{n_live} ohne Commons-URL (>50%)")
@@ -372,8 +416,9 @@ def process_article(
         zr  = zim_refs[i]
         ce  = commons_entries[i]
         rec: dict = {
-            "position":   i,
-            "filename":   ce["filename"],
+            "position":    i,
+            "filename":    ce["filename"],
+            "caption":     ce["caption"],
             "commons_url": ce["commons_url"],
         }
         if zr["type"] == "hash":
@@ -388,7 +433,7 @@ def process_article(
     if not zim_refs:
         for i, ce in enumerate(commons_entries):
             mapped.append({"position": i, "filename": ce["filename"],
-                           "commons_url": ce["commons_url"]})
+                           "caption": ce["caption"], "commons_url": ce["commons_url"]})
 
     # ── Konsolen-Ausgabe ─────────────────────────────────────────
     print()
@@ -396,6 +441,7 @@ def process_article(
         pos  = r["position"]
         fn   = r["filename"]
         cu   = r.get("commons_url", "")
+        cap  = r.get("caption") or ""
         extra = ""
         if "hash" in r:
             extra = f"  hash={r['hash']}"
@@ -403,6 +449,8 @@ def process_article(
             extra = f"  zim_named={r['zim_named'][:40]}"
         cu_short = (cu[:70] + "…") if cu and len(cu) > 70 else (cu or "(kein Commons-Link)")
         print(f"  [{pos}] {fn}")
+        if cap:
+            print(f"       Bildtext: {cap[:100]}{'…' if len(cap)>100 else ''}")
         print(f"       {cu_short}{extra}")
 
     if zim_refs and len(zim_refs) != n_live:
