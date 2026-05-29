@@ -1,0 +1,42 @@
+name: Read ZIM Metadata
+
+# Liest Date, Title, Creator, Language etc. aus der ZIM-Datei.
+# Beantwortet: Welche ZIM liegt vor? Wann wurde sie erstellt?
+#
+# Run: Actions → Read ZIM Metadata → Run workflow
+
+on:
+  workflow_dispatch:
+
+env:
+  ZIM_URL: https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install deps
+        run: pip install zstandard
+
+      - name: Download ZIM
+        run: |
+          echo "Downloading: $ZIM_URL"
+          curl -fsSL -o klexikon.zim "$ZIM_URL"
+          echo ""
+          echo "=== File info ==="
+          ls -lh klexikon.zim
+          echo "Created:  $(stat -c %y klexikon.zim)"
+          echo "Modified: $(stat -c %y klexikon.zim)"
+
+      - name: Read ZIM metadata
+        run: python scripts/read_zim_metadata.py
+        env:
+          ZIM_FILE: klexikon.zim
