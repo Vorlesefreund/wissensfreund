@@ -1,0 +1,45 @@
+name: Inspect ZIM HTML Structure
+
+# Zeigt die exakte HTML-Struktur rund um <img>-Tags für Artikel
+# deren ZIM-count=0 war (figure + thumbinner greifen nicht).
+#
+# Run: Actions → Inspect ZIM HTML Structure → Run workflow
+# Dauer: ~5 Min
+
+on:
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: 'Komma-getrennte Artikel-Titel'
+        required: false
+        default: 'Aachen,Afrika,Amsterdam'
+        type: string
+
+env:
+  ZIM_URL: https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install deps
+        run: pip install zstandard
+
+      - name: Download ZIM
+        run: |
+          curl -fsSL -o klexikon.zim "$ZIM_URL"
+          ls -lh klexikon.zim
+
+      - name: Inspect HTML structure
+        run: python scripts/inspect_html_structure.py
+        env:
+          ZIM_FILE: klexikon.zim
+          TARGETS:  ${{ inputs.targets || 'Aachen,Afrika,Amsterdam' }}
