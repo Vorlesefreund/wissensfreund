@@ -1,0 +1,169 @@
+name: Build Image ZIPs (Hash-basiert)
+
+# Lädt Bilder von Wikimedia Commons und paketiert sie als hash-basierte ZIPs.
+# INPUT: article_image_map.json vom Scrape-Run
+# OUTPUT: images_thumb.zip (300px) + images_standard.zip (800px) → R2
+#
+# Laufzeit: ~70 Min (3 parallele Shards à ~23 Min)
+# Run: Actions → Build Image ZIPs → Run workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      scrape_run_id:
+        description: 'Run-ID des Scrape-Runs (article_image_map.json)'
+        required: true
+        default: '26637176686'
+        type: string
+      max_images:
+        description: 'Max. Bilder pro Shard (0 = alle)'
+        required: false
+        default: '0'
+        type: string
+      delay:
+        description: 'Pause zwischen Downloads in Sekunden'
+        required: false
+        default: '0.15'
+        type: string
+
+env:
+  MIN_SUCCESS_PCT: '85'
+
+jobs:
+  # ── Shard-Downloads (3× parallel) ────────────────────────────────────────────
+  download:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: article_image_map.json laden
+        run: |
+          gh run download ${{ inputs.scrape_run_id }} \
+            --name article-image-map \
+            --dir .
+          ls -lh article_image_map.json
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Shard ${{ matrix.shard }} — Bilder herunterladen
+        run: python scripts/build_image_zips.py
+        env:
+          IMAGE_MAP:       article_image_map.json
+          DELAY:           ${{ inputs.delay || '0.15' }}
+          MAX_IMAGES:      ${{ inputs.max_images || '0' }}
+          MIN_SUCCESS_PCT: ${{ env.MIN_SUCCESS_PCT }}
+          SHARD_INDEX:     ${{ matrix.shard }}
+          SHARD_COUNT:     '3'
+
+      - name: Upload Shard-Artefakte
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: image-shard-${{ matrix.shard }}
+          retention-days: 2
+          path: |
+            images_thumb.zip
+            images_standard.zip
+            build_summary.json
+            skipped.log
+
+  # ── Merge + Plausibilitätsprüfung + R2-Upload ────────────────────────────────
+  merge-and-upload:
+    runs-on: ubuntu-latest
+    needs: download
+    timeout-minutes: 90
+    if: always()
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Shard 0 laden
+        uses: actions/download-artifact@v5
+        with:
+          name: image-shard-0
+          path: shard-0/
+
+      - name: Shard 1 laden
+        uses: actions/download-artifact@v5
+        with:
+          name: image-shard-1
+          path: shard-1/
+
+      - name: Shard 2 laden
+        uses: actions/download-artifact@v5
+        with:
+          name: image-shard-2
+          path: shard-2/
+
+      - name: ZIPs zusammenführen
+        run: python scripts/merge_image_zips.py
+        env:
+          SHARD_COUNT: '3'
+
+      - name: Größen und Summary anzeigen
+        if: always()
+        run: |
+          echo "=== ZIP-Größen ==="
+          ls -lh images_thumb.zip images_standard.zip 2>/dev/null || echo "(nicht vorhanden)"
+          echo ""
+          echo "=== build_summary.json ==="
+          cat build_summary.json 2>/dev/null || echo "(nicht vorhanden)"
+
+      - name: Upload nach Cloudflare R2
+        if: success()
+        run: |
+          R2_BASE="s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}"
+          ENDPOINT="https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com"
+
+          for TIER in thumb standard; do
+            ZIP="images_${TIER}.zip"
+            if [ -f "$ZIP" ]; then
+              echo "Uploading $ZIP …"
+              aws s3 cp "$ZIP" \
+                "${R2_BASE}/${ZIP}" \
+                --endpoint-url "$ENDPOINT" \
+                --content-type application/zip \
+                --cache-control "public, max-age=86400" \
+                --no-progress
+              echo "  ✓ ${ZIP} hochgeladen"
+            else
+              echo "  WARN: $ZIP nicht gefunden"
+            fi
+          done
+
+          # build_summary nach R2 für spätere Referenz
+          aws s3 cp build_summary.json \
+            "${R2_BASE}/article_image_map_summary.json" \
+            --endpoint-url "$ENDPOINT" \
+            --content-type application/json \
+            --cache-control "public, max-age=86400" \
+            --no-progress
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION:    auto
+
+      - name: Upload finale Artefakte
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: image-zips-final
+          retention-days: 14
+          path: |
+            images_thumb.zip
+            images_standard.zip
+            build_summary.json
