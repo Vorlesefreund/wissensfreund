@@ -1,5 +1,42 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-28T17:57:34Z -->
+<!-- updated: 2026-05-29T09:46:25Z -->
+
+## LAUFEND (Session 2026-05-29 — Bild-Scraping Vollrun)
+
+### Vollrun scrape_klexikon_images.py gestartet
+- **GitHub Actions:** https://github.com/Vorlesefreund/wissensfreund/actions/runs/26630058109
+- Alle ~3.500 Klexikon-Artikel, SKIP_COMMONS=1, DELAY=0.8s
+- Geschätzte Laufzeit: ~60 Minuten
+- Artefakte nach Run: `article_image_map.json`, `gallery_articles.json`, `run_summary.json`
+
+### Scraping-Ansatz validiert (50-Artikel-Test)
+- **84% perfect match** (live_count == mapped) bei 50 Testart ikeln
+- 100% der Commons-URLs lagen unter `wikipedia/commons/` (kein `wikipedia/de/` o.ä.)
+- Commons-URL deterministisch aus Dateiname berechenbar → SKIP_COMMONS verlustfrei
+- Gallery-Erkennung implementiert: `live > zim + 3` → `has_gallery: true`
+- Afghanistan-Fall analysiert: Gallery-Artikel haben ZIM-seitig keine `_assets_/`-img-Tags
+
+### Nächste Schritte nach dem Vollrun
+1. **`run_summary.json` prüfen** — Erwartung: ≥84% perfect match, ~24.000 gemappte Bilder
+2. **Option A implementieren (Hash-basierte ZIPs):**
+   - `article_image_map.json` → Commons-URL aus Dateiname berechnen
+   - Bilder von Wikimedia Commons herunterladen
+   - Als `{hash}.jpg` im ZIP speichern (statt altem `I/langde-…`-Key)
+   - App lädt Bilder direkt per Hash — kein ZIM-Verzeichnis-Lookup nötig
+3. **Gallery-Artikel vormerken** für späteren Nachlauf:
+   - `gallery_articles.json` enthält alle Artikel mit Gallery-Lücken (~100–200 erwartet)
+   - Diese Bilder: Dateiname + Caption vorhanden, aber kein Hash
+   - Später per berechneter Commons-URL nachladen
+
+### Bereits fertig (diese Session)
+- `scripts/scrape_klexikon_images.py` — vollständig implementiert:
+  - SCHRITT 1–4 (Live-Seite → Datei-Links → Datei-Seiten → ZIM-Hash → Mapping)
+  - Caption-Extraktion: 3 Formate (thumbcaption, figcaption, gallerytext)
+  - Gallery-Erkennung + has_gallery-Flag
+  - Vollrun-Modi: ALL_ARTICLES, SKIP_COMMONS, MAX_ARTICLES
+  - Periodischer Zwischenspeicher alle 100 Artikel
+- `.github/workflows/test_scrape_klexikon_images.yml` — 3-Artikel-Test ✓
+- `.github/workflows/scrape_all_klexikon.yml` — Vollrun-Workflow ✓
 
 ## Zuletzt erledigt (Session 2026-05-28 Abend — UI-Fixes + Offline-Library-Verbesserungen)
 
