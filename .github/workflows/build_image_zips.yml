@@ -4,7 +4,7 @@ name: Build Image ZIPs (Hash-basiert)
 # INPUT: article_image_map.json vom Scrape-Run
 # OUTPUT: images_thumb.zip (300px) + images_standard.zip (800px) → R2
 #
-# Laufzeit: ~70 Min (3 parallele Shards à ~23 Min)
+# Laufzeit: ~90 Min (6 parallele Shards à ~88 Min)
 # Run: Actions → Build Image ZIPs → Run workflow
 
 on:
@@ -28,16 +28,17 @@ on:
 
 env:
   MIN_SUCCESS_PCT: '85'
+  SHARD_COUNT: '6'
 
 jobs:
-  # ── Shard-Downloads (3× parallel) ────────────────────────────────────────────
+  # ── Shard-Downloads (6× parallel) ────────────────────────────────────────────
   download:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 300
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2]
+        shard: [0, 1, 2, 3, 4, 5]
 
     steps:
       - uses: actions/checkout@v5
@@ -63,7 +64,7 @@ jobs:
           MAX_IMAGES:      ${{ inputs.max_images || '0' }}
           MIN_SUCCESS_PCT: ${{ env.MIN_SUCCESS_PCT }}
           SHARD_INDEX:     ${{ matrix.shard }}
-          SHARD_COUNT:     '3'
+          SHARD_COUNT:     ${{ env.SHARD_COUNT }}
 
       - name: Upload Shard-Artefakte
         uses: actions/upload-artifact@v5
@@ -91,28 +92,22 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Shard 0 laden
-        uses: actions/download-artifact@v5
-        with:
-          name: image-shard-0
-          path: shard-0/
-
-      - name: Shard 1 laden
-        uses: actions/download-artifact@v5
-        with:
-          name: image-shard-1
-          path: shard-1/
-
-      - name: Shard 2 laden
-        uses: actions/download-artifact@v5
-        with:
-          name: image-shard-2
-          path: shard-2/
+      - name: Alle Shard-Artefakte laden
+        run: |
+          for s in $(seq 0 $((SHARD_COUNT-1))); do
+            gh run download ${{ github.run_id }} \
+              --name image-shard-${s} \
+              --dir shard-${s}/
+            echo "Shard ${s} geladen: $(ls -lh shard-${s}/*.zip 2>/dev/null | awk '{print $5, $9}' | tr '\n' '  ')"
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHARD_COUNT: ${{ env.SHARD_COUNT }}
 
       - name: ZIPs zusammenführen
         run: python scripts/merge_image_zips.py
         env:
-          SHARD_COUNT: '3'
+          SHARD_COUNT: ${{ env.SHARD_COUNT }}
 
       - name: Größen und Summary anzeigen
         if: always()
@@ -145,7 +140,6 @@ jobs:
             fi
           done
 
-          # build_summary nach R2 für spätere Referenz
           aws s3 cp build_summary.json \
             "${R2_BASE}/article_image_map_summary.json" \
             --endpoint-url "$ENDPOINT" \
