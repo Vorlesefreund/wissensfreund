@@ -1,0 +1,66 @@
+name: Build ZIM→API Title Map
+
+# Lädt alle ZIM-Artikel-Titel und alle Live-API-Titel,
+# matched sie exakt + fuzzy (Singular/Plural, ratio > 0.85),
+# speichert nicht-matchbare Titel zur manuellen Prüfung.
+#
+# Run: Actions → Build ZIM→API Title Map → Run workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      ratio_threshold:
+        description: 'difflib-Schwellwert für Singular/Plural-Match (default: 0.85)'
+        required: false
+        default: '0.85'
+        type: string
+
+env:
+  ZIM_URL: https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: pip install zstandard requests
+
+      - name: Download ZIM
+        run: |
+          echo "Downloading $ZIM_URL"
+          curl -fsSL -o klexikon.zim "$ZIM_URL"
+          ls -lh klexikon.zim
+
+      - name: Build title map
+        run: python scripts/build_title_map.py
+        env:
+          ZIM_FILE:        klexikon.zim
+          OUTPUT_FILE:     title_map.json
+          API_DELAY:       '0.3'
+          RATIO_THRESHOLD: ${{ inputs.ratio_threshold || '0.85' }}
+
+      - name: Show compact stats
+        run: |
+          python3 -c "
+          import json
+          d = json.load(open('title_map.json'))
+          s = d['stats']
+          print(f'ZIM: {s[\"zim_total\"]}  API: {s[\"api_total\"]}')
+          print(f'Exact: {s[\"exact\"]}  Fuzzy: {s[\"fuzzy\"]}  ZIM-only: {s[\"zim_only\"]}  API-only: {s[\"api_only\"]}')
+          print(f'Coverage: {(s[\"exact\"]+s[\"fuzzy\"])*100//s[\"zim_total\"]}%')
+          "
+
+      - name: Upload title_map.json
+        uses: actions/upload-artifact@v5
+        with:
+          name: title-map
+          path: title_map.json
+          retention-days: 14
