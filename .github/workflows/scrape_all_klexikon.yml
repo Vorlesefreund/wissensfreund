@@ -1,0 +1,89 @@
+name: Scrape All Klexikon Images
+
+# Vollrun: alle ~3.500 Artikel scrapen → article_image_map.json
+# Nur SCHRITT 1+3+4 (SKIP_COMMONS=1) → ~60 Min Laufzeit
+# Run: Actions → Scrape All Klexikon Images → Run workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      max_articles:
+        description: 'Max. Artikel (0 = alle ~3500)'
+        required: false
+        default: '0'
+        type: string
+      delay:
+        description: 'Sekunden zwischen Requests'
+        required: false
+        default: '0.8'
+        type: string
+
+env:
+  ZIM_URL: https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.10'
+
+      - name: Install deps
+        run: pip install zstandard
+
+      - name: Download ZIM
+        run: |
+          curl -fsSL -o klexikon.zim "$ZIM_URL"
+          ls -lh klexikon.zim
+
+      - name: Scrape alle Artikel
+        run: python scripts/scrape_klexikon_images.py
+        env:
+          ZIM_FILE:     klexikon.zim
+          ALL_ARTICLES: '1'
+          SKIP_COMMONS: '1'
+          MAX_ARTICLES: ${{ inputs.max_articles || '0' }}
+          DELAY:        ${{ inputs.delay || '0.8' }}
+          OUTPUT:       article_image_map.json
+
+      - name: Zusammenfassung
+        if: always()
+        run: |
+          echo "=== Letzte 30 Zeilen ==="
+          tail -30 article_image_map.json 2>/dev/null || echo "(keine Ausgabe)"
+          echo ""
+          echo "=== Statistik ==="
+          python3 -c "
+          import json, sys
+          try:
+              data = json.load(open('article_image_map.json', encoding='utf-8'))
+          except Exception as e:
+              print(f'Fehler: {e}'); sys.exit(0)
+          ok   = sum(1 for r in data if r['status'] == 'OK')
+          warn = sum(1 for r in data if r['status'].startswith('WARN'))
+          stop = sum(1 for r in data if r['status'].startswith('STOP'))
+          imgs = sum(r.get('live_count', 0) for r in data)
+          maps = sum(r.get('mapped', 0) for r in data)
+          print(f'Artikel gesamt: {len(data)}')
+          print(f'OK:     {ok}')
+          print(f'WARN:   {warn}')
+          print(f'STOP:   {stop}')
+          print(f'Bilder (live):  {imgs}')
+          print(f'Hash-Mappings:  {maps}')
+          no_imgs = [r[\"article\"] for r in data if r.get(\"live_count\",0)==0]
+          if no_imgs:
+              print(f'Ohne Bilder ({len(no_imgs)}): {no_imgs[:10]}')
+          " 2>/dev/null || true
+
+      - name: Upload article_image_map
+        uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: article-image-map
+          path: article_image_map.json
+          retention-days: 30

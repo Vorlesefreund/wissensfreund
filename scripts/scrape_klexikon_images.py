@@ -28,10 +28,13 @@ try:
 except ImportError:
     HAS_ZSTD = False
 
-ZIM_FILE = os.environ.get("ZIM_FILE", "klexikon.zim")
-ARTICLES = [a.strip() for a in os.environ.get("ARTICLES", "Elefanten,Fußball,Berlin").split(",")]
-DELAY    = float(os.environ.get("DELAY", "1.0"))
-OUTPUT   = Path(os.environ.get("OUTPUT", "scrape_image_results.json"))
+ZIM_FILE     = os.environ.get("ZIM_FILE", "klexikon.zim")
+ARTICLES     = [a.strip() for a in os.environ.get("ARTICLES", "Elefanten,Fußball,Berlin").split(",") if a.strip()]
+DELAY        = float(os.environ.get("DELAY", "1.0"))
+OUTPUT       = Path(os.environ.get("OUTPUT", "scrape_image_results.json"))
+SKIP_COMMONS = os.environ.get("SKIP_COMMONS", "0") == "1"
+ALL_ARTICLES = os.environ.get("ALL_ARTICLES", "0") == "1"
+MAX_ARTICLES = int(os.environ.get("MAX_ARTICLES", "0"))  # 0 = kein Limit
 
 KLEXIKON  = "https://klexikon.zum.de"
 ZIM_MAGIC = 0x044D495A
@@ -365,25 +368,34 @@ def process_article(
         plausibility_ok = False
 
     # ── Schritt 2 ────────────────────────────────────────────────
-    print("Schritt 2 — Datei-Seiten → Commons-URLs …")
     commons_entries: list[dict] = []
     no_commons = 0
-    for item in live_files:
-        fn = item["filename"]
-        cu = scrape_commons_url(fn)
-        if cu is None:
-            no_commons += 1
-            print(f"  WARN keine Commons-URL: {fn}")
-        commons_entries.append({
-            "filename":   fn,
-            "caption":    item["caption"],
-            "commons_url": cu,
-        })
+    if SKIP_COMMONS:
+        print("Schritt 2 — übersprungen (SKIP_COMMONS=1)")
+        for item in live_files:
+            commons_entries.append({
+                "filename":    item["filename"],
+                "caption":     item["caption"],
+                "commons_url": None,
+            })
+    else:
+        print("Schritt 2 — Datei-Seiten → Commons-URLs …")
+        for item in live_files:
+            fn = item["filename"]
+            cu = scrape_commons_url(fn)
+            if cu is None:
+                no_commons += 1
+                print(f"  WARN keine Commons-URL: {fn}")
+            commons_entries.append({
+                "filename":    fn,
+                "caption":     item["caption"],
+                "commons_url": cu,
+            })
 
-    if live_files and no_commons / n_live > 0.5:
-        print(f"  STOP: {no_commons}/{n_live} ohne Commons-URL (>50%)")
-        return {"article": article, "status": "STOP_no_commons",
-                "live_count": n_live, "no_commons": no_commons, "data": []}
+        if live_files and no_commons / n_live > 0.5:
+            print(f"  STOP: {no_commons}/{n_live} ohne Commons-URL (>50%)")
+            return {"article": article, "status": "STOP_no_commons",
+                    "live_count": n_live, "no_commons": no_commons, "data": []}
 
     # ── Schritt 3 (nur mit ZIM) ───────────────────────────────────
     zim_refs: list[dict] = []
@@ -470,6 +482,20 @@ def process_article(
 
 # ── Main ─────────────────────────────────────────────────────────────────────────
 
+def _all_article_titles(zim_index: dict) -> list[str]:
+    """Gibt alle Original-Titel aus dem ZIM-Index zurück (kein Redirect-Filter nötig,
+    build_zim_index liefert bereits nur HTML-Einträge)."""
+    seen_norm: set[str] = set()
+    titles: list[str]   = []
+    for norm, (title, _cn, _bn) in zim_index.items():
+        if norm in seen_norm:
+            continue
+        seen_norm.add(norm)
+        titles.append(title)
+    titles.sort()
+    return titles
+
+
 def main():
     zim_path = Path(ZIM_FILE)
     has_zim  = zim_path.exists()
@@ -483,14 +509,37 @@ def main():
         print(f"INFO: ZIM nicht gefunden ({ZIM_FILE}) — nur Schritt 1+2 aktiv")
         zim_index = cluster_ptrs = eof = None
 
+    # Artikel-Liste bestimmen
+    if ALL_ARTICLES:
+        if not has_zim:
+            print("ERROR: ALL_ARTICLES=1 erfordert ZIM_FILE"); sys.exit(1)
+        articles = _all_article_titles(zim_index)
+        print(f"ALL_ARTICLES: {len(articles)} Artikel aus ZIM-Index")
+    else:
+        articles = ARTICLES
+
+    if MAX_ARTICLES and len(articles) > MAX_ARTICLES:
+        print(f"MAX_ARTICLES={MAX_ARTICLES}: kürze auf {MAX_ARTICLES} Artikel")
+        articles = articles[:MAX_ARTICLES]
+
+    if SKIP_COMMONS:
+        print("SKIP_COMMONS=1: Datei-Seiten werden nicht abgerufen")
+
     all_results = []
     if has_zim:
         with open(zim_path, "rb") as zim_f:
-            for article in ARTICLES:
+            for i, article in enumerate(articles, 1):
+                if ALL_ARTICLES:
+                    print(f"\n[{i}/{len(articles)}]", end="")
                 r = process_article(article, zim_index, cluster_ptrs, eof, zim_f)
                 all_results.append(r)
+                # Periodisch speichern (alle 100 Artikel) damit Teilergebnisse verfügbar sind
+                if ALL_ARTICLES and i % 100 == 0:
+                    OUTPUT.write_text(json.dumps(all_results, indent=2, ensure_ascii=False),
+                                      encoding="utf-8")
+                    print(f"  [Zwischenspeichern: {i} Artikel]")
     else:
-        for article in ARTICLES:
+        for article in articles:
             r = process_article(article, None, None, None, None)
             all_results.append(r)
 
@@ -501,17 +550,26 @@ def main():
     print(f"\n{'='*65}")
     print("ZUSAMMENFASSUNG")
     print(f"{'='*65}")
-    total_mapped   = sum(r.get("mapped", 0)     for r in all_results)
-    total_no_comm  = sum(r.get("no_commons", 0) for r in all_results)
-    total_live     = sum(r.get("live_count", 0) for r in all_results)
-    stops          = [r["article"] for r in all_results if r["status"].startswith("STOP")]
-    for r in all_results:
-        print(f"  {r['article']:20s}  live={r.get('live_count',0):2d}  "
-              f"zim={r.get('zim_count','—'):>2}  mapped={r.get('mapped','—'):>2}  "
-              f"no_commons={r.get('no_commons',0)}  [{r['status']}]")
+    total_mapped  = sum(r.get("mapped", 0)     for r in all_results)
+    total_live    = sum(r.get("live_count", 0) for r in all_results)
+    stops         = [r["article"] for r in all_results if r["status"].startswith("STOP")]
+    ok            = sum(1 for r in all_results if r["status"] == "OK")
+    warn          = sum(1 for r in all_results if r["status"].startswith("WARN"))
+    print(f"  Gesamt: {len(all_results)} Artikel")
+    print(f"  OK:     {ok}")
+    print(f"  WARN:   {warn}")
+    print(f"  STOP:   {len(stops)}")
+    print(f"  Live-Bilder gesamt:  {total_live}")
+    print(f"  Gemappte Hash-Paare: {total_mapped}")
+    if not ALL_ARTICLES:
+        for r in all_results:
+            print(f"  {r['article']:20s}  live={r.get('live_count',0):2d}  "
+                  f"zim={r.get('zim_count','—'):>2}  mapped={r.get('mapped','—'):>2}  "
+                  f"no_commons={r.get('no_commons',0)}  [{r['status']}]")
     if stops:
-        print(f"\nSTOP-Artikel: {stops}")
-        sys.exit(1)
+        print(f"\nSTOP-Artikel ({len(stops)}): {stops[:10]}")
+        if not ALL_ARTICLES:
+            sys.exit(1)
 
 
 if __name__ == "__main__":
