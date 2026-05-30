@@ -99,8 +99,8 @@ def _download_one(filename: str, width: int) -> bytes | None:
 def _download_pair(args: tuple[str, str]) -> tuple[str, str, bytes | None, bytes | None]:
     """Lädt Thumb (300px) und Standard (800px) gleichzeitig herunter."""
     h, fn = args
-    # Zufälliger Start-Offset verhindert den initialen Thundering-Herd-Burst
-    time.sleep(random.uniform(0, 2.0))
+    # Kleiner Jitter verhindert den initialen Thundering-Herd-Burst
+    time.sleep(random.uniform(0, 0.5))
     with ThreadPoolExecutor(max_workers=2) as ex:
         f_thumb = ex.submit(_download_one, fn, 300)
         f_std   = ex.submit(_download_one, fn, 800)
