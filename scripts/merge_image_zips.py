@@ -18,12 +18,33 @@ Env:
 
 import json
 import os
+import subprocess
 import sys
 import zipfile
 from pathlib import Path
 
 SHARD_COUNT = int(os.environ.get("SHARD_COUNT", "3"))
 TIERS = ["thumb", "standard"]
+
+
+def _open_zip(src: Path) -> zipfile.ZipFile | None:
+    """Öffnet ZIP; versucht Reparatur mit 'zip -F' bei BadZipFile."""
+    try:
+        return zipfile.ZipFile(src, "r")
+    except zipfile.BadZipFile:
+        print(f"  WARN: {src} beschädigt — versuche zip -F Reparatur …", file=sys.stderr)
+        fixed = src.with_suffix(".fixed.zip")
+        try:
+            r = subprocess.run(
+                ["zip", "-F", str(src), "--out", str(fixed)],
+                capture_output=True, timeout=120
+            )
+            if r.returncode == 0 and fixed.exists() and fixed.stat().st_size > 1000:
+                return zipfile.ZipFile(fixed, "r")
+        except Exception as e:
+            print(f"  WARN: zip -F fehlgeschlagen: {e}", file=sys.stderr)
+        print(f"  WARN: {src} übersprungen (nicht reparierbar)", file=sys.stderr)
+        return None
 
 
 def main() -> None:
@@ -38,7 +59,10 @@ def main() -> None:
                 if not src.exists():
                     print(f"  WARN: {src} nicht gefunden", file=sys.stderr)
                     continue
-                with zipfile.ZipFile(src, "r") as in_zip:
+                in_zip = _open_zip(src)
+                if in_zip is None:
+                    continue
+                with in_zip:
                     count = 0
                     for item in in_zip.infolist():
                         out_zip.writestr(item, in_zip.read(item.filename))
