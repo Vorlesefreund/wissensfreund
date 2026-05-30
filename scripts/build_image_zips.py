@@ -24,6 +24,7 @@ Env:
 import hashlib
 import json
 import os
+import random
 import sys
 import time
 import zipfile
@@ -41,7 +42,7 @@ MAX_IMAGES      = int(os.environ.get("MAX_IMAGES",         "0"))
 MIN_SUCCESS_PCT = int(os.environ.get("MIN_SUCCESS_PCT",    "85"))
 SHARD_INDEX     = int(os.environ.get("SHARD_INDEX",        "0"))
 SHARD_COUNT     = int(os.environ.get("SHARD_COUNT",        "1"))
-OUTER_WORKERS   = int(os.environ.get("OUTER_WORKERS",      "10"))
+OUTER_WORKERS   = int(os.environ.get("OUTER_WORKERS",      "5"))
 
 UA = "Wissensfreund-App/1.0 (educational children's app; az@expansionssupport.de)"
 SKIP_EXTS = {".webm", ".ogv", ".mp4", ".ogg", ".oga", ".wav", ".mp3", ".opus", ".pdf"}
@@ -74,7 +75,7 @@ def _fallback_url(filename: str, width: int) -> str:
 def _download_one(filename: str, width: int) -> bytes | None:
     """Lädt ein Thumbnail herunter. Direkter URL zuerst, Fallback auf Special:FilePath."""
     for url in (_direct_url(filename, width), _fallback_url(filename, width)):
-        for attempt in range(2):
+        for attempt in range(3):
             try:
                 r = _session.get(url, timeout=30, allow_redirects=True)
                 if r.status_code == 200 and len(r.content) >= 500:
@@ -82,8 +83,10 @@ def _download_one(filename: str, width: int) -> bytes | None:
                 if r.status_code == 404:
                     break           # nächste URL versuchen
                 if r.status_code == 429:
-                    wait = 60 * (attempt + 1)
-                    print(f"  429 — warte {wait}s …", file=sys.stderr)
+                    base = 60 * (attempt + 1)
+                    # Jitter verhindert synchrone Retry-Stürme bei parallelen Workern
+                    wait = base + random.uniform(0, base * 0.5)
+                    print(f"  429 — warte {wait:.0f}s …", file=sys.stderr)
                     time.sleep(wait)
                     continue
                 break               # anderer Fehler → nächste URL
@@ -96,6 +99,8 @@ def _download_one(filename: str, width: int) -> bytes | None:
 def _download_pair(args: tuple[str, str]) -> tuple[str, str, bytes | None, bytes | None]:
     """Lädt Thumb (300px) und Standard (800px) gleichzeitig herunter."""
     h, fn = args
+    # Zufälliger Start-Offset verhindert den initialen Thundering-Herd-Burst
+    time.sleep(random.uniform(0, 2.0))
     with ThreadPoolExecutor(max_workers=2) as ex:
         f_thumb = ex.submit(_download_one, fn, 300)
         f_std   = ex.submit(_download_one, fn, 800)
@@ -147,8 +152,8 @@ def main() -> None:
         pairs = pairs[:MAX_IMAGES]
 
     n = len(pairs)
-    # Laufzeitschätzung: OUTER_WORKERS parallele Downloads, ~2s/Bild im Schnitt
-    est_sec = n * 2.0 / OUTER_WORKERS
+    # Laufzeitschätzung: ~10-20s/Bild (inkl. on-demand-Thumbnail-Generierung) / OUTER_WORKERS
+    est_sec = n * 15 / OUTER_WORKERS
     est_min = est_sec / 60
     print(f"\n{'='*65}")
     print(f"Bilder: {n}  |  OUTER_WORKERS={OUTER_WORKERS}  |  DELAY={DELAY}s/Worker")
