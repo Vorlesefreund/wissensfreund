@@ -156,8 +156,10 @@ class HiResImageService {
     }
   }
 
-  File _cacheFile(String filename) =>
-      File('${StorageManager.instance.imageCacheDir.path}/$filename');
+  File _cacheFile(String filename) {
+    final key = filename.replaceFirst(RegExp(r'^_assets_[/\\]'), '');
+    return File('${StorageManager.instance.imageCacheDir.path}/$key');
+  }
 
   Future<int> cacheSizeBytes() => LicenseCacheDb.instance.imageCacheTotalBytes();
 

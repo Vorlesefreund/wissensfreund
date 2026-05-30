@@ -164,8 +164,12 @@ class ImageLibraryService {
 
   // ── Internal ─────────────────────────────────────────────────────────────────
 
-  File _fileFor(String filename) =>
-      File('${StorageManager.instance.imageLibraryDir.path}/$filename');
+  File _fileFor(String filename) {
+    // New hash-based ZIPs store entries as "{hash}.jpg".
+    // ZimReader passes "_assets_/{hash}.jpg" from the ZIM HTML src attribute.
+    final key = filename.replaceFirst(RegExp(r'^_assets_[/\\]'), '');
+    return File('${StorageManager.instance.imageLibraryDir.path}/$key');
+  }
 
   Future<void> _extractZipTo(String zipPath, Directory dir,
       {void Function(int done, int total)? onExtractProgress}) async {
