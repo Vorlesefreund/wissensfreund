@@ -2,21 +2,23 @@
 """
 build_image_zips.py — Hash-basierte Bild-ZIPs aus article_image_map.json
 
-Optimierungen gegenüber v1:
+Optimierungen v3:
   - Direkte Thumbnail-URL (MD5 des Dateinamens) — kein HTTP-Redirect
-  - Thumb (300px) und Standard (800px) werden GLEICHZEITIG heruntergeladen
+  - OUTER_WORKERS Bilder werden gleichzeitig heruntergeladen
+  - Pro Bild: Thumb (300px) und Standard (800px) parallel (2 Threads)
   - requests.Session mit Connection-Pooling
 
 INPUT:  article_image_map.json
 OUTPUT: images_thumb.zip, images_standard.zip, build_summary.json, skipped.log
 
 Env:
-  IMAGE_MAP       article_image_map.json       (default: article_image_map.json)
-  DELAY           Pause zwischen Bildern (s)   (default: 0.1)
-  MAX_IMAGES      Testlimit, 0=alle            (default: 0)
-  MIN_SUCCESS_PCT Mindest-Erfolgsquote %       (default: 85)
-  SHARD_INDEX     0-basiert                    (default: 0)
-  SHARD_COUNT     Gesamtzahl Shards            (default: 1)
+  IMAGE_MAP         article_image_map.json       (default: article_image_map.json)
+  DELAY             Pause pro Worker nach Download(default: 0.1)
+  MAX_IMAGES        Testlimit, 0=alle            (default: 0)
+  MIN_SUCCESS_PCT   Mindest-Erfolgsquote %       (default: 85)
+  SHARD_INDEX       0-basiert                    (default: 0)
+  SHARD_COUNT       Gesamtzahl Shards            (default: 1)
+  OUTER_WORKERS     Parallele Bild-Downloads     (default: 10)
 """
 
 import hashlib
@@ -25,7 +27,7 @@ import os
 import sys
 import time
 import zipfile
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import date
 from pathlib import Path
 from urllib.parse import quote
@@ -39,16 +41,17 @@ MAX_IMAGES      = int(os.environ.get("MAX_IMAGES",         "0"))
 MIN_SUCCESS_PCT = int(os.environ.get("MIN_SUCCESS_PCT",    "85"))
 SHARD_INDEX     = int(os.environ.get("SHARD_INDEX",        "0"))
 SHARD_COUNT     = int(os.environ.get("SHARD_COUNT",        "1"))
+OUTER_WORKERS   = int(os.environ.get("OUTER_WORKERS",      "10"))
 
 UA = "Wissensfreund-App/1.0 (educational children's app; az@expansionssupport.de)"
 SKIP_EXTS = {".webm", ".ogv", ".mp4", ".ogg", ".oga", ".wav", ".mp3", ".opus", ".pdf"}
-LOG_INTERVAL = 500
+LOG_INTERVAL = 200
 
 # ── HTTP Session mit Connection-Pooling ──────────────────────────────────────
 
 _session = requests.Session()
 _session.headers["User-Agent"] = UA
-_adapter = HTTPAdapter(pool_connections=10, pool_maxsize=20)
+_adapter = HTTPAdapter(pool_connections=20, pool_maxsize=40)
 _session.mount("https://", _adapter)
 _session.mount("http://",  _adapter)
 
@@ -91,12 +94,15 @@ def _download_one(filename: str, width: int) -> bytes | None:
 
 
 def _download_pair(args: tuple[str, str]) -> tuple[str, str, bytes | None, bytes | None]:
-    """Lädt Thumb (300px) und Standard (800px) GLEICHZEITIG herunter."""
+    """Lädt Thumb (300px) und Standard (800px) gleichzeitig herunter."""
     h, fn = args
     with ThreadPoolExecutor(max_workers=2) as ex:
         f_thumb = ex.submit(_download_one, fn, 300)
         f_std   = ex.submit(_download_one, fn, 800)
-    return h, fn, f_thumb.result(), f_std.result()
+        thumb = f_thumb.result()
+        std   = f_std.result()
+    time.sleep(DELAY)
+    return h, fn, thumb, std
 
 
 # ── Artikel-Map laden ─────────────────────────────────────────────────────────
@@ -141,43 +147,47 @@ def main() -> None:
         pairs = pairs[:MAX_IMAGES]
 
     n = len(pairs)
-    # Laufzeitschätzung: parallele Downloads ~1.2s/Bild + DELAY
-    est_sec = n * (1.2 + DELAY)
+    # Laufzeitschätzung: OUTER_WORKERS parallele Downloads, ~2s/Bild im Schnitt
+    est_sec = n * 2.0 / OUTER_WORKERS
     est_min = est_sec / 60
     print(f"\n{'='*65}")
-    print(f"Bilder: {n}  |  2 Größen parallel  |  DELAY={DELAY}s")
-    print(f"Laufzeit-Schätzung: ~{est_min:.0f} Min")
+    print(f"Bilder: {n}  |  OUTER_WORKERS={OUTER_WORKERS}  |  DELAY={DELAY}s/Worker")
+    print(f"Laufzeit-Schätzung: ~{est_min:.0f} Min (konservativ)")
     print(f"Plausibilitätsschwelle: ≥{MIN_SUCCESS_PCT}%")
     print(f"{'='*65}\n")
 
     counts   = {"thumb": 0, "standard": 0}
     failures = {"thumb": [], "standard": []}
 
-    zips = {
-        "thumb":    zipfile.ZipFile("images_thumb.zip",    "w", zipfile.ZIP_STORED),
-        "standard": zipfile.ZipFile("images_standard.zip", "w", zipfile.ZIP_STORED),
-    }
-
     t_start = time.monotonic()
-    for i, (h, fn, thumb, std) in enumerate(map(_download_pair, pairs), 1):
-        time.sleep(DELAY)
-        if thumb:
-            zips["thumb"].writestr(h, thumb);     counts["thumb"]    += 1
-        else:
-            failures["thumb"].append(fn)
-        if std:
-            zips["standard"].writestr(h, std);    counts["standard"] += 1
-        else:
-            failures["standard"].append(fn)
 
-        if i % LOG_INTERVAL == 0 or i == n:
-            elapsed = time.monotonic() - t_start
-            eta     = (n - i) * elapsed / i if i else 0
-            print(f"  [{i:>5}/{n}] thumb={counts['thumb']}  std={counts['standard']}"
-                  f"  fail={len(failures['thumb'])}  elapsed={elapsed:.0f}s  ETA={eta:.0f}s")
+    with (zipfile.ZipFile("images_thumb.zip",    "w", zipfile.ZIP_STORED) as z_thumb,
+          zipfile.ZipFile("images_standard.zip", "w", zipfile.ZIP_STORED) as z_std):
 
-    for z in zips.values():
-        z.close()
+        with ThreadPoolExecutor(max_workers=OUTER_WORKERS) as pool:
+            futures = {pool.submit(_download_pair, p): p for p in pairs}
+            done = 0
+            for future in as_completed(futures):
+                done += 1
+                h, fn, thumb, std = future.result()
+
+                if thumb:
+                    z_thumb.writestr(h, thumb)
+                    counts["thumb"] += 1
+                else:
+                    failures["thumb"].append(fn)
+
+                if std:
+                    z_std.writestr(h, std)
+                    counts["standard"] += 1
+                else:
+                    failures["standard"].append(fn)
+
+                if done % LOG_INTERVAL == 0 or done == n:
+                    elapsed = time.monotonic() - t_start
+                    eta     = (n - done) * elapsed / done if done else 0
+                    print(f"  [{done:>5}/{n}] thumb={counts['thumb']}  std={counts['standard']}"
+                          f"  fail={len(failures['thumb'])}  elapsed={elapsed:.0f}s  ETA={eta:.0f}s")
 
     # ── Ergebnis ─────────────────────────────────────────────────────────────
     print(f"\n{'='*65}")

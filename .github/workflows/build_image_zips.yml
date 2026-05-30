@@ -25,6 +25,11 @@ on:
         required: false
         default: '0.15'
         type: string
+      outer_workers:
+        description: 'Parallele Bild-Downloads pro Shard'
+        required: false
+        default: '10'
+        type: string
 
 env:
   MIN_SUCCESS_PCT: '85'
@@ -68,6 +73,7 @@ jobs:
           MIN_SUCCESS_PCT: ${{ env.MIN_SUCCESS_PCT }}
           SHARD_INDEX:     ${{ matrix.shard }}
           SHARD_COUNT:     ${{ env.SHARD_COUNT }}
+          OUTER_WORKERS:   ${{ inputs.outer_workers || '10' }}
 
       - name: Upload Shard-Artefakte
         uses: actions/upload-artifact@v5
