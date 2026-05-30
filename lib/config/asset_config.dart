@@ -16,6 +16,7 @@ class AssetConfig {
   static String get audioIndexUrl     => '$r2BaseUrl/audio_index.json';
   static String get audioZipUrl       => '$r2BaseUrl/wissensfreund_audio.zip';
   static String get zimVersionUrl     => '$r2BaseUrl/zim_version.json';
+  static String get imageIndexUrl     => '$r2BaseUrl/image_index.json';
 
   // ── Image tiers ─────────────────────────────────────────────────────────────
   // thumb (300px)    — Free tier, offline download (~545 MB, ~15k images)

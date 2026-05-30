@@ -9,6 +9,7 @@ import 'package:just_audio/just_audio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/audio_package_service.dart';
+import '../services/hires_image_service.dart';
 import '../services/image_library_service.dart';
 import '../services/license_cache_db.dart';
 import '../services/network_service.dart';
@@ -1383,22 +1384,55 @@ class WissensfreundProvider extends ChangeNotifier {
   Future<Uint8List?> getImageBytes(String filename) async {
     if (_imageBytesCache.containsKey(filename)) return _imageBytesCache[filename];
     try {
-      // Prefer offline library (medium quality 800px) over ZIM bytes.
-      final libraryBytes = await ImageLibraryService.instance.getImage(filename);
-      if (libraryBytes != null) {
-        if (libraryBytes.length <= 2 * 1024 * 1024) {
-          _imageBytesCache[filename] = libraryBytes;
-        }
-        return libraryBytes;
-      }
-
-      // Fall back to native ZIM extraction.
-      final bytes =
-          await _zimChannel.invokeMethod<Uint8List>('getImageBytes', {'filename': filename});
+      final bytes = await _resolveImageBytes(filename);
       if (bytes != null && bytes.length <= 2 * 1024 * 1024) {
         _imageBytesCache[filename] = bytes;
       }
       return bytes;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Routing logic depending on subscription tier and Plus image mode.
+  ///
+  /// Free:                   thumb ZIP (300px)        → ZIM
+  /// Plus onDemand:          HiRes (2048px, WiFi)     → thumb ZIP → ZIM
+  /// Plus offline:           standard ZIP (800px)     → ZIM
+  /// Plus offlineOnDemand:   HiRes (2048px, WiFi)     → standard ZIP → ZIM
+  Future<Uint8List?> _resolveImageBytes(String filename) async {
+    final isPlus = SubscriptionService.instance.isPlus;
+
+    if (!isPlus) {
+      // Free: thumb ZIP only.
+      return await ImageLibraryService.instance.getImage(filename)
+          ?? await _zimBytes(filename);
+    }
+
+    final mode = await ImageLibraryService.getStoredMode();
+
+    switch (mode) {
+      case PlusImageMode.onDemand:
+        return await HiResImageService.instance.getHiResImage(filename)
+            ?? await ImageLibraryService.instance.getImage(filename)
+            ?? await _zimBytes(filename);
+
+      case PlusImageMode.offline:
+        return await ImageLibraryService.instance.getImage(filename)
+            ?? await _zimBytes(filename);
+
+      case PlusImageMode.offlineOnDemand:
+        return await HiResImageService.instance.getHiResImage(filename)
+            ?? await ImageLibraryService.instance.getImage(filename)
+            ?? await _zimBytes(filename);
+    }
+  }
+
+  Future<Uint8List?> _zimBytes(String filename) async {
+    try {
+      return await _zimChannel.invokeMethod<Uint8List>(
+        'getImageBytes', {'filename': filename},
+      );
     } catch (_) {
       return null;
     }

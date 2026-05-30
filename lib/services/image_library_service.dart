@@ -9,6 +9,17 @@ import '../config/asset_config.dart';
 import 'asset_download_service.dart';
 import 'storage_manager.dart';
 
+enum PlusImageMode {
+  /// WiFi: 2048px on-demand; no WiFi: 300px thumb ZIP.
+  onDemand,
+
+  /// Always: 800px standard ZIP; no on-demand.
+  offline,
+
+  /// WiFi: 2048px on-demand; no WiFi: 800px standard ZIP. (Default)
+  offlineOnDemand,
+}
+
 class _CancelledException implements Exception {
   const _CancelledException();
 }
@@ -64,10 +75,26 @@ class ImageLibraryService {
   int get downloadTotalBytes => _downloadTotalBytes;
   Duration? get downloadEta => _downloadEta;
 
-  /// Returns true if thumb tier (300px), false if standard (600px), null if unknown.
+  /// Returns true if thumb tier (300px), false if standard (800px), null if unknown.
   static Future<bool?> getStoredTier() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool('image_library_thumb_tier');
+  }
+
+  /// Current Plus image mode. Default: offlineOnDemand.
+  static Future<PlusImageMode> getStoredMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    switch (prefs.getString('plus_image_mode')) {
+      case 'onDemand':       return PlusImageMode.onDemand;
+      case 'offline':        return PlusImageMode.offline;
+      case 'offlineOnDemand':
+      default:               return PlusImageMode.offlineOnDemand;
+    }
+  }
+
+  static Future<void> setMode(PlusImageMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('plus_image_mode', mode.name);
   }
 
   /// Downloads the image library ZIP from R2, extracts it into image_library/.

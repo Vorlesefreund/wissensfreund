@@ -69,6 +69,23 @@ jobs:
               print(f'  {r[\"article\"]:25s}  live={r[\"live_count\"]}  zim={r[\"zim_count\"]}  gap={r[\"gap\"]}')
           " 2>/dev/null || true
 
+      - name: Generate image_index.json
+        run: python scripts/generate_image_index.py
+        env:
+          INPUT:  article_image_map.json
+          OUTPUT: image_index.json
+
+      - name: Upload image_index.json nach R2
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+        run: |
+          ENDPOINT="https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com"
+          aws s3 cp image_index.json \
+            "s3://${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}/image_index.json" \
+            --endpoint-url "$ENDPOINT" --no-progress
+          echo "✓ image_index.json auf R2"
+
       - name: Upload Ergebnisse
         uses: actions/upload-artifact@v5
         if: always()
@@ -78,4 +95,5 @@ jobs:
             article_image_map.json
             gallery_articles.json
             run_summary.json
+            image_index.json
           retention-days: 30
