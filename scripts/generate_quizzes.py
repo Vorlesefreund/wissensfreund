@@ -43,22 +43,22 @@ REGELN:
 - Ausgabe: NUR valides JSON, kein Markdown, keine Erklärung
 
 FORMAT:
-{
+{{
   "questions": [
-    {
+    {{
       "id": "q01",
       "question": "...",
       "options": [
-        {"key": "A", "text": "..."},
-        {"key": "B", "text": "..."},
-        {"key": "C", "text": "..."}
+        {{"key": "A", "text": "..."}},
+        {{"key": "B", "text": "..."}},
+        {{"key": "C", "text": "..."}}
       ],
       "correct_key": "A",
       "explanation": "...",
       "image_quiz": false
-    }
+    }}
   ]
-}
+}}
 
 ARTIKELTITEL: {title}
 
