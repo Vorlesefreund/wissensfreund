@@ -9,17 +9,6 @@ import '../config/asset_config.dart';
 import 'asset_download_service.dart';
 import 'storage_manager.dart';
 
-enum PlusImageMode {
-  /// WiFi: 2048px on-demand; no WiFi: 300px thumb ZIP.
-  onDemand,
-
-  /// Always: 800px standard ZIP; no on-demand.
-  offline,
-
-  /// WiFi: 2048px on-demand; no WiFi: 800px standard ZIP. (Default)
-  offlineOnDemand,
-}
-
 class _CancelledException implements Exception {
   const _CancelledException();
 }
@@ -81,20 +70,15 @@ class ImageLibraryService {
     return prefs.getBool('image_library_thumb_tier');
   }
 
-  /// Current Plus image mode. Default: offlineOnDemand.
-  static Future<PlusImageMode> getStoredMode() async {
+  /// Whether to auto-load best available image on WiFi (default: true).
+  static Future<bool> hiresOnWifiEnabled() async {
     final prefs = await SharedPreferences.getInstance();
-    switch (prefs.getString('plus_image_mode')) {
-      case 'onDemand':       return PlusImageMode.onDemand;
-      case 'offline':        return PlusImageMode.offline;
-      case 'offlineOnDemand':
-      default:               return PlusImageMode.offlineOnDemand;
-    }
+    return prefs.getBool('hires_on_wifi_enabled') ?? true;
   }
 
-  static Future<void> setMode(PlusImageMode mode) async {
+  static Future<void> setHiresOnWifi(bool enabled) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('plus_image_mode', mode.name);
+    await prefs.setBool('hires_on_wifi_enabled', enabled);
   }
 
   /// Downloads the image library ZIP from R2, extracts it into image_library/.

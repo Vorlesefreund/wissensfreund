@@ -1779,10 +1779,10 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
   String? _error;
   int _freeBytes = -1; // -1 = noch nicht geladen
 
-  // thumb: ~400 MB peak (141 MB ZIP + extraction); standard: ~600 MB peak
+  // peak = ZIP + extracted (both ~same size, ZIP_STORED)
   static int get _requiredBytes => SubscriptionService.instance.isPlus
-      ? 600 * 1024 * 1024
-      : 400 * 1024 * 1024;
+      ? AssetConfig.imageLibrarySizeBytes * 2   // ~6.6 GB
+      : AssetConfig.imageThumbLibrarySizeBytes * 2; // ~1.1 GB
 
   @override
   void initState() {
@@ -1881,7 +1881,7 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
                     final isPlus = SubscriptionService.instance.isPlus;
                     return _QualityRow(
                       icon: Icons.hd_outlined,
-                      title: isPlus ? 'Gut  (~218 MB)' : 'Einheitlich 300px  (~141 MB)',
+                      title: isPlus ? 'Gut  (~3,3 GB · 800px)' : 'Einheitlich 300px  (~545 MB)',
                       subtitle: 'Offline-Bilderbibliothek · ca. 1–3 min im WLAN',
                       highlight: _hasEnoughSpace,
                     );
@@ -1923,7 +1923,7 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
                   style: FilledButton.styleFrom(
                       backgroundColor: const Color(0xFF2E7D32)),
                   onPressed: _hasEnoughSpace ? _startDownload : null,
-                  child: const Text('Gut herunterladen'),
+                  child: Text(SubscriptionService.instance.isPlus ? 'Herunterladen (800px)' : 'Herunterladen (300px)'),
                 ),
               ],
       ),
@@ -1999,7 +1999,8 @@ class _StorageScreen extends StatefulWidget {
 
 class _StorageScreenState extends State<_StorageScreen> {
   int _libraryBytes = 0;
-  bool? _libraryIsThumb; // true=300px, false=600px, null=unbekannt
+  bool? _libraryIsThumb; // true=300px, false=800px, null=unbekannt
+  bool _hiresOnWifi = true;
   bool _loadingLibrary = false;
   bool _loadingStats = true;
 
@@ -2025,12 +2026,14 @@ class _StorageScreenState extends State<_StorageScreen> {
       await StorageManager.instance.initialize();
       final bgDl = ImageLibraryService.instance.isDownloading && !_downloading;
       if (!mounted) return;
-      final tier = await ImageLibraryService.getStoredTier();
+      final tier     = await ImageLibraryService.getStoredTier();
+      final hiresWifi = await ImageLibraryService.hiresOnWifiEnabled();
       if (!mounted) return;
       setState(() {
-        _libraryBytes = ImageLibraryService.instance.totalSizeBytes;
+        _libraryBytes   = ImageLibraryService.instance.totalSizeBytes;
         _libraryIsThumb = tier;
-        _bgDownloading = bgDl;
+        _hiresOnWifi    = hiresWifi;
+        _bgDownloading  = bgDl;
         if (bgDl) {
           _dlProgress = ImageLibraryService.instance.downloadProgress;
           _dlEta = ImageLibraryService.instance.downloadEta;
@@ -2127,7 +2130,7 @@ class _StorageScreenState extends State<_StorageScreen> {
           const Row(children: [
             Icon(Icons.star_rounded, color: Color(0xFF2E7D32), size: 18),
             SizedBox(width: 6),
-            Text('Mit Plus: Bilder in 600px',
+            Text('Mit Plus: Bilder in guter Qualität',
                 style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
@@ -2135,7 +2138,7 @@ class _StorageScreenState extends State<_StorageScreen> {
           ]),
           const SizedBox(height: 6),
           const Text(
-            'Bessere Bildqualität offline (~218 MB) und automatisch beste Qualität bei WLAN.',
+            '800px statt 300px offline (~3,3 GB) und automatisch beste Qualität bei WLAN.',
             style: TextStyle(fontSize: 12, color: Color(0xFF555555)),
           ),
           const SizedBox(height: 10),
@@ -2173,7 +2176,7 @@ class _StorageScreenState extends State<_StorageScreen> {
             const SizedBox(width: 10),
             Expanded(
               child: Text(
-                'Fertig! $tierLabel-Bilder sind jetzt verfügbar.',
+                'Fertig — $tierLabel-Bilder sind jetzt verfügbar.',
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Color(0xFF2E7D32)),
               ),
             ),
@@ -2186,7 +2189,7 @@ class _StorageScreenState extends State<_StorageScreen> {
     final tierLabel = _downloadingThumbTier == true
         ? '300px (Free-Qualität)'
         : _downloadingThumbTier == false
-            ? '600px (Plus-Qualität)'
+            ? '800px (Plus-Qualität)'
             : 'Bilder';
     final extractPct = extracting ? ((_dlProgress - 1.0) * 100).round() : 0;
 
@@ -2275,7 +2278,7 @@ class _StorageScreenState extends State<_StorageScreen> {
                     const SizedBox(height: 4),
                     if (!isDl)
                       const Text(
-                        'Lokal speichern für einheitlich 300px (~141 MB)',
+                        'Lokal speichern für einheitlich 300px (~545 MB)',
                         style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
                       ),
                     const SizedBox(height: 12),
@@ -2292,7 +2295,7 @@ class _StorageScreenState extends State<_StorageScreen> {
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.download_rounded, size: 18),
-                          label: const Text('Bilder herunterladen (300px, ~141 MB)'),
+                          label: const Text('Bilder herunterladen (300px, ~545 MB)'),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF2E7D32),
                             side: const BorderSide(color: Color(0xFF2E7D32)),
@@ -2307,7 +2310,7 @@ class _StorageScreenState extends State<_StorageScreen> {
                   ] else if (!isPlus && hasLib) ...[
                     _InfoRow(
                       label: 'Offline-Bilder',
-                      value: '300px — ${_fmtSize(_libraryBytes)}',
+                      value: '300px (Free) — ${_fmtSize(_libraryBytes)}',
                     ),
                     const SizedBox(height: 12),
                     SizedBox(
@@ -2337,7 +2340,7 @@ class _StorageScreenState extends State<_StorageScreen> {
                     const SizedBox(height: 4),
                     if (!isDl)
                       const Text(
-                        'Lade alle Bilder für schnelle Offline-Anzeige (~218 MB)',
+                        'Lade alle Bilder für schnelle Offline-Anzeige (~3,3 GB)',
                         style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
                       ),
                     const SizedBox(height: 12),
@@ -2354,7 +2357,7 @@ class _StorageScreenState extends State<_StorageScreen> {
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.download_rounded, size: 18),
-                          label: const Text('Bilder herunterladen (600px, ~218 MB)'),
+                          label: const Text('Bilder herunterladen (800px, ~3,3 GB)'),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF2E7D32),
                             side: const BorderSide(color: Color(0xFF2E7D32)),
@@ -2367,12 +2370,12 @@ class _StorageScreenState extends State<_StorageScreen> {
                   ] else ...[
                     _InfoRow(
                       label: 'Offline-Bilder',
-                      value: '${_libraryIsThumb == true ? "300px (Free-Qualität)" : _libraryIsThumb == false ? "600px" : "Unbekannte Qualität"} — ${_fmtSize(_libraryBytes)}',
+                      value: '${_libraryIsThumb == true ? "300px (Free)" : _libraryIsThumb == false ? "800px (Plus)" : "Unbekannte Qualität"} — ${_fmtSize(_libraryBytes)}',
                     ),
                     if (_libraryIsThumb != false) ...[
                       const SizedBox(height: 4),
                       const Text(
-                        'Mit Plus kannst du auf 600px upgraden (~218 MB)',
+                        'Mit Plus kannst du auf 800px upgraden (~3,3 GB)',
                         style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
                       ),
                       const SizedBox(height: 12),
@@ -2383,7 +2386,7 @@ class _StorageScreenState extends State<_StorageScreen> {
                           width: double.infinity,
                           child: OutlinedButton.icon(
                             icon: const Icon(Icons.upgrade_rounded, size: 18),
-                            label: const Text('Auf 600px upgraden (~218 MB)'),
+                            label: const Text('Auf 800px upgraden (~3,3 GB)'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xFF2E7D32),
                               side: const BorderSide(color: Color(0xFF2E7D32)),
@@ -2413,11 +2416,39 @@ class _StorageScreenState extends State<_StorageScreen> {
                         onPressed: _loadingLibrary ? null : _clearLibrary,
                       ),
                     ),
+                    const SizedBox(height: 20),
+                    _buildWifiSwitch(),
                   ],
                 ],
               ),
             ),
             ),
+    );
+  }
+
+  Widget _buildWifiSwitch() {
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFF5F5F5),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: SwitchListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+        title: const Text(
+          'Bei WLAN automatisch höchste Qualität laden',
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+        ),
+        subtitle: const Text(
+          'Hochaufgelöste Bilder direkt von Wikipedia',
+          style: TextStyle(fontSize: 12, color: Color(0xFF666666), height: 1.4),
+        ),
+        value: _hiresOnWifi,
+        activeColor: const Color(0xFF2E7D32),
+        onChanged: (val) async {
+          setState(() => _hiresOnWifi = val);
+          await ImageLibraryService.setHiresOnWifi(val);
+        },
+      ),
     );
   }
 }

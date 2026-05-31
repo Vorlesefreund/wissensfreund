@@ -1394,38 +1394,25 @@ class WissensfreundProvider extends ChangeNotifier {
     }
   }
 
-  /// Routing logic depending on subscription tier and Plus image mode.
+  /// Routing logic depending on subscription tier and WiFi setting.
   ///
-  /// Free:                   thumb ZIP (300px)        → ZIM
-  /// Plus onDemand:          HiRes (2048px, WiFi)     → thumb ZIP → ZIM
-  /// Plus offline:           standard ZIP (800px)     → ZIM
-  /// Plus offlineOnDemand:   HiRes (2048px, WiFi)     → standard ZIP → ZIM
+  /// Free:              offline ZIP (300px)        → ZIM
+  /// Plus, WiFi on:     HiRes (best, WiFi-gated)   → offline ZIP (800px) → ZIM
+  /// Plus, WiFi off:    offline ZIP (800px)         → ZIM
   Future<Uint8List?> _resolveImageBytes(String filename) async {
-    final isPlus = SubscriptionService.instance.isPlus;
-
-    if (!isPlus) {
-      // Free: thumb ZIP only.
+    if (!SubscriptionService.instance.isPlus) {
       return await ImageLibraryService.instance.getImage(filename)
           ?? await _zimBytes(filename);
     }
 
-    final mode = await ImageLibraryService.getStoredMode();
-
-    switch (mode) {
-      case PlusImageMode.onDemand:
-        return await HiResImageService.instance.getHiResImage(filename)
-            ?? await ImageLibraryService.instance.getImage(filename)
-            ?? await _zimBytes(filename);
-
-      case PlusImageMode.offline:
-        return await ImageLibraryService.instance.getImage(filename)
-            ?? await _zimBytes(filename);
-
-      case PlusImageMode.offlineOnDemand:
-        return await HiResImageService.instance.getHiResImage(filename)
-            ?? await ImageLibraryService.instance.getImage(filename)
-            ?? await _zimBytes(filename);
+    final hiresWifi = await ImageLibraryService.hiresOnWifiEnabled();
+    if (hiresWifi) {
+      return await HiResImageService.instance.getHiResImage(filename)
+          ?? await ImageLibraryService.instance.getImage(filename)
+          ?? await _zimBytes(filename);
     }
+    return await ImageLibraryService.instance.getImage(filename)
+        ?? await _zimBytes(filename);
   }
 
   Future<Uint8List?> _zimBytes(String filename) async {
