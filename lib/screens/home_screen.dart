@@ -376,6 +376,10 @@ class _HomeScreenState extends State<HomeScreen>
                                   title: provider.articleTitle,
                                   text: provider.articleText,
                                 ),
+                              // TODO: TEMP TEST — remove before release
+                              if (provider.state == AppState.idle &&
+                                  provider.articleText.isEmpty)
+                                _JsonTestButton(provider: provider),
                               const SizedBox(height: 16),
                             ],
                           ),
@@ -3916,3 +3920,26 @@ class _UpgradeCard extends StatelessWidget {
     );
   }
 }
+
+// TEMP TEST BUTTON — remove before release
+class _JsonTestButton extends StatelessWidget {
+  const _JsonTestButton({required this.provider});
+  final WissensfreundProvider provider;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: OutlinedButton.icon(
+        onPressed: () => provider.loadAndSpeakJsonArticle('elefant_l2'),
+        icon: const Text('🐛', style: TextStyle(fontSize: 16)),
+        label: const Text('JSON Test'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.deepOrange,
+          side: const BorderSide(color: Colors.deepOrange),
+        ),
+      ),
+    );
+  }
+}
+

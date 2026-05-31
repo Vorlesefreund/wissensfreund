@@ -12,6 +12,10 @@ class AssetConfig {
   static const String r2BaseUrl =
       'https://pub-07f0107be14b48fd8652e5318441c7c2.r2.dev';
 
+  /// Bucket for generated article JSONs (wissensfreund-articles).
+  static const String r2ArticlesBaseUrl =
+      'https://pub-a4cddbe0f7104b91ae193707a08ff0d2.r2.dev';
+
   static String get mediaLicensesUrl  => '$r2BaseUrl/media_licenses.json';
   static String get audioIndexUrl     => '$r2BaseUrl/audio_index.json';
   static String get audioZipUrl       => '$r2BaseUrl/wissensfreund_audio.zip';

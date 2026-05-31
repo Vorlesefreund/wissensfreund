@@ -90,7 +90,7 @@ class JsonArticleService extends ChangeNotifier {
       }
     }
     // Fetch from R2
-    final url = '${AssetConfig.r2BaseUrl}/articles/$articleId.json';
+    final url = '${AssetConfig.r2ArticlesBaseUrl}/articles/$articleId.json';
     try {
       final resp = await _client.get(Uri.parse(url));
       if (resp.statusCode == 404) {
