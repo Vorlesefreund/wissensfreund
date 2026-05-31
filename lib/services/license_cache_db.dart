@@ -56,7 +56,7 @@ class LicenseCacheDb {
     final dbPath = join(await getDatabasesPath(), 'license_cache.db');
     return openDatabase(
       dbPath,
-      version: 7,
+      version: 8,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE license_cache (
@@ -179,6 +179,11 @@ class LicenseCacheDb {
         }
         if (oldVersion < 7) {
           await _createProfileTables(db);
+        }
+        if (oldVersion < 8) {
+          await db.execute(
+            'ALTER TABLE profiles ADD COLUMN age_level INTEGER NOT NULL DEFAULT 2',
+          );
         }
       },
     );
@@ -413,6 +418,7 @@ class LicenseCacheDb {
         birth_year     INTEGER NOT NULL,
         avatar_id      TEXT NOT NULL,
         language_level TEXT NOT NULL,
+        age_level      INTEGER NOT NULL DEFAULT 2,
         created_at     TEXT,
         last_used_at   TEXT
       )
@@ -455,6 +461,7 @@ class LicenseCacheDb {
     required int birthYear,
     required String avatarId,
     required String languageLevel,
+    int ageLevel = 2,
   }) async {
     final now = DateTime.now().toIso8601String();
     final id = await (await _database).insert('profiles', {
@@ -462,6 +469,7 @@ class LicenseCacheDb {
       'birth_year':     birthYear,
       'avatar_id':      avatarId,
       'language_level': languageLevel,
+      'age_level':      ageLevel,
       'created_at':     now,
       'last_used_at':   now,
     });
@@ -471,6 +479,7 @@ class LicenseCacheDb {
       birthYear:     birthYear,
       avatarId:      avatarId,
       languageLevel: languageLevel,
+      ageLevel:      ageLevel,
       createdAt:     DateTime.parse(now),
       lastUsedAt:    DateTime.parse(now),
     );

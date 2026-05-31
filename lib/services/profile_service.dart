@@ -9,6 +9,7 @@ class UserProfile {
   final int birthYear;
   final String avatarId;
   final String languageLevel; // 'easy' | 'medium' | 'advanced'
+  final int ageLevel;         // 1 | 2 | 3
   final DateTime? createdAt;
   final DateTime? lastUsedAt;
 
@@ -18,6 +19,7 @@ class UserProfile {
     required this.birthYear,
     required this.avatarId,
     required this.languageLevel,
+    this.ageLevel = 2,
     this.createdAt,
     this.lastUsedAt,
   });
@@ -33,6 +35,7 @@ class UserProfile {
     int? birthYear,
     String? avatarId,
     String? languageLevel,
+    int? ageLevel,
     DateTime? lastUsedAt,
   }) => UserProfile(
     id:            id,
@@ -40,6 +43,7 @@ class UserProfile {
     birthYear:     birthYear     ?? this.birthYear,
     avatarId:      avatarId      ?? this.avatarId,
     languageLevel: languageLevel ?? this.languageLevel,
+    ageLevel:      ageLevel      ?? this.ageLevel,
     createdAt:     createdAt,
     lastUsedAt:    lastUsedAt    ?? this.lastUsedAt,
   );
@@ -49,6 +53,7 @@ class UserProfile {
     'birth_year':     birthYear,
     'avatar_id':      avatarId,
     'language_level': languageLevel,
+    'age_level':      ageLevel,
     'created_at':     createdAt?.toIso8601String(),
     'last_used_at':   lastUsedAt?.toIso8601String(),
   };
@@ -59,6 +64,7 @@ class UserProfile {
     birthYear:     m['birth_year'] as int,
     avatarId:      m['avatar_id'] as String,
     languageLevel: m['language_level'] as String,
+    ageLevel:      m['age_level'] as int? ?? 2,
     createdAt:     m['created_at'] != null
         ? DateTime.tryParse(m['created_at'] as String)
         : null,
@@ -85,6 +91,7 @@ class ProfileService extends ChangeNotifier {
   List<UserProfile> get profiles => List.unmodifiable(_profiles);
   UserProfile? get activeProfile => _activeProfile;
   bool get hasProfiles => _profiles.isNotEmpty;
+  int get activeAgeLevel => _activeProfile?.ageLevel ?? 2;
 
   // ── Initialization ────────────────────────────────────────────────────────────
 
@@ -130,12 +137,14 @@ class ProfileService extends ChangeNotifier {
     required int birthYear,
     required String avatarId,
     required String languageLevel,
+    int ageLevel = 2,
   }) async {
     final profile = await LicenseCacheDb.instance.insertProfile(
       name:          name,
       birthYear:     birthYear,
       avatarId:      avatarId,
       languageLevel: languageLevel,
+      ageLevel:      ageLevel,
     );
     _profiles.add(profile);
     notifyListeners();

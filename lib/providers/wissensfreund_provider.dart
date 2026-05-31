@@ -15,9 +15,11 @@ import '../services/license_cache_db.dart';
 import '../services/network_service.dart';
 import '../services/professor_response_service.dart';
 import '../services/profile_service.dart';
+import '../services/json_article_service.dart';
 import '../services/subscription_service.dart';
 import '../services/wikimedia_license_checker.dart';
 import '../services/zim_update_service.dart';
+import '../models/wf_article.dart';
 
 class ArticleImageInfo {
   final String filename;
@@ -119,6 +121,7 @@ class WissensfreundProvider extends ChangeNotifier {
   static const _zimProgressChannel  = EventChannel('wissensfreund/zim_progress');
 
   final _tts = FlutterTts();
+  final JsonArticleService _jsonArticleService = JsonArticleService.instance;
 
   AppState _state        = AppState.idle;
   String _recognizedText = '';
@@ -824,6 +827,12 @@ class WissensfreundProvider extends ChangeNotifier {
   /// Clears the saved "Weiterhören" position for the active profile.
   Future<void> clearLastArticle() async {
     await ProfileService.instance.clearLastArticle();
+  }
+
+  // ── JSON article access (Schritt A — kein Rendering) ────────────────────────
+
+  Future<WfArticle?> loadJsonArticle(String articleId) async {
+    return _jsonArticleService.loadArticle(articleId);
   }
 
   /// Resumes a previously saved article from [charOffset] with an intro phrase.

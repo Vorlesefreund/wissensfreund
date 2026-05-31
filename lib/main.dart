@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'providers/wissensfreund_provider.dart';
 import 'services/data_limit_overlay_service.dart';
+import 'services/json_article_service.dart';
 import 'services/parental_lock_service.dart';
 import 'services/profile_service.dart';
 import 'screens/first_run_screen.dart';
@@ -20,6 +21,7 @@ void main() async {
   restoreSystemUI();
   await ParentalLockService.instance.init();
   await ProfileService.instance.initialize();
+  unawaited(JsonArticleService.instance.initialize());
   final prefs = await SharedPreferences.getInstance();
   final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
   // Kiosk-Modus nach erstem Frame automatisch reaktivieren (falls zuvor aktiviert)
