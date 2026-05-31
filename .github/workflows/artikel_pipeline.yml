@@ -1,0 +1,280 @@
+name: Artikel-Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      age_levels:
+        description: "Altersgruppen (space-separated: 1 2 3)"
+        default: "2 3"
+        required: true
+      top_category:
+        description: "Nur diese Top-Kategorie (leer = alle)"
+        default: ""
+        required: false
+      batch_size:
+        description: "Jobs pro Batch-Datei"
+        default: "50"
+        required: false
+      dry_run:
+        description: "Dry-Run (kein API-Call, keine Kosten)"
+        type: boolean
+        default: false
+  schedule:
+    # Jeden Montag 03:00 UTC — Stufe 2+3, alle Kategorien
+    - cron: "0 3 * * 1"
+
+env:
+  PYTHON_VERSION: "3.11"
+  JOBS_DIR:       "jobs"
+  ARTICLES_DIR:   "articles"
+  CHECKPOINT:     "checkpoint_done.json"
+  WHITELIST:      "wissensfreund_categories_whitelist.json"
+  SYSTEM_PROMPT:  "wissensfreund_system_prompt.md"
+  R2_BUCKET:      "wissensfreund-articles"
+  R2_ENDPOINT:    "https://${{ secrets.CF_ACCOUNT_ID }}.r2.cloudflarestorage.com"
+
+jobs:
+
+  # ──────────────────────────────────────────
+  # Job 1: Prepare — Wikipedia abfragen, Batches erstellen
+  # ──────────────────────────────────────────
+  prepare:
+    name: "1 · Prepare Batches"
+    runs-on: ubuntu-latest
+    outputs:
+      batch_count: ${{ steps.count.outputs.batch_count }}
+      total_jobs:  ${{ steps.count.outputs.total_jobs }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Abhängigkeiten installieren
+        run: pip install requests
+
+      - name: Checkpoint aus Cache laden
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CHECKPOINT }}
+          key: checkpoint-${{ github.run_id }}
+          restore-keys: checkpoint-
+
+      - name: Batches erstellen
+        run: |
+          ARGS="--whitelist ${{ env.WHITELIST }} \
+                --out-dir ${{ env.JOBS_DIR }} \
+                --age-levels ${{ inputs.age_levels || '2 3' }} \
+                --batch-size ${{ inputs.batch_size || '50' }} \
+                --checkpoint ${{ env.CHECKPOINT }}"
+
+          if [ -n "${{ inputs.top_category }}" ]; then
+            ARGS="$ARGS --top-category ${{ inputs.top_category }}"
+          fi
+
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+
+          python prepare_articles.py $ARGS
+
+      - name: Batch-Anzahl ermitteln
+        id: count
+        run: |
+          BATCH_COUNT=$(ls ${{ env.JOBS_DIR }}/batch_*.json 2>/dev/null | wc -l)
+          TOTAL_JOBS=$(python -c "
+          import json, glob, pathlib
+          total = 0
+          for f in sorted(pathlib.Path('${{ env.JOBS_DIR }}').glob('batch_*.json')):
+              total += len(json.loads(f.read_text())['jobs'])
+          print(total)
+          ")
+          echo "batch_count=$BATCH_COUNT" >> $GITHUB_OUTPUT
+          echo "total_jobs=$TOTAL_JOBS"   >> $GITHUB_OUTPUT
+          echo "### Prepare-Ergebnis" >> $GITHUB_STEP_SUMMARY
+          echo "- Batches: **$BATCH_COUNT**" >> $GITHUB_STEP_SUMMARY
+          echo "- Jobs gesamt: **$TOTAL_JOBS**" >> $GITHUB_STEP_SUMMARY
+
+      - name: Plausibilitätsprüfung
+        run: |
+          python -c "
+          import sys, json
+          total = int('${{ steps.count.outputs.total_jobs }}')
+          if total == 0:
+              print('WARNUNG: 0 Jobs — Pipeline wird beendet')
+              sys.exit(0)
+          if total > 50000:
+              print(f'FEHLER: {total} Jobs ist unplausibel hoch (max 50.000)')
+              sys.exit(1)
+          print(f'Plausibilitätsprüfung OK: {total} Jobs')
+          "
+
+      - name: Jobs-Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: article-jobs
+          path: ${{ env.JOBS_DIR }}/
+          retention-days: 3
+
+
+  # ──────────────────────────────────────────
+  # Job 2: Generate — Claude API (matrix über Batches)
+  # ──────────────────────────────────────────
+  generate:
+    name: "2 · Generate Batch ${{ matrix.batch_num }}"
+    needs: prepare
+    runs-on: ubuntu-latest
+    if: needs.prepare.outputs.batch_count > 0
+
+    strategy:
+      # Parallelität begrenzen um Claude Rate-Limits zu respektieren
+      max-parallel: 3
+      fail-fast: false
+      matrix:
+        # Batches 0001–0020 (wird durch tatsächliche Anzahl begrenzt)
+        batch_num: ["0001","0002","0003","0004","0005",
+                    "0006","0007","0008","0009","0010",
+                    "0011","0012","0013","0014","0015",
+                    "0016","0017","0018","0019","0020"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Abhängigkeiten installieren
+        run: pip install requests
+
+      - name: Jobs-Artefakt herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          name: article-jobs
+          path: ${{ env.JOBS_DIR }}/
+
+      - name: Checkpoint laden
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.CHECKPOINT }}
+          key: checkpoint-batch-${{ matrix.batch_num }}-${{ github.run_id }}
+          restore-keys: checkpoint-
+
+      - name: Batch-Datei prüfen
+        id: check_batch
+        run: |
+          BATCH_FILE="${{ env.JOBS_DIR }}/batch_${{ matrix.batch_num }}.json"
+          if [ -f "$BATCH_FILE" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Batch ${{ matrix.batch_num }} existiert nicht — skip"
+          fi
+
+      - name: Artikel generieren
+        if: steps.check_batch.outputs.exists == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          ARGS="--jobs-dir ${{ env.JOBS_DIR }} \
+                --out-dir ${{ env.ARTICLES_DIR }} \
+                --system-prompt ${{ env.SYSTEM_PROMPT }} \
+                --batch ${{ matrix.batch_num }} \
+                --checkpoint ${{ env.CHECKPOINT }}"
+
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+
+          python generate_articles.py $ARGS
+
+      - name: Artikel-Artefakt hochladen
+        if: steps.check_batch.outputs.exists == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: articles-batch-${{ matrix.batch_num }}
+          path: ${{ env.ARTICLES_DIR }}/
+          retention-days: 7
+
+
+  # ──────────────────────────────────────────
+  # Job 3: Upload — Index bauen + zu R2
+  # ──────────────────────────────────────────
+  upload:
+    name: "3 · Index + Upload zu Cloudflare R2"
+    needs: generate
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.dry_run }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Abhängigkeiten installieren
+        run: pip install requests
+
+      - name: Alle Artikel-Artefakte herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          pattern: articles-batch-*
+          path: ${{ env.ARTICLES_DIR }}/
+          merge-multiple: true
+
+      - name: Plausibilitätsprüfung
+        run: |
+          python -c "
+          import pathlib, sys
+          ok  = len(list(pathlib.Path('${{ env.ARTICLES_DIR }}').glob('*.json')))
+          err = len(list(pathlib.Path('${{ env.ARTICLES_DIR }}/_errors').glob('*.json'))) if pathlib.Path('${{ env.ARTICLES_DIR }}/_errors').exists() else 0
+          total = ok + err
+          print(f'Artikel: {ok} OK, {err} Fehler')
+          if total == 0:
+              sys.exit('FEHLER: Keine Artikel vorhanden')
+          if err / total > 0.2:
+              sys.exit(f'FEHLER: Fehlerrate {err/total:.1%} > 20%')
+          print('Plausibilitätsprüfung OK')
+          "
+
+      - name: rclone installieren
+        run: curl https://rclone.org/install.sh | bash
+
+      - name: Index bauen + Upload
+        env:
+          CF_R2_ACCESS_KEY_ID:     ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          CF_R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          CF_ACCOUNT_ID:           ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          python upload_articles.py \
+            --articles-dir ${{ env.ARTICLES_DIR }} \
+            --topic-tree   wissensfreund_topic_tree.json \
+            --out-dir      upload_staging/ \
+            --bucket       ${{ env.R2_BUCKET }}
+
+      - name: Zusammenfassung
+        run: |
+          python -c "
+          import json, pathlib
+          meta = json.loads(pathlib.Path('upload_staging/meta/pipeline_run.json').read_text())
+          print('## Artikel-Pipeline Ergebnis\n')
+          print('| Metrik | Wert |')
+          print('|--------|------|')
+          print(f'| ✅ Artikel hochgeladen | {meta[\"total_articles\"]} |')
+          print(f'| ⚑ Review-Flag         | {meta[\"review_flagged\"]} |')
+          for lvl, cnt in meta[\"by_age_level\"].items():
+              print(f'| Stufe {lvl} | {cnt} |')
+          print(f'\n_Run: {meta[\"run_at\"]}_')
+          " >> $GITHUB_STEP_SUMMARY

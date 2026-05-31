@@ -1,0 +1,446 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://wissensfreund.app/schemas/topic_tree/v1",
+  "title": "WissensfreundThemenbaum",
+  "description": "Navigationshierarchie für die Wissensfreund-App. 3 Ebenen: Themengebiet → Unterthema → Artikel.",
+  "version": "1.0",
+  "generated_at": "2026-05-29",
+
+  "nav_config": {
+    "max_depth": 3,
+    "tile_layout": "grid_2x2",
+    "back_nav": "swipe_right_or_button",
+    "breadcrumb": true,
+    "search_enabled": true,
+    "age_filter_enabled": true
+  },
+
+  "topics": [
+
+    {
+      "id": "tiere",
+      "label": "Tiere",
+      "emoji": "🐾",
+      "theme_color": "#4caf50",
+      "icon_asset": "icon_tiere.png",
+      "category_ref": "tiere",
+      "subtopics": [
+        {
+          "id": "tiere_saeugetiere",
+          "label": "Säugetiere",
+          "emoji": "🦁",
+          "category_ref": "tiere_saeugetiere",
+          "featured_articles": ["loewe_l2", "elefant_l2", "delfin_l2", "gorilla_l2"]
+        },
+        {
+          "id": "tiere_voegel",
+          "label": "Vögel",
+          "emoji": "🦅",
+          "category_ref": "tiere_voegel",
+          "featured_articles": ["adler_l2", "pinguin_l2", "kolibri_l2"]
+        },
+        {
+          "id": "tiere_wasser",
+          "label": "Wassertiere",
+          "emoji": "🐙",
+          "category_ref": "tiere_fische",
+          "featured_articles": ["weisser_hai_l2", "oktopus_l2", "clownfisch_l2"]
+        },
+        {
+          "id": "tiere_reptilien",
+          "label": "Reptilien",
+          "emoji": "🦎",
+          "category_ref": "tiere_reptilien",
+          "featured_articles": ["komododrache_l2", "anakonda_l2", "seeschildkroete_l2"]
+        },
+        {
+          "id": "tiere_insekten",
+          "label": "Insekten",
+          "emoji": "🐝",
+          "category_ref": "tiere_insekten",
+          "featured_articles": ["biene_l2", "monarchfalter_l2", "gottesanbeterin_l2"]
+        },
+        {
+          "id": "tiere_ausgestorben",
+          "label": "Ausgestorbene Tiere",
+          "emoji": "🦕",
+          "category_ref": "tiere_ausgestorben",
+          "age_level_minimum": 1,
+          "featured_articles": ["tyrannosaurus_l2", "mammut_l2", "dodo_l2"]
+        }
+      ]
+    },
+
+    {
+      "id": "pflanzen",
+      "label": "Pflanzen",
+      "emoji": "🌿",
+      "theme_color": "#33691e",
+      "icon_asset": "icon_pflanzen.png",
+      "category_ref": "pflanzen",
+      "subtopics": [
+        {
+          "id": "pflanzen_baeume",
+          "label": "Bäume",
+          "emoji": "🌳",
+          "category_ref": "pflanzen_baeume",
+          "featured_articles": ["sequoia_l2", "baobab_l2", "eiche_l2"]
+        },
+        {
+          "id": "pflanzen_blumen",
+          "label": "Blumen & Pflanzen",
+          "emoji": "🌸",
+          "category_ref": "pflanzen_blumen",
+          "featured_articles": ["venusfliegenfalle_l2", "kaktus_l2", "seerose_l2"]
+        },
+        {
+          "id": "pflanzen_pilze",
+          "label": "Pilze",
+          "emoji": "🍄",
+          "category_ref": "pflanzen_pilze",
+          "featured_articles": ["fliegenpilz_l2", "trueffel_l2"]
+        }
+      ]
+    },
+
+    {
+      "id": "erde_natur",
+      "label": "Erde & Natur",
+      "emoji": "🌍",
+      "theme_color": "#1565c0",
+      "icon_asset": "icon_erde.png",
+      "category_ref": "erde_natur",
+      "subtopics": [
+        {
+          "id": "erde_phaenomene",
+          "label": "Naturphänomene",
+          "emoji": "⚡",
+          "category_ref": "erde_phaenomene",
+          "featured_articles": ["blitz_l2", "regenbogen_l1", "nordlicht_l2", "tornado_l2"]
+        },
+        {
+          "id": "erde_geologie",
+          "label": "Berge & Vulkane",
+          "emoji": "🌋",
+          "category_ref": "erde_geologie",
+          "featured_articles": ["etna_l2", "himalaya_l2", "kilimandscharo_l2"]
+        },
+        {
+          "id": "erde_meere",
+          "label": "Meere & Flüsse",
+          "emoji": "🌊",
+          "category_ref": "erde_ozeane",
+          "featured_articles": ["pazifischer_ozean_l2", "niagarafaelle_l2", "nil_l2"]
+        },
+        {
+          "id": "erde_oekosysteme",
+          "label": "Landschaften",
+          "emoji": "🌴",
+          "category_ref": "erde_oekosysteme",
+          "featured_articles": ["amazonas_regenwald_l2", "sahara_l2", "great_barrier_reef_l2"]
+        }
+      ]
+    },
+
+    {
+      "id": "weltall",
+      "label": "Weltall",
+      "emoji": "🚀",
+      "theme_color": "#283593",
+      "icon_asset": "icon_weltall.png",
+      "category_ref": "weltall",
+      "subtopics": [
+        {
+          "id": "weltall_planeten",
+          "label": "Planeten & Monde",
+          "emoji": "🪐",
+          "category_ref": "weltall_planeten",
+          "featured_articles": ["mars_l2", "jupiter_l2", "saturn_l2", "mond_l1"]
+        },
+        {
+          "id": "weltall_sterne",
+          "label": "Sterne & Galaxien",
+          "emoji": "⭐",
+          "category_ref": "weltall_sterne",
+          "featured_articles": ["sonne_l1", "milchstrasse_l2", "schwarzes_loch_l3"]
+        },
+        {
+          "id": "weltall_raumfahrt",
+          "label": "Raumfahrt",
+          "emoji": "🛸",
+          "category_ref": "weltall_raumfahrt",
+          "featured_articles": ["internationale_raumstation_l2", "apollo_11_l2", "james_webb_teleskop_l3"]
+        }
+      ]
+    },
+
+    {
+      "id": "laender",
+      "label": "Länder & Städte",
+      "emoji": "🗺️",
+      "theme_color": "#e65100",
+      "icon_asset": "icon_laender.png",
+      "category_ref": "laender_staedte",
+      "subtopics": [
+        {
+          "id": "laender_europa",
+          "label": "Europa",
+          "emoji": "🏰",
+          "category_ref": "laender_europa",
+          "featured_articles": ["deutschland_l2", "frankreich_l2", "island_l2", "griechenland_l2"]
+        },
+        {
+          "id": "laender_americas",
+          "label": "Amerika",
+          "emoji": "🌎",
+          "category_ref": "laender_americas",
+          "featured_articles": ["brasilien_l2", "kanada_l2", "peru_l2", "mexiko_l2"]
+        },
+        {
+          "id": "laender_asien",
+          "label": "Asien",
+          "emoji": "🏯",
+          "category_ref": "laender_asien",
+          "featured_articles": ["japan_l2", "indien_l2", "mongolei_l2"]
+        },
+        {
+          "id": "laender_afrika",
+          "label": "Afrika",
+          "emoji": "🦒",
+          "category_ref": "laender_afrika",
+          "featured_articles": ["aegypten_l2", "kenia_l2", "madagaskar_l2"]
+        },
+        {
+          "id": "laender_ozeanien",
+          "label": "Ozeanien & Polargebiete",
+          "emoji": "🐧",
+          "category_ref": "laender_ozeanien",
+          "featured_articles": ["australien_l2", "neuseeland_l2", "antarktis_l2"]
+        }
+      ]
+    },
+
+    {
+      "id": "geschichte",
+      "label": "Geschichte",
+      "emoji": "🏛️",
+      "theme_color": "#795548",
+      "icon_asset": "icon_geschichte.png",
+      "category_ref": "geschichte",
+      "age_level_minimum": 1,
+      "subtopics": [
+        {
+          "id": "geschichte_antike",
+          "label": "Antike Kulturen",
+          "emoji": "🏺",
+          "category_ref": "geschichte_antike",
+          "featured_articles": ["pharaonen_l2", "gladiatoren_l2", "pyramiden_l2", "azteken_l2"]
+        },
+        {
+          "id": "geschichte_mittelalter",
+          "label": "Mittelalter",
+          "emoji": "⚔️",
+          "category_ref": "geschichte_mittelalter",
+          "featured_articles": ["ritter_l2", "burg_l2", "gutenberg_l2"]
+        },
+        {
+          "id": "geschichte_neuzeit",
+          "label": "Zeitalter der Entdeckungen",
+          "emoji": "⛵",
+          "category_ref": "geschichte_neuzeit",
+          "featured_articles": ["kolumbus_l2", "dampfmaschine_l2"]
+        },
+        {
+          "id": "geschichte_modern",
+          "label": "Neuere Geschichte",
+          "emoji": "🌐",
+          "category_ref": "geschichte_modern",
+          "age_level_minimum": 2,
+          "featured_articles": ["mondlandung_l2", "berliner_mauer_l3", "nelson_mandela_l2"]
+        }
+      ]
+    },
+
+    {
+      "id": "personen",
+      "label": "Berühmte Personen",
+      "emoji": "👤",
+      "theme_color": "#6a1b9a",
+      "icon_asset": "icon_personen.png",
+      "category_ref": "personen",
+      "subtopics": [
+        {
+          "id": "personen_wissenschaft",
+          "label": "Wissenschaftler",
+          "emoji": "🔬",
+          "category_ref": "personen_wissenschaft",
+          "featured_articles": ["einstein_l2", "marie_curie_l2", "newton_l2", "ada_lovelace_l3"]
+        },
+        {
+          "id": "personen_kunst",
+          "label": "Künstler & Musiker",
+          "emoji": "🎨",
+          "category_ref": "personen_kunst_musik",
+          "featured_articles": ["da_vinci_l2", "beethoven_l2", "mozart_l2", "frida_kahlo_l2"]
+        },
+        {
+          "id": "personen_entdecker",
+          "label": "Entdecker",
+          "emoji": "🧭",
+          "category_ref": "personen_entdecker",
+          "featured_articles": ["amelia_earhart_l2", "magellan_l2", "humboldt_l2"]
+        },
+        {
+          "id": "personen_rechte",
+          "label": "Friedensmacher",
+          "emoji": "🕊️",
+          "category_ref": "personen_rechte",
+          "featured_articles": ["mlk_l2", "malala_l2", "gandhi_l2"]
+        }
+      ]
+    },
+
+    {
+      "id": "technik",
+      "label": "Technik & Erfindungen",
+      "emoji": "⚙️",
+      "theme_color": "#37474f",
+      "icon_asset": "icon_technik.png",
+      "category_ref": "technik_wissenschaft",
+      "subtopics": [
+        {
+          "id": "technik_fahrzeuge",
+          "label": "Fahrzeuge & Transport",
+          "emoji": "🚂",
+          "category_ref": "technik_maschinen",
+          "featured_articles": ["dampflokomotive_l2", "titanic_l2", "fahrrad_l1", "flugzeug_l2"]
+        },
+        {
+          "id": "technik_digital",
+          "label": "Computer & Roboter",
+          "emoji": "🤖",
+          "category_ref": "technik_digital",
+          "featured_articles": ["computer_l2", "internet_l2", "roboter_l2", "3d_drucker_l3"]
+        },
+        {
+          "id": "technik_energie",
+          "label": "Energie",
+          "emoji": "⚡",
+          "category_ref": "technik_energie",
+          "featured_articles": ["solarenergie_l2", "windkraftanlage_l2", "wasserkraft_l2"]
+        },
+        {
+          "id": "wissenschaft_physik",
+          "label": "Physik & Chemie",
+          "emoji": "🔭",
+          "category_ref": "wissenschaft_physik",
+          "featured_articles": ["schwerkraft_l2", "licht_l2", "feuer_l1"]
+        },
+        {
+          "id": "wissenschaft_koerper",
+          "label": "Unser Körper",
+          "emoji": "🫀",
+          "category_ref": "wissenschaft_medizin",
+          "featured_articles": ["herz_l2", "gehirn_l2", "immunsystem_l3", "skelett_l2"]
+        }
+      ]
+    },
+
+    {
+      "id": "kultur",
+      "label": "Kultur & Gesellschaft",
+      "emoji": "🎭",
+      "theme_color": "#c62828",
+      "icon_asset": "icon_kultur.png",
+      "category_ref": "kultur_gesellschaft",
+      "subtopics": [
+        {
+          "id": "kultur_feste",
+          "label": "Feste & Traditionen",
+          "emoji": "🎉",
+          "category_ref": "kultur_religion",
+          "featured_articles": ["weihnachten_l1", "karneval_l2", "diwali_l2", "ramadan_l2"]
+        },
+        {
+          "id": "kultur_sport",
+          "label": "Sport & Spiele",
+          "emoji": "⚽",
+          "category_ref": "kultur_sport",
+          "featured_articles": ["olympische_spiele_l2", "fussball_l1", "schach_l2", "marathon_l2"]
+        },
+        {
+          "id": "kultur_essen",
+          "label": "Essen & Landwirtschaft",
+          "emoji": "🍫",
+          "category_ref": "kultur_essen",
+          "featured_articles": ["schokolade_l1", "brot_l2", "honig_l2", "reis_l2"]
+        },
+        {
+          "id": "kultur_musik",
+          "label": "Musik & Kunst",
+          "emoji": "🎵",
+          "category_ref": "kultur_musik_kunst",
+          "featured_articles": ["klavier_l2", "jazz_l3", "graffiti_l2"]
+        }
+      ]
+    },
+
+    {
+      "id": "sprache",
+      "label": "Sprache & Medien",
+      "emoji": "📖",
+      "theme_color": "#00838f",
+      "icon_asset": "icon_sprache.png",
+      "category_ref": "sprache_kommunikation",
+      "subtopics": [
+        {
+          "id": "sprache_schrift",
+          "label": "Schrift & Sprachen",
+          "emoji": "✍️",
+          "category_ref": "sprache_schrift",
+          "featured_articles": ["hieroglyphen_l2", "braille_l2", "lateinisches_alphabet_l2"]
+        },
+        {
+          "id": "sprache_medien",
+          "label": "Medien & Kommunikation",
+          "emoji": "📻",
+          "category_ref": "sprache_medien",
+          "featured_articles": ["buchdruck_l2", "telefon_l2", "radio_l2"]
+        }
+      ]
+    }
+
+  ],
+
+  "special_collections": [
+    {
+      "id": "stufe1_einstieg",
+      "label": "Für die Kleinsten",
+      "emoji": "⭐",
+      "description": "Perfekte Einstiegsartikel für 4–6 Jährige",
+      "age_level": 1,
+      "curated_articles": [
+        "mond_l1", "feuer_l1", "biene_l1", "regenbogen_l1",
+        "fahrrad_l1", "schokolade_l1", "weihnachten_l1", "fussball_l1"
+      ]
+    },
+    {
+      "id": "neu_diese_woche",
+      "label": "Neu diese Woche",
+      "emoji": "🆕",
+      "description": "Zuletzt hinzugefügte Artikel",
+      "dynamic": true,
+      "sort": "generated_at_desc",
+      "limit": 12
+    },
+    {
+      "id": "zufalls_artikel",
+      "label": "Überrasch mich!",
+      "emoji": "🎲",
+      "description": "Zufälliger Artikel passend zur Altersgruppe",
+      "dynamic": true,
+      "sort": "random",
+      "limit": 1
+    }
+  ]
+}

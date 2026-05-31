@@ -1,5 +1,17 @@
-<!-- last-updated: 2026-05-25T09:01:27Z -->
+<!-- last-updated: 2026-05-31T00:00:00Z -->
 # Changelog — Wissensfreund App
+
+---
+
+## [2026-05-31] — Artikel-Pipeline Konsolidierung
+- `wissensfreund_system_prompt_v3_2.md` als aktive System-Prompt-Version ins Repo
+- Veraltete Dateien nach `_alt/` archiviert (system_prompt v1, v3, artikel_briefing)
+- `prepare_articles.py` + `generate_articles.py` ins Repo aufgenommen (scripts/)
+- `prepare_articles.py`: Bug `prop=info|revisions` mit mehreren pageids gefixt → `prop=info` + `lastrevid`
+- `prepare_articles.py`: `compute_content_depth`, `compute_topic_interest`, `fetch_pageviews` ergänzt
+- `generate_articles.py`: `CONTENT_DEPTH` + `TOPIC_INTEREST` im Prompt-Build
+- `wissensfreund_categories_whitelist.json` + `wissensfreund_topic_tree.json` aktualisiert
+- `artikel_pipeline.yml` Workflow ins Repo aufgenommen
 
 ---
 

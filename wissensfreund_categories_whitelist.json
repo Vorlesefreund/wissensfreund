@@ -1,0 +1,423 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://wissensfreund.app/schemas/categories/v1",
+  "title": "WissensfreundKategorienWhitelist",
+  "description": "Erlaubte Wikipedia-Kategorien für die automatische Artikel-Pipeline. Nur Artikel aus diesen Kategorien werden verarbeitet.",
+  "version": "1.0",
+  "generated_at": "2026-05-29",
+
+  "pipeline_rules": {
+    "min_wikipedia_text_length": 500,
+    "max_wikipedia_text_length": 50000,
+    "require_german_wikipedia": true,
+    "exclude_disambiguation_pages": true,
+    "exclude_list_articles": true,
+    "exclude_redirect_articles": true,
+    "require_infobox": false,
+    "min_images_on_wikimedia": 1
+  },
+
+  "categories": [
+
+    {
+      "id": "tiere",
+      "label": "Tiere",
+      "emoji": "🐾",
+      "theme_color": "#4caf50",
+      "pattern": "living_being",
+      "priority": 1,
+      "subcategories": [
+        {
+          "id": "tiere_saeugetiere",
+          "label": "Säugetiere",
+          "wikipedia_categories": [
+            "Säugetiere",
+            "Landtiere",
+            "Meeressäuger",
+            "Primaten",
+            "Raubtiere",
+            "Nagetiere",
+            "Huftiere"
+          ],
+          "example_articles": ["Elefant", "Blauwal", "Gorilla", "Löwe", "Polarfuchs"]
+        },
+        {
+          "id": "tiere_voegel",
+          "label": "Vögel",
+          "wikipedia_categories": ["Vögel", "Greifvögel", "Pinguine", "Papageien", "Singvögel"],
+          "example_articles": ["Adler", "Pinguin", "Papagei", "Kolibri"]
+        },
+        {
+          "id": "tiere_reptilien",
+          "label": "Reptilien & Amphibien",
+          "wikipedia_categories": ["Reptilien", "Amphibien", "Schildkröten", "Krokodile", "Schlangen"],
+          "example_articles": ["Komododrache", "Anakonda", "Seeschildkröte"]
+        },
+        {
+          "id": "tiere_fische",
+          "label": "Fische & Meerestiere",
+          "wikipedia_categories": ["Fische", "Haie", "Knochenfische", "Tintenfische", "Krustentiere"],
+          "example_articles": ["Weißer Hai", "Tintenfisch", "Clownfisch", "Oktopus"]
+        },
+        {
+          "id": "tiere_insekten",
+          "label": "Insekten & Spinnen",
+          "wikipedia_categories": ["Insekten", "Schmetterlinge", "Käfer", "Spinnen", "Bienen"],
+          "example_articles": ["Biene", "Monarchfalter", "Gottesanbeterin", "Vogelspinne"]
+        },
+        {
+          "id": "tiere_ausgestorben",
+          "label": "Ausgestorbene Tiere",
+          "wikipedia_categories": ["Ausgestorbenes Tier", "Dinosaurier", "Pleistozän"],
+          "example_articles": ["Tyrannosaurus", "Mammut", "Dodo", "Smilodon"],
+          "review_flag_default": true,
+          "review_reason": "Aussterben kann sensibles Thema für junge Kinder sein"
+        }
+      ]
+    },
+
+    {
+      "id": "pflanzen",
+      "label": "Pflanzen & Pilze",
+      "emoji": "🌿",
+      "theme_color": "#33691e",
+      "pattern": "living_being",
+      "priority": 2,
+      "subcategories": [
+        {
+          "id": "pflanzen_baeume",
+          "label": "Bäume",
+          "wikipedia_categories": ["Baum", "Laubbäume", "Nadelbäume", "Tropenbäume"],
+          "example_articles": ["Sequoia", "Baobab", "Eiche", "Bambus"]
+        },
+        {
+          "id": "pflanzen_blumen",
+          "label": "Blumen & Pflanzen",
+          "wikipedia_categories": ["Blütenpflanze", "Heilpflanzen", "Nutzpflanzen", "Wasserpflanzen"],
+          "example_articles": ["Sonnenblume", "Venusfliegenfalle", "Seerose", "Kaktus"]
+        },
+        {
+          "id": "pflanzen_pilze",
+          "label": "Pilze",
+          "wikipedia_categories": ["Pilze", "Speisepilze", "Schimmelpilze"],
+          "example_articles": ["Fliegenpilz", "Trüffel", "Riesenporling"]
+        }
+      ]
+    },
+
+    {
+      "id": "erde_natur",
+      "label": "Erde & Natur",
+      "emoji": "🌍",
+      "theme_color": "#1565c0",
+      "pattern": "tech_science",
+      "priority": 3,
+      "subcategories": [
+        {
+          "id": "erde_phaenomene",
+          "label": "Naturphänomene",
+          "wikipedia_categories": ["Naturphänomen", "Wetter", "Klimaphänomen", "Meeresströmung"],
+          "example_articles": ["Blitz", "Regenbogen", "Monsun", "Nordlicht", "Tornado"]
+        },
+        {
+          "id": "erde_geologie",
+          "label": "Geologie & Berge",
+          "wikipedia_categories": ["Gebirge", "Vulkan", "Erdbeben", "Gletscher", "Höhle"],
+          "example_articles": ["Kilimandscharo", "Himalaya", "Ätna", "Amazonas"]
+        },
+        {
+          "id": "erde_ozeane",
+          "label": "Meere & Gewässer",
+          "wikipedia_categories": ["Ozean", "See (Gewässer)", "Fluss", "Wasserfall"],
+          "example_articles": ["Pazifischer Ozean", "Niagarafälle", "Nil", "Titicacasee"]
+        },
+        {
+          "id": "erde_oekosysteme",
+          "label": "Ökosysteme & Landschaften",
+          "wikipedia_categories": ["Ökosystem", "Regenwald", "Wüste", "Savanne", "Tundra", "Korallenriff"],
+          "example_articles": ["Amazonas-Regenwald", "Sahara", "Serengeti", "Great Barrier Reef"]
+        }
+      ]
+    },
+
+    {
+      "id": "weltall",
+      "label": "Weltall & Astronomie",
+      "emoji": "🚀",
+      "theme_color": "#283593",
+      "pattern": "tech_science",
+      "priority": 4,
+      "subcategories": [
+        {
+          "id": "weltall_planeten",
+          "label": "Planeten & Monde",
+          "wikipedia_categories": ["Planet", "Mond", "Zwergplanet", "Asteroid"],
+          "example_articles": ["Mars", "Jupiter", "Saturn", "Mond", "Pluto"]
+        },
+        {
+          "id": "weltall_sterne",
+          "label": "Sterne & Galaxien",
+          "wikipedia_categories": ["Stern", "Galaxie", "Schwarzes Loch", "Nebel", "Sternbild"],
+          "example_articles": ["Sonne", "Milchstraße", "Andromeda", "Supernova"]
+        },
+        {
+          "id": "weltall_raumfahrt",
+          "label": "Raumfahrt",
+          "wikipedia_categories": ["Raumfahrt", "Raumfahrzeug", "Raumstation", "Rakete"],
+          "example_articles": ["Internationale Raumstation", "Apollo 11", "James-Webb-Weltraumteleskop"]
+        }
+      ]
+    },
+
+    {
+      "id": "laender_staedte",
+      "label": "Länder & Städte",
+      "emoji": "🗺️",
+      "theme_color": "#e65100",
+      "pattern": "place_geography",
+      "priority": 5,
+      "subcategories": [
+        {
+          "id": "laender_europa",
+          "label": "Europa",
+          "wikipedia_categories": ["Staat in Europa"],
+          "example_articles": ["Deutschland", "Frankreich", "Island", "Griechenland"]
+        },
+        {
+          "id": "laender_americas",
+          "label": "Nord- & Südamerika",
+          "wikipedia_categories": ["Staat in Nordamerika", "Staat in Südamerika"],
+          "example_articles": ["Brasilien", "Kanada", "Peru", "Mexiko"]
+        },
+        {
+          "id": "laender_asien",
+          "label": "Asien",
+          "wikipedia_categories": ["Staat in Asien"],
+          "example_articles": ["Japan", "Indien", "China", "Mongolei"]
+        },
+        {
+          "id": "laender_afrika",
+          "label": "Afrika",
+          "wikipedia_categories": ["Staat in Afrika"],
+          "example_articles": ["Ägypten", "Kenia", "Madagaskar", "Marokko"]
+        },
+        {
+          "id": "laender_ozeanien",
+          "label": "Ozeanien & Polargebiete",
+          "wikipedia_categories": ["Staat in Ozeanien", "Polargebiet"],
+          "example_articles": ["Australien", "Neuseeland", "Antarktis"]
+        },
+        {
+          "id": "staedte_weltweit",
+          "label": "Große Städte der Welt",
+          "wikipedia_categories": ["Millionenstadt", "Weltstadt", "Hauptstadt"],
+          "example_articles": ["Tokio", "Rio de Janeiro", "Kairo", "New York City"],
+          "min_population": 500000
+        }
+      ]
+    },
+
+    {
+      "id": "geschichte",
+      "label": "Geschichte",
+      "emoji": "🏛️",
+      "theme_color": "#795548",
+      "pattern": "history_person",
+      "priority": 6,
+      "review_flag_default": true,
+      "review_reason": "Historische Themen können Krieg, Gewalt oder Tod enthalten",
+      "subcategories": [
+        {
+          "id": "geschichte_antike",
+          "label": "Antike Kulturen",
+          "wikipedia_categories": ["Altes Ägypten", "Antikes Griechenland", "Römisches Reich", "Mesopotamien", "Azteken", "Inka", "Maya"],
+          "example_articles": ["Pharaonen", "Gladiatoren", "Römisches Kolosseum", "Pyramiden von Gizeh"]
+        },
+        {
+          "id": "geschichte_mittelalter",
+          "label": "Mittelalter",
+          "wikipedia_categories": ["Mittelalter", "Ritter", "Burg", "Kreuzzüge"],
+          "example_articles": ["Ritter im Mittelalter", "Burg", "Gutenberg", "Pest"]
+        },
+        {
+          "id": "geschichte_neuzeit",
+          "label": "Neuzeit & Erfindungen",
+          "wikipedia_categories": ["Frühe Neuzeit", "Industrielle Revolution", "Zeitalter der Entdeckungen"],
+          "example_articles": ["Kolumbus", "Dampfmaschine", "Französische Revolution"]
+        },
+        {
+          "id": "geschichte_modern",
+          "label": "Moderne Geschichte",
+          "wikipedia_categories": ["20. Jahrhundert", "Zweiter Weltkrieg", "Kalter Krieg"],
+          "example_articles": ["Mondlandung", "Berliner Mauer", "Nelson Mandela"],
+          "age_level_minimum": 2,
+          "review_flag_default": true,
+          "review_reason": "Enthält Krieg, Holocaust, politische Gewalt — immer manuell prüfen"
+        }
+      ]
+    },
+
+    {
+      "id": "personen",
+      "label": "Berühmte Personen",
+      "emoji": "👤",
+      "theme_color": "#6a1b9a",
+      "pattern": "history_person",
+      "priority": 7,
+      "subcategories": [
+        {
+          "id": "personen_wissenschaft",
+          "label": "Wissenschaftler & Erfinder",
+          "wikipedia_categories": ["Physiker", "Chemiker", "Biologe", "Mathematiker", "Erfinder"],
+          "example_articles": ["Albert Einstein", "Marie Curie", "Isaac Newton", "Ada Lovelace"]
+        },
+        {
+          "id": "personen_kunst_musik",
+          "label": "Künstler & Musiker",
+          "wikipedia_categories": ["Maler", "Bildhauer", "Komponist", "Klassische Musik"],
+          "example_articles": ["Leonardo da Vinci", "Beethoven", "Mozart", "Frida Kahlo"]
+        },
+        {
+          "id": "personen_entdecker",
+          "label": "Entdecker & Abenteurer",
+          "wikipedia_categories": ["Entdecker", "Forschungsreisender", "Polarforscher"],
+          "example_articles": ["Amelia Earhart", "Ferdinand Magellan", "Alexander von Humboldt"]
+        },
+        {
+          "id": "personen_rechte",
+          "label": "Friedens- & Menschenrechtler",
+          "wikipedia_categories": ["Friedensnobelpreisträger", "Bürgerrechtsbewegung"],
+          "example_articles": ["Martin Luther King", "Malala Yousafzai", "Mahatma Gandhi"],
+          "review_flag_default": true,
+          "review_reason": "Biographien enthalten ggf. Gewalt oder Tod"
+        }
+      ]
+    },
+
+    {
+      "id": "technik_wissenschaft",
+      "label": "Technik & Wissenschaft",
+      "emoji": "⚙️",
+      "theme_color": "#37474f",
+      "pattern": "tech_science",
+      "priority": 8,
+      "subcategories": [
+        {
+          "id": "technik_maschinen",
+          "label": "Maschinen & Fahrzeuge",
+          "wikipedia_categories": ["Fahrzeug", "Schiff", "Flugzeug", "Eisenbahn", "Maschine"],
+          "example_articles": ["Dampflokomotive", "Titanic", "Flugzeug", "Fahrrad"]
+        },
+        {
+          "id": "technik_digital",
+          "label": "Computer & Internet",
+          "wikipedia_categories": ["Computer", "Internet", "Künstliche Intelligenz", "Roboter"],
+          "example_articles": ["Computer", "Internet", "Roboter", "3D-Drucker"]
+        },
+        {
+          "id": "technik_energie",
+          "label": "Energie & Umwelt",
+          "wikipedia_categories": ["Erneuerbare Energie", "Solarenergie", "Windkraft", "Kernenergie"],
+          "example_articles": ["Solarenergie", "Windkraftanlage", "Wasserkraft"]
+        },
+        {
+          "id": "wissenschaft_physik",
+          "label": "Physik & Chemie",
+          "wikipedia_categories": ["Physikalisches Phänomen", "Chemisches Element", "Aggregatzustand"],
+          "example_articles": ["Schwerkraft", "Licht", "Feuer", "Wasser (Chemie)"]
+        },
+        {
+          "id": "wissenschaft_medizin",
+          "label": "Körper & Gesundheit",
+          "wikipedia_categories": ["Menschlicher Körper", "Organ (Biologie)", "Krankheit"],
+          "example_articles": ["Herz", "Gehirn", "Immunsystem", "Skelett"],
+          "review_flag_default": true,
+          "review_reason": "Krankheiten, Verletzungen — altersgerechte Filterung prüfen"
+        }
+      ]
+    },
+
+    {
+      "id": "kultur_gesellschaft",
+      "label": "Kultur & Gesellschaft",
+      "emoji": "🎭",
+      "theme_color": "#c62828",
+      "pattern": "history_person",
+      "priority": 9,
+      "subcategories": [
+        {
+          "id": "kultur_religion",
+          "label": "Weltreligionen & Feste",
+          "wikipedia_categories": ["Weltreligion", "Religiöses Fest", "Buddhismus", "Islam", "Christentum", "Judentum", "Hinduismus"],
+          "example_articles": ["Weihnachten", "Ramadan", "Diwali", "Karneval"],
+          "review_flag_default": true,
+          "review_reason": "Religiöse Themen — neutrale, respektvolle Darstellung sicherstellen"
+        },
+        {
+          "id": "kultur_sport",
+          "label": "Sport & Olympia",
+          "wikipedia_categories": ["Sportart", "Olympische Spiele", "Fußball", "Leichtathletik"],
+          "example_articles": ["Olympische Spiele", "Fußball", "Marathon", "Schach"]
+        },
+        {
+          "id": "kultur_essen",
+          "label": "Essen & Landwirtschaft",
+          "wikipedia_categories": ["Lebensmittel", "Getreide", "Nutzpflanze", "Nutztier", "Landwirtschaft"],
+          "example_articles": ["Schokolade", "Brot", "Reis", "Honig"]
+        },
+        {
+          "id": "kultur_musik_kunst",
+          "label": "Musik & Kunst",
+          "wikipedia_categories": ["Musikinstrument", "Musikstil", "Kunstgattung"],
+          "example_articles": ["Klavier", "Jazz", "Graffiti", "Skulptur"]
+        }
+      ]
+    },
+
+    {
+      "id": "sprache_kommunikation",
+      "label": "Sprache & Kommunikation",
+      "emoji": "📖",
+      "theme_color": "#00838f",
+      "pattern": "tech_science",
+      "priority": 10,
+      "subcategories": [
+        {
+          "id": "sprache_schrift",
+          "label": "Schrift & Sprachen",
+          "wikipedia_categories": ["Schrift", "Sprache", "Alphabet", "Zeichensprache"],
+          "example_articles": ["Hieroglyphen", "Braille-Schrift", "Lateinisches Alphabet"]
+        },
+        {
+          "id": "sprache_medien",
+          "label": "Medien & Kommunikation",
+          "wikipedia_categories": ["Kommunikationstechnik", "Druckmedium", "Nachrichtenübermittlung"],
+          "example_articles": ["Buchdruck", "Telefon", "Radio", "Zeitung"]
+        }
+      ]
+    }
+
+  ],
+
+  "global_exclusions": {
+    "description": "Artikel die NIEMALS verarbeitet werden, unabhängig von Kategorie",
+    "patterns": [
+      "Begriffsklärung",
+      "Liste der",
+      "Liste von",
+      "Vorlage:",
+      "Kategorie:",
+      "Wikipedia:",
+      "Diskussion:",
+      "Benutzer:"
+    ],
+    "topics": [
+      "Pornografie",
+      "Sexualität (explizit)",
+      "Waffen (technische Details)",
+      "Drogen (Konsum)",
+      "Suizid",
+      "Terrorismus (Anleitungen)"
+    ]
+  }
+}
