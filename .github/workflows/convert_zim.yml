@@ -1,0 +1,199 @@
+name: ZIM → JSON Konvertierung + Upload
+
+# Nur manuell triggerbar.
+# Benötigte GitHub Secrets: ANTHROPIC_API_KEY, CF_R2_ACCESS_KEY_ID,
+#                           CF_R2_SECRET_ACCESS_KEY, CF_ACCOUNT_ID
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry-Run (nur 10 Artikel, kein API-Call, kein Upload)"
+        type: boolean
+        default: false
+
+env:
+  PYTHON_VERSION: "3.11"
+  ZIM_URL:        "https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim"
+  ARTICLES_DIR:   "articles_zim"
+  R2_BUCKET:      "wissensfreund-articles"
+
+jobs:
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Job 1: Convert — ZIM herunterladen + in WfArticle-JSON konvertieren
+  # ──────────────────────────────────────────────────────────────────────────
+  convert:
+    name: "1 · ZIM laden + konvertieren"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Abhängigkeiten installieren
+        run: pip install libzim beautifulsoup4
+
+      - name: ZIM herunterladen
+        run: |
+          echo "Lade ZIM: ${{ env.ZIM_URL }}"
+          curl -fsSL -o klexikon.zim "${{ env.ZIM_URL }}"
+          ls -lh klexikon.zim
+
+      - name: ZIM konvertieren
+        run: |
+          ARGS="--zim klexikon.zim --out-dir ${{ env.ARTICLES_DIR }}"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python scripts/convert_zim_to_json.py $ARGS
+
+      - name: Konvertierungs-Zusammenfassung
+        if: always()
+        run: |
+          OK=$(find "${{ env.ARTICLES_DIR }}" -maxdepth 1 -name "*.json" 2>/dev/null | wc -l)
+          ERR=$(find "${{ env.ARTICLES_DIR }}/_errors" -name "*.json" 2>/dev/null | wc -l || echo 0)
+          echo "### Konvertierung" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Artikel konvertiert: **$OK**" >> $GITHUB_STEP_SUMMARY
+          echo "- ❌ Fehler: **$ERR**" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔬 Dry-Run: **${{ inputs.dry_run }}**" >> $GITHUB_STEP_SUMMARY
+
+      - name: Artikel-Artefakt hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: articles-zim
+          path: ${{ env.ARTICLES_DIR }}/
+          retention-days: 7
+
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Job 2: Quiz — Platzhalter-Quizze via Claude API nachgenerieren
+  # Benötigt: ANTHROPIC_API_KEY als GitHub Secret
+  # ──────────────────────────────────────────────────────────────────────────
+  quiz:
+    name: "2 · Quiz-Generierung (Claude API)"
+    needs: convert
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Abhängigkeiten installieren
+        run: pip install requests
+
+      - name: Artikel-Artefakt herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          name: articles-zim
+          path: ${{ env.ARTICLES_DIR }}/
+
+      - name: Quizze generieren
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          ARGS="--articles-dir ${{ env.ARTICLES_DIR }} --only-placeholders"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python scripts/generate_quizzes.py $ARGS
+
+      - name: Aktualisierte Artikel hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: articles-zim-with-quiz
+          path: ${{ env.ARTICLES_DIR }}/
+          retention-days: 7
+
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Job 3: Upload — Index bauen + nach Cloudflare R2 hochladen
+  # Benötigt: CF_R2_ACCESS_KEY_ID, CF_R2_SECRET_ACCESS_KEY, CF_ACCOUNT_ID
+  # Wird bei dry_run übersprungen.
+  # ──────────────────────────────────────────────────────────────────────────
+  upload:
+    name: "3 · Index + Upload → Cloudflare R2"
+    needs: quiz
+    runs-on: ubuntu-latest
+    if: ${{ !inputs.dry_run }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Abhängigkeiten installieren
+        run: pip install requests
+
+      - name: Artikel-Artefakt herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          name: articles-zim-with-quiz
+          path: ${{ env.ARTICLES_DIR }}/
+
+      - name: Plausibilitätsprüfung
+        run: |
+          python -c "
+          import pathlib, sys
+          ok  = len(list(pathlib.Path('${{ env.ARTICLES_DIR }}').glob('*.json')))
+          err_dir = pathlib.Path('${{ env.ARTICLES_DIR }}/_errors')
+          err = len(list(err_dir.glob('*.json'))) if err_dir.exists() else 0
+          total = ok + err
+          print(f'Artikel: {ok} OK, {err} Fehler')
+          if total == 0:
+              sys.exit('FEHLER: Keine Artikel vorhanden')
+          if total > 0 and err / total > 0.2:
+              sys.exit(f'FEHLER: Fehlerrate {err/total:.1%} > 20%')
+          print('Plausibilitätsprüfung OK')
+          "
+
+      - name: rclone installieren
+        run: curl https://rclone.org/install.sh | bash
+
+      - name: Index bauen + Upload
+        env:
+          CF_R2_ACCESS_KEY_ID:     ${{ secrets.CF_R2_ACCESS_KEY_ID }}
+          CF_R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
+          CF_ACCOUNT_ID:           ${{ secrets.CF_ACCOUNT_ID }}
+        run: |
+          python scripts/upload_articles.py \
+            --articles-dir ${{ env.ARTICLES_DIR }} \
+            --topic-tree   wissensfreund_topic_tree.json \
+            --out-dir      upload_staging/ \
+            --bucket       ${{ env.R2_BUCKET }}
+
+      - name: Upload-Zusammenfassung
+        if: always()
+        run: |
+          META="upload_staging/meta/pipeline_run.json"
+          if [ -f "$META" ]; then
+            python -c "
+          import json, pathlib
+          meta = json.loads(pathlib.Path('$META').read_text())
+          print('### Upload-Ergebnis\n')
+          print('| Metrik | Wert |')
+          print('|--------|------|')
+          print(f'| ✅ Artikel hochgeladen | {meta[\"total_articles\"]} |')
+          print(f'| ⚑  Review-Flag         | {meta[\"review_flagged\"]} |')
+          for lvl, cnt in meta.get(\"by_age_level\", {}).items():
+              print(f'| Stufe {lvl} | {cnt} |')
+          print(f'\n_Run: {meta[\"run_at\"]}_')
+          " >> $GITHUB_STEP_SUMMARY
+          fi

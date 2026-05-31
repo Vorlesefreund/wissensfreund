@@ -1,5 +1,17 @@
-<!-- last-updated: 2026-05-31T00:00:00Z -->
+<!-- last-updated: 2026-05-31T14:34:11Z -->
 # Changelog — Wissensfreund App
+
+---
+
+## [2026-05-31] — ZIM-Konvertierungs-Pipeline
+
+- `scripts/convert_zim_to_json.py` — Klexikon-ZIM → WfArticle-JSON (age_level=2, Platzhalter-Bilder ohne image_map)
+- `scripts/upload_articles.py` — Index bauen + rclone-Upload nach Cloudflare R2
+- `.github/workflows/convert_zim.yml` — 3-stufiger Workflow (convert → quiz → upload), nur manuell triggerbar
+  - Job 1: 2026-05-ZIM von ftp.fau.de laden + `convert_zim_to_json.py` (dry_run = 10 Artikel)
+  - Job 2: `generate_quizzes.py --only-placeholders` via ANTHROPIC_API_KEY Secret
+  - Job 3: `upload_articles.py` nach R2-Bucket `wissensfreund-articles` (übersprungen bei dry_run)
+- Benötigte GitHub Secrets: `ANTHROPIC_API_KEY`, `CF_R2_ACCESS_KEY_ID`, `CF_R2_SECRET_ACCESS_KEY`, `CF_ACCOUNT_ID`
 
 ---
 
