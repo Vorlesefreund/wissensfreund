@@ -1,42 +1,35 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-29T09:46:25Z -->
+<!-- updated: 2026-05-31T01:30:00Z -->
 
-## LAUFEND (Session 2026-05-29 — Bild-Scraping Vollrun)
+## Bild-Pipeline — ABGESCHLOSSEN
 
-### Vollrun scrape_klexikon_images.py gestartet
-- **GitHub Actions:** https://github.com/Vorlesefreund/wissensfreund/actions/runs/26630058109
-- Alle ~3.500 Klexikon-Artikel, SKIP_COMMONS=1, DELAY=0.8s
-- Geschätzte Laufzeit: ~60 Minuten
-- Artefakte nach Run: `article_image_map.json`, `gallery_articles.json`, `run_summary.json`
+- `scrape_klexikon_images.py`: 3.611 Artikel gescrapt
+- 16.582 Bilder gemappt (Hash → Commons-Dateiname)
+- `image_index.json` generiert und in R2 hochgeladen
+- ZIPs in R2: `images_thumb.zip` (300px, ~545 MB) + `images_standard.zip` (800px, ~3,3 GB)
+- `HiResImageService`: Original-URL (< 5 MB) + 2048px-Fallback + negativer In-Memory-Cache
+- `ImageLibraryService`: `hiresOnWifiEnabled` Bool (SharedPrefs, Default: true)
+- `WissensfreundProvider._resolveImageBytes()`: Routing nach Tier + WiFi-Setting
+- `_StorageScreen`: WLAN-Switch + korrekte Größen-/Qualitäts-Labels (800px, ~3,3 GB)
+- Bildlade-Logik:
+  - Free: 300px ZIP → ZIM
+  - Plus + WLAN-Switch an: Bestes Wikimedia-Bild → 800px ZIP → ZIM
+  - Plus + WLAN-Switch aus: 800px ZIP → ZIM
 
-### Scraping-Ansatz validiert (50-Artikel-Test)
-- **84% perfect match** (live_count == mapped) bei 50 Testart ikeln
-- 100% der Commons-URLs lagen unter `wikipedia/commons/` (kein `wikipedia/de/` o.ä.)
-- Commons-URL deterministisch aus Dateiname berechenbar → SKIP_COMMONS verlustfrei
-- Gallery-Erkennung implementiert: `live > zim + 3` → `has_gallery: true`
-- Afghanistan-Fall analysiert: Gallery-Artikel haben ZIM-seitig keine `_assets_/`-img-Tags
+## Offene Punkte (niedrige Priorität)
 
-### Nächste Schritte nach dem Vollrun
-1. **`run_summary.json` prüfen** — Erwartung: ≥84% perfect match, ~24.000 gemappte Bilder
-2. **Option A implementieren (Hash-basierte ZIPs):**
-   - `article_image_map.json` → Commons-URL aus Dateiname berechnen
-   - Bilder von Wikimedia Commons herunterladen
-   - Als `{hash}.jpg` im ZIP speichern (statt altem `I/langde-…`-Key)
-   - App lädt Bilder direkt per Hash — kein ZIM-Verzeichnis-Lookup nötig
-3. **Gallery-Artikel vormerken** für späteren Nachlauf:
-   - `gallery_articles.json` enthält alle Artikel mit Gallery-Lücken (~100–200 erwartet)
-   - Diese Bilder: Dateiname + Caption vorhanden, aber kein Hash
-   - Später per berechneter Commons-URL nachladen
+- **Gallery-Artikel (111 Artikel, 540 Bilder)** → Version 1.1
+  - Bilder nicht im ZIM → kein Hash → kein ZIP-Eintrag
+  - Braucht: gallery_index.json + eigene Gallery-UI-Komponente (~3–4 Tage)
+- **Audio-Pipeline** → separater Run
+- **Gemini-Integration** → `_handleGeminiPlaceholder()` ist Einstiegspunkt
 
-### Bereits fertig (diese Session)
-- `scripts/scrape_klexikon_images.py` — vollständig implementiert:
-  - SCHRITT 1–4 (Live-Seite → Datei-Links → Datei-Seiten → ZIM-Hash → Mapping)
-  - Caption-Extraktion: 3 Formate (thumbcaption, figcaption, gallerytext)
-  - Gallery-Erkennung + has_gallery-Flag
-  - Vollrun-Modi: ALL_ARTICLES, SKIP_COMMONS, MAX_ARTICLES
-  - Periodischer Zwischenspeicher alle 100 Artikel
-- `.github/workflows/test_scrape_klexikon_images.yml` — 3-Artikel-Test ✓
-- `.github/workflows/scrape_all_klexikon.yml` — Vollrun-Workflow ✓
+## Verworfene Ansätze (NICHT nochmal versuchen)
+
+- `entry.title` aus ZIM → immer null
+- `Datei:`-Links im ZIM → von Kiwix beim Bauen gestripped
+- `prop=images` + Caption-Matching → nur ~30% confident
+- `action=parse` + Count-Matching → zu viele Fehlerquellen
 
 ## Zuletzt erledigt (Session 2026-05-28 Abend — UI-Fixes + Offline-Library-Verbesserungen)
 
