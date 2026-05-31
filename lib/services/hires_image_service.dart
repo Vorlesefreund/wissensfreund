@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:io';;
+import 'dart:io';
 
 import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
@@ -12,53 +12,52 @@ import 'network_service.dart';
 import 'storage_manager.dart';
 import 'subscription_service.dart';
 
-const _ua              = 'Wissensfreund/1.0';
-const _downloadTimeout = Duration(seconds: 15);
-const _maxBytes        = 8 * 1024 * 1024;   // 8 MB per image (2048px can be large)
-const _maxCacheBytes   = 500 * 1024 * 1024; // 500 MB LRU cache limit
+const _ua               = 'Wissensfreund/1.0';
+const _downloadTimeout  = Duration(seconds: 15);
+const _originalMaxBytes = 5 * 1024 * 1024;  // originals ≥ 5 MB → use thumb instead
+const _maxCacheBytes    = 500 * 1024 * 1024;
 const _targetCacheBytes = 400 * 1024 * 1024;
 
-const _wikimediaThumbBase =
-    'https://upload.wikimedia.org/wikipedia/commons/thumb';
+const _wikimediaBase      = 'https://upload.wikimedia.org/wikipedia/commons';
+const _wikimediaThumbBase = '$_wikimediaBase/thumb';
 
-/// Downloads on-demand 2048px images from Wikimedia Commons.
+/// Downloads on-demand high-res images from Wikimedia Commons.
 ///
-/// - Plus/Premium only.
-/// - Only on WiFi (or allowed mobile connection).
-/// - One download at a time; further requests silently return null.
-/// - LRU cache in StorageManager.imageCacheDir, max 500 MB.
-/// - Uses image_index.json (hash → Commons filename) loaded from R2.
+/// Step 1: HEAD the original file — load if < 5 MB, else fall through.
+/// Step 2: Request 2048px thumbnail.
+/// 404 at either step → negative in-memory cache (skips future attempts).
+/// On null: caller falls back to offline ZIP or ZIM.
 class HiResImageService {
   HiResImageService._();
   static final HiResImageService instance = HiResImageService._();
 
   bool _loading = false;
 
-  // image_index.json: ZIM hash (e.g. "d772913a.jpg") → Commons filename
+  // image_index.json: ZIM hash key → Commons filename
   Map<String, String>? _index;
   bool _indexLoading = false;
 
+  // Commons filenames confirmed 404 at both steps — skip on next request.
+  final Set<String> _hiResFailed = {};
+
   // ── Public API ───────────────────────────────────────────────────────────────
 
-  /// Returns 2048px image bytes for [filename] (ZIM _assets_/ path), or null.
+  /// Returns the best available image bytes for [filename] (_assets_/ path), or null.
   Future<Uint8List?> getHiResImage(String filename) async {
-    // Local cache hit.
     final cached = await _fromCache(filename);
     if (cached != null) return cached;
 
-    // Feature gate — Plus or Premium only.
     if (!SubscriptionService.instance.canUseHighResOnDemand) return null;
 
-    // Resolve Commons filename from index.
     final commonsFilename = await _lookupCommonsFilename(filename);
     if (commonsFilename == null) return null;
 
-    // Only one concurrent download.
+    if (_hiResFailed.contains(commonsFilename)) return null;
+
     if (_loading) return null;
 
-    // Network gate — enforces WiFi/mobile settings and data limits.
     final check = await NetworkService.instance.canUseNetwork(
-      estimatedBytes: _maxBytes,
+      estimatedBytes: _originalMaxBytes,
     );
     if (!check.allowed) return null;
 
@@ -66,7 +65,7 @@ class HiResImageService {
     try {
       return await _download(filename, commonsFilename);
     } catch (e) {
-      debugPrint('HiRes: error for $filename: $e');
+      debugPrint('HiRes: error for $commonsFilename: $e');
       return null;
     } finally {
       _loading = false;
@@ -75,16 +74,13 @@ class HiResImageService {
 
   // ── Index ─────────────────────────────────────────────────────────────────────
 
-  /// Looks up the Commons filename for a ZIM _assets_/ path.
   Future<String?> _lookupCommonsFilename(String zimFilename) async {
     final index = await _loadIndex();
     if (index == null) return null;
-    // Strip _assets_/ prefix to get the hash key (e.g. "d772913a.jpg").
     final key = zimFilename.replaceFirst(RegExp(r'^_assets_[/\\]'), '');
     return index[key];
   }
 
-  /// Loads image_index.json from R2 on first call, then returns cached map.
   Future<Map<String, String>?> _loadIndex() async {
     if (_index != null) return _index;
     if (_indexLoading) return null;
@@ -93,13 +89,10 @@ class HiResImageService {
       final client = http.Client();
       try {
         final resp = await client
-            .get(
-              Uri.parse(AssetConfig.imageIndexUrl),
-              headers: {'User-Agent': _ua},
-            )
+            .get(Uri.parse(AssetConfig.imageIndexUrl), headers: {'User-Agent': _ua})
             .timeout(const Duration(seconds: 20));
         if (resp.statusCode != 200) {
-          debugPrint('HiRes: image_index.json fetch failed (${resp.statusCode})');
+          debugPrint('HiRes: index fetch failed (${resp.statusCode})');
           return null;
         }
         final raw = json.decode(resp.body) as Map<String, dynamic>;
@@ -117,22 +110,125 @@ class HiResImageService {
     }
   }
 
-  // ── URL computation ───────────────────────────────────────────────────────────
+  // ── URL helpers ───────────────────────────────────────────────────────────────
 
-  /// Builds the Wikimedia thumb URL for [commonsFilename] at 2048px.
-  ///
-  /// Format: .../thumb/{md5[0]}/{md5[0..1]}/{encoded}/2048px-{encoded}
-  /// SVG: suffix becomes 2048px-{encoded}.png
-  static String _thumbUrl(String commonsFilename) {
+  static ({String h0, String h2, String encoded}) _urlParts(String commonsFilename) {
     final md5Hash = hex.encode(md5.convert(utf8.encode(commonsFilename)).bytes);
-    final encoded = Uri.encodeComponent(commonsFilename);
-    final suffix  = commonsFilename.toLowerCase().endsWith('.svg')
-        ? '2048px-$encoded.png'
-        : '2048px-$encoded';
-    return '$_wikimediaThumbBase/${md5Hash[0]}/${md5Hash.substring(0, 2)}/$encoded/$suffix';
+    return (
+      h0:      md5Hash[0],
+      h2:      md5Hash.substring(0, 2),
+      encoded: Uri.encodeComponent(commonsFilename),
+    );
   }
 
-  // ── Download + cache ─────────────────────────────────────────────────────────
+  static String _originalUrl(String commonsFilename) {
+    final p = _urlParts(commonsFilename);
+    return '$_wikimediaBase/${p.h0}/${p.h2}/${p.encoded}';
+  }
+
+  static String _thumbUrl(String commonsFilename) {
+    final p = _urlParts(commonsFilename);
+    final isSvg   = commonsFilename.toLowerCase().endsWith('.svg');
+    final suffix  = isSvg ? '2048px-${p.encoded}.png' : '2048px-${p.encoded}';
+    return '$_wikimediaThumbBase/${p.h0}/${p.h2}/${p.encoded}/$suffix';
+  }
+
+  // ── Download logic ────────────────────────────────────────────────────────────
+
+  Future<Uint8List?> _download(String zimFilename, String commonsFilename) async {
+    final client = http.Client();
+    try {
+      // Step 1 — probe the original file via HEAD.
+      final headResp = await client
+          .head(Uri.parse(_originalUrl(commonsFilename)), headers: {'User-Agent': _ua})
+          .timeout(_downloadTimeout);
+
+      if (headResp.statusCode == 404) {
+        debugPrint('HiRes: original 404 → $commonsFilename');
+        _hiResFailed.add(commonsFilename);
+        return null;
+      }
+
+      if (headResp.statusCode == 200) {
+        final contentLength = int.tryParse(
+          headResp.headers['content-length'] ?? '',
+        );
+
+        if (contentLength == null || contentLength < _originalMaxBytes) {
+          // No Content-Length or small enough → fetch original.
+          final bytes = await _get(client, _originalUrl(commonsFilename));
+          if (bytes != null) {
+            if (bytes.length < _originalMaxBytes) {
+              await _cache(zimFilename, commonsFilename, bytes);
+              return bytes;
+            }
+            // Unexpectedly large despite HEAD → fall through to thumb.
+          }
+          // GET failed with non-404 → fall through to thumb.
+        }
+        // Content-Length ≥ 5 MB → fall through to thumb.
+      }
+      // Any non-200/404 HEAD status → fall through to thumb.
+
+      // Step 2 — 2048px thumbnail.
+      final thumbBytes = await _get(client, _thumbUrl(commonsFilename));
+      if (thumbBytes != null) {
+        await _cache(zimFilename, commonsFilename, thumbBytes);
+        return thumbBytes;
+      }
+      return null;
+    } finally {
+      client.close();
+    }
+  }
+
+  /// GET [url], returns bytes on 200, null otherwise.
+  /// Adds to negative cache on 404.
+  Future<Uint8List?> _get(http.Client client, String url) async {
+    try {
+      final resp = await client
+          .get(Uri.parse(url), headers: {'User-Agent': _ua})
+          .timeout(_downloadTimeout);
+
+      if (resp.statusCode == 200 && resp.bodyBytes.isNotEmpty) {
+        return resp.bodyBytes;
+      }
+      if (resp.statusCode == 404) {
+        // Caller decides whether to add to negative cache.
+        debugPrint('HiRes: GET 404 $url');
+      } else {
+        debugPrint('HiRes: GET ${resp.statusCode} $url');
+      }
+      return null;
+    } catch (e) {
+      debugPrint('HiRes: GET error $url — $e');
+      return null;
+    }
+  }
+
+  Future<void> _cache(
+    String zimFilename,
+    String commonsFilename,
+    Uint8List bytes,
+  ) async {
+    await _saveToCache(zimFilename, bytes);
+    await NetworkService.instance.recordUsage(bytes.length);
+    debugPrint('HiRes: cached $commonsFilename (${bytes.length ~/ 1024} KB)');
+  }
+
+  // ── Negative cache: mark 404 from thumb step ──────────────────────────────────
+  //
+  // _get() returns null for 404 but does not mutate _hiResFailed — _download()
+  // adds to the set only when *both* steps fail with a definitive 404, inferred
+  // from _get() returning null after the thumb URL. We cannot distinguish 404
+  // from network errors here, so we only add when the original HEAD was 404
+  // (handled above) or when the caller wants an explicit mark.
+  //
+  // For the thumb step: a null return may mean 404 or a transient error.
+  // We do NOT add to negative cache here — a transient failure should be
+  // retried next time the user opens the article.
+
+  // ── Cache storage ─────────────────────────────────────────────────────────────
 
   Future<Uint8List?> _fromCache(String filename) async {
     final file = _cacheFile(filename);
@@ -145,39 +241,11 @@ class HiResImageService {
     }
   }
 
-  Future<Uint8List?> _download(String zimFilename, String commonsFilename) async {
-    final url = _thumbUrl(commonsFilename);
-    final client = http.Client();
-    try {
-      final resp = await client
-          .get(Uri.parse(url), headers: {'User-Agent': _ua})
-          .timeout(_downloadTimeout);
-
-      if (resp.statusCode != 200) {
-        debugPrint('HiRes: $commonsFilename → HTTP ${resp.statusCode}');
-        return null;
-      }
-
-      final bytes = resp.bodyBytes;
-      if (bytes.isEmpty || bytes.length > _maxBytes) {
-        debugPrint('HiRes: $commonsFilename size ${bytes.length ~/ 1024} KB — skipped');
-        return null;
-      }
-
-      await _saveToCache(zimFilename, bytes);
-      await NetworkService.instance.recordUsage(bytes.length);
-      debugPrint('HiRes: cached $commonsFilename (${bytes.length ~/ 1024} KB)');
-      return bytes;
-    } finally {
-      client.close();
-    }
-  }
-
   Future<void> _saveToCache(String filename, Uint8List bytes) async {
     final dir = StorageManager.instance.imageCacheDir;
     if (!dir.existsSync()) await dir.create(recursive: true);
 
-    final file = _cacheFile(filename);
+    final file   = _cacheFile(filename);
     final parent = file.parent;
     if (!parent.existsSync()) await parent.create(recursive: true);
     await file.writeAsBytes(bytes);
@@ -191,7 +259,6 @@ class HiResImageService {
     await _evictIfNeeded();
   }
 
-  /// LRU eviction: if cache exceeds 500 MB, delete oldest files until ~400 MB.
   Future<void> _evictIfNeeded() async {
     final total = await cacheSizeBytes();
     if (total <= _maxCacheBytes) return;
@@ -232,7 +299,6 @@ class HiResImageService {
     await LicenseCacheDb.instance.clearImageCacheIndex();
   }
 
-  /// Clears the in-memory index (forces re-fetch on next request).
   void resetIndex() {
     _index = null;
     _indexLoading = false;
