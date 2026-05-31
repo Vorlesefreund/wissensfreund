@@ -31,6 +31,7 @@ class ArticleImageInfo {
   final String? author;
   final String? license;
   final String? sourceUrl;
+  final String? thumbUrl; // JSON articles: direct CDN URL for image loading
   const ArticleImageInfo({
     required this.filename,
     this.caption,
@@ -38,6 +39,7 @@ class ArticleImageInfo {
     this.author,
     this.license,
     this.sourceUrl,
+    this.thumbUrl,
   });
 }
 
@@ -160,6 +162,8 @@ class WissensfreundProvider extends ChangeNotifier {
   List<ArticleImageInfo> _articleImages = [];
   int _selectedImageIndex = -1;
   final Map<String, Uint8List> _imageBytesCache = {};
+  // JSON article images: filename → thumbUrl, for _resolveImageBytes fallback
+  final Map<String, String> _jsonThumbUrlMap = {};
 
   // Media state — unified thumbnail list (images + audio in document order)
   List<ArticleMediaItem> _mediaItems = [];
@@ -761,6 +765,7 @@ class WissensfreundProvider extends ChangeNotifier {
       _articleImages = [];
       _selectedImageIndex = -1;
       _imageBytesCache.clear();
+      _jsonThumbUrlMap.clear();
       _ttsCursor    = 0;
       _resumeOffset = 0;
       _isPaused     = false;
@@ -880,9 +885,14 @@ class WissensfreundProvider extends ChangeNotifier {
     _articleLinks       = [];
     _selectedImageIndex = -1;
     _imageBytesCache.clear();
+    _jsonThumbUrlMap.clear();
     _ttsCursor          = 0;
     _resumeOffset       = 0;
     _isPaused           = false;
+
+    for (final img in rendered.images) {
+      if ((img.thumbUrl ?? '').isNotEmpty) _jsonThumbUrlMap[img.filename] = img.thumbUrl!;
+    }
 
     _articleImages = rendered.images.map((img) => ArticleImageInfo(
           filename:     img.filename,
@@ -891,7 +901,18 @@ class WissensfreundProvider extends ChangeNotifier {
           author:       img.author,
           license:      img.license,
           sourceUrl:    img.sourceUrl,
+          thumbUrl:     img.thumbUrl,
         )).toList();
+
+    _mediaItems = rendered.images.map((img) => ArticleMediaItem(
+          filename:  img.filename,
+          caption:   img.caption,
+          isAudio:   false,
+          posInHtml: img.index,
+        )).toList();
+    _selectedMediaIndex = _mediaItems.isNotEmpty ? 0 : -1;
+    _activeAudioIndex   = -1;
+    _isPlayingAudio     = false;
 
     // ── Sentence-level chunks (pre-split, no heuristic needed) ──────────────
     _speechChunks = sentences.map((s) => s.text).toList();
@@ -1496,7 +1517,14 @@ class WissensfreundProvider extends ChangeNotifier {
   /// Free:              offline ZIP (300px)        → ZIM
   /// Plus, WiFi on:     HiRes (best, WiFi-gated)   → offline ZIP (800px) → ZIM
   /// Plus, WiFi off:    offline ZIP (800px)         → ZIM
+  /// JSON articles:     thumbUrl (direct CDN fetch) — skips ZIM/ZIP chain
   Future<Uint8List?> _resolveImageBytes(String filename) async {
+    // JSON article images bypass the ZIM/ZIP chain — use the CDN thumb URL directly.
+    final thumbUrl = _jsonThumbUrlMap[filename];
+    if (thumbUrl != null && thumbUrl.isNotEmpty) {
+      return _fetchFromThumbUrl(thumbUrl);
+    }
+
     if (!SubscriptionService.instance.isPlus) {
       return await ImageLibraryService.instance.getImage(filename)
           ?? await _zimBytes(filename);
@@ -1510,6 +1538,12 @@ class WissensfreundProvider extends ChangeNotifier {
     }
     return await ImageLibraryService.instance.getImage(filename)
         ?? await _zimBytes(filename);
+  }
+
+  Future<Uint8List?> _fetchFromThumbUrl(String url) async {
+    final check = await NetworkService.instance.canUseNetwork(estimatedBytes: 300 * 1024);
+    if (!check.allowed) return null;
+    return HiResImageService.instance.fetchUrlBytes(url);
   }
 
   Future<Uint8List?> _zimBytes(String filename) async {

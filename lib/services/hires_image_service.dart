@@ -329,6 +329,16 @@ class HiResImageService {
     await LicenseCacheDb.instance.clearImageCacheIndex();
   }
 
+  /// Fetches raw bytes from [url] directly. Used for JSON article thumb images.
+  Future<Uint8List?> fetchUrlBytes(String url) async {
+    final client = http.Client();
+    try {
+      return await _get(client, url);
+    } finally {
+      client.close();
+    }
+  }
+
   void resetIndex() {
     _index = null;
     _indexLoading = false;

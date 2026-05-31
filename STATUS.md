@@ -1,5 +1,29 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-31T01:30:00Z -->
+<!-- updated: 2026-05-31T20:57:51Z -->
+
+## Zuletzt erledigt (Session 2026-05-31 — JSON-Artikel Bilder + Thumbnail-Strip)
+
+### Schritt 1 — Bilder laden für JSON-Artikel
+- `HiResImageService.fetchUrlBytes(url)`: neue Public-Methode für direkten CDN-Fetch
+- `ArticleImageInfo.thumbUrl` (optional): CDN-URL wird von `RenderedImage` durchgereicht
+- `WissensfreundProvider._jsonThumbUrlMap: Map<String, String>`: Commons-Dateiname → thumbUrl
+  - Wird in `loadAndSpeakJsonArticle()` befüllt, in `_loadAndSpeak()` (ZIM) + neuer JSON-Load geleert
+- `_resolveImageBytes()`: prüft `_jsonThumbUrlMap[filename]` zuerst → `_fetchFromThumbUrl(url)`
+  - JSON-Artikel umgehen damit die ZIM/ZIP-Kette komplett
+- `_fetchFromThumbUrl(url)`: NetworkService-Check (300 KB) vor HTTP-Fetch
+
+### Schritt 2 — Thumbnail-Strip für JSON-Artikel
+- `loadAndSpeakJsonArticle()`: befüllt `_mediaItems` direkt aus `rendered.images`
+  - Jedes `RenderedImage` → `ArticleMediaItem(posInHtml: img.index, isAudio: false)`
+  - `_selectedMediaIndex = 0` wenn Bilder vorhanden
+- Thumbnail-Strip (`_ThumbnailRow`) und Bildnavigation (Swipe, `onMediaTap`) funktionieren
+  jetzt für JSON-Artikel ohne ZIM-Kanal
+
+### APK installiert und getestet
+- `flutter build apk --debug` ✓ + `flutter install --debug` ✓ (ZIM bleibt erhalten)
+- SM S911B (Galaxy S23) — Testergebnis ausstehend
+
+---
 
 ## Bild-Pipeline — ABGESCHLOSSEN
 
