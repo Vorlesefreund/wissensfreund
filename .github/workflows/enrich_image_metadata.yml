@@ -1,0 +1,89 @@
+name: Bild-Metadaten anreichern (Wikimedia Commons)
+
+# Nur manuell triggerbar — nicht im monatlichen Automatik-Run.
+# Benötigte GitHub Secrets: CLOUDFLARE_R2_ACCESS_KEY_ID,
+#                           CLOUDFLARE_R2_SECRET_ACCESS_KEY,
+#                           CLOUDFLARE_ACCOUNT_ID,
+#                           CLOUDFLARE_R2_BUCKET_NAME
+
+on:
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: "3.11"
+  IMAGE_INDEX_PUBLIC_URL: "https://pub-07f0107be14b48fd8652e5318441c7c2.r2.dev/image_index.json"
+
+jobs:
+  enrich:
+    name: "Commons-Metadaten abrufen + nach R2 hochladen"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Abhängigkeiten installieren
+        run: pip install requests
+
+      - name: image_index.json herunterladen
+        run: |
+          curl -fsSL -o image_index.json "${{ env.IMAGE_INDEX_PUBLIC_URL }}"
+          COUNT=$(python -c "import json; print(len(json.load(open('image_index.json'))))")
+          echo "Einträge in image_index.json: $COUNT"
+
+      - name: Metadaten anreichern
+        run: |
+          python enrich_image_metadata_v1.py \
+            --input  image_index.json \
+            --output image_index_v2.json \
+            --batch-size 50 \
+            --delay 0.5
+
+      - name: Ergebnis prüfen
+        run: |
+          python -c "
+          import json
+          d = json.load(open('image_index_v2.json'))
+          with_meta = sum(1 for v in d.values() if isinstance(v, dict) and v.get('source_url'))
+          print(f'Eintraege: {len(d)}, davon mit Metadaten: {with_meta}')
+          "
+
+      - name: image_index_v2.json nach R2 hochladen (als image_index.json)
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION:    auto
+        run: |
+          ENDPOINT="https://${{ secrets.CLOUDFLARE_ACCOUNT_ID }}.eu.r2.cloudflarestorage.com"
+          BUCKET="${{ secrets.CLOUDFLARE_R2_BUCKET_NAME }}"
+          aws s3 cp image_index_v2.json \
+            "s3://${BUCKET}/image_index.json" \
+            --endpoint-url "$ENDPOINT" \
+            --content-type application/json \
+            --cache-control "public, max-age=3600"
+          echo "Upload abgeschlossen: s3://${BUCKET}/image_index.json"
+
+      - name: Zusammenfassung
+        if: always()
+        run: |
+          if [ -f image_index_v2.json ]; then
+            python -c "
+          import json
+          d = json.load(open('image_index_v2.json'))
+          total = len(d)
+          with_meta = sum(1 for v in d.values() if isinstance(v, dict) and v.get('source_url'))
+          no_meta = total - with_meta
+          print('### Metadaten-Anreicherung\n')
+          print('| Metrik | Wert |')
+          print('|--------|------|')
+          print(f'| Eintraege gesamt | {total} |')
+          print(f'| Mit Metadaten | {with_meta} |')
+          print(f'| Ohne Metadaten | {no_meta} |')
+          " >> \$GITHUB_STEP_SUMMARY
+          fi
