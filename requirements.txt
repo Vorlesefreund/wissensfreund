@@ -1,0 +1,3 @@
+libzim
+beautifulsoup4
+requests
