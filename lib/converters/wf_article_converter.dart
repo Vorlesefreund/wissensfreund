@@ -53,6 +53,9 @@ class WfArticleConverter {
           caption:      img.caption.isNotEmpty ? img.caption : null,
           thumbUrl:     img.thumbUrl.isNotEmpty ? img.thumbUrl : null,
           fromKlexikon: false,
+          author:       img.licenseAuthor.isNotEmpty ? img.licenseAuthor : null,
+          license:      img.license.isNotEmpty ? img.license : null,
+          sourceUrl:    img.sourceUrl.isNotEmpty ? img.sourceUrl : null,
         )).toList();
 
     return RenderedArticle(

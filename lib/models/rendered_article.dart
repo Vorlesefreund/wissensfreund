@@ -8,6 +8,9 @@ class RenderedImage {
   final String? caption;
   final String? thumbUrl;  // JSON only
   final bool fromKlexikon;
+  final String? author;
+  final String? license;
+  final String? sourceUrl;
 
   const RenderedImage({
     required this.index,
@@ -15,6 +18,9 @@ class RenderedImage {
     this.caption,
     this.thumbUrl,
     required this.fromKlexikon,
+    this.author,
+    this.license,
+    this.sourceUrl,
   });
 }
 

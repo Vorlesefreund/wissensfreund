@@ -692,46 +692,100 @@ class _MainArticleImageState extends State<_MainArticleImage> {
         final selIdx = (images.isEmpty || provider.selectedImageIndex < 0)
             ? 0
             : provider.selectedImageIndex.clamp(0, images.length - 1);
-        final fromKlexikon = images.isEmpty ? false : images[selIdx].fromKlexikon;
+        final fromKlexikon  = images.isEmpty ? false : images[selIdx].fromKlexikon;
+        final selectedImage = images.isEmpty ? null  : images[selIdx];
 
         final future = _bytesFuture;
         final fn     = _loadedFilename;
 
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: future == null
-              ? _ArticleImage(
-                  key: const ValueKey('fallback'),
-                  title: widget.fallbackTitle,
-                )
-              : FutureBuilder<Uint8List?>(
-                  key: ValueKey(fn),
-                  future: future,
-                  builder: (_, snap) {
-                    final bytes = snap.data;
-                    if (bytes == null) {
-                      return _ArticleImage(title: widget.fallbackTitle);
-                    }
-                    return GestureDetector(
-                      onTap: widget.enableFullscreenTap
-                          ? () => _openFullscreen(context, selIdx)
-                          : widget.onTap,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          Image.memory(bytes, fit: widget.fit),
-                          Positioned(
-                            right: 8,
-                            bottom: 8,
-                            child: _LicenseInfoButton(filename: fn!, fromKlexikon: fromKlexikon),
-                          ),
-                        ],
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 300),
+                child: future == null
+                    ? _ArticleImage(
+                        key: const ValueKey('fallback'),
+                        title: widget.fallbackTitle,
+                      )
+                    : FutureBuilder<Uint8List?>(
+                        key: ValueKey(fn),
+                        future: future,
+                        builder: (_, snap) {
+                          final bytes = snap.data;
+                          if (bytes == null) {
+                            return _ArticleImage(title: widget.fallbackTitle);
+                          }
+                          return GestureDetector(
+                            onTap: widget.enableFullscreenTap
+                                ? () => _openFullscreen(context, selIdx)
+                                : widget.onTap,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.memory(bytes, fit: widget.fit),
+                                Positioned(
+                                  right: 8,
+                                  bottom: 8,
+                                  child: _LicenseInfoButton(filename: fn!, fromKlexikon: fromKlexikon),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
-                    );
-                  },
-                ),
+              ),
+            ),
+            _ImageCaptionLine(image: selectedImage),
+          ],
         );
       },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Attribution caption shown at the bottom of the main article image.
+// Tappable → opens source URL (with parental auth); hidden when both empty.
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ImageCaptionLine extends StatelessWidget {
+  final ArticleImageInfo? image;
+  const _ImageCaptionLine({this.image});
+
+  @override
+  Widget build(BuildContext context) {
+    final author    = image?.author    ?? '';
+    final license   = image?.license   ?? '';
+    final sourceUrl = image?.sourceUrl ?? '';
+    if (author.isEmpty && license.isEmpty) return const SizedBox.shrink();
+
+    final parts = <String>[];
+    if (author.isNotEmpty)  parts.add('© $author');
+    if (license.isNotEmpty) parts.add(license);
+    final label = parts.join(' · ');
+    final hasUrl = sourceUrl.isNotEmpty;
+
+    return GestureDetector(
+      onTap: hasUrl
+          ? () => _launchUrlWithParentalAuth(context, Uri.parse(sourceUrl))
+          : null,
+      child: Container(
+        color: Colors.black54,
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 10,
+            color: Colors.white,
+            decoration: hasUrl ? TextDecoration.underline : null,
+            decorationColor: Colors.white,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
     );
   }
 }

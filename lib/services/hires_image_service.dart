@@ -21,6 +21,19 @@ const _targetCacheBytes = 400 * 1024 * 1024;
 const _wikimediaBase      = 'https://upload.wikimedia.org/wikipedia/commons';
 const _wikimediaThumbBase = '$_wikimediaBase/thumb';
 
+class _ImageMeta {
+  final String filename;
+  final String sourceUrl;
+  final String author;
+  final String license;
+  const _ImageMeta({
+    required this.filename,
+    required this.sourceUrl,
+    required this.author,
+    required this.license,
+  });
+}
+
 /// Downloads on-demand high-res images from Wikimedia Commons.
 ///
 /// Step 1: HEAD the original file — load if < 5 MB, else fall through.
@@ -33,8 +46,8 @@ class HiResImageService {
 
   bool _loading = false;
 
-  // image_index.json: ZIM hash key → Commons filename
-  Map<String, String>? _index;
+  // image_index.json: ZIM hash key → image metadata (v1: String, v2: object)
+  Map<String, _ImageMeta>? _index;
   bool _indexLoading = false;
 
   // Commons filenames confirmed 404 at both steps — skip on next request.
@@ -75,13 +88,19 @@ class HiResImageService {
   // ── Index ─────────────────────────────────────────────────────────────────────
 
   Future<String?> _lookupCommonsFilename(String zimFilename) async {
+    final meta = await lookupMeta(zimFilename);
+    return meta?.filename.isNotEmpty == true ? meta!.filename : null;
+  }
+
+  /// Returns full metadata for [zimFilename], or null if not found.
+  Future<_ImageMeta?> lookupMeta(String zimFilename) async {
     final index = await _loadIndex();
     if (index == null) return null;
     final key = zimFilename.replaceFirst(RegExp(r'^_assets_[/\\]'), '');
     return index[key];
   }
 
-  Future<Map<String, String>?> _loadIndex() async {
+  Future<Map<String, _ImageMeta>?> _loadIndex() async {
     if (_index != null) return _index;
     if (_indexLoading) return null;
     _indexLoading = true;
@@ -96,7 +115,18 @@ class HiResImageService {
           return null;
         }
         final raw = json.decode(resp.body) as Map<String, dynamic>;
-        _index = raw.map((k, v) => MapEntry(k, v as String));
+        _index = raw.map((k, v) {
+          if (v is String) {
+            return MapEntry(k, _ImageMeta(filename: v, sourceUrl: '', author: '', license: ''));
+          }
+          final m = v as Map<String, dynamic>;
+          return MapEntry(k, _ImageMeta(
+            filename:  m['filename']   as String? ?? '',
+            sourceUrl: m['source_url'] as String? ?? '',
+            author:    m['author']     as String? ?? '',
+            license:   m['license']    as String? ?? '',
+          ));
+        });
         debugPrint('HiRes: index loaded (${_index!.length} entries)');
         return _index;
       } finally {

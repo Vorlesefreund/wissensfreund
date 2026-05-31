@@ -28,10 +28,16 @@ class ArticleImageInfo {
   // true = Bild stammt nachweislich aus der Klexikon-ZIM (CC BY-SA 3.0).
   // false = Herkunft unklar → Bild wird nicht angezeigt.
   final bool fromKlexikon;
+  final String? author;
+  final String? license;
+  final String? sourceUrl;
   const ArticleImageInfo({
     required this.filename,
     this.caption,
     this.fromKlexikon = false,
+    this.author,
+    this.license,
+    this.sourceUrl,
   });
 }
 
@@ -882,6 +888,9 @@ class WissensfreundProvider extends ChangeNotifier {
           filename:     img.filename,
           caption:      img.caption,
           fromKlexikon: img.fromKlexikon,
+          author:       img.author,
+          license:      img.license,
+          sourceUrl:    img.sourceUrl,
         )).toList();
 
     // ── Sentence-level chunks (pre-split, no heuristic needed) ──────────────
@@ -1234,15 +1243,21 @@ class WissensfreundProvider extends ChangeNotifier {
       final rawList =
           await _zimChannel.invokeMethod<List>('listImages', {'urlIndex': urlIndex});
       if (rawList == null) return;
-      // All Klexikon images are CC-licensed — no per-image gate.
-      // License info (author/URL) is fetched on-demand by the ⓘ overlay.
-      _articleImages = rawList.cast<Map>().map((ref) {
-        return ArticleImageInfo(
-          filename:     ref['filename'] as String? ?? '',
-          caption:      ref['caption']  as String?,
-          fromKlexikon: true, // einzige Quelle in dieser App = Klexikon-ZIM (CC BY-SA 3.0)
-        );
-      }).where((img) => img.filename.isNotEmpty && img.fromKlexikon).toList();
+      final imgs = <ArticleImageInfo>[];
+      for (final ref in rawList.cast<Map>()) {
+        final filename = ref['filename'] as String? ?? '';
+        if (filename.isEmpty) continue;
+        final meta = await HiResImageService.instance.lookupMeta(filename);
+        imgs.add(ArticleImageInfo(
+          filename:     filename,
+          caption:      ref['caption'] as String?,
+          fromKlexikon: true,
+          author:       meta?.author,
+          license:      meta?.license,
+          sourceUrl:    meta?.sourceUrl,
+        ));
+      }
+      _articleImages = imgs;
     } catch (e) {
       debugPrint('loadImages error: $e');
     }
@@ -1287,13 +1302,21 @@ class WissensfreundProvider extends ChangeNotifier {
     _mediaItems = items;
 
     // Keep _articleImages in sync for the main image display.
-    _articleImages = rawImages.cast<Map>().map((ref) {
-      return ArticleImageInfo(
-        filename:     ref['filename'] as String? ?? '',
-        caption:      ref['caption']  as String?,
+    final imgInfos = <ArticleImageInfo>[];
+    for (final ref in rawImages.cast<Map>()) {
+      final filename = ref['filename'] as String? ?? '';
+      if (filename.isEmpty) continue;
+      final meta = await HiResImageService.instance.lookupMeta(filename);
+      imgInfos.add(ArticleImageInfo(
+        filename:     filename,
+        caption:      ref['caption'] as String?,
         fromKlexikon: true,
-      );
-    }).where((img) => img.filename.isNotEmpty).toList();
+        author:       meta?.author,
+        license:      meta?.license,
+        sourceUrl:    meta?.sourceUrl,
+      ));
+    }
+    _articleImages = imgInfos;
 
     if (_mediaItems.isNotEmpty) _selectedMediaIndex = 0;
     notifyListeners();
