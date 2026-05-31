@@ -100,6 +100,7 @@ def iter_articles(archive) -> list[tuple[str, str]]:
     """
     Gibt alle Artikel-Einträge zurück als (title, html).
     Überspringt Weiterleitungen, Metaseiten und sehr kurze Einträge.
+    Unterstützt altes ZIM-Format (A/-Namespace) und neues (flat namespace).
     """
     articles = []
     for i in range(archive.entry_count):
@@ -108,16 +109,26 @@ def iter_articles(archive) -> list[tuple[str, str]]:
             if entry.is_redirect:
                 continue
             path = entry.path
-            # Nur A-Namespace (Artikel)
-            if not path.startswith("A/"):
+            # Titel: aus A/-Namespace, C/-Namespace oder flachem Pfad
+            if path.startswith("A/"):
+                raw_title = path[2:]
+            elif path.startswith("C/"):
+                raw_title = path[2:]
+            elif "/" not in path:
+                raw_title = path
+            else:
+                # Subpfad (Bilder, Assets usw.) — überspringen
                 continue
-            title = entry.title or path.replace("A/", "").replace("_", " ")
+            title = entry.title or raw_title.replace("_", " ")
             # Metaseiten überspringen
             if any(title.startswith(skip) for skip in (
-                "Klexikon:", "Vorlage:", "Kategorie:", "Hilfe:"
+                "Klexikon:", "Vorlage:", "Kategorie:", "Hilfe:", "Wikipedia:"
             )):
                 continue
             item = entry.get_item()
+            # Nur HTML-Einträge sind Artikel
+            if "text/html" not in item.mimetype:
+                continue
             html = bytes(item.content).decode("utf-8", errors="replace")
             if len(html) < 500:
                 continue
