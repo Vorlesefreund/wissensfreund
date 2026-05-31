@@ -15,11 +15,12 @@ import '../services/license_cache_db.dart';
 import '../services/network_service.dart';
 import '../services/professor_response_service.dart';
 import '../services/profile_service.dart';
+import '../converters/wf_article_converter.dart';
+import '../models/wf_article.dart';
 import '../services/json_article_service.dart';
 import '../services/subscription_service.dart';
 import '../services/wikimedia_license_checker.dart';
 import '../services/zim_update_service.dart';
-import '../models/wf_article.dart';
 
 class ArticleImageInfo {
   final String filename;
@@ -829,10 +830,74 @@ class WissensfreundProvider extends ChangeNotifier {
     await ProfileService.instance.clearLastArticle();
   }
 
-  // ── JSON article access (Schritt A — kein Rendering) ────────────────────────
+  // ── JSON article access ──────────────────────────────────────────────────────
 
   Future<WfArticle?> loadJsonArticle(String articleId) async {
     return _jsonArticleService.loadArticle(articleId);
+  }
+
+  /// Loads a JSON article by ID and starts TTS playback.
+  ///
+  /// Mirrors [_loadAndSpeak] for ZIM articles: same state cleanup, same
+  /// speaking flow. Uses sentence-level chunks from [WfArticleConverter] so
+  /// TTS cursor positions land exactly on sentence boundaries.
+  Future<void> loadAndSpeakJsonArticle(String articleId) async {
+    _state = AppState.thinking;
+    notifyListeners();
+
+    final article = await _jsonArticleService.loadArticle(articleId);
+    if (article == null) {
+      await _speakAndIdle(_noArticleMessage);
+      return;
+    }
+
+    final rendered = WfArticleConverter.convert(article);
+    final sentences = rendered.sections.expand((s) => s.sentences).toList();
+
+    // ── Reset state — identical to _loadAndSpeak ────────────────────────────
+    _navStack.clear();
+    _isLinkNavigation           = false;
+    _awaitingDisambiguation     = false;
+    _pendingCandidates          = [];
+    _awaitingArticleSwitch      = false;
+    _pendingArticleCandidate    = null;
+    _hasInterruptedForMic       = false;
+    _savedArticleTextForMic     = '';
+    _misserfolgZaehler          = 0;
+    _technischZaehler           = 0;
+    _lastFailedQuery            = '';
+    _cancelIdleTimers();
+
+    _articleTitle       = rendered.title;
+    _articleText        = rendered.plainText;
+    _articlePath        = rendered.sourceUrl;
+    _articleLinks       = [];
+    _selectedImageIndex = -1;
+    _imageBytesCache.clear();
+    _ttsCursor          = 0;
+    _resumeOffset       = 0;
+    _isPaused           = false;
+
+    _articleImages = rendered.images.map((img) => ArticleImageInfo(
+          filename:     img.filename,
+          caption:      img.caption,
+          fromKlexikon: img.fromKlexikon,
+        )).toList();
+
+    // ── Sentence-level chunks (pre-split, no heuristic needed) ──────────────
+    _speechChunks = sentences.map((s) => s.text).toList();
+    _chunkOffsets = sentences.map((s) => s.startChar).toList();
+    _currentChunk = 0;
+
+    unawaited(ProfileService.instance.clearLastArticle());
+    _state = AppState.speaking;
+    notifyListeners();
+    _pauseScreenTimer();
+    _trackArticleListened();
+
+    if (_speechChunks.isNotEmpty) {
+      unawaited(_tts.speak(_speechChunks[0]));
+    }
   }
 
   /// Resumes a previously saved article from [charOffset] with an intro phrase.
