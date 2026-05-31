@@ -1,5 +1,5 @@
 # Wissensfreund Status
-<!-- updated: 2026-05-31T20:57:51Z -->
+<!-- updated: 2026-05-31T21:15:00Z -->
 
 ## Zuletzt erledigt (Session 2026-05-31 — JSON-Artikel Bilder + Thumbnail-Strip)
 
@@ -19,9 +19,17 @@
 - Thumbnail-Strip (`_ThumbnailRow`) und Bildnavigation (Swipe, `onMediaTap`) funktionieren
   jetzt für JSON-Artikel ohne ZIM-Kanal
 
-### APK installiert und getestet
+### APK installiert und getestet ✅
 - `flutter build apk --debug` ✓ + `flutter install --debug` ✓ (ZIM bleibt erhalten)
-- SM S911B (Galaxy S23) — Testergebnis ausstehend
+- SM S911B (Galaxy S23): Hauptbild lädt, Thumbnail-Strip zeigt 2 Bilder, Tap wechselt Bild ✓
+- Root Cause des Leertests: `elefant_l2.json` war Schema v1.0 mit `"images": []` (alter Artikel)
+- Fix für Tests: Artikel manuell mit 2 echten Wikimedia-URLs gepatcht + per adb push übertragen
+
+### Offen: Article-Generator
+- `generate_articles.py` hat `fetch_images_for_article()` bereits implementiert
+- Aber: Alte Artikel im R2-Cache haben `"images": []` → müssen neu generiert werden
+- `_filename_from_title()` gibt lowercase aus — Wikimedia-Filenames sind case-sensitiv
+  (macht für den Map-Key nichts, thumb_url-Fetch läuft über die URL, nicht den Dateinamen)
 
 ---
 
