@@ -37,6 +37,8 @@ windows/
 
 # Binäre Assets
 assets/
+*.png
+*.jpg
 
 # Dart-generierter Code
 *.g.dart
