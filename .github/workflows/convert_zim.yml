@@ -169,9 +169,9 @@ jobs:
 
       - name: Index bauen + Upload
         env:
-          CF_R2_ACCESS_KEY_ID:     ${{ secrets.CF_R2_ACCESS_KEY_ID }}
-          CF_R2_SECRET_ACCESS_KEY: ${{ secrets.CF_R2_SECRET_ACCESS_KEY }}
-          CF_ACCOUNT_ID:           ${{ secrets.CF_ACCOUNT_ID }}
+          CF_R2_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          CF_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          CF_ACCOUNT_ID:           ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           python scripts/upload_articles.py \
             --articles-dir ${{ env.ARTICLES_DIR }} \
