@@ -3,6 +3,15 @@
 
 ---
 
+## [2026-05-31] — App-Umbau Schritt A: JSON-Datenschicht
+- `lib/models/wf_article.dart` — WfArticle + alle Unterklassen (WfArticleMeta, WfImage, WfSection, WfSentence, WfBox, WfTable, WfQuiz, WfQuizQuestion, WfQuizOption, WfTtsConfig) mit fromJson()
+- `lib/services/json_article_service.dart` — Singleton ChangeNotifier; R2-Download + 24h-Cache; WfArticleIndexEntry; articleIdFor/slugify
+- `lib/services/profile_service.dart` + `license_cache_db.dart` — ageLevel-Feld (int 1–3, DEFAULT 2); SQLite Schema v7→v8 Migration; activeAgeLevel-Getter
+- `lib/providers/wissensfreund_provider.dart` — JsonArticleService-Feld + loadJsonArticle()-Methode
+- `lib/main.dart` — JsonArticleService.instance.initialize() beim App-Start
+
+---
+
 ## [2026-05-31] — Artikel-Pipeline Konsolidierung
 - `wissensfreund_system_prompt_v3_2.md` als aktive System-Prompt-Version ins Repo
 - Veraltete Dateien nach `_alt/` archiviert (system_prompt v1, v3, artikel_briefing)
