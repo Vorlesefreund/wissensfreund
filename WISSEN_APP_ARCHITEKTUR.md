@@ -134,6 +134,42 @@ adb push klexikon.zim /sdcard/Android/data/.../files/
 
 ---
 
+## Navigation & Bild-Sync nach Altersstufe
+
+Implementiert in `article_screen.dart` + `wissensfreund_provider.dart` (Session 2026-06-01).
+
+### Mode-Toggle nach Altersstufe
+- Stufe 1 (ageLevel==1): Toggle zeigt nur B und C (2 Icons). Modus A ausgeblendet.
+- Stufe 2/3: Toggle zeigt A, B, C (3 Icons).
+- Automatischer Wechsel: Wenn Stufe 1 aktiv und Modus A gespeichert → postFrameCallback setzt Modus B.
+- Implementiert als `_buildModeToggle()` in `_ArticleHeader`; nutzt `provider.setViewMode(mode)`.
+
+### Bild-Sync (`_doImageSwipe` — top-level Hilfsfunktion)
+- Stufe 1: freies Wischen, kein TTS-Sync.
+- Stufe 2/3 vorwärts (next > ttsImg): `provider.pauseImageSync()` → Sync pausiert bis TTS aufholt.
+- Stufe 2/3 rückwärts (next < ttsImg): 10 s Timer → danach Bild auf TTS-img_index zurück.
+- Provider-Felder: `_chunkImgIndices`, `_imageSyncPaused`, `currentTtsImageIndex`.
+- Sync wird im Chunk-Advance-Handler automatisch weitergeschalten.
+- Nur für JSON-Artikel (img_index pro Satz). ZIM-Artikel: `_chunkImgIndices` leer → kein Sync.
+
+### Scroll-Navigation Modus A (Stufe 2/3)
+- 1500 ms Debounce nach Scroll-Stop (`_scrollDebounce` in `_ModeAContentState`).
+- Kein Sprung wenn aktueller TTS-Satz bereits sichtbar (`_sentenceTopCache`).
+- Sonst: oberster vollständig sichtbarer Satz ermittelt → `provider.seekAfterCurrentChunk(offset)`.
+
+### Kapitel-Navigation Modus C (Stufe 2/3)
+- Zwei Pfeil-Buttons `‹`/`›` (36 px, halbtransparent) neben Thumbnails.
+- Nur sichtbar wenn `sectionChunkStarts.length > 1` und `ageLevel >= 2`.
+- `_prevSection` / `_nextSection` in `_ModeCContentState` (jetzt StatefulWidget).
+- Provider-Felder: `_sectionChunkStarts`, `_sectionHeadings`, `chunkCharOffset(idx)`.
+
+### Provider: `seekAfterCurrentChunk(charOffset)`
+- Wenn Professor spricht: deferred via `_pendingSeekOffset`, Sprung nach aktuellem Chunk.
+- JSON-Artikel (img_index vorhanden): Chunk-Index per Offset-Lookup, `_chunkImgIndices` bleibt erhalten.
+- ZIM-Artikel: `_startSpeakingFrom(offset)` (Heuristik-Chunking, keine img-Daten).
+
+---
+
 ## Wichtige Designentscheidungen (nicht rückgängig machen)
 
 - **Kein Doppel-Renderer** — ZIM-Artikel werden per `convert_zim_to_json.py` konvertiert, dann identisch behandelt

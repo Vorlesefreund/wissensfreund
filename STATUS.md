@@ -1,18 +1,25 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-01T09:56:50Z -->
+<!-- updated: 2026-06-01T11:33:54Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Nur die letzten 2 Sessions + aktuell Offenes bleibt hier. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## 🟢 Zuletzt abgeschlossen (Session 2026-05-31)
+## 🟢 Zuletzt abgeschlossen (Session 2026-06-01)
 
-- JSON-Artikel zeigen Bilder: `HiResImageService.fetchUrlBytes()` + `_jsonThumbUrlMap`
-- Thumbnail-Strip für JSON-Artikel: `_mediaItems` direkt aus `rendered.images` befüllt
-- APK gebaut + getestet auf Galaxy S23 ✅
-- Bild-Pipeline komplett: alle 3 ZIPs in R2 (thumb 300px, standard 800px, pro 1600px) ✅
-- ZIM-Konvertierung (run 26741429128): 3.544 Artikel → R2 Staging ✅
+### Artikel-Screen: Navigation & Bild-Sync nach Altersstufe
+- **Mode-Toggle** nach Altersstufe: Stufe 1 → 2 Icons (B/C); Stufe 2/3 → 3 Icons (A/B/C)
+  - Auto-Switch: Profil Stufe 1 + Modus A aktiv → sofort auf B wechseln
+- **Bild-Sync** (Stufe 2/3 JSON-Artikel): Auto-Bildwechsel per `img_index` im Chunk-Advance-Handler
+  - Vorwärts-Wischen → Sync pausiert bis TTS aufholt
+  - Rückwärts-Wischen → 10 s Timer, dann Bild auf TTS-Position zurück
+- **Scroll-Navigation Modus A** (Stufe 2/3): 1500 ms Debounce → Professor springt zum obersten sichtbaren Satz
+- **Kapitel-Pfeile Modus C** (Stufe 2/3): `‹`/`›` neben Thumbnails, springt zu nächstem/vorherigem Abschnitt
+- `_ModeCContent` zu StatefulWidget umgebaut (Timer + Methoden)
+- Provider: `seekAfterCurrentChunk`, `pauseImageSync`, `setViewMode`, `sectionChunkStarts`, `chunkCharOffset`
+- `flutter analyze` + `flutter build apk --debug` ✅ (keine neuen Fehler)
+- WISSEN_APP_ARCHITEKTUR.md ergänzt: neuer Abschnitt "Navigation & Bild-Sync nach Altersstufe"
 
 ---
 
@@ -37,33 +44,20 @@ Dann `quiz_and_upload.yml` manuell triggern. Laufzeit ~8.9h → braucht 2 Runs (
 
 ---
 
-## Wichtige Erkenntnisse aus dieser Session
-
-- **Alle ZIM-Artikel sind age_level=2** (Stufe 2, 7–9 Jahre). Klexikon differenziert nicht nach Alter.
-  Stufe 1 + 3 kommen nur aus `generate_articles.py` (separater Pipeline).
-- **Quiz-Qualität gut**: 3 Fragen, A/B/C Optionen, TTS-tauglich, testen echten Artikeltext ✓
-- **Workflow-Schwachstelle**: Quiz-Run schreibt Artikel nur lokal. Bei Abbruch → Quizze verloren.
-  Verbesserung: Artikel nach jeder N-Batch direkt zurück nach R2 schreiben.
-
----
-
 ## 🟡 Offen — nächste Schritte
 
 ### Hoch
 - **Quiz-Checkpoint löschen + Run neu starten** (s.o.)
+- **Bilder-Patch** nach Quiz-Run: `patch_article_images_v1.py` laufen lassen (s. CLAUDE_CHAT_NOTIZEN.md)
 - **App-Umbau Schritt B: Renderer** — gemeinsamer JSON-Renderer für ZIM + eigene Artikel
-  - `RenderedArticle` internes Format
-  - `ZimArticleConverter` + `JsonArticleConverter`
   - Quiz-Widget (A/B/C per STT)
   - Callout-Boxen (wow/fakt/myth/warn)
-  - Bild-Wechsel per `imgIndex` pro Satz
 
 ### Mittel
 - **Gemini-Integration** — `_detectQueryType()` vorhanden aber inaktiv
   - Typ 3 (Vergleichsfrage) + Typ 5 (Fallback) fehlen noch
   - `_handleGeminiPlaceholder()` ist der Einstiegspunkt
 - **Topic-Tree Kachel-Navigation** in der App (Ebene 1→2→3)
-- **Quiz-Workflow verbessern**: Artikel nach jeder Batch nach R2 zurückschreiben
 
 ### Niedrig
 - Upgrade-Dialog für Free-User bei Rückfrage (wartet auf Gemini)
@@ -86,4 +80,4 @@ Dann `quiz_and_upload.yml` manuell triggern. Laufzeit ~8.9h → braucht 2 Runs (
 |---|---|
 | `WISSEN_BILDER.md` | Bild-Pipeline, R2-Struktur, verworfene Ansätze |
 | `WISSEN_ARTIKEL_PIPELINE.md` | JSON-Schema, Altersstufen, Pipeline-Skripte, Related Terms |
-| `WISSEN_APP_ARCHITEKTUR.md` | Services, Freemium, Frage-Typen, Designentscheidungen |
+| `WISSEN_APP_ARCHITEKTUR.md` | Services, Freemium, Frage-Typen, Navigation+Sync, Designentscheidungen |
