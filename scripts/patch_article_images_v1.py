@@ -15,6 +15,7 @@ Verwendung:
 import argparse
 import json
 import logging
+import os
 import re
 import sys
 import time
@@ -29,17 +30,57 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-WIKIPEDIA_API = "https://de.wikipedia.org/w/api.php"
-COMMONS_API   = "https://commons.wikimedia.org/w/api.php"
-THUMB_WIDTH   = 960
-RATE_PAUSE    = 0.5
-MAX_IMAGES    = 6
+WIKIPEDIA_API   = "https://de.wikipedia.org/w/api.php"
+COMMONS_API     = "https://commons.wikimedia.org/w/api.php"
+CLAUDE_API_URL  = "https://api.anthropic.com/v1/messages"
+CLAUDE_MODEL    = "claude-sonnet-4-6"
+THUMB_WIDTH     = 960
+RATE_PAUSE      = 0.5
+MAX_IMAGES      = 6    # Fallback ohne KI
+MAX_CANDIDATES  = 15   # Kandidaten-Pool für KI-Filter
 
 FILTER_PATTERN = re.compile(
     r"logo|flag|wappen|karte|map|icon|picto|portrait|stamp",
     re.IGNORECASE,
 )
-ALLOWED_EXT    = {".jpg", ".jpeg", ".png", ".webp"}
+ALLOWED_EXT = {".jpg", ".jpeg", ".png", ".webp"}
+
+AGE_LABELS = {1: "4-6 Jahre", 2: "7-9 Jahre", 3: "10-12 Jahre"}
+
+AI_PROMPT = """\
+Du bist Redakteur für das Kinderlexikon Wissensfreund.
+Aufgabe: Wähle passende Bilder für einen Artikel aus und weise sie den Sätzen zu.
+
+Artikel: {titel}
+Altersstufe: {age_level} ({age_label})
+Maximale Bildanzahl: {max_images}
+
+ALTERSSTUFEN-HINWEISE:
+Stufe 1 (4-6 J.): Nur lebende Tiere, bunte Natur, freundliche \
+Bilder. Keine Skelette, Fossilien, Anatomie, tote Tiere, \
+Jagdszenen, verstörende Inhalte.
+Stufe 2 (7-9 J.): Wie Stufe 1, aber Skelette und anatomische \
+Darstellungen sind ok wenn sie lehrreich sind. Keine Fossilien \
+ausgestorbener Arten als Hauptthema.
+Stufe 3 (10-12 J.): Alle sachlich korrekten Bilder erlaubt, \
+auch Fossilien, Vergleichsanatomie, historische Darstellungen.
+
+ABSCHNITTE UND SÄTZE:
+{sections_json}
+
+BILDKANDIDATEN:
+{filenames_list}
+
+Antworte NUR mit validem JSON — kein Text davor oder danach.
+Format:
+{{
+  "images": [{{"filename": "...", "reason": "..."}}],
+  "sentence_image_assignments": [
+    {{"section_id": "...", "sent_id": "...", "img_index": 0}}
+  ]
+}}
+
+Maximale Bildanzahl nach Interesse: high=15, medium=10, low=6"""
 
 
 # ─── Checkpoint ──────────────────────────────────────────────────────────────
@@ -106,8 +147,8 @@ def fetch_wikipedia_image_names(title: str, session: requests.Session) -> list[s
 
 # ─── Filter ──────────────────────────────────────────────────────────────────
 
-def filter_images(filenames: list[str]) -> list[str]:
-    """Filtert nicht-inhaltliche Bilder und begrenzt auf MAX_IMAGES."""
+def filter_images(filenames: list[str], limit: int = MAX_IMAGES) -> list[str]:
+    """Filtert nicht-inhaltliche Bilder (SVG, Icons, …) und begrenzt auf limit."""
     result = []
     for fn in filenames:
         if Path(fn).suffix.lower() not in ALLOWED_EXT:
@@ -115,7 +156,7 @@ def filter_images(filenames: list[str]) -> list[str]:
         if FILTER_PATTERN.search(fn):
             continue
         result.append(fn)
-        if len(result) >= MAX_IMAGES:
+        if len(result) >= limit:
             break
     return result
 
@@ -198,6 +239,73 @@ def build_image_entry(idx: int, filename: str, meta: dict) -> dict:
     }
 
 
+# ─── KI-Bildfilter ───────────────────────────────────────────────────────────
+
+def build_sections_json(article: dict) -> str:
+    """Kompakte Abschnitt+Satz-Struktur für den KI-Prompt."""
+    sections = []
+    for sec in article.get("sections", []):
+        sections.append({
+            "id":        sec.get("id", ""),
+            "heading":   sec.get("heading", ""),
+            "sentences": [
+                {"id": s.get("id", ""), "text": s.get("text", "")}
+                for s in sec.get("sentences", [])
+            ],
+        })
+    return json.dumps(sections, ensure_ascii=False, indent=2)
+
+
+def call_claude_image_filter(
+    api_key: str,
+    article: dict,
+    filenames: list[str],
+) -> dict | None:
+    """
+    Lässt Claude Bilder filtern, sortieren und Sätzen zuweisen.
+    Gibt das geparste JSON-Objekt zurück oder None bei Fehler.
+    """
+    meta      = article.get("meta", {})
+    age_level = meta.get("age_level", 2)
+    titel     = meta.get("title", "")
+
+    prompt = AI_PROMPT.format(
+        titel=titel,
+        age_level=age_level,
+        age_label=AGE_LABELS.get(age_level, "7-9 Jahre"),
+        max_images=15,
+        sections_json=build_sections_json(article),
+        filenames_list="\n".join(f"{i}. {fn}" for i, fn in enumerate(filenames)),
+    )
+
+    headers = {
+        "x-api-key":         api_key,
+        "anthropic-version": "2023-06-01",
+        "content-type":      "application/json",
+    }
+    body = {
+        "model":    CLAUDE_MODEL,
+        "max_tokens": 1000,
+        "messages": [{"role": "user", "content": prompt}],
+    }
+
+    for attempt in range(3):
+        try:
+            resp = requests.post(CLAUDE_API_URL, headers=headers, json=body, timeout=60)
+            if resp.status_code == 429:
+                time.sleep(10 * (attempt + 1))
+                continue
+            resp.raise_for_status()
+            raw     = resp.json()["content"][0]["text"]
+            cleaned = re.sub(r"^```json\s*", "", raw.strip())
+            cleaned = re.sub(r"```\s*$",     "", cleaned)
+            return json.loads(cleaned)
+        except Exception as e:
+            log.warning("  Claude-Versuch %d fehlgeschlagen: %s", attempt + 1, e)
+            time.sleep(5)
+    return None
+
+
 def needs_patch(article: dict, force: bool) -> bool:
     if force:
         return True
@@ -212,11 +320,12 @@ def patch_article(
     article: dict,
     session: requests.Session,
     dry_run: bool,
+    api_key: str | None = None,
 ) -> bool:
     """
-    Holt Bilder von Klexikon/Commons und schreibt sie in den Artikel.
+    Holt Bilder von Wikipedia/Commons, filtert und sortiert sie per KI,
+    weist sie den Sätzen zu und schreibt zurück.
     Setzt voraus, dass needs_patch() bereits True ergeben hat.
-    Gibt True bei Erfolg zurück.
     """
     title = get_wikipedia_title(article)
     if not title:
@@ -232,23 +341,65 @@ def patch_article(
         log.warning("  Keine Bilder auf Wikipedia gefunden")
         return False
 
-    filtered = filter_images(raw_names)
+    # Kandidaten-Pool für KI (mehr als MAX_IMAGES, SVG/Icons bereits raus)
+    candidates = filter_images(raw_names, limit=MAX_CANDIDATES)
     log.info(
-        "  Klexikon: %d Bilder gesamt → %d nach Filter (SVG/Icon/Portrait/Stamp entfernt)",
-        len(raw_names), len(filtered),
+        "  Wikipedia: %d Bilder gesamt → %d Kandidaten nach Vorfilter",
+        len(raw_names), len(candidates),
     )
 
-    if not filtered:
+    if not candidates:
         log.warning("  Alle Bilder herausgefiltert — Artikel übersprungen")
         return False
 
-    meta_map = fetch_commons_metadata(filtered, session)
+    meta_map = fetch_commons_metadata(candidates, session)
     time.sleep(RATE_PAUSE)
 
+    # ── KI-Filter ────────────────────────────────────────────────────────────
+    selected_filenames = candidates  # Fallback: alle Kandidaten
+    ai_result = None
+
+    if api_key:
+        log.info("  KI-Filter: %d Kandidaten → Claude ...", len(candidates))
+        ai_result = call_claude_image_filter(api_key, article, candidates)
+        time.sleep(RATE_PAUSE)
+
+    if ai_result:
+        ai_images = ai_result.get("images", [])
+        log.info("  KI wählte %d Bilder aus:", len(ai_images))
+        for item in ai_images:
+            log.info("    • %-55s  %s", item.get("filename", "")[:55], item.get("reason", ""))
+
+        # Nur KI-gewählte Dateinamen die im meta_map vorhanden sind
+        selected_filenames = [
+            item["filename"] for item in ai_images
+            if item.get("filename") in meta_map
+        ]
+
+        # Satz-Zuweisungen anwenden
+        assignments = {
+            (a["section_id"], a["sent_id"]): a["img_index"]
+            for a in ai_result.get("sentence_image_assignments", [])
+            if "section_id" in a and "sent_id" in a and "img_index" in a
+        }
+        if assignments:
+            for sec in article.get("sections", []):
+                for sent in sec.get("sentences", []):
+                    key = (sec.get("id", ""), sent.get("id", ""))
+                    if key in assignments:
+                        sent["img_index"] = assignments[key]
+            log.info("  %d Satz-Zuweisungen gesetzt", len(assignments))
+    else:
+        if api_key:
+            log.warning("  KI-Filter fehlgeschlagen — Fallback auf Vorfilter-Ergebnis")
+        # Ohne KI: Kandidaten auf MAX_IMAGES begrenzen
+        selected_filenames = candidates[:MAX_IMAGES]
+
+    # ── images[]-Array aufbauen ───────────────────────────────────────────────
     images = []
-    for idx, fn in enumerate(filtered):
-        meta  = meta_map.get(fn, {})
-        entry = build_image_entry(idx, fn, meta)
+    for idx, fn in enumerate(selected_filenames):
+        cm = meta_map.get(fn, {})
+        entry = build_image_entry(idx, fn, cm)
         log.info(
             "  [%d] %-60s  thumb: %s",
             idx, fn[:60], "✓" if entry["thumb_url"] else "FEHLT",
@@ -278,6 +429,10 @@ def main() -> None:
 
     if not args.articles_dir.is_dir():
         sys.exit(f"Verzeichnis nicht gefunden: {args.articles_dir}")
+
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not api_key:
+        log.warning("ANTHROPIC_API_KEY nicht gesetzt — KI-Filter deaktiviert, Fallback aktiv")
 
     files = sorted(args.articles_dir.glob("*.json"))
     log.info("%d Artikel-Dateien gefunden", len(files))
@@ -323,7 +478,7 @@ def main() -> None:
             continue
 
         # Patch durchführen
-        success = patch_article(path, article, session, args.dry_run)
+        success = patch_article(path, article, session, args.dry_run, api_key)
         processed += 1
 
         if success:
