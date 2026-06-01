@@ -69,6 +69,9 @@ class ProfileManagementScreen extends StatelessWidget {
                   ],
                 ),
                 child: ListTile(
+                  onTap: isActive
+                      ? null
+                      : () => ps.setActiveProfile(profile),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16, vertical: 8,
                   ),
