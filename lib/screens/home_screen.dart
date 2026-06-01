@@ -924,65 +924,63 @@ class _AppMenuState extends State<_AppMenu> {
 
           // ── Profile header ───────────────────────────────────────────
           if (profile != null)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
-              child: Row(
-                children: [
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFE8F5E9),
-                      shape: BoxShape.circle,
-                    ),
-                    child: Center(
-                      child: Text(
-                        profile.avatarId,
-                        style: const TextStyle(fontSize: 26),
+            GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(outerContext).push(
+                  MaterialPageRoute(
+                    builder: (_) => const ProfileSelectionScreen(),
+                  ),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 8),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFE8F5E9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Center(
+                        child: Text(
+                          profile.avatarId,
+                          style: const TextStyle(fontSize: 26),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          profile.name,
-                          style: const TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF1B5E20),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            profile.name,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w700,
+                              color: Color(0xFF1B5E20),
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${profile.age} Jahre · ${_levelLabel(profile.languageLevel)}',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF888888),
+                          Text(
+                            '${profile.age} Jahre · ${_levelLabel(profile.languageLevel)}',
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF888888),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      Navigator.of(outerContext).push(
-                        MaterialPageRoute(
-                          builder: (_) => const ProfileSelectionScreen(),
-                        ),
-                      );
-                    },
-                    child: const Text(
-                      'Wechseln',
-                      style: TextStyle(
-                        color: Color(0xFF4CAF50),
-                        fontWeight: FontWeight.w600,
+                        ],
                       ),
                     ),
-                  ),
-                ],
+                    const Icon(
+                      Icons.chevron_right_rounded,
+                      color: Color(0xFF4CAF50),
+                      size: 24,
+                    ),
+                  ],
+                ),
               ),
             ),
           const Divider(height: 1, indent: 20, endIndent: 20),
