@@ -70,7 +70,8 @@ jobs:
           mkdir -p "${{ env.ARTICLES_DIR }}"
           rclone sync "r2:${{ env.R2_BUCKET }}/staging/articles_zim/" \
             "${{ env.ARTICLES_DIR }}/" \
-            --transfers=20 --checkers=20 --stats=30s
+            --transfers=20 --checkers=20 --stats=30s \
+            --s3-no-check-bucket
           COUNT=$(find "${{ env.ARTICLES_DIR }}" -maxdepth 1 -name "*.json" | wc -l)
           echo "Geladene Artikel: $COUNT"
           if [ "$COUNT" -eq 0 ]; then
