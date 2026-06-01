@@ -161,6 +161,9 @@ Implementiert in `article_screen.dart` + `wissensfreund_provider.dart` (Session 
 **Mode A** (`_ModeAContentState`): nutzt `_sentenceTopCache` (gebaut einmalig bei initState).
 - `_userScrolling = false` sofort in `_jumpToTopSentence` — funktioniert weil `_sentenceTopCache` stabil ist
   (Mode A ändert keine Font-Sizes, Positionen bleiben korrekt).
+- **Bug 2026-06-01**: `_jumpToTopSentence` hatte `_userScrolling = false` an KEINEM Return-Pfad.
+  → Nach erstem manuellen Scroll: `_userScrolling = true` für immer → `_smartScrollTo` dauerhaft geblockt.
+  Fix: `_userScrolling = false` an allen 5 Early-Returns + unmittelbar nach `seekAfterCurrentChunk`.
 
 **Mode B** (`_ModeBContentState`): nutzt **live** `findRenderObject()` in `_jumpToTopSentence`.
 - Stale-Cache-Problem: aktiver Satz fontSize 19, inaktiv 15 → Positionen verschieben sich mit jedem TTS-Advance.
@@ -169,6 +172,11 @@ Implementiert in `article_screen.dart` + `wissensfreund_provider.dart` (Session 
 - `_seekResumeTimer` (3000 ms): `_userScrolling` bleibt nach Seek-Aufruf `true` bis Timer feuert.
   Verhindert, dass `_smartScrollTo` für alte TTS-Sätze sofort zurückscrollt, bevor Seek greift.
   Neuer Scroll von User → `_seekResumeTimer?.cancel()` (State-Machine Reset).
+- **Professor-Zone-Bug 2026-06-01**: Professor-Widget (218 dp) deckt untere ~220 dp des Viewports ab.
+  - Scroll-Schwelle `viewportH * 0.5` zu spät: Safe-Zone endet bei ~306 dp, 50% = ~262 dp, nächster
+    Satz bei ~312 dp → bereits unter Professor. Fix: Schwelle auf `viewportH * 0.35` (≈184 dp).
+  - Bottom-Padding `_kMicClear` (80 dp) → letzter Artikel-Satz unter Professor sichtbar.
+    Fix: Padding auf `_kProfZone = _kProfH + _kProfBottom - 4 = 220 dp` erhöht.
 
 ### Kapitel-Navigation Modus C (Stufe 2/3)
 - Zwei Pfeil-Buttons `‹`/`›` (36 px, halbtransparent) neben Thumbnails.
@@ -215,3 +223,7 @@ Auf Mobilfunk ohne explizites Freischalten → JSON-Bilder werden geblockt → `
 - **Staging-Dir-Pattern** für Downloads — `.new/` Verzeichnis, atomarer Austausch am Ende
 - **Plausibilitätsprüfung manuell** — Claude Code/Chat macht Fehler bei großen Zahlen, Andreas prüft selbst
 - **Test-Button hardcoded auf `elefant_l2`** — nie wieder dynamisch nach Altersstufe bauen
+- **`_userScrolling` an ALLEN Return-Pfaden zurücksetzen** — gilt für Mode A und B; vergessene
+  Resets führen zu dauerhaft blockiertem Auto-Scroll ohne offensichtlichen Fehler
+- **Mode B Bottom-Padding = `_kProfZone` (220 dp)**, nicht `_kMicClear` (80 dp) — Professor
+  ist 218 dp hoch; Mic ist 52+14+14 = 80 dp; beide Konstanten vorhanden, die richtige verwenden
