@@ -1,0 +1,220 @@
+name: Quiz generieren + Upload → R2
+
+# Wird automatisch gestartet wenn convert_zim.yml erfolgreich war.
+# Kann auch manuell gestartet werden (z.B. nach Timeout, für Retry).
+# Checkpoint wird auf R2 gesichert → bei Neustart wird dort weitergemacht.
+# Benötigte GitHub Secrets: ANTHROPIC_API_KEY, CF_R2_ACCESS_KEY_ID,
+#                           CF_R2_SECRET_ACCESS_KEY, CF_ACCOUNT_ID
+
+on:
+  workflow_run:
+    workflows: ["ZIM → JSON Konvertierung"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry-Run (kein API-Call, kein Upload)"
+        type: boolean
+        default: false
+
+env:
+  PYTHON_VERSION:  "3.11"
+  ARTICLES_DIR:    "articles_zim"
+  R2_BUCKET:       "wissensfreund-articles"
+  CHECKPOINT_KEY:  "staging/checkpoints/quiz_checkpoint.json"
+
+jobs:
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Job 1: Quiz — Platzhalter-Quizze via Claude API nachgenerieren
+  # Lädt Checkpoint von R2 → macht dort weiter → sichert Checkpoint zurück.
+  # ────────────────────────────────────────────────────────────────────────────
+  quiz:
+    name: "Quiz-Generierung (Claude API)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 340
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Abhängigkeiten installieren
+        run: |
+          pip install requests
+          curl https://rclone.org/install.sh | bash
+
+      - name: rclone konfigurieren
+        env:
+          CF_R2_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          CF_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          CF_ACCOUNT_ID:           ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          rclone config create r2 s3 \
+            provider=Cloudflare \
+            access_key_id="$CF_R2_ACCESS_KEY_ID" \
+            secret_access_key="$CF_R2_SECRET_ACCESS_KEY" \
+            endpoint="https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" \
+            --non-interactive
+
+      - name: Artikel von R2 Staging laden
+        run: |
+          mkdir -p "${{ env.ARTICLES_DIR }}"
+          rclone sync "r2:${{ env.R2_BUCKET }}/staging/articles_zim/" \
+            "${{ env.ARTICLES_DIR }}/" \
+            --transfers=20 --checkers=20 --stats=30s
+          COUNT=$(find "${{ env.ARTICLES_DIR }}" -maxdepth 1 -name "*.json" | wc -l)
+          echo "Geladene Artikel: $COUNT"
+          if [ "$COUNT" -eq 0 ]; then
+            echo "FEHLER: Keine Artikel in Staging gefunden — convert_zim.yml zuerst ausführen"
+            exit 1
+          fi
+
+      - name: Checkpoint von R2 laden (falls vorhanden)
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          CF_ACCOUNT_ID:         ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          aws s3 cp \
+            "s3://${{ env.R2_BUCKET }}/${{ env.CHECKPOINT_KEY }}" \
+            checkpoint_quiz.json \
+            --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" \
+            --no-progress 2>/dev/null \
+          && echo "Checkpoint geladen: $(python3 -c "import json,sys; d=json.load(open('checkpoint_quiz.json')); print(len(d), 'Artikel bereits generiert')")" \
+          || echo "Kein Checkpoint auf R2 — starte von vorn"
+
+      - name: Quizze generieren
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          ARGS="--articles-dir ${{ env.ARTICLES_DIR }} --only-placeholders --checkpoint checkpoint_quiz.json"
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python scripts/generate_quizzes.py $ARGS
+
+      - name: Checkpoint auf R2 sichern
+        if: always()
+        env:
+          AWS_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          CF_ACCOUNT_ID:         ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -f checkpoint_quiz.json ]; then
+            aws s3 cp \
+              checkpoint_quiz.json \
+              "s3://${{ env.R2_BUCKET }}/${{ env.CHECKPOINT_KEY }}" \
+              --endpoint-url "https://${CF_ACCOUNT_ID}.r2.cloudflarestorage.com" \
+              --no-progress
+            COUNT=$(python3 -c "import json; print(len(json.load(open('checkpoint_quiz.json'))))")
+            echo "✅ Checkpoint gesichert: $COUNT Artikel"
+          fi
+
+      - name: Artikel-Artefakt hochladen
+        if: ${{ inputs.dry_run != true }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: articles-with-quiz
+          path: ${{ env.ARTICLES_DIR }}/
+          retention-days: 7
+
+      - name: Quiz-Zusammenfassung
+        if: always()
+        run: |
+          DONE=0
+          if [ -f checkpoint_quiz.json ]; then
+            DONE=$(python3 -c "import json; print(len(json.load(open('checkpoint_quiz.json'))))")
+          fi
+          TOTAL=$(find "${{ env.ARTICLES_DIR }}" -maxdepth 1 -name "*.json" 2>/dev/null | wc -l)
+          echo "### Quiz-Generierung" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Quizze generiert: **$DONE / $TOTAL**" >> $GITHUB_STEP_SUMMARY
+          echo "- 🔬 Dry-Run: **${{ inputs.dry_run }}**" >> $GITHUB_STEP_SUMMARY
+
+
+  # ────────────────────────────────────────────────────────────────────────────
+  # Job 2: Upload — Index bauen + nach Cloudflare R2 hochladen
+  # ────────────────────────────────────────────────────────────────────────────
+  upload:
+    name: "Index + Upload → Cloudflare R2"
+    needs: quiz
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: ${{ github.event_name != 'workflow_dispatch' || !inputs.dry_run }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Python einrichten
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+
+      - name: Abhängigkeiten installieren
+        run: pip install requests
+
+      - name: Artikel-Artefakt herunterladen
+        uses: actions/download-artifact@v4
+        with:
+          name: articles-with-quiz
+          path: ${{ env.ARTICLES_DIR }}/
+
+      - name: Plausibilitätsprüfung
+        run: |
+          python -c "
+          import pathlib, sys
+          ok  = len(list(pathlib.Path('${{ env.ARTICLES_DIR }}').glob('*.json')))
+          err_dir = pathlib.Path('${{ env.ARTICLES_DIR }}/_errors')
+          err = len(list(err_dir.glob('*.json'))) if err_dir.exists() else 0
+          total = ok + err
+          print(f'Artikel: {ok} OK, {err} Fehler')
+          if total == 0:
+              sys.exit('FEHLER: Keine Artikel vorhanden')
+          if total > 0 and err / total > 0.2:
+              sys.exit(f'FEHLER: Fehlerrate {err/total:.1%} > 20%')
+          print('Plausibilitätsprüfung OK')
+          "
+
+      - name: rclone installieren
+        run: curl https://rclone.org/install.sh | bash
+
+      - name: Index bauen + Upload
+        env:
+          CF_R2_ACCESS_KEY_ID:     ${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID }}
+          CF_R2_SECRET_ACCESS_KEY: ${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}
+          CF_ACCOUNT_ID:           ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          python scripts/upload_articles.py \
+            --articles-dir ${{ env.ARTICLES_DIR }} \
+            --topic-tree   wissensfreund_topic_tree.json \
+            --out-dir      upload_staging/ \
+            --bucket       ${{ env.R2_BUCKET }}
+
+      - name: Upload-Zusammenfassung
+        if: always()
+        run: |
+          META="upload_staging/meta/pipeline_run.json"
+          if [ -f "$META" ]; then
+            python -c "
+          import json, pathlib
+          meta = json.loads(pathlib.Path('$META').read_text())
+          print('### Upload-Ergebnis\n')
+          print('| Metrik | Wert |')
+          print('|--------|------|')
+          print(f'| ✅ Artikel hochgeladen | {meta[\"total_articles\"]} |')
+          print(f'| ⚑  Review-Flag         | {meta[\"review_flagged\"]} |')
+          for lvl, cnt in meta.get(\"by_age_level\", {}).items():
+              print(f'| Stufe {lvl} | {cnt} |')
+          print(f'\n_Run: {meta[\"run_at\"]}_')
+          " >> $GITHUB_STEP_SUMMARY
+          fi
