@@ -75,7 +75,7 @@ jobs:
 
       - name: rclone installieren
         if: ${{ inputs.dry_run != true }}
-        run: curl https://rclone.org/install.sh | bash
+        run: curl https://rclone.org/install.sh | sudo bash
 
       - name: Artikel nach R2 Staging hochladen
         if: ${{ inputs.dry_run != true }}
