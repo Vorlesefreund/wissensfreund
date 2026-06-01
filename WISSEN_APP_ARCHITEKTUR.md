@@ -225,6 +225,13 @@ Auf Mobilfunk ohne explizites Freischalten → JSON-Bilder werden geblockt → `
 - **Test-Button hardcoded auf `elefant_l2`** — nie wieder dynamisch nach Altersstufe bauen
 - **`_userScrolling` an ALLEN Return-Pfaden zurücksetzen** — gilt für Mode A und B; vergessene
   Resets führen zu dauerhaft blockiertem Auto-Scroll ohne offensichtlichen Fehler
+- **`_userScrolling = true` VOR dem `ageLevel < 2`-Check setzen** — sonst greift der Guard bei
+  Level 0/1 nie, und Auto-Scroll springt Text zurück (Bug 2026-06-01, beide _onScroll-Methoden)
+- **`_seekToChunkForOffset`: `startSpeaking`-Parameter auch im ZIM-Pfad beachten** — der else-Zweig
+  (`_chunkImgIndices` leer) muss `startSpeaking: false` respektieren, sonst startet TTS bei Pause+Scroll
+- **Links in JSON-Artikeln fehlen im Datenmodell** — `WfSentence` hat kein Link-Feld; `WfArticleConverter`
+  setzt `links: const []`. Lösung erfordert Python-Pipeline-Änderung (Link-Positionen aus HTML extrahieren),
+  dann `WfSentence.links`, `WfArticleConverter`-Update, Provider-Befüllung. Backlog nach Quiz-Run.
 - **Mode B Bottom-Padding = `_kProfZone` (220 dp)**, nicht `_kMicClear` (80 dp) — Professor
   ist 218 dp hoch; Mic ist 52+14+14 = 80 dp; beide Konstanten vorhanden, die richtige verwenden
 

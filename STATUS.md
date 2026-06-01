@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-01T18:01:03Z -->
+<!-- updated: 2026-06-01T20:05:08Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Nur die letzten 2 Sessions + aktuell Offenes bleibt hier. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
@@ -19,35 +19,36 @@ Scroll-Schwelle auf `viewportH * 0.35`, Bottom-Padding auf `_kProfZone` (220 dp)
 **Bug 3 — Bilder zeigen keinen Lade-Zustand:**
 `CircularProgressIndicator` (grün, strokeWidth 2.5) während `ConnectionState.waiting`.
 
-Commit `wissensfreund_app`: `d487458` ✅
-
 ---
 
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-01 abend — diese Session)
+## 🟢 Zuletzt abgeschlossen (Session 2026-06-01 — UI-Feinschliff)
 
-### Modus C — Slider-Navigation + Headings-Fix
+### UI-Korrekturen & Bug-Fixes
 
-**🔊 Taste nach oben verschoben:** Von unterhalb Bild → `top: 90` (knapp oberhalb Titelzeile).
+**Mode B Artikelbild größer:** `0.22→0.32`, Clamp `140–220 → 180–300dp` (~220dp auf S23).
 
-**Pfeile ‹/› ersetzt durch Slider + Skip-Icons:**
-- ⏮ (`skip_previous_rounded`) | Slider | ⏭ (`skip_next_rounded`)
-- Slider zeigt satzweise Position im Artikel, `divisions = totalChunks - 1`
-- `_sliderDragValue`: lokaler State während Drag — verhindert Snap-Back durch Consumer-Rebuilds
+**Mode C Attribution sichtbar:** War bei `_kMicClear-10=70dp` hinter Mic-Overlay versteckt.
+Fix: Attribution `bottom: _kMicClear=80dp`, Thumbnails `bottom: _kMicClear+32=112dp`.
 
-**Navigation: sektionsweise → satzweise (chunk-level):**
-- `totalChunks` Getter in Provider (`_speechChunks.length`)
-- `_prevChunk`/`_nextChunk` statt `_prevSection`/`_nextSection`
-- `jumpToSection(offset)` — neue Methode, unterbricht TTS sofort
+**Mode B Scroll-Position:** Satz-Anfang jetzt bei 30% vom Viewport-Top (war: vertikal zentriert).
+Fade-Zone endet bei 18% → 30% = sicherer Puffer, erste Zeile immer sichtbar.
 
-**Kapitelüberschriften werden jetzt vorgelesen:**
-- Heading dem ersten Satz jeder Sektion vorangestellt: `'$heading. ${s.text}'`
-- `_chunkOffsets`/`_chunkImgIndices` bleiben korrekt (`s.startChar`)
+**Mikrofon Toggle:** Zweites Tippen schaltet Mikrofon ab (`stopListening()` wenn `isListening`).
 
-**`jumpToSection()` vs `seekAfterCurrentChunk()`:**
-- `jumpToSection`: sofortiger Interrupt — `_isPaused = true` → stop → seek → speak
-- `seekAfterCurrentChunk`: deferred — queued `_pendingSeekOffset`, wirkt erst nach Satz-Ende
+**Mode A Scroll verbessert:** Trigger `localY > 35%` (war 50%) + `localY < 0` (Satz oberhalb).
+Alignment 0.18 (war 0.15).
 
-**autoCompactWindow** auf 500.000 erhöht.
+**Pause+Scroll Bug:** `_jumpToTopSentence` prüft jetzt `provider.isPaused` — kein Seek bei Pause.
+Betrifft Mode A + B, beide Pfade gesichert.
+
+**Scroll-Zurücksprung alte ZIM-Artikel:** `_userScrolling = true` stand nach `if (ageLevel < 2) return`.
+Fix: `_userScrolling = true` VOR dem ageLevel-Check, Reset-Timer auch für Level 0/1.
+
+**ZIM Seek-Bug:** `_seekToChunkForOffset` ignorierte `startSpeaking`-Parameter für ZIM-Artikel.
+Fix: `else { if (startSpeaking) _startSpeakingFrom() else { _ttsCursor/resumeOffset setzen } }`.
+
+**Diagnose Links im JSON-Artikel:** `WfSentence` hat kein Link-Feld → `WfArticleConverter` setzt
+`links: const []`. Muss in Python-Pipeline ergänzt werden (Backlog, nach Quiz-Run).
 
 ---
 
@@ -67,14 +68,16 @@ Dann `quiz_and_upload.yml` manuell triggern. Laufzeit ~8.9h → 2 Runs nötig.
 
 ---
 
-## 🟡 Offen — nächste Schritte
+## 🟡 Offen — nächste Schritte (nach Priorität)
 
 ### Hoch
 - **Quiz-Checkpoint löschen + Run neu starten** (s.o.)
 - **Bilder-Patch** nach Quiz-Run: `patch_article_images_v1.py`
-- **App-Umbau Schritt B: Renderer** — Quiz-Widget, Callout-Boxen
 
 ### Mittel
+- **Links in JSON-Artikeln** — Python-Pipeline: Link-Positionen in `WfSentence` ergänzen,
+  dann `WfArticleConverter` + Provider befüllen. Vor App-Umbau Schritt B angehen.
+- **App-Umbau Schritt B: Renderer** — Quiz-Widget, Callout-Boxen
 - **Gemini-Integration** — `_detectQueryType()` vorhanden, `_handleGeminiPlaceholder()` Einstiegspunkt
 - **Topic-Tree Kachel-Navigation** in der App
 
