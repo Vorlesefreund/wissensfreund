@@ -152,6 +152,15 @@ class WissensfreundProvider extends ChangeNotifier {
   List<String> _speechChunks  = [];
   List<int>    _chunkOffsets  = [];  // absolute char offset of each chunk in _articleText
   int          _currentChunk  = 0;
+  // img-index per chunk (JSON articles only; empty for ZIM)
+  List<int>    _chunkImgIndices    = [];
+  // section navigation (JSON articles only)
+  List<int>    _sectionChunkStarts = [];
+  List<String> _sectionHeadings   = [];
+  // image sync pause: true after user swipes forward, cleared when TTS catches up
+  bool         _imageSyncPaused   = false;
+  // deferred seek: jump to this char offset after current chunk finishes
+  int?         _pendingSeekOffset;
 
   // Disambiguation state: when two results are equally good, store them
   // and ask the user once before auto-picking
@@ -251,6 +260,18 @@ class WissensfreundProvider extends ChangeNotifier {
 
   List<ArticleImageInfo> get articleImages     => List.unmodifiable(_articleImages);
   int                    get selectedImageIndex => _selectedImageIndex;
+  int                    get currentChunkIndex  => _currentChunk;
+  /// Returns the img_index of the current TTS chunk, or -1 for ZIM articles.
+  int get currentTtsImageIndex => _chunkImgIndices.isEmpty
+      ? -1
+      : _chunkImgIndices[_currentChunk.clamp(0, _chunkImgIndices.length - 1)];
+  bool              get imageSyncPaused   => _imageSyncPaused;
+  List<int>         get sectionChunkStarts => List.unmodifiable(_sectionChunkStarts);
+  List<String>      get sectionHeadings   => List.unmodifiable(_sectionHeadings);
+
+  int? chunkCharOffset(int chunkIndex) => (chunkIndex >= 0 && chunkIndex < _chunkOffsets.length)
+      ? _chunkOffsets[chunkIndex]
+      : null;
 
   List<ArticleMediaItem> get mediaItems        => List.unmodifiable(_mediaItems);
   int                    get selectedMediaIndex => _selectedMediaIndex;
@@ -408,6 +429,39 @@ class WissensfreundProvider extends ChangeNotifier {
         // chunks (e.g. mode switch) highlights the correct sentence rather
         // than the stale end-of-previous-chunk position.
         _ttsCursor = _chunkOffsets[_currentChunk];
+
+        // Deferred seek: scroll navigation or section arrows requested a jump.
+        if (_pendingSeekOffset != null) {
+          final targetOffset = _pendingSeekOffset!;
+          _pendingSeekOffset = null;
+          _seekToChunkForOffset(targetOffset);
+          return;
+        }
+
+        // Auto-advance image for JSON articles (img_index per sentence).
+        if (_chunkImgIndices.isNotEmpty) {
+          final newImg = _chunkImgIndices[_currentChunk.clamp(0, _chunkImgIndices.length - 1)];
+          if (!_imageSyncPaused && newImg >= 0 && newImg != _selectedImageIndex) {
+            _selectedImageIndex = newImg;
+            int ic = 0;
+            for (int i = 0; i < _mediaItems.length; i++) {
+              if (!_mediaItems[i].isAudio) {
+                if (ic == newImg) { _selectedMediaIndex = i; break; }
+                ic++;
+              }
+            }
+            notifyListeners();
+          }
+          // Clear sync-pause once TTS reaches the image the user swiped to.
+          if (_imageSyncPaused) {
+            final curImg = _chunkImgIndices[_currentChunk.clamp(0, _chunkImgIndices.length - 1)];
+            if (curImg == _selectedImageIndex) {
+              _imageSyncPaused = false;
+              notifyListeners();
+            }
+          }
+        }
+
         // Check for a pending 80%/90% limit warning between chunks.
         final warning = NetworkService.instance.consumePendingWarning();
         if (warning != null && warning != LimitWarningLevel.limitReached) {
@@ -417,8 +471,13 @@ class WissensfreundProvider extends ChangeNotifier {
         }
         _tts.speak(_speechChunks[_currentChunk]);
       } else {
-        _speechChunks  = [];
-        _chunkOffsets  = [];
+        _speechChunks       = [];
+        _chunkOffsets       = [];
+        _chunkImgIndices    = [];
+        _sectionChunkStarts = [];
+        _sectionHeadings    = [];
+        _imageSyncPaused    = false;
+        _pendingSeekOffset  = null;
         _currentChunk  = 0;
         _isPaused      = false;
         _resumeOffset  = 0;
@@ -465,7 +524,12 @@ class WissensfreundProvider extends ChangeNotifier {
       _chunkOffsets.add(pos);
       pos += chunk.length;
     }
-    _currentChunk = 0;
+    _currentChunk       = 0;
+    _chunkImgIndices    = [];
+    _sectionChunkStarts = [];
+    _sectionHeadings    = [];
+    _imageSyncPaused    = false;
+    _pendingSeekOffset  = null;
     _state = AppState.speaking;
     notifyListeners();
     _pauseScreenTimer(); // Während Vorlesen kein Idle-Timeout
@@ -488,6 +552,46 @@ class WissensfreundProvider extends ChangeNotifier {
     notifyListeners();
     final prefs = await SharedPreferences.getInstance();
     prefs.setInt('viewMode', _viewMode.index);
+  }
+
+  Future<void> setViewMode(ArticleViewMode mode) async {
+    if (_viewMode == mode) return;
+    _viewMode = mode;
+    notifyListeners();
+    final prefs = await SharedPreferences.getInstance();
+    prefs.setInt('viewMode', mode.index);
+  }
+
+  void pauseImageSync() {
+    _imageSyncPaused = true;
+    notifyListeners();
+  }
+
+  void seekAfterCurrentChunk(int charOffset) {
+    if (_state == AppState.speaking && !_isPaused) {
+      _pendingSeekOffset = charOffset;
+    } else {
+      _seekToChunkForOffset(charOffset);
+    }
+  }
+
+  void _seekToChunkForOffset(int charOffset) {
+    if (_chunkImgIndices.isNotEmpty) {
+      // JSON article: find chunk whose startChar <= charOffset
+      int targetChunk = 0;
+      for (int i = _chunkOffsets.length - 1; i >= 0; i--) {
+        if (_chunkOffsets[i] <= charOffset) { targetChunk = i; break; }
+      }
+      _currentChunk = targetChunk;
+      _ttsCursor    = _chunkOffsets[targetChunk];
+      _imageSyncPaused = false;
+      _state = AppState.speaking;
+      notifyListeners();
+      _pauseScreenTimer();
+      _tts.speak(_speechChunks[targetChunk]);
+    } else {
+      _startSpeakingFrom(charOffset);
+    }
   }
 
   // ── STT ───────────────────────────────────────────────────────────────────
@@ -915,9 +1019,22 @@ class WissensfreundProvider extends ChangeNotifier {
     _isPlayingAudio     = false;
 
     // ── Sentence-level chunks (pre-split, no heuristic needed) ──────────────
-    _speechChunks = sentences.map((s) => s.text).toList();
-    _chunkOffsets = sentences.map((s) => s.startChar).toList();
-    _currentChunk = 0;
+    _speechChunks     = sentences.map((s) => s.text).toList();
+    _chunkOffsets     = sentences.map((s) => s.startChar).toList();
+    _chunkImgIndices  = sentences.map((s) => s.imageIndex).toList();
+    _currentChunk     = 0;
+    _imageSyncPaused  = false;
+    _pendingSeekOffset = null;
+
+    // Section navigation data for Modus C arrows.
+    _sectionChunkStarts = [];
+    _sectionHeadings    = [];
+    int _secChunkIdx = 0;
+    for (final section in rendered.sections) {
+      _sectionChunkStarts.add(_secChunkIdx);
+      _sectionHeadings.add(section.heading);
+      _secChunkIdx += section.sentences.length;
+    }
 
     unawaited(ProfileService.instance.clearLastArticle());
     _state = AppState.speaking;

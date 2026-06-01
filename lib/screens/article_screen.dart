@@ -121,6 +121,13 @@ class _ArticleScreenState extends State<ArticleScreen> {
   Widget build(BuildContext context) {
     return Consumer<WissensfreundProvider>(
       builder: (context, provider, _) {
+        // Auto-switch to Mode B when ageLevel 1 is active and Mode A is set.
+        if (ProfileService.instance.activeAgeLevel == 1 &&
+            provider.viewMode == ArticleViewMode.a) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (mounted) context.read<WissensfreundProvider>().setViewMode(ArticleViewMode.b);
+          });
+        }
         final isDark = provider.viewMode != ArticleViewMode.a;
 
         return Scaffold(
@@ -414,18 +421,48 @@ class _ArticleHeader extends StatelessWidget {
 
   const _ArticleHeader({required this.provider, this.dark = false});
 
-  String get _modeIcon => switch (provider.viewMode) {
-        ArticleViewMode.a => '📄',
-        ArticleViewMode.b => '🔍',
-        ArticleViewMode.c => '🎧',
-      };
-
   Color get _fgColor =>
       dark ? Colors.white : const Color(0xFF2D6A4F);
 
   Color get _btnBg => dark
       ? Colors.white.withValues(alpha: 0.15)
       : const Color(0xFFE8F5E9);
+
+  Widget _buildModeToggle() {
+    final ageLevel = ProfileService.instance.activeAgeLevel;
+    final modes = ageLevel == 1
+        ? [ArticleViewMode.b, ArticleViewMode.c]
+        : [ArticleViewMode.a, ArticleViewMode.b, ArticleViewMode.c];
+    final icons = {
+      ArticleViewMode.a: '📄',
+      ArticleViewMode.b: '🔍',
+      ArticleViewMode.c: '🎧',
+    };
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: modes.map((mode) {
+        final isActive = provider.viewMode == mode;
+        return GestureDetector(
+          onTap: () => provider.setViewMode(mode),
+          child: Container(
+            width: 30,
+            height: 30,
+            margin: const EdgeInsets.only(left: 4),
+            decoration: BoxDecoration(
+              color: isActive
+                  ? (dark
+                      ? Colors.white.withValues(alpha: 0.3)
+                      : const Color(0xFFC8EDDA))
+                  : _btnBg,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            alignment: Alignment.center,
+            child: Text(icons[mode]!, style: const TextStyle(fontSize: 15)),
+          ),
+        );
+      }).toList(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -469,12 +506,8 @@ class _ArticleHeader extends StatelessWidget {
               fgColor: _fgColor,
             ),
           const SizedBox(width: 8),
-          // Mode toggle
-          _HeaderBtn(
-            bg: _btnBg,
-            child: Text(_modeIcon, style: const TextStyle(fontSize: 17)),
-            onTap: provider.cycleViewMode,
-          ),
+          // Mode toggle — 2 icons for ageLevel 1, 3 icons for 2/3
+          _buildModeToggle(),
           const SizedBox(width: 8),
           // Menu
           _HeaderBtn(
@@ -1555,6 +1588,44 @@ class _CaptionResumeOverlayState extends State<_CaptionResumeOverlay> {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Shared image-swipe logic (Stufe 1: free swipe; Stufe 2/3: TTS-synced)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Handles a horizontal drag end for all three modes.
+/// [onLeftSwipe] is called when the user swipes backward (older image) on
+/// Stufe 2/3 — the caller should start a 10 s timer to resync.
+void _doImageSwipe(
+  DragEndDetails d,
+  WissensfreundProvider provider,
+  int ageLevel,
+  VoidCallback onLeftSwipe,
+) {
+  final v = d.primaryVelocity ?? 0;
+  if (v.abs() < 200) return;
+  final images     = provider.articleImages;
+  final mediaItems = provider.mediaItems;
+  if (images.isEmpty) return;
+  final cur  = provider.selectedImageIndex.clamp(0, images.length - 1);
+  final next = v < 0 ? cur + 1 : cur - 1; // left-swipe = next image (forward)
+  if (next < 0 || next >= images.length) return;
+  int ic = 0;
+  for (int i = 0; i < mediaItems.length; i++) {
+    if (!mediaItems[i].isAudio) {
+      if (ic == next) { provider.onMediaTap(i); break; }
+      ic++;
+    }
+  }
+  if (ageLevel < 2) return; // Stufe 1: no TTS sync
+  final ttsImg = provider.currentTtsImageIndex;
+  if (ttsImg < 0) return;  // ZIM article: no img_index data
+  if (next > ttsImg) {
+    provider.pauseImageSync(); // ahead of TTS → pause; auto-resumes when TTS catches up
+  } else if (next < ttsImg) {
+    onLeftSwipe();             // behind TTS → caller starts 10 s resync timer
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Shared sentence utilities
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1602,6 +1673,11 @@ class _ModeAContentState extends State<_ModeAContent> {
   final _sentenceHeightCache = <int, double>{};
   bool _cacheBuilt = false;
 
+  // Stufe 2/3: debounce timer for scroll-jump navigation.
+  Timer? _scrollDebounce;
+  // Stufe 2/3: resync timer after backward image swipe (10 s).
+  Timer? _syncResetTimer;
+
   @override
   void initState() {
     super.initState();
@@ -1624,32 +1700,79 @@ class _ModeAContentState extends State<_ModeAContent> {
   }
 
   void _onScroll() {
-    if (mounted) setState(() {});
+    if (!mounted) return;
+    setState(() {});
+    final ageLevel = ProfileService.instance.activeAgeLevel;
+    if (ageLevel < 2) return;
+    _scrollDebounce?.cancel();
+    _scrollDebounce = Timer(const Duration(milliseconds: 1500), _jumpToTopSentence);
+  }
+
+  void _jumpToTopSentence() {
+    if (!mounted || !_scrollCtrl.hasClients || !_cacheBuilt) return;
+    final provider = context.read<WissensfreundProvider>();
+    final sentences = _splitSentences(provider.articleText);
+    if (sentences.isEmpty) return;
+    final activeIdx = _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
+    final scrollOffset = _scrollCtrl.offset;
+    final vpH = _scrollCtrl.position.viewportDimension;
+
+    // No jump if the current TTS sentence is already visible.
+    final activeDocY = _sentenceTopCache[activeIdx];
+    if (activeDocY != null) {
+      final activeViewY = activeDocY - scrollOffset;
+      if (activeViewY >= 0 && activeViewY < vpH) return;
+    }
+
+    // Find the topmost fully visible sentence.
+    int topIdx = -1;
+    double minY = double.infinity;
+    for (int i = 0; i < sentences.length; i++) {
+      final docY = _sentenceTopCache[i];
+      if (docY == null) continue;
+      final h = _sentenceHeightCache[i] ?? 24.0;
+      final viewY = docY - scrollOffset;
+      if (viewY >= 0 && viewY + h <= vpH && viewY < minY) {
+        minY = viewY;
+        topIdx = i;
+      }
+    }
+    if (topIdx < 0 || topIdx == activeIdx) return;
+
+    // Compute char offset by summing sentence lengths up to topIdx.
+    int charOffset = 0;
+    for (int i = 0; i < topIdx; i++) {
+      charOffset += sentences[i].length + 1; // +1 for the stripped delimiter
+    }
+    provider.seekAfterCurrentChunk(charOffset);
+  }
+
+  void _startSyncResetTimer(WissensfreundProvider provider) {
+    _syncResetTimer?.cancel();
+    _syncResetTimer = Timer(const Duration(seconds: 10), () {
+      if (!mounted) return;
+      final ttsImg = provider.currentTtsImageIndex;
+      if (ttsImg < 0) return;
+      final media = provider.mediaItems;
+      int ic = 0;
+      for (int i = 0; i < media.length; i++) {
+        if (!media[i].isAudio) {
+          if (ic == ttsImg) { provider.onMediaTap(i); break; }
+          ic++;
+        }
+      }
+    });
   }
 
   void _swipeImage(DragEndDetails d, WissensfreundProvider provider) {
-    final v = d.primaryVelocity ?? 0;
-    if (v.abs() < 200) return;
-    final images     = provider.articleImages;
-    final mediaItems = provider.mediaItems;
-    if (images.isEmpty) return;
-    final curImgIdx  = provider.selectedImageIndex.clamp(0, images.length - 1);
-    final nextImgIdx = v < 0 ? curImgIdx + 1 : curImgIdx - 1;
-    if (nextImgIdx < 0 || nextImgIdx >= images.length) return;
-    int imgCount = 0;
-    for (int i = 0; i < mediaItems.length; i++) {
-      if (!mediaItems[i].isAudio) {
-        if (imgCount == nextImgIdx) {
-          provider.onMediaTap(i);
-          return;
-        }
-        imgCount++;
-      }
-    }
+    final ageLevel = ProfileService.instance.activeAgeLevel;
+    _doImageSwipe(d, provider, ageLevel, () => _startSyncResetTimer(provider));
   }
 
   @override
   void dispose() {
+    _scrollDebounce?.cancel();
+    _syncResetTimer?.cancel();
     _scrollCtrl.removeListener(_onScroll);
     _scrollCtrl.dispose();
     super.dispose();
@@ -2135,29 +2258,33 @@ class _ModeBContentState extends State<_ModeBContent> {
     });
   }
 
-  void _swipeImage(DragEndDetails d, WissensfreundProvider provider) {
-    final v = d.primaryVelocity ?? 0;
-    if (v.abs() < 200) return;
-    final images     = provider.articleImages;
-    final mediaItems = provider.mediaItems;
-    if (images.isEmpty) return;
-    final curImgIdx  = provider.selectedImageIndex.clamp(0, images.length - 1);
-    final nextImgIdx = v < 0 ? curImgIdx + 1 : curImgIdx - 1;
-    if (nextImgIdx < 0 || nextImgIdx >= images.length) return;
-    int imgCount = 0;
-    for (int i = 0; i < mediaItems.length; i++) {
-      if (!mediaItems[i].isAudio) {
-        if (imgCount == nextImgIdx) {
-          provider.onMediaTap(i);
-          return;
+  Timer? _syncResetTimer;
+
+  void _startSyncResetTimer(WissensfreundProvider provider) {
+    _syncResetTimer?.cancel();
+    _syncResetTimer = Timer(const Duration(seconds: 10), () {
+      if (!mounted) return;
+      final ttsImg = provider.currentTtsImageIndex;
+      if (ttsImg < 0) return;
+      final media = provider.mediaItems;
+      int ic = 0;
+      for (int i = 0; i < media.length; i++) {
+        if (!media[i].isAudio) {
+          if (ic == ttsImg) { provider.onMediaTap(i); break; }
+          ic++;
         }
-        imgCount++;
       }
-    }
+    });
+  }
+
+  void _swipeImage(DragEndDetails d, WissensfreundProvider provider) {
+    final ageLevel = ProfileService.instance.activeAgeLevel;
+    _doImageSwipe(d, provider, ageLevel, () => _startSyncResetTimer(provider));
   }
 
   @override
   void dispose() {
+    _syncResetTimer?.cancel();
     _scrollCtrl.dispose();
     super.dispose();
   }
@@ -2505,31 +2632,67 @@ class _WaveformPainter extends CustomPainter {
 // Professor und Mic-Button identisch zu Mode B (über Root-Stack).
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _ModeCContent extends StatelessWidget {
+class _ModeCContent extends StatefulWidget {
   const _ModeCContent({super.key});
+  @override
+  State<_ModeCContent> createState() => _ModeCContentState();
+}
 
-  // Swipe to next/previous image — syncs both selectedImageIndex and selectedMediaIndex.
-  void _swipeImage(DragEndDetails d, WissensfreundProvider provider) {
-    final v = d.primaryVelocity ?? 0;
-    if (v.abs() < 200) return;
-    final images     = provider.articleImages;
-    final mediaItems = provider.mediaItems;
-    if (images.isEmpty) return;
-    final curImgIdx  = provider.selectedImageIndex.clamp(0, images.length - 1);
-    final nextImgIdx = v < 0 ? curImgIdx + 1 : curImgIdx - 1;
-    if (nextImgIdx < 0 || nextImgIdx >= images.length) return;
+class _ModeCContentState extends State<_ModeCContent> {
+  Timer? _syncResetTimer;
 
-    // Find the mediaItems index for the target image (skip audio items).
-    int imgCount = 0;
-    for (int i = 0; i < mediaItems.length; i++) {
-      if (!mediaItems[i].isAudio) {
-        if (imgCount == nextImgIdx) {
-          provider.onMediaTap(i); // syncs both _selectedMediaIndex + _selectedImageIndex
-          return;
+  void _startSyncResetTimer(WissensfreundProvider provider) {
+    _syncResetTimer?.cancel();
+    _syncResetTimer = Timer(const Duration(seconds: 10), () {
+      if (!mounted) return;
+      final ttsImg = provider.currentTtsImageIndex;
+      if (ttsImg < 0) return;
+      final media = provider.mediaItems;
+      int ic = 0;
+      for (int i = 0; i < media.length; i++) {
+        if (!media[i].isAudio) {
+          if (ic == ttsImg) { provider.onMediaTap(i); break; }
+          ic++;
         }
-        imgCount++;
+      }
+    });
+  }
+
+  void _swipeImage(DragEndDetails d, WissensfreundProvider provider) {
+    final ageLevel = ProfileService.instance.activeAgeLevel;
+    _doImageSwipe(d, provider, ageLevel, () => _startSyncResetTimer(provider));
+  }
+
+  void _prevSection(WissensfreundProvider provider) {
+    final starts = provider.sectionChunkStarts;
+    if (starts.length <= 1) return;
+    final cur = provider.currentChunkIndex;
+    int secIdx = 0;
+    for (int i = starts.length - 1; i >= 0; i--) {
+      if (starts[i] <= cur) { secIdx = i; break; }
+    }
+    if (secIdx <= 0) return;
+    final offset = provider.chunkCharOffset(starts[secIdx - 1]);
+    if (offset != null) provider.seekAfterCurrentChunk(offset);
+  }
+
+  void _nextSection(WissensfreundProvider provider) {
+    final starts = provider.sectionChunkStarts;
+    if (starts.isEmpty) return;
+    final cur = provider.currentChunkIndex;
+    for (int i = 0; i < starts.length; i++) {
+      if (starts[i] > cur) {
+        final offset = provider.chunkCharOffset(starts[i]);
+        if (offset != null) provider.seekAfterCurrentChunk(offset);
+        return;
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _syncResetTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -2670,6 +2833,26 @@ class _ModeCContent extends StatelessWidget {
                         dark: true,
                       ),
                     ),
+                    // ── Section arrows ‹ / › — Stufe 2/3, beside thumbnails ──
+                    if (ProfileService.instance.activeAgeLevel >= 2 &&
+                        provider.sectionChunkStarts.length > 1) ...[
+                      Positioned(
+                        bottom: _kMicClear + 46,
+                        left: 8,
+                        child: _SectionArrowBtn(
+                          label: '‹',
+                          onTap: () => _prevSection(provider),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: _kMicClear + 4,
+                        left: 8,
+                        child: _SectionArrowBtn(
+                          label: '›',
+                          onTap: () => _nextSection(provider),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -2677,6 +2860,36 @@ class _ModeCContent extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+}
+
+class _SectionArrowBtn extends StatelessWidget {
+  final String label;
+  final VoidCallback onTap;
+  const _SectionArrowBtn({required this.label, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          color: Colors.white.withValues(alpha: 0.2),
+          shape: BoxShape.circle,
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
     );
   }
 }
