@@ -227,3 +227,68 @@ Auf Mobilfunk ohne explizites Freischalten → JSON-Bilder werden geblockt → `
   Resets führen zu dauerhaft blockiertem Auto-Scroll ohne offensichtlichen Fehler
 - **Mode B Bottom-Padding = `_kProfZone` (220 dp)**, nicht `_kMicClear` (80 dp) — Professor
   ist 218 dp hoch; Mic ist 52+14+14 = 80 dp; beide Konstanten vorhanden, die richtige verwenden
+
+---
+
+## Modus C — Slider-Navigation (ab 2026-06-01)
+
+### UI-Layout
+
+```
+[oben] 🔊 (top: 90, right: 14) — Bildunterschrift vorlesen
+[Bild]
+[unten] ⏮ | ────Slider──── | ⏭  (height: 48, bottom: imageClearance - 24)
+[Thumbnails]
+```
+
+### Slider-State-Pattern (`_sliderDragValue`)
+```dart
+double? _sliderDragValue;   // null = Provider-Wert; non-null = Drag-Position
+
+Slider(
+  value: _sliderDragValue ?? _chunkFraction(provider),
+  onChanged: (v) => setState(() => _sliderDragValue = v),
+  onChangeEnd: (v) {
+    setState(() => _sliderDragValue = null);
+    // → jumpToSection(...)
+  },
+)
+```
+**Warum:** Consumer-Rebuilds während Drag würden Slider auf Provider-Position snappen ohne lokalen State.
+
+### Navigation: Chunk-Level (nicht Sektion)
+- `totalChunks` = `_speechChunks.length` (Provider Getter)
+- `_prevChunk`/`_nextChunk` springen zum nächsten Satz (`chunkCharOffset(cur ± 1)`)
+- `_chunkFraction = currentChunkIndex / (totalChunks - 1)` → Slider-Position
+
+### `jumpToSection(int charOffset)` — sofortiger TTS-Interrupt
+```dart
+Future<void> jumpToSection(int charOffset) async {
+  _pendingSeekOffset = null;
+  final wasPlaying = _state == AppState.speaking && !_isPaused;
+  if (wasPlaying) {
+    _isPaused = true;   // GUARD: verhindert onComplete → auto-advance
+    _state = AppState.idle;
+    notifyListeners();
+    await _tts.stop();
+    _isPaused = false;
+  }
+  _seekToChunkForOffset(charOffset, startSpeaking: !_isPaused);
+}
+```
+`_isPaused = true` MUSS vor `await _tts.stop()` gesetzt werden — `onComplete` prüft `_isPaused`
+und würde sonst zum nächsten Chunk weiter springen.
+
+Gegensatz: `seekAfterCurrentChunk` queued `_pendingSeekOffset` → wirkt erst nach aktuellem Satz.
+
+### Kapitelüberschriften mitvorlesen
+Beim Aufbau von `_speechChunks` in `loadAndSpeakJsonArticle`:
+```dart
+final text = (i == 0 && heading.isNotEmpty)
+    ? '$heading. ${s.text}'
+    : s.text;
+_speechChunks.add(text);
+_chunkOffsets.add(s.startChar);   // Offset bleibt s.startChar, nicht vom Heading verschoben
+_chunkImgIndices.add(s.imageIndex);
+```
+Heading wird laut gelesen, taucht aber nicht im Artikeltext auf → kein Offset-Fehler.

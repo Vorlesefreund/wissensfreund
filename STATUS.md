@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-01T14:24:57Z -->
+<!-- updated: 2026-06-01T18:01:03Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Nur die letzten 2 Sessions + aktuell Offenes bleibt hier. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
@@ -11,33 +11,43 @@
 ### 3 neue Bugs nach APK-Install behoben
 
 **Bug 1 — Mode A Auto-Scroll dauerhaft gebrochen:**
-`_ModeAContentState._jumpToTopSentence()` hat `_userScrolling` an keinem Return-Pfad zurückgesetzt.
-Nach erstem manuellen Scroll → `_userScrolling = true` für immer → `_smartScrollTo` always blocked.
-Fix: `_userScrolling = false` an allen 5 Early-Returns + nach `seekAfterCurrentChunk`.
-Mode A sicher: `_sentenceTopCache` stabil (keine Font-Size-Änderungen wie in Mode B).
+`_userScrolling = false` an allen 5 Early-Returns + nach `seekAfterCurrentChunk` ergänzt.
 
 **Bug 2 — Mode B Text unter Professor-Widget:**
-- Scroll-Schwelle `viewportH * 0.5` zu hoch → aktiver Satz noch im Professor-Bereich (218 dp).
-  Fix: Schwelle auf `viewportH * 0.35` gesenkt.
-- Bottom-Padding `_kMicClear` (80 dp) << Professor-Höhe (218 dp).
-  Fix: Padding auf `_kProfZone` (220 dp) erhöht.
+Scroll-Schwelle auf `viewportH * 0.35`, Bottom-Padding auf `_kProfZone` (220 dp).
 
 **Bug 3 — Bilder zeigen keinen Lade-Zustand:**
-`FutureBuilder` zeigte während `ConnectionState.waiting` denselben Fallback wie bei Fehler.
-Fix: `CircularProgressIndicator` (grün, strokeWidth 2.5) während Waiting-State.
+`CircularProgressIndicator` (grün, strokeWidth 2.5) während `ConnectionState.waiting`.
 
 Commit `wissensfreund_app`: `d487458` ✅
 
 ---
 
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-01 abends)
+## 🟢 Zuletzt abgeschlossen (Session 2026-06-01 abend — diese Session)
 
-### Bilder + Kapitel-Pfeile Modus C — Bug behoben
+### Modus C — Slider-Navigation + Headings-Fix
 
-- Test-Button hardcoded auf `'elefant_l2'` (war dynamisch → Level 1/3 → 404 → keine Bilder)
-- `json_article_service.dart`: Bundled-Asset-Fallback (`assets/test/$id.json`)
-- `pubspec.yaml`: `assets/test/` ergänzt; `elefant_l2.json` als Asset eingebettet
-- Commit `wissensfreund_app`: `4baa030` ✅
+**🔊 Taste nach oben verschoben:** Von unterhalb Bild → `top: 90` (knapp oberhalb Titelzeile).
+
+**Pfeile ‹/› ersetzt durch Slider + Skip-Icons:**
+- ⏮ (`skip_previous_rounded`) | Slider | ⏭ (`skip_next_rounded`)
+- Slider zeigt satzweise Position im Artikel, `divisions = totalChunks - 1`
+- `_sliderDragValue`: lokaler State während Drag — verhindert Snap-Back durch Consumer-Rebuilds
+
+**Navigation: sektionsweise → satzweise (chunk-level):**
+- `totalChunks` Getter in Provider (`_speechChunks.length`)
+- `_prevChunk`/`_nextChunk` statt `_prevSection`/`_nextSection`
+- `jumpToSection(offset)` — neue Methode, unterbricht TTS sofort
+
+**Kapitelüberschriften werden jetzt vorgelesen:**
+- Heading dem ersten Satz jeder Sektion vorangestellt: `'$heading. ${s.text}'`
+- `_chunkOffsets`/`_chunkImgIndices` bleiben korrekt (`s.startChar`)
+
+**`jumpToSection()` vs `seekAfterCurrentChunk()`:**
+- `jumpToSection`: sofortiger Interrupt — `_isPaused = true` → stop → seek → speak
+- `seekAfterCurrentChunk`: deferred — queued `_pendingSeekOffset`, wirkt erst nach Satz-Ende
+
+**autoCompactWindow** auf 500.000 erhöht.
 
 ---
 
