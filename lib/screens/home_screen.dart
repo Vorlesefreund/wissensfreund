@@ -377,8 +377,7 @@ class _HomeScreenState extends State<HomeScreen>
                                   text: provider.articleText,
                                 ),
                               // TODO: TEMP TEST — remove before release
-                              if (provider.state == AppState.idle &&
-                                  provider.articleText.isEmpty)
+                              if (provider.state == AppState.idle)
                                 _JsonTestButton(provider: provider),
                               const SizedBox(height: 16),
                             ],
@@ -3929,9 +3928,11 @@ class _JsonTestButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: OutlinedButton.icon(
-        onPressed: () => provider.loadAndSpeakJsonArticle('elefant_l2'),
-        icon: const Text('🐛', style: TextStyle(fontSize: 16)),
-        label: const Text('JSON Test'),
+        onPressed: () {
+          provider.loadAndSpeakJsonArticle('elefant_l2');
+        },
+        icon: const Text('🐘', style: TextStyle(fontSize: 16)),
+        label: const Text('JSON Test (Elefant L2)'),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.deepOrange,
           side: const BorderSide(color: Colors.deepOrange),

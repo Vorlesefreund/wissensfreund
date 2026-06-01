@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 
@@ -93,24 +94,28 @@ class JsonArticleService extends ChangeNotifier {
     final url = '${AssetConfig.r2ArticlesBaseUrl}/articles/$articleId.json';
     try {
       final resp = await _client.get(Uri.parse(url));
-      if (resp.statusCode == 404) {
-        debugPrint('[JsonArticleService] article not found: $articleId');
-        return null;
+      if (resp.statusCode == 200) {
+        final body = resp.body;
+        final article =
+            WfArticle.fromJson(json.decode(body) as Map<String, dynamic>);
+        await cacheFile.parent.create(recursive: true);
+        await cacheFile.writeAsString(body);
+        return article;
       }
-      if (resp.statusCode != 200) {
-        debugPrint(
-            '[JsonArticleService] HTTP ${resp.statusCode} for $articleId');
-        return null;
-      }
-      final body = resp.body;
-      final article =
-          WfArticle.fromJson(json.decode(body) as Map<String, dynamic>);
-      // Persist to cache
-      await cacheFile.parent.create(recursive: true);
-      await cacheFile.writeAsString(body);
-      return article;
+      debugPrint('[JsonArticleService] HTTP ${resp.statusCode} for $articleId');
     } catch (e) {
       debugPrint('[JsonArticleService] network error for $articleId: $e');
+    }
+    // Fallback: bundled test asset
+    return _loadFromAsset(articleId);
+  }
+
+  Future<WfArticle?> _loadFromAsset(String articleId) async {
+    try {
+      final raw = await rootBundle.loadString('assets/test/$articleId.json');
+      debugPrint('[JsonArticleService] loaded $articleId from bundled asset');
+      return WfArticle.fromJson(json.decode(raw) as Map<String, dynamic>);
+    } catch (_) {
       return null;
     }
   }
