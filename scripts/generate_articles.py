@@ -37,7 +37,7 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-CLAUDE_MODEL      = "claude-sonnet-4-20250514"
+CLAUDE_MODEL      = "claude-sonnet-4-6"
 CLAUDE_API_URL    = "https://api.anthropic.com/v1/messages"
 WIKIPEDIA_API     = "https://de.wikipedia.org/w/api.php"
 USER_AGENT        = "Wissensfreund-Pipeline/1.0 (educational children's app)"

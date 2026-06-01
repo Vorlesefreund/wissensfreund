@@ -30,8 +30,8 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-7s  %(message)s", datefmt="%H:%M:%S")
 
 CLAUDE_API_URL = "https://api.anthropic.com/v1/messages"
-CLAUDE_MODEL   = "claude-sonnet-4-20250514"
-RATE_PAUSE     = 0.8
+CLAUDE_MODEL   = "claude-haiku-4-5-20251001"
+RATE_PAUSE     = 0.5
 
 QUIZ_PROMPT = """Du generierst 3 Quiz-Fragen für einen Kinderlexikon-Artikel (Altersgruppe 7–9 Jahre).
 
@@ -112,11 +112,22 @@ def call_claude(api_key: str, title: str, text: str) -> list[dict] | None:
     return None
 
 
+def load_checkpoint(path: Path) -> set[str]:
+    if not path.exists():
+        return set()
+    return set(json.loads(path.read_text(encoding="utf-8")))
+
+
+def save_checkpoint(path: Path, done: set[str]) -> None:
+    path.write_text(json.dumps(sorted(done), ensure_ascii=False), encoding="utf-8")
+
+
 def main() -> None:
     p = argparse.ArgumentParser()
     p.add_argument("--articles-dir",     required=True, type=Path)
     p.add_argument("--only-placeholders", action="store_true")
     p.add_argument("--dry-run",          action="store_true")
+    p.add_argument("--checkpoint",       default=Path("checkpoint_quiz.json"), type=Path)
     args = p.parse_args()
 
     api_key = os.environ.get("ANTHROPIC_API_KEY")
@@ -126,15 +137,25 @@ def main() -> None:
     files = sorted(args.articles_dir.glob("*.json"))
     log.info("%d Artikel-Dateien gefunden", len(files))
 
+    done = load_checkpoint(args.checkpoint)
+    if done:
+        log.info("Checkpoint: %d bereits generiert", len(done))
+
     ok = skip = err = 0
 
     for path in files:
+        article_id = path.stem
         try:
             article = json.loads(path.read_text(encoding="utf-8"))
         except Exception:
             continue
 
+        if article_id in done:
+            skip += 1
+            continue
+
         if args.only_placeholders and not needs_quiz_generation(article):
+            done.add(article_id)
             skip += 1
             continue
 
@@ -154,16 +175,16 @@ def main() -> None:
             err += 1
             continue
 
-        # review_flag aus Fragen entfernen, Quiz ersetzen
         for q in questions:
             q.pop("review_flag", None)
 
         article["quiz"]["questions"] = questions
-        # review_flag auf Artikel-Ebene nur entfernen wenn es nur wegen Quiz gesetzt war
         if article.get("meta", {}).get("review_reason") == "":
             article["meta"]["review_flag"] = False
 
         path.write_text(json.dumps(article, ensure_ascii=False, indent=2), encoding="utf-8")
+        done.add(article_id)
+        save_checkpoint(args.checkpoint, done)
         ok += 1
         log.info("  ✓ Quiz ersetzt")
 

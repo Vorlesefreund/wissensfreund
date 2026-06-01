@@ -15,6 +15,7 @@ on:
 env:
   PYTHON_VERSION: "3.11"
   ZIM_URL:        "https://ftp.fau.de/kiwix/zim/other/klexikon_de_all_maxi_2026-05.zim"
+  IMAGE_MAP_URL:  "https://pub-07f0107be14b48fd8652e5318441c7c2.r2.dev/image_index.json"
   ARTICLES_DIR:   "articles_zim"
   R2_BUCKET:      "wissensfreund-articles"
 
@@ -26,6 +27,7 @@ jobs:
   convert:
     name: "1 · ZIM laden + konvertieren"
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
@@ -46,9 +48,18 @@ jobs:
           curl -fsSL -o klexikon.zim "${{ env.ZIM_URL }}"
           ls -lh klexikon.zim
 
+      - name: image_index.json herunterladen
+        run: |
+          curl -fsSL -o image_map.json "${{ env.IMAGE_MAP_URL }}" \
+            && echo "image_map.json: $(wc -l < image_map.json) Zeilen" \
+            || echo "image_map.json nicht verfügbar — Bilder ohne thumb_url"
+
       - name: ZIM konvertieren
         run: |
           ARGS="--zim klexikon.zim --out-dir ${{ env.ARTICLES_DIR }}"
+          if [ -f image_map.json ]; then
+            ARGS="$ARGS --image-map image_map.json"
+          fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
           fi
@@ -74,12 +85,14 @@ jobs:
 
   # ──────────────────────────────────────────────────────────────────────────
   # Job 2: Quiz — Platzhalter-Quizze via Claude API nachgenerieren
+  # Läuft in Batches mit Checkpoint — kann nach Timeout neu gestartet werden.
   # Benötigt: ANTHROPIC_API_KEY als GitHub Secret
   # ──────────────────────────────────────────────────────────────────────────
   quiz:
     name: "2 · Quiz-Generierung (Claude API)"
     needs: convert
     runs-on: ubuntu-latest
+    timeout-minutes: 340
 
     steps:
       - name: Checkout
@@ -127,6 +140,7 @@ jobs:
     name: "3 · Index + Upload → Cloudflare R2"
     needs: quiz
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     if: ${{ !inputs.dry_run }}
 
     steps:
