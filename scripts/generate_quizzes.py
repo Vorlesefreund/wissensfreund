@@ -30,7 +30,7 @@ log = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO, format="%(asctime)s  %(levelname)-7s  %(message)s", datefmt="%H:%M:%S")
 
 CLAUDE_API_URL = "https://api.anthropic.com/v1/messages"
-CLAUDE_MODEL   = "claude-haiku-4-5-20251001"
+CLAUDE_MODEL   = "claude-sonnet-4-6"
 RATE_PAUSE     = 0.5
 
 QUIZ_PROMPT = """Du generierst 3 Quiz-Fragen für einen Kinderlexikon-Artikel (Altersgruppe 7–9 Jahre).
