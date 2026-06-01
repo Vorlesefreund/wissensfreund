@@ -2721,6 +2721,13 @@ class _ModeCContent extends StatefulWidget {
 
 class _ModeCContentState extends State<_ModeCContent> {
   Timer? _syncResetTimer;
+  double? _sliderDragValue; // non-null while user drags section slider
+
+  double _chunkFraction(WissensfreundProvider provider) {
+    final total = provider.totalChunks;
+    if (total <= 1) return 0.0;
+    return provider.currentChunkIndex / (total - 1);
+  }
 
   void _startSyncResetTimer(WissensfreundProvider provider) {
     _syncResetTimer?.cancel();
@@ -2744,30 +2751,19 @@ class _ModeCContentState extends State<_ModeCContent> {
     _doImageSwipe(d, provider, ageLevel, () => _startSyncResetTimer(provider));
   }
 
-  void _prevSection(WissensfreundProvider provider) {
-    final starts = provider.sectionChunkStarts;
-    if (starts.length <= 1) return;
+  void _prevChunk(WissensfreundProvider provider) {
     final cur = provider.currentChunkIndex;
-    int secIdx = 0;
-    for (int i = starts.length - 1; i >= 0; i--) {
-      if (starts[i] <= cur) { secIdx = i; break; }
-    }
-    if (secIdx <= 0) return;
-    final offset = provider.chunkCharOffset(starts[secIdx - 1]);
-    if (offset != null) provider.seekAfterCurrentChunk(offset);
+    if (cur <= 0) return;
+    final offset = provider.chunkCharOffset(cur - 1);
+    if (offset != null) provider.jumpToSection(offset);
   }
 
-  void _nextSection(WissensfreundProvider provider) {
-    final starts = provider.sectionChunkStarts;
-    if (starts.isEmpty) return;
+  void _nextChunk(WissensfreundProvider provider) {
     final cur = provider.currentChunkIndex;
-    for (int i = 0; i < starts.length; i++) {
-      if (starts[i] > cur) {
-        final offset = provider.chunkCharOffset(starts[i]);
-        if (offset != null) provider.seekAfterCurrentChunk(offset);
-        return;
-      }
-    }
+    final total = provider.totalChunks;
+    if (cur >= total - 1) return;
+    final offset = provider.chunkCharOffset(cur + 1);
+    if (offset != null) provider.jumpToSection(offset);
   }
 
   @override
@@ -2870,7 +2866,7 @@ class _ModeCContentState extends State<_ModeCContent> {
 
                     // ── 🔊 Bildtext vorlesen — nur wenn Caption vorhanden ───
                     Positioned(
-                      bottom: imageClearance + 10,
+                      top: 90,
                       right: 14,
                       child: hasCaption
                           ? GestureDetector(
@@ -2914,26 +2910,80 @@ class _ModeCContentState extends State<_ModeCContent> {
                         dark: true,
                       ),
                     ),
-                    // ── Section arrows ‹ / › — Stufe 2/3, beside thumbnails ──
+                    // ── Section-Slider — Stufe 2/3, unter Bildkante ─────────
                     if (ProfileService.instance.activeAgeLevel >= 2 &&
-                        provider.sectionChunkStarts.length > 1) ...[
+                        provider.totalChunks > 1)
                       Positioned(
-                        bottom: _kMicClear + 46,
-                        left: 8,
-                        child: _SectionArrowBtn(
-                          label: '‹',
-                          onTap: () => _prevSection(provider),
+                        bottom: imageClearance - 24,
+                        left: 4,
+                        right: 4,
+                        height: 48,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onTap: () => _prevChunk(provider),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 4),
+                                child: Icon(
+                                  Icons.skip_previous_rounded,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: SliderTheme(
+                                data: SliderThemeData(
+                                  trackHeight: 3.0,
+                                  thumbShape: const RoundSliderThumbShape(
+                                    enabledThumbRadius: 8,
+                                  ),
+                                  overlayShape: const RoundSliderOverlayShape(
+                                    overlayRadius: 18,
+                                  ),
+                                  activeTrackColor: Colors.white,
+                                  inactiveTrackColor:
+                                      Colors.white.withValues(alpha: 0.3),
+                                  thumbColor: Colors.white,
+                                  overlayColor:
+                                      Colors.white.withValues(alpha: 0.2),
+                                ),
+                                child: Slider(
+                                  value: _sliderDragValue ??
+                                      _chunkFraction(provider),
+                                  divisions: provider.totalChunks - 1,
+                                  onChanged: (v) =>
+                                      setState(() => _sliderDragValue = v),
+                                  onChangeEnd: (v) {
+                                    final total = provider.totalChunks;
+                                    final idx = (v * (total - 1))
+                                        .round()
+                                        .clamp(0, total - 1);
+                                    final offset =
+                                        provider.chunkCharOffset(idx);
+                                    if (offset != null) {
+                                      provider.jumpToSection(offset);
+                                    }
+                                    setState(() => _sliderDragValue = null);
+                                  },
+                                ),
+                              ),
+                            ),
+                            GestureDetector(
+                              onTap: () => _nextChunk(provider),
+                              child: const Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 4),
+                                child: Icon(
+                                  Icons.skip_next_rounded,
+                                  color: Colors.white,
+                                  size: 30,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      Positioned(
-                        bottom: _kMicClear + 4,
-                        left: 8,
-                        child: _SectionArrowBtn(
-                          label: '›',
-                          onTap: () => _nextSection(provider),
-                        ),
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -2946,30 +2996,27 @@ class _ModeCContentState extends State<_ModeCContent> {
 }
 
 class _SectionArrowBtn extends StatelessWidget {
-  final String label;
+  final IconData icon;
   final VoidCallback onTap;
-  const _SectionArrowBtn({required this.label, required this.onTap});
+  const _SectionArrowBtn({required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 36,
-        height: 36,
+        width: 44,
+        height: 44,
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.2),
+          color: Colors.white.withValues(alpha: 0.22),
           shape: BoxShape.circle,
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.35),
+            width: 1.0,
           ),
         ),
+        alignment: Alignment.center,
+        child: Icon(icon, color: Colors.white, size: 26),
       ),
     );
   }
