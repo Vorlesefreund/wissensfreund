@@ -1,552 +1,65 @@
-# Wissensfreund Status
-<!-- updated: 2026-05-31T21:15:00Z -->
-
-## Zuletzt erledigt (Session 2026-05-31 — JSON-Artikel Bilder + Thumbnail-Strip)
-
-### Schritt 1 — Bilder laden für JSON-Artikel
-- `HiResImageService.fetchUrlBytes(url)`: neue Public-Methode für direkten CDN-Fetch
-- `ArticleImageInfo.thumbUrl` (optional): CDN-URL wird von `RenderedImage` durchgereicht
-- `WissensfreundProvider._jsonThumbUrlMap: Map<String, String>`: Commons-Dateiname → thumbUrl
-  - Wird in `loadAndSpeakJsonArticle()` befüllt, in `_loadAndSpeak()` (ZIM) + neuer JSON-Load geleert
-- `_resolveImageBytes()`: prüft `_jsonThumbUrlMap[filename]` zuerst → `_fetchFromThumbUrl(url)`
-  - JSON-Artikel umgehen damit die ZIM/ZIP-Kette komplett
-- `_fetchFromThumbUrl(url)`: NetworkService-Check (300 KB) vor HTTP-Fetch
-
-### Schritt 2 — Thumbnail-Strip für JSON-Artikel
-- `loadAndSpeakJsonArticle()`: befüllt `_mediaItems` direkt aus `rendered.images`
-  - Jedes `RenderedImage` → `ArticleMediaItem(posInHtml: img.index, isAudio: false)`
-  - `_selectedMediaIndex = 0` wenn Bilder vorhanden
-- Thumbnail-Strip (`_ThumbnailRow`) und Bildnavigation (Swipe, `onMediaTap`) funktionieren
-  jetzt für JSON-Artikel ohne ZIM-Kanal
-
-### APK installiert und getestet ✅
-- `flutter build apk --debug` ✓ + `flutter install --debug` ✓ (ZIM bleibt erhalten)
-- SM S911B (Galaxy S23): Hauptbild lädt, Thumbnail-Strip zeigt 2 Bilder, Tap wechselt Bild ✓
-- Root Cause des Leertests: `elefant_l2.json` war Schema v1.0 mit `"images": []` (alter Artikel)
-- Fix für Tests: Artikel manuell mit 2 echten Wikimedia-URLs gepatcht + per adb push übertragen
-
-### Offen: Article-Generator
-- `generate_articles.py` hat `fetch_images_for_article()` bereits implementiert
-- Aber: Alte Artikel im R2-Cache haben `"images": []` → müssen neu generiert werden
-- `_filename_from_title()` gibt lowercase aus — Wikimedia-Filenames sind case-sensitiv
-  (macht für den Map-Key nichts, thumb_url-Fetch läuft über die URL, nicht den Dateinamen)
+# Wissensfreund — STATUS
+<!-- updated: 2026-06-01T10:00:00Z -->
+<!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
+<!-- Nur die letzten 2 Sessions + aktuell Offenes bleibt hier. -->
+<!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## Bild-Pipeline — ABGESCHLOSSEN
+## 🟢 Zuletzt abgeschlossen (Session 2026-05-31)
 
-- `scrape_klexikon_images.py`: 3.611 Artikel gescrapt
-- 16.582 Bilder gemappt (Hash → Commons-Dateiname)
-- `image_index.json` generiert und in R2 hochgeladen
-- ZIPs in R2: `images_thumb.zip` (300px, ~545 MB) + `images_standard.zip` (800px, ~3,3 GB)
-- `HiResImageService`: Original-URL (< 5 MB) + 2048px-Fallback + negativer In-Memory-Cache
-- `ImageLibraryService`: `hiresOnWifiEnabled` Bool (SharedPrefs, Default: true)
-- `WissensfreundProvider._resolveImageBytes()`: Routing nach Tier + WiFi-Setting
-- `_StorageScreen`: WLAN-Switch + korrekte Größen-/Qualitäts-Labels (800px, ~3,3 GB)
-- Bildlade-Logik:
-  - Free: 300px ZIP → ZIM
-  - Plus + WLAN-Switch an: Bestes Wikimedia-Bild → 800px ZIP → ZIM
-  - Plus + WLAN-Switch aus: 800px ZIP → ZIM
-
-## Offene Punkte (niedrige Priorität)
-
-- **Gallery-Artikel (111 Artikel, 540 Bilder)** → Version 1.1
-  - Bilder nicht im ZIM → kein Hash → kein ZIP-Eintrag
-  - Braucht: gallery_index.json + eigene Gallery-UI-Komponente (~3–4 Tage)
-- **Audio-Pipeline** → separater Run
-- **Gemini-Integration** → `_handleGeminiPlaceholder()` ist Einstiegspunkt
-
-## Verworfene Ansätze (NICHT nochmal versuchen)
-
-- `entry.title` aus ZIM → immer null
-- `Datei:`-Links im ZIM → von Kiwix beim Bauen gestripped
-- `prop=images` + Caption-Matching → nur ~30% confident
-- `action=parse` + Count-Matching → zu viele Fehlerquellen
-
-## Zuletzt erledigt (Session 2026-05-28 Abend — UI-Fixes + Offline-Library-Verbesserungen)
-
-### R2-Status bestätigt: Beide Image-ZIPs live und korrekt
-- `images_thumb.zip` → HTTP 200, ~141 MB (300px, Free-Qualität) ✓
-- `images_standard.zip` → HTTP 200, ~218 MB (600px, Plus-Qualität) ✓
-- Pipeline-Fix (Zstandard-Bug + build_image_map.py 3 Strategien) war bereits erledigt
-- Schlechte Bilder = ZIM-Thumbnails (120–330px); nach Offline-Download → 300px/600px sichtbar
-
-### first_run_screen.dart — "Los geht's"-Button sichtbar ohne Scrollen
-- `SafeArea(bottom: false)` → `SafeArea()` (kein manuelles viewPadding.bottom mehr)
-- Content komprimiert auf ~431dp → passt in ~550dp (Mindest-Zielgröße 4.7" Gerät, ~100dp Reserve)
-- Eingeführte Regel: **Niemals viewPadding.bottom manuell rechnen** — SafeArea() reicht
-
-### image_library_service.dart — Verbesserungen
-- Progress-Tracking: `_downloadProgress`, `_downloadedBytes`, `_downloadTotalBytes`, `_downloadEta` + Getters
-- `getStoredTier()` statische Methode (liest `image_library_thumb_tier` aus SharedPreferences)
-- Staging-Dir-Pattern: Download+Extraktion in `.new/`, alte Library bleibt während Download nutzbar,
-  atomarer Austausch am Ende (nur Millisekunden ohne Bilder)
-- `clear()` entfernt jetzt auch `image_library_thumb_tier` aus SharedPreferences
-
-### home_screen.dart — Verbesserungen
-- Speicher & Qualität: echter Fortschrittsbalken mit % + ETA (war "durchlaufendes Band")
-- Tier-Label liest tatsächlich gespeicherten Tier aus SharedPreferences (war hardcoded "600px")
-- Upgrade-Button "Auf 600px upgraden" erscheint nur wenn nicht schon 600px vorhanden
-- `edgeToEdge` in allen Submenü-Screens: Speicher, Internet, Abo (Android-Leiste nun sichtbar)
-- Pixel-Overflow in `_UpgradeCard` behoben: linke Column in `Flexible` gewrapped
-- Plus-Kauf: startet sofort Hintergrund-Download 600px (unawaited), App bleibt nutzbar
-
-### settings.json
-- `autoCompactEnabled: true`, `autoCompactWindow: 150000` gesetzt
-
-## Zuletzt erledigt (Session 2026-05-28 — Bild-Pipeline Root Cause gefunden + Fix)
-
-### Root Cause: Nur ~800 statt 21.000 Bilder in der Pipeline
-
-**Diagnose-Script** `scripts/diagnose_zim.py` + Workflow `diagnose_zim.yml` erstellt
-und auf dem 2026-05 ZIM ausgeführt.
-
-**Befunde:**
-- ZIM hat **21.100 Bilder** im Verzeichnis (nicht ~1.000 — frühere Schätzung war falsch)
-- `media_licenses.json` korrekt mit **21.039 Einträgen** befüllt ✓
-- Cluster-Kompression: 69× Typ 1 (unkomprimiert) + 23× Typ 5 (Zstandard) = 92 gesamt
-- Avg. Bilder pro HTML-Artikel (Stichprobe): **6,1** → projiziert **22.202 Bilder** total
-
-**Root Cause in `download_images.py`:**
-```python
-# ALT (fehlerhaft):
-elif compression == 4:
-    raw = zstandard.ZstdDecompressor().decompress(...)  # 4 = LZMA, nicht Zstandard!
-else:
-    raise ValueError(...)  # Fängt Typ 5 (Zstandard) → stille Fehler
-```
-
-Kompressionstyp 5 (Zstandard) trifft die `else`-Verzweigung und wirft `ValueError`.
-Bilder in Zstandard-Clustern (vermutlich Großteil aller Bilder) wurden nie extrahiert.
-
-**Fix:**
-```python
-elif compression == 4:
-    raw = lzma.decompress(payload)        # korrekt: LZMA
-elif compression in (5, 8):
-    raw = zstandard.ZstdDecompressor().decompress(payload, ...)  # korrekt: Zstandard
-else:
-    raise ValueError(...)
-```
-
-Außerdem: `extract_from_zim()` gibt jetzt Fehler-Counts aus statt sie still zu verschlucken.
-
-**Status**: Fix committed + gepusht. `update_image_licenses`-Workflow muss neu getriggert
-werden um alle ~21.000 Bilder zu laden.
+- JSON-Artikel zeigen Bilder: `HiResImageService.fetchUrlBytes()` + `_jsonThumbUrlMap`
+- Thumbnail-Strip für JSON-Artikel: `_mediaItems` direkt aus `rendered.images` befüllt
+- APK gebaut + getestet auf Galaxy S23 ✅
+- Bild-Pipeline komplett: alle 3 ZIPs in R2 (thumb 300px, standard 800px, pro 1600px) ✅
 
 ---
 
-## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 5)
+## 🔴 Gerade in Arbeit
 
-### Zurück-Button: Artikel-Navigation fertig
-
-**Problem**: Zurück-Button nach Link-Navigation (z.B. Elefant → Säugetiere) landete
-immer wieder bei Säugetieren statt bei Elefanten.
-
-**Root Cause 1** (navStack-Push wurde übersprungen):
-`startListening()` löschte `_articleTitle`/`_articleText` unbedingt. Wenn es während
-`_awaitingLinkConfirmation` aufgerufen wurde (automatisch nach TTS-Frage), war
-`_articleTitle` beim späteren navStack-Push in `_followLink` bereits leer.
-
-**Fix**: Guard in `startListening()` — Artikel-Kontext bleibt erhalten wenn
-`_awaitingLinkConfirmation` gesetzt ist:
-```dart
-if (!_awaitingLinkConfirmation) {
-  _articleText = ''; _articleTitle = ''; ...
-}
-```
-
-**Root Cause 2** (falscher Button):
-Der `_ArticleControls`-Back-Button (während Vorlesen sichtbar) rief `Navigator.pop(context)`
-auf, nicht `provider.goBack()`. Nur der `_ArticleHeader`-Button war korrekt verdrahtet.
-
-**Fix**: Beide Back-Buttons in `_ArticleControls` (speaking/paused/listening + idle)
-prüfen jetzt `provider.canGoBack` — wenn true → `provider.goBack()`, sonst → `Navigator.pop`.
-
-**Root Cause 3** (falsche Links nach Zurück-Sprung):
-`_articleLinks` wurde in `goBack()` nicht geleert. Beim `notifyListeners()`-Aufruf
-nach ZIM-Load waren noch die Säugetiere-Links sichtbar. Außerdem Race Condition:
-laufender `_loadLinks(säugetiereIdx)` überschrieb evtl. die frisch geladenen Elefant-Links.
-
-**Fix**:
-- `_articleLinks = []` in `goBack()` vor `notifyListeners()` ergänzt
-- `_loadLinks()` verwirft Ergebnis wenn `_currentUrlIndex != urlIndex` (stale guard)
-
-**Debug-Prints entfernt**: alle `GO_BACK:`, `NAV_PUSH:`, `NAV_FOLLOW:`, `COMPLETION:`
-Logs aus `wissensfreund_provider.dart` bereinigt.
+- **Artikel-Generator läuft** (`generate_articles.py` via GitHub Actions)
+  - Alte Artikel in R2-Cache haben `"images": []` → müssen neu generiert werden
+  - `_filename_from_title()` gibt lowercase aus — Wikimedia-Filenames sind case-sensitiv
+    (macht für Map-Key nichts, aber für Display beachten)
 
 ---
 
-## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 4)
+## 🟡 Offen — nächste Schritte
 
-### Interne Links in Modus-A-Satzansicht (article_screen.dart)
+### Hoch
+- **App-Umbau Schritt B: Renderer** — gemeinsamer JSON-Renderer für ZIM + eigene Artikel
+  - `RenderedArticle` internes Format
+  - `ZimArticleConverter` + `JsonArticleConverter`
+  - Quiz-Widget (A/B/C per STT)
+  - Callout-Boxen (wow/fakt/myth/warn)
+  - Bild-Wechsel per `imgIndex` pro Satz
 
-**Problem**: Links waren nur im `ArticleScreenA`-Expanded-Bereich sichtbar (nach Tippen
-auf „Mehr entdecken"), nicht in der eigentlichen `_ModeAContent`-Satzansicht.
+### Mittel
+- **Gemini-Integration** — `_detectQueryType()` vorhanden aber inaktiv
+  - Typ 3 (Vergleichsfrage) + Typ 5 (Fallback) fehlen noch
+  - `_handleGeminiPlaceholder()` ist der Einstiegspunkt
+- **Topic-Tree Kachel-Navigation** in der App (Ebene 1→2→3)
+- **Pageviews-Abfrage** in `prepare_articles.py` (Wikimedia REST API)
 
-**Fix** in `article_screen.dart`:
-- `_SentenceWidget`: `StatelessWidget` → `StatefulWidget` mit `TapGestureRecognizer`-Lifecycle
-- Inaktive Sätze werden jetzt mit `Text.rich` + blau unterstrichenen tippbaren Links gerendert
-- Aktive Sätze (Fenster-Highlight / Vollsatz-Highlight) bleiben unverändert (kein Link-Tap während Vorlesen)
-- `_buildSentenceWidgets`: berechnet per-Satz-Links via `fullText.indexOf(sentText, searchFrom)`,
-  verschiebt `startChar`/`endChar` relativ zum Satz-Start
-- Aufruf in `build()`: `provider.articleLinks`, `provider.articleText`, `provider.onLinkTapped` übergeben
-
-## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 3)
-
-### Biometrie-Deaktivierung nach App-Beenden behoben
-
-**Ursache**: `DevicePolicyManager.lockNow()` (aufgerufen in `home_screen.dart:191` nach
-erfolgreichem BiometricPrompt beim App-Beenden) versetzt Android in den „Strong Auth Required"-
-Zustand. Standardverhalten Android: Nach programmatischem Lock via Device Admin ist Biometrie
-bis zur nächsten PIN-Eingabe deaktiviert. Kein Samsung-Bug, kein Timing-Problem.
-
-**Fix**: `if (ps.isAdminActive) await ps.lockDevice();` aus dem Beenden-Flow entfernt
-(`home_screen.dart:191`). Die Methode `lockDevice()` selbst bleibt bestehen.
-
-**Neuer Ablauf**: BiometricPrompt bestätigen → App beendet sich → Homescreen, Biometrie normal.
-
-**Nicht geändert**: `lockDevice()`-Methode in `parental_lock_service.dart` und `MainActivity.kt`
-(könnte an anderer Stelle noch benötigt werden). `ParentalUnlockActivity.kt` war bereits sauber
-(BiometricPrompt + finishAffinity, kein requestDismissKeyguard).
-
-## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 2)
-
-### Kiosk-Entsperr-Flow: Kompletter Neuansatz mit BiometricPrompt (APK installiert)
-
-**Problem**: `requestDismissKeyguard()` ist herstellerspezifisch (Samsung One UI, Xiaomi etc.
-implementieren Keyguard unterschiedlich) → nach Auth landete Nutzer am Sperrbildschirm statt Homescreen;
-nur Kennwort-Entsperrung möglich, kein PIN/Biometrie.
-
-**Lösung** — 3 Dateien geändert:
-
-`ParentalUnlockActivity.kt` — komplett neu:
-- `requestDismissKeyguard` + alle Handler/Delays entfernt
-- `BiometricPrompt` (BIOMETRIC_STRONG | BIOMETRIC_WEAK | DEVICE_CREDENTIAL) direkt in `onCreate`
-- Bei Auth-Erfolg: `released=true` → `setShowWhenLocked(false)` → `startActivity(HOME_INTENT)` → `finishAffinity()`
-- `finishAffinity()` schließt den gesamten Wissensfreund-Task-Stack (MainActivity + ParentalUnlockActivity),
-  verhindert Samsung "App in Vordergrund nach Keyguard-Dismiss"-Lifecycle-Event
-
-`MainActivity.kt` — vereinfacht:
-- `unlockCompletedAt` + `signalUnlockCompleted()` entfernt
-- `onStart()`: einfach `released=false` + `hideOverlay()`
-- `onStop()`: einfach Kiosk-Check ohne Timestamp-Fenster
-
-`AndroidManifest.xml` — `showWhenLocked="true"` + `turnScreenOn="true"` für ParentalUnlockActivity
-
-**Warum `setShowWhenLocked(false)` statt Navigation mit aktivem Lock?**
-Das Signal teilt dem System synchron mit, dass die Activity fertig ist. Der anschließende
-HOME_INTENT landet direkt am Homescreen — System übernimmt die Entsperranimation.
-
-**APK**: debug-Build erstellt und per `adb install -r` installiert (ZIM-Datei bleibt erhalten).
-
-## Zuletzt erledigt (Session 2026-05-27 Abend — Teil 1)
-
-### Drei Bugfixes: Professor-Zone, Kiosk-Auth, Idle-TTS im Hintergrund
-
-**Professor-Zone-Fix (artikel_screen.dart)**
-- Ursache: RenderBox-Positionen änderten sich durch Zone-Padding → Feedback-Loop / Oszillation
-- Fix: Positionen beim ersten Frame cachen (`_sentenceTopCache`, `_sentenceHeightCache`, `_cacheBuilt`); alle Scroll-Berechnungen nutzen stabile Document-Koordinaten
-- Zusätzlich: `_kProfPad` 182→160 (Text läuft weiter rechts), `_kProfZone` 245→220 (eine Zeile mehr sichtbar)
-
-**Kiosk-Entsperr-Flow (ParentalUnlockActivity.kt) — älterer Versuch (ersetzt durch Teil 2)**
-- Ansatz war `requestDismissKeyguard()` — herstellerspezifisch, hat nicht funktioniert
-
-**Idle-TTS im Hintergrund (wissensfreund_provider.dart + main.dart)**
-- Ursache: `pauseSpeaking()` prüfte `_state==speaking` — bei Idle-Zustand passierte nichts, Idle-Timer liefen weiter
-- Fix: `_isInBackground`-Flag; `enterBackground()` cancelt Timer + stoppt TTS sofort; Guard in `_fireK6S1/2/3`; `main.dart` nutzt `enterBackground()`/`exitBackground()` statt `pauseSpeaking()`/`resumeSpeaking()`
-
-## Zuletzt erledigt (Session 2026-05-27 Nachmittag)
-
-### Bild-Pipeline: Root-Cause-Analyse + Fix (commit 55d703c)
-
-**Problem**: Alle 3 Image-ZIPs (thumb/standard/pro) waren identisch (136 MB, 21039 ZIM-Bilder,
-0 Commons-Bilder). Ursache: Der 2026-05 Klexikon-ZIM hat **keine** `<a href="Datei:...">` Wrapper
-um `<img>` Tags — Kiwix hat diese Links beim Bauen des ZIM entfernt. Die alte FILE_LINK_RE-Strategie
-in `build_image_map.py` produzierte daher immer 0 Mappings.
-
-**Fix in `build_image_map.py`** — 3 Strategien (werden der Reihe nach versucht):
-1. **alt-as-filename** (offline): Wenn `<img alt="Name.jpg">` wie ein Dateiname aussieht (hat Bild-Extension), direkt verwenden. Deckt Icons, Logos, un-captioned Images ab.
-2. **Datei-Link** (offline, Fallback für ältere ZIMs): `<a href="...Datei:...">` in 1200 Zeichen vor dem img-Tag suchen.
-3. **MediaWiki API** (online, Production-only): Für verbleibende unmappte Bilder live-HTML von klexikon.zum.de holen (action=parse), daraus Datei:-Links in Reihenfolge extrahieren, per Position mit ZIM-img-Tags matchen. Wird bei MAX_ARTICLES (Testmodus) übersprungen.
-
-**Fix im Workflow** — `actions/upload-artifact@v4` → `@v5` und `download-artifact@v4` → `@v5`:
-Node.js 20 wird ab 2. Juni 2026 deprecated. Alle 7 Artifact-Action-Aufrufe geupdated.
-
-**Test-Run ausgelöst**: Run #26496624714 (max_articles=50) läuft gerade, prüft ob alt-as-filename greift.
-
-**Nächster Schritt**: Nach Test-Run → Ergebnis prüfen → Full-Run starten (max_articles=0).
-Full-Run wird Strategy 3 (MediaWiki API, ~3600 API-Calls à 0.4s ≈ +25 min) nutzen.
-
-## Zuletzt erledigt (Session 2026-05-27 Früh)
-
-### Interne Klexikon-Links im Artikel-Screen (Modus A)
-
-### Interne Klexikon-Links im Artikel-Screen (Modus A)
-
-**ZimReader.kt** — `LinkRef` data class + `getLinkRefs()` + `extractLinkRefsFromHtml()`:
-- Scannt Artikel-HTML nach internen `<a href>` Links (keine externen URLs, keine Namespace-Links)
-- Ordnet jeden Link einem Zeichen-Offset im Plain-Text zu (sequential `indexOf`-Suche)
-- Liefert `List<LinkRef>` mit `{text, target, startChar, endChar}`
-
-**MainActivity.kt** — `"listLinks"` Channel-Handler + `zimListLinks()`:
-- Neuer ZIM-Channel-Aufruf: `{urlIndex}` → `[{text, target, startChar, endChar}]`
-- Bugfix: `zimListImages` liefert jetzt auch `"posInHtml"` (war vorher vergessen)
-
-**wissensfreund_provider.dart** — Link-Navigations-System:
-- Neue State-Felder: `_articleLinks`, `_navStack` (max 2), `_awaitingLinkConfirmation`, `_awaitingNavStackResume`, `_isLinkNavigation`
-- `onLinkTapped(target)`: während Vorlesen → Pause + Rückfrage; im Idle → direkt navigieren
-- `_followLink(target)`: sucht Artikel, schiebt aktuellen Artikel auf Nav-Stack, lädt neuen
-- `_onArticleEnd()`: bei leerem Stack → "Was möchtest du als nächstes hören?" + Auto-Mic 2s; bei Einträgen → Stack-Prompt + Auto-Mic
-- `_handleNavStackResume(text)`: erkennt genannte Artikel-Titel, lädt von gespeicherter Position
-- `_loadLinks(urlIndex)`: lädt Links fire-and-forget nach Artikel-Load
-- `_loadAndSpeak()`: räumt Nav-Stack bei neuen User-Suchen, bewahrt ihn bei Link-Navigation
-
-**article_screen_a.dart** — `_LinkedArticleText` Widget:
-- `StatefulWidget` mit `TapGestureRecognizer`-Lifecycle (dispose on rebuild)
-- Rendert Artikel-Text als `RichText` mit blauen unterstrichenen Links (Color 0xFF1565C0)
-- Expand-Toggle jetzt auch während Vorlesen sichtbar (früher: nur im Idle)
-
-## Zuletzt erledigt (Session 2026-05-26)
-
-### Bildqualitäts-System (Freemium-Umbau)
-
-#### Neue Stufen-Logik (300px / 600px / 1200px)
-- **Free**: 300px aus ZIM — kein on-demand, kein Download nötig
-- **Plus/Premium ohne lokalen Download**: 300px sofort, 1200px on-demand bei WLAN (Crossfade 300ms)
-- **Plus/Premium mit lokalem Download**: 600px aus `image_library/`, 1200px on-demand bei WLAN
-
-#### Geänderte Dateien
-- `lib/config/asset_config.dart`: URL auf `images_standard.zip` (600px) umgestellt; `imageLibrarySizeBytes` → 600 MB; alte `images_medium.zip`-Referenzen entfernt
-- `lib/services/hires_image_service.dart`: Komplettumbau:
-  - Commons-Dateiname wird aus ZIM-Pfad extrahiert (`langde-{size}px-{original}` → `{original}`)
-  - Download via `Special:FilePath/{commons_fn}?width=1200` (ein HTTP-Request statt vorher zwei)
-  - LRU-Cache: max 500 MB, evict auf 400 MB wenn überschritten
-  - Free-User-Gate: `canUseHighResOnDemand` — liefert sofort null
-- `lib/screens/article_screen.dart`:
-  - `_loadHiRes()`: früher Ausstieg für Free-User (kein Netz-Check, kein Download)
-  - Upgrade-Hinweis `_UpgradeHint` im Vollbild (Free-User, nicht während Vorlesen): "Schärfere Bilder mit Wissensfreund Plus" → tippt auf Alert-Dialog
-- `lib/screens/first_run_screen.dart`:
-  - Image-Quality-Seite wird für Free-User übersprungen (`_goToAfterNetwork()`)
-  - Neue Texte: "Ja, bessere Bilder speichern (~600 MB)" / "Nein, nur bei WLAN laden"
-  - `_kRequiredBytes` → 1 GB (600 MB ZIP + Extraktions-Overhead)
-- `lib/screens/home_screen.dart` — `_StorageDialog` komplett überarbeitet:
-  - **Free**: "Standard (300px)" + "Mit Plus: deutlich schärfere Bilder" + Upgrade-Button
-  - **Plus/Premium ohne Download**: "Gut bei WLAN (bis 1200px)" + Inline-Download mit Fortschrittsanzeige
-  - **Plus/Premium mit Download**: "Offline-Bilder: Gut (600px) — X MB" + "Löschen"-Button + "Bei WLAN: 1200px"
-  - 1200px-Cache-Zeile nur für Plus/Premium sichtbar
-
-#### Satzerkennung (Zahlen-Fix)
-- `_splitSentences()` (article_screen.dart + article_screen_a.dart): neue Regex erkennt `1.000`, `1.000.000`, `1,5` als eine Einheit → kein falsches Satzende bei deutschen Zahlenformaten
-- `_sentenceStartOffset()` (provider): überspringe Punkt zwischen zwei Ziffern beim Rückwärts-Scan
-
-#### GitHub Actions (Workflow-Trigger)
-- `update_image_licenses.yml`: `type: string` zu `workflow_dispatch` input hinzugefügt
-- GitHub hatte zum Zeitpunkt der letzten Trigger-Versuche einen Major Outage (10:57–13:xx UTC); Testlauf mit `max_articles=10` sobald GitHub wieder grün ist
-
-### Offen / Nächste Schritte
-- **Workflow-Testlauf**: `max_articles=10` starten sobald GitHub Actions wieder stabil (githubstatus.com prüfen)
-- **images_standard.zip**: tatsächliche Größe nach erstem Lauf bekannt — `imageLibrarySizeBytes` ggf. anpassen
-- **Gemini-Integration**: Frage-Typ-Erkennung Typ 3 (Vergleich) + Typ 5 (Fallback) noch ausstehend
-- **Download-Größe dynamisch**: "~600 MB" noch statisch; nach erstem Workflow-Run aus Manifest lesen
+### Niedrig
+- Upgrade-Dialog für Free-User bei Rückfrage (wartet auf Gemini)
+- Download-Größe dynamisch aus Manifest statt statisch "~2 GB"
+- Plus & Premium Dialog: Design-Vorgaben noch ausstehend
+- Sound-Thumbnails: Audio-Infrastruktur fertig, wartet auf Audio-Pipeline-Run
 
 ---
 
-## Zuletzt erledigt (Session 2026-05-25 — nacht)
+## 🔵 Verschoben auf Version 1.1
 
-### "Weiterhören" + Gemini-Platzhalter (komplett implementiert)
-
-#### Weiterhören (Home-Screen)
-- `ProfileService`: `saveLastArticle(title, charOffset)` / `getLastArticle()` / `clearLastArticle()` hinzugefügt
-- `ProfileService.deleteProfile()`: löscht jetzt auch `last_article_title_{id}` + `last_article_offset_{id}`
-- `WissensfreundProvider`:
-  - `saveCurrentArticlePosition()` — speichert aktuellen Satzanfang-Offset
-  - `clearLastArticle()` — delegiert an ProfileService
-  - `resumeLastArticle(title, offset)` — ZIM-Suche → `_loadAndSpeakFrom()` → spricht "Weiter mit [Titel]!" → Resume
-  - `_loadAndSpeakFrom()` — lädt Artikel, setzt `_resumeAfterHandoff=true`, spielt Intro-Phrase
-  - `_loadAndSpeak()`: ruft jetzt `clearLastArticle()` bevor `_startSpeakingFrom(0)` (neuer Artikel = Weiterhören löschen)
-  - TTS completion (Artikel-Ende): ruft `clearLastArticle()` auf
-- `article_screen.dart`: ← Button (sprechend + idle) speichert Position vor `stopSpeaking()`
-- `article_screen.dart`: "Vorlesen beenden" + "Zum Hauptmenü" rufen `clearLastArticle()` auf
-- `main.dart`: Background-Pause speichert Position (`saveCurrentArticlePosition()`) vor `pauseSpeaking()`
-- `home_screen.dart`:
-  - `_lastArticle` State, `_loadLastArticle()`, `_onProfileChanged()` Listener
-  - `_WeiterhoerenCard` Widget (grüne Karte mit ▶, Titel, Untertitel)
-  - Karte erscheint nur wenn idle + kein Artikel geladen + letzter Artikel gespeichert
-
-#### Gemini-Platzhalter (5 Frage-Typen verdrahtet)
-- `_QueryType` Enum: `{ fullRead, targeted, comparison, followUp, unknown }`
-- `_kCompareWords` Konstante (19 Vergleichswörter)
-- `_detectQueryType()`: gibt jetzt `unknown` als Default zurück (war `fullRead`)
-- `_processQuery()` komplett überarbeitet — 5 Typen:
-  - Typ 1 (fullRead): wie bisher → Artikel vorlesen
-  - Typ 2 (targeted): `_handleGeminiPlaceholder()` nach ZIM-Suche mit Treffer
-  - Typ 3 (comparison): erkannt nach ZIM (2 Treffer ≥ kMinScore + Vergleichswort) → Platzhalter
-  - Typ 4 (followUp): erkannt via `_hasInterruptedForMic` → Platzhalter, kein ZIM-Download
-  - Typ 5 (unknown): kein Treffer → Eltern-Verweis; Treffer → Artikel vorlesen (wie Typ 1)
-  - Typen 2/3/5 ohne Treffer: immer Eltern-Verweis (eiserne Regel)
-- `_handleGeminiPlaceholder()`: Free → Upgrade-Phrase (3 Varianten); Premium → Platzhalter-Phrase (3 Varianten)
+- Gallery-Artikel (111 Artikel, 540 Bilder) — braucht eigene UI-Komponente
+- Audio-Pipeline — separater GitHub Actions Run
 
 ---
 
-## Zuletzt erledigt (Session 2026-05-25 — abends)
+## Wissensdokumente (bei Bedarf lesen)
 
-### Onboarding-Flow (FirstRunScreen) — komplett implementiert
-
-#### Neue Dateien
-- `lib/screens/first_run_screen.dart` — 4-seitiger Willkommens-Wizard:
-  - Seite 0: Welcome — Begrüßung, Beschreibung, "~3 Minuten"-Badge, Übersicht der 4 Schritte
-  - Seite 1: Internet & Daten — identische Logik wie `_NetworkSettingsOnboardingDialog` (WLAN-Unlimited, Tageslimit, Monatslimit, Mobilfunk-Toggle)
-  - Seite 2: Bildqualität — Standard vs. Gut (~2 GB), Speicherplatz-Prüfung, Download mit Fortschrittsanzeige
-  - Seite 3: Kinderschutz — `requestOverlayPermission` flow (intro → warten → erteilt/verweigert → fertig)
-  - Nach Seite 3: `onboarding_complete = true` setzen, alle Onboarding-Flags schreiben, → `ProfileCreationScreen(isFirstProfile: true)`
-
-#### Geänderte Dateien
-- `lib/main.dart`:
-  - `SharedPreferences.getBool('onboarding_complete')` beim Start
-  - Neues Pflichtargument `onboardingComplete` für `WissensfreundApp`
-  - Routing: `!onboardingComplete` → `FirstRunScreen`, sonst bekannte Logik
-
-#### Ablauf (wie vom User spezifiziert)
-1. Erstinstallation → `FirstRunScreen` mit Fortschrittspunkten
-2. Eltern richten Internet-Limits, Bildqualität und Kinderschutz ein
-3. → `ProfileCreationScreen` (Name, Alter, Avatar, Sprachniveau, Fertig+Konfetti)
-4. → `HomeScreen` (normaler App-Start)
-5. Alle Folgestarts: `onboarding_complete = true` → direkt zum normalen Start-Screen
-
-#### Fixes (Slider, Back-Button aus letzter Session)
-- Slider-Bug in Profil-Wizard (Schritt 2 ohne sichtbaren Regler) → `FocusScope.unfocus()` in `_next()`
-- Back-Button-Spinner-Loop → `PopScope(canPop: !widget.isFirstProfile)` in `ProfileCreationScreen`
-
----
-
-## Zuletzt erledigt (Session 2026-05-25 — nachmittags 2)
-
-### 100% Datenlimit-Overlay (komplett implementiert)
-
-#### Neue Dateien
-- `lib/services/data_limit_overlay_service.dart` — Singleton ChangeNotifier (show/dismiss + retry/cancel-Callbacks)
-- `lib/widgets/data_limit_overlay.dart` — Vollbild-Overlay, 4 Phasen:
-  - Gesperrt: "Datenlimit erreicht" + Verbrauch mit Fortschrittsbalken + Entsperren-Button
-  - Entsperrt: Tageslimit / Monatslimit erhöhen
-  - Anpassen: Radio-Liste (100/200/500 MB/Tag, 500 MB/1 GB/2 GB/Monat + Unbegrenzt)
-  - Speichern → NetworkSettingsService + dismiss(retry: true) → automatischer Retry
-
-#### Geänderte Dateien
-- `lib/main.dart` — DataLimitOverlayService in Providers; DataLimitOverlay in _AppShell-Stack
-- `lib/providers/wissensfreund_provider.dart`:
-  - `pauseForDataLimit()` — pausiert Vorlesen, spricht Übergabe-Phrase, awaitable Completer
-  - `resumeAfterDataLimit()` — setzt Vorlesen fort nach Retry
-  - `speakDataLimitCancelled()` — "Kein Problem, wir machen weiter!" → auto-Resume
-  - 80%/90%-Warnphrases zwischen TTS-Chunks eingebettet (`_deferredArticleChunk`)
-  - 3 Übergabe-Varianten, 3×80%-Varianten, 3×90%-Varianten
-- `lib/screens/article_screen.dart` (`_FullscreenGalleryState`):
-  - `_loadHiRes()` prüft jetzt canUseNetwork() → triggert Overlay bei limit_reached
-  - `_triggerDataLimitOverlay()` — awaitet Professor-Phrase, zeigt Overlay
-- `lib/screens/home_screen.dart`:
-  - `_UsageProgressRow` — neues Widget mit Fortschrittsbalken (grün → orange 80% → rot 100%)
-  - Ersetzt einfache `_UsageRow` im Internet & Daten Dialog
-
-#### Ablauf (wie spezifiziert)
-1. Kind tippt → limit_reached erkannt
-2. Professor beendet graceful, spricht Übergabe-Phrase (aus 3 Zufallsvarianten)
-3. Vollbild-Overlay erscheint → "Datenlimit erreicht" + Verbrauchsstats
-4. Eltern entsperren mit BiometricPrompt → Limit erhöhen → Speichern
-5. Overlay schließt → unterbrochene Aktion startet automatisch neu
-6. Bei Abbrechen: Professor sagt "Kein Problem" → liest weiter ab Speicherpunkt
-
----
-
-## Zuletzt erledigt (Session 2026-05-25 — nachmittags)
-
-### Multi-User-System + Bottom-Sheet-Menü (komplett)
-
-#### Schritt 1 — SQLite Schema v6 → v7
-- `profiles` Tabelle (id, name, birth_year, avatar_id, language_level, created_at, last_used_at)
-- `article_history` Tabelle (profile_id FK, article_title, opened_at) — max. 200 Einträge/Profil
-- `favorites` Tabelle (profile_id FK, article_title, added_at)
-- Alle CRUD-Methoden in `LicenseCacheDb`
-
-#### Schritt 2 — Profilerstellungs-Wizard (5 Schritte)
-- `lib/screens/profile_creation_screen.dart`
-- Schritte: Name → Geburtsjahr (Slider) → Avatar (20 Tiere) → Sprachniveau → Fertig + Konfetti
-- Kein Back-Button auf Schritt 1 wenn erstes Profil
-
-#### Schritt 3 — Profilauswahl-Screen
-- `lib/screens/profile_selection_screen.dart`
-- "Wer bist du heute?" mit Karten-Grid (Avatar, Name, Alter)
-- "+" Karte für neues Profil
-- Beim Start: kein Profil → direkt Erstellungs-Wizard; sonst → Grid
-
-#### Schritt 4 — Bottom-Sheet-Menü neu
-- Profil-Header (Avatar, Name, Alter, Sprachniveau, "Wechseln"-Button)
-- Kinder-Sektion: Hauptmenü, Texteingabe, Verlauf, Favoriten (ohne Auth)
-- Eltern-Sektion: gesichert mit BiometricPrompt (einmalig pro Menü-Öffnung)
-  → Internet & Daten, Kinderschutz, Speicher & Qualität, Profile verwalten, Plus & Premium
-
-#### Schritt 5 — Profilverwaltung für Eltern
-- `lib/screens/profile_management_screen.dart`
-- Liste aller Profile; aktives markiert
-- Bearbeiten-Dialog (Avatar, Name, Alter, Sprachniveau)
-- Löschen mit Bestätigungs-Dialog (nur wenn > 1 Profil)
-
-#### `ProfileService` + `main.dart`
-- `lib/services/profile_service.dart` — CRUD, setActiveProfile, Verlauf, Favoriten
-- `main.dart`: ProfileService.initialize() beim Start; Route → ProfileSelectionScreen wenn kein Profil
-
-#### Nachträglich ergänzt (vollständig verdrahtet)
-- `_trackArticleListened()` in `wissensfreund_provider.dart` ruft jetzt auch
-  `ProfileService.instance.recordArticleOpened(title)` auf → Verlauf füllt sich automatisch
-- `_FavoriteBtn` (⭐) im Artikel-Screen-Header — prüft und togglet Favorit per Tap
-  (gelber Stern wenn aktiv, Outline wenn nicht); Zustand aus DB geladen
-
----
-
-## Zuletzt erledigt (Session 2026-05-25 — vormittags)
-
-### Freemium-Modell
-- `SubscriptionService` (Free / Plus / Premium) mit SharedPreferences-Cache
-- `BillingService.kt` — Google Play Billing 6.2.1, Produkte: `wissensfreund_plus` (INAPP), `wissensfreund_premium` (SUBS)
-- Feature-Gates: `canAskQuestions`, `canDownloadMediumQuality`, `canUseHighResOnDemand`
-- `_SubscriptionDialog` im Menü mit Upgrade-Cards, Statistiken, Restore-Button
-- `question_usage` + `usage_stats` Tabellen in SQLite (Schema v6)
-
-### Menü & Kinderschutz
-- Menü-Zugang durch BiometricPrompt gesichert wenn Kiosk aktiv
-- Einmalige Auth für alle Menüpunkte (`parentalUnlocked`-Flag — kein zweiter Prompt)
-
-### Onboarding-Kette (Bugfix)
-- `StorageManager.initialize()` fehlte vor der Kette → `AssertionError` → Bildqualitäts- und Netzwerk-Dialog wurden nie gezeigt. Gefixt.
-- `evictOldCache()` wird jetzt beim App-Start im Hintergrund aufgerufen (war toter Code)
-
-### Bildqualitäts-Dialog
-- Speicher-Prüfung via `StatFs` (neuer `getFreeStorageBytes()`-Channel in MainActivity.kt)
-- Bei < 2 GB frei: Standard empfohlen, Orange-Warnung, Download-Button deaktiviert
-- Fehlermeldungen jetzt sprechend: HTTP 404 → "Bildpaket noch nicht verfügbar" statt "Bitte WLAN prüfen"
-
----
-
-## Offen / Nächste Schritte
-
-### Dringend
-- **images_medium.zip**: Neuer Workflow läuft (Stand 20:08 UTC):
-  `prepare` ✅ 1h 14m, `download` ✅ 1h 2m, `images` ⏳ seit 7h 30m noch aktiv.
-  Sobald `images`-Job grün: `images_medium.zip` auf R2 → "Gut"-Bildqualität downloadbar.
-
-### Fehlende Features
-- **Gemini-Integration**: Frage-Typ-Erkennung (5 Typen) muss vor Gemini verdrahtet werden.
-  Logik dokumentiert in CLAUDE_CHAT_NOTIZEN.md (2026-05-25).
-  `_detectQueryType()` vorhanden aber nicht aktiv. Typ 3 (Vergleichsfrage) und Typ 5 (Fallback) fehlen noch.
-- **Upgrade-Flow bei Rückfrage (Free-User)**: `canAskQuestions`-Gate vorhanden,
-  aber kein Dialog wenn Free-User fragt. Wartet auf Gemini-Integration.
-- **Download-Größe dynamisch**: Wird noch statisch ("~2 GB") angezeigt, nicht aus Manifest gelesen.
-
-### Design-Ausstände
-- **Plus & Premium Dialog**: Neue Designvorgaben vom User angekündigt, noch nicht geliefert.
-- **Sound-Thumbnails**: Audio-Infrastruktur fertig; wartet auf Ergebnis des GH-Actions-Audio-Runs.
-
-### Technische Schulden
-- `kMonthlyQuestionLimit = 5000` und `addSessionMinutes()` vorhanden aber inaktiv
-  (aktivieren wenn Gemini läuft).
-- RadioListTile groupValue/onChanged deprecated in Flutter 3.32+ (data_limit_overlay.dart) —
-  kein Fehler, nur Info-Warnung; bei Gelegenheit auf RadioGroup umstellen.
+| Datei | Inhalt |
+|---|---|
+| `WISSEN_BILDER.md` | Bild-Pipeline, R2-Struktur, verworfene Ansätze |
+| `WISSEN_ARTIKEL_PIPELINE.md` | JSON-Schema, Altersstufen, Pipeline-Skripte, Related Terms |
+| `WISSEN_APP_ARCHITEKTUR.md` | Services, Freemium, Frage-Typen, Designentscheidungen |
