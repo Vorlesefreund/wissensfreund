@@ -1,8 +1,28 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-01T13:21:49Z -->
+<!-- updated: 2026-06-01T13:55:38Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Nur die letzten 2 Sessions + aktuell Offenes bleibt hier. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
+
+---
+
+## 🟢 Zuletzt abgeschlossen (Session 2026-06-01 abends)
+
+### Bilder + Kapitel-Pfeile Modus C — Bug behoben
+
+**Root-Cause:** Test-Button hat dynamisch `'elefant_l$level'` gebaut (Altersstufe 1 oder 3).
+Nur `elefant_l2.json` existiert. Stufe 1 oder 3 → 404 → `loadAndSpeakJsonArticle` bricht ab →
+`_articleImages = []`, `_sectionChunkStarts = []` → keine Bilder, keine Pfeile.
+
+**Fixes:**
+- `home_screen.dart`: Test-Button jetzt hardcoded `'elefant_l2'` (Label: "JSON Test (Elefant L2)")
+- `json_article_service.dart`: Bundled-Asset-Fallback eingebaut — wenn R2 fehlschlägt → `rootBundle.loadString('assets/test/$id.json')`
+- `pubspec.yaml`: `assets/test/` Eintrag ergänzt
+- `assets/test/elefant_l2.json`: 5-Abschnitt-Elefant-Artikel als Bundled-Asset eingefügt
+- `flutter build apk --debug` + `adb install -r` ✅
+
+**Weiterhin bekannt:** JSON-Bilder brauchen WiFi — `mobileAllowed=false` default → auf Mobilfunk geblockt.
+ZIM-Bilder kommen aus lokaler ZIM-Datei, brauchen kein Netzwerk.
 
 ---
 
@@ -10,57 +30,29 @@
 
 ### Scroll-Sync-Bugs Mode A + B — alle drei behoben
 
-- **Bug 1 — Mode B scroll DOWN (Professor springt nicht)**: Root-Cause: `_sentenceTopCache` veraltet,
-  weil aktiver Satz (fontSize 19) vs. inaktiv (fontSize 15) Satzpositionen verschiebt →
-  falsches `topIdx` → `topIdx == activeIdx` → kein Seek.
-  **Fix**: `_jumpToTopSentence` nutzt jetzt live `findRenderObject()` statt staler Cache.
-
-- **Bug 2 — Mode B scroll UP (Professor springt zurück)**: Root-Cause: `_userScrolling = false` am
-  Anfang von `_jumpToTopSentence` → `_smartScrollTo` läuft sofort los für alte TTS-Position.
-  **Fix**: `_userScrolling` bleibt `true` nach dem Seek-Aufruf; neuer `_seekResumeTimer` (3000 ms)
-  setzt ihn zurück, wenn der Seek gegriffen hat.
-
-- **Bug 3 — Mode A liest zu lang (ein Satz extra)**: Debounce 1500 ms → TTS konnte ganzen Satz
-  noch vollständig vortragen + nächsten starten.
-  **Fix**: Debounce in Mode A + B auf 800 ms reduziert.
-
-- Elefant L2 Testartikel (5 Bilder, 5 Abschnitte, ~23 Sätze) per `adb push` bereits auf Gerät.
-- `flutter build apk --debug` + `adb install -r` ✅
-
----
-
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-01 morgens)
-
-### Artikel-Screen: Navigation & Bild-Sync nach Altersstufe
-- **Mode-Toggle** nach Altersstufe: Stufe 1 → 2 Icons (B/C); Stufe 2/3 → 3 Icons (A/B/C)
-  - Auto-Switch: Profil Stufe 1 + Modus A aktiv → sofort auf B wechseln
-- **Bild-Sync** (Stufe 2/3 JSON-Artikel): Auto-Bildwechsel per `img_index` im Chunk-Advance-Handler
-  - Vorwärts-Wischen → Sync pausiert bis TTS aufholt
-  - Rückwärts-Wischen → 10 s Timer, dann Bild auf TTS-Position zurück
-- **Scroll-Navigation Modus A** (Stufe 2/3): Debounce → Professor springt zum obersten sichtbaren Satz
-- **Kapitel-Pfeile Modus C** (Stufe 2/3): `‹`/`›` neben Thumbnails, springt zu nächstem/vorherigem Abschnitt
-- Provider: `seekAfterCurrentChunk`, `pauseImageSync`, `setViewMode`, `sectionChunkStarts`, `chunkCharOffset`
+- **Bug 1 — Mode B scroll DOWN**: `_sentenceTopCache` veraltet (fontSize-Wechsel aktiv/inaktiv) →
+  falsches `topIdx` → kein Seek. **Fix**: live `findRenderObject()` statt Cache.
+- **Bug 2 — Mode B scroll UP**: `_userScrolling = false` zu früh → Auto-Scroll überschreibt Seek.
+  **Fix**: `_seekResumeTimer` (3000 ms) hält `_userScrolling = true` bis Seek greift.
+- **Bug 3 — Mode A liest zu lang**: Debounce 1500 ms → 800 ms reduziert.
 
 ---
 
 ## 🔴 Gerade in Arbeit / Unterbrochen
 
-### Quiz-Generierung — teilweise erledigt, Checkpoint-Problem
+### Quiz-Generierung — Checkpoint-Problem
 
-- Run `26741537309` lief 2h7m, dann manuell abgebrochen
-- **609 von 3.544 Quizzen** generiert (A–D alphabetisch: "1. FC Union Berlin" → "Deutsche Kolonien")
-- **Checkpoint auf R2 gespeichert** (`staging/checkpoints/quiz_checkpoint.json`, 609 Einträge)
-- **ABER: Quizze sind verloren** — Artikel-Artefakt wurde nicht hochgeladen (Job abgebrochen)
-- R2 Staging hat für ALLE 3.544 Artikel noch Placeholder-Quizze (`review_flag=true`)
-- Checkpoint markiert 609 als "erledigt" → werden beim nächsten Run übersprungen
-- **→ Checkpoint MUSS gelöscht werden**, sonst bleiben 609 Artikel permanent ohne echte Quizze
+- Run `26741537309` lief 2h7m, manuell abgebrochen
+- **609 von 3.544 Quizzen** generiert; Artikel-Artefakt NICHT hochgeladen → Quizze verloren
+- Checkpoint auf R2 gespeichert → 609 als "erledigt" markiert → werden übersprungen
+- **→ Checkpoint MUSS gelöscht werden**, sonst 609 Artikel dauerhaft ohne echte Quizze
 
 ### Sofortmaßnahme:
 ```
 aws s3 rm s3://wissensfreund-articles/staging/checkpoints/quiz_checkpoint.json \
   --endpoint-url "https://<CF_ACCOUNT_ID>.r2.cloudflarestorage.com"
 ```
-Dann `quiz_and_upload.yml` manuell triggern. Laufzeit ~8.9h → braucht 2 Runs (Checkpoint-Mechanismus hält Fortschritt).
+Dann `quiz_and_upload.yml` manuell triggern. Laufzeit ~8.9h → 2 Runs nötig.
 
 ---
 
@@ -68,22 +60,18 @@ Dann `quiz_and_upload.yml` manuell triggern. Laufzeit ~8.9h → braucht 2 Runs (
 
 ### Hoch
 - **Quiz-Checkpoint löschen + Run neu starten** (s.o.)
-- **Bilder-Patch** nach Quiz-Run: `patch_article_images_v1.py` laufen lassen (s. CLAUDE_CHAT_NOTIZEN.md)
-- **App-Umbau Schritt B: Renderer** — gemeinsamer JSON-Renderer für ZIM + eigene Artikel
-  - Quiz-Widget (A/B/C per STT)
-  - Callout-Boxen (wow/fakt/myth/warn)
+- **Bilder-Patch** nach Quiz-Run: `patch_article_images_v1.py` laufen lassen
+- **App-Umbau Schritt B: Renderer** — Quiz-Widget (A/B/C per STT), Callout-Boxen
 
 ### Mittel
-- **Gemini-Integration** — `_detectQueryType()` vorhanden aber inaktiv
-  - Typ 3 (Vergleichsfrage) + Typ 5 (Fallback) fehlen noch
-  - `_handleGeminiPlaceholder()` ist der Einstiegspunkt
+- **Gemini-Integration** — `_detectQueryType()` vorhanden, `_handleGeminiPlaceholder()` Einstiegspunkt
 - **Topic-Tree Kachel-Navigation** in der App (Ebene 1→2→3)
 
 ### Niedrig
 - Upgrade-Dialog für Free-User bei Rückfrage (wartet auf Gemini)
 - Download-Größe dynamisch aus Manifest statt statisch "~2 GB"
 - Plus & Premium Dialog: Design-Vorgaben noch ausstehend
-- Sound-Thumbnails: Audio-Infrastruktur fertig, wartet auf Audio-Pipeline-Run
+- Sound-Thumbnails: wartet auf Audio-Pipeline-Run
 
 ---
 

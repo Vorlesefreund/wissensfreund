@@ -183,9 +183,35 @@ Implementiert in `article_screen.dart` + `wissensfreund_provider.dart` (Session 
 
 ---
 
+## JSON-Artikel: Bundled-Asset-Fallback (ab 2026-06-01)
+
+`JsonArticleService.loadArticle(id)` hat drei Stufen:
+1. Lokaler Datei-Cache (`getApplicationDocumentsDirectory()/wf_articles/articles/$id.json`)
+2. R2-CDN-Fetch (`AssetConfig.r2ArticlesBaseUrl/articles/$id.json`)
+3. **Bundled Asset** (`assets/test/$id.json`) — Fallback wenn R2 nicht erreichbar oder 404
+
+`pubspec.yaml` enthält `- assets/test/` damit Flutter die Dateien einbettet.
+Aktuell bundled: `elefant_l2.json` (5 Abschnitte, 5 Bilder, 4 Quiz-Fragen).
+
+**Test-Button** (`home_screen.dart`): immer `'elefant_l2'` laden — NICHT dynamisch nach Altersstufe.
+Grund: Nur `elefant_l2.json` existiert. Dynamisches `'elefant_l$level'` mit Stufe 1 oder 3 → 404 →
+leerer Artikel → keine Bilder, keine Kapitel-Pfeile in Modus C.
+
+## Bild-Fetch: JSON vs. ZIM
+
+| Quelle | Weg | Netzwerk nötig? |
+|---|---|---|
+| JSON-Artikel | `_fetchFromThumbUrl` → `NetworkService.canUseNetwork` → `HiResImageService` (Wikimedia CDN) | Ja — WiFi (default: `mobileAllowed=false`) |
+| ZIM-Artikel | `ImageLibraryService._zimBytes` → lokal aus ZIM-Datei gelesen | Nein |
+
+Auf Mobilfunk ohne explizites Freischalten → JSON-Bilder werden geblockt → `_articleImages = []` → keine Bilder sichtbar.
+
+---
+
 ## Wichtige Designentscheidungen (nicht rückgängig machen)
 
 - **Kein Doppel-Renderer** — ZIM-Artikel werden per `convert_zim_to_json.py` konvertiert, dann identisch behandelt
 - **Kein `viewPadding.bottom` manuell berechnen** — immer `SafeArea()` verwenden
 - **Staging-Dir-Pattern** für Downloads — `.new/` Verzeichnis, atomarer Austausch am Ende
 - **Plausibilitätsprüfung manuell** — Claude Code/Chat macht Fehler bei großen Zahlen, Andreas prüft selbst
+- **Test-Button hardcoded auf `elefant_l2`** — nie wieder dynamisch nach Altersstufe bauen
