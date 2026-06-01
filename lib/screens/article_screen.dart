@@ -121,14 +121,19 @@ class _ArticleScreenState extends State<ArticleScreen> {
   Widget build(BuildContext context) {
     return Consumer<WissensfreundProvider>(
       builder: (context, provider, _) {
-        // Auto-switch to Mode B when ageLevel 1 is active and Mode A is set.
-        if (ProfileService.instance.activeAgeLevel == 1 &&
-            provider.viewMode == ArticleViewMode.a) {
+        // Watch ProfileService so a profile change triggers a rebuild here.
+        final ageLevel = context.watch<ProfileService>().activeAgeLevel;
+        // Clamp mode: Stufe 1 may never show Mode A.
+        final effectiveMode = (ageLevel == 1 && provider.viewMode == ArticleViewMode.a)
+            ? ArticleViewMode.b
+            : provider.viewMode;
+        // Persist the clamped mode so SharedPreferences stays consistent.
+        if (effectiveMode != provider.viewMode) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (mounted) context.read<WissensfreundProvider>().setViewMode(ArticleViewMode.b);
+            if (mounted) context.read<WissensfreundProvider>().setViewMode(effectiveMode);
           });
         }
-        final isDark = provider.viewMode != ArticleViewMode.a;
+        final isDark = effectiveMode != ArticleViewMode.a;
 
         return Scaffold(
           backgroundColor:
@@ -141,7 +146,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
                   duration: const Duration(milliseconds: 250),
                   transitionBuilder: (child, anim) =>
                       FadeTransition(opacity: anim, child: child),
-                  child: switch (provider.viewMode) {
+                  child: switch (effectiveMode) {
                     ArticleViewMode.a =>
                       const _ModeAContent(key: ValueKey('a')),
                     ArticleViewMode.b =>
@@ -438,29 +443,22 @@ class _ArticleHeader extends StatelessWidget {
       ArticleViewMode.b: '🔍',
       ArticleViewMode.c: '🎧',
     };
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: modes.map((mode) {
-        final isActive = provider.viewMode == mode;
-        return GestureDetector(
-          onTap: () => provider.setViewMode(mode),
-          child: Container(
-            width: 30,
-            height: 30,
-            margin: const EdgeInsets.only(left: 4),
-            decoration: BoxDecoration(
-              color: isActive
-                  ? (dark
-                      ? Colors.white.withValues(alpha: 0.3)
-                      : const Color(0xFFC8EDDA))
-                  : _btnBg,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            alignment: Alignment.center,
-            child: Text(icons[mode]!, style: const TextStyle(fontSize: 15)),
-          ),
-        );
-      }).toList(),
+    final current = modes.contains(provider.viewMode)
+        ? provider.viewMode
+        : modes.first;
+    final nextMode = modes[(modes.indexOf(current) + 1) % modes.length];
+    return GestureDetector(
+      onTap: () => provider.setViewMode(nextMode),
+      child: Container(
+        width: 30,
+        height: 30,
+        decoration: BoxDecoration(
+          color: _btnBg,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        alignment: Alignment.center,
+        child: Text(icons[current]!, style: const TextStyle(fontSize: 15)),
+      ),
     );
   }
 
@@ -746,6 +744,14 @@ class _MainArticleImageState extends State<_MainArticleImage> {
                         key: ValueKey(fn),
                         future: future,
                         builder: (_, snap) {
+                          if (snap.connectionState == ConnectionState.waiting) {
+                            return const Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF95D5B2),
+                                strokeWidth: 2.5,
+                              ),
+                            );
+                          }
                           final bytes = snap.data;
                           if (bytes == null) {
                             return _ArticleImage(title: widget.fallbackTitle);
@@ -1665,6 +1671,9 @@ class _ModeAContentState extends State<_ModeAContent> {
   int _lastActiveIdx = -1;
   String _lastArticleText = '';
   bool _scrollPending = false;
+  bool _userScrolling = false;     // true while user is manually scrolling
+  bool _programmaticScroll = false; // suppresses _onScroll during TTS auto-scroll
+  Timer? _programmaticScrollTimer;
 
   // Cached full-width document positions (in scroll-content coordinates).
   // Built once after the first render when all sentences are at full width.
@@ -1702,17 +1711,19 @@ class _ModeAContentState extends State<_ModeAContent> {
   void _onScroll() {
     if (!mounted) return;
     setState(() {});
+    if (_programmaticScroll) return; // ignore scroll events from TTS auto-scroll
     final ageLevel = ProfileService.instance.activeAgeLevel;
     if (ageLevel < 2) return;
+    _userScrolling = true;
     _scrollDebounce?.cancel();
-    _scrollDebounce = Timer(const Duration(milliseconds: 1500), _jumpToTopSentence);
+    _scrollDebounce = Timer(const Duration(milliseconds: 800), _jumpToTopSentence);
   }
 
   void _jumpToTopSentence() {
-    if (!mounted || !_scrollCtrl.hasClients || !_cacheBuilt) return;
+    if (!mounted || !_scrollCtrl.hasClients || !_cacheBuilt) { _userScrolling = false; return; }
     final provider = context.read<WissensfreundProvider>();
     final sentences = _splitSentences(provider.articleText);
-    if (sentences.isEmpty) return;
+    if (sentences.isEmpty) { _userScrolling = false; return; }
     final activeIdx = _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
     final scrollOffset = _scrollCtrl.offset;
     final vpH = _scrollCtrl.position.viewportDimension;
@@ -1721,7 +1732,7 @@ class _ModeAContentState extends State<_ModeAContent> {
     final activeDocY = _sentenceTopCache[activeIdx];
     if (activeDocY != null) {
       final activeViewY = activeDocY - scrollOffset;
-      if (activeViewY >= 0 && activeViewY < vpH) return;
+      if (activeViewY >= 0 && activeViewY < vpH) { _userScrolling = false; return; }
     }
 
     // Find the topmost fully visible sentence.
@@ -1737,7 +1748,7 @@ class _ModeAContentState extends State<_ModeAContent> {
         topIdx = i;
       }
     }
-    if (topIdx < 0 || topIdx == activeIdx) return;
+    if (topIdx < 0 || topIdx == activeIdx) { _userScrolling = false; return; }
 
     // Compute char offset by summing sentence lengths up to topIdx.
     int charOffset = 0;
@@ -1745,6 +1756,8 @@ class _ModeAContentState extends State<_ModeAContent> {
       charOffset += sentences[i].length + 1; // +1 for the stripped delimiter
     }
     provider.seekAfterCurrentChunk(charOffset);
+    // Mode A uses a stable position cache (no font-size flicker) → safe to unblock immediately.
+    _userScrolling = false;
   }
 
   void _startSyncResetTimer(WissensfreundProvider provider) {
@@ -1773,6 +1786,7 @@ class _ModeAContentState extends State<_ModeAContent> {
   void dispose() {
     _scrollDebounce?.cancel();
     _syncResetTimer?.cancel();
+    _programmaticScrollTimer?.cancel();
     _scrollCtrl.removeListener(_onScroll);
     _scrollCtrl.dispose();
     super.dispose();
@@ -1782,9 +1796,9 @@ class _ModeAContentState extends State<_ModeAContent> {
       _sentenceKeys.putIfAbsent(i, () => GlobalKey());
 
   // Scroll DOWN to active sentence only if it has drifted below 50% of viewport.
-  // Never scrolls back up so the user can read ahead freely.
+  // Blocked while user is manually scrolling (_userScrolling = true).
   void _smartScrollTo(int idx) {
-    if (_scrollPending) return;
+    if (_scrollPending || _userScrolling) return;
     _scrollPending = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollPending = false;
@@ -1804,6 +1818,12 @@ class _ModeAContentState extends State<_ModeAContent> {
 
       // Only pull it into view when it has slipped past 50% down
       if (localY > viewportH * 0.5) {
+        // Mark as programmatic so _onScroll ignores the resulting scroll events
+        _programmaticScroll = true;
+        _programmaticScrollTimer?.cancel();
+        _programmaticScrollTimer = Timer(const Duration(milliseconds: 600), () {
+          _programmaticScroll = false;
+        });
         Scrollable.ensureVisible(
           ctx,
           duration: const Duration(milliseconds: 400),
@@ -2210,55 +2230,141 @@ class _ModeBContent extends StatefulWidget {
 
 class _ModeBContentState extends State<_ModeBContent> {
   final _scrollCtrl = ScrollController();
+  final _sentenceKeys = <int, GlobalKey>{};
+  int _lastActiveIdx = -1;
+  String _lastArticleText = '';
   bool _scrollPending = false;
+  bool _userScrolling = false;
+  bool _programmaticScroll = false;
+  Timer? _programmaticScrollTimer;
+  Timer? _scrollDebounce;
+  Timer? _syncResetTimer;
+  Timer? _seekResumeTimer;
 
-  static const _sentenceStyle = TextStyle(
-    fontSize: 17,
-    height: 1.55,
-    color: Colors.white,
-    fontWeight: FontWeight.w500,
-  );
+  final _sentenceTopCache = <int, double>{};
+  bool _cacheBuilt = false;
 
-  static const _longThreshold = 200;
-
-  int _sentenceStart(List<String> sentences, int idx) {
-    int pos = 0;
-    for (int i = 0; i < idx; i++) {
-      pos += sentences[i].length + 1;
-    }
-    return pos;
+  @override
+  void initState() {
+    super.initState();
+    _scrollCtrl.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _buildCache();
+      final provider = context.read<WissensfreundProvider>();
+      final sentences = _splitSentences(provider.articleText);
+      final idx = _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
+      if (idx <= 0) return;
+      _lastActiveIdx = idx;
+      final ctx = _sentenceKeys[idx]?.currentContext;
+      if (ctx == null) return;
+      Scrollable.ensureVisible(ctx, duration: Duration.zero, alignment: 0.1);
+    });
   }
 
-  // Drives the ScrollController to keep the current word near the top.
-  // Uses real layout metrics (maxScrollExtent + viewportDimension) so no
-  // TextPainter estimation is needed and all content is guaranteed visible.
-  void _scheduleScroll(
-      String sentence, int ttsCursor, List<String> sentences, int activeIdx) {
-    if (_scrollPending) return;
+  void _onScroll() {
+    if (!mounted) return;
+    if (_programmaticScroll) return;
+    final ageLevel = ProfileService.instance.activeAgeLevel;
+    if (ageLevel < 2) return;
+    _userScrolling = true;
+    _seekResumeTimer?.cancel(); // new scroll overrides any pending seek-resume
+    _scrollDebounce?.cancel();
+    _scrollDebounce = Timer(const Duration(milliseconds: 800), _jumpToTopSentence);
+  }
+
+  void _jumpToTopSentence() {
+    // _userScrolling stays TRUE here — only reset after seek settles or no seek needed
+    if (!mounted || !_scrollCtrl.hasClients) { _userScrolling = false; return; }
+    final provider = context.read<WissensfreundProvider>();
+    final sentences = _splitSentences(provider.articleText);
+    if (sentences.isEmpty) { _userScrolling = false; return; }
+    final activeIdx = _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
+
+    // Live render query — avoids stale positions caused by font-size changes (active: 19px, inactive: 15px)
+    RenderBox? vpBox;
+    int topIdx = -1;
+    double minY = double.infinity;
+    for (int i = 0; i < sentences.length; i++) {
+      final ctx = _sentenceKeys[i]?.currentContext;
+      if (ctx == null) continue;
+      final box = ctx.findRenderObject() as RenderBox?;
+      if (box == null || !box.attached) continue;
+      vpBox ??= Scrollable.maybeOf(ctx)?.context.findRenderObject() as RenderBox?;
+      if (vpBox == null || !vpBox.attached) break;
+      final localY = vpBox.globalToLocal(box.localToGlobal(Offset.zero)).dy;
+      if (localY >= 0 && localY < minY) {
+        minY = localY;
+        topIdx = i;
+      }
+    }
+
+    if (topIdx < 0 || topIdx == activeIdx) { _userScrolling = false; return; }
+
+    int charOffset = 0;
+    for (int i = 0; i < topIdx; i++) {
+      charOffset += sentences[i].length + 1;
+    }
+    provider.seekAfterCurrentChunk(charOffset);
+
+    // Keep _userScrolling = true until the pending seek takes effect (prevents scroll-back).
+    // Reset after 3 s — long enough for the current TTS chunk to finish and seek to fire.
+    _seekResumeTimer?.cancel();
+    _seekResumeTimer = Timer(const Duration(milliseconds: 3000), () {
+      if (mounted) _userScrolling = false;
+    });
+  }
+
+  void _buildCache() {
+    if (_cacheBuilt || !_scrollCtrl.hasClients) return;
+    _sentenceTopCache.clear();
+    final scrollOffset = _scrollCtrl.offset;
+    RenderBox? vpBox;
+    for (int i = 0; i < _sentenceKeys.length; i++) {
+      final ctx = _sentenceKeys[i]?.currentContext;
+      if (ctx == null) continue;
+      final box = ctx.findRenderObject() as RenderBox?;
+      if (box == null || !box.attached) continue;
+      vpBox ??= Scrollable.maybeOf(ctx)?.context.findRenderObject() as RenderBox?;
+      if (vpBox == null || !vpBox.attached) break;
+      final topInVp = vpBox.globalToLocal(box.localToGlobal(Offset.zero)).dy;
+      _sentenceTopCache[i] = topInVp + scrollOffset;
+    }
+    if (_sentenceTopCache.isNotEmpty) _cacheBuilt = true;
+  }
+
+  void _smartScrollTo(int idx) {
+    if (_scrollPending || _userScrolling) return;
     _scrollPending = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollPending = false;
       if (!mounted || !_scrollCtrl.hasClients) return;
-      final pos = _scrollCtrl.position;
-      final maxExt = pos.maxScrollExtent;
-      if (maxExt <= 0) return;
-      final textH = maxExt + pos.viewportDimension;
-      final sentStart = _sentenceStart(sentences, activeIdx);
-      final cursorInSent =
-          (ttsCursor - sentStart).clamp(0, sentence.length);
-      final progress =
-          sentence.isEmpty ? 0.0 : cursorInSent / sentence.length;
-      // progress * textH maps cursor to text pixel position;
-      // clamping to maxExt keeps the current word at the viewport top
-      // for most of the sentence, only reaching the bottom at the very end.
-      // Delay scroll start: keep the first ~35% of the viewport static
-      // before scrolling begins (≈ 2 lines of head-start at fontSize 17).
-      final headStart = pos.viewportDimension * 0.35;
-      _scrollCtrl.jumpTo((progress * textH - headStart).clamp(0.0, maxExt));
+      final ctx = _sentenceKeys[idx]?.currentContext;
+      if (ctx == null) return;
+      final box = ctx.findRenderObject() as RenderBox?;
+      if (box == null) return;
+      final scrollable = Scrollable.of(ctx);
+      final vpBox = scrollable.context.findRenderObject() as RenderBox?;
+      if (vpBox == null) return;
+      final localY = vpBox.globalToLocal(box.localToGlobal(Offset.zero)).dy;
+      final viewportH = _scrollCtrl.position.viewportDimension;
+      // Professor covers bottom ~220dp of viewport — fire scroll earlier so the active
+      // sentence stays in the safe zone above it.
+      if (localY > viewportH * 0.35) {
+        _programmaticScroll = true;
+        _programmaticScrollTimer?.cancel();
+        _programmaticScrollTimer = Timer(const Duration(milliseconds: 600), () {
+          _programmaticScroll = false;
+        });
+        Scrollable.ensureVisible(ctx,
+            duration: const Duration(milliseconds: 400),
+            curve: Curves.easeOut,
+            alignment: 0.1);
+      }
     });
   }
 
-  Timer? _syncResetTimer;
+  GlobalKey _keyFor(int i) => _sentenceKeys.putIfAbsent(i, () => GlobalKey());
 
   void _startSyncResetTimer(WissensfreundProvider provider) {
     _syncResetTimer?.cancel();
@@ -2284,7 +2390,11 @@ class _ModeBContentState extends State<_ModeBContent> {
 
   @override
   void dispose() {
+    _scrollDebounce?.cancel();
     _syncResetTimer?.cancel();
+    _seekResumeTimer?.cancel();
+    _programmaticScrollTimer?.cancel();
+    _scrollCtrl.removeListener(_onScroll);
     _scrollCtrl.dispose();
     super.dispose();
   }
@@ -2298,57 +2408,24 @@ class _ModeBContentState extends State<_ModeBContent> {
             _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
         final progress =
             sentences.isEmpty ? 0.0 : (activeIdx + 1) / sentences.length;
-        final currentSentence =
-            sentences.isEmpty ? '' : sentences[activeIdx];
-        final isLong = currentSentence.length > _longThreshold;
 
-        if (isLong) {
-          _scheduleScroll(
-              currentSentence, provider.ttsCursor, sentences, activeIdx);
+        if (provider.articleText != _lastArticleText) {
+          _lastArticleText = provider.articleText;
+          _sentenceKeys.clear();
+          _sentenceTopCache.clear();
+          _cacheBuilt = false;
+          _lastActiveIdx = -1;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            if (_scrollCtrl.hasClients) _scrollCtrl.jumpTo(0);
+            _buildCache();
+          });
         }
 
-        // Long sentences: SingleChildScrollView driven by _scrollCtrl.
-        // Keyed by activeIdx so Flutter recreates the widget (and the scroll
-        // position resets to 0) whenever the sentence changes.
-        // Short sentences: AnimatedSwitcher with fade + slide.
-        final textWidget = isLong
-            ? Expanded(
-                child: SingleChildScrollView(
-                  key: ValueKey('scroll_$activeIdx'),
-                  controller: _scrollCtrl,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
-                  child: Text(currentSentence, style: _sentenceStyle),
-                ),
-              )
-            : Expanded(
-                child: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 350),
-                  transitionBuilder: (child, anim) => FadeTransition(
-                    opacity: anim,
-                    child: SlideTransition(
-                      position: Tween<Offset>(
-                        begin: const Offset(0, 0.05),
-                        end: Offset.zero,
-                      ).animate(anim),
-                      child: child,
-                    ),
-                  ),
-                  child: Align(
-                    key: ValueKey(activeIdx),
-                    alignment: Alignment.topLeft,
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
-                      child: Text(
-                        currentSentence,
-                        maxLines: 5,
-                        overflow: TextOverflow.fade,
-                        style: _sentenceStyle,
-                      ),
-                    ),
-                  ),
-                ),
-              );
+        if (provider.state == AppState.speaking && activeIdx != _lastActiveIdx) {
+          _lastActiveIdx = activeIdx;
+          _smartScrollTo(activeIdx);
+        }
 
         return Container(
           decoration: const BoxDecoration(
@@ -2368,7 +2445,7 @@ class _ModeBContentState extends State<_ModeBContent> {
                 behavior: HitTestBehavior.opaque,
                 onHorizontalDragEnd: (d) => _swipeImage(d, provider),
                 child: SizedBox(
-                  height: (MediaQuery.of(context).size.height * 0.29).clamp(170.0, 300.0),
+                  height: (MediaQuery.of(context).size.height * 0.22).clamp(140.0, 220.0),
                   width: double.infinity,
                   child: _MainArticleImage(fallbackTitle: provider.articleTitle),
                 ),
@@ -2376,7 +2453,7 @@ class _ModeBContentState extends State<_ModeBContent> {
 
               // ── Fortschrittsleiste ────────────────────────────────────────
               Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
                 child: Row(
                   children: [
                     Expanded(
@@ -2384,19 +2461,15 @@ class _ModeBContentState extends State<_ModeBContent> {
                         borderRadius: BorderRadius.circular(4),
                         child: LinearProgressIndicator(
                           value: progress,
-                          backgroundColor:
-                              Colors.white.withValues(alpha: 0.15),
-                          valueColor: const AlwaysStoppedAnimation(
-                              Color(0xFF95D5B2)),
-                          minHeight: 5,
+                          backgroundColor: Colors.white.withValues(alpha: 0.15),
+                          valueColor: const AlwaysStoppedAnimation(Color(0xFF95D5B2)),
+                          minHeight: 4,
                         ),
                       ),
                     ),
                     const SizedBox(width: 10),
                     Text(
-                      sentences.isEmpty
-                          ? ''
-                          : '${activeIdx + 1} / ${sentences.length}',
+                      sentences.isEmpty ? '' : '${activeIdx + 1} / ${sentences.length}',
                       style: TextStyle(
                         fontSize: 12,
                         color: Colors.white.withValues(alpha: 0.6),
@@ -2406,30 +2479,38 @@ class _ModeBContentState extends State<_ModeBContent> {
                 ),
               ),
 
-              // ── Aktueller Satz ────────────────────────────────────────────
-              textWidget,
-
-              // ── Thumbnails ────────────────────────────────────────────────
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 16, bottom: 8),
-                    child: Text(
-                      'WEITERE BILDER',
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white.withValues(alpha: 0.55),
-                        letterSpacing: 1.2,
-                      ),
-                    ),
+              // ── Alle Sätze, scrollbar ─────────────────────────────────────
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: _scrollCtrl,
+                  padding: const EdgeInsets.fromLTRB(16, 10, 16, _kProfZone),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (int i = 0; i < sentences.length; i++)
+                        Padding(
+                          key: _keyFor(i),
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: Text(
+                            sentences[i],
+                            style: TextStyle(
+                              fontSize: i == activeIdx ? 19 : 15,
+                              height: 1.5,
+                              color: i == activeIdx
+                                  ? Colors.white
+                                  : Colors.white.withValues(alpha: 0.4),
+                              fontWeight: i == activeIdx
+                                  ? FontWeight.w600
+                                  : FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 8),
+                      const _ThumbnailRow(),
+                      _KlexikonAttribution(url: provider.articleUrl, dark: true),
+                    ],
                   ),
-                  const _ThumbnailRow(),
-                  _KlexikonAttribution(url: provider.articleUrl, dark: true),
-                  const SizedBox(height: _kMicClear),
-                ],
+                ),
               ),
             ],
           ),
