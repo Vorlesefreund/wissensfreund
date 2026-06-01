@@ -19,7 +19,6 @@ import re
 import sys
 import time
 from pathlib import Path
-from urllib.parse import unquote
 
 import requests
 
@@ -30,7 +29,7 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 
-KLEXIKON_API  = "https://klexikon.zum.de/api.php"
+WIKIPEDIA_API = "https://de.wikipedia.org/w/api.php"
 COMMONS_API   = "https://commons.wikimedia.org/w/api.php"
 THUMB_WIDTH   = 960
 RATE_PAUSE    = 0.5
@@ -41,7 +40,6 @@ FILTER_PATTERN = re.compile(
     re.IGNORECASE,
 )
 ALLOWED_EXT    = {".jpg", ".jpeg", ".png", ".webp"}
-WIKITEXT_FILE  = re.compile(r"\[\[(?:File|Datei):([^\]\|]+)", re.IGNORECASE)
 
 
 # ─── Checkpoint ──────────────────────────────────────────────────────────────
@@ -56,50 +54,53 @@ def save_checkpoint(path: Path, done: set[str]) -> None:
     path.write_text(json.dumps(sorted(done), ensure_ascii=False), encoding="utf-8")
 
 
-# ─── Klexikon API ────────────────────────────────────────────────────────────
+# ─── Wikipedia API ───────────────────────────────────────────────────────────
 
-def get_klexikon_title(article: dict) -> str | None:
-    """Extrahiert den Artikeltitel aus meta.source_url."""
-    source_url = article.get("meta", {}).get("source_url", "")
-    m = re.search(r"/wiki/(.+)$", source_url)
-    if not m:
-        return None
-    return unquote(m.group(1).replace("_", " "))
+_DE_ARTICLE = re.compile(r"^(?:Der|Die|Das)\s+", re.IGNORECASE)
 
-
-def fetch_klexikon_image_names(title: str, session: requests.Session) -> list[str]:
+def get_wikipedia_title(article: dict) -> str | None:
     """
-    Holt Bildnamen aus dem Klexikon-Wikitext.
-    Klexikon's prop=images liefert keine Ergebnisse — Bilder stehen als
-    [[File:...]] / [[Datei:...]] direkt im Wikitext.
-    redirects=1 folgt Weiterleitungen automatisch (z.B. Elefant → Elefanten).
+    Liest meta.wikipedia_title, Fallback auf meta.title.
+    Führende Artikel (Der/Die/Das) werden abgeschnitten, da Wikipedia-Titel
+    normalerweise ohne Artikel stehen (z.B. "Elefant" statt "Der Elefant").
+    meta.wikipedia_title wird unverändert übernommen (bereits korrekt gesetzt).
     """
+    meta = article.get("meta", {})
+    title = meta.get("wikipedia_title") or meta.get("title") or None
+    if title and not meta.get("wikipedia_title"):
+        title = _DE_ARTICLE.sub("", title).strip() or title
+    return title or None
+
+
+def fetch_wikipedia_image_names(title: str, session: requests.Session) -> list[str]:
+    """Holt alle Dateinamen der Bilder im deutschen Wikipedia-Artikel."""
     try:
-        r = session.get(KLEXIKON_API, params={
+        r = session.get(WIKIPEDIA_API, params={
             "action":        "query",
             "titles":        title,
             "redirects":     "1",
-            "prop":          "revisions",
-            "rvprop":        "content",
+            "prop":          "images",
+            "imlimit":       "50",
             "format":        "json",
             "formatversion": "2",
         }, timeout=20)
         r.raise_for_status()
         pages = r.json().get("query", {}).get("pages", [])
     except Exception as e:
-        log.warning("  Klexikon API Fehler: %s", e)
+        log.warning("  Wikipedia API Fehler: %s", e)
         return []
 
     if not pages or pages[0].get("missing"):
-        log.warning("  Klexikon-Artikel nicht gefunden: %r", title)
+        log.warning("  Wikipedia-Artikel nicht gefunden: %r", title)
         return []
 
-    revisions = pages[0].get("revisions", [])
-    if not revisions:
-        return []
-
-    wikitext = revisions[0].get("content", "")
-    names = [m.strip() for m in WIKITEXT_FILE.findall(wikitext)]
+    names = []
+    for img in pages[0].get("images", []):
+        t = img.get("title", "")
+        if t.startswith("File:"):
+            names.append(t.removeprefix("File:"))
+        elif t.startswith("Datei:"):
+            names.append(t.removeprefix("Datei:"))
     return names
 
 
@@ -217,18 +218,18 @@ def patch_article(
     Setzt voraus, dass needs_patch() bereits True ergeben hat.
     Gibt True bei Erfolg zurück.
     """
-    title = get_klexikon_title(article)
+    title = get_wikipedia_title(article)
     if not title:
-        log.warning("  Kein Klexikon-Titel in source_url: %s", path.stem)
+        log.warning("  Kein Titel in meta: %s", path.stem)
         return False
 
-    log.info("Verarbeite: %s  (Klexikon: %r)", path.stem, title)
+    log.info("Verarbeite: %s  (Wikipedia: %r)", path.stem, title)
 
-    raw_names = fetch_klexikon_image_names(title, session)
+    raw_names = fetch_wikipedia_image_names(title, session)
     time.sleep(RATE_PAUSE)
 
     if not raw_names:
-        log.warning("  Keine Bilder auf Klexikon gefunden")
+        log.warning("  Keine Bilder auf Wikipedia gefunden")
         return False
 
     filtered = filter_images(raw_names)
