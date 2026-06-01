@@ -328,7 +328,9 @@ class _ArticleControlsState extends State<_ArticleControls>
           _btn(
             icon: Icons.mic_rounded,
             bg: isListening ? kRed : kGreen,
-            onTap: () => widget.provider.interruptAndStartListening(),
+            onTap: () => isListening
+                ? widget.provider.stopListening()
+                : widget.provider.interruptAndStartListening(),
           ),
         ],
       ),
@@ -1712,9 +1714,15 @@ class _ModeAContentState extends State<_ModeAContent> {
     if (!mounted) return;
     setState(() {});
     if (_programmaticScroll) return; // ignore scroll events from TTS auto-scroll
-    final ageLevel = ProfileService.instance.activeAgeLevel;
-    if (ageLevel < 2) return;
     _userScrolling = true;
+    final ageLevel = ProfileService.instance.activeAgeLevel;
+    if (ageLevel < 2) {
+      _scrollDebounce?.cancel();
+      _scrollDebounce = Timer(const Duration(milliseconds: 800), () {
+        if (mounted) _userScrolling = false;
+      });
+      return;
+    }
     _scrollDebounce?.cancel();
     _scrollDebounce = Timer(const Duration(milliseconds: 800), _jumpToTopSentence);
   }
@@ -1749,6 +1757,7 @@ class _ModeAContentState extends State<_ModeAContent> {
       }
     }
     if (topIdx < 0 || topIdx == activeIdx) { _userScrolling = false; return; }
+    if (provider.isPaused) { _userScrolling = false; return; }
 
     // Compute char offset by summing sentence lengths up to topIdx.
     int charOffset = 0;
@@ -1816,9 +1825,8 @@ class _ModeAContentState extends State<_ModeAContent> {
       final localY = vpBox.globalToLocal(box.localToGlobal(Offset.zero)).dy;
       final viewportH = _scrollCtrl.position.viewportDimension;
 
-      // Only pull it into view when it has slipped past 50% down
-      if (localY > viewportH * 0.5) {
-        // Mark as programmatic so _onScroll ignores the resulting scroll events
+      // Scroll if sentence top is above viewport OR past 35% down
+      if (localY < 0 || localY > viewportH * 0.35) {
         _programmaticScroll = true;
         _programmaticScrollTimer?.cancel();
         _programmaticScrollTimer = Timer(const Duration(milliseconds: 600), () {
@@ -1828,7 +1836,7 @@ class _ModeAContentState extends State<_ModeAContent> {
           ctx,
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeOut,
-          alignment: 0.15, // land near top (~2nd line)
+          alignment: 0.18,
         );
       }
     });
@@ -2030,21 +2038,9 @@ class _ModeAContentState extends State<_ModeAContent> {
                           links: provider.articleLinks,
                           onLinkTap: provider.onLinkTapped,
                         ),
-                        // ── Thumbnails at end of article ──────────────────
+                        const _ThumbnailRow(),
                         if (sentences.isNotEmpty) ...[
-                          const SizedBox(height: 24),
-                          const Text(
-                            'WEITERE BILDER',
-                            style: TextStyle(
-                              fontSize: 11,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF2D6A4F),
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          const _ThumbnailRow(),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 8),
                           _KlexikonAttribution(url: provider.articleUrl),
                         ],
                       ],
@@ -2265,10 +2261,16 @@ class _ModeBContentState extends State<_ModeBContent> {
   void _onScroll() {
     if (!mounted) return;
     if (_programmaticScroll) return;
-    final ageLevel = ProfileService.instance.activeAgeLevel;
-    if (ageLevel < 2) return;
     _userScrolling = true;
-    _seekResumeTimer?.cancel(); // new scroll overrides any pending seek-resume
+    _seekResumeTimer?.cancel();
+    final ageLevel = ProfileService.instance.activeAgeLevel;
+    if (ageLevel < 2) {
+      _scrollDebounce?.cancel();
+      _scrollDebounce = Timer(const Duration(milliseconds: 800), () {
+        if (mounted) _userScrolling = false;
+      });
+      return;
+    }
     _scrollDebounce?.cancel();
     _scrollDebounce = Timer(const Duration(milliseconds: 800), _jumpToTopSentence);
   }
@@ -2300,6 +2302,7 @@ class _ModeBContentState extends State<_ModeBContent> {
     }
 
     if (topIdx < 0 || topIdx == activeIdx) { _userScrolling = false; return; }
+    if (provider.isPaused) { _userScrolling = false; return; }
 
     int charOffset = 0;
     for (int i = 0; i < topIdx; i++) {
@@ -2342,25 +2345,23 @@ class _ModeBContentState extends State<_ModeBContent> {
       final ctx = _sentenceKeys[idx]?.currentContext;
       if (ctx == null) return;
       final box = ctx.findRenderObject() as RenderBox?;
-      if (box == null) return;
+      if (box == null || !box.attached) return;
       final scrollable = Scrollable.of(ctx);
       final vpBox = scrollable.context.findRenderObject() as RenderBox?;
-      if (vpBox == null) return;
-      final localY = vpBox.globalToLocal(box.localToGlobal(Offset.zero)).dy;
+      if (vpBox == null || !vpBox.attached) return;
+      // Place sentence top just below the top fade zone (fade ends at 18% → use 22%)
+      final sentenceTopInVp = vpBox.globalToLocal(box.localToGlobal(Offset.zero)).dy;
+      final sentenceTopInContent = sentenceTopInVp + _scrollCtrl.offset;
       final viewportH = _scrollCtrl.position.viewportDimension;
-      // Professor covers bottom ~220dp of viewport — fire scroll earlier so the active
-      // sentence stays in the safe zone above it.
-      if (localY > viewportH * 0.35) {
-        _programmaticScroll = true;
-        _programmaticScrollTimer?.cancel();
-        _programmaticScrollTimer = Timer(const Duration(milliseconds: 600), () {
-          _programmaticScroll = false;
-        });
-        Scrollable.ensureVisible(ctx,
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeOut,
-            alignment: 0.1);
-      }
+      final target = (sentenceTopInContent - viewportH * 0.30)
+          .clamp(_scrollCtrl.position.minScrollExtent, _scrollCtrl.position.maxScrollExtent);
+      _programmaticScroll = true;
+      _programmaticScrollTimer?.cancel();
+      _programmaticScrollTimer = Timer(const Duration(milliseconds: 600), () {
+        _programmaticScroll = false;
+      });
+      _scrollCtrl.animateTo(target,
+          duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
     });
   }
 
@@ -2445,7 +2446,7 @@ class _ModeBContentState extends State<_ModeBContent> {
                 behavior: HitTestBehavior.opaque,
                 onHorizontalDragEnd: (d) => _swipeImage(d, provider),
                 child: SizedBox(
-                  height: (MediaQuery.of(context).size.height * 0.22).clamp(140.0, 220.0),
+                  height: (MediaQuery.of(context).size.height * 0.32).clamp(180.0, 300.0),
                   width: double.infinity,
                   child: _MainArticleImage(fallbackTitle: provider.articleTitle),
                 ),
@@ -2479,37 +2480,61 @@ class _ModeBContentState extends State<_ModeBContent> {
                 ),
               ),
 
-              // ── Alle Sätze, scrollbar ─────────────────────────────────────
+              // ShaderMask federt oben/unten nahtlos mit dem Hintergrundgradienten —
+              // kein Farbmismatch, weil nur der Alpha-Kanal des Inhalts moduliert wird.
               Expanded(
-                child: SingleChildScrollView(
-                  controller: _scrollCtrl,
-                  padding: const EdgeInsets.fromLTRB(16, 10, 16, _kProfZone),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (int i = 0; i < sentences.length; i++)
-                        Padding(
-                          key: _keyFor(i),
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: Text(
-                            sentences[i],
-                            style: TextStyle(
-                              fontSize: i == activeIdx ? 19 : 15,
-                              height: 1.5,
-                              color: i == activeIdx
-                                  ? Colors.white
-                                  : Colors.white.withValues(alpha: 0.4),
-                              fontWeight: i == activeIdx
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                            ),
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: ShaderMask(
+                        shaderCallback: (rect) => const LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          stops: [0.0, 0.18, 0.72, 1.0],
+                          colors: [
+                            Colors.transparent,
+                            Colors.white,
+                            Colors.white,
+                            Colors.transparent,
+                          ],
+                        ).createShader(rect),
+                        blendMode: BlendMode.dstIn,
+                        child: SingleChildScrollView(
+                          controller: _scrollCtrl,
+                          padding: const EdgeInsets.fromLTRB(16, 10, 16, 40),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (int i = 0; i < sentences.length; i++)
+                                Padding(
+                                  key: _keyFor(i),
+                                  padding: const EdgeInsets.only(bottom: 12),
+                                  child: Text(
+                                    sentences[i],
+                                    style: TextStyle(
+                                      fontSize: i == activeIdx ? 19 : 15,
+                                      height: 1.5,
+                                      color: i == activeIdx
+                                          ? Colors.white
+                                          : Colors.white.withValues(alpha: 0.4),
+                                      fontWeight: i == activeIdx
+                                          ? FontWeight.w600
+                                          : FontWeight.w400,
+                                    ),
+                                  ),
+                                ),
+                              // Quellenhinweis am Ende des Textes (im Scrollbereich)
+                              _KlexikonAttribution(url: provider.articleUrl, dark: true),
+                            ],
                           ),
                         ),
-                      const SizedBox(height: 8),
-                      const _ThumbnailRow(),
-                      _KlexikonAttribution(url: provider.articleUrl, dark: true),
-                    ],
-                  ),
+                      ),
+                    ),
+                    // Abstand zwischen Textfeld und Thumbnails
+                    const SizedBox(height: 20),
+                    const _ThumbnailRow(),
+                    const SizedBox(height: _kMicClear),
+                  ],
                 ),
               ),
             ],
@@ -2776,9 +2801,8 @@ class _ModeCContentState extends State<_ModeCContent> {
   Widget build(BuildContext context) {
     return Consumer<WissensfreundProvider>(
       builder: (context, provider, _) {
-        // Bottom of image = professor's top edge (_kProfH + _kProfBottom = 224px).
-        // This clears both the professor (224px) and the thumbnail row (180px).
-        const double imageClearance = _kProfH + _kProfBottom;
+        // Image ends 36dp higher than professor top → more room for slider above thumbnails.
+        const double imageClearance = _kProfH + _kProfBottom + 36;
 
         // Caption of the currently selected image (for the 🔊 button).
         final images  = provider.articleImages;
@@ -2894,15 +2918,15 @@ class _ModeCContentState extends State<_ModeCContent> {
                           : const SizedBox.shrink(),
                     ),
 
-                    // ── Thumbnails + Attribution ─────────────────────────────
+                    // ── Thumbnails + Attribution — etwas tiefer als vorher ───
                     Positioned(
-                      bottom: _kMicClear,
+                      bottom: _kMicClear + 32,
                       left: 0,
                       right: 0,
                       child: const _ThumbnailRow(),
                     ),
                     Positioned(
-                      bottom: _kMicClear + 104,
+                      bottom: _kMicClear,
                       left: 0,
                       right: 0,
                       child: _KlexikonAttribution(
@@ -2914,7 +2938,7 @@ class _ModeCContentState extends State<_ModeCContent> {
                     if (ProfileService.instance.activeAgeLevel >= 2 &&
                         provider.totalChunks > 1)
                       Positioned(
-                        bottom: imageClearance - 24,
+                        bottom: imageClearance - 36,
                         left: 4,
                         right: 4,
                         height: 48,

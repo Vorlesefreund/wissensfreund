@@ -619,7 +619,13 @@ class WissensfreundProvider extends ChangeNotifier {
         notifyListeners();
       }
     } else {
-      _startSpeakingFrom(charOffset);
+      if (startSpeaking) {
+        _startSpeakingFrom(charOffset);
+      } else {
+        _ttsCursor    = charOffset;
+        _resumeOffset = charOffset;
+        notifyListeners();
+      }
     }
   }
 
