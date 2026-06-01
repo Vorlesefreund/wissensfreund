@@ -1,12 +1,35 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-01T11:33:54Z -->
+<!-- updated: 2026-06-01T13:21:49Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Nur die letzten 2 Sessions + aktuell Offenes bleibt hier. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-01)
+## 🟢 Zuletzt abgeschlossen (Session 2026-06-01 nachmittags)
+
+### Scroll-Sync-Bugs Mode A + B — alle drei behoben
+
+- **Bug 1 — Mode B scroll DOWN (Professor springt nicht)**: Root-Cause: `_sentenceTopCache` veraltet,
+  weil aktiver Satz (fontSize 19) vs. inaktiv (fontSize 15) Satzpositionen verschiebt →
+  falsches `topIdx` → `topIdx == activeIdx` → kein Seek.
+  **Fix**: `_jumpToTopSentence` nutzt jetzt live `findRenderObject()` statt staler Cache.
+
+- **Bug 2 — Mode B scroll UP (Professor springt zurück)**: Root-Cause: `_userScrolling = false` am
+  Anfang von `_jumpToTopSentence` → `_smartScrollTo` läuft sofort los für alte TTS-Position.
+  **Fix**: `_userScrolling` bleibt `true` nach dem Seek-Aufruf; neuer `_seekResumeTimer` (3000 ms)
+  setzt ihn zurück, wenn der Seek gegriffen hat.
+
+- **Bug 3 — Mode A liest zu lang (ein Satz extra)**: Debounce 1500 ms → TTS konnte ganzen Satz
+  noch vollständig vortragen + nächsten starten.
+  **Fix**: Debounce in Mode A + B auf 800 ms reduziert.
+
+- Elefant L2 Testartikel (5 Bilder, 5 Abschnitte, ~23 Sätze) per `adb push` bereits auf Gerät.
+- `flutter build apk --debug` + `adb install -r` ✅
+
+---
+
+## 🟢 Zuletzt abgeschlossen (Session 2026-06-01 morgens)
 
 ### Artikel-Screen: Navigation & Bild-Sync nach Altersstufe
 - **Mode-Toggle** nach Altersstufe: Stufe 1 → 2 Icons (B/C); Stufe 2/3 → 3 Icons (A/B/C)
@@ -14,12 +37,9 @@
 - **Bild-Sync** (Stufe 2/3 JSON-Artikel): Auto-Bildwechsel per `img_index` im Chunk-Advance-Handler
   - Vorwärts-Wischen → Sync pausiert bis TTS aufholt
   - Rückwärts-Wischen → 10 s Timer, dann Bild auf TTS-Position zurück
-- **Scroll-Navigation Modus A** (Stufe 2/3): 1500 ms Debounce → Professor springt zum obersten sichtbaren Satz
+- **Scroll-Navigation Modus A** (Stufe 2/3): Debounce → Professor springt zum obersten sichtbaren Satz
 - **Kapitel-Pfeile Modus C** (Stufe 2/3): `‹`/`›` neben Thumbnails, springt zu nächstem/vorherigem Abschnitt
-- `_ModeCContent` zu StatefulWidget umgebaut (Timer + Methoden)
 - Provider: `seekAfterCurrentChunk`, `pauseImageSync`, `setViewMode`, `sectionChunkStarts`, `chunkCharOffset`
-- `flutter analyze` + `flutter build apk --debug` ✅ (keine neuen Fehler)
-- WISSEN_APP_ARCHITEKTUR.md ergänzt: neuer Abschnitt "Navigation & Bild-Sync nach Altersstufe"
 
 ---
 

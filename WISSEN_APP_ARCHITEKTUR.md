@@ -152,10 +152,23 @@ Implementiert in `article_screen.dart` + `wissensfreund_provider.dart` (Session 
 - Sync wird im Chunk-Advance-Handler automatisch weitergeschalten.
 - Nur für JSON-Artikel (img_index pro Satz). ZIM-Artikel: `_chunkImgIndices` leer → kein Sync.
 
-### Scroll-Navigation Modus A (Stufe 2/3)
-- 1500 ms Debounce nach Scroll-Stop (`_scrollDebounce` in `_ModeAContentState`).
-- Kein Sprung wenn aktueller TTS-Satz bereits sichtbar (`_sentenceTopCache`).
-- Sonst: oberster vollständig sichtbarer Satz ermittelt → `provider.seekAfterCurrentChunk(offset)`.
+### Scroll-Navigation Modus A + B (Stufe 2/3)
+- **800 ms Debounce** nach Scroll-Stop (`_scrollDebounce`).
+- `_userScrolling = true` während User scrollt → blockiert `_smartScrollTo` (kein Auto-Scroll zurück).
+- `_programmaticScroll = true` (600 ms) während TTS-Auto-Scroll → blockiert `_onScroll` (kein falsches _userScrolling).
+- Nach Debounce: `_jumpToTopSentence()` ermittelt obersten sichtbaren Satz → `seekAfterCurrentChunk(offset)`.
+
+**Mode A** (`_ModeAContentState`): nutzt `_sentenceTopCache` (gebaut einmalig bei initState).
+- `_userScrolling = false` sofort in `_jumpToTopSentence` — funktioniert weil `_sentenceTopCache` stabil ist
+  (Mode A ändert keine Font-Sizes, Positionen bleiben korrekt).
+
+**Mode B** (`_ModeBContentState`): nutzt **live** `findRenderObject()` in `_jumpToTopSentence`.
+- Stale-Cache-Problem: aktiver Satz fontSize 19, inaktiv 15 → Positionen verschieben sich mit jedem TTS-Advance.
+  Ein staler Cache liefert falsches `topIdx` → `topIdx == activeIdx` → kein Seek.
+- Fix: `_jumpToTopSentence` iteriert alle `_sentenceKeys`, fragt jedes Mal live `globalToLocal()` ab.
+- `_seekResumeTimer` (3000 ms): `_userScrolling` bleibt nach Seek-Aufruf `true` bis Timer feuert.
+  Verhindert, dass `_smartScrollTo` für alte TTS-Sätze sofort zurückscrollt, bevor Seek greift.
+  Neuer Scroll von User → `_seekResumeTimer?.cancel()` (State-Machine Reset).
 
 ### Kapitel-Navigation Modus C (Stufe 2/3)
 - Zwei Pfeil-Buttons `‹`/`›` (36 px, halbtransparent) neben Thumbnails.
