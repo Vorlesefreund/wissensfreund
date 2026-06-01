@@ -97,6 +97,27 @@ r2://wissensfreund-articles/
 
 ---
 
+## R2-Bestandsaufnahme (2026-06-01)
+
+Ergebnis einer Stichproben-Analyse (10 von 3.544 Artikel):
+
+| Feld | Befund |
+|---|---|
+| Artikel gesamt | 3.544 (alle `_l2`, nur Stufe 2) |
+| `license` + `license_author` | überall befüllt |
+| `thumb_url` | überall leer — Bilder-Patch noch nicht gelaufen |
+| `img_index` pro Satz | 100% zugewiesen |
+| Quiz-Inhalte | Platzhalter (`"Antwort A/B/C"`) — Quiz-Run noch ausstehend |
+| Checkpoint | existiert, 609 Einträge — muss vor Quiz-Run gelöscht werden |
+
+**Credentials-Speicherort lokal:** `C:\Users\Andreas\Wissensfreund\Anthropic API Key für Wissensfreund Pipeline.docx`
+(Access Key ID + Secret Access Key + CF Account ID = `b5bffc31dcd02623c9f8a2b01d8ea58e`)
+
+**boto3** (Python 3.14): `C:\Users\Andreas\AppData\Local\Python\pythoncore-3.14-64\python.exe -m pip install boto3`
+R2-Endpoint: `https://b5bffc31dcd02623c9f8a2b01d8ea58e.r2.cloudflarestorage.com`
+
+---
+
 ## App-Integration (Flutter)
 
 - `JsonArticleService` — R2-Download, lokaler Cache
