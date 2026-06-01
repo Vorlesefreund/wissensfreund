@@ -49,7 +49,7 @@ AGE_LABELS = {1: "4-6 Jahre", 2: "7-9 Jahre", 3: "10-12 Jahre"}
 
 AI_PROMPT = """\
 Du bist Redakteur für das Kinderlexikon Wissensfreund.
-Aufgabe: Wähle passende Bilder für einen Artikel aus und weise sie den Sätzen zu.
+Aufgabe: Wähle passende Bilder für einen Artikel aus und weise jedem Satz einen img_index zu.
 
 Artikel: {titel}
 Altersstufe: {age_level} ({age_label})
@@ -64,6 +64,14 @@ Darstellungen sind ok wenn sie lehrreich sind. Keine Fossilien \
 ausgestorbener Arten als Hauptthema.
 Stufe 3 (10-12 J.): Alle sachlich korrekten Bilder erlaubt, \
 auch Fossilien, Vergleichsanatomie, historische Darstellungen.
+
+ZUWEISUNG — REGELN:
+- Weise jedem Satz einen img_index zu (0-basiert, Position im images[]-Array)
+- Ein Bildwechsel soll dort stattfinden wo sich das Thema inhaltlich ändert — das kann mitten im Abschnitt sein
+- Mehrere aufeinanderfolgende Sätze können denselben img_index haben
+- Wähle so viele Bilder wie nötig um den Artikel visuell abwechslungsreich zu gestalten (max. {max_images})
+- Kein Bild einem Satz zuweisen wenn es inhaltlich nicht passt — lieber denselben img_index weiterführen
+- Jeder Satz muss eine Zuweisung erhalten
 
 ABSCHNITTE UND SÄTZE:
 {sections_json}
@@ -80,6 +88,7 @@ Format:
   ]
 }}
 
+img_index verweist auf die Position im images[]-Array (0-basiert). Jeder Satz muss eine Zuweisung haben.
 Maximale Bildanzahl nach Interesse: high=15, medium=10, low=6"""
 
 
