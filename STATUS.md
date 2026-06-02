@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-02T08:16:07Z -->
+<!-- updated: 2026-06-02T09:23:19Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
@@ -43,10 +43,19 @@
 - **stimmt_das Reveal**: zentrierter Text, abwechselnde Richtig-Phrasen, Falsch-Prefix "Das ist leider nicht ganz richtig."
 - APK gebaut + installiert ✅
 
+## 🟢 Zuletzt abgeschlossen (Session 2026-06-02 — Thumbnail-Bug-Fix)
+
+- **Root Cause gefunden**: `elefant_l2.json` Zeile 132 hatte ein ASCII-`"` (U+0022) inmitten einer JSON-String, was `FormatException` auslöste → `_loadFromAsset` → null → 0 Bilder
+- **Fix**: Ersetzt durch typografisches `"` (U+201D): `„Elefanten vergessen nie."`
+- **`_ThumbnailRow`** refactored: images/selectedIndex/onTap als Parameter statt innerer Consumer
+- **`_ThumbTile`**: zeigt farbigen Placeholder → lädt echte Bild-Bytes via `getImageBytes()`
+- **Debug-Prints entfernt**: `article_screen.dart`, `wissensfreund_provider.dart`, `json_article_service.dart` bereinigt
+- APK gebaut + installiert ✅ — 5 Thumbnails sollten jetzt in allen 3 Modi sichtbar sein
+
 ## 🟡 Offen — nächste Schritte (nach Priorität)
 
 ### Hoch
-- **Manuell testen** (Boxen in Modus A, Reveal-Texte, Thumbnails)
+- **Manuell testen** (5 Thumbnail-Kacheln in Modus A/B/C, Boxen Modus A, Reveal-Texte)
 - **Selbst produzierte Artikel** (neue JSON-Artikel mit echten Inhalten)
 
 ### Mittel (zurückgestellt)

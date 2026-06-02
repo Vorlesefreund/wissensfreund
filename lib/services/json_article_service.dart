@@ -85,7 +85,8 @@ class JsonArticleService extends ChangeNotifier {
     if (await cacheFile.exists()) {
       try {
         final raw = await cacheFile.readAsString();
-        return WfArticle.fromJson(json.decode(raw) as Map<String, dynamic>);
+        final cached = WfArticle.fromJson(json.decode(raw) as Map<String, dynamic>);
+        if (cached.images.isNotEmpty) return cached;
       } catch (e) {
         debugPrint('[JsonArticleService] cache parse error for $articleId: $e');
       }
@@ -98,6 +99,12 @@ class JsonArticleService extends ChangeNotifier {
         final body = resp.body;
         final article =
             WfArticle.fromJson(json.decode(body) as Map<String, dynamic>);
+        if (article.images.isEmpty) {
+          final testArticle = await _loadFromAsset(articleId);
+          if (testArticle != null && testArticle.images.isNotEmpty) {
+            return testArticle;
+          }
+        }
         await cacheFile.parent.create(recursive: true);
         await cacheFile.writeAsString(body);
         return article;
@@ -106,16 +113,16 @@ class JsonArticleService extends ChangeNotifier {
     } catch (e) {
       debugPrint('[JsonArticleService] network error for $articleId: $e');
     }
-    // Fallback: bundled test asset
     return _loadFromAsset(articleId);
   }
 
   Future<WfArticle?> _loadFromAsset(String articleId) async {
     try {
       final raw = await rootBundle.loadString('assets/test/$articleId.json');
-      debugPrint('[JsonArticleService] loaded $articleId from bundled asset');
-      return WfArticle.fromJson(json.decode(raw) as Map<String, dynamic>);
-    } catch (_) {
+      final parsed = json.decode(raw) as Map<String, dynamic>;
+      return WfArticle.fromJson(parsed);
+    } catch (e) {
+      debugPrint('[JsonArticleService] asset load error for $articleId: $e');
       return null;
     }
   }

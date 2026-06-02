@@ -2204,7 +2204,11 @@ class _ModeAContentState extends State<_ModeAContent> {
                           sentences,
                           provider.articleSections,
                         ),
-                        const _ThumbnailRow(),
+                        _ThumbnailRow(
+                          images: provider.articleImages,
+                          selectedIndex: provider.selectedImageIndex,
+                          onTap: provider.onImageSelected,
+                        ),
                         if (sentences.isNotEmpty) ...[
                           const SizedBox(height: 8),
                           _KlexikonAttribution(url: provider.articleUrl),
@@ -2716,7 +2720,11 @@ class _ModeBContentState extends State<_ModeBContent> {
                     ),
                     // Abstand zwischen Textfeld und Thumbnails
                     const SizedBox(height: 20),
-                    const _ThumbnailRow(),
+                    _ThumbnailRow(
+                      images: provider.articleImages,
+                      selectedIndex: provider.selectedImageIndex,
+                      onTap: provider.onImageSelected,
+                    ),
                     const SizedBox(height: _kMicClear),
                   ],
                 ),
@@ -2734,7 +2742,15 @@ class _ModeBContentState extends State<_ModeBContent> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _ThumbnailRow extends StatelessWidget {
-  const _ThumbnailRow();
+  final List<ArticleImageInfo> images;
+  final int selectedIndex;
+  final ValueChanged<int> onTap;
+
+  const _ThumbnailRow({
+    required this.images,
+    required this.selectedIndex,
+    required this.onTap,
+  });
 
   static const _placeholderColors = [
     Color(0xFFB2DFDB), Color(0xFFBBDEFB), Color(0xFFD1C4E9),
@@ -2744,43 +2760,29 @@ class _ThumbnailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<WissensfreundProvider>(
-      builder: (_, provider, __) {
-        // Prefer articleImages (populated for both JSON and ZIM articles).
-        // Fall back to image-only mediaItems if articleImages is empty.
-        final images = provider.articleImages;
-        final count = images.isNotEmpty
-            ? images.length
-            : provider.mediaItems.where((m) => !m.isAudio).length;
-        if (count == 0) return const SizedBox.shrink();
+    if (images.isEmpty) return const SizedBox.shrink();
 
-        final filenames = images.isNotEmpty
-            ? images.map((img) => img.filename).toList()
-            : provider.mediaItems.where((m) => !m.isAudio).map((m) => m.filename).toList();
+    final selIdx = selectedIndex < 0 ? 0 : selectedIndex;
 
-        final selIdx = provider.selectedImageIndex < 0 ? 0 : provider.selectedImageIndex;
-
-        return SizedBox(
-          height: 108,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.only(right: _kThumbRight),
-            itemCount: count,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (_, i) {
-              final name = filenames[i];
-              final color = _placeholderColors[i % _placeholderColors.length];
-              return _ThumbTile(
-                key: ValueKey(name),
-                filename: name,
-                placeholderColor: color,
-                isSelected: i == selIdx,
-                onTap: () => provider.onImageSelected(i),
-              );
-            },
-          ),
-        );
-      },
+    return SizedBox(
+      height: 108,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.only(right: _kThumbRight),
+        itemCount: images.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        itemBuilder: (_, i) {
+          final name = images[i].filename;
+          final color = _placeholderColors[i % _placeholderColors.length];
+          return _ThumbTile(
+            key: ValueKey(name),
+            filename: name,
+            placeholderColor: color,
+            isSelected: i == selIdx,
+            onTap: () => onTap(i),
+          );
+        },
+      ),
     );
   }
 }
@@ -3114,7 +3116,11 @@ class _ModeCContentState extends State<_ModeCContent> {
                       bottom: _kMicClear + 32,
                       left: 0,
                       right: 0,
-                      child: const _ThumbnailRow(),
+                      child: _ThumbnailRow(
+                        images: images,
+                        selectedIndex: provider.selectedImageIndex,
+                        onTap: provider.onImageSelected,
+                      ),
                     ),
                     Positioned(
                       bottom: _kMicClear,
