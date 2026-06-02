@@ -1937,7 +1937,8 @@ class _ModeAContentState extends State<_ModeAContent> {
       }
     }
     if (topIdx < 0) {
-      // User scrolled past all sentence content — keep lock to prevent snap-back.
+      // User scrolled past all sentence content — cancel pending seek and lock scroll.
+      provider.cancelPendingSeek();
       _seekResumeTimer?.cancel();
       _seekResumeTimer = Timer(const Duration(milliseconds: 2000), () {
         if (mounted) _userScrolling = false;
@@ -1945,6 +1946,16 @@ class _ModeAContentState extends State<_ModeAContent> {
       return;
     }
     if (topIdx == activeIdx) { _userScrolling = false; return; }
+    if (topIdx == activeIdx + 1) {
+      // Only 1 sentence ahead — likely viewing box content between sentences.
+      // Cancel any stale pending seek and let TTS advance naturally through box chunks.
+      provider.cancelPendingSeek();
+      _seekResumeTimer?.cancel();
+      _seekResumeTimer = Timer(const Duration(milliseconds: 3000), () {
+        if (mounted) _userScrolling = false;
+      });
+      return;
+    }
     if (provider.isPaused) { _userScrolling = false; return; }
 
     // Compute char offset by summing sentence lengths up to topIdx.
@@ -1957,9 +1968,9 @@ class _ModeAContentState extends State<_ModeAContent> {
     final nl = sentences[topIdx].indexOf('\n');
     if (nl >= 0) charOffset += nl + 1;
 
-    provider.seekNow(charOffset);
+    provider.seekAfterCurrentChunk(charOffset);
     _seekResumeTimer?.cancel();
-    _seekResumeTimer = Timer(const Duration(milliseconds: 2000), () {
+    _seekResumeTimer = Timer(const Duration(milliseconds: 3000), () {
       if (mounted) _userScrolling = false;
     });
   }
@@ -2021,8 +2032,8 @@ class _ModeAContentState extends State<_ModeAContent> {
       final localY = vpBox.globalToLocal(box.localToGlobal(Offset.zero)).dy;
       final viewportH = _scrollCtrl.position.viewportDimension;
 
-      // Scroll if sentence top is above viewport OR past 35% down
-      if (localY < 0 || localY > viewportH * 0.35) {
+      // Scroll if sentence is above viewport or below the lower third
+      if (localY < 0 || localY > viewportH * 0.6) {
         _programmaticScroll = true;
         _programmaticScrollTimer?.cancel();
         _programmaticScrollTimer = Timer(const Duration(milliseconds: 600), () {
@@ -2032,7 +2043,7 @@ class _ModeAContentState extends State<_ModeAContent> {
           ctx,
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeOut,
-          alignment: 0.18,
+          alignment: 0.5,
         );
       }
     });
@@ -2519,7 +2530,8 @@ class _ModeBContentState extends State<_ModeBContent> {
     }
 
     if (topIdx < 0) {
-      // User scrolled past all sentence content — keep lock to prevent snap-back.
+      // User scrolled past all sentence content — cancel pending seek and lock scroll.
+      provider.cancelPendingSeek();
       _seekResumeTimer?.cancel();
       _seekResumeTimer = Timer(const Duration(milliseconds: 2000), () {
         if (mounted) _userScrolling = false;
@@ -2527,6 +2539,16 @@ class _ModeBContentState extends State<_ModeBContent> {
       return;
     }
     if (topIdx == activeIdx) { _userScrolling = false; return; }
+    if (topIdx == activeIdx + 1) {
+      // Only 1 sentence ahead — likely viewing box content between sentences.
+      // Cancel any stale pending seek and let TTS advance naturally through box chunks.
+      provider.cancelPendingSeek();
+      _seekResumeTimer?.cancel();
+      _seekResumeTimer = Timer(const Duration(milliseconds: 3000), () {
+        if (mounted) _userScrolling = false;
+      });
+      return;
+    }
     if (provider.isPaused) { _userScrolling = false; return; }
 
     // Compute char offset by summing sentence lengths up to topIdx.
@@ -2539,9 +2561,9 @@ class _ModeBContentState extends State<_ModeBContent> {
     final nl = sentences[topIdx].indexOf('\n');
     if (nl >= 0) charOffset += nl + 1;
 
-    provider.seekNow(charOffset);
+    provider.seekAfterCurrentChunk(charOffset);
     _seekResumeTimer?.cancel();
-    _seekResumeTimer = Timer(const Duration(milliseconds: 2000), () {
+    _seekResumeTimer = Timer(const Duration(milliseconds: 3000), () {
       if (mounted) _userScrolling = false;
     });
   }
@@ -2577,11 +2599,11 @@ class _ModeBContentState extends State<_ModeBContent> {
       final scrollable = Scrollable.of(ctx);
       final vpBox = scrollable.context.findRenderObject() as RenderBox?;
       if (vpBox == null || !vpBox.attached) return;
-      // Place sentence top just below the top fade zone (fade ends at 18% → use 22%)
       final sentenceTopInVp = vpBox.globalToLocal(box.localToGlobal(Offset.zero)).dy;
       final sentenceTopInContent = sentenceTopInVp + _scrollCtrl.offset;
       final viewportH = _scrollCtrl.position.viewportDimension;
-      final target = (sentenceTopInContent - viewportH * 0.30)
+      // Center the active sentence vertically in the viewport
+      final target = (sentenceTopInContent - viewportH / 2 + box.size.height / 2)
           .clamp(_scrollCtrl.position.minScrollExtent, _scrollCtrl.position.maxScrollExtent);
       _programmaticScroll = true;
       _programmaticScrollTimer?.cancel();

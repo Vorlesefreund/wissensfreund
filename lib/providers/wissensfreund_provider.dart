@@ -635,6 +635,10 @@ class WissensfreundProvider extends ChangeNotifier {
     }
   }
 
+  /// Löscht einen gequeuten Seek ohne TTS zu unterbrechen.
+  /// Aufgerufen wenn der User zurückscrollt und der vorherige Seek-Zielort nicht mehr relevant ist.
+  void cancelPendingSeek() => _pendingSeekOffset = null;
+
   /// Kapitel-Sprung: unterbricht TTS sofort und springt zum Ziel-Offset.
   /// Für Section-Pfeile (nicht für Scroll-Navigation).
   Future<void> jumpToSection(int charOffset) async {
