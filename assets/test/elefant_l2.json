@@ -19,47 +19,52 @@
     {
       "index": 0,
       "filename": "elefant_0.png",
-      "alt": "Afrikanischer Elefant",
-      "caption": "Ein Afrikanischer Buschelefant in freier Wildbahn",
-      "license": "Testbild",
-      "license_author": "Wissensfreund",
-      "source_url": "asset://assets/test/images/elefant_0.png"
+      "alt": "Elefantenfamilie in Indien",
+      "caption": "Eine Elefantenfamilie in Indien",
+      "license": "CC BY-SA 4.0",
+      "license_author": "AJTJohnsingh",
+      "source_url": "https://commons.wikimedia.org/wiki/File:A_family_group_of_elephants_in_Mudumalai_TR_AJTJohnsingh.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/A_family_group_of_elephants_in_Mudumalai_TR_AJTJohnsingh.jpg/960px-A_family_group_of_elephants_in_Mudumalai_TR_AJTJohnsingh.jpg"
     },
     {
       "index": 1,
       "filename": "elefant_1.png",
-      "alt": "Elefantenherde",
-      "caption": "Eine Elefantenherde in der afrikanischen Savanne",
-      "license": "Testbild",
-      "license_author": "Wissensfreund",
-      "source_url": "asset://assets/test/images/elefant_1.png"
+      "alt": "Elefantenherde im Kaudulla Nationalpark",
+      "caption": "Elefantenfamilie im Kaudulla Nationalpark, Sri Lanka",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Charles J. Sharp",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Elefantenfamilie_kaudulla_nationalpark_2017-10-17_%2833%29.jpg/960px-Elefantenfamilie_kaudulla_nationalpark_2017-10-17_%2833%29.jpg"
     },
     {
       "index": 2,
       "filename": "elefant_2.png",
-      "alt": "Elefantenrüssel",
-      "caption": "Der Rüssel ist das wichtigste Werkzeug des Elefanten",
-      "license": "Testbild",
-      "license_author": "Wissensfreund",
-      "source_url": "asset://assets/test/images/elefant_2.png"
+      "alt": "Afrikanischer Elefant",
+      "caption": "Afrikanischer Buschelefant – der größte Elefant der Welt",
+      "license": "CC BY-SA 4.0",
+      "license_author": "AJTJohnsingh",
+      "source_url": "https://commons.wikimedia.org/wiki/File:A_family_group_of_elephants_in_Mudumalai_TR_AJTJohnsingh.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/A_family_group_of_elephants_in_Mudumalai_TR_AJTJohnsingh.jpg/960px-A_family_group_of_elephants_in_Mudumalai_TR_AJTJohnsingh.jpg"
     },
     {
       "index": 3,
       "filename": "elefant_3.png",
-      "alt": "Asiatischer Elefant",
-      "caption": "Der Asiatische Elefant hat kleinere Ohren als sein afrikanischer Verwandter",
-      "license": "Testbild",
-      "license_author": "Wissensfreund",
-      "source_url": "asset://assets/test/images/elefant_3.png"
+      "alt": "Elefantenherde",
+      "caption": "Elefanten leben in Herden – angeführt von der ältesten Kuh",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Charles J. Sharp",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/Elefantenfamilie_kaudulla_nationalpark_2017-10-17_%2833%29.jpg/960px-Elefantenfamilie_kaudulla_nationalpark_2017-10-17_%2833%29.jpg"
     },
     {
       "index": 4,
       "filename": "elefant_4.png",
-      "alt": "Baby-Elefant",
-      "caption": "Ein junger Elefant bleibt nah bei seiner Mutter",
-      "license": "Testbild",
-      "license_author": "Wissensfreund",
-      "source_url": "asset://assets/test/images/elefant_4.png"
+      "alt": "Elefantenfamilie",
+      "caption": "Elefantenbabys werden von der ganzen Herde umsorgt",
+      "license": "CC BY-SA 4.0",
+      "license_author": "AJTJohnsingh",
+      "source_url": "https://commons.wikimedia.org/wiki/File:A_family_group_of_elephants_in_Mudumalai_TR_AJTJohnsingh.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/A_family_group_of_elephants_in_Mudumalai_TR_AJTJohnsingh.jpg/960px-A_family_group_of_elephants_in_Mudumalai_TR_AJTJohnsingh.jpg"
     }
   ],
   "sections": [

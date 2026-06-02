@@ -8,6 +8,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/rendered_article.dart';
+import '../models/wf_article.dart';
 import '../providers/wissensfreund_provider.dart';
 import '../utils/system_ui.dart';
 import '../services/data_limit_overlay_service.dart';
@@ -2615,8 +2616,8 @@ class _ModeBContentState extends State<_ModeBContent> {
                               if (provider.articleQuiz != null &&
                                   provider.articleQuiz!.questions.isNotEmpty)
                                 Padding(
-                                  padding: const EdgeInsets.only(top: 24),
-                                  child: QuizWidget(quiz: provider.articleQuiz!),
+                                  padding: const EdgeInsets.only(top: 16, bottom: 8),
+                                  child: _QuizStartButton(quiz: provider.articleQuiz!),
                                 ),
                             ],
                           ),
@@ -3108,6 +3109,70 @@ class _ModeCContentState extends State<_ModeCContent> {
           ],
         );
       },
+    );
+  }
+}
+
+class _QuizStartButton extends StatelessWidget {
+  final WfQuiz quiz;
+  const _QuizStartButton({required this.quiz});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: FilledButton.icon(
+        style: FilledButton.styleFrom(
+          backgroundColor: const Color(0xFF2D6A4F),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        icon: const Text('🎯', style: TextStyle(fontSize: 18)),
+        label: const Text(
+          'Quiz starten',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        onPressed: () => showModalBottomSheet(
+          context: context,
+          isScrollControlled: true,
+          backgroundColor: Colors.transparent,
+          builder: (_) => DraggableScrollableSheet(
+            initialChildSize: 0.7,
+            minChildSize: 0.4,
+            maxChildSize: 0.92,
+            expand: false,
+            builder: (ctx, scrollCtrl) => Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                children: [
+                  // Drag handle
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10, bottom: 4),
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: scrollCtrl,
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+                      child: QuizWidget(quiz: quiz),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-02T06:53:28Z -->
+<!-- updated: 2026-06-02T07:15:08Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
@@ -19,7 +19,9 @@
 - **Provider**: articleSections + articleQuiz Getter, populate + clear
 - **article_screen.dart**: `_insertSectionBoxes()` Helper; Modus A+B: Boxen nach Abschnittsende, Quiz am Artikelende; Modus C: keine Änderung
 - **Test-Asset** `assets/test/elefant_l2.json`: Boxen + Quiz vollständig befüllt (5 Sektionen, 4 Boxen, 4 Quizfragen)
-- APK gebaut + installiert ✅
+- APK gebaut + installiert ✅ (Phase 1 vollständig)
+- **Modus B Quiz** via BottomSheet (`_QuizStartButton` in article_screen.dart)
+- **Bilder im Test-JSON** (`elefant_l2.json`): echte Wikimedia-thumb_urls statt Placeholder-PNGs
 
 ---
 
