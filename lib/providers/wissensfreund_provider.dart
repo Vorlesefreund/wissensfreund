@@ -228,9 +228,11 @@ class WissensfreundProvider extends ChangeNotifier {
   bool _resumeAfterHandoff = false;
   bool _ttsStopPending = false; // guard against stop()-induced onDone race
 
-  // JSON article structural data (sections with boxes, quiz)
+  // JSON article structural data (sections with boxes, quiz, emoji, color)
   List<RenderedSection> _articleSections = [];
   WfQuiz? _articleQuiz;
+  String _articleEmoji      = '';
+  String _articleThemeColor = '';
 
   // Internal link navigation
   List<Map<String, dynamic>> _articleLinks = [];
@@ -288,6 +290,8 @@ class WissensfreundProvider extends ChangeNotifier {
   List<Map<String, dynamic>> get articleLinks  => List.unmodifiable(_articleLinks);
   List<RenderedSection>      get articleSections => List.unmodifiable(_articleSections);
   WfQuiz?                    get articleQuiz     => _articleQuiz;
+  String                     get articleEmoji      => _articleEmoji;
+  String                     get articleThemeColor => _articleThemeColor;
   bool get canGoBack => _navStack.isNotEmpty;
 
   WissensfreundProvider() {
@@ -1030,6 +1034,8 @@ class WissensfreundProvider extends ChangeNotifier {
     _articlePath        = rendered.sourceUrl;
     _articleSections    = rendered.sections;
     _articleQuiz        = rendered.quiz;
+    _articleEmoji       = rendered.emoji;
+    _articleThemeColor  = rendered.themeColor;
     _articleLinks       = [];
     _selectedImageIndex = -1;
     _imageBytesCache.clear();
@@ -1825,8 +1831,10 @@ class WissensfreundProvider extends ChangeNotifier {
     _articleText     = '';
     _articleTitle    = '';
     _articlePath     = '';
-    _articleSections = [];
-    _articleQuiz     = null;
+    _articleSections  = [];
+    _articleQuiz      = null;
+    _articleEmoji      = '';
+    _articleThemeColor = '';
     _articleImages      = [];
     _selectedImageIndex = -1;
     _mediaItems         = [];

@@ -57,12 +57,25 @@ class _CalloutBoxState extends State<CalloutBox> {
         ],
       );
 
+  static const _correctPhrases = [
+    'Richtig!',
+    'Genau so ist es!',
+    'Super, du hast es gewusst!',
+    'Ja, das stimmt!',
+  ];
+
   Widget _buildReveal() {
     final correct = widget.box.answer ?? false;
+    final explanation = widget.box.explanation ?? '';
+    final phrase = correct
+        ? _correctPhrases[widget.box.text.hashCode.abs() % _correctPhrases.length]
+        : 'Das ist leider nicht ganz richtig.';
+    final revealText = explanation.isNotEmpty ? '$phrase $explanation' : phrase;
+
     return GestureDetector(
       onTap: _revealed ? null : () => setState(() => _revealed = true),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -80,7 +93,6 @@ class _CalloutBoxState extends State<CalloutBox> {
           const SizedBox(height: 10),
           if (!_revealed)
             Container(
-              width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 9),
               decoration: BoxDecoration(
                 color: Colors.purple.shade300,
@@ -92,19 +104,20 @@ class _CalloutBoxState extends State<CalloutBox> {
                 style: TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w600),
               ),
             )
-          else ...[
-            Text(
-              correct ? '✅ Stimmt!' : '❌ Stimmt nicht!',
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-            ),
-            if ((widget.box.explanation ?? '').isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(
-                widget.box.explanation!,
-                style: const TextStyle(fontSize: 13, height: 1.4),
+          else
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text(
+                revealText,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  height: 1.45,
+                  fontWeight: FontWeight.w500,
+                  color: correct ? const Color(0xFF2E7D32) : const Color(0xFFC62828),
+                ),
               ),
-            ],
-          ],
+            ),
         ],
       ),
     );

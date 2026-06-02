@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-02T07:15:08Z -->
+<!-- updated: 2026-06-02T07:39:33Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
@@ -35,10 +35,18 @@
 
 ---
 
+## 🟢 Zuletzt abgeschlossen (Session 2026-06-02 — Bug-Fix-Runde)
+
+- **Callout-Boxen Modus A** nicht sichtbar → `_insertSectionBoxes` neu: text-content-matching statt startChar-Algo
+- **Bilder-Platzhalter** Header: emoji+themeColor aus JSON-Artikel (neu: `articleEmoji`, `articleThemeColor` im Provider)
+- **Thumbnail-Platzhalter** sichtbar: farbige Box statt unsichtbarem SizedBox.expand()
+- **stimmt_das Reveal**: zentrierter Text, abwechselnde Richtig-Phrasen, Falsch-Prefix "Das ist leider nicht ganz richtig."
+- APK gebaut + installiert ✅
+
 ## 🟡 Offen — nächste Schritte (nach Priorität)
 
 ### Hoch
-- **Manuell testen** (Checkliste aus CLAUDE_CODE_PHASE1_QUIZ_CALLOUT.md)
+- **Manuell testen** (Boxen in Modus A, Reveal-Texte, Thumbnails)
 - **Selbst produzierte Artikel** (neue JSON-Artikel mit echten Inhalten)
 
 ### Mittel (zurückgestellt)

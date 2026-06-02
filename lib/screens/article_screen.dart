@@ -627,41 +627,60 @@ class _FavoriteBtnState extends State<_FavoriteBtn> {
 
 class _ArticleImage extends StatelessWidget {
   final String title;
-  const _ArticleImage({super.key, required this.title});
+  final String emoji;
+  final String themeColor;
+  const _ArticleImage({
+    super.key,
+    required this.title,
+    this.emoji = '',
+    this.themeColor = '',
+  });
 
-  static const _themes = <String, (String, List<Color>)>{
-    'Elefant': ('🐘', [Color(0xFF8D6E63), Color(0xFF4E342E)]),
-    'Hund': ('🐕', [Color(0xFF78909C), Color(0xFF37474F)]),
-    'Katze': ('🐈', [Color(0xFFAB47BC), Color(0xFF6A1B9A)]),
+  static const _fallbackThemes = <String, (String, List<Color>)>{
+    'elefant': ('🐘', [Color(0xFF8D6E63), Color(0xFF4E342E)]),
+    'hund':    ('🐕', [Color(0xFF78909C), Color(0xFF37474F)]),
+    'katze':   ('🐈', [Color(0xFFAB47BC), Color(0xFF6A1B9A)]),
+    'pferd':   ('🐴', [Color(0xFF6D4C41), Color(0xFF3E2723)]),
+    'fisch':   ('🐠', [Color(0xFF0288D1), Color(0xFF01579B)]),
+    'vogel':   ('🐦', [Color(0xFF26A69A), Color(0xFF00695C)]),
   };
+
+  (String, List<Color>) _resolveTheme() {
+    if (emoji.isNotEmpty || themeColor.isNotEmpty) {
+      final e = emoji.isNotEmpty ? emoji : '📖';
+      Color base = const Color(0xFF43A047);
+      if (themeColor.isNotEmpty) {
+        try {
+          base = Color(int.parse('FF${themeColor.replaceAll('#', '')}', radix: 16));
+        } catch (_) {}
+      }
+      final hsl = HSLColor.fromColor(base);
+      return (e, [
+        hsl.withLightness((hsl.lightness + 0.15).clamp(0.0, 1.0)).toColor(),
+        hsl.withLightness((hsl.lightness - 0.1).clamp(0.0, 1.0)).toColor(),
+      ]);
+    }
+    final lcTitle = title.toLowerCase();
+    for (final entry in _fallbackThemes.entries) {
+      if (lcTitle.contains(entry.key)) return entry.value;
+    }
+    return ('📚', const [Color(0xFF43A047), Color(0xFF1B5E20)]);
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = _themes[title] ??
-        ('📚', const [Color(0xFF43A047), Color(0xFF1B5E20)]);
+    final (emojiStr, colors) = _resolveTheme();
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: theme.$2,
+          colors: colors,
         ),
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(theme.$1, style: const TextStyle(fontSize: 60)),
-          const SizedBox(height: 4),
-          Text(
-            'Artikelbild',
-            style: TextStyle(
-              fontSize: 11,
-              color: Colors.white.withValues(alpha: 0.65),
-              letterSpacing: 0.5,
-            ),
-          ),
-        ],
+      child: Center(
+        child: Text(emojiStr, style: const TextStyle(fontSize: 72)),
       ),
     );
   }
@@ -745,22 +764,27 @@ class _MainArticleImageState extends State<_MainArticleImage> {
                     ? _ArticleImage(
                         key: const ValueKey('fallback'),
                         title: widget.fallbackTitle,
+                        emoji: provider.articleEmoji,
+                        themeColor: provider.articleThemeColor,
                       )
                     : FutureBuilder<Uint8List?>(
                         key: ValueKey(fn),
                         future: future,
                         builder: (_, snap) {
                           if (snap.connectionState == ConnectionState.waiting) {
-                            return const Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF95D5B2),
-                                strokeWidth: 2.5,
-                              ),
+                            return _ArticleImage(
+                              title: widget.fallbackTitle,
+                              emoji: provider.articleEmoji,
+                              themeColor: provider.articleThemeColor,
                             );
                           }
                           final bytes = snap.data;
                           if (bytes == null) {
-                            return _ArticleImage(title: widget.fallbackTitle);
+                            return _ArticleImage(
+                              title: widget.fallbackTitle,
+                              emoji: provider.articleEmoji,
+                              themeColor: provider.articleThemeColor,
+                            );
                           }
                           return GestureDetector(
                             onTap: widget.enableFullscreenTap
@@ -877,7 +901,18 @@ class _ZimImageTileState extends State<_ZimImageTile> {
               future: _bytesFuture,
               builder: (_, snap) {
                 final bytes = snap.data;
-                if (bytes == null) return const SizedBox.expand();
+                if (bytes == null) {
+                  const thumbColors = [
+                    Color(0xFFB2DFDB), Color(0xFFBBDEFB), Color(0xFFD1C4E9),
+                    Color(0xFFFFF9C4), Color(0xFFFFCCBC),
+                  ];
+                  final color = thumbColors[widget.image.filename.hashCode.abs() % thumbColors.length];
+                  return Container(
+                    color: color,
+                    alignment: Alignment.center,
+                    child: const Text('🖼️', style: TextStyle(fontSize: 28)),
+                  );
+                }
                 return Image.memory(bytes, fit: BoxFit.cover);
               },
             ),
@@ -1642,57 +1677,41 @@ void _doImageSwipe(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Inserts [CalloutBox] widgets after the last flat sentence of each section.
+/// Uses text-content matching: searches the flat sentence list for the text
+/// of each section's last [RenderedSentence], then inserts boxes after that index.
 /// Returns a new list — original [sentenceWidgets] unchanged.
 List<Widget> _insertSectionBoxes(
   List<Widget> sentenceWidgets,
   List<String> sentences,
-  String fullText,
   List<RenderedSection> sections,
 ) {
   if (sections.isEmpty || sentences.isEmpty) return sentenceWidgets;
   if (sections.every((s) => s.boxes.isEmpty)) return sentenceWidgets;
 
-  // Step 1: char start of each flat sentence in fullText
-  final sentStarts = <int>[];
-  int scanPos = 0;
-  for (final sent in sentences) {
-    final idx = fullText.indexOf(sent, scanPos);
-    if (idx >= 0) {
-      sentStarts.add(idx);
-      scanPos = idx + sent.length;
-    } else {
-      sentStarts.add(scanPos);
+  // For each section with boxes, find the flat-sentence index that contains
+  // the last sentence of that section, then record boxes to insert after it.
+  final Map<int, List<RenderedBox>> boxesAfter = {};
+  int searchFrom = 0;
+  for (final sec in sections) {
+    if (sec.sentences.isEmpty) continue;
+    final lastText = sec.sentences.last.text;
+    for (int i = searchFrom; i < sentences.length; i++) {
+      if (sentences[i] == lastText || sentences[i].contains(lastText)) {
+        if (sec.boxes.isNotEmpty) boxesAfter[i] = sec.boxes;
+        searchFrom = i + 1;
+        break;
+      }
     }
   }
 
-  // Step 2: exclusive end char of each section
-  final sectionEndChars = <int>[
-    for (int s = 0; s < sections.length; s++)
-      (s + 1 < sections.length && sections[s + 1].sentences.isNotEmpty)
-          ? sections[s + 1].sentences.first.startChar
-          : fullText.length + 1,
-  ];
+  if (boxesAfter.isEmpty) return sentenceWidgets;
 
-  // Step 3: map each flat sentence → section index
-  final sentSec = <int>[
-    for (int i = 0; i < sentences.length; i++) () {
-      final start = i < sentStarts.length ? sentStarts[i] : 0;
-      for (int s = 0; s < sections.length; s++) {
-        if (start < sectionEndChars[s]) return s;
-      }
-      return sections.length - 1;
-    }(),
-  ];
-
-  // Step 4: build result with box widgets injected after each section's last sentence
   final result = <Widget>[];
   for (int i = 0; i < sentenceWidgets.length; i++) {
     result.add(sentenceWidgets[i]);
-    final sec = i < sentSec.length ? sentSec[i] : -1;
-    if (sec < 0) continue;
-    final isLast = i == sentences.length - 1 || sentSec[i + 1] != sec;
-    if (isLast && sections[sec].boxes.isNotEmpty) {
-      for (final box in sections[sec].boxes) {
+    final boxes = boxesAfter[i];
+    if (boxes != null) {
+      for (final box in boxes) {
         result.add(Padding(
           padding: const EdgeInsets.symmetric(vertical: 6),
           child: CalloutBox(box: box),
@@ -2110,7 +2129,6 @@ class _ModeAContentState extends State<_ModeAContent> {
                             onLinkTap: provider.onLinkTapped,
                           ),
                           sentences,
-                          provider.articleText,
                           provider.articleSections,
                         ),
                         const _ThumbnailRow(),
@@ -2608,7 +2626,6 @@ class _ModeBContentState extends State<_ModeBContent> {
                                     ),
                                 ],
                                 sentences,
-                                provider.articleText,
                                 provider.articleSections,
                               ),
                               // Quellenhinweis am Ende des Textes (im Scrollbereich)
