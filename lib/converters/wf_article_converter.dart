@@ -37,11 +37,12 @@ class WfArticleConverter {
         sentences: renderedSentences,
         boxes: sec.boxes
             .map((b) => RenderedBox(
-                  type:       b.type,
-                  headline:   b.headline,
-                  text:       b.text,
-                  revealMode: b.revealMode,
-                  revealText: b.revealText,
+                  type:        b.type,
+                  headline:    b.headline,
+                  text:        b.text,
+                  revealMode:  b.revealMode,
+                  answer:      b.answer,
+                  explanation: b.explanation,
                 ))
             .toList(),
       ));

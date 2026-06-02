@@ -16,6 +16,7 @@ import '../services/network_service.dart';
 import '../services/professor_response_service.dart';
 import '../services/profile_service.dart';
 import '../converters/wf_article_converter.dart';
+import '../models/rendered_article.dart';
 import '../models/wf_article.dart';
 import '../services/json_article_service.dart';
 import '../services/subscription_service.dart';
@@ -227,6 +228,10 @@ class WissensfreundProvider extends ChangeNotifier {
   bool _resumeAfterHandoff = false;
   bool _ttsStopPending = false; // guard against stop()-induced onDone race
 
+  // JSON article structural data (sections with boxes, quiz)
+  List<RenderedSection> _articleSections = [];
+  WfQuiz? _articleQuiz;
+
   // Internal link navigation
   List<Map<String, dynamic>> _articleLinks = [];
   int _currentUrlIndex = -1;
@@ -281,6 +286,8 @@ class WissensfreundProvider extends ChangeNotifier {
   bool                   get isRestMode        => _isRestMode;
   ZimVersionInfo?        get pendingZimUpdate  => _pendingZimUpdate;
   List<Map<String, dynamic>> get articleLinks  => List.unmodifiable(_articleLinks);
+  List<RenderedSection>      get articleSections => List.unmodifiable(_articleSections);
+  WfQuiz?                    get articleQuiz     => _articleQuiz;
   bool get canGoBack => _navStack.isNotEmpty;
 
   WissensfreundProvider() {
@@ -1021,6 +1028,8 @@ class WissensfreundProvider extends ChangeNotifier {
     _articleTitle       = rendered.title;
     _articleText        = rendered.plainText;
     _articlePath        = rendered.sourceUrl;
+    _articleSections    = rendered.sections;
+    _articleQuiz        = rendered.quiz;
     _articleLinks       = [];
     _selectedImageIndex = -1;
     _imageBytesCache.clear();
@@ -1813,9 +1822,11 @@ class WissensfreundProvider extends ChangeNotifier {
     _isPaused     = false;
     _resumeOffset = 0;
     _ttsCursor    = 0;
-    _articleText  = '';
-    _articleTitle = '';
-    _articlePath  = '';
+    _articleText     = '';
+    _articleTitle    = '';
+    _articlePath     = '';
+    _articleSections = [];
+    _articleQuiz     = null;
     _articleImages      = [];
     _selectedImageIndex = -1;
     _mediaItems         = [];

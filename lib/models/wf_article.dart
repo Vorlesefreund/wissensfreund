@@ -80,7 +80,8 @@ class WfImage {
         license:       j['license']        as String? ?? '',
         licenseAuthor: j['license_author'] as String? ?? '',
         sourceUrl:     j['source_url']     as String? ?? '',
-        thumbUrl:      j['thumb_url']      as String? ?? '',
+        thumbUrl:      j['thumb_url']      as String?
+                    ?? j['source_url']  as String? ?? '',
         zimHash:       j['zim_hash']       as String?,
       );
 }
@@ -107,23 +108,26 @@ class WfBox {
   final String type;
   final String? headline;
   final String text;
-  final String? revealMode;
-  final String? revealText;
+  final bool revealMode;
+  final bool? answer;        // stimmt_das: true = correct, false = incorrect
+  final String? explanation; // stimmt_das: shown after reveal
 
   const WfBox({
     required this.type,
     this.headline,
     required this.text,
-    this.revealMode,
-    this.revealText,
+    this.revealMode = false,
+    this.answer,
+    this.explanation,
   });
 
   factory WfBox.fromJson(Map<String, dynamic> j) => WfBox(
-        type:       j['type']        as String? ?? '',
-        headline:   j['headline']    as String?,
-        text:       j['text']        as String? ?? '',
-        revealMode: j['reveal_mode'] as String?,
-        revealText: j['reveal_text'] as String?,
+        type:        j['type']        as String? ?? '',
+        headline:    j['headline']    as String?,
+        text:        j['text']        as String? ?? '',
+        revealMode:  j['reveal_mode'] == true,
+        answer:      j['answer']      as bool?,
+        explanation: j['explanation'] as String?,
       );
 }
 

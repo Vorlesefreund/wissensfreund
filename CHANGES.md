@@ -1,5 +1,18 @@
-<!-- last-updated: 2026-05-31T14:34:11Z -->
+<!-- last-updated: 2026-06-02T00:00:00Z -->
 # Changelog — Wissensfreund App
+
+---
+
+## [2026-06-02] — Phase 1: Quiz-Widget + Callout-Boxen
+
+- `lib/widgets/callout_box.dart` — CalloutBox für Typen wow/fakt/stimmt_das/warnung; stimmt_das mit Reveal-Mechanismus (Tippen deckt Antwort + Erklärung auf)
+- `lib/widgets/quiz_widget.dart` — QuizWidget (eine Frage pro Schritt, grün/rot Feedback, Ergebnis-Anzeige mit Emoji)
+- `lib/models/wf_article.dart` — WfBox: revealMode (bool), answer (bool?), explanation (String?) ergänzt; revealText entfernt
+- `lib/models/rendered_article.dart` — RenderedBox analog aktualisiert
+- `lib/converters/wf_article_converter.dart` — neue WfBox-Felder durchgereicht
+- `lib/providers/wissensfreund_provider.dart` — articleSections + articleQuiz Getter; Reset in stopSpeaking
+- `lib/screens/article_screen.dart` — _insertSectionBoxes() Helper; Boxen in Modus A+B nach Abschnittsende; Quiz am Artikelende (Modus A+B); Modus C unverändert
+- `assets/test/elefant_l2.json` — Testartikel mit 4 Callout-Boxen (wow, fakt, stimmt_das ×2, warnung) und 4 Quiz-Fragen
 
 ---
 

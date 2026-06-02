@@ -39,18 +39,20 @@ class RenderedLink {
 }
 
 class RenderedBox {
-  final String type;       // "wow" | "fakt" | "stimmt" | "warn"
+  final String type;       // "wow" | "fakt" | "stimmt_das" | "warnung"
   final String? headline;
   final String text;
-  final String? revealMode;
-  final String? revealText;
+  final bool revealMode;
+  final bool? answer;
+  final String? explanation;
 
   const RenderedBox({
     required this.type,
     this.headline,
     required this.text,
-    this.revealMode,
-    this.revealText,
+    this.revealMode = false,
+    this.answer,
+    this.explanation,
   });
 }
 

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../models/rendered_article.dart';
 import '../providers/wissensfreund_provider.dart';
 import '../utils/system_ui.dart';
 import '../services/data_limit_overlay_service.dart';
@@ -16,7 +17,9 @@ import '../services/parental_lock_service.dart';
 import '../services/subscription_service.dart';
 import '../services/profile_service.dart';
 import '../services/wikimedia_license_checker.dart';
+import '../widgets/callout_box.dart';
 import '../widgets/professor_widget.dart';
+import '../widgets/quiz_widget.dart';
 
 // Professor / mic layout — ALL size-dependent values derive from these constants.
 // When the professor or mic button changes size, update only here.
@@ -1634,6 +1637,72 @@ void _doImageSwipe(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Callout-Box / Quiz helpers (JSON articles, Mode A + B only)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/// Inserts [CalloutBox] widgets after the last flat sentence of each section.
+/// Returns a new list — original [sentenceWidgets] unchanged.
+List<Widget> _insertSectionBoxes(
+  List<Widget> sentenceWidgets,
+  List<String> sentences,
+  String fullText,
+  List<RenderedSection> sections,
+) {
+  if (sections.isEmpty || sentences.isEmpty) return sentenceWidgets;
+  if (sections.every((s) => s.boxes.isEmpty)) return sentenceWidgets;
+
+  // Step 1: char start of each flat sentence in fullText
+  final sentStarts = <int>[];
+  int scanPos = 0;
+  for (final sent in sentences) {
+    final idx = fullText.indexOf(sent, scanPos);
+    if (idx >= 0) {
+      sentStarts.add(idx);
+      scanPos = idx + sent.length;
+    } else {
+      sentStarts.add(scanPos);
+    }
+  }
+
+  // Step 2: exclusive end char of each section
+  final sectionEndChars = <int>[
+    for (int s = 0; s < sections.length; s++)
+      (s + 1 < sections.length && sections[s + 1].sentences.isNotEmpty)
+          ? sections[s + 1].sentences.first.startChar
+          : fullText.length + 1,
+  ];
+
+  // Step 3: map each flat sentence → section index
+  final sentSec = <int>[
+    for (int i = 0; i < sentences.length; i++) () {
+      final start = i < sentStarts.length ? sentStarts[i] : 0;
+      for (int s = 0; s < sections.length; s++) {
+        if (start < sectionEndChars[s]) return s;
+      }
+      return sections.length - 1;
+    }(),
+  ];
+
+  // Step 4: build result with box widgets injected after each section's last sentence
+  final result = <Widget>[];
+  for (int i = 0; i < sentenceWidgets.length; i++) {
+    result.add(sentenceWidgets[i]);
+    final sec = i < sentSec.length ? sentSec[i] : -1;
+    if (sec < 0) continue;
+    final isLast = i == sentences.length - 1 || sentSec[i + 1] != sec;
+    if (isLast && sections[sec].boxes.isNotEmpty) {
+      for (final box in sections[sec].boxes) {
+        result.add(Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6),
+          child: CalloutBox(box: box),
+        ));
+      }
+    }
+  }
+  return result;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Shared sentence utilities
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -2027,22 +2096,33 @@ class _ModeAContentState extends State<_ModeAContent> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        ..._buildSentenceWidgets(
-                          sentences: sentences,
-                          activeIdx: activeIdx,
-                          inZone: inZone,
-                          ttsCursor: provider.ttsCursor,
-                          isSpeaking: provider.state == AppState.speaking,
-                          isPaused: provider.isPaused,
-                          fullText: provider.articleText,
-                          links: provider.articleLinks,
-                          onLinkTap: provider.onLinkTapped,
+                        ..._insertSectionBoxes(
+                          _buildSentenceWidgets(
+                            sentences: sentences,
+                            activeIdx: activeIdx,
+                            inZone: inZone,
+                            ttsCursor: provider.ttsCursor,
+                            isSpeaking: provider.state == AppState.speaking,
+                            isPaused: provider.isPaused,
+                            fullText: provider.articleText,
+                            links: provider.articleLinks,
+                            onLinkTap: provider.onLinkTapped,
+                          ),
+                          sentences,
+                          provider.articleText,
+                          provider.articleSections,
                         ),
                         const _ThumbnailRow(),
                         if (sentences.isNotEmpty) ...[
                           const SizedBox(height: 8),
                           _KlexikonAttribution(url: provider.articleUrl),
                         ],
+                        if (provider.articleQuiz != null &&
+                            provider.articleQuiz!.questions.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 24, bottom: _kProfZone),
+                            child: QuizWidget(quiz: provider.articleQuiz!),
+                          ),
                       ],
                     ),
                   );
@@ -2505,26 +2585,39 @@ class _ModeBContentState extends State<_ModeBContent> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              for (int i = 0; i < sentences.length; i++)
-                                Padding(
-                                  key: _keyFor(i),
-                                  padding: const EdgeInsets.only(bottom: 12),
-                                  child: Text(
-                                    sentences[i],
-                                    style: TextStyle(
-                                      fontSize: i == activeIdx ? 19 : 15,
-                                      height: 1.5,
-                                      color: i == activeIdx
-                                          ? Colors.white
-                                          : Colors.white.withValues(alpha: 0.4),
-                                      fontWeight: i == activeIdx
-                                          ? FontWeight.w600
-                                          : FontWeight.w400,
+                              ..._insertSectionBoxes(
+                                [
+                                  for (int i = 0; i < sentences.length; i++)
+                                    Padding(
+                                      key: _keyFor(i),
+                                      padding: const EdgeInsets.only(bottom: 12),
+                                      child: Text(
+                                        sentences[i],
+                                        style: TextStyle(
+                                          fontSize: i == activeIdx ? 19 : 15,
+                                          height: 1.5,
+                                          color: i == activeIdx
+                                              ? Colors.white
+                                              : Colors.white.withValues(alpha: 0.4),
+                                          fontWeight: i == activeIdx
+                                              ? FontWeight.w600
+                                              : FontWeight.w400,
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
+                                ],
+                                sentences,
+                                provider.articleText,
+                                provider.articleSections,
+                              ),
                               // Quellenhinweis am Ende des Textes (im Scrollbereich)
                               _KlexikonAttribution(url: provider.articleUrl, dark: true),
+                              if (provider.articleQuiz != null &&
+                                  provider.articleQuiz!.questions.isNotEmpty)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 24),
+                                  child: QuizWidget(quiz: provider.articleQuiz!),
+                                ),
                             ],
                           ),
                         ),
