@@ -288,6 +288,34 @@ und würde sonst zum nächsten Chunk weiter springen.
 
 Gegensatz: `seekAfterCurrentChunk` queued `_pendingSeekOffset` → wirkt erst nach aktuellem Satz.
 
+### `seekNow(int charOffset)` — sofortiger Interrupt für Scroll-Navigation
+```dart
+void seekNow(int charOffset) {
+  _pendingSeekOffset = null;
+  _stimmtPauseTimer?.cancel();
+  if (_state == AppState.speaking && !_isPaused) {
+    _ttsStopPending = true;     // onComplete-Guard: unterdrückt Stop-Event
+    unawaited(_tts.stop());
+    _seekToChunkForOffset(charOffset);  // synchron, vor dem Dart-Event-Loop-Tick
+  } else {
+    _seekToChunkForOffset(charOffset, startSpeaking: !_isPaused);
+  }
+}
+```
+Gegenüber `jumpToSection` kein async/await nötig, weil `_ttsStopPending` den Completion-Handler abblockt.
+Wird von `_jumpToTopSentence` (Mode A+B) gerufen, nicht für Section-Pfeile.
+
+### Heading-Gap Bug in _jumpToTopSentence (behoben 2026-06-02)
+`WfArticleConverter` schreibt `"Heading\n"` in `plainText`. `_splitSentences` merged Überschriften ohne Satzzeichen mit dem ersten Satz der Section → `sentences[k]` = `"Heading\nErster Satz."`.
+
+Berechneter `charOffset` für diesen "merged Satz" = start of Heading in `plainText`. Aber `_chunkOffsets[s3_0]` = start of Heading + len(Heading) + 1. Dadurch fand `_seekToChunkForOffset` den letzten Satz VOR der Überschrift statt des richtigen Satzes.
+
+**Fix in `_jumpToTopSentence`**:
+```dart
+final nl = sentences[topIdx].indexOf('\n');
+if (nl >= 0) charOffset += nl + 1;  // spring past "Heading\n" zum echten Satz
+```
+
 ### Kapitelüberschriften mitvorlesen
 Beim Aufbau von `_speechChunks` in `loadAndSpeakJsonArticle`:
 ```dart

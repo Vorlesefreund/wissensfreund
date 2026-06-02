@@ -3,7 +3,8 @@ import '../models/rendered_article.dart';
 
 class CalloutBox extends StatefulWidget {
   final RenderedBox box;
-  const CalloutBox({required this.box, super.key});
+  final bool isActive;
+  const CalloutBox({required this.box, this.isActive = false, super.key});
 
   @override
   State<CalloutBox> createState() => _CalloutBoxState();
@@ -36,9 +37,15 @@ class _CalloutBoxState extends State<CalloutBox> {
       decoration: BoxDecoration(
         color: _bgColor(),
         borderRadius: BorderRadius.circular(12),
+        border: widget.isActive
+            ? Border.all(color: const Color(0xFF2D6A4F), width: 2.5)
+            : null,
+        boxShadow: widget.isActive
+            ? [const BoxShadow(color: Color(0x33000000), blurRadius: 8, spreadRadius: 1)]
+            : null,
       ),
-      child: widget.box.type == 'stimmt_das' && widget.box.revealMode
-          ? _buildReveal()
+      child: widget.box.type == 'stimmt_das'
+          ? _buildStimmt()
           : _buildStatic(),
     );
   }
@@ -57,67 +64,76 @@ class _CalloutBoxState extends State<CalloutBox> {
         ],
       );
 
-  static const _correctPhrases = [
-    'Richtig!',
-    'Genau so ist es!',
-    'Super, du hast es gewusst!',
-    'Ja, das stimmt!',
-  ];
-
-  Widget _buildReveal() {
-    final correct = widget.box.answer ?? false;
+  Widget _buildStimmt() {
+    final revealMode = widget.box.revealMode;
     final explanation = widget.box.explanation ?? '';
-    final phrase = correct
-        ? _correctPhrases[widget.box.text.hashCode.abs() % _correctPhrases.length]
-        : 'Das ist leider nicht ganz richtig.';
-    final revealText = explanation.isNotEmpty ? '$phrase $explanation' : phrase;
+    final correct = widget.box.answer ?? false;
+    final explanationStyle = TextStyle(
+      fontSize: 14,
+      height: 1.45,
+      fontWeight: FontWeight.w500,
+      color: correct ? const Color(0xFF2E7D32) : const Color(0xFFC62828),
+    );
 
-    return GestureDetector(
-      onTap: _revealed ? null : () => setState(() => _revealed = true),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+    if (!revealMode) {
+      // reveal_mode: false → Erklärung sofort sichtbar
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(_emoji(), style: const TextStyle(fontSize: 24)),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  widget.box.text,
-                  style: const TextStyle(fontSize: 14, height: 1.45),
-                ),
+              const SizedBox(width: 8),
+              const Text(
+                'Stimmt das wirklich?',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          if (!_revealed)
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 9),
-              decoration: BoxDecoration(
-                color: Colors.purple.shade300,
-                borderRadius: BorderRadius.circular(8),
+          const SizedBox(height: 6),
+          Text(widget.box.text, style: const TextStyle(fontSize: 14, height: 1.45)),
+          if (explanation.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(explanation, style: explanationStyle),
+          ],
+        ],
+      );
+    }
+
+    // reveal_mode: true → Kind tippt um Erklärung zu sehen
+    return GestureDetector(
+      onTap: _revealed ? null : () => setState(() => _revealed = true),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(_emoji(), style: const TextStyle(fontSize: 24)),
+              const SizedBox(width: 8),
+              const Text(
+                'Stimmt das wirklich?',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
               ),
-              child: const Text(
-                'Tippe um die Antwort zu sehen',
-                textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: Colors.white, fontWeight: FontWeight.w600),
-              ),
-            )
-          else
-            Padding(
-              padding: const EdgeInsets.only(top: 2),
-              child: Text(
-                revealText,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  height: 1.45,
-                  fontWeight: FontWeight.w500,
-                  color: correct ? const Color(0xFF2E7D32) : const Color(0xFFC62828),
-                ),
-              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(widget.box.text, style: const TextStyle(fontSize: 14, height: 1.45)),
+          const SizedBox(height: 8),
+          AnimatedCrossFade(
+            duration: const Duration(milliseconds: 300),
+            crossFadeState: _revealed
+                ? CrossFadeState.showSecond
+                : CrossFadeState.showFirst,
+            firstChild: Text(
+              'Tippe auf die Box um die Antwort zu sehen',
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
             ),
+            secondChild: explanation.isNotEmpty
+                ? Text(explanation, style: explanationStyle)
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );

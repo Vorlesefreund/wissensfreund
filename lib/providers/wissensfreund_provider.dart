@@ -20,6 +20,7 @@ import '../models/rendered_article.dart';
 import '../models/wf_article.dart';
 import '../services/json_article_service.dart';
 import '../services/subscription_service.dart';
+import '../utils/professor_phrases.dart';
 import '../services/wikimedia_license_checker.dart';
 import '../services/zim_update_service.dart';
 
@@ -155,6 +156,14 @@ class WissensfreundProvider extends ChangeNotifier {
   int          _currentChunk  = 0;
   // img-index per chunk (JSON articles only; empty for ZIM)
   List<int>    _chunkImgIndices    = [];
+  // true for chunks that represent callout-box text (not article sentences)
+  List<bool>   _chunkIsBox        = [];
+  // true specifically for stimmt_das explanation chunks (needs 5 s pause before speak)
+  List<bool>   _chunkIsStimmtExpl = [];
+  Timer?       _stimmtPauseTimer;
+  // Maps chunk index → section index / box-within-section index (box chunks only)
+  Map<int, int> _chunkBoxSectionMap   = {};
+  Map<int, int> _chunkBoxInSectionMap = {};
   // section navigation (JSON articles only)
   List<int>    _sectionChunkStarts = [];
   List<String> _sectionHeadings   = [];
@@ -273,6 +282,14 @@ class WissensfreundProvider extends ChangeNotifier {
   int get currentTtsImageIndex => _chunkImgIndices.isEmpty
       ? -1
       : _chunkImgIndices[_currentChunk.clamp(0, _chunkImgIndices.length - 1)];
+  /// True while TTS is reading a callout-box chunk (not an article sentence).
+  bool get currentChunkIsBox => _chunkIsBox.isNotEmpty &&
+      _currentChunk < _chunkIsBox.length &&
+      _chunkIsBox[_currentChunk];
+  /// Section index of the box chunk currently being read, or -1 if none.
+  int get currentBoxSectionIdx   => _chunkBoxSectionMap[_currentChunk]   ?? -1;
+  /// Box-within-section index of the box chunk currently being read, or -1 if none.
+  int get currentBoxInSectionIdx => _chunkBoxInSectionMap[_currentChunk] ?? -1;
   bool              get imageSyncPaused   => _imageSyncPaused;
   List<int>         get sectionChunkStarts => List.unmodifiable(_sectionChunkStarts);
   List<String>      get sectionHeadings   => List.unmodifiable(_sectionHeadings);
@@ -481,11 +498,24 @@ class WissensfreundProvider extends ChangeNotifier {
           _tts.speak(_randomLimitWarningPhrase(warning));
           return;
         }
+        // stimmt_das explanation: 5-second pause so child can think first.
+        if (_chunkIsStimmtExpl.length > _currentChunk && _chunkIsStimmtExpl[_currentChunk]) {
+          final chunkToSpeak = _speechChunks[_currentChunk];
+          _stimmtPauseTimer?.cancel();
+          _stimmtPauseTimer = Timer(const Duration(seconds: 5), () {
+            if (_state == AppState.speaking && !_isPaused) _tts.speak(chunkToSpeak);
+          });
+          return;
+        }
         _tts.speak(_speechChunks[_currentChunk]);
       } else {
-        _speechChunks       = [];
-        _chunkOffsets       = [];
-        _chunkImgIndices    = [];
+        _speechChunks          = [];
+        _chunkOffsets          = [];
+        _chunkImgIndices       = [];
+        _chunkIsBox            = [];
+        _chunkIsStimmtExpl     = [];
+        _chunkBoxSectionMap.clear();
+        _chunkBoxInSectionMap.clear();
         _sectionChunkStarts = [];
         _sectionHeadings    = [];
         _imageSyncPaused    = false;
@@ -538,6 +568,10 @@ class WissensfreundProvider extends ChangeNotifier {
     }
     _currentChunk       = 0;
     _chunkImgIndices    = [];
+    _chunkIsBox         = [];
+    _chunkIsStimmtExpl  = [];
+    _chunkBoxSectionMap.clear();
+    _chunkBoxInSectionMap.clear();
     _sectionChunkStarts = [];
     _sectionHeadings    = [];
     _imageSyncPaused    = false;
@@ -587,6 +621,20 @@ class WissensfreundProvider extends ChangeNotifier {
     }
   }
 
+  /// Sofort-Sprung: unterbricht den laufenden TTS-Chunk und springt direkt zum Ziel.
+  /// Für Scroll-Navigation — kürzer als seekAfterCurrentChunk (kein Warten auf Chunk-Ende).
+  void seekNow(int charOffset) {
+    _pendingSeekOffset = null;
+    _stimmtPauseTimer?.cancel();
+    if (_state == AppState.speaking && !_isPaused) {
+      _ttsStopPending = true;
+      unawaited(_tts.stop());
+      _seekToChunkForOffset(charOffset);
+    } else {
+      _seekToChunkForOffset(charOffset, startSpeaking: !_isPaused);
+    }
+  }
+
   /// Kapitel-Sprung: unterbricht TTS sofort und springt zum Ziel-Offset.
   /// Für Section-Pfeile (nicht für Scroll-Navigation).
   Future<void> jumpToSection(int charOffset) async {
@@ -603,10 +651,13 @@ class WissensfreundProvider extends ChangeNotifier {
   }
 
   void _seekToChunkForOffset(int charOffset, {bool startSpeaking = true}) {
+    _stimmtPauseTimer?.cancel();
     if (_chunkImgIndices.isNotEmpty) {
-      // JSON article: find chunk whose startChar <= charOffset
+      // JSON article: find highest-indexed SENTENCE chunk (not box) with startChar <= charOffset.
+      // Box chunks are skipped so seek always lands on a real sentence, not an interstitial box.
       int targetChunk = 0;
       for (int i = _chunkOffsets.length - 1; i >= 0; i--) {
+        if (_chunkIsBox.length > i && _chunkIsBox[i]) continue;
         if (_chunkOffsets[i] <= charOffset) { targetChunk = i; break; }
       }
       _currentChunk = targetChunk;
@@ -1072,11 +1123,18 @@ class WissensfreundProvider extends ChangeNotifier {
     _speechChunks       = [];
     _chunkOffsets       = [];
     _chunkImgIndices    = [];
+    _chunkIsBox         = [];
+    _chunkIsStimmtExpl  = [];
+    _chunkBoxSectionMap.clear();
+    _chunkBoxInSectionMap.clear();
     _sectionChunkStarts = [];
     _sectionHeadings    = [];
-    for (final section in rendered.sections) {
+    for (int sIdx = 0; sIdx < rendered.sections.length; sIdx++) {
+      final section = rendered.sections[sIdx];
       _sectionChunkStarts.add(_speechChunks.length);
       _sectionHeadings.add(section.heading);
+      int lastOffset  = _chunkOffsets.isNotEmpty ? _chunkOffsets.last : 0;
+      int lastImgIdx  = -1;
       for (int i = 0; i < section.sentences.length; i++) {
         final s = section.sentences[i];
         final heading = section.heading.trim();
@@ -1086,6 +1144,41 @@ class WissensfreundProvider extends ChangeNotifier {
         _speechChunks.add(text);
         _chunkOffsets.add(s.startChar);
         _chunkImgIndices.add(s.imageIndex);
+        _chunkIsBox.add(false);
+        _chunkIsStimmtExpl.add(false); // keep list aligned with _speechChunks
+        lastOffset = s.startChar;
+        lastImgIdx = s.imageIndex;
+      }
+      // Box-Texte als eigene Chunks direkt nach dem letzten Satz des Abschnitts.
+      // _chunkIsBox = true → Seek-Algorithmus überspringt diese Chunks.
+      for (int bIdx = 0; bIdx < section.boxes.length; bIdx++) {
+        final box = section.boxes[bIdx];
+        void addBox(String text, {bool isStimmtExpl = false}) {
+          // Record section + box position so UI can highlight the active box.
+          _chunkBoxSectionMap[_speechChunks.length]   = sIdx;
+          _chunkBoxInSectionMap[_speechChunks.length] = bIdx;
+          _speechChunks.add(text);
+          _chunkOffsets.add(lastOffset);
+          _chunkImgIndices.add(lastImgIdx);
+          _chunkIsBox.add(true);
+          _chunkIsStimmtExpl.add(isStimmtExpl);
+        }
+        switch (box.type) {
+          case 'wow':
+            addBox('${ProfessorPhrases.pick(ProfessorPhrases.wowPrefix)} ${box.text}');
+          case 'fakt':
+            addBox('${ProfessorPhrases.pick(ProfessorPhrases.faktPrefix)} ${box.text}');
+          case 'warnung':
+            addBox(box.text);
+          case 'stimmt_das':
+            // ABWEICHUNG vom Spec: Titel "Stimmt das wirklich?" wird mitvorgelesen.
+            // Spec sagt nur These vorlesen — User-Wunsch 2026-06-02.
+            addBox('Stimmt das wirklich? ${box.text}');
+            final expl = box.explanation ?? '';
+            if (expl.isNotEmpty) addBox(expl, isStimmtExpl: true);
+          default:
+            addBox(box.text);
+        }
       }
     }
     _currentChunk      = 0;
@@ -1774,6 +1867,7 @@ class WissensfreundProvider extends ChangeNotifier {
 
   Future<void> pauseSpeaking() async {
     if (_state != AppState.speaking) return;
+    _stimmtPauseTimer?.cancel();
     _resumeOffset = _ttsCursor;
     _isPaused = true;  // guard completion handler before stop()
     _state = AppState.idle;
@@ -1815,10 +1909,11 @@ class WissensfreundProvider extends ChangeNotifier {
   }
 
   /// Pausiert den Idle-Timer während der Professor spricht.
+  /// Verwendet "reading"-Modus: fixiert Helligkeit auf System-Level → verhindert adaptives Auto-Dimmen.
   void _pauseScreenTimer() {
     _screenDimTimer?.cancel();
     _screenOffTimer?.cancel();
-    _zimChannel.invokeMethod<void>('setScreenMode', {'mode': 'awake'});
+    _zimChannel.invokeMethod<void>('setScreenMode', {'mode': 'reading'});
   }
 
   Future<void> resumeSpeaking() async {
@@ -1835,6 +1930,7 @@ class WissensfreundProvider extends ChangeNotifier {
   }
 
   Future<void> stopSpeaking() async {
+    _stimmtPauseTimer?.cancel();
     _captionPromptDelayTimer?.cancel();
     _captionPromptDelayTimer = null;
     _captionResumeTimer?.cancel();

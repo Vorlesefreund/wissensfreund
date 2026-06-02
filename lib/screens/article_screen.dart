@@ -1753,24 +1753,32 @@ void _doImageSwipe(
 /// Uses text-content matching: searches the flat sentence list for the text
 /// of each section's last [RenderedSentence], then inserts boxes after that index.
 /// Returns a new list — original [sentenceWidgets] unchanged.
+///
+/// [boxKeys]: if provided, GlobalKeys are assigned per box (key = "$sIdx-$bIdx")
+///   so Mode B can scroll directly to the active box.
+/// [activeSectionIdx]/[activeBoxIdx]: which box is currently being read aloud.
 List<Widget> _insertSectionBoxes(
   List<Widget> sentenceWidgets,
   List<String> sentences,
-  List<RenderedSection> sections,
-) {
+  List<RenderedSection> sections, {
+  Map<String, GlobalKey>? boxKeys,
+  int activeSectionIdx = -1,
+  int activeBoxIdx = -1,
+}) {
   if (sections.isEmpty || sentences.isEmpty) return sentenceWidgets;
   if (sections.every((s) => s.boxes.isEmpty)) return sentenceWidgets;
 
   // For each section with boxes, find the flat-sentence index that contains
-  // the last sentence of that section, then record boxes to insert after it.
-  final Map<int, List<RenderedBox>> boxesAfter = {};
+  // the last sentence of that section, then record (sectionIdx, boxes) after it.
+  final Map<int, (int sIdx, List<RenderedBox> boxes)> boxesAfter = {};
   int searchFrom = 0;
-  for (final sec in sections) {
+  for (int sIdx = 0; sIdx < sections.length; sIdx++) {
+    final sec = sections[sIdx];
     if (sec.sentences.isEmpty) continue;
     final lastText = sec.sentences.last.text;
     for (int i = searchFrom; i < sentences.length; i++) {
       if (sentences[i] == lastText || sentences[i].contains(lastText)) {
-        if (sec.boxes.isNotEmpty) boxesAfter[i] = sec.boxes;
+        if (sec.boxes.isNotEmpty) boxesAfter[i] = (sIdx, sec.boxes);
         searchFrom = i + 1;
         break;
       }
@@ -1782,12 +1790,18 @@ List<Widget> _insertSectionBoxes(
   final result = <Widget>[];
   for (int i = 0; i < sentenceWidgets.length; i++) {
     result.add(sentenceWidgets[i]);
-    final boxes = boxesAfter[i];
-    if (boxes != null) {
-      for (final box in boxes) {
+    final entry = boxesAfter[i];
+    if (entry != null) {
+      final (sIdx, boxes) = entry;
+      for (int bIdx = 0; bIdx < boxes.length; bIdx++) {
+        final gKey = boxKeys?.putIfAbsent('$sIdx-$bIdx', () => GlobalKey());
         result.add(Padding(
+          key: gKey,
           padding: const EdgeInsets.symmetric(vertical: 6),
-          child: CalloutBox(box: box),
+          child: CalloutBox(
+            box: boxes[bIdx],
+            isActive: sIdx == activeSectionIdx && bIdx == activeBoxIdx,
+          ),
         ));
       }
     }
@@ -1848,6 +1862,8 @@ class _ModeAContentState extends State<_ModeAContent> {
 
   // Stufe 2/3: debounce timer for scroll-jump navigation.
   Timer? _scrollDebounce;
+  // Keeps _userScrolling=true until pending seek takes effect (prevents snap-back).
+  Timer? _seekResumeTimer;
   // Stufe 2/3: resync timer after backward image swipe (10 s).
   Timer? _syncResetTimer;
 
@@ -1880,18 +1896,20 @@ class _ModeAContentState extends State<_ModeAContent> {
     final ageLevel = ProfileService.instance.activeAgeLevel;
     if (ageLevel < 2) {
       _scrollDebounce?.cancel();
-      _scrollDebounce = Timer(const Duration(milliseconds: 800), () {
+      _scrollDebounce = Timer(const Duration(milliseconds: 300), () {
         if (mounted) _userScrolling = false;
       });
       return;
     }
     _scrollDebounce?.cancel();
-    _scrollDebounce = Timer(const Duration(milliseconds: 800), _jumpToTopSentence);
+    _scrollDebounce = Timer(const Duration(milliseconds: 300), _jumpToTopSentence);
   }
 
   void _jumpToTopSentence() {
     if (!mounted || !_scrollCtrl.hasClients || !_cacheBuilt) { _userScrolling = false; return; }
     final provider = context.read<WissensfreundProvider>();
+    // Never seek while a box chunk is active — boxes have no sentence position.
+    if (provider.currentChunkIsBox) { _userScrolling = false; return; }
     final sentences = _splitSentences(provider.articleText);
     if (sentences.isEmpty) { _userScrolling = false; return; }
     final activeIdx = _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
@@ -1918,17 +1936,32 @@ class _ModeAContentState extends State<_ModeAContent> {
         topIdx = i;
       }
     }
-    if (topIdx < 0 || topIdx == activeIdx) { _userScrolling = false; return; }
+    if (topIdx < 0) {
+      // User scrolled past all sentence content — keep lock to prevent snap-back.
+      _seekResumeTimer?.cancel();
+      _seekResumeTimer = Timer(const Duration(milliseconds: 2000), () {
+        if (mounted) _userScrolling = false;
+      });
+      return;
+    }
+    if (topIdx == activeIdx) { _userScrolling = false; return; }
     if (provider.isPaused) { _userScrolling = false; return; }
 
     // Compute char offset by summing sentence lengths up to topIdx.
+    // If sentences[topIdx] is a heading-merged sentence (contains \n), advance past the heading
+    // so the seek lands on the real sentence start rather than the heading gap.
     int charOffset = 0;
     for (int i = 0; i < topIdx; i++) {
       charOffset += sentences[i].length + 1; // +1 for the stripped delimiter
     }
-    provider.seekAfterCurrentChunk(charOffset);
-    // Mode A uses a stable position cache (no font-size flicker) → safe to unblock immediately.
-    _userScrolling = false;
+    final nl = sentences[topIdx].indexOf('\n');
+    if (nl >= 0) charOffset += nl + 1;
+
+    provider.seekNow(charOffset);
+    _seekResumeTimer?.cancel();
+    _seekResumeTimer = Timer(const Duration(milliseconds: 2000), () {
+      if (mounted) _userScrolling = false;
+    });
   }
 
   void _startSyncResetTimer(WissensfreundProvider provider) {
@@ -1956,6 +1989,7 @@ class _ModeAContentState extends State<_ModeAContent> {
   @override
   void dispose() {
     _scrollDebounce?.cancel();
+    _seekResumeTimer?.cancel();
     _syncResetTimer?.cancel();
     _programmaticScrollTimer?.cancel();
     _scrollCtrl.removeListener(_onScroll);
@@ -2016,7 +2050,7 @@ class _ModeAContentState extends State<_ModeAContent> {
     required void Function(String) onLinkTap,
   }) {
     int activeCursorInSent = -1;
-    if ((isSpeaking || isPaused) && sentences.isNotEmpty) {
+    if ((isSpeaking || isPaused) && sentences.isNotEmpty && activeIdx >= 0) {
       int sentStart = 0;
       for (int i = 0; i < activeIdx; i++) {
         sentStart += sentences[i].length + 1;
@@ -2130,8 +2164,9 @@ class _ModeAContentState extends State<_ModeAContent> {
     return Consumer<WissensfreundProvider>(
       builder: (context, provider, _) {
         final sentences = _splitSentences(provider.articleText);
-        final activeIdx =
-            _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
+        final activeIdx = provider.currentChunkIsBox
+            ? -1
+            : _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
 
         // Reset keys + cache when article changes; rebuild after full-width render.
         if (provider.articleText != _lastArticleText) {
@@ -2203,6 +2238,8 @@ class _ModeAContentState extends State<_ModeAContent> {
                           ),
                           sentences,
                           provider.articleSections,
+                          activeSectionIdx: provider.currentBoxSectionIdx,
+                          activeBoxIdx: provider.currentBoxInSectionIdx,
                         ),
                         _ThumbnailRow(
                           images: provider.articleImages,
@@ -2404,6 +2441,8 @@ class _ModeBContentState extends State<_ModeBContent> {
   final _scrollCtrl = ScrollController();
   final _sentenceKeys = <int, GlobalKey>{};
   int _lastActiveIdx = -1;
+  String? _lastBoxKey;           // last '$sIdx-$bIdx' key scrolled to
+  final _boxKeys = <String, GlobalKey>{}; // GlobalKey per box widget
   String _lastArticleText = '';
   bool _scrollPending = false;
   bool _userScrolling = false;
@@ -2442,19 +2481,21 @@ class _ModeBContentState extends State<_ModeBContent> {
     final ageLevel = ProfileService.instance.activeAgeLevel;
     if (ageLevel < 2) {
       _scrollDebounce?.cancel();
-      _scrollDebounce = Timer(const Duration(milliseconds: 800), () {
+      _scrollDebounce = Timer(const Duration(milliseconds: 300), () {
         if (mounted) _userScrolling = false;
       });
       return;
     }
     _scrollDebounce?.cancel();
-    _scrollDebounce = Timer(const Duration(milliseconds: 800), _jumpToTopSentence);
+    _scrollDebounce = Timer(const Duration(milliseconds: 300), _jumpToTopSentence);
   }
 
   void _jumpToTopSentence() {
     // _userScrolling stays TRUE here — only reset after seek settles or no seek needed
     if (!mounted || !_scrollCtrl.hasClients) { _userScrolling = false; return; }
     final provider = context.read<WissensfreundProvider>();
+    // Never seek while a box chunk is active — boxes have no sentence position.
+    if (provider.currentChunkIsBox) { _userScrolling = false; return; }
     final sentences = _splitSentences(provider.articleText);
     if (sentences.isEmpty) { _userScrolling = false; return; }
     final activeIdx = _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
@@ -2477,19 +2518,30 @@ class _ModeBContentState extends State<_ModeBContent> {
       }
     }
 
-    if (topIdx < 0 || topIdx == activeIdx) { _userScrolling = false; return; }
+    if (topIdx < 0) {
+      // User scrolled past all sentence content — keep lock to prevent snap-back.
+      _seekResumeTimer?.cancel();
+      _seekResumeTimer = Timer(const Duration(milliseconds: 2000), () {
+        if (mounted) _userScrolling = false;
+      });
+      return;
+    }
+    if (topIdx == activeIdx) { _userScrolling = false; return; }
     if (provider.isPaused) { _userScrolling = false; return; }
 
+    // Compute char offset by summing sentence lengths up to topIdx.
+    // If sentences[topIdx] is a heading-merged sentence (contains \n), advance past the heading
+    // so the seek lands on the real sentence start rather than the heading gap.
     int charOffset = 0;
     for (int i = 0; i < topIdx; i++) {
       charOffset += sentences[i].length + 1;
     }
-    provider.seekAfterCurrentChunk(charOffset);
+    final nl = sentences[topIdx].indexOf('\n');
+    if (nl >= 0) charOffset += nl + 1;
 
-    // Keep _userScrolling = true until the pending seek takes effect (prevents scroll-back).
-    // Reset after 3 s — long enough for the current TTS chunk to finish and seek to fire.
+    provider.seekNow(charOffset);
     _seekResumeTimer?.cancel();
-    _seekResumeTimer = Timer(const Duration(milliseconds: 3000), () {
+    _seekResumeTimer = Timer(const Duration(milliseconds: 2000), () {
       if (mounted) _userScrolling = false;
     });
   }
@@ -2543,6 +2595,37 @@ class _ModeBContentState extends State<_ModeBContent> {
 
   GlobalKey _keyFor(int i) => _sentenceKeys.putIfAbsent(i, () => GlobalKey());
 
+  /// Scrolls to a box widget identified by GlobalKey. Same logic as [_smartScrollTo]
+  /// but uses live RenderBox coordinates instead of the sentence position cache.
+  void _smartScrollToBox(GlobalKey key) {
+    if (_scrollPending || _userScrolling) return;
+    _scrollPending = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollPending = false;
+      if (!mounted || !_scrollCtrl.hasClients) return;
+      final ctx = key.currentContext;
+      if (ctx == null) return;
+      final box = ctx.findRenderObject() as RenderBox?;
+      if (box == null || !box.attached) return;
+      final scrollable = Scrollable.maybeOf(ctx);
+      if (scrollable == null) return;
+      final vpBox = scrollable.context.findRenderObject() as RenderBox?;
+      if (vpBox == null || !vpBox.attached) return;
+      final boxTopInVp = vpBox.globalToLocal(box.localToGlobal(Offset.zero)).dy;
+      final boxTopInContent = boxTopInVp + _scrollCtrl.offset;
+      final viewportH = _scrollCtrl.position.viewportDimension;
+      final target = (boxTopInContent - viewportH / 2 + box.size.height / 2)
+          .clamp(_scrollCtrl.position.minScrollExtent, _scrollCtrl.position.maxScrollExtent);
+      _programmaticScroll = true;
+      _programmaticScrollTimer?.cancel();
+      _programmaticScrollTimer = Timer(const Duration(milliseconds: 600), () {
+        _programmaticScroll = false;
+      });
+      _scrollCtrl.animateTo(target,
+          duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+    });
+  }
+
   void _startSyncResetTimer(WissensfreundProvider provider) {
     _syncResetTimer?.cancel();
     _syncResetTimer = Timer(const Duration(seconds: 10), () {
@@ -2581,17 +2664,23 @@ class _ModeBContentState extends State<_ModeBContent> {
     return Consumer<WissensfreundProvider>(
       builder: (context, provider, _) {
         final sentences = _splitSentences(provider.articleText);
-        final activeIdx =
-            _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
-        final progress =
-            sentences.isEmpty ? 0.0 : (activeIdx + 1) / sentences.length;
+        final rawIdx = _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
+        // -1 while box chunk plays → no sentence highlighted; scroll still uses rawIdx
+        // so the view follows the last sentence and the box below it stays visible.
+        final activeIdx = provider.currentChunkIsBox ? -1 : rawIdx;
+        final scrollIdx = provider.currentChunkIsBox ? rawIdx : activeIdx;
+        final progress = sentences.isEmpty
+            ? 0.0
+            : (activeIdx < 0 ? 1.0 : (activeIdx + 1) / sentences.length);
 
         if (provider.articleText != _lastArticleText) {
           _lastArticleText = provider.articleText;
           _sentenceKeys.clear();
+          _boxKeys.clear();
           _sentenceTopCache.clear();
           _cacheBuilt = false;
           _lastActiveIdx = -1;
+          _lastBoxKey = null;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
             if (_scrollCtrl.hasClients) _scrollCtrl.jumpTo(0);
@@ -2599,9 +2688,24 @@ class _ModeBContentState extends State<_ModeBContent> {
           });
         }
 
-        if (provider.state == AppState.speaking && activeIdx != _lastActiveIdx) {
-          _lastActiveIdx = activeIdx;
-          _smartScrollTo(activeIdx);
+        // Determine box key for the currently active box chunk.
+        final sIdx = provider.currentBoxSectionIdx;
+        final bIdx = provider.currentBoxInSectionIdx;
+        final currentBoxKey = (provider.currentChunkIsBox && sIdx >= 0) ? '$sIdx-$bIdx' : null;
+
+        if (provider.state == AppState.speaking) {
+          if (!provider.currentChunkIsBox && scrollIdx != _lastActiveIdx) {
+            // Sentence chunk: scroll to the active sentence.
+            _lastActiveIdx = scrollIdx;
+            _lastBoxKey = null;
+            _smartScrollTo(scrollIdx);
+          } else if (provider.currentChunkIsBox && currentBoxKey != _lastBoxKey) {
+            // Box chunk: scroll to the active box widget.
+            _lastBoxKey = currentBoxKey;
+            _lastActiveIdx = scrollIdx;
+            final key = currentBoxKey != null ? _boxKeys[currentBoxKey] : null;
+            if (key != null) _smartScrollToBox(key);
+          }
         }
 
         return Container(
@@ -2704,6 +2808,9 @@ class _ModeBContentState extends State<_ModeBContent> {
                                 ],
                                 sentences,
                                 provider.articleSections,
+                                boxKeys: _boxKeys,
+                                activeSectionIdx: provider.currentBoxSectionIdx,
+                                activeBoxIdx: provider.currentBoxInSectionIdx,
                               ),
                               // Quellenhinweis am Ende des Textes (im Scrollbereich)
                               _KlexikonAttribution(url: provider.articleUrl, dark: true),

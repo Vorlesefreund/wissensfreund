@@ -1,61 +1,57 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-02T09:23:19Z -->
+<!-- updated: 2026-06-02T12:56:39Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-02 — Phase 1: Quiz + Callout-Boxen)
+## 🟢 Zuletzt abgeschlossen (Session 2026-06-02 — TTS-Seek + Scroll-Bugs)
 
-- **CalloutBox-Widget** (`lib/widgets/callout_box.dart`)
-  - Typen: wow 🤩 / fakt 🔍 / stimmt_das 🤔 / warnung ⚠️
-  - stimmt_das mit Reveal-Mechanismus: Tippen deckt ✅/❌ + Erklärungstext auf
-- **QuizWidget** (`lib/widgets/quiz_widget.dart`)
-  - Schritt-für-Schritt, eine Frage auf einmal
-  - Antwort-Feedback: grün/rot; richtige Antwort immer grün markiert
-  - Ergebnis-Anzeige: "X von Y richtig" + Emoji (🎉/👍/🤔)
-- **WfBox-Modell** erweitert: revealMode (bool), answer (bool?), explanation (String?)
-- **RenderedBox + Converter** entsprechend aktualisiert
-- **Provider**: articleSections + articleQuiz Getter, populate + clear
-- **article_screen.dart**: `_insertSectionBoxes()` Helper; Modus A+B: Boxen nach Abschnittsende, Quiz am Artikelende; Modus C: keine Änderung
-- **Test-Asset** `assets/test/elefant_l2.json`: Boxen + Quiz vollständig befüllt (5 Sektionen, 4 Boxen, 4 Quizfragen)
-- APK gebaut + installiert ✅ (Phase 1 vollständig)
-- **Modus B Quiz** via BottomSheet (`_QuizStartButton` in article_screen.dart)
-- **Bilder im Test-JSON** (`elefant_l2.json`): echte Wikimedia-thumb_urls statt Placeholder-PNGs
+### Bugfixes in dieser Session
+
+- **Endlosschleife stimmt_das** (AnimatedCrossFade → _jumpToTopSentence Schleife): `currentChunkIsBox`-Guard
+- **Box-Highlighting**: `isActive`-Parameter in `CalloutBox`, Highlight beim Vorlesen
+- **TTS 5s-Pausen**: `_chunkIsStimmtExpl`-Alignment-Bug behoben (alle Chunks müssen `false` eintragen)
+- **Screen-Dimming**: `FLAG_KEEP_SCREEN_ON` per Window-Attribut; "reading"=Flag setzen, "awake"=clearFlags
+- **Box-Zentrierung**: `_smartScrollToBox` zentriert Box jetzt korrekt: `boxTopInContent - vpH/2 + boxHeight/2`
+- **Box-Koordinaten-Tracking**: `_chunkBoxSectionMap`/`_chunkBoxInSectionMap` für aktive Box-Hervorhebung
+- **Doppel-Vorlesen "Elefantenbabys"-Satz** (Root Cause: Heading-Gap):
+  - Abschnittsüberschriften ohne Satzzeichen werden in `_splitSentences` mit dem ersten Satz gemergt
+  - berechneter `charOffset` landete im Heading-Gap → Seek ging auf falschen Satz zurück
+  - **Fix**: nach `charOffset`-Berechnung `\n` in `sentences[topIdx]` suchen; falls vorhanden, `charOffset += nl + 1`
+- **Snap-Back nach Box-Bereich scrollen** (topIdx = -1):
+  - Wenn User über alle Sätze hinausscrollt, wurde `_userScrolling = false` gesetzt → Consumer scrollte zurück
+  - **Fix**: `topIdx < 0` → `_seekResumeTimer` 2 s setzen, `_userScrolling` bleibt true
+- **Seek zu spät** (Folgesatz wird noch gelesen):
+  - `seekAfterCurrentChunk` wartet auf aktuellen Chunk-Abschluss
+  - **Fix**: neues `seekNow()` in Provider — stoppt TTS sofort, springt direkt zum Ziel
+  - Debounce 800 ms → 300 ms reduziert
+- **Seek-Genauigkeit** (Mode A+B): `seekAfterCurrentChunk` → `seekNow`, 3s → 2s _seekResumeTimer
+
+Geänderte Dateien:
+- `lib/providers/wissensfreund_provider.dart`: `seekNow()` Methode, `_chunkIsStimmtExpl`-Fix, Screen-Mode
+- `lib/screens/article_screen.dart`: Mode A+B `_jumpToTopSentence` komplett, `_smartScrollToBox` Zentrierung
+- `lib/widgets/callout_box.dart`: `isActive` Highlighting
+- `android/.../MainActivity.kt`: `setScreenMode` (reading/awake/dim/off)
+
+APK gebaut + installiert ✅
 
 ---
 
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-01 — UI-Feinschliff)
+## 🟡 Noch nicht getestet (zum Testen)
 
-- Mode B: Artikelbild 0.32 (clamp 180–300dp), Satz-Anfang bei 30%
-- Mode C: Attribution bei _kMicClear=80dp sichtbar
-- Mikrofon: Toggle-Funktion
-- Mode A: Scroll-Trigger 35%, alignment 0.18
-- ZIM-Seek: respektiert startSpeaking-Parameter
+- Scroll past boxes → kein Doppel-Vorlesen mehr
+- Seek springt sofort (nicht nach Folgesatz)
+- Zweite Box ist korrekt zentriert
+- Box-Highlight beim Vorlesen sichtbar
+- Kein Screen-Dimming während TTS
 
 ---
-
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-02 — Bug-Fix-Runde)
-
-- **Callout-Boxen Modus A** nicht sichtbar → `_insertSectionBoxes` neu: text-content-matching statt startChar-Algo
-- **Bilder-Platzhalter** Header: emoji+themeColor aus JSON-Artikel (neu: `articleEmoji`, `articleThemeColor` im Provider)
-- **Thumbnail-Platzhalter** sichtbar: neuer `_ThumbTile` + `_ThumbnailRow` direkt von `articleImages` (nicht mediaItems)
-- **stimmt_das Reveal**: zentrierter Text, abwechselnde Richtig-Phrasen, Falsch-Prefix "Das ist leider nicht ganz richtig."
-- APK gebaut + installiert ✅
-
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-02 — Thumbnail-Bug-Fix)
-
-- **Root Cause gefunden**: `elefant_l2.json` Zeile 132 hatte ein ASCII-`"` (U+0022) inmitten einer JSON-String, was `FormatException` auslöste → `_loadFromAsset` → null → 0 Bilder
-- **Fix**: Ersetzt durch typografisches `"` (U+201D): `„Elefanten vergessen nie."`
-- **`_ThumbnailRow`** refactored: images/selectedIndex/onTap als Parameter statt innerer Consumer
-- **`_ThumbTile`**: zeigt farbigen Placeholder → lädt echte Bild-Bytes via `getImageBytes()`
-- **Debug-Prints entfernt**: `article_screen.dart`, `wissensfreund_provider.dart`, `json_article_service.dart` bereinigt
-- APK gebaut + installiert ✅ — 5 Thumbnails sollten jetzt in allen 3 Modi sichtbar sein
 
 ## 🟡 Offen — nächste Schritte (nach Priorität)
 
 ### Hoch
-- **Manuell testen** (5 Thumbnail-Kacheln in Modus A/B/C, Boxen Modus A, Reveal-Texte)
+- **Manuell testen** (alle Bugfixes aus dieser Session)
 - **Selbst produzierte Artikel** (neue JSON-Artikel mit echten Inhalten)
 
 ### Mittel (zurückgestellt)
