@@ -1852,6 +1852,7 @@ class _ModeAContentState extends State<_ModeAContent> {
   bool _userScrolling = false;     // true while user is manually scrolling
   bool _programmaticScroll = false; // suppresses _onScroll during TTS auto-scroll
   Timer? _programmaticScrollTimer;
+  double _lastScrollOffset = 0.0;
 
   // Cached full-width document positions (in scroll-content coordinates).
   // Built once after the first render when all sentences are at full width.
@@ -1889,9 +1890,12 @@ class _ModeAContentState extends State<_ModeAContent> {
   }
 
   void _onScroll() {
-    if (!mounted) return;
+    if (!mounted || !_scrollCtrl.hasClients) return;
     setState(() {});
     if (_programmaticScroll) return; // ignore scroll events from TTS auto-scroll
+    final offset = _scrollCtrl.offset;
+    if ((offset - _lastScrollOffset).abs() < 1.0) return;
+    _lastScrollOffset = offset;
     _userScrolling = true;
     final ageLevel = ProfileService.instance.activeAgeLevel;
     if (ageLevel < 2) {
@@ -2048,15 +2052,15 @@ class _ModeAContentState extends State<_ModeAContent> {
       if (localY < 0 || localY > viewportH * 0.6) {
         _programmaticScroll = true;
         _programmaticScrollTimer?.cancel();
-        _programmaticScrollTimer = Timer(const Duration(milliseconds: 600), () {
-          _programmaticScroll = false;
-        });
+        _programmaticScrollTimer = null;
         Scrollable.ensureVisible(
           ctx,
           duration: const Duration(milliseconds: 400),
           curve: Curves.easeOut,
           alignment: 0.5,
-        );
+        ).whenComplete(() {
+          if (mounted) _programmaticScroll = false;
+        });
       }
     });
   }
@@ -2472,6 +2476,7 @@ class _ModeBContentState extends State<_ModeBContent> {
   bool _userScrolling = false;
   bool _programmaticScroll = false;
   Timer? _programmaticScrollTimer;
+  double _lastScrollOffset = 0.0;
   Timer? _scrollDebounce;
   Timer? _syncResetTimer;
   Timer? _seekResumeTimer;
@@ -2498,8 +2503,11 @@ class _ModeBContentState extends State<_ModeBContent> {
   }
 
   void _onScroll() {
-    if (!mounted) return;
+    if (!mounted || !_scrollCtrl.hasClients) return;
     if (_programmaticScroll) return;
+    final offset = _scrollCtrl.offset;
+    if ((offset - _lastScrollOffset).abs() < 1.0) return;
+    _lastScrollOffset = offset;
     _userScrolling = true;
     _seekResumeTimer?.cancel();
     final ageLevel = ProfileService.instance.activeAgeLevel;
@@ -2636,11 +2644,12 @@ class _ModeBContentState extends State<_ModeBContent> {
           .clamp(_scrollCtrl.position.minScrollExtent, _scrollCtrl.position.maxScrollExtent);
       _programmaticScroll = true;
       _programmaticScrollTimer?.cancel();
-      _programmaticScrollTimer = Timer(const Duration(milliseconds: 600), () {
-        _programmaticScroll = false;
-      });
+      _programmaticScrollTimer = null;
       _scrollCtrl.animateTo(target,
-          duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+          duration: const Duration(milliseconds: 400), curve: Curves.easeOut)
+          .whenComplete(() {
+        if (mounted) _programmaticScroll = false;
+      });
     });
   }
 
@@ -2671,11 +2680,12 @@ class _ModeBContentState extends State<_ModeBContent> {
           .clamp(_scrollCtrl.position.minScrollExtent, _scrollCtrl.position.maxScrollExtent);
       _programmaticScroll = true;
       _programmaticScrollTimer?.cancel();
-      _programmaticScrollTimer = Timer(const Duration(milliseconds: 600), () {
-        _programmaticScroll = false;
-      });
+      _programmaticScrollTimer = null;
       _scrollCtrl.animateTo(target,
-          duration: const Duration(milliseconds: 400), curve: Curves.easeOut);
+          duration: const Duration(milliseconds: 400), curve: Curves.easeOut)
+          .whenComplete(() {
+        if (mounted) _programmaticScroll = false;
+      });
     });
   }
 

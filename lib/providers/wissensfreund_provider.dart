@@ -653,6 +653,7 @@ class WissensfreundProvider extends ChangeNotifier {
     _seekDelayTimer = Timer(delay, () {
       _stoppedForDelayedSeek = false;
       _seekDelayTimer = null;
+      _ttsStopPending = false;  // stop() hat evtl. kein onDone gefeuert → Flag manuell löschen
       if (_state != AppState.idle) {
         _seekToChunkForOffset(charOffset, startSpeaking: !_isPaused);
       }
