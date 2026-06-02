@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-02T07:39:33Z -->
+<!-- updated: 2026-06-02T08:16:07Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
@@ -39,7 +39,7 @@
 
 - **Callout-Boxen Modus A** nicht sichtbar → `_insertSectionBoxes` neu: text-content-matching statt startChar-Algo
 - **Bilder-Platzhalter** Header: emoji+themeColor aus JSON-Artikel (neu: `articleEmoji`, `articleThemeColor` im Provider)
-- **Thumbnail-Platzhalter** sichtbar: farbige Box statt unsichtbarem SizedBox.expand()
+- **Thumbnail-Platzhalter** sichtbar: neuer `_ThumbTile` + `_ThumbnailRow` direkt von `articleImages` (nicht mediaItems)
 - **stimmt_das Reveal**: zentrierter Text, abwechselnde Richtig-Phrasen, Falsch-Prefix "Das ist leider nicht ganz richtig."
 - APK gebaut + installiert ✅
 

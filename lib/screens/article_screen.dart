@@ -860,6 +860,79 @@ class _ImageCaptionLine extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Simple thumbnail tile: shows colored placeholder immediately, loads real
+// image in background if available.
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _ThumbTile extends StatefulWidget {
+  final String filename;
+  final Color placeholderColor;
+  final bool isSelected;
+  final VoidCallback onTap;
+  const _ThumbTile({
+    super.key,
+    required this.filename,
+    required this.placeholderColor,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  @override
+  State<_ThumbTile> createState() => _ThumbTileState();
+}
+
+class _ThumbTileState extends State<_ThumbTile> {
+  Uint8List? _bytes;
+  bool _loading = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_loading && _bytes == null) {
+      _loading = true;
+      context.read<WissensfreundProvider>().getImageBytes(widget.filename).then((b) {
+        if (mounted && b != null) setState(() => _bytes = b);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.onTap,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: SizedBox(
+          width: 100,
+          height: 100,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              _bytes != null
+                  ? Image.memory(_bytes!, fit: BoxFit.cover)
+                  : Container(
+                      color: widget.placeholderColor,
+                      alignment: Alignment.center,
+                      child: const Text('🖼️', style: TextStyle(fontSize: 28)),
+                    ),
+              if (widget.isSelected)
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white, width: 2.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Single thumbnail tile with lazy image load and ⓘ icon
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -2663,39 +2736,46 @@ class _ModeBContentState extends State<_ModeBContent> {
 class _ThumbnailRow extends StatelessWidget {
   const _ThumbnailRow();
 
+  static const _placeholderColors = [
+    Color(0xFFB2DFDB), Color(0xFFBBDEFB), Color(0xFFD1C4E9),
+    Color(0xFFFFF9C4), Color(0xFFFFCCBC), Color(0xFFC8E6C9),
+    Color(0xFFFFCDD2), Color(0xFFE1BEE7),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Consumer<WissensfreundProvider>(
-      builder: (ctx, provider, _) {
-        final items = provider.mediaItems;
-        if (items.isEmpty) return const SizedBox(height: 100);
+      builder: (_, provider, __) {
+        // Prefer articleImages (populated for both JSON and ZIM articles).
+        // Fall back to image-only mediaItems if articleImages is empty.
+        final images = provider.articleImages;
+        final count = images.isNotEmpty
+            ? images.length
+            : provider.mediaItems.where((m) => !m.isAudio).length;
+        if (count == 0) return const SizedBox.shrink();
+
+        final filenames = images.isNotEmpty
+            ? images.map((img) => img.filename).toList()
+            : provider.mediaItems.where((m) => !m.isAudio).map((m) => m.filename).toList();
+
+        final selIdx = provider.selectedImageIndex < 0 ? 0 : provider.selectedImageIndex;
+
         return SizedBox(
-          height: 100,
+          height: 108,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.only(right: _kThumbRight),
-            itemCount: items.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
-            itemBuilder: (ctx, i) {
-              final item = items[i];
-              final isSelected = i == provider.selectedMediaIndex;
-              return GestureDetector(
-                onTap: () => provider.onMediaTap(i),
-                child: item.isAudio
-                    ? _SoundThumbnailTile(
-                        key: ValueKey('audio_${item.filename}'),
-                        isSelected: isSelected,
-                        isPlaying: provider.activeAudioIndex == i,
-                      )
-                    : _ZimImageTile(
-                        key: ValueKey(item.filename),
-                        image: ArticleImageInfo(
-                          filename: item.filename,
-                          caption:  item.caption,
-                          fromKlexikon: true,
-                        ),
-                        isSelected: isSelected,
-                      ),
+            itemCount: count,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (_, i) {
+              final name = filenames[i];
+              final color = _placeholderColors[i % _placeholderColors.length];
+              return _ThumbTile(
+                key: ValueKey(name),
+                filename: name,
+                placeholderColor: color,
+                isSelected: i == selIdx,
+                onTap: () => provider.onImageSelected(i),
               );
             },
           ),

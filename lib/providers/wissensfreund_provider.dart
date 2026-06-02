@@ -1516,6 +1516,24 @@ class WissensfreundProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  // Direct image selection by index in articleImages list (for JSON articles).
+  void onImageSelected(int imageIndex) {
+    if (imageIndex < 0 || imageIndex >= _articleImages.length) return;
+    _selectedImageIndex = imageIndex;
+    _imageSyncPaused = true;
+    // Sync _selectedMediaIndex if mediaItems exist
+    if (_mediaItems.isNotEmpty) {
+      int ic = 0;
+      for (int i = 0; i < _mediaItems.length; i++) {
+        if (!_mediaItems[i].isAudio) {
+          if (ic == imageIndex) { _selectedMediaIndex = i; break; }
+          ic++;
+        }
+      }
+    }
+    notifyListeners();
+  }
+
   // Thumbnail tap — handles image selection AND audio playback (Fall A, B, C).
   Future<void> onMediaTap(int index) async {
     final item = _mediaItems[index];
