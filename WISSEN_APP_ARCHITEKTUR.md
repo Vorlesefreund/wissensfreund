@@ -316,6 +316,32 @@ final nl = sentences[topIdx].indexOf('\n');
 if (nl >= 0) charOffset += nl + 1;  // spring past "Heading\n" zum echten Satz
 ```
 
+---
+
+## _lastActiveIdx Premature-Update Bug (2026-06-02)
+
+### Symptome
+- Aktiver Satz zentriert sich nicht automatisch nach Scrollen
+- TTS "hängt" (läuft weiter, aber Screen scrollt nicht mit → Satz off-screen)
+- Gleicher Absatz wird wiederholt vorgelesen (User scrollt TTS hinterher → neuer Seek → springt zurück)
+
+### Root Cause
+In beiden Modes (A + B) wurde `_lastActiveIdx = scrollIdx` im **Consumer-Builder** gesetzt, BEVOR
+`_smartScrollTo()` die Guards `_scrollPending` / `_userScrolling` prüfte. Wenn `_smartScrollTo`
+wegen `_userScrolling = true` blockiert wurde:
+- `_lastActiveIdx` war bereits auf den neuen Wert gesetzt
+- Nächster Consumer-Rebuild sah `scrollIdx == _lastActiveIdx` → kein Aufruf → Scroll feuert nie
+
+### Fix
+`_lastActiveIdx = idx` wird nur innerhalb `_smartScrollTo()` gesetzt, NACH den Guards (wenn Scroll
+tatsächlich ausgeführt wird). Gleiches gilt für `_lastBoxKey = boxKey` in `_smartScrollToBox()`.
+
+Consumer-Builder ruft `_smartScrollTo()` / `_smartScrollToBox()` auf solange `scrollIdx != _lastActiveIdx`
+→ retried automatisch bei jedem Rebuild bis Guards passierbar sind.
+
+`_smartScrollToBox` Signatur: `(GlobalKey key, String? boxKey, int rawIdx)` — boxKey + rawIdx werden
+intern gesetzt.
+
 ### Kapitelüberschriften mitvorlesen
 Beim Aufbau von `_speechChunks` in `loadAndSpeakJsonArticle`:
 ```dart

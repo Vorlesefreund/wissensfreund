@@ -2015,6 +2015,7 @@ class _ModeAContentState extends State<_ModeAContent> {
   // Blocked while user is manually scrolling (_userScrolling = true).
   void _smartScrollTo(int idx) {
     if (_scrollPending || _userScrolling) return;
+    _lastActiveIdx = idx;
     _scrollPending = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollPending = false;
@@ -2195,9 +2196,10 @@ class _ModeAContentState extends State<_ModeAContent> {
           });
         }
 
-        // Auto-scroll: pull active sentence to near top when speaking
+        // Auto-scroll: pull active sentence to near top when speaking.
+        // _lastActiveIdx is updated inside _smartScrollTo only when scroll actually fires —
+        // so blocked calls (during _userScrolling) keep retrying on every rebuild.
         if (provider.state == AppState.speaking && activeIdx != _lastActiveIdx) {
-          _lastActiveIdx = activeIdx;
           _smartScrollTo(activeIdx);
         }
 
@@ -2588,6 +2590,7 @@ class _ModeBContentState extends State<_ModeBContent> {
 
   void _smartScrollTo(int idx) {
     if (_scrollPending || _userScrolling) return;
+    _lastActiveIdx = idx;
     _scrollPending = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollPending = false;
@@ -2619,8 +2622,10 @@ class _ModeBContentState extends State<_ModeBContent> {
 
   /// Scrolls to a box widget identified by GlobalKey. Same logic as [_smartScrollTo]
   /// but uses live RenderBox coordinates instead of the sentence position cache.
-  void _smartScrollToBox(GlobalKey key) {
+  void _smartScrollToBox(GlobalKey key, String? boxKey, int rawIdx) {
     if (_scrollPending || _userScrolling) return;
+    _lastBoxKey = boxKey;
+    _lastActiveIdx = rawIdx;
     _scrollPending = true;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _scrollPending = false;
@@ -2718,15 +2723,14 @@ class _ModeBContentState extends State<_ModeBContent> {
         if (provider.state == AppState.speaking) {
           if (!provider.currentChunkIsBox && scrollIdx != _lastActiveIdx) {
             // Sentence chunk: scroll to the active sentence.
-            _lastActiveIdx = scrollIdx;
+            // _lastActiveIdx is updated inside _smartScrollTo only when not blocked.
             _lastBoxKey = null;
             _smartScrollTo(scrollIdx);
           } else if (provider.currentChunkIsBox && currentBoxKey != _lastBoxKey) {
             // Box chunk: scroll to the active box widget.
-            _lastBoxKey = currentBoxKey;
-            _lastActiveIdx = scrollIdx;
+            // _lastBoxKey/_lastActiveIdx updated inside _smartScrollToBox only when not blocked.
             final key = currentBoxKey != null ? _boxKeys[currentBoxKey] : null;
-            if (key != null) _smartScrollToBox(key);
+            if (key != null) _smartScrollToBox(key, currentBoxKey, scrollIdx);
           }
         }
 

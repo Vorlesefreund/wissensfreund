@@ -1,57 +1,51 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-02T12:56:39Z -->
+<!-- updated: 2026-06-02T14:21:26Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-02 — TTS-Seek + Scroll-Bugs)
+## 🟢 Zuletzt abgeschlossen (Session 2026-06-02 — TTS-Hang + Zentrierung Root Cause Fix)
 
-### Bugfixes in dieser Session
+### Bugfixes dieser Session
 
-- **Endlosschleife stimmt_das** (AnimatedCrossFade → _jumpToTopSentence Schleife): `currentChunkIsBox`-Guard
-- **Box-Highlighting**: `isActive`-Parameter in `CalloutBox`, Highlight beim Vorlesen
-- **TTS 5s-Pausen**: `_chunkIsStimmtExpl`-Alignment-Bug behoben (alle Chunks müssen `false` eintragen)
-- **Screen-Dimming**: `FLAG_KEEP_SCREEN_ON` per Window-Attribut; "reading"=Flag setzen, "awake"=clearFlags
-- **Box-Zentrierung**: `_smartScrollToBox` zentriert Box jetzt korrekt: `boxTopInContent - vpH/2 + boxHeight/2`
-- **Box-Koordinaten-Tracking**: `_chunkBoxSectionMap`/`_chunkBoxInSectionMap` für aktive Box-Hervorhebung
-- **Doppel-Vorlesen "Elefantenbabys"-Satz** (Root Cause: Heading-Gap):
-  - Abschnittsüberschriften ohne Satzzeichen werden in `_splitSentences` mit dem ersten Satz gemergt
-  - berechneter `charOffset` landete im Heading-Gap → Seek ging auf falschen Satz zurück
-  - **Fix**: nach `charOffset`-Berechnung `\n` in `sentences[topIdx]` suchen; falls vorhanden, `charOffset += nl + 1`
-- **Snap-Back nach Box-Bereich scrollen** (topIdx = -1):
-  - Wenn User über alle Sätze hinausscrollt, wurde `_userScrolling = false` gesetzt → Consumer scrollte zurück
-  - **Fix**: `topIdx < 0` → `_seekResumeTimer` 2 s setzen, `_userScrolling` bleibt true
-- **Seek zu spät** (Folgesatz wird noch gelesen):
-  - `seekAfterCurrentChunk` wartet auf aktuellen Chunk-Abschluss
-  - **Fix**: neues `seekNow()` in Provider — stoppt TTS sofort, springt direkt zum Ziel
-  - Debounce 800 ms → 300 ms reduziert
-- **Seek-Genauigkeit** (Mode A+B): `seekAfterCurrentChunk` → `seekNow`, 3s → 2s _seekResumeTimer
+- **TTS "hängt" nach Scrollen / Zentrierung funktioniert nicht** (Root Cause: `_lastActiveIdx` premature update):
+  - `_lastActiveIdx = scrollIdx` wurde im Consumer-Builder gesetzt, BEVOR `_smartScrollTo` die Guards (`_userScrolling`) prüfte
+  - → Wenn blockiert: `_lastActiveIdx` schon auf neuen Wert gesetzt → nächster Rebuild sieht keine Änderung → Scroll feuert nie
+  - → User sieht TTS "hängt": TTS läuft, aber Screen scrollt nicht mit → Satz off-screen
+  - → Re-Read: User scrollt um TTS zu finden → neuer Seek → springt zurück
+  - **Fix**: `_lastActiveIdx = idx` erst INNERHALB von `_smartScrollTo()` setzen (nach Guard-Check)
+  - **Fix**: `_lastBoxKey = boxKey` / `_lastActiveIdx = rawIdx` erst INNERHALB von `_smartScrollToBox()` setzen
+  - `_smartScrollToBox` Signatur geändert: jetzt `(GlobalKey key, String? boxKey, int rawIdx)`
+  - Consumer-Builder: Redundante Updates entfernt, Consumer retried nun korrekt bis Scroll tatsächlich feuert
+  - Gilt für Mode A und Mode B
 
 Geänderte Dateien:
-- `lib/providers/wissensfreund_provider.dart`: `seekNow()` Methode, `_chunkIsStimmtExpl`-Fix, Screen-Mode
-- `lib/screens/article_screen.dart`: Mode A+B `_jumpToTopSentence` komplett, `_smartScrollToBox` Zentrierung
-- `lib/widgets/callout_box.dart`: `isActive` Highlighting
-- `android/.../MainActivity.kt`: `setScreenMode` (reading/awake/dim/off)
+- `lib/screens/article_screen.dart`:
+  - Mode A `_smartScrollTo`: `_lastActiveIdx = idx` vor `_scrollPending = true`
+  - Mode A Consumer: `_lastActiveIdx = activeIdx` entfernt
+  - Mode B `_smartScrollTo`: `_lastActiveIdx = idx` vor `_scrollPending = true`
+  - Mode B `_smartScrollToBox`: neue Parameter `boxKey, rawIdx`; Updates darin
+  - Mode B Consumer: `_lastActiveIdx`/`_lastBoxKey` Updates entfernt, Aufruf angepasst
 
-APK gebaut + installiert ✅
+APK gebaut + installiert ✅ (Commit noch ausstehend)
 
 ---
 
-## 🟡 Noch nicht getestet (zum Testen)
+## 🟡 Zum Testen (in dieser Reihenfolge)
 
-- Scroll past boxes → kein Doppel-Vorlesen mehr
-- Seek springt sofort (nicht nach Folgesatz)
-- Zweite Box ist korrekt zentriert
-- Box-Highlight beim Vorlesen sichtbar
-- Kein Screen-Dimming während TTS
+1. Artikel öffnen, TTS starten → vorherige Sätze/Boxen in Modus B scrollen
+2. Aktiver Satz soll sich automatisch zentrieren, wenn TTS weiterschreitet
+3. Nach Scroll: Satz soll nach 3s wieder zentriert werden (kein TTS-Hang)
+4. Box nach Satz: TTS liest weiter (kein Hänger)
+5. Gleicher Absatz darf nicht doppelt vorgelesen werden
 
 ---
 
 ## 🟡 Offen — nächste Schritte (nach Priorität)
 
 ### Hoch
-- **Manuell testen** (alle Bugfixes aus dieser Session)
+- **Manuell testen** (alle Bugfixes aus letzten zwei Sessions)
 - **Selbst produzierte Artikel** (neue JSON-Artikel mit echten Inhalten)
 
 ### Mittel (zurückgestellt)
