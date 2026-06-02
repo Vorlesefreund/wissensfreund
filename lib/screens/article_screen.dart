@@ -1950,9 +1950,8 @@ class _ModeAContentState extends State<_ModeAContent> {
       _userScrolling = false;
       return;
     }
-    if (topIdx == activeIdx + 1) {
-      // Only 1 sentence ahead — likely viewing box content between sentences.
-      // Cancel any stale pending seek and let TTS advance naturally through box chunks.
+    if (topIdx == activeIdx + 1 || topIdx == activeIdx + 2) {
+      // 1–2 sentences ahead: slight forward scroll — let TTS advance naturally.
       provider.cancelPendingSeek();
       _seekResumeTimer?.cancel();
       _seekResumeTimer = Timer(const Duration(milliseconds: 3000), () {
@@ -2551,9 +2550,11 @@ class _ModeBContentState extends State<_ModeBContent> {
       _userScrolling = false;
       return;
     }
-    if (topIdx == activeIdx + 1) {
-      // Only 1 sentence ahead — likely viewing box content between sentences.
-      // Cancel any stale pending seek and let TTS advance naturally through box chunks.
+    if (topIdx == activeIdx + 1 || topIdx == activeIdx + 2) {
+      // 1–2 sentences ahead: slight forward scroll or small overshoot.
+      // The active sentence (19px) is taller than inactive (15px); a ~100px overshoot
+      // past the active sentence's top edge already puts k+2 at the viewport top.
+      // Let TTS advance naturally rather than interrupting for such small offsets.
       provider.cancelPendingSeek();
       _seekResumeTimer?.cancel();
       _seekResumeTimer = Timer(const Duration(milliseconds: 3000), () {
