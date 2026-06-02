@@ -1,59 +1,58 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-02T14:21:26Z -->
+<!-- updated: 2026-06-02T14:43:05Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-02 — TTS-Hang + Zentrierung Root Cause Fix)
+## 🟢 Zuletzt abgeschlossen (Session 2026-06-02 — seekWithDelay + Architekturwechsel)
 
-### Bugfixes dieser Session
+### Neue Seek-Architektur (seekWithDelay)
+- **Altes Verhalten**: `seekAfterCurrentChunk` — TTS liest Satz zu Ende, dann Spring zur neuen Stelle → kurzer Snap-Back
+- **Neues Verhalten**: `seekWithDelay(1200ms)` — TTS stoppt sofort, 1,2s Pause, liest dann ab neuer Stelle
+- **Reversierbar**: `seekAfterCurrentChunk` bleibt erhalten; Revert = 2 Zeilen in `_jumpToTopSentence` + Timer 3000ms
 
-- **TTS "hängt" nach Scrollen / Zentrierung funktioniert nicht** (Root Cause: `_lastActiveIdx` premature update):
-  - `_lastActiveIdx = scrollIdx` wurde im Consumer-Builder gesetzt, BEVOR `_smartScrollTo` die Guards (`_userScrolling`) prüfte
-  - → Wenn blockiert: `_lastActiveIdx` schon auf neuen Wert gesetzt → nächster Rebuild sieht keine Änderung → Scroll feuert nie
-  - → User sieht TTS "hängt": TTS läuft, aber Screen scrollt nicht mit → Satz off-screen
-  - → Re-Read: User scrollt um TTS zu finden → neuer Seek → springt zurück
-  - **Fix**: `_lastActiveIdx = idx` erst INNERHALB von `_smartScrollTo()` setzen (nach Guard-Check)
-  - **Fix**: `_lastBoxKey = boxKey` / `_lastActiveIdx = rawIdx` erst INNERHALB von `_smartScrollToBox()` setzen
-  - `_smartScrollToBox` Signatur geändert: jetzt `(GlobalKey key, String? boxKey, int rawIdx)`
-  - Consumer-Builder: Redundante Updates entfernt, Consumer retried nun korrekt bis Scroll tatsächlich feuert
-  - Gilt für Mode A und Mode B
+Provider-Änderungen:
+- `_seekDelayTimer` + `_stoppedForDelayedSeek` Felder
+- `seekWithDelay(charOffset, delay)` — stoppt TTS sofort (Guard gegen Doppel-Stop), startet nach Delay
+- `cancelPendingSeek()` — nimmt TTS wieder auf falls durch seekWithDelay gestoppt
+- `dispose()` canceliert `_seekDelayTimer`
 
-Geänderte Dateien:
-- `lib/screens/article_screen.dart`:
-  - Mode A `_smartScrollTo`: `_lastActiveIdx = idx` vor `_scrollPending = true`
-  - Mode A Consumer: `_lastActiveIdx = activeIdx` entfernt
-  - Mode B `_smartScrollTo`: `_lastActiveIdx = idx` vor `_scrollPending = true`
-  - Mode B `_smartScrollToBox`: neue Parameter `boxKey, rawIdx`; Updates darin
-  - Mode B Consumer: `_lastActiveIdx`/`_lastBoxKey` Updates entfernt, Aufruf angepasst
+Screen-Änderungen (Mode A + Mode B `_jumpToTopSentence`):
+- `topIdx == activeIdx`: `cancelPendingSeek()` hinzugefügt (stellt TTS wieder her wenn gestoppt)
+- `seekAfterCurrentChunk` → `seekWithDelay`
+- `_seekResumeTimer` 3000ms → 1400ms (passt zur neuen 1200ms Delay)
 
-APK gebaut + installiert ✅ (Commit noch ausstehend)
+APK gebaut ✅ — Gerät nicht verbunden, Installation ausstehend
+
+### Frühere Session-Fixes (2026-06-02)
+- `_lastActiveIdx` Premature-Update Bug → Auto-Zentrierung + TTS-Scroll-Hang behoben
+- `_smartScrollToBox` Signatur: `(key, boxKey, rawIdx)`
 
 ---
 
-## 🟡 Zum Testen (in dieser Reihenfolge)
+## 🟡 Zum Testen
 
-1. Artikel öffnen, TTS starten → vorherige Sätze/Boxen in Modus B scrollen
-2. Aktiver Satz soll sich automatisch zentrieren, wenn TTS weiterschreitet
-3. Nach Scroll: Satz soll nach 3s wieder zentriert werden (kein TTS-Hang)
-4. Box nach Satz: TTS liest weiter (kein Hänger)
-5. Gleicher Absatz darf nicht doppelt vorgelesen werden
+1. Scrolle während TTS liest → Professor hört sofort auf
+2. Ca. 1,2s Pause → liest ab neuer Stelle
+3. Kurz zurückscroll → TTS nimmt alten Satz wieder auf (cancelPendingSeek)
+4. Auto-Zentrierung folgt TTS auch nach Scroll
+5. Kein Snap-Back zur alten Stelle
 
 ---
 
 ## 🟡 Offen — nächste Schritte (nach Priorität)
 
 ### Hoch
-- **Manuell testen** (alle Bugfixes aus letzten zwei Sessions)
-- **Selbst produzierte Artikel** (neue JSON-Artikel mit echten Inhalten)
+- **Manuell testen** — seekWithDelay + Zentrierung
+- Mode B Lupe: Bold entfernen (wechselnde Zeilenumbrüche in Mode A)
+- Mode B Lupe: `_ttsCursor` erst im progressHandler updaten (zu früh springendes Highlight)
 
 ### Mittel (zurückgestellt)
+- **Selbst produzierte Artikel** (neue JSON-Artikel mit echten Inhalten)
 - **Quiz-Checkpoint löschen + Run neu starten**
 - **Bilder-Patch** (`patch_article_images_v1.py`)
-- **Links in JSON-Artikeln**
-- **Gemini-Integration**
-- **Topic-Tree Kachel-Navigation**
+- **Links in JSON-Artikeln**, **Gemini-Integration**, **Topic-Tree**
 
 ### Niedrig
 - Upgrade-Dialog, Plus/Premium-Design, Sound-Thumbnails
@@ -61,6 +60,4 @@ APK gebaut + installiert ✅ (Commit noch ausstehend)
 ---
 
 ## 🔵 Verschoben auf Version 1.1
-
-- Gallery-Artikel (111 Artikel, 540 Bilder)
-- Audio-Pipeline
+- Gallery-Artikel (111 Artikel, 540 Bilder), Audio-Pipeline

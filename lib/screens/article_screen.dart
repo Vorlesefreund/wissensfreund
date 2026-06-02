@@ -1945,7 +1945,11 @@ class _ModeAContentState extends State<_ModeAContent> {
       });
       return;
     }
-    if (topIdx == activeIdx) { _userScrolling = false; return; }
+    if (topIdx == activeIdx) {
+      provider.cancelPendingSeek(); // restart TTS if it was stopped for a delayed seek
+      _userScrolling = false;
+      return;
+    }
     if (topIdx == activeIdx + 1) {
       // Only 1 sentence ahead — likely viewing box content between sentences.
       // Cancel any stale pending seek and let TTS advance naturally through box chunks.
@@ -1968,9 +1972,11 @@ class _ModeAContentState extends State<_ModeAContent> {
     final nl = sentences[topIdx].indexOf('\n');
     if (nl >= 0) charOffset += nl + 1;
 
-    provider.seekAfterCurrentChunk(charOffset);
+    // seekWithDelay: TTS stops immediately, restarts after 1.2s at new position.
+    // To revert: replace seekWithDelay with seekAfterCurrentChunk and timer with 3000ms.
+    provider.seekWithDelay(charOffset);
     _seekResumeTimer?.cancel();
-    _seekResumeTimer = Timer(const Duration(milliseconds: 3000), () {
+    _seekResumeTimer = Timer(const Duration(milliseconds: 1400), () {
       if (mounted) _userScrolling = false;
     });
   }
@@ -2540,7 +2546,11 @@ class _ModeBContentState extends State<_ModeBContent> {
       });
       return;
     }
-    if (topIdx == activeIdx) { _userScrolling = false; return; }
+    if (topIdx == activeIdx) {
+      provider.cancelPendingSeek(); // restart TTS if it was stopped for a delayed seek
+      _userScrolling = false;
+      return;
+    }
     if (topIdx == activeIdx + 1) {
       // Only 1 sentence ahead — likely viewing box content between sentences.
       // Cancel any stale pending seek and let TTS advance naturally through box chunks.
@@ -2563,9 +2573,11 @@ class _ModeBContentState extends State<_ModeBContent> {
     final nl = sentences[topIdx].indexOf('\n');
     if (nl >= 0) charOffset += nl + 1;
 
-    provider.seekAfterCurrentChunk(charOffset);
+    // seekWithDelay: TTS stops immediately, restarts after 1.2s at new position.
+    // To revert: replace seekWithDelay with seekAfterCurrentChunk and timer with 3000ms.
+    provider.seekWithDelay(charOffset);
     _seekResumeTimer?.cancel();
-    _seekResumeTimer = Timer(const Duration(milliseconds: 3000), () {
+    _seekResumeTimer = Timer(const Duration(milliseconds: 1400), () {
       if (mounted) _userScrolling = false;
     });
   }

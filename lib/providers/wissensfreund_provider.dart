@@ -171,6 +171,9 @@ class WissensfreundProvider extends ChangeNotifier {
   bool         _imageSyncPaused   = false;
   // deferred seek: jump to this char offset after current chunk finishes
   int?         _pendingSeekOffset;
+  // instant-stop seek: TTS was stopped for a delayed seek; flag prevents double-stop
+  Timer?       _seekDelayTimer;
+  bool         _stoppedForDelayedSeek = false;
 
   // Disambiguation state: when two results are equally good, store them
   // and ask the user once before auto-picking
@@ -635,9 +638,42 @@ class WissensfreundProvider extends ChangeNotifier {
     }
   }
 
+  /// Stoppt TTS sofort und liest nach [delay] ab der neuen Stelle weiter.
+  /// Kein "Satz-zu-Ende-lesen" — löst seekAfterCurrentChunk in der Scroll-Navigation ab.
+  /// Revert: seekAfterCurrentChunk wieder verwenden + Timer in _jumpToTopSentence auf 3000ms.
+  void seekWithDelay(int charOffset, {Duration delay = const Duration(milliseconds: 1200)}) {
+    _seekDelayTimer?.cancel();
+    _pendingSeekOffset = null;
+    _stimmtPauseTimer?.cancel();
+    if (_state == AppState.speaking && !_isPaused && !_stoppedForDelayedSeek) {
+      _ttsStopPending = true;
+      _stoppedForDelayedSeek = true;
+      unawaited(_tts.stop());
+    }
+    _seekDelayTimer = Timer(delay, () {
+      _stoppedForDelayedSeek = false;
+      _seekDelayTimer = null;
+      if (_state != AppState.idle) {
+        _seekToChunkForOffset(charOffset, startSpeaking: !_isPaused);
+      }
+    });
+  }
+
   /// Löscht einen gequeuten Seek ohne TTS zu unterbrechen.
-  /// Aufgerufen wenn der User zurückscrollt und der vorherige Seek-Zielort nicht mehr relevant ist.
-  void cancelPendingSeek() => _pendingSeekOffset = null;
+  /// Falls TTS für einen verzögerten Seek gestoppt wurde, nimmt es den aktuellen Chunk wieder auf.
+  void cancelPendingSeek() {
+    _pendingSeekOffset = null;
+    _seekDelayTimer?.cancel();
+    _seekDelayTimer = null;
+    if (_stoppedForDelayedSeek) {
+      _stoppedForDelayedSeek = false;
+      if (_state == AppState.speaking && !_isPaused && _currentChunk < _speechChunks.length) {
+        _ttsCursor = _chunkOffsets[_currentChunk];
+        notifyListeners();
+        unawaited(_tts.speak(_speechChunks[_currentChunk]));
+      }
+    }
+  }
 
   /// Kapitel-Sprung: unterbricht TTS sofort und springt zum Ziel-Offset.
   /// Für Section-Pfeile (nicht für Scroll-Navigation).
@@ -2150,6 +2186,7 @@ class WissensfreundProvider extends ChangeNotifier {
   @override
   void dispose() {
     _cancelIdleTimers();
+    _seekDelayTimer?.cancel();
     _tts.stop();
     _audioPlayer.dispose();
     super.dispose();
