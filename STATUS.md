@@ -1,58 +1,57 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-02T14:43:05Z -->
+<!-- updated: 2026-06-02T21:37:38Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-02 — seekWithDelay + Architekturwechsel)
+## 🟢 Zuletzt abgeschlossen
 
-### Neue Seek-Architektur (seekWithDelay)
-- **Altes Verhalten**: `seekAfterCurrentChunk` — TTS liest Satz zu Ende, dann Spring zur neuen Stelle → kurzer Snap-Back
-- **Neues Verhalten**: `seekWithDelay(1200ms)` — TTS stoppt sofort, 1,2s Pause, liest dann ab neuer Stelle
-- **Reversierbar**: `seekAfterCurrentChunk` bleibt erhalten; Revert = 2 Zeilen in `_jumpToTopSentence` + Timer 3000ms
-
-Provider-Änderungen:
-- `_seekDelayTimer` + `_stoppedForDelayedSeek` Felder
-- `seekWithDelay(charOffset, delay)` — stoppt TTS sofort (Guard gegen Doppel-Stop), startet nach Delay
-- `cancelPendingSeek()` — nimmt TTS wieder auf falls durch seekWithDelay gestoppt
-- `dispose()` canceliert `_seekDelayTimer`
-
-Screen-Änderungen (Mode A + Mode B `_jumpToTopSentence`):
-- `topIdx == activeIdx`: `cancelPendingSeek()` hinzugefügt (stellt TTS wieder her wenn gestoppt)
-- `seekAfterCurrentChunk` → `seekWithDelay`
-- `_seekResumeTimer` 3000ms → 1400ms (passt zur neuen 1200ms Delay)
-
-APK gebaut ✅ — Gerät nicht verbunden, Installation ausstehend
-
-### Frühere Session-Fixes (2026-06-02)
-- `_lastActiveIdx` Premature-Update Bug → Auto-Zentrierung + TTS-Scroll-Hang behoben
-- `_smartScrollToBox` Signatur: `(key, boxKey, rawIdx)`
+### Problem 1 — TTS stoppt nach User-Scroll (Commit 99115f7)
+- **Ursache**: `_ttsStopPending` blieb `true` nach `seekWithDelay`, weil Android-TTS `stop()` kein `onDone` feuert
+- **Fix**: `_ttsStopPending = false` in `_seekDelayTimer`-Callback in `wissensfreund_provider.dart`
+- **Getestet**: ✅ bestätigt funktionierend
 
 ---
 
-## 🟡 Zum Testen
+## 🔴 Gerade offen — Problem 2: Snap-Back nach User-Scroll
 
-1. Scrolle während TTS liest → Professor hört sofort auf
-2. Ca. 1,2s Pause → liest ab neuer Stelle
-3. Kurz zurückscroll → TTS nimmt alten Satz wieder auf (cancelPendingSeek)
-4. Auto-Zentrierung folgt TTS auch nach Scroll
-5. Kein Snap-Back zur alten Stelle
+### Was eingebaut ist (article_screen.dart, noch nicht committed)
+- Neues Feld `bool _skipNextAutoScroll = false` in `_ModeAContentState` + `_ModeBContentState`
+- 2s-Timer-Callbacks (Mode A + B): `_skipNextAutoScroll = true` vor `_userScrolling = false`
+- Consumer Mode A + B: `_smartScrollTo` nur wenn `!_skipNextAutoScroll`, sonst `_lastActiveIdx` synchen
+- Mode B Artikel-Reset: `_skipNextAutoScroll = false`
+
+### Warum der Fix unwirksam ist — zwei Snap-Back-Pfade identifiziert
+
+**Pfad 1 — `currentChunkIsBox`-Early-Return (article_screen.dart Zeile 2538)**
+Wenn TTS während der ~600ms (Scroll-Debounce) von Satz N in Box wechselt:
+- `_jumpToTopSentence` → `currentChunkIsBox = true` → `_userScrolling = false; return;`
+- Consumer Box-Branch: `_smartScrollToBox()` → Snap zur Box
+- `_skipNextAutoScroll` nie gesetzt (2s-Timer wurde von `_onScroll` via `_seekResumeTimer?.cancel()` abgebrochen)
+
+**Pfad 2 — `topIdx == activeIdx + 1/2`-Zweig (Zeile 2582)**
+Wenn Satz M (Ziel-Scroll) nur 1–2 Sätze nach Box liegt:
+- 3s-Timer ohne `_skipNextAutoScroll = true`
+- Consumer Satz-Branch: `_smartScrollTo(currentTTSIdx)` → Snap zur TTS-Stelle
+
+### Nächster Schritt (für Opus)
+Vollständige Code-Analyse aller Pfade in `_onScroll`, `_jumpToTopSentence` und Consumer-Block,
+dann gezielter Fix für beide Snap-Back-Pfade:
+- Pfad 1: `currentChunkIsBox`-Early-Return: entweder entfernen oder durch Timer+`_skipNextAutoScroll` ersetzen
+- Pfad 2: `topIdx == activeIdx + 1/2`-Timer: `_skipNextAutoScroll = true` ergänzen
 
 ---
 
-## 🟡 Offen — nächste Schritte (nach Priorität)
+## 🟡 Weitere offene Punkte (nach Priorität)
 
 ### Hoch
-- **Manuell testen** — seekWithDelay + Zentrierung
+- **Problem 3**: Snap-Back während Box-Playback — User scrollt während Box → nach Box Snap zu Satz N+1
 - Mode B Lupe: Bold entfernen (wechselnde Zeilenumbrüche in Mode A)
 - Mode B Lupe: `_ttsCursor` erst im progressHandler updaten (zu früh springendes Highlight)
 
 ### Mittel (zurückgestellt)
-- **Selbst produzierte Artikel** (neue JSON-Artikel mit echten Inhalten)
-- **Quiz-Checkpoint löschen + Run neu starten**
-- **Bilder-Patch** (`patch_article_images_v1.py`)
-- **Links in JSON-Artikeln**, **Gemini-Integration**, **Topic-Tree**
+- Selbst produzierte Artikel, Quiz-Checkpoint, Bilder-Patch, Links, Gemini, Topic-Tree
 
 ### Niedrig
 - Upgrade-Dialog, Plus/Premium-Design, Sound-Thumbnails

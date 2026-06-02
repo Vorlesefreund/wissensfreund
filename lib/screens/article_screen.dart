@@ -1853,6 +1853,7 @@ class _ModeAContentState extends State<_ModeAContent> {
   bool _programmaticScroll = false; // suppresses _onScroll during TTS auto-scroll
   Timer? _programmaticScrollTimer;
   double _lastScrollOffset = 0.0;
+  bool _skipNextAutoScroll = false;
 
   // Cached full-width document positions (in scroll-content coordinates).
   // Built once after the first render when all sentences are at full width.
@@ -1951,6 +1952,7 @@ class _ModeAContentState extends State<_ModeAContent> {
         final sents = _splitSentences(p.articleText);
         final curIdx = _findActiveIdx(p.articleText, p.ttsCursor, sents);
         if (curIdx > _lastActiveIdx) _lastActiveIdx = curIdx;
+        _skipNextAutoScroll = true;
         _userScrolling = false;
       });
       return;
@@ -2215,7 +2217,12 @@ class _ModeAContentState extends State<_ModeAContent> {
         // _lastActiveIdx is updated inside _smartScrollTo only when scroll actually fires —
         // so blocked calls (during _userScrolling) keep retrying on every rebuild.
         if (provider.state == AppState.speaking && activeIdx != _lastActiveIdx) {
-          _smartScrollTo(activeIdx);
+          if (_skipNextAutoScroll) {
+            _skipNextAutoScroll = false;
+            _lastActiveIdx = activeIdx;
+          } else {
+            _smartScrollTo(activeIdx);
+          }
         }
 
         return Column(
@@ -2477,6 +2484,7 @@ class _ModeBContentState extends State<_ModeBContent> {
   bool _programmaticScroll = false;
   Timer? _programmaticScrollTimer;
   double _lastScrollOffset = 0.0;
+  bool _skipNextAutoScroll = false;
   Timer? _scrollDebounce;
   Timer? _syncResetTimer;
   Timer? _seekResumeTimer;
@@ -2561,6 +2569,7 @@ class _ModeBContentState extends State<_ModeBContent> {
         final sents = _splitSentences(p.articleText);
         final curIdx = _findActiveIdx(p.articleText, p.ttsCursor, sents);
         if (curIdx > _lastActiveIdx) _lastActiveIdx = curIdx;
+        _skipNextAutoScroll = true;
         _userScrolling = false;
       });
       return;
@@ -2744,6 +2753,7 @@ class _ModeBContentState extends State<_ModeBContent> {
           _cacheBuilt = false;
           _lastActiveIdx = -1;
           _lastBoxKey = null;
+          _skipNextAutoScroll = false;
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (!mounted) return;
             if (_scrollCtrl.hasClients) _scrollCtrl.jumpTo(0);
@@ -2761,7 +2771,12 @@ class _ModeBContentState extends State<_ModeBContent> {
             // Sentence chunk: scroll to the active sentence.
             // _lastActiveIdx is updated inside _smartScrollTo only when not blocked.
             _lastBoxKey = null;
-            _smartScrollTo(scrollIdx);
+            if (_skipNextAutoScroll) {
+              _skipNextAutoScroll = false;
+              _lastActiveIdx = scrollIdx;
+            } else {
+              _smartScrollTo(scrollIdx);
+            }
           } else if (provider.currentChunkIsBox && currentBoxKey != _lastBoxKey) {
             // Box chunk: scroll to the active box widget.
             // _lastBoxKey/_lastActiveIdx updated inside _smartScrollToBox only when not blocked.
