@@ -1937,11 +1937,17 @@ class _ModeAContentState extends State<_ModeAContent> {
       }
     }
     if (topIdx < 0) {
-      // User scrolled past all sentence content — cancel pending seek and lock scroll.
+      // User scrolled past all sentence content (box/thumbnail area).
+      // Sync _lastActiveIdx to current TTS when lock expires to prevent snap-back.
       provider.cancelPendingSeek();
       _seekResumeTimer?.cancel();
       _seekResumeTimer = Timer(const Duration(milliseconds: 2000), () {
-        if (mounted) _userScrolling = false;
+        if (!mounted) return;
+        final p = context.read<WissensfreundProvider>();
+        final sents = _splitSentences(p.articleText);
+        final curIdx = _findActiveIdx(p.articleText, p.ttsCursor, sents);
+        if (curIdx > _lastActiveIdx) _lastActiveIdx = curIdx;
+        _userScrolling = false;
       });
       return;
     }
@@ -2537,11 +2543,17 @@ class _ModeBContentState extends State<_ModeBContent> {
     }
 
     if (topIdx < 0) {
-      // User scrolled past all sentence content — cancel pending seek and lock scroll.
+      // User scrolled past all sentence content (box/thumbnail area).
+      // Sync _lastActiveIdx to current TTS when lock expires to prevent snap-back.
       provider.cancelPendingSeek();
       _seekResumeTimer?.cancel();
       _seekResumeTimer = Timer(const Duration(milliseconds: 2000), () {
-        if (mounted) _userScrolling = false;
+        if (!mounted) return;
+        final p = context.read<WissensfreundProvider>();
+        final sents = _splitSentences(p.articleText);
+        final curIdx = _findActiveIdx(p.articleText, p.ttsCursor, sents);
+        if (curIdx > _lastActiveIdx) _lastActiveIdx = curIdx;
+        _userScrolling = false;
       });
       return;
     }
@@ -2616,6 +2628,7 @@ class _ModeBContentState extends State<_ModeBContent> {
       final vpBox = scrollable.context.findRenderObject() as RenderBox?;
       if (vpBox == null || !vpBox.attached) return;
       final sentenceTopInVp = vpBox.globalToLocal(box.localToGlobal(Offset.zero)).dy;
+
       final sentenceTopInContent = sentenceTopInVp + _scrollCtrl.offset;
       final viewportH = _scrollCtrl.position.viewportDimension;
       // Center the active sentence vertically in the viewport
