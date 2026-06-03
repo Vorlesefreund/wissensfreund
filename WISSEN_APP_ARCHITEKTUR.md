@@ -353,3 +353,44 @@ _chunkOffsets.add(s.startChar);   // Offset bleibt s.startChar, nicht vom Headin
 _chunkImgIndices.add(s.imageIndex);
 ```
 Heading wird laut gelesen, taucht aber nicht im Artikeltext auf → kein Offset-Fehler.
+
+---
+
+## Zone-Padding Feedback-Loop & Live-Scan-Entscheidung (2026-06-03)
+
+### Das Problem: Zone-Padding Feedback-Loop in Mode A
+
+Mode A blendet den Professor-Bereich am unteren Viewport-Rand ein. Sätze, die in diesen
+Bereich fallen, bekommen `extraRightPad = _kProfPad` → schmalere Textbreite → mehr Zeilen
+→ Satz wird höher → alle Sätze darunter verschieben sich nach unten.
+
+Würde `_computeProfessorZone` live messen (statt Cache), entsteht ein Feedback-Loop:
+1. Messe Position Satz N → in Zone → Padding → Satz N höher
+2. Satz N höher → Satz N+1 rutscht in Zone → N+1 bekommt Padding → wird höher
+3. N+1 höher → N+1 rutscht aus Zone → kein Padding → kürzer → rutscht rein → …
+→ Endlose Oszillation zwischen zwei Layout-Zuständen.
+
+**Fix:** `_sentenceTopCache` / `_sentenceHeightCache` — Snapshot einmalig vor dem ersten
+Padding-Auftrag (`_buildCache()` im `initState`-PostFrameCallback). Cache ändert sich nie
+→ `_computeProfessorZone` liefert immer dasselbe Ergebnis → keine Oszillation.
+
+### Warum Live-Scan in `_jumpToTopSentence` trotzdem sicher ist
+
+`_jumpToTopSentence` ist **rein lesend** — es ruft nur `seekWithDelay`/`seekToChunk` auf
+und schreibt keine Padding-Werte zurück. Deshalb kann ein Live-Scan dort keinen Feedback-
+Loop in `_computeProfessorZone` auslösen. `_computeProfessorZone` bleibt cache-basiert und
+ist von `_jumpToTopSentence` vollständig entkoppelt.
+
+Mode B hat das Problem nie gehabt: Mode B hat kein `extraRightPad` und kein
+`_computeProfessorZone` — der Professor-Bereich ist dort nicht in das Text-Layout integriert.
+
+### Entscheidung (2026-06-03)
+
+`_jumpToTopSentence` in Mode A auf Live-Scan umgestellt (identisch Mode B):
+- Satz-Loop: `Scrollable.maybeOf(ctx)` → `vpBox.globalToLocal` → `localY >= 0`
+- Box-Loop: identisch, über `_boxKeys`
+- `_computeProfessorZone` bleibt unverändert cache-basiert
+
+Gemischter Zustand (live in `_jumpToTopSentence`, cached in `_computeProfessorZone`) ist
+stabil: eine minimale Positions-Diskrepanz durch aktives Padding ist möglich (wenige Pixel),
+aber kein Stabilitätsproblem.
