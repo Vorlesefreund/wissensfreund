@@ -1,54 +1,37 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-02T21:37:38Z -->
-<!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
-<!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
+<!-- updated: 2026-06-03T07:24:22Z -->
 
 ---
 
-## 🟢 Zuletzt abgeschlossen
+## Zuletzt abgeschlossen
 
-### Problem 1 — TTS stoppt nach User-Scroll (Commit 99115f7)
-- **Ursache**: `_ttsStopPending` blieb `true` nach `seekWithDelay`, weil Android-TTS `stop()` kein `onDone` feuert
-- **Fix**: `_ttsStopPending = false` in `_seekDelayTimer`-Callback in `wissensfreund_provider.dart`
-- **Getestet**: ✅ bestätigt funktionierend
+### Scroll-Navigation: chunk-index-basiertes Anker-System (Commit d38caf4)
+- **Problem**: Snap-Back nach User-Scroll, Box-Chunks beim Seek übersprungen,
+  charOffset-Summe hatte Off-by-1-Fehler nahe Box-Grenzen
+- **Fix**: `seekToChunk(chunkIndex)` — direkter Chunk-Seek ohne charOffset-Mapping
+- **Anker-Scan**: `_jumpToTopSentence` Mode B iteriert Sätze UND Boxen,
+  wählt das topmost Element mit `localY >= 0` als Anker
+- **Symmetrisch**: Satz-Branch und Box-Branch rufen beide `seekToChunk` auf
+- **ZIM-Fallback**: `sentenceChunkForOffset == -1` → weiter mit `seekWithDelay`
+- **Getestet**: ✅ Scrolling klappt einwandfrei am Gerät
 
----
-
-## 🔴 Gerade offen — Problem 2: Snap-Back nach User-Scroll
-
-### Was eingebaut ist (article_screen.dart, noch nicht committed)
-- Neues Feld `bool _skipNextAutoScroll = false` in `_ModeAContentState` + `_ModeBContentState`
-- 2s-Timer-Callbacks (Mode A + B): `_skipNextAutoScroll = true` vor `_userScrolling = false`
-- Consumer Mode A + B: `_smartScrollTo` nur wenn `!_skipNextAutoScroll`, sonst `_lastActiveIdx` synchen
-- Mode B Artikel-Reset: `_skipNextAutoScroll = false`
-
-### Warum der Fix unwirksam ist — zwei Snap-Back-Pfade identifiziert
-
-**Pfad 1 — `currentChunkIsBox`-Early-Return (article_screen.dart Zeile 2538)**
-Wenn TTS während der ~600ms (Scroll-Debounce) von Satz N in Box wechselt:
-- `_jumpToTopSentence` → `currentChunkIsBox = true` → `_userScrolling = false; return;`
-- Consumer Box-Branch: `_smartScrollToBox()` → Snap zur Box
-- `_skipNextAutoScroll` nie gesetzt (2s-Timer wurde von `_onScroll` via `_seekResumeTimer?.cancel()` abgebrochen)
-
-**Pfad 2 — `topIdx == activeIdx + 1/2`-Zweig (Zeile 2582)**
-Wenn Satz M (Ziel-Scroll) nur 1–2 Sätze nach Box liegt:
-- 3s-Timer ohne `_skipNextAutoScroll = true`
-- Consumer Satz-Branch: `_smartScrollTo(currentTTSIdx)` → Snap zur TTS-Stelle
-
-### Nächster Schritt (für Opus)
-Vollständige Code-Analyse aller Pfade in `_onScroll`, `_jumpToTopSentence` und Consumer-Block,
-dann gezielter Fix für beide Snap-Back-Pfade:
-- Pfad 1: `currentChunkIsBox`-Early-Return: entweder entfernen oder durch Timer+`_skipNextAutoScroll` ersetzen
-- Pfad 2: `topIdx == activeIdx + 1/2`-Timer: `_skipNextAutoScroll = true` ergänzen
+### Frühere Fixes (Session 2026-06-02)
+- `_suspendAutoScrollOnce` Helper (9eb5907) — Snap-Back Pfad 1+2
+- `seekWithDelay` + `_ttsStopPending` (99115f7) — TTS-Stop nach Scroll
 
 ---
 
-## 🟡 Weitere offene Punkte (nach Priorität)
+## Offen — nach Priorität
 
 ### Hoch
-- **Problem 3**: Snap-Back während Box-Playback — User scrollt während Box → nach Box Snap zu Satz N+1
+- **Epoch-Guard für TTS-Callbacks** (separater Refactor):
+  `_ttsStopPending` hat Zeitfenster auf langsamen Geräten: feuert `stop()` sein `onDone`
+  erst nach 1200ms, läuft es als „neuer Chunk fertig" durch. Lösung: `setCompletionHandler`
+  vor jedem `speak()` neu registrieren (Closure capturt Epoch-ID). Betrifft 5+ Stellen.
+- **1-Satz-Toleranz beobachten**: Scroll um einen Satz → sofort Seek + 1,2s Pause.
+  Falls ruckelig: Toleranz-Zweig (topIdx == activeIdx+1) wieder einbauen.
 - Mode B Lupe: Bold entfernen (wechselnde Zeilenumbrüche in Mode A)
-- Mode B Lupe: `_ttsCursor` erst im progressHandler updaten (zu früh springendes Highlight)
+- Mode B Lupe: `_ttsCursor` erst im progressHandler updaten
 
 ### Mittel (zurückgestellt)
 - Selbst produzierte Artikel, Quiz-Checkpoint, Bilder-Patch, Links, Gemini, Topic-Tree
@@ -58,5 +41,5 @@ dann gezielter Fix für beide Snap-Back-Pfade:
 
 ---
 
-## 🔵 Verschoben auf Version 1.1
+## Verschoben auf Version 1.1
 - Gallery-Artikel (111 Artikel, 540 Bilder), Audio-Pipeline
