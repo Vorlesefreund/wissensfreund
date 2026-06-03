@@ -676,6 +676,67 @@ class WissensfreundProvider extends ChangeNotifier {
     }
   }
 
+  /// Read-only Version von _seekToChunkForOffset: Chunk-Index ohne Seek.
+  /// Gibt -1 für ZIM-Artikel zurück (_chunkImgIndices leer → kein Chunk-Mapping).
+  int sentenceChunkForOffset(int charOffset) {
+    if (_chunkImgIndices.isEmpty) return -1;
+    for (int i = _chunkOffsets.length - 1; i >= 0; i--) {
+      if (_chunkIsBox.length > i && _chunkIsBox[i]) continue;
+      if (_chunkOffsets[i] <= charOffset) return i;
+    }
+    return 0;
+  }
+
+  /// Gibt den Chunk-Index der Box (sIdx, bIdx) zurück, -1 wenn nicht gefunden.
+  int chunkIndexForBox(int sIdx, int bIdx) {
+    for (final entry in _chunkBoxSectionMap.entries) {
+      if (entry.value == sIdx &&
+          (_chunkBoxInSectionMap[entry.key] ?? -1) == bIdx) {
+        return entry.key;
+      }
+    }
+    return -1;
+  }
+
+  /// Springt direkt auf Chunk-Index [chunkIndex] (Satz oder Box).
+  /// Kein charOffset-Mapping, kein Box-Skip-Fehler.
+  /// _ttsStopPending-Pattern identisch zu seekWithDelay (Problem-1-Schutz).
+  void seekToChunk(int chunkIndex,
+      {Duration delay = const Duration(milliseconds: 1200)}) {
+    if (chunkIndex < 0 || chunkIndex >= _speechChunks.length) return;
+    _seekDelayTimer?.cancel();
+    _pendingSeekOffset = null;
+    _stimmtPauseTimer?.cancel();
+    if (_state == AppState.speaking && !_isPaused && !_stoppedForDelayedSeek) {
+      _ttsStopPending = true;
+      _stoppedForDelayedSeek = true;
+      unawaited(_tts.stop());
+    }
+    _seekDelayTimer = Timer(delay, () {
+      _stoppedForDelayedSeek = false;
+      _seekDelayTimer = null;
+      _ttsStopPending = false; // manuell löschen: stop() feuert auf manchen Geräten kein onDone
+      if (_state == AppState.idle || chunkIndex >= _speechChunks.length) return;
+      _currentChunk    = chunkIndex;
+      _ttsCursor       = _chunkOffsets[chunkIndex];
+      _imageSyncPaused = false;
+      if (_chunkImgIndices.isNotEmpty) {
+        for (int i = chunkIndex; i >= 0; i--) {
+          if (_chunkImgIndices[i] >= 0) { _selectedImageIndex = _chunkImgIndices[i]; break; }
+        }
+      }
+      if (!_isPaused) {
+        _state = AppState.speaking;
+        notifyListeners();
+        _pauseScreenTimer();
+        unawaited(_tts.speak(_speechChunks[chunkIndex]));
+      } else {
+        _resumeOffset = _chunkOffsets[chunkIndex];
+        notifyListeners();
+      }
+    });
+  }
+
   /// Kapitel-Sprung: unterbricht TTS sofort und springt zum Ziel-Offset.
   /// Für Section-Pfeile (nicht für Scroll-Navigation).
   Future<void> jumpToSection(int charOffset) async {

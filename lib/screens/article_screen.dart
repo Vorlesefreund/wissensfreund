@@ -1822,6 +1822,15 @@ List<String> _splitSentences(String text) {
   return result.isEmpty ? [text] : result;
 }
 
+/// Gibt die Start-Offsets aller Sätze zurück — identische Regex wie _splitSentences,
+/// nur .start statt .group(0).trim(). Ändert sich _splitSentences, muss diese mit.
+List<int> _splitSentenceStarts(String text) {
+  if (text.isEmpty) return [];
+  final ms = RegExp(r'(?:\d+(?:[.,]\d+)+|[^.!?])+[.!?]+\s*').allMatches(text);
+  final result = ms.map((m) => m.start).toList();
+  return result.isEmpty ? [0] : result;
+}
+
 int _findActiveIdx(String text, int cursor, List<String> sentences) {
   if (sentences.isEmpty) return 0;
   int pos = 0;
@@ -2541,33 +2550,60 @@ class _ModeBContentState extends State<_ModeBContent> {
     // _userScrolling stays TRUE here — only reset after seek settles or no seek needed
     if (!mounted || !_scrollCtrl.hasClients) { _userScrolling = false; return; }
     final provider = context.read<WissensfreundProvider>();
-    // Never seek while a box chunk is active — boxes have no sentence position.
-    if (provider.currentChunkIsBox) { _suspendAutoScrollOnce(); _userScrolling = false; return; }
     final sentences = _splitSentences(provider.articleText);
     if (sentences.isEmpty) { _userScrolling = false; return; }
     final activeIdx = _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
 
-    // Live render query — avoids stale positions caused by font-size changes (active: 19px, inactive: 15px)
+    // Combined anchor scan: topmost visible element — sentences AND boxes.
+    // sentenceStarts via same regex as _splitSentences → kein Divergenz-Risiko.
+    final sentenceStarts = _splitSentenceStarts(provider.articleText);
+
     RenderBox? vpBox;
-    int topIdx = -1;
-    double minY = double.infinity;
+    int    topSentIdx        = -1;
+    double topSentY          = double.infinity;
+    int    topSentCharOffset = 0;
+    String? topBoxKey;
+    int    topBoxChunkIdx   = -1;
+    double topBoxY          = double.infinity;
+
     for (int i = 0; i < sentences.length; i++) {
       final ctx = _sentenceKeys[i]?.currentContext;
       if (ctx == null) continue;
-      final box = ctx.findRenderObject() as RenderBox?;
-      if (box == null || !box.attached) continue;
+      final rbox = ctx.findRenderObject() as RenderBox?;
+      if (rbox == null || !rbox.attached) continue;
       vpBox ??= Scrollable.maybeOf(ctx)?.context.findRenderObject() as RenderBox?;
       if (vpBox == null || !vpBox.attached) break;
-      final localY = vpBox.globalToLocal(box.localToGlobal(Offset.zero)).dy;
-      if (localY >= 0 && localY < minY) {
-        minY = localY;
-        topIdx = i;
+      final localY = vpBox.globalToLocal(rbox.localToGlobal(Offset.zero)).dy;
+      if (localY >= 0 && localY < topSentY) {
+        topSentY          = localY;
+        topSentIdx        = i;
+        topSentCharOffset = i < sentenceStarts.length ? sentenceStarts[i] : 0;
       }
     }
 
-    if (topIdx < 0) {
-      // User scrolled past all sentence content (box/thumbnail area).
-      // Sync _lastActiveIdx to current TTS when lock expires to prevent snap-back.
+    for (final entry in _boxKeys.entries) {
+      final ctx = entry.value.currentContext;
+      if (ctx == null) continue;
+      final rbox = ctx.findRenderObject() as RenderBox?;
+      if (rbox == null || !rbox.attached) continue;
+      vpBox ??= Scrollable.maybeOf(ctx)?.context.findRenderObject() as RenderBox?;
+      if (vpBox == null || !vpBox.attached) continue;
+      final localY = vpBox.globalToLocal(rbox.localToGlobal(Offset.zero)).dy;
+      if (localY >= 0 && localY < topBoxY) {
+        topBoxY       = localY;
+        topBoxKey     = entry.key;
+        final parts   = entry.key.split('-');
+        topBoxChunkIdx = parts.length == 2
+            ? provider.chunkIndexForBox(
+                int.tryParse(parts[0]) ?? -1, int.tryParse(parts[1]) ?? -1)
+            : -1;
+      }
+    }
+
+    final boxIsAnchor = topBoxKey != null && topBoxY < topSentY;
+
+    if (topSentIdx < 0 && topBoxKey == null) {
+      // Nichts sichtbar — User unterhalb aller Inhalte (Thumbnail/Bild-Bereich).
       provider.cancelPendingSeek();
       _seekResumeTimer?.cancel();
       _seekResumeTimer = Timer(const Duration(milliseconds: 2000), () {
@@ -2581,40 +2617,34 @@ class _ModeBContentState extends State<_ModeBContent> {
       });
       return;
     }
-    if (topIdx == activeIdx) {
-      provider.cancelPendingSeek(); // restart TTS if it was stopped for a delayed seek
-      _userScrolling = false;
-      return;
-    }
-    if (topIdx == activeIdx + 1 || topIdx == activeIdx + 2) {
-      // 1–2 sentences ahead: slight forward scroll or small overshoot.
-      // The active sentence (19px) is taller than inactive (15px); a ~100px overshoot
-      // past the active sentence's top edge already puts k+2 at the viewport top.
-      // Let TTS advance naturally rather than interrupting for such small offsets.
-      provider.cancelPendingSeek();
-      _seekResumeTimer?.cancel();
-      _seekResumeTimer = Timer(const Duration(milliseconds: 3000), () {
-        if (!mounted) return;
+
+    if (boxIsAnchor) {
+      if (topBoxChunkIdx >= 0 && topBoxChunkIdx == provider.currentChunkIndex) {
+        _userScrolling = false;
+        return;
+      }
+      if (provider.isPaused) { _userScrolling = false; return; }
+      if (topBoxChunkIdx < 0) {
         _suspendAutoScrollOnce();
         _userScrolling = false;
-      });
-      return;
+        return;
+      }
+      provider.seekToChunk(topBoxChunkIdx);
+    } else {
+      if (topSentIdx == activeIdx) {
+        provider.cancelPendingSeek();
+        _userScrolling = false;
+        return;
+      }
+      if (provider.isPaused) { _userScrolling = false; return; }
+      final sentChunkIdx = provider.sentenceChunkForOffset(topSentCharOffset);
+      if (sentChunkIdx >= 0) {
+        provider.seekToChunk(sentChunkIdx);
+      } else {
+        provider.seekWithDelay(topSentCharOffset); // ZIM-Fallback
+      }
     }
-    if (provider.isPaused) { _userScrolling = false; return; }
 
-    // Compute char offset by summing sentence lengths up to topIdx.
-    // If sentences[topIdx] is a heading-merged sentence (contains \n), advance past the heading
-    // so the seek lands on the real sentence start rather than the heading gap.
-    int charOffset = 0;
-    for (int i = 0; i < topIdx; i++) {
-      charOffset += sentences[i].length + 1;
-    }
-    final nl = sentences[topIdx].indexOf('\n');
-    if (nl >= 0) charOffset += nl + 1;
-
-    // seekWithDelay: TTS stops immediately, restarts after 1.2s at new position.
-    // To revert: replace seekWithDelay with seekAfterCurrentChunk and timer with 3000ms.
-    provider.seekWithDelay(charOffset);
     _seekResumeTimer?.cancel();
     _seekResumeTimer = Timer(const Duration(milliseconds: 1400), () {
       if (mounted) _userScrolling = false;
