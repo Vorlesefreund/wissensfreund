@@ -1,43 +1,65 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-03T14:08:40Z -->
+<!-- updated: 2026-06-03T14:43:29Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-03 — Spike: photo_view_plus Evaluation)
+## 🟢 Zuletzt abgeschlossen (Session 2026-06-03 — Phase 2: photo_view_plus Migration)
 
-### Phase 1 Spike — ERGEBNIS: ✅ JA — Bitte Phase 2 Migration genehmigen
+### Migration image_fullscreen_overlay.dart → photo_view_plus 1.1.1
 
-Branch: `spike/photo-view-plus` (pubspec.yaml + STATUS.md geändert; main bleibt launchbar)
+**Branch:** `spike/photo-view-plus` — APK installiert auf S23, wartet auf Geräte-Test.
 
-| Kriterium | Ergebnis | Begründung |
-|---|---|---|
-| 1. Gesture Arena (PageView vs. Pinch) | ✅ JA | `PhotoViewGestureRecognizer._decideIfWeAcceptEvent`: 2-Pointer (Pinch) gewinnt immer; 1-Pointer (Pan) nur wenn nicht am Rand → PageView bekommt nur Edge-Swipes |
-| 2. PhotoViewInteractionPolicy Clamp-Hook | ✅ JA | 3 injectable Callbacks: `clampPosition(metrics, nextPos)` + `onGestureEnd(context)` + filterQuality; Standard-Impl nutzt `metrics.clampPosition()` — korrekt out-of-box |
-| 3. Limited Cover max 15% Crop | ✅ JA | `PhotoViewScale` ist abstract → `LimitedCoverScale`-Subklasse: `resolve()` = `min(sk, sc * 1.18)`; PV berechnet childSize intern aus MemoryImage |
-| 4. Doppeltipp 1x-2.5x an Tippposition | JA (30 Zeilen) | `disableDoubleTap:true` + `onTapUp` Debounce + eigener AnimController; `newPos = (tap-center)*(1-r) + pos0*r` wobei `r = scale1/scale0` |
+**Was geändert wurde:**
+- `InteractiveViewer` + `TransformationController` + `Matrix4`-Logik vollständig entfernt
+- `photo_view_plus: 1.1.1` (exakt gepinnt, kein `^`) in pubspec.yaml
+- `_LimitedCoverScale extends PhotoViewScale` — `resolve()` = `min(sk, sc * 1.18)`
+- `PhotoViewGestureDetectorScope(axis: Axis.horizontal)` wraps `PageView.builder`
+  → Pinch gewinnt Gesture-Arena immer; PageView bekommt nur Edge-Swipes
+- `PhotoView` pro Seite: `initialScale/minScale = _limitedCoverScale`, `strictScale: true`
+- `maxScale: PhotoViewComputedScale.covered * 4.0`
+- Kein eigenes `_clampedMatrix` mehr — `metrics.clampPosition()` out-of-box
+- Double-tap: `disableDoubleTap: true` + `onTapUp` Debounce (300ms/40px) + AnimController
+  - Zoom-in: `targetScale = initScale * 2.5`, Fokuspunkt-Formel: `(tapPos - center)*(1-r) + pos0*r`
+  - Zoom-out: `targetScale = initScale`, `position = Offset.zero`
+- `scaleStateChangedCallback` für Pinch-Zoom-State (mit `index == _currentIndex` Guard)
+- `onScaleStart`: laufende Double-tap-Animation stoppen (verhindert Konflikt)
+- `_imageSizes` Map für Double-tap initScale-Berechnung (aus `ui.decodeImageFromList`)
+- `_outerSizes` Map aus `LayoutBuilder` — outerCenter für Fokuspunkt-Formel
+- Rand-Swipe via `Listener` entfernt — `PhotoViewGestureDetectorScope` übernimmt das
+- `NeverScrollableScrollPhysics` entfernt — Scope regelt es
+- Kein `_tcInitialized`, kein `_imageRatios`-Block-Guard mehr nötig
+- `_imageRatios` nur noch für Dreh-Hinweis
 
-**Kriterium 4 ist kein Blocker:** Implementierung einfacher als Matrix4 (scale+position getrennt).
-
-**Zusätzliche Erkenntnisse:**
-- `MemoryImage(bytes)` direkt als imageProvider nutzbar — kein manuelles imgRatio-Decode mehr nötig
-- PhotoViewGallery wraps intern PageView.builder mit PhotoViewGestureDetectorScope — keine eigene PageView nötig
-- `wantKeepAlive: true` verhindert State-Reset beim Blättern
-- `strictScale: true` verhindert Zoom unter minScale (= LimitedCoverScale)
+**Was NICHT geändert wurde (Regressions-Check vorbereitet):**
+- Byte-Loading via `_futureFor` + FutureBuilder — identisch
+- Spinner während Ladevorgang — identisch
+- Caption-Gradient, Caption-Text, Zähler "1/3" — identisch
+- Zurück-Button, Speaker-Button — identisch
+- Dreh-Hinweis — identisch
+- ⓘ Lizenz-Button (nur ungezoomt) — identisch
+- Orientierung Portrait + Landscape in initState/dispose — identisch
 
 ---
 
-## 🔴 Warte auf Entscheidung (STOPP bis Claude Chat / Andreas grünes Licht gibt)
+## 🔴 Muss am S23 verifiziert werden (Checkliste)
 
-- **Phase 2: Migration von InteractiveViewer → photo_view_plus**
-  Branch `spike/photo-view-plus` ist vorbereitet. main bleibt launchbar.
-  Nach Genehmigung: Migration auf main, spike-Branch löschen.
+```
+[ ] PageView Mehrbild-Wisch (links/rechts blättern)
+[ ] Pinch sofort nach Öffnen — KERN-BUG, explizit testen!
+[ ] Bild lässt sich im Zoom NICHT aus Viewport schieben
+[ ] Doppeltipp 1x↔2.5x zentriert auf Tippposition
+[ ] Zurück- / Speaker- / ⓘ-Lizenz-Button funktionsgleich
+[ ] Bildunterschrift + "1 / 3"-Zähler korrekt (onPageChanged)
+[ ] Limited cover max ~15% Crop, kein unerwarteter Letterbox
+[ ] Bildquelle (on-demand Commons / R2 / Fallback) als imageProvider korrekt
+[ ] Schwarzer Hintergrund
+```
 
 ---
 
 ## 🟡 Zum Testen (ausstehend)
-- ImageFullscreenOverlay Pinch + Doppeltipp (nach Phase 2)
 - Mode B Lupe: Bold entfernen
 - Mode B Lupe: `_ttsCursor` erst im progressHandler updaten
 
