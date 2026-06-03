@@ -152,6 +152,26 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
         return bytes?.toList();
       });
 
+  // Klemmt position nach Double-tap-Zoom-in: verhindert Bild außerhalb Viewport.
+  // Koordinatensystem PV (basePosition=center): position=0 → Bildmitte = Viewportmitte.
+  // Erlaubter Bereich: ±(scaledDim - outerDim)/2 wenn Bild größer als Viewport, sonst 0.
+  Offset _clampPosition(Offset pos, double scale, int index) {
+    final outerSize = _outerSizes[index];
+    final imgSize   = index < widget.images.length
+        ? _imageSizes[widget.images[index].filename] : null;
+    if (outerSize == null || imgSize == null) return pos;
+
+    double clampAxis(double p, double scaled, double outer) {
+      if (scaled <= outer) return 0.0;
+      final half = (scaled - outer) / 2;
+      return p.clamp(-half, half);
+    }
+    return Offset(
+      clampAxis(pos.dx, imgSize.width  * scale, outerSize.width),
+      clampAxis(pos.dy, imgSize.height * scale, outerSize.height),
+    );
+  }
+
   // Löst den initialen Scale für Double-tap-Ziel (zoom-out Rückkehr).
   double? _initialScaleFor(int index) {
     if (index >= widget.images.length) return null;
@@ -205,9 +225,11 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
       // Zoom-in: 2.5× auf Tippposition. Fokuspunkt unter dem Finger bleibt fest.
       // Formel: newPos = (tapPos - outerCenter) * (1 - r) + currentPos * r
       // mit r = targetScale / currentScale. Äquivalent zur alten newCx/newCy-Formel.
+      // _clampPosition stellt sicher, dass das Bild nach der Animation im Viewport bleibt.
       targetScale = initScale * 2.5;
       final r = targetScale / currentScale;
-      targetPos = (tapPos - outerCenter) * (1 - r) + currentPos * r;
+      final rawPos = (tapPos - outerCenter) * (1 - r) + currentPos * r;
+      targetPos = _clampPosition(rawPos, targetScale, index);
       if (mounted) setState(() => _isZoomed = true);
     }
 
@@ -294,7 +316,8 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
                   // ── Dreh-Hinweis ─────────────────────────────────────────
                   if (_showRotateHint && orientation == Orientation.portrait)
                     Positioned(
-                      bottom: 100, left: 0, right: 0,
+                      bottom: MediaQuery.of(context).padding.bottom + 60,
+                      left: 0, right: 0,
                       child: Center(
                         child: Container(
                           padding: const EdgeInsets.symmetric(
@@ -346,6 +369,8 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
         return LayoutBuilder(builder: (_, constraints) {
           _outerSizes[index] =
               Size(constraints.maxWidth, constraints.maxHeight);
+          // Systembar-Inset (iOS home indicator / Android Nav-Bar in nicht-immersiver Phase)
+          final bottomInset = MediaQuery.of(ctx).padding.bottom;
 
           return Stack(
             fit: StackFit.expand,
@@ -361,7 +386,8 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
                 strictScale:       true,
                 backgroundDecoration:
                     const BoxDecoration(color: Colors.black),
-                filterQuality:     FilterQuality.medium,
+                // high = bicubic bei Ruhe; PV-Policy droppt auto auf medium während Gesture
+                filterQuality:     FilterQuality.high,
                 disableDoubleTap:  true,
                 onTapUp: (ctx, details, value) =>
                     _onTapUp(ctx, details, value, index),
@@ -385,7 +411,8 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
               // ── Caption-Gradient + Text ──────────────────────────────────
               if (hasCaption) ...[
                 Positioned(
-                  left: 0, right: 0, bottom: 0, height: 80,
+                  left: 0, right: 0, bottom: 0,
+                  height: 80 + bottomInset,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
@@ -400,7 +427,7 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
                   ),
                 ),
                 Positioned(
-                  left: 60, right: 12, bottom: 12,
+                  left: 60, right: 12, bottom: 12 + bottomInset,
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
@@ -440,7 +467,7 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
               // ── Zähler ohne Caption ──────────────────────────────────────
               if (!hasCaption && imgCount > 1)
                 Positioned(
-                  right: 46, bottom: 12,
+                  right: 46, bottom: 12 + bottomInset,
                   child: Text(
                     '${index + 1} / $imgCount',
                     style: const TextStyle(
@@ -455,7 +482,7 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
               if (!_isZoomed && widget.onLicenseInfo != null)
                 Positioned(
                   right:  12,
-                  bottom: hasCaption ? 88 : 12,
+                  bottom: (hasCaption ? 88 : 12) + bottomInset,
                   child: GestureDetector(
                     onTap: () => widget.onLicenseInfo!(context, index),
                     child: Container(
