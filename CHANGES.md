@@ -1,5 +1,12 @@
-<!-- last-updated: 2026-06-02T00:00:00Z -->
+<!-- last-updated: 2026-06-03T07:46:50Z -->
 # Changelog — Wissensfreund App
+
+---
+
+## [2026-06-03] — Phase 2: Echter Vollbild-Modus (ImageFullscreenOverlay)
+
+- `lib/widgets/image_fullscreen_overlay.dart` (neu) — PageView mit InteractiveViewer, Pinch-to-Zoom (1×–4×), Doppeltipp-Zoom (toggle 1×↔2.5×), Bildschirm-Rotation (Hoch-/Querformat), Orientierungs-Hinweis bei Querbild im Hochformat, Bildunterschrift mit Gradient, 🔊 Speaker-Button, Bild-Zähler, TTS pausiert beim Öffnen
+- `lib/screens/article_screen.dart` — `_pushImageFullscreen` Top-Level-Helper (Abo-Check: Plus/Premium → Overlay, Free → SnackBar); Trigger in `_FullscreenGallery` (2. Tipp auf Bild → Overlay); Trigger in Modus C (`_MainArticleImage.onTap` → direktes Overlay)
 
 ---
 

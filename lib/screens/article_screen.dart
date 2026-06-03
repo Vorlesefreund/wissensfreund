@@ -19,8 +19,30 @@ import '../services/subscription_service.dart';
 import '../services/profile_service.dart';
 import '../services/wikimedia_license_checker.dart';
 import '../widgets/callout_box.dart';
+import '../widgets/image_fullscreen_overlay.dart';
 import '../widgets/professor_widget.dart';
 import '../widgets/quiz_widget.dart';
+
+void _pushImageFullscreen(
+    BuildContext context, List<ArticleImageInfo> images, int index) {
+  if (!SubscriptionService.instance.isPlus) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: const Text('Vollbild-Bilder gibt es mit Wissensfreund Plus ⭐'),
+      action: SnackBarAction(label: 'Mehr erfahren', onPressed: () {}),
+      duration: const Duration(seconds: 4),
+    ));
+    return;
+  }
+  final safeIndex = index.clamp(0, (images.length - 1).clamp(0, images.length));
+  Navigator.of(context).push(PageRouteBuilder(
+    opaque: false,
+    barrierColor: Colors.black,
+    pageBuilder: (_, __, ___) => ImageFullscreenOverlay(
+      images: images,
+      initialIndex: safeIndex,
+    ),
+  ));
+}
 
 // Professor / mic layout — ALL size-dependent values derive from these constants.
 // When the professor or mic button changes size, update only here.
@@ -1449,6 +1471,10 @@ class _FullscreenGalleryState extends State<_FullscreenGallery> {
                       onHorizontalDragEnd: _swipe,
                       onVerticalDragEnd: (d) {
                         if ((d.primaryVelocity ?? 0) > 300) _close();
+                      },
+                      onTap: () {
+                        final imgs = context.read<WissensfreundProvider>().articleImages;
+                        _pushImageFullscreen(context, imgs, _currentIndex);
                       },
                       child: Column(
                         children: [
@@ -3262,6 +3288,12 @@ class _ModeCContentState extends State<_ModeCContent> {
                         fallbackTitle: provider.articleTitle,
                         enableFullscreenTap: false,
                         fit: BoxFit.contain,
+                        onTap: () {
+                          final imgs = provider.articleImages;
+                          final idx = provider.currentTtsImageIndex
+                              .clamp(0, (imgs.length - 1).clamp(0, imgs.length));
+                          _pushImageFullscreen(context, imgs, idx);
+                        },
                       ),
                     ),
 
