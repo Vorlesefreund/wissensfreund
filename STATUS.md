@@ -1,56 +1,58 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-03T13:54:57Z -->
+<!-- updated: 2026-06-03T14:08:40Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-03 — Mode A: Anker-Scan + Box-Seek)
+## 🟢 Zuletzt abgeschlossen (Session 2026-06-03 — Spike: photo_view_plus Evaluation)
 
-### Mode A: vollständiger Port von Mode B's Scroll-/Seek-Logik
-- `_boxKeys` + `_lastBoxKey` in `_ModeAContentState` ergänzt
-- `_insertSectionBoxes` in Mode A nun mit `boxKeys: _boxKeys` → Boxen haben GlobalKeys
-- `_jumpToTopSentence` komplett ersetzt: Live-Scan (Sätze + Boxen, `localY >= 0`)
-  - charOffset via `_splitSentenceStarts()` statt alter Längen-Summe
-  - `seekToChunk` für JSON, `seekWithDelay` + `\n`-Fix als ZIM-Fallback
-  - Box-Anker-Logik + `seekToChunk(topBoxChunkIdx)` — exakte Spiegelung Mode B
-  - „1–2 Sätze voraus"-Toleranz entfernt (A/B-Konsistenz)
-  - `!_cacheBuilt`-Guard entfernt (Live-Scan braucht keinen Cache)
-- `_smartScrollToBox` hinzugefügt (TTS-Auto-Scroll zu Boxen)
-- `_suspendAutoScrollOnce` mit Box-Tracking (wie Mode B)
-- `build()`: `rawIdx`/`scrollIdx`-Split, Box-Auto-Scroll-Block, `_boxKeys.clear()` bei Artikel-Reset
-- Getestet auf S23 ✅ — Satz-Seek, Box-Seek, Snap-Back-Szenarien alle bestanden
+### Phase 1 Spike — ERGEBNIS: ✅ JA — Bitte Phase 2 Migration genehmigen
+
+Branch: `spike/photo-view-plus` (pubspec.yaml + STATUS.md geändert; main bleibt launchbar)
+
+| Kriterium | Ergebnis | Begründung |
+|---|---|---|
+| 1. Gesture Arena (PageView vs. Pinch) | ✅ JA | `PhotoViewGestureRecognizer._decideIfWeAcceptEvent`: 2-Pointer (Pinch) gewinnt immer; 1-Pointer (Pan) nur wenn nicht am Rand → PageView bekommt nur Edge-Swipes |
+| 2. PhotoViewInteractionPolicy Clamp-Hook | ✅ JA | 3 injectable Callbacks: `clampPosition(metrics, nextPos)` + `onGestureEnd(context)` + filterQuality; Standard-Impl nutzt `metrics.clampPosition()` — korrekt out-of-box |
+| 3. Limited Cover max 15% Crop | ✅ JA | `PhotoViewScale` ist abstract → `LimitedCoverScale`-Subklasse: `resolve()` = `min(sk, sc * 1.18)`; PV berechnet childSize intern aus MemoryImage |
+| 4. Doppeltipp 1x-2.5x an Tippposition | JA (30 Zeilen) | `disableDoubleTap:true` + `onTapUp` Debounce + eigener AnimController; `newPos = (tap-center)*(1-r) + pos0*r` wobei `r = scale1/scale0` |
+
+**Kriterium 4 ist kein Blocker:** Implementierung einfacher als Matrix4 (scale+position getrennt).
+
+**Zusätzliche Erkenntnisse:**
+- `MemoryImage(bytes)` direkt als imageProvider nutzbar — kein manuelles imgRatio-Decode mehr nötig
+- PhotoViewGallery wraps intern PageView.builder mit PhotoViewGestureDetectorScope — keine eigene PageView nötig
+- `wantKeepAlive: true` verhindert State-Reset beim Blättern
+- `strictScale: true` verhindert Zoom unter minScale (= LimitedCoverScale)
 
 ---
 
-## 🟡 Zum Testen (noch ausstehend)
-- Manuell testen — ImageFullscreenOverlay (aus voriger Session)
-- Mode B Lupe: Bold entfernen (wechselnde Zeilenumbrüche in Mode A)
-- Mode B Lupe: `_ttsCursor` erst im progressHandler updaten (zu früh springendes Highlight)
+## 🔴 Warte auf Entscheidung (STOPP bis Claude Chat / Andreas grünes Licht gibt)
+
+- **Phase 2: Migration von InteractiveViewer → photo_view_plus**
+  Branch `spike/photo-view-plus` ist vorbereitet. main bleibt launchbar.
+  Nach Genehmigung: Migration auf main, spike-Branch löschen.
+
+---
+
+## 🟡 Zum Testen (ausstehend)
+- ImageFullscreenOverlay Pinch + Doppeltipp (nach Phase 2)
+- Mode B Lupe: Bold entfernen
+- Mode B Lupe: `_ttsCursor` erst im progressHandler updaten
 
 ---
 
 ## 🔴 Offene To-Dos (nach Priorität)
 
-### Hoch — eigener Refactor nötig
-- **Epoch-Guard für TTS-Seek**: `_ttsStopPending`-Mirror hat auf sehr langsamen Geräten
-  ein Zeitfenster — feuert `stop()` sein `onDone` erst nach den 1200 ms, läuft es als
-  „neuer Chunk fertig" durch und der frische Satz wird abgeschnitten.
-  Echte Cross-Device-Lösung: Epoch-/Generations-Zähler (oder `awaitSpeakCompletion(true)`
-  + `await` statt globalem `setCompletionHandler`).
-  Betrifft 5+ Seek-Stellen im Provider — eigener Refactor.
-
 ### Mittel
-- **Mode-B-ZIM-`\n`-Loch**: Mode B's `seekWithDelay`-Fallback (Zeile ~2670) hat keinen
-  `\n`-Fix für heading-merged Sätze, Mode A schon. Für A/B-Konsistenz angleichen.
-- **1-Satz-Toleranz**: Ohne die alte „1–2 Sätze voraus"-Toleranz löst jeder kleine
-  Korrektur-Scroll Unterbrechen+Seek aus. Falls ruckelig: 1-Element-Toleranz zurückbauen.
-- **Selbst produzierte Artikel** (neue JSON-Artikel mit echten Inhalten)
-- **Quiz-Checkpoint löschen + Run neu starten**
-- **Bilder-Patch** (`patch_article_images_v1.py`)
+- **Selbst produzierte Artikel**, **Quiz-Checkpoint + Run neu**
+- **Bilder-Patch** (`patch_article_images_v1.py`) nach Quiz-Fertigstellung
 
 ### Niedrig
-- **Links in JSON-Artikeln**, **Gemini-Integration**, **Topic-Tree**
+- Epoch-Guard TTS-Seek (eigener Refactor)
+- Mode-B-ZIM-`\n`-Loch
+- Links in JSON-Artikeln, Gemini-Integration, Topic-Tree
 - Upgrade-Dialog, Plus/Premium-Design, Sound-Thumbnails
 
 ---

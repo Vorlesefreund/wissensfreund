@@ -472,6 +472,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "7.0.2"
+  photo_view_plus:
+    dependency: "direct main"
+    description:
+      name: photo_view_plus
+      sha256: fdfa1f314835a77f844327543021c1e45691a9054e42233154ac86edb42c02ae
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.1"
   platform:
     dependency: transitive
     description:

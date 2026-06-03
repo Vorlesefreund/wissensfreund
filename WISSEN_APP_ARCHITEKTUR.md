@@ -394,3 +394,68 @@ Mode B hat das Problem nie gehabt: Mode B hat kein `extraRightPad` und kein
 Gemischter Zustand (live in `_jumpToTopSentence`, cached in `_computeProfessorZone`) ist
 stabil: eine minimale Positions-Diskrepanz durch aktives Padding ist möglich (wenige Pixel),
 aber kein Stabilitätsproblem.
+
+---
+
+## Vollbild-Zoom: InteractiveViewer → photo_view_plus (2026-06-03)
+
+### Warum InteractiveViewer aufgegeben wurde
+
+Drei überlappende Probleme — alle architekturell unlösbar:
+
+1. **Gesture Arena** (Hauptursache): PageView (HorizontalDragRecognizer) vs. InteractiveViewer
+   (ScaleGestureRecognizer). Erster Pointer wird als Drag eingeordnet → PageView gewinnt →
+   Pinch wird nie registriert. Nicht fixbar ohne PageView zu ersetzen.
+
+2. **boundaryMargin-Paradox**: `constrained: false` + `boundaryMargin: EdgeInsets.zero` ist
+   strukturell unlösbar wenn `displayH < screenH`. Workaround `EdgeInsets.all(double.infinity)`
+   + eigenes `_clampedMatrix` in `onInteractionUpdate` kämpft gegen IVs Focal-Point-Mathematik.
+
+3. **Animation-Gesture-Konflikt**: onInteractionEnd-Animation vs. neu beginnender Pinch.
+
+### photo_view_plus Evaluation — Phase 1 Spike (2026-06-03)
+
+Package: `photo_view_plus: ^1.1.1`
+
+**1. Gesture Arena — ✅ GELÖST**
+`PhotoViewGestureRecognizer._decideIfWeAcceptEvent`:
+- 2 Pointer → always accept → Pinch gewinnt immer
+- 1 Pointer → nur accept wenn nicht am Rand (`hitDetector.shouldMove`) → PageView bekommt Edge-Swipes
+- `PhotoViewGallery` wraps `PageView.builder` in `PhotoViewGestureDetectorScope` → out-of-box
+
+**2. InteractionPolicy Clamp-Hook — ✅ VORHANDEN**
+```dart
+PhotoViewInteractionPolicy(
+  clampPosition: (metrics, nextPos) => metrics.clampPosition(nextPos),  // Standard reicht
+  onGestureEnd: (ctx) => defaultGestureEndPolicy(ctx),  // Spring-Back + Fling
+)
+```
+
+**3. Limited Cover max 15% Crop — ✅ IMPLEMENTIERBAR**
+```dart
+class LimitedCoverScale extends PhotoViewScale {
+  const LimitedCoverScale();
+  @override
+  double resolve(Size outerSize, Size childSize) {
+    final sc = math.min(outerSize.width / childSize.width, outerSize.height / childSize.height);
+    final sk = math.max(outerSize.width / childSize.width, outerSize.height / childSize.height);
+    return math.min(sk, sc * 1.18);
+  }
+}
+```
+`initialScale: const LimitedCoverScale()`, `minScale: const LimitedCoverScale()`, `strictScale: true`
+PV berechnet childSize intern aus `MemoryImage` — kein manuelles imgRatio-Decode nötig!
+
+**4. Doppeltipp 1x↔2.5x an Tippposition — ⚠️ IMPLEMENTIERBAR (~30 Zeilen)**
+`disableDoubleTap: true` + `onTapUp` mit Zeit/Distanz-Debounce + eigener AnimController.
+Positionsformel (PhotoView-Koordinaten, basePosition=center):
+```
+outerCenter = Offset(outerSize.width/2, outerSize.height/2)
+r = targetScale / currentScale
+newPosition = (tapPos - outerCenter) * (1 - r) + currentPosition * r
+newPosition = metrics.clampPosition(newPosition)
+```
+Dann `controller.updateMultiple(position, scale)` in AnimationController-Listener aufrufen.
+
+**Gesamtbewertung: Phase 2 Migration empfohlen.**
+Alle 4 Kriterien erfüllt. `MemoryImage(bytes)` funktioniert out-of-box als imageProvider.
