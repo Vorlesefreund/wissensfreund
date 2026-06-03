@@ -1914,7 +1914,7 @@ class _ModeAContentState extends State<_ModeAContent> {
     if (!mounted || !_scrollCtrl.hasClients || !_cacheBuilt) { _userScrolling = false; return; }
     final provider = context.read<WissensfreundProvider>();
     // Never seek while a box chunk is active — boxes have no sentence position.
-    if (provider.currentChunkIsBox) { _userScrolling = false; return; }
+    if (provider.currentChunkIsBox) { _suspendAutoScrollOnce(); _userScrolling = false; return; }
     final sentences = _splitSentences(provider.articleText);
     if (sentences.isEmpty) { _userScrolling = false; return; }
     final activeIdx = _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
@@ -1952,7 +1952,7 @@ class _ModeAContentState extends State<_ModeAContent> {
         final sents = _splitSentences(p.articleText);
         final curIdx = _findActiveIdx(p.articleText, p.ttsCursor, sents);
         if (curIdx > _lastActiveIdx) _lastActiveIdx = curIdx;
-        _skipNextAutoScroll = true;
+        _suspendAutoScrollOnce();
         _userScrolling = false;
       });
       return;
@@ -1967,7 +1967,9 @@ class _ModeAContentState extends State<_ModeAContent> {
       provider.cancelPendingSeek();
       _seekResumeTimer?.cancel();
       _seekResumeTimer = Timer(const Duration(milliseconds: 3000), () {
-        if (mounted) _userScrolling = false;
+        if (!mounted) return;
+        _suspendAutoScrollOnce();
+        _userScrolling = false;
       });
       return;
     }
@@ -1990,6 +1992,11 @@ class _ModeAContentState extends State<_ModeAContent> {
     _seekResumeTimer = Timer(const Duration(milliseconds: 1400), () {
       if (mounted) _userScrolling = false;
     });
+  }
+
+  void _suspendAutoScrollOnce() {
+    if (!mounted) return;
+    _skipNextAutoScroll = true;
   }
 
   void _startSyncResetTimer(WissensfreundProvider provider) {
@@ -2535,7 +2542,7 @@ class _ModeBContentState extends State<_ModeBContent> {
     if (!mounted || !_scrollCtrl.hasClients) { _userScrolling = false; return; }
     final provider = context.read<WissensfreundProvider>();
     // Never seek while a box chunk is active — boxes have no sentence position.
-    if (provider.currentChunkIsBox) { _userScrolling = false; return; }
+    if (provider.currentChunkIsBox) { _suspendAutoScrollOnce(); _userScrolling = false; return; }
     final sentences = _splitSentences(provider.articleText);
     if (sentences.isEmpty) { _userScrolling = false; return; }
     final activeIdx = _findActiveIdx(provider.articleText, provider.ttsCursor, sentences);
@@ -2569,7 +2576,7 @@ class _ModeBContentState extends State<_ModeBContent> {
         final sents = _splitSentences(p.articleText);
         final curIdx = _findActiveIdx(p.articleText, p.ttsCursor, sents);
         if (curIdx > _lastActiveIdx) _lastActiveIdx = curIdx;
-        _skipNextAutoScroll = true;
+        _suspendAutoScrollOnce();
         _userScrolling = false;
       });
       return;
@@ -2587,7 +2594,9 @@ class _ModeBContentState extends State<_ModeBContent> {
       provider.cancelPendingSeek();
       _seekResumeTimer?.cancel();
       _seekResumeTimer = Timer(const Duration(milliseconds: 3000), () {
-        if (mounted) _userScrolling = false;
+        if (!mounted) return;
+        _suspendAutoScrollOnce();
+        _userScrolling = false;
       });
       return;
     }
@@ -2610,6 +2619,17 @@ class _ModeBContentState extends State<_ModeBContent> {
     _seekResumeTimer = Timer(const Duration(milliseconds: 1400), () {
       if (mounted) _userScrolling = false;
     });
+  }
+
+  void _suspendAutoScrollOnce() {
+    if (!mounted) return;
+    final p = context.read<WissensfreundProvider>();
+    _skipNextAutoScroll = true;
+    if (p.currentChunkIsBox) {
+      final sIdx = p.currentBoxSectionIdx;
+      final bIdx = p.currentBoxInSectionIdx;
+      if (sIdx >= 0) _lastBoxKey = '$sIdx-$bIdx';
+    }
   }
 
   void _buildCache() {
