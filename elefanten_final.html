@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🐘 Elefanten – Wissensfreund</title>
+<style>
+:root {
+  --bg: #0e1f0e;
+  --bg2: #0a180a;
+  --surface: #162816;
+  --surface2: #1e3a1e;
+  --accent: #4caf50;
+  --accent-glow: rgba(76,175,80,0.28);
+  --text: #f0f4f0;
+  --text-dim: #8aaa90;
+  --text-dimmer: #4a6a52;
+  --wow-color: #f7d44f;
+  --wow-bg: rgba(247,212,79,0.1);
+  --fakt-color: #7ec8f7;
+  --fakt-bg: rgba(126,200,247,0.08);
+  --warn-color: #f7a44f;
+  --warn-bg: rgba(247,164,79,0.1);
+  --stimmt-color: #c47ef7;
+  --stimmt-bg: rgba(196,126,247,0.1);
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: var(--bg2);
+  color: var(--text);
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  overscroll-behavior: none;
+  user-select: none;
+}
+
+/* ── SHELL ── */
+.shell {
+  max-width: 420px;
+  margin: 0 auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── TOPBAR ── */
+.topbar {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  background: var(--bg2);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  gap: 10px;
+}
+.topbar-logo { font-size: 22px; }
+.topbar-title { font-size: 17px; font-weight: 700; color: var(--text); flex: 1; }
+.topbar-btn {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: none; color: var(--text-dim);
+  font-size: 16px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.topbar-btn.active { background: var(--accent); color: #fff; }
+
+/* ── HERO IMAGE ── */
+.hero-wrap {
+  width: 100%;
+  aspect-ratio: 16/9;
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.hero-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: opacity 0.4s ease;
+}
+.hero-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 60%, rgba(20,36,20,0.9) 100%);
+}
+.hero-info-btn {
+  position: absolute; bottom: 10px; right: 10px;
+  width: 26px; height: 26px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 50%;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: rgba(255,255,255,0.7);
+  border: none;
+}
+.hero-progress {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 3px;
+  background: rgba(255,255,255,0.1);
+}
+.hero-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 0%;
+  transition: width 0.3s;
+}
+.sent-counter {
+  position: absolute; bottom: 8px; right: 40px;
+  font-size: 11px; color: rgba(255,255,255,0.5);
+  background: rgba(0,0,0,0.4);
+  padding: 2px 8px; border-radius: 10px;
+}
+
+/* ── AGE TABS ── */
+.age-tabs {
+  display: flex;
+  background: var(--bg2);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.age-tab {
+  flex: 1; padding: 9px 4px;
+  font-size: 12px; font-weight: 700;
+  text-align: center; cursor: pointer;
+  color: var(--text-dim);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.age-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── MODE SWITCHER ── */
+.mode-bar {
+  display: flex;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--bg2);
+}
+.mode-btn {
+  flex: 1; padding: 6px;
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  border: 2px solid transparent;
+  color: var(--text-dim);
+  font-size: 12px; font-weight: 700;
+  cursor: pointer; text-align: center;
+  transition: all 0.2s;
+}
+.mode-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(76,175,114,0.08); }
+
+/* ── SCROLL AREA ── */
+.scroll-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 140px;
+  scrollbar-width: none;
+}
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* ══════════════════════════
+   MODUS A — Fließtext
+══════════════════════════ */
+.modeA-content { padding: 16px 18px; display: none; }
+.modeA-content.visible { display: block; }
+
+.article-title-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 12px;
+}
+.article-emoji-big { font-size: 32px; }
+.article-title { font-size: 24px; font-weight: 800; line-height: 1.1; }
+.article-subtitle { font-size: 13px; color: var(--text-dim); margin-top: 3px; }
+
+.section { margin-bottom: 24px; }
+.section-heading {
+  font-size: 17px; font-weight: 800;
+  color: var(--text); margin-bottom: 8px;
+  line-height: 1.25;
+}
+.section-text { font-size: 15px; line-height: 1.72; color: #c8e6c9; }
+.section-text p + p { margin-top: 10px; }
+
+/* Satz-Highlighting */
+.sent {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 1px 0;
+  transition: background 0.15s;
+}
+.sent.active {
+  background: rgba(76,175,114,0.25);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* WOW-Fact */
+.wow-box {
+  background: var(--wow-bg);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin: 16px 0;
+  text-align: center;
+  animation: wowIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  opacity: 0;
+}
+.wow-box.visible { animation: wowIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both; opacity: 1; }
+@keyframes wowIn {
+  from { opacity: 0; transform: scale(0.85) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.wow-label {
+  font-size: 12px; font-weight: 800;
+  color: var(--wow-color);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  display: block;
+}
+.wow-text { font-size: 15px; color: #f0dea0; line-height: 1.5; font-weight: 600; }
+
+/* FAKT-Box (Stufe 3) */
+.fakt-box {
+  background: var(--fakt-bg);
+  border-left: 3px solid var(--fakt-color);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 12px 14px; margin: 16px 0;
+  animation: wowIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  opacity: 0;
+}
+.fakt-box.visible { opacity: 1; }
+.fakt-label { font-size: 11px; font-weight: 800; color: var(--fakt-color); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; display: block; }
+.fakt-text { font-size: 14px; color: #b8dcf0; line-height: 1.55; }
+
+/* STIMMT DAS? (Stufe 3) */
+.stimmt-box {
+  background: var(--stimmt-bg);
+  border-radius: var(--radius);
+  padding: 14px 16px; margin: 16px 0;
+  animation: wowIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+  opacity: 0;
+}
+.stimmt-box.visible { opacity: 1; }
+.stimmt-label { font-size: 11px; font-weight: 800; color: var(--stimmt-color); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; display: block; }
+.stimmt-these { font-size: 15px; color: #e0c8f8; font-weight: 700; margin-bottom: 10px; }
+.stimmt-reveal-btn {
+  background: rgba(196,126,247,0.15);
+  border: 1px solid rgba(196,126,247,0.3);
+  border-radius: 20px; padding: 6px 16px;
+  color: var(--stimmt-color); font-size: 13px;
+  font-weight: 700; cursor: pointer;
+}
+.stimmt-answer {
+  display: none; margin-top: 10px;
+  font-size: 14px; color: #c8b0e0; line-height: 1.55;
+  border-top: 1px solid rgba(196,126,247,0.2);
+  padding-top: 10px;
+}
+.stimmt-answer.open { display: block; }
+
+/* WARN-Box */
+.warn-box {
+  background: var(--warn-bg);
+  border-left: 3px solid var(--warn-color);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 12px 14px; margin: 16px 0;
+}
+.warn-label { font-size: 11px; font-weight: 800; color: var(--warn-color); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 4px; display: block; }
+.warn-text { font-size: 14px; color: #f0c898; line-height: 1.55; }
+
+/* TABLE */
+.table-wrap {
+  background: var(--surface);
+  border-radius: var(--radius);
+  overflow: hidden; margin: 14px 0;
+}
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th { background: var(--surface2); color: var(--text-dim); padding: 8px 10px; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; }
+td { padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); color: #b8ccbc; }
+tr:last-child td { border-bottom: none; }
+td:first-child { font-weight: 600; color: var(--text); }
+
+/* DIVIDER */
+.divider { height: 1px; background: rgba(255,255,255,0.05); margin: 20px 0; }
+
+/* ══════════════════════════
+   MODUS B — Satz-Fokus
+══════════════════════════ */
+.modeB-content { display: none; }
+.modeB-content.visible { display: flex; flex-direction: column; }
+
+.modeB-sent-display {
+  padding: 28px 24px 16px;
+  min-height: 160px;
+  display: flex; align-items: center;
+}
+.modeB-sent-text {
+  font-size: 22px; font-weight: 700;
+  line-height: 1.4; color: var(--text);
+  animation: fadeInUp 0.3s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modeB-section-label {
+  padding: 0 24px 8px;
+  font-size: 11px; font-weight: 700;
+  color: var(--text-dimmer);
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+
+/* WOW in Modus B */
+.modeB-wow {
+  margin: 0 16px 16px;
+  background: var(--wow-bg);
+  border-radius: var(--radius);
+  padding: 16px; text-align: center;
+  display: none;
+  animation: wowIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.modeB-wow.visible { display: block; }
+
+/* STIMMT in Modus B */
+.modeB-stimmt {
+  margin: 0 16px 16px;
+  background: var(--stimmt-bg);
+  border-radius: var(--radius);
+  padding: 14px;
+  display: none;
+  animation: wowIn 0.4s ease both;
+}
+.modeB-stimmt.visible { display: block; }
+
+/* ══════════════════════════
+   MODUS C — Vollbild-Galerie
+══════════════════════════ */
+.modeC-content { display: none; }
+.modeC-content.visible { display: block; }
+
+.modeC-gallery {
+  display: flex; overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  height: 55vw; max-height: 230px;
+}
+.modeC-gallery::-webkit-scrollbar { display: none; }
+
+.modeC-slide {
+  flex-shrink: 0; width: 100%;
+  scroll-snap-align: start;
+  position: relative;
+}
+.modeC-slide img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.modeC-slide-cap {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  padding: 20px 12px 8px;
+  font-size: 11px; color: rgba(255,255,255,0.7);
+}
+
+.modeC-text {
+  padding: 14px 18px;
+  font-size: 15px; line-height: 1.68; color: #c8e6c9;
+}
+.modeC-section-head {
+  font-size: 16px; font-weight: 800; color: var(--text);
+  margin-bottom: 8px;
+}
+
+/* ══════════════════════════
+   THUMBNAIL STRIP
+══════════════════════════ */
+.thumb-strip-wrap {
+  position: fixed;
+  bottom: 64px; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 420px;
+  background: linear-gradient(transparent, rgba(20,36,20,0.98) 40%);
+  padding: 20px 0 8px;
+  z-index: 40;
+}
+.thumb-strip {
+  display: flex; gap: 8px;
+  overflow-x: auto; scrollbar-width: none;
+  padding: 0 16px;
+}
+.thumb-strip::-webkit-scrollbar { display: none; }
+
+.thumb {
+  flex-shrink: 0;
+  width: 56px; height: 42px;
+  border-radius: 8px; overflow: hidden;
+  border: 2px solid transparent;
+  cursor: pointer; transition: all 0.2s;
+  background: var(--surface);
+}
+.thumb.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* source line */
+.source-line {
+  padding: 4px 16px;
+  font-size: 10px; color: var(--text-dimmer);
+}
+.source-line a { color: var(--text-dimmer); text-decoration: none; }
+
+/* ══════════════════════════
+   BOTTOM NAV
+══════════════════════════ */
+.bottom-nav {
+  position: fixed; bottom: 0;
+  left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 420px;
+  background: rgba(20,36,20,0.97);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 8px 0 16px;
+  z-index: 50;
+}
+.nav-btn {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 3px;
+  font-size: 10px; color: var(--text-dimmer);
+  cursor: pointer;
+  width: 52px; height: 44px;
+  border-radius: 10px;
+  border: none; background: none;
+  justify-content: center;
+  transition: all 0.15s;
+}
+.nav-btn .nav-icon { font-size: 20px; }
+.nav-btn.active { color: var(--accent); }
+
+/* play/pause center */
+.nav-play {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none; color: #fff;
+  font-size: 20px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 16px var(--accent-glow);
+  transition: transform 0.15s;
+}
+.nav-play:active { transform: scale(0.92); }
+
+/* ══════════════════════════
+   QUIZ
+══════════════════════════ */
+.quiz-wrap {
+  margin: 24px 0 0;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+.quiz-title { font-size: 16px; font-weight: 800; margin-bottom: 16px; }
+.quiz-q { margin-bottom: 16px; }
+.quiz-q-text { font-size: 14px; font-weight: 700; margin-bottom: 8px; line-height: 1.4; }
+.quiz-opts { display: flex; flex-direction: column; gap: 6px; }
+.quiz-opt {
+  background: var(--surface2);
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 9px 13px;
+  font-size: 14px; color: var(--text);
+  cursor: pointer; text-align: left;
+  transition: all 0.15s;
+}
+.quiz-opt:hover { border-color: var(--accent); }
+.quiz-opt.correct { border-color: #4fd17a; background: rgba(79,209,122,0.1); color: #90e8a8; }
+.quiz-opt.wrong { border-color: #f7614f; background: rgba(247,97,79,0.08); color: #f0a098; }
+
+/* ══════════════════════════
+   PROFESSOR
+══════════════════════════ */
+.professor {
+  position: fixed;
+  bottom: 70px; right: calc(50% - 210px + 8px);
+  width: 72px; pointer-events: none;
+  z-index: 45;
+  transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+.professor.hidden { transform: translateX(90px); }
+.professor img { width: 100%; }
+
+/* ══════════════════════════
+   INTERSECTION OBSERVER ANIMATION
+══════════════════════════ */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.animate-on-scroll.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <span class="topbar-logo">🎓</span>
+    <span class="topbar-title">Wissensfreund</span>
+    <button class="topbar-btn" title="Merken">☆</button>
+    <button class="topbar-btn active" title="Modi">▤</button>
+    <button class="topbar-btn" title="Menü">☰</button>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero-wrap">
+    <img class="hero-img" id="heroImg"
+      src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/African_Bush_Elephant.jpg/1280px-African_Bush_Elephant.jpg"
+      alt="Afrikanischer Elefant"
+      onerror="this.style.opacity=0.3">
+    <div class="hero-overlay"></div>
+    <div class="hero-progress"><div class="hero-progress-fill" id="progressFill"></div></div>
+    <div class="sent-counter" id="sentCounter">1 / 1</div>
+    <button class="hero-info-btn" onclick="showImgInfo()">ⓘ</button>
+  </div>
+
+  <!-- AGE TABS -->
+  <div class="age-tabs">
+    <div class="age-tab active" onclick="switchAge(1,this)">🟢 4–6 Jahre</div>
+    <div class="age-tab" onclick="switchAge(2,this)">🟡 7–9 Jahre</div>
+    <div class="age-tab" onclick="switchAge(3,this)">🔴 10–12 Jahre</div>
+  </div>
+
+  <!-- MODE BAR -->
+  <div class="mode-bar">
+    <button class="mode-btn active" onclick="switchMode('A',this)">▤ Lesen</button>
+    <button class="mode-btn" onclick="switchMode('B',this)">❝ Satz</button>
+    <button class="mode-btn" onclick="switchMode('C',this)">🖼 Galerie</button>
+  </div>
+
+  <!-- SCROLL AREA -->
+  <div class="scroll-area" id="scrollArea">
+
+    <!-- ═══════════ STUFE 1 ═══════════ -->
+    <div id="age1" class="age-pane">
+
+      <!-- MODUS A -->
+      <div class="modeA-content visible" id="a1-modeA">
+        <div class="article-title-row">
+          <span class="article-emoji-big">🐘</span>
+          <div>
+            <div class="article-title">Elefanten</div>
+            <div class="article-subtitle">Die größten Landtiere der Welt</div>
+          </div>
+        </div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Hallo, ich bin ein Riese! 🐘</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="0">Stell dir vor, du stehst neben einem Tier, das so groß ist wie ein Haus!</span> <span class="sent" data-img="0">Elefanten sind die größten Tiere, die auf dem Land leben.</span> <span class="sent" data-img="0">Ihre Beine sind so dick wie Baumstämme — und trotzdem können sie leise schleichen!</span></p>
+          </div>
+          <div class="wow-box animate-on-scroll">
+            <span class="wow-label">🤩 Wow!</span>
+            <div class="wow-text">Ein Elefant ist so schwer wie fünf Autos zusammen!</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Der Zauber-Rüssel ✨</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="1">Ein Elefant hat keine Hände — aber er braucht sie auch nicht!</span> <span class="sent" data-img="1">Mit seinem langen Rüssel kann er Blätter pflücken, Wasser aufsaugen und sich selbst abduschen.</span> <span class="sent" data-img="1">Der Rüssel ist gleichzeitig Nase, Hand und Trinkhalm.</span></p>
+          </div>
+          <div class="wow-box animate-on-scroll">
+            <span class="wow-label">🤩 Wow!</span>
+            <div class="wow-text">In einen Elefantenrüssel passen bis zu 8 Liter Wasser — das ist mehr als ein großer Eimer!</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Ohren wie Fächer 👂</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="2">Elefantenohren sind riiiesig!</span> <span class="sent" data-img="2">Wenn es heiß ist, wedeln Elefanten damit hin und her — wie ein eingebauter Ventilator.</span> <span class="sent" data-img="2">Afrikanische Elefanten haben besonders große Ohren, die fast wie die Form von Afrika aussehen!</span></p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Eine große, liebevolle Familie ❤️</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="3">Elefanten leben nie allein.</span> <span class="sent" data-img="3">Mamas, Omas, Tanten und Babys wohnen zusammen.</span> <span class="sent" data-img="3">Die älteste Oma ist die Chefin und kennt die besten Wasserstellen.</span> <span class="sent" data-img="3">Wenn ein Baby hinfällt, helfen alle zusammen!</span></p>
+          </div>
+          <div class="wow-box animate-on-scroll">
+            <span class="wow-label">🤩 Wow!</span>
+            <div class="wow-text">Ein Elefantenbaby wiegt bei der Geburt schon rund 100 Kilogramm — so viel wie ein erwachsener Mensch!</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Schlammbad statt Dusche 🛁</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="4">Elefanten lieben Matsch!</span> <span class="sent" data-img="4">Sie rollen sich darin und schmieren ihn überall hin.</span> <span class="sent" data-img="4">Das klingt dreckig — aber es ist superschlau!</span> <span class="sent" data-img="4">Der Schlamm schützt ihre Haut vor der heißen Sonne und vor fiesen Mücken.</span></p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Elefanten brauchen unsere Hilfe ⚠️</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="5">Leider gibt es immer weniger Elefanten.</span> <span class="sent" data-img="5">Menschen bauen Straßen und Häuser dort, wo Elefanten früher lebten.</span> <span class="sent" data-img="5">Deshalb ist es wichtig, dass wir sie schützen!</span></p>
+          </div>
+        </div>
+
+        <!-- QUIZ 1 -->
+        <div class="quiz-wrap animate-on-scroll">
+          <div class="quiz-title">🎯 Weißt du's noch?</div>
+          <div class="quiz-q">
+            <div class="quiz-q-text">Womit duscht sich ein Elefant?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" onclick="ans(this,true)">🦣 Mit dem Rüssel</button>
+              <button class="quiz-opt" onclick="ans(this,false)">👂 Mit den Ohren</button>
+              <button class="quiz-opt" onclick="ans(this,false)">🐾 Mit dem Schwanz</button>
+            </div>
+          </div>
+          <div class="quiz-q">
+            <div class="quiz-q-text">Wer ist die Chefin in der Elefantenfamilie?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" onclick="ans(this,false)">Der stärkste Bulle</button>
+              <button class="quiz-opt" onclick="ans(this,true)">Die älteste Oma-Elefantin</button>
+              <button class="quiz-opt" onclick="ans(this,false)">Das jüngste Baby</button>
+            </div>
+          </div>
+          <div class="quiz-q">
+            <div class="quiz-q-text">Wozu ist der Schlamm gut?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" onclick="ans(this,true)">Als Sonnenschutz und gegen Mücken</button>
+              <button class="quiz-opt" onclick="ans(this,false)">Als Nahrung</button>
+              <button class="quiz-opt" onclick="ans(this,false)">Nur zum Spielen</button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /modeA age1 -->
+
+      <!-- MODUS B age1 -->
+      <div class="modeB-content" id="a1-modeB">
+        <div class="modeB-section-label" id="b1-label">Hallo, ich bin ein Riese! 🐘</div>
+        <div class="modeB-sent-display">
+          <div class="modeB-sent-text" id="b1-text">Stell dir vor, du stehst neben einem Tier, das so groß ist wie ein Haus!</div>
+        </div>
+        <div class="modeB-wow" id="b1-wow">
+          <span class="wow-label">🤩 Wow!</span>
+          <div class="wow-text" id="b1-wow-text"></div>
+        </div>
+      </div>
+
+      <!-- MODUS C age1 -->
+      <div class="modeC-content" id="a1-modeC">
+        <div class="modeC-gallery" id="c1-gallery">
+          <!-- slides injected by JS -->
+        </div>
+        <div class="modeC-text" id="c1-text">
+          <div class="modeC-section-head">Hallo, ich bin ein Riese! 🐘</div>
+          <p>Stell dir vor, du stehst neben einem Tier, das so groß ist wie ein Haus! Elefanten sind die größten Tiere, die auf dem Land leben.</p>
+        </div>
+      </div>
+
+    </div><!-- /age1 -->
+
+    <!-- ═══════════ STUFE 2 ═══════════ -->
+    <div id="age2" class="age-pane" style="display:none">
+      <div class="modeA-content visible" id="a2-modeA">
+        <div class="article-title-row">
+          <span class="article-emoji-big">🐘</span>
+          <div>
+            <div class="article-title">Elefanten</div>
+            <div class="article-subtitle">Riesen, Familien und Geheimnisse</div>
+          </div>
+        </div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Die Riesen unter den Landtieren 🌍</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="0">Elefanten sind die größten Landtiere der Welt — und zu den klügsten Tieren überhaupt zählen sie außerdem.</span> <span class="sent" data-img="0">Es gibt drei Arten, und man kann sie überraschend leicht auseinanderhalten!</span></p>
+            <p><span class="sent" data-img="0">Afrikanische Elefanten haben riesige Ohren, die fast wie die Landkarte Afrikas geformt sind.</span> <span class="sent" data-img="0">Asiatische Elefanten sind etwas kleiner und haben einen gewölbten Rücken.</span> <span class="sent" data-img="0">Der Waldelefant lebt versteckt im Regenwald und ist der kleinste der drei.</span></p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <tr><th>Art</th><th>Heimat</th><th>Besonderheit</th></tr>
+              <tr><td>Afrikanischer Elefant</td><td>Savanne</td><td>Größte Ohren, größtes Landtier</td></tr>
+              <tr><td>Waldelefant</td><td>Regenwald</td><td>Kleinster, sehr scheu</td></tr>
+              <tr><td>Asiatischer Elefant</td><td>Wälder Asiens</td><td>Gewölbter Rücken</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Das Schweizer Taschenmesser der Natur 🔧</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="1">Der Rüssel ist das erstaunlichste Werkzeug der Tierwelt.</span> <span class="sent" data-img="1">Er besteht aus über 40.000 Muskeln — aber keinem einzigen Knochen!</span> <span class="sent" data-img="1">Afrikanische Elefanten haben zwei kleine Greiffinger an der Rüsselspitze, asiatische nur einen.</span></p>
+            <p><span class="sent" data-img="1">Damit können sie sogar einen einzelnen Grashalm aufheben — und gleichzeitig schwere Baumstämme schleppen!</span></p>
+          </div>
+          <div class="wow-box animate-on-scroll">
+            <span class="wow-label">🤩 Wow!</span>
+            <div class="wow-text">Mit dem Rüssel kann ein Elefant Wasser aufspüren, das 19 Kilometer entfernt ist — das schafft nicht einmal ein Hund!</div>
+          </div>
+        </div>
+          <div class="stimmt-box" data-tts-auto="true">
+            <span class="stimmt-label">🤔 Stimmt das?</span>
+            <div class="stimmt-these" style="font-size:14px">„Elefanten trinken durch den Rüssel wie durch einen Strohhalm."</div>
+            <button class="stimmt-reveal-btn" onclick="revealStimmt(this)">Auflösung zeigen</button>
+            <div class="stimmt-answer">Nicht ganz richtig! Elefanten saugen Wasser in den Rüssel — aber dann führen sie ihn zum Maul. Der Rüssel ist also eher ein Eimer als ein Strohhalm.</div>
+          </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Stoßzähne — Werkzeug fürs Leben 🦷</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="2">Die langen weißen Zähne heißen Stoßzähne — und sie wachsen das ganze Leben lang.</span> <span class="sent" data-img="2">Manche werden über drei Meter lang!</span> <span class="sent" data-img="2">Elefanten nutzen sie, um nach Wasser zu graben, Baumrinde zu schälen und sich zu verteidigen.</span></p>
+            <p><span class="sent" data-img="2">Leider sind genau diese Zähne das größte Problem: Menschen jagen Elefanten wegen des wertvollen Elfenbeins.</span> <span class="sent" data-img="2">Das ist verboten — aber es passiert trotzdem noch.</span></p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Teamwork in der Herde 🤝</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="3">Elefanten sind echte Familienmenschen!</span> <span class="sent" data-img="3">Die Herde wird von der ältesten Kuh angeführt — der Leitkuh.</span> <span class="sent" data-img="3">Sie kennt nach Jahrzehnten jeden Wanderweg und jede Wasserstelle.</span> <span class="sent" data-img="3">In der Trockenzeit kann ihr Wissen die ganze Familie retten.</span></p>
+            <p><span class="sent" data-img="3">Junge Weibchen bleiben ihr ganzes Leben bei der Familie.</span> <span class="sent" data-img="3">Junge Männchen ziehen mit etwa neun Jahren los und leben dann meist alleine.</span></p>
+          </div>
+          <div class="wow-box animate-on-scroll">
+            <span class="wow-label">🤩 Wow!</span>
+            <div class="wow-text">Elefanten trauern um ihre Toten. Sie bleiben manchmal tagelang bei einem verstorbenen Familienmitglied und berühren es sanft mit dem Rüssel.</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Geheime Sprache der Riesen 📡</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="4">Elefanten reden miteinander auf eine Weise, die wir Menschen nicht hören können!</span> <span class="sent" data-img="4">Sie senden tiefe Töne aus — sogenannten Infraschall — die kilometerweit durch den Boden reisen.</span> <span class="sent" data-img="4">Andere Elefanten spüren diese Vibrationen mit den Füßen!</span></p>
+            <p><span class="sent" data-img="4">Außerdem erkennen sie Familienmitglieder am Geruch — selbst nach Jahren der Trennung.</span></p>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Elefanten und Menschen ⚠️</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="5">Die Beziehung zwischen Menschen und Elefanten ist kompliziert.</span> <span class="sent" data-img="5">Einerseits bewundern wir sie und schützen sie in Reservaten.</span> <span class="sent" data-img="5">Andererseits zerstören wir ihren Lebensraum durch Straßen, Felder und Städte.</span></p>
+            <p><span class="sent" data-img="5">Wenn Elefanten auf Felder wandern und Ernten fressen, ist das für Bauern eine Katastrophe.</span> <span class="sent" data-img="5">Viele Menschen arbeiten hart daran, für alle Seiten Lösungen zu finden.</span></p>
+          </div>
+        </div>
+
+        
+          <div class="stimmt-box" data-tts-auto="true">
+            <span class="stimmt-label">🤔 Stimmt das?</span>
+            <div class="stimmt-these" style="font-size:14px">„Elefanten im Zoo leben genauso gut wie in der Wildnis."</div>
+            <button class="stimmt-reveal-btn" onclick="revealStimmt(this)">Auflösung zeigen</button>
+            <div class="stimmt-answer">Nein. Elefanten legen in der Wildnis täglich viele Kilometer zurück und leben in großen Familiengruppen. Im Zoo ist der Platz sehr begrenzt — das macht viele Zoo-Elefanten krank oder traurig.</div>
+          </div>
+
+        <!-- QUIZ 2 -->
+        <div class="quiz-wrap animate-on-scroll">
+          <div class="quiz-title">🎯 Bist du ein Elefanten-Experte?</div>
+          <div class="quiz-q">
+            <div class="quiz-q-text">Wie viele Muskeln hat ein Elefantenrüssel?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" onclick="ans(this,false)">400 Muskeln</button>
+              <button class="quiz-opt" onclick="ans(this,false)">4.000 Muskeln</button>
+              <button class="quiz-opt" onclick="ans(this,true)">Über 40.000 Muskeln</button>
+            </div>
+          </div>
+          <div class="quiz-q">
+            <div class="quiz-q-text">Was ist Infraschall?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" onclick="ans(this,false)">Eine Elefantenart</button>
+              <button class="quiz-opt" onclick="ans(this,true)">Töne, die Menschen nicht hören können</button>
+              <button class="quiz-opt" onclick="ans(this,false)">Ein Werkzeug von Forschern</button>
+            </div>
+          </div>
+          <div class="quiz-q">
+            <div class="quiz-q-text">Wer führt die Elefantenherde an?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" onclick="ans(this,false)">Der stärkste Bulle</button>
+              <button class="quiz-opt" onclick="ans(this,true)">Die älteste, erfahrenste Kuh</button>
+              <button class="quiz-opt" onclick="ans(this,false)">Das jüngste Kalb</button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /modeA age2 -->
+
+      <div class="modeB-content" id="a2-modeB">
+        <div class="modeB-section-label">Die Riesen unter den Landtieren 🌍</div>
+        <div class="modeB-sent-display">
+          <div class="modeB-sent-text">Elefanten sind die größten Landtiere der Welt — und zu den klügsten Tieren überhaupt zählen sie außerdem.</div>
+        </div>
+      </div>
+
+      <div class="modeC-content" id="a2-modeC">
+        <div class="modeC-gallery" id="c2-gallery"></div>
+        <div class="modeC-text">
+          <div class="modeC-section-head">Die Riesen unter den Landtieren 🌍</div>
+          <p>Elefanten sind die größten Landtiere der Welt — und zu den klügsten Tieren überhaupt zählen sie außerdem.</p>
+        </div>
+      </div>
+    </div><!-- /age2 -->
+
+    <!-- ═══════════ STUFE 3 ═══════════ -->
+    <div id="age3" class="age-pane" style="display:none">
+      <div class="modeA-content visible" id="a3-modeA">
+        <div class="article-title-row">
+          <span class="article-emoji-big">🐘</span>
+          <div>
+            <div class="article-title">Elefanten</div>
+            <div class="article-subtitle">Giganten der Erde — Biologie, Verhalten und Konflikt</div>
+          </div>
+        </div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Giganten der Erde — und warum sie zählen</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="0">Der Afrikanische Elefant ist das größte Landtier der Erde.</span> <span class="sent" data-img="0">Ausgewachsene Bullen erreichen bis zu 3,7 Meter Schulterhöhe und über sechs Tonnen Gewicht.</span> <span class="sent" data-img="0">Was Elefanten aber wirklich besonders macht, ist nicht ihre Größe: Sie sind hochintelligent, sozial komplex — und ökologisch unverzichtbar.</span></p>
+            <p><span class="sent" data-img="0">Lange galt es als zwei Elefantenarten. Genetische Analysen zeigten jedoch, dass der Waldelefant eine vollständig eigenständige Art ist — mit einer Evolutionsgeschichte, die schon vor etwa 3 Millionen Jahren von den Savannelefanten abzweigte.</span></p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <tr><th>Art</th><th>Höhe</th><th>Gewicht</th><th>Status</th></tr>
+              <tr><td>Afrikanischer Elefant</td><td>bis 3,7 m</td><td>bis 6,6 t</td><td>Gefährdet</td></tr>
+              <tr><td>Waldelefant</td><td>ca. 2,1 m</td><td>ca. 2 t</td><td>Stark bedroht</td></tr>
+              <tr><td>Asiatischer Elefant</td><td>ca. 2,5–3 m</td><td>ca. 3–5 t</td><td>Gefährdet</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Für Giganten konstruiert — Anatomie im Detail</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="1">Was wie ein simpler grauer Körper wirkt, ist in Wirklichkeit ein Ingenieurswerk der Evolution.</span> <span class="sent" data-img="1">Die säulenartigen Beine tragen das enorme Gewicht — die Vorderbeine allein schultern rund 60 Prozent davon.</span> <span class="sent" data-img="1">Unter den Fußsohlen liegt ein dickes Polster aus Fett- und Bindegewebe, das jeden Schritt abfedert.</span></p>
+            <p><span class="sent" data-img="1">Der Schädel wirkt massiv, ist aber überraschend leicht: Bienenwabenartige Luftkammern durchziehen das Knocheninnere. Die Schädeldecke kann dadurch 40 Zentimeter dick sein, ohne das Tier zu schwer zu machen.</span></p>
+          </div>
+          <div class="fakt-box animate-on-scroll">
+            <span class="fakt-label">🔬 Fakt</span>
+            <div class="fakt-text">Elefanten können trotz ihres Gewichts kaum springen — ihre Knochen sind zu massiv dafür gebaut, Sprungkräfte abzufangen. Dafür können sie schneller laufen als ein Mensch: bis zu 25 km/h.</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">40.000 Muskeln, kein einziger Knochen</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="2">Der Rüssel entstand evolutionär aus der Verwachsung von Nase und Oberlippe und enthält schätzungsweise 40.000 bis 150.000 einzelne Muskeleinheiten.</span> <span class="sent" data-img="2">Afrikanische Elefanten besitzen zwei gegenüberliegende Greiffinger an der Spitze, Asiatische nur einen.</span></p>
+            <p><span class="sent" data-img="2">Elefanten können mit dem Rüssel Wasser aufspüren, das bis zu 19 Kilometer entfernt ist — das Riechvermögen übertrifft das eines Bluthundes deutlich.</span></p>
+          </div>
+          <div class="stimmt-box animate-on-scroll">
+            <span class="stimmt-label">🤔 Stimmt das?</span>
+            <div class="stimmt-these">„Elefanten trinken durch den Rüssel wie durch einen Strohhalm."</div>
+            <button class="stimmt-reveal-btn" onclick="revealStimmt(this)">Auflösung zeigen</button>
+            <div class="stimmt-answer">Nicht ganz richtig. Elefanten saugen Wasser in den Rüssel — aber dann führen sie den Rüssel zum Maul und lassen das Wasser hineinfließen. Der Rüssel ist eher ein Eimer als ein Strohhalm. Trinken durch den Rüssel direkt in den Magen ist anatomisch nicht möglich.</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Das Zahnkarussell</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="2">Elefanten haben ein einzigartiges Zahnwechselsystem.</span> <span class="sent" data-img="2">Da die Backenzähne sehr groß sind, ist in jeder Kieferhälfte immer nur ein bis zwei gleichzeitig in Funktion.</span> <span class="sent" data-img="2">Vom hinteren Kieferende schiebt sich frisches Zahnmaterial nach vorne — abgenutzte Zähne fallen vorne heraus.</span></p>
+            <p><span class="sent" data-img="2">Im Laufe des Lebens verbrauchen Elefanten insgesamt 24 Backenzähne. Wenn der letzte verschlissen ist, können sie keine harte Nahrung mehr zerkauen — das begrenzt ihr Leben in der Wildnis auf etwa 60 bis 65 Jahre.</span></p>
+          </div>
+          <div class="wow-box animate-on-scroll">
+            <span class="wow-label">🤩 Wow!</span>
+            <div class="wow-text">Stoßzähne von Elefanten können bis zu 345 cm lang und über 110 kg schwer werden. Der Rekord liegt bei Mammuten: 490 cm Länge, 170 kg Gewicht.</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Matriarchat und gespeichertes Wissen</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="3">Elefantenherden sind Matriarchate — angeführt von der ältesten, erfahrensten Kuh.</span> <span class="sent" data-img="3">Ihr akkumuliertes Wissen über Wanderwege, Wasserstellen und Gefahren ist für die Herde lebensnotwendig.</span> <span class="sent" data-img="3">Studien zeigen: Herden mit älteren Leitkühen überleben Dürreperioden deutlich besser als Herden ohne diese Erfahrung.</span></p>
+            <p><span class="sent" data-img="3">Einmal jährlich durchleben junge Bullen die sogenannte Musth — eine Phase mit starkem Hormonanstieg, die sie deutlich aggressiver macht. Eine ölige Flüssigkeit läuft dabei aus Schläfendrüsen. Die Musth ist Teil des Fortpflanzungsverhaltens.</span></p>
+          </div>
+          <div class="stimmt-box animate-on-scroll">
+            <span class="stimmt-label">🤔 Stimmt das?</span>
+            <div class="stimmt-these">„Elefanten haben ein besseres Gedächtnis als Menschen."</div>
+            <button class="stimmt-reveal-btn" onclick="revealStimmt(this)">Auflösung zeigen</button>
+            <div class="stimmt-answer">Teils richtig, teils übertrieben. Elefanten können sich über viele Jahrzehnte an bestimmte Orte, andere Elefanten und Gefahren erinnern — das ist belegt. Direkte Vergleiche mit dem menschlichen Gedächtnis sind aber schwierig, weil Elefanten andere Stärken haben. Der Satz „Elefanten vergessen nie" ist vereinfacht, aber nicht völlig falsch.</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Von Mammuts bis Zwergelefanten</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="4">Die Vorfahren der Elefanten entstanden vor etwa 55 Millionen Jahren in Afrika.</span> <span class="sent" data-img="4">Daraus entwickelten sich hunderte Arten — darunter das Wollhaarmammut, das noch vor etwa 4.000 Jahren lebte.</span></p>
+            <p><span class="sent" data-img="4">Auf Inseln entstanden durch sogenannte Inselverzwergung winzige Formen: Der Sizilianische Zwergelefant wurde nur etwa einen Meter hoch. Auf Inseln mit begrenzter Nahrung ist ein kleinerer Körper energieeffizienter — über viele Generationen wurden die Tiere kleiner.</span></p>
+          </div>
+          <div class="fakt-box animate-on-scroll">
+            <span class="fakt-label">🔬 Fakt</span>
+            <div class="fakt-text">Das Steppenmammut war mit 4,2 bis 4,5 Meter Schulterhöhe und bis zu 15 Tonnen Gewicht noch größer als der heutige Afrikanische Elefant — eines der größten Landtiere, das je gelebt hat.</div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Der Mensch als größte Bedrohung</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="5">Obwohl der internationale Elfenbeinhandel seit 1989 verboten ist, werden jährlich noch tausende Elefanten getötet.</span> <span class="sent" data-img="5">Die Nachfrage kommt vor allem aus Asien, wo Elfenbein als Statussymbol gilt.</span> <span class="sent" data-img="5">Ranger riskieren täglich ihr Leben, um die Tiere zu schützen.</span></p>
+            <p><span class="sent" data-img="5">Gleichzeitig wächst Afrikas Bevölkerung schnell. Wo früher Wanderkorridore lagen, stehen heute Felder und Städte. Elefanten, die auf Felder eindringen, vernichten Ernten — und werden deshalb manchmal getötet. Hier gibt es keine einfachen Schuldigen, sondern echte Zielkonflikte.</span></p>
+          </div>
+          <div class="warn-box">
+            <span class="warn-label">⚠️ Falscher Tourismus</span>
+            <div class="warn-text">Viele Elefanten in Asien werden unter grausamen Bedingungen für den Tourismus gehalten. Ethisch vertretbar sind nur Projekte, die Tiere in möglichst natürlicher Umgebung beobachtbar machen — ohne Dressur, ohne Reiten.</div>
+          </div>
+          <div class="stimmt-box animate-on-scroll">
+            <span class="stimmt-label">🤔 Stimmt das?</span>
+            <div class="stimmt-these">„Strengere Gesetze allein können Elefanten retten."</div>
+            <button class="stimmt-reveal-btn" onclick="revealStimmt(this)">Auflösung zeigen</button>
+            <div class="stimmt-answer">Nein — das zeigen Jahrzehnte Erfahrung. Das Elfenbein-Handelsverbot von 1989 hat geholfen, aber Wilderei gibt es weiterhin. Schutzprogramme, die lokale Gemeinschaften einbeziehen und ihnen wirtschaftliche Alternativen bieten, sind nachweislich wirksamer als reine Verbote. Gesetze ohne wirtschaftliche Anreize ändern wenig.</div>
+          </div>
+        </div>
+
+        <div class="section animate-on-scroll">
+          <div class="section-heading">Was wirklich hilft</div>
+          <div class="section-text">
+            <p><span class="sent" data-img="5">Schutzprogramme, die lokale Gemeinschaften einbeziehen, sind nachweislich wirksamer als reine Verbote.</span> <span class="sent" data-img="5">Wenn Bauern vom Elefanten-Tourismus profitieren, haben sie einen Anreiz, die Tiere zu schützen statt zu bekämpfen.</span> <span class="sent" data-img="5">Internationale Handelsverbote, gut finanzierte Ranger-Programme und die Vernetzung von Schutzgebieten durch Wanderkorridore sind die wichtigsten Hebel — aber nur gemeinsam wirken sie.</span></p>
+          </div>
+        </div>
+
+        <!-- QUIZ 3 -->
+        <div class="quiz-wrap animate-on-scroll">
+          <div class="quiz-title">🎯 Experten-Check</div>
+          <div class="quiz-q">
+            <div class="quiz-q-text">Warum ist der Elefantenschädel trotz seiner Dicke leicht?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" onclick="ans(this,false)">Er ist komplett hohl</button>
+              <button class="quiz-opt" onclick="ans(this,true)">Bienenwabenartige Luftkammern durchziehen den Knochen</button>
+              <button class="quiz-opt" onclick="ans(this,false)">Er besteht aus einem anderen Material als andere Knochen</button>
+            </div>
+          </div>
+          <div class="quiz-q">
+            <div class="quiz-q-text">Was passiert, wenn ein Elefant seinen letzten Backenzahn verbraucht hat?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" onclick="ans(this,false)">Ein neuer Zahn wächst nach</button>
+              <button class="quiz-opt" onclick="ans(this,true)">Er kann keine harte Nahrung mehr zerkauen</button>
+              <button class="quiz-opt" onclick="ans(this,false)">Er wechselt auf reine Flüssignahrung</button>
+            </div>
+          </div>
+          <div class="quiz-q">
+            <div class="quiz-q-text">Was ist Inselverzwergung?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" onclick="ans(this,false)">Eine Krankheit auf Insel-Ökosystemen</button>
+              <button class="quiz-opt" onclick="ans(this,true)">Tiere werden über Generationen kleiner, weil Ressourcen knapp sind</button>
+              <button class="quiz-opt" onclick="ans(this,false)">Eine Methode zum Schutz von Tierarten</button>
+            </div>
+          </div>
+          <div class="quiz-q">
+            <div class="quiz-q-text">Warum reichen Gesetze allein nicht aus, um Elefanten zu schützen?</div>
+            <div class="quiz-opts">
+              <button class="quiz-opt" onclick="ans(this,false)">Weil Elefanten international nicht anerkannt sind</button>
+              <button class="quiz-opt" onclick="ans(this,true)">Weil lokale Menschen wirtschaftliche Anreize brauchen, damit Schutz funktioniert</button>
+              <button class="quiz-opt" onclick="ans(this,false)">Weil Ranger zu wenig ausgebildet sind</button>
+            </div>
+          </div>
+        </div>
+      </div><!-- /modeA age3 -->
+
+      <div class="modeB-content" id="a3-modeB">
+        <div class="modeB-section-label">Giganten der Erde</div>
+        <div class="modeB-sent-display">
+          <div class="modeB-sent-text">Der Afrikanische Elefant ist das größte Landtier der Erde.</div>
+        </div>
+        <div class="modeB-stimmt" id="b3-stimmt">
+          <span class="stimmt-label">🤔 Stimmt das?</span>
+          <div class="stimmt-these" style="font-size:14px;color:#e0c8f8;font-weight:700;margin-bottom:8px;">„Elefanten trinken durch den Rüssel wie durch einen Strohhalm."</div>
+          <button class="stimmt-reveal-btn" onclick="revealStimmt(this)" style="font-size:12px;padding:5px 12px;">Auflösung</button>
+          <div class="stimmt-answer" style="font-size:13px;">Nicht ganz. Sie saugen Wasser in den Rüssel und führen ihn dann zum Maul — der Rüssel ist eher ein Eimer als ein Strohhalm.</div>
+        </div>
+      </div>
+
+      <div class="modeC-content" id="a3-modeC">
+        <div class="modeC-gallery" id="c3-gallery"></div>
+        <div class="modeC-text">
+          <div class="modeC-section-head">Giganten der Erde</div>
+          <p>Der Afrikanische Elefant ist das größte Landtier der Erde. Ausgewachsene Bullen erreichen bis zu 3,7 Meter Schulterhöhe und über sechs Tonnen Gewicht.</p>
+        </div>
+      </div>
+    </div><!-- /age3 -->
+
+  </div><!-- /scroll-area -->
+
+  <!-- THUMBNAIL STRIP -->
+  <div class="thumb-strip-wrap">
+    <div class="thumb-strip" id="thumbStrip"></div>
+    <div class="source-line" id="sourceInfo">
+      Quelle: <a href="https://commons.wikimedia.org" target="_blank">Wikimedia Commons</a> · Lizenz: CC BY-SA
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="nav-btn active">
+      <span class="nav-icon">←</span>
+      <span>Zurück</span>
+    </button>
+    <button class="nav-btn">
+      <span class="nav-icon">🔖</span>
+      <span>Merken</span>
+    </button>
+    <button class="nav-play" id="playBtn" onclick="togglePlay()">▶</button>
+    <button class="nav-btn">
+      <span class="nav-icon">🎤</span>
+      <span>Fragen</span>
+    </button>
+    <button class="nav-btn">
+      <span class="nav-icon">🏠</span>
+      <span>Start</span>
+    </button>
+  </div>
+
+</div><!-- /shell -->
+
+<script>
+// ── DATA ──
+const images = [
+  {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/37/African_Bush_Elephant.jpg/1280px-African_Bush_Elephant.jpg',
+    cap: 'Afrikanischer Busch-Elefant', credit: 'Muhammad Mahdi Karim, GFDL 1.2'
+  },
+  {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Elephant_drinking.jpg/1280px-Elephant_drinking.jpg',
+    cap: 'Elefant saugt Wasser mit dem Rüssel', credit: 'Wikimedia Commons, CC BY-SA'
+  },
+  {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1d/Elephant_in_Botswana.JPG/1280px-Elephant_in_Botswana.JPG',
+    cap: 'Elefant mit Stoßzähnen, Botswana', credit: 'Wikimedia Commons, CC BY-SA'
+  },
+  {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/Serengeti-African-Elephants.JPG/1280px-Serengeti-African-Elephants.JPG',
+    cap: 'Elefantenherde in der Serengeti', credit: 'Bjørn Christian Tørrissen, CC BY-SA 3.0'
+  },
+  {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/202003_Woolly_mammoth.png/1024px-202003_Woolly_mammoth.png',
+    cap: 'Wollhaarmammut (Illustration)', credit: 'Wikimedia Commons, CC BY 4.0'
+  },
+  {
+    src: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Namibie_Etosha_Eléphant_03.jpg/1280px-Namibie_Etosha_Eléphant_03.jpg',
+    cap: 'Elefantenmutter mit Kalb, Etosha', credit: 'Wikimedia Commons, CC BY-SA'
+  }
+];
+
+let currentAge = 1;
+let currentMode = 'A';
+let currentImg = 0;
+let playing = false;
+
+// ── INIT ──
+function init() {
+  buildThumbs();
+  buildGalleries();
+  setHeroImg(0);
+  setupScrollAnimation();
+  setupSentClick();
+}
+
+function buildThumbs() {
+  const strip = document.getElementById('thumbStrip');
+  strip.innerHTML = '';
+  images.forEach((img, i) => {
+    const div = document.createElement('div');
+    div.className = 'thumb' + (i === 0 ? ' active' : '');
+    div.innerHTML = `<img src="${img.src}" alt="${img.cap}" onerror="this.parentElement.style.opacity=0.3">`;
+    div.addEventListener('click', () => jumpToImg(i));
+    strip.appendChild(div);
+  });
+}
+
+function buildGalleries() {
+  ['c1-gallery','c2-gallery','c3-gallery'].forEach(id => {
+    const g = document.getElementById(id);
+    if (!g) return;
+    g.innerHTML = images.map((img,i) =>
+      `<div class="modeC-slide">
+        <img src="${img.src}" alt="${img.cap}" onerror="this.style.opacity=0.3">
+        <div class="modeC-slide-cap">${img.cap} · ${img.credit}</div>
+      </div>`
+    ).join('');
+  });
+}
+
+function setHeroImg(idx) {
+  currentImg = idx;
+  const img = images[idx];
+  const hero = document.getElementById('heroImg');
+  hero.style.opacity = 0;
+  setTimeout(() => {
+    hero.src = img.src;
+    hero.onerror = () => { hero.style.opacity = 0.3; };
+    hero.onload = () => { hero.style.opacity = 1; };
+    hero.style.opacity = 1;
+    document.getElementById('sourceInfo').innerHTML =
+      `${img.cap} · <a href="https://commons.wikimedia.org" target="_blank">${img.credit}</a>`;
+  }, 200);
+  // update thumbs
+  document.querySelectorAll('.thumb').forEach((t,i) => {
+    t.classList.toggle('active', i === idx);
+  });
+  // scroll thumb into view
+  const strip = document.getElementById('thumbStrip');
+  const thumbs = strip.querySelectorAll('.thumb');
+  if (thumbs[idx]) thumbs[idx].scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+  // progress
+  document.getElementById('progressFill').style.width = ((idx+1)/images.length*100)+'%';
+  document.getElementById('sentCounter').textContent = `${idx+1} / ${images.length}`;
+}
+
+function jumpToImg(idx) {
+  setHeroImg(idx);
+  // scroll to section with data-img=idx in current mode A
+  if (currentMode === 'A') {
+    const sents = document.querySelectorAll(`#age${currentAge} .sent[data-img="${idx}"]`);
+    if (sents.length) {
+      sents[0].scrollIntoView({behavior:'smooth', block:'center'});
+      // highlight briefly
+      sents.forEach(s => {
+        s.classList.add('active');
+        setTimeout(() => s.classList.remove('active'), 1500);
+      });
+    }
+  }
+}
+
+// ── TABS ──
+function switchAge(age, el) {
+  currentAge = age;
+  document.querySelectorAll('.age-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.age-pane').forEach(p => p.style.display='none');
+  document.getElementById('age'+age).style.display='block';
+  // hero changes
+  const heroMap = { 1:0, 2:3, 3:1 };
+  setHeroImg(heroMap[age]);
+  window.scrollTo({top:0, behavior:'smooth'});
+  switchMode(currentMode, document.querySelector('.mode-btn.active'));
+}
+
+function switchMode(mode, el) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  ['A','B','C'].forEach(m => {
+    const el2 = document.getElementById(`a${currentAge}-mode${m}`);
+    if (el2) {
+      el2.classList.toggle('visible', m === mode);
+      if (m !== mode) el2.style.display = '';
+    }
+  });
+  const paneEl = document.getElementById(`a${currentAge}-modeA`);
+  if (mode === 'A' && paneEl) paneEl.classList.add('visible');
+}
+
+// ── PLAY ──
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('playBtn').textContent = playing ? '⏸' : '▶';
+}
+
+// ── QUIZ ──
+function ans(btn, correct) {
+  const group = btn.closest('.quiz-opts');
+  if (group.querySelector('.correct,.wrong')) return;
+  btn.classList.add(correct ? 'correct' : 'wrong');
+}
+
+// ── STIMMT ──
+function revealStimmt(btn) {
+  const ans = btn.nextElementSibling;
+  ans.classList.toggle('open');
+  btn.textContent = ans.classList.contains('open') ? 'Zuklappen' : 'Auflösung zeigen';
+}
+
+// ── SENT CLICK (Mode A → jump image) ──
+function setupSentClick() {
+  document.querySelectorAll('.sent').forEach(s => {
+    s.addEventListener('click', function() {
+      const idx = parseInt(this.getAttribute('data-img'));
+      setHeroImg(idx);
+      document.querySelectorAll('.sent').forEach(x => x.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+}
+
+// ── HERO IMG INFO ──
+function showImgInfo() {
+  const img = images[currentImg];
+  alert(`${img.cap}\n${img.credit}\nQuelle: Wikimedia Commons`);
+}
+
+// ── INTERSECTION OBSERVER für Animationen ──
+function setupScrollAnimation() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('in-view');
+        // Trigger wow/fakt animation
+        const box = e.target.querySelector('.wow-box, .fakt-box, .stimmt-box');
+        if (box) {
+          setTimeout(() => box.classList.add('visible'), 150);
+        }
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
+
+  // Also observe wow/fakt/stimmt boxes directly
+  const boxObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('visible');
+    });
+  }, { threshold: 0.3 });
+  document.querySelectorAll('.wow-box, .fakt-box, .stimmt-box').forEach(el => {
+    boxObs.observe(el);
+    // Auto-reveal for age2 stimmt-boxes (TTS pause simulation)
+    if (el.dataset.ttsAuto) {
+      const autoObs = new IntersectionObserver(entries => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            setTimeout(() => {
+              const ans = e.target.querySelector('.stimmt-answer');
+              const btn = e.target.querySelector('.stimmt-reveal-btn');
+              if (ans && !ans.classList.contains('open')) {
+                ans.classList.add('open');
+                if (btn) btn.textContent = 'Zuklappen';
+              }
+            }, 3500);
+            autoObs.disconnect();
+          }
+        });
+      }, {threshold: 0.5});
+      autoObs.observe(el);
+    }
+  });
+}
+
+// ── SWIPE on hero (jump image) ──
+let touchStartX = 0;
+document.querySelector('.hero-wrap').addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+});
+document.querySelector('.hero-wrap').addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 40) {
+    const next = dx < 0
+      ? Math.min(currentImg+1, images.length-1)
+      : Math.max(currentImg-1, 0);
+    jumpToImg(next);
+  }
+});
+
+// ── START ──
+init();
+</script>
+</body>
+</html>
