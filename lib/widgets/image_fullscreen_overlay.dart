@@ -214,7 +214,13 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
         now.difference(_lastTapDownTime!) < const Duration(milliseconds: 300)) {
       _lastTapDownTime = null;
       _lastTapIndex    = null;
-      _handleDoubleTap(index, event.localPosition);
+      // Microtask-Defer: zweiter Pinch-Finger setzt _activePointers>1 noch in
+      // derselben Event-Batch → Microtask überspringt Doppeltipp-Ausführung.
+      final tapPos = event.localPosition;
+      Future.microtask(() {
+        if (!mounted || _activePointers > 1) return;
+        _handleDoubleTap(index, tapPos);
+      });
     } else {
       _lastTapDownTime = now;
       _lastTapIndex    = index;
@@ -347,6 +353,15 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
         final imgCount    = images.length;
         final bottomInset = MediaQuery.of(context).padding.bottom;
 
+        // Letterbox-Berechnung: freier Raum unter dem contained Bild.
+        // _outerSize kommt aus LayoutBuilder (vorheriger Frame, stabil nach 1. Layout).
+        final _curImgSz = _imageSizes[cur.filename];
+        final _curMs    = _initialScaleFor(_currentIndex);
+        final letterboxBelow = (_curImgSz != null && _outerSize != Size.zero)
+            ? math.max(0.0, (_outerSize.height - _curImgSz.height * _curMs) / 2)
+            : 0.0;
+        final captionInLetterbox = letterboxBelow > 30;
+
         // Seitenoptionen aufbauen; Ladevorgang pro Bild starten.
         // PhotoViewGallery (non-builder) cached NICHT → pageOptions werden
         // bei jedem Rebuild neu ausgewertet → Spinner → Bild-Transition korrekt.
@@ -441,59 +456,46 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
                   }),
 
                   // ── Caption-Gradient + Text ──────────────────────────────
+                  // captionInLetterbox: freier Raum unter Bild → kein Gradient,
+                  // Text direkt unter Bildunterkante verankert.
+                  // Sonst (Bild füllt Höhe): Gradient-Overlay auf Bildunterkante.
                   if (hasCaption) ...[
-                    Positioned(
-                      left: 0, right: 0, bottom: 0,
-                      height: 80 + bottomInset,
-                      child: DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin:  Alignment.topCenter,
-                            end:    Alignment.bottomCenter,
-                            colors: [
-                              Colors.transparent,
-                              Colors.black.withValues(alpha: 0.6),
-                            ],
+                    if (!captionInLetterbox)
+                      Positioned(
+                        left: 0, right: 0, bottom: 0,
+                        height: 80 + bottomInset,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin:  Alignment.topCenter,
+                              end:    Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withValues(alpha: 0.6),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    Positioned(
-                      left: 60, right: 12, bottom: 12 + bottomInset,
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Expanded(
-                            child: Text(
-                              cur.caption!,
-                              textAlign: TextAlign.center,
-                              maxLines:  2,
-                              overflow:  TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color:     Colors.white,
-                                fontSize:  13,
-                                height:    1.4,
-                                fontStyle: FontStyle.italic,
-                                shadows:   [
-                                  Shadow(color: Colors.black87, blurRadius: 4)
-                                ],
-                              ),
-                            ),
+                    captionInLetterbox
+                      ? Positioned(
+                          left: 60, right: 12,
+                          top: _outerSize.height - letterboxBelow + 8,
+                          child: _CaptionRow(
+                            caption:  cur.caption!,
+                            current:  _currentIndex,
+                            total:    imgCount,
                           ),
-                          if (imgCount > 1) ...[
-                            const SizedBox(width: 8),
-                            Text(
-                              '${_currentIndex + 1} / $imgCount',
-                              style: const TextStyle(
-                                color:      Colors.white60,
-                                fontSize:   12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
+                        )
+                      : Positioned(
+                          left: 60, right: 12,
+                          bottom: 12 + bottomInset,
+                          child: _CaptionRow(
+                            caption:  cur.caption!,
+                            current:  _currentIndex,
+                            total:    imgCount,
+                          ),
+                        ),
                   ],
 
                   // ── Zähler ohne Caption ──────────────────────────────────
@@ -514,7 +516,9 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
                   if (!_isZoomed && widget.onLicenseInfo != null)
                     Positioned(
                       right:  12,
-                      bottom: (hasCaption ? 88 : 12) + bottomInset,
+                      bottom: captionInLetterbox
+                          ? letterboxBelow + 4
+                          : (hasCaption ? 88 : 12) + bottomInset,
                       child: GestureDetector(
                         onTap: () =>
                             widget.onLicenseInfo!(context, _currentIndex),
@@ -601,6 +605,53 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
           ),
         );
       },
+    );
+  }
+}
+
+class _CaptionRow extends StatelessWidget {
+  final String caption;
+  final int    current;
+  final int    total;
+
+  const _CaptionRow({
+    required this.caption,
+    required this.current,
+    required this.total,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: Text(
+            caption,
+            textAlign: TextAlign.center,
+            maxLines:  2,
+            overflow:  TextOverflow.ellipsis,
+            style: const TextStyle(
+              color:     Colors.white,
+              fontSize:  13,
+              height:    1.4,
+              fontStyle: FontStyle.italic,
+              shadows:   [Shadow(color: Colors.black87, blurRadius: 4)],
+            ),
+          ),
+        ),
+        if (total > 1) ...[
+          const SizedBox(width: 8),
+          Text(
+            '${current + 1} / $total',
+            style: const TextStyle(
+              color:      Colors.white60,
+              fontSize:   12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
