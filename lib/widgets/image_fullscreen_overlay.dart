@@ -154,16 +154,15 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     );
   }
 
-  // Limited-Cover: min(covered, contained*1.18) — entspricht dem PV-initialScale.
-  // Stimmt numerisch mit PhotoViewComputedScale.contained*1.18 überein (Zoom-out-Ziel).
+  // Contained: min(w/W, h/H) — Bild vollständig sichtbar, kein Überstehen.
+  // Stimmt mit PhotoViewComputedScale.contained überein (Zoom-out-Ziel).
   double _initialScaleFor(int index) {
     if (index >= widget.images.length) return 1.0;
     final imgSize   = _imageSizes[widget.images[index].filename];
     final outerSize = _outerSizes[index];
     if (imgSize == null || outerSize == null) return 1.0;
-    final sc = math.min(outerSize.width / imgSize.width, outerSize.height / imgSize.height);
-    final sk = math.max(outerSize.width / imgSize.width, outerSize.height / imgSize.height);
-    return math.min(sk, sc * 1.18);
+    return math.min(
+        outerSize.width / imgSize.width, outerSize.height / imgSize.height);
   }
 
   // Setzt den Controller einer Seite auf Basis-Scale zurück (nach Wischen).
@@ -371,39 +370,35 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
           return Stack(
             fit: StackFit.expand,
             children: [
-              // ── PhotoView (in Listener für Double-tap via raw pointer) ────
-              // Listener nimmt NICHT am GestureArena teil → kein Pinch-Konflikt.
-              // disableDoubleTap:true verhindert PV-eigene nextScaleState-Logik.
-              // onTapUp entfernt → kein TapGestureRecognizer in der Arena.
-              Listener(
-                behavior: HitTestBehavior.translucent,
-                onPointerDown: (event) => _trackPointerDown(event, index),
-                child: PhotoView(
-                  key:               ValueKey('pv_${img.filename}'),
-                  imageProvider:     MemoryImage(bytes),
-                  controller:        _ctrlFor(index),
-                  initialScale:      PhotoViewComputedScale.contained * 1.18,
-                  minScale:          PhotoViewComputedScale.contained * 1.18,
-                  maxScale:          PhotoViewComputedScale.covered * 4.0,
-                  strictScale:       true,
-                  backgroundDecoration:
-                      const BoxDecoration(color: Colors.black),
-                  filterQuality:     FilterQuality.high,
-                  disableDoubleTap:  true,
-                  onScaleStart: (ctx, details, value) {
-                    _pvAnimControllers.remove(index)?.dispose();
-                  },
-                  scaleStateChangedCallback: (state) {
-                    if (index != _currentIndex) return;
-                    final zoomed = state != PhotoViewScaleState.initial &&
-                        state != PhotoViewScaleState.zoomedOut;
-                    if (zoomed != _isZoomed && mounted) {
-                      setState(() => _isZoomed = zoomed);
-                    }
-                  },
-                  loadingBuilder: (ctx, event) => const Center(
-                      child: CircularProgressIndicator(color: Colors.white54)),
-                ),
+              // ── PhotoView — DIAGNOSE F2: Listener-Schicht entfernt ────────
+              // Listener (eigene Doppeltipp-Schicht) deaktiviert.
+              // disableDoubleTap:true → PV-DTGR mit null-Callback bleibt aktiv.
+              // Test: greift Pinch jetzt beim ERSTEN Touch?
+              PhotoView(
+                key:               ValueKey('pv_${img.filename}'),
+                imageProvider:     MemoryImage(bytes),
+                controller:        _ctrlFor(index),
+                initialScale:      PhotoViewComputedScale.contained,
+                minScale:          PhotoViewComputedScale.contained,
+                maxScale:          PhotoViewComputedScale.covered * 4.0,
+                strictScale:       true,
+                backgroundDecoration:
+                    const BoxDecoration(color: Colors.black),
+                filterQuality:     FilterQuality.high,
+                disableDoubleTap:  true,
+                onScaleStart: (ctx, details, value) {
+                  _pvAnimControllers.remove(index)?.dispose();
+                },
+                scaleStateChangedCallback: (state) {
+                  if (index != _currentIndex) return;
+                  final zoomed = state != PhotoViewScaleState.initial &&
+                      state != PhotoViewScaleState.zoomedOut;
+                  if (zoomed != _isZoomed && mounted) {
+                    setState(() => _isZoomed = zoomed);
+                  }
+                },
+                loadingBuilder: (ctx, event) => const Center(
+                    child: CircularProgressIndicator(color: Colors.white54)),
               ),
 
               // ── Caption-Gradient + Text ──────────────────────────────────

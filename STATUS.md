@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-04T08:16:45Z -->
+<!-- updated: 2026-06-04T08:29:23Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
@@ -16,32 +16,35 @@
 - R2: `onTapUp` entfernt → kein TapGestureRecognizer in Arena
 - R3: `Listener(onPointerDown:)` für Double-tap (kein Arena-Konflikt)
 
-**Diese Session (F1/F2):**
+**Session 2026-06-04 (Feinschliff F1/F2-Diagnose):**
 
-**F1 (>50% Crop → Limited-Cover):** `PhotoViewComputedScale.covered` →
-`PhotoViewComputedScale.contained * 1.18` für `initialScale` + `minScale`.
-PV berechnet dies nativ per Layout → Drehen rechnet automatisch neu.
-`_initialScaleFor()` stimmt numerisch mit `min(sk, sc*1.18)` überein → Doppeltipp-Zoom-out
-kehrt exakt auf Basis-Scale zurück.
+**F1 (Crop → Contained):** `contained * 1.18` → `PhotoViewComputedScale.contained`
+für `initialScale`+`minScale`. Faktor 1.18 entfernt — jedes Überstehen verhindert
+Wischen. Letterbox bei abweichendem Seitenverhältnis bewusst akzeptiert.
+`_initialScaleFor()` gibt `min(w/W, h/H)` zurück (Zoom-out-Ziel numerisch konsistent).
 
-**F2 (Nach Wischen: nächste Seite gezoomt):** `_resetController(index)` → ruft
-`ctrl.updateMultiple(scale: initScale, position: Offset.zero)` auf. Wird in
-`_onPageChanged` für verlassene UND neue Seite aufgerufen.
+**F2-Diagnose (Pinch 2. Touch):** Listener-Schicht (eigene Doppeltipp-Erkennung)
+temporär entfernt. PV-DTGR mit null-Callback (`disableDoubleTap:true`) bleibt.
+→ Wartet auf Gerätetest: greift Pinch jetzt beim ERSTEN Touch?
+  JA → Listener war die Ursache → Doppeltipp via PV-native Callbacks lösen.
+  NEIN → DTGR(null) ist das Problem → PhotoViewGallery-Refactor besprechen.
 
 ---
 
-## 🔴 Muss am S23 verifiziert werden (Regressions-Checkliste)
+## 🔴 Diagnose-Test auf S23 (Antwort erforderlich!)
 
 ```
-[ ] PageView Mehrbild-Wisch
-[ ] Pinch sofort nach Öffnen
-[ ] Bild lässt sich im Zoom NICHT aus Viewport schieben
-[ ] Doppeltipp 1x↔2.5x zentriert auf Tippposition; Zoom-out → Basis-Scale
-[ ] Querformat-Bild hochkant: ~15% Crop, nicht >50%-Crop
-[ ] Drehen → Crop neu berechnet (kein Panning-Offset hängt nach)
+[ ] PINCH beim ERSTEN Touch — funktioniert es jetzt?
+[ ] Bild steht NICHT horizontal über (vollständig sichtbar)
+[ ] Wischen ohne Zoom wechselt Bild direkt
 [ ] Aus gezoomtem Bild wischen → nächste Seite in Basis-Scale
-[ ] Zurück- / Speaker- / ⓘ-Button | Caption + Zähler | Schwarzer Hintergrund
+[ ] Zurück- / Speaker- / ⓘ-Button | Caption | Schwarzer Hintergrund
 ```
+Doppeltipp ist in dieser Diagnose-Version NICHT implementiert (Listener entfernt).
+
+**Nächster Schritt nach Rückmeldung:**
+- Pinch OK → Listener-freie Doppeltipp-Lösung implementieren (PV-native)
+- Pinch NOK → PhotoViewGallery-Refactor (Rückmeldung abwarten)
 
 **Nach Geräte-Parität:** `spike/photo-view-plus` → `main` mergen, Branch löschen.
 
