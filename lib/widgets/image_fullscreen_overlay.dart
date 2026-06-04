@@ -85,6 +85,8 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
       _pvControllers.putIfAbsent(i, () => PhotoViewController());
 
   void _onPageChanged(int index) {
+    _resetController(_currentIndex); // verlassene Seite zurücksetzen
+    _resetController(index);         // neue Seite sicherheitshalber auch
     setState(() {
       _currentIndex = index;
       _speakerUsed  = false;
@@ -152,14 +154,25 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     );
   }
 
-  // Cover-Scale: max(w/W, h/H) — Bild füllt Viewport immer aus.
-  double _coverScaleFor(int index) {
+  // Limited-Cover: min(covered, contained*1.18) — entspricht dem PV-initialScale.
+  // Stimmt numerisch mit PhotoViewComputedScale.contained*1.18 überein (Zoom-out-Ziel).
+  double _initialScaleFor(int index) {
     if (index >= widget.images.length) return 1.0;
     final imgSize   = _imageSizes[widget.images[index].filename];
     final outerSize = _outerSizes[index];
     if (imgSize == null || outerSize == null) return 1.0;
-    return math.max(
-        outerSize.width / imgSize.width, outerSize.height / imgSize.height);
+    final sc = math.min(outerSize.width / imgSize.width, outerSize.height / imgSize.height);
+    final sk = math.max(outerSize.width / imgSize.width, outerSize.height / imgSize.height);
+    return math.min(sk, sc * 1.18);
+  }
+
+  // Setzt den Controller einer Seite auf Basis-Scale zurück (nach Wischen).
+  void _resetController(int index) {
+    final ctrl = _pvControllers[index];
+    if (ctrl == null) return;
+    _pvAnimControllers.remove(index)?.dispose();
+    final initScale = _initialScaleFor(index);
+    ctrl.updateMultiple(scale: initScale, position: Offset.zero);
   }
 
   // Doppeltipp via Listener.onPointerDown (kein GestureArena-Konflikt):
@@ -188,7 +201,7 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     final currentPos   = value.position;
     final outerSize    = _outerSizes[index] ?? Size.zero;
     final outerCenter  = Offset(outerSize.width / 2, outerSize.height / 2);
-    final initScale    = _coverScaleFor(index);
+    final initScale    = _initialScaleFor(index);
 
     _pvAnimControllers.remove(index)?.dispose();
     final ac = AnimationController(
@@ -369,8 +382,8 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
                   key:               ValueKey('pv_${img.filename}'),
                   imageProvider:     MemoryImage(bytes),
                   controller:        _ctrlFor(index),
-                  initialScale:      PhotoViewComputedScale.covered,
-                  minScale:          PhotoViewComputedScale.covered,
+                  initialScale:      PhotoViewComputedScale.contained * 1.18,
+                  minScale:          PhotoViewComputedScale.contained * 1.18,
                   maxScale:          PhotoViewComputedScale.covered * 4.0,
                   strictScale:       true,
                   backgroundDecoration:

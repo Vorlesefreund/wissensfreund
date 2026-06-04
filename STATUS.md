@@ -1,27 +1,32 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-04T08:04:27Z -->
+<!-- updated: 2026-06-04T08:16:45Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## 🟡 Gerade in Arbeit (Session 2026-06-04 — R1/R2/R3 Fixes)
+## 🟡 Gerade in Arbeit (Session 2026-06-04 — F1/F2 Restfehler)
 
 **Branch:** `spike/photo-view-plus` — APK auf S23 installiert, wartet auf Gerätetest.
 
 ### Fixes implementiert (lib/widgets/image_fullscreen_overlay.dart)
-**R1 (Letterbox):** `_LimitedCoverScale` entfernt → `PhotoViewComputedScale.covered` für
-`initialScale` + `minScale`. Formel `min(sk, sc*1.18)` produzierte Letterbox für fast alle
-Nicht-Quadrat-Bilder (sk/sc >> 1.18 → Ergebnis ≈ contained). Fix: covered füllt Viewport immer.
 
-**R2 (Pinch erst beim 2. Touch):** `onTapUp` aus PhotoView entfernt → kein TapGestureRecognizer
-in der GestureArena. DoubleTapGestureRecognizer (mit null-Callback von disableDoubleTap:true)
-bleibt, gibt aber bei 2-Pointer-Event (Pinch) sofort auf.
+**Vorherige Session (R1/R2/R3):**
+- R1→covered überkorrigiert (>50% Crop)
+- R2: `onTapUp` entfernt → kein TapGestureRecognizer in Arena
+- R3: `Listener(onPointerDown:)` für Double-tap (kein Arena-Konflikt)
 
-**R3 (Doppeltipp tut nichts):** `Listener(onPointerDown:)` um PhotoView gewickelt.
-`Listener` nimmt NICHT am GestureArena teil → kein Konflikt mit PV-internem DTGR.
-Debounce-Logik (300ms/40px) auf PointerDown des 2. Taps → `_handleDoubleTap` mit
-`ctrl.value` für aktuellen Scale/Position. Animiert 1x↔2.5x zur Tippposition.
+**Diese Session (F1/F2):**
+
+**F1 (>50% Crop → Limited-Cover):** `PhotoViewComputedScale.covered` →
+`PhotoViewComputedScale.contained * 1.18` für `initialScale` + `minScale`.
+PV berechnet dies nativ per Layout → Drehen rechnet automatisch neu.
+`_initialScaleFor()` stimmt numerisch mit `min(sk, sc*1.18)` überein → Doppeltipp-Zoom-out
+kehrt exakt auf Basis-Scale zurück.
+
+**F2 (Nach Wischen: nächste Seite gezoomt):** `_resetController(index)` → ruft
+`ctrl.updateMultiple(scale: initScale, position: Offset.zero)` auf. Wird in
+`_onPageChanged` für verlassene UND neue Seite aufgerufen.
 
 ---
 
@@ -29,13 +34,13 @@ Debounce-Logik (300ms/40px) auf PointerDown des 2. Taps → `_handleDoubleTap` m
 
 ```
 [ ] PageView Mehrbild-Wisch
-[ ] Pinch sofort nach Öffnen — KERN-BUG, explizit testen!
+[ ] Pinch sofort nach Öffnen
 [ ] Bild lässt sich im Zoom NICHT aus Viewport schieben
-[ ] Doppeltipp 1x↔2.5x zentriert auf Tippposition
-[ ] Zurück- / Speaker- / ⓘ-Lizenz-Button funktionsgleich
-[ ] Bildunterschrift + "1 / 3"-Zähler korrekt
-[ ] Bild füllt Viewport (kein Letterbox)
-[ ] Schwarzer Hintergrund | Seitenverhältnis-Randfälle
+[ ] Doppeltipp 1x↔2.5x zentriert auf Tippposition; Zoom-out → Basis-Scale
+[ ] Querformat-Bild hochkant: ~15% Crop, nicht >50%-Crop
+[ ] Drehen → Crop neu berechnet (kein Panning-Offset hängt nach)
+[ ] Aus gezoomtem Bild wischen → nächste Seite in Basis-Scale
+[ ] Zurück- / Speaker- / ⓘ-Button | Caption + Zähler | Schwarzer Hintergrund
 ```
 
 **Nach Geräte-Parität:** `spike/photo-view-plus` → `main` mergen, Branch löschen.
