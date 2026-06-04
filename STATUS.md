@@ -1,70 +1,69 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-04T13:06:17Z -->
-<!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
+<!-- updated: 2026-06-04T13:39:04Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## ✅ Zuletzt abgeschlossen (Session 2026-06-04, 6. Teil)
+## ✅ Zuletzt abgeschlossen (Session 2026-06-04, 7. Teil)
 
-**Vollbild-Viewer — Doppeltipp Scale-Werte + onScaleStart-Bug gefixt**
+**Vollbild-Viewer — Endwerte Doppeltipp-Animation exakt**
 Branch `spike/photo-view-plus`, auf S23 installiert.
 
-### Root Causes (beide gefixt)
+### P1: Basis-Schritt ohne Endsprung
 
-**Bug 1: onScaleStart stoppte Animation beim zweiten Tap**
-`onScaleStart: _zoomAnimCtrl.stop()` feuert für JEDEN Pointer-Down (auch einfachen Tap).
-Zweiter Tap der Doppel-Geste → Animation startet → onScaleStart stoppt sie sofort.
-Fix: `if (_activePointers > 1) _zoomAnimCtrl.stop()` — nur bei echtem Pinch stoppen.
-`_onPointerDown` (Multi-Touch-Branch) stoppt ebenfalls.
+**Root Cause**: `ssCtrl.reset()` in `_onZoomAnimStatus` setzte scaleState = initial via
+normalen Setter → notifyListeners() → `_blindScaleStateListener` (ignorable) → 
+`animateOnScaleStateUpdate(unserEndwert, PVsMinScale)` → sichtbarer Endsprung.
 
-**Bug 2: Skalenwerte rechneten mit falschen Bezugswerten**
-`_initialScaleFor` und `_computeMaxScale` nutzten `MediaQuery.sizeOf(context)` statt der
-echten Layout-Größe, die PV intern verwendet. Fix: `LayoutBuilder` um `Listener`+Gallery →
-`_outerSize = constraints.biggest` (identisch mit PVs scaleBoundaries.outerSize).
-Alle Scale-Berechnungen (baseScale, maxScale, Focal-Point-Clamp) verwenden nun `_outerSize`.
+**Fix**: `ssCtrl.setInvisibly(PhotoViewScaleState.initial)` statt `reset()` →
+nur regular listeners → `_blindScaleStateListener` NOT triggered → kein Endsprung.
+Plus: `ctrl.updateMultiple(minScale, Offset.zero)` vor setInvisibly → exakter Finalwert.
 
-### Logging noch aktiv
+### P2: Max exakt erreichen
+
+**Fix**: In `_onZoomAnimStatus` (non-toBase): `ctrl.updateMultiple(scale: _zoomAnimToScale, ...)`
+→ Floating-Point-sicherer finaler Snap auf exakten Zielwert.
+Erweitertes Logging: `WISS DT` zeigt jetzt outer×img×base×max; `WISS anim done` zeigt
+scale vs. target nach Abschluss.
+
+### Logging (zum Verifizieren, bis Test bestätigt)
 ```
 adb logcat | grep WISS
 ```
-Erwartet: `scale≈0.2xx` bei Basis, `scale≈0.5xx` bei Stufe1, `scale≈3.xx` bei Max.
-Branch immer korrekt (`→Stufe1`, `→Max`, `→Basis`).
 
 ---
 
 ## 🔴 Gerätetest — S23
 
 ```
-[ ] 1. Basis → Stufe1 → Max → Basis → Stufe1 → … (beliebig oft, deutliche Stufen)
-[ ] 2. Fokalpunkt: Bildbereich unter Finger bleibt beim Zoom-in stehen
-[ ] 3. Pinch zoomen → dann Doppeltipp → sinnvolle Stufe, kein Einfrieren
-[ ] 4. Wischen direkt nach Zoom-out (Basis) funktioniert
-[ ] 5. Panning frei, Seitennavigation zuverlässig
+[ ] 1. Basis → Stufe1 → Max → Basis → … mehrfach: VOLLE Stufen, kein "fast"
+[ ] 2. Max → Basis: EXAKT Ausgangsgröße, Wischen direkt danach OK
+[ ] 3. Log: WISS anim done scale=X.XXXX target=X.XXXX → beide gleich
+[ ] 4. Pinch → Doppeltipp → sinnvolle Reaktion
+[ ] 5. Fokalpunkt: Bildbereich unter Finger bleibt stehen
 ```
 
 ---
 
 ## 🔴 Nach bestandenem Test
-- `debugPrint`-Zeilen entfernen, neu committen
+- `debugPrint`-Zeilen entfernen
 - `spike/photo-view-plus` → `main` mergen, Branch löschen
 
 ---
 
-## 🟡 Zum Testen (niedrigere Prio)
+## 🟡 Ausstehend (niedrigere Prio)
 - Mode B Lupe: Bold entfernen + `_ttsCursor` erst im progressHandler updaten
 
 ---
 
-## 🔴 Offene To-Dos (nach Priorität)
+## 🔴 Offene To-Dos
 
 ### Mittel
-- **Selbst produzierte Artikel**, **Quiz-Checkpoint + Run neu**
-- **Bilder-Patch** (patch_article_images_v1.py) nach Quiz-Fertigstellung
+- Selbst produzierte Artikel, Quiz-Checkpoint + Run neu
+- Bilder-Patch (patch_article_images_v1.py) nach Quiz-Fertigstellung
 
 ### Niedrig
-- Epoch-Guard TTS-Seek | Mode-B-ZIM-\n-Loch
-- Links/Gemini-Integration/Topic-Tree
+- Epoch-Guard TTS-Seek | Mode-B-ZIM-\n-Loch | Links/Gemini/Topic-Tree
 - Upgrade-Dialog, Plus/Premium-Design, Sound-Thumbnails
 
 ---

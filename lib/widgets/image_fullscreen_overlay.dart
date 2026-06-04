@@ -233,7 +233,12 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     final s0       = ctrl.scale ?? minScale;
     final branch   = s0 <= minScale * 1.05 ? '→Stufe1'
                    : s0 <= minScale * 2.625 ? '→Max' : '→Basis';
-    debugPrint('WISS DT fired idx=$index scale=${s0.toStringAsFixed(3)} min=${minScale.toStringAsFixed(3)} $branch');
+    final imgSize  = index < widget.images.length
+        ? _imageSizes[widget.images[index].filename] : null;
+    debugPrint('WISS DT idx=$index s0=${s0.toStringAsFixed(4)} '
+        'base=${minScale.toStringAsFixed(4)} max=${maxScale.toStringAsFixed(4)} '
+        'outer=${_outerSize.width.toStringAsFixed(1)}×${_outerSize.height.toStringAsFixed(1)} '
+        'img=${imgSize?.width.toInt()}×${imgSize?.height.toInt()} $branch');
 
     if (s0 <= minScale * 1.05) {
       final s1 = minScale * 2.5;
@@ -298,10 +303,19 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
 
   void _onZoomAnimStatus(AnimationStatus status) {
     if (status != AnimationStatus.completed) return;
+    final ctrl  = _pvControllers[_zoomAnimIndex];
+    final ssCtrl = _pvScaleStateControllers[_zoomAnimIndex];
     if (_zoomAnimToBase) {
-      // Exakter Reset: scaleState auf initial → PV erkennt Ruhezustand.
-      _pvScaleStateControllers[_zoomAnimIndex]?.reset();
+      // Exakter Basis-Reset: erst Zielwerte forcen (Floating-Point-Sicherheit),
+      // dann setInvisibly statt reset() — kein animateOnScaleStateUpdate → kein Endsprung.
+      final minScale = _initialScaleFor(_zoomAnimIndex);
+      ctrl?.updateMultiple(scale: minScale, position: Offset.zero);
+      ssCtrl?.setInvisibly(PhotoViewScaleState.initial);
       if (mounted) setState(() => _isZoomed = false);
+    } else {
+      // Auch für Stufe1/Max: finale Zielwerte exakt setzen.
+      ctrl?.updateMultiple(scale: _zoomAnimToScale, position: _zoomAnimToPos);
+      debugPrint('WISS anim done scale=${ctrl?.scale?.toStringAsFixed(4)} target=${_zoomAnimToScale.toStringAsFixed(4)}');
     }
   }
 
