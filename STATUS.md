@@ -1,54 +1,60 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-04T09:55:09Z -->
+<!-- updated: 2026-06-04T11:54:01Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## ✅ Zuletzt abgeschlossen (Session 2026-06-04, 2. Teil)
+## ✅ Zuletzt abgeschlossen (Session 2026-06-04, 3. Teil)
 
-**Vollbild-Viewer fertiggestellt** — `image_fullscreen_overlay.dart` + Provider, Branch `spike/photo-view-plus`
+**Vollbild-Viewer — Doppeltipp + Wischen-nach-Zoom gefixt**
+Branch `spike/photo-view-plus`, auf S23 installiert.
 
-### P1 — contained (kein Crop)
-- `initialScale` + `minScale`: `contained * 1.18` → `PhotoViewComputedScale.contained`
-- `_initialScaleFor()`: `sc * 1.18` → `sc` (konsistent mit PV-Scale)
-- Basis-Scale: Bild ganz sichtbar, kein Überstehen → Wischen zuverlässig
+### Root Cause (bestätigt durch PV-Source-Analyse)
+Nach Zoom-out: `_blindScaleListener` setzt `scaleState = zoomedOut` (invisibly), weil
+`controller.scale == initialScale` → `scale > initialScale` false → `zoomedOut`.
+- `scaleState = zoomedOut` → `isZooming = true` → `_blindScaleStateListener` blockiert
+  Animation beim nächsten Doppeltipp (DTGR → `nextScaleState` → re-arm schlägt fehl)
+- Swipe klemmt: `shouldMove` ergibt `true` wenn `position` nicht exakt Offset.zero
+  (Floating-Point in `childWidth > outerWidth`)
 
-### P2 — Weichgezeichneter Hintergrund-Füller
-- `const _kBlurredBackdrop = true;` — abschaltbar mit einer Zeile
-- `ImageFiltered(blur: 24)` + `Image.memory(cacheWidth: 96)` als 96px-Thumbnail
-- Schwarzer Scrim `0x44000000` (27%) für Caption-Lesbarkeit
-- Gallery `backgroundDecoration: Colors.transparent` damit Blur durchscheint
-- Liegt im Stack unter der Gallery, keine Gesten
+### Fixes implementiert
 
-### P3 — Doppeltipp-Fix
-- Root Cause: `_blindScaleStateListener` prüft `isZooming = zoomedIn|zoomedOut` →
-  überspringt Animation wenn Zielstate `zoomedOut`. Zoom-out animierte nie.
-- Fix: `_scaleStateCycle` gibt jetzt `initial` statt `zoomedOut` zurück.
-  Gleiche Scale (= initialScale = contained), aber `initial ∉ isZooming` → Animation läuft.
-- Cycle korrekt: initial→covering→initial→covering (beliebig oft)
+**1. Exakter Reset (`_resetController`)**
+- `ctrl.updateMultiple(scale: initScale, position: Offset.zero)` — unverändert
+- **NEU**: `_pvScaleStateControllers[index]?.reset()` → setzt `scaleState = initial`
+  PV erkennt Ruhezustand: shouldMove=false, Doppeltipp-Zyklus re-armt
 
-### P4 — Lautsprecher-Button-Regression
-- `_speakerUsed`-Flag entfernt (blieb bis Seitenwechsel aktiv)
-- `bool get isCaptionPlaying => _isCaptionPlaying;` in WissensfreundProvider ergänzt
-- Button `dimmed: provider.isCaptionPlaying` → reaktiv auf TTS-Ende
+**2. Manueller Doppeltipp via `onTapDown`-Timing**
+- `disableDoubleTap: true` in PageOptions → DTGR gewinnt Arena, ruft aber `nextScaleState`
+  NICHT auf (kein Callback) → kein Konflikt mit unserem Handler
+- `_onImageTapDown(index, details)`: Zeitfenster 80–300ms zwischen zwei Downs
+  Min 80ms filtert Pinch (2 Finger < 40ms auseinander)
+- `_handleDoubleTap(index)`: liest `ssCtrl.scaleState` statt `_isPageZoomedIn`:
+  - `initial || zoomedOut` → Zoom-in: `ssCtrl.scaleState = covering` → PV animiert
+  - sonst → Zoom-out: `ssCtrl.scaleState = initial` → PV animiert + Position → Offset.zero
 
-### Commit auf S23 installiert: 2026-06-04
+**3. Pinch-out Reset (`onScaleEnd`)**
+- `_onScaleEnd`: wenn `scale ≤ minScale * 1.01` → `ssCtrl.reset()` → `scaleState = initial`
+- Behebt `scaleState = zoomedOut` nach Pinch-out ohne Animation-Konflikt
+
+**4. `_pvScaleStateControllers` Map**
+- Pro Seite ein `PhotoViewScaleStateController` — extern gehalten
+- In `PageOptions`: `scaleStateController: _scaleStateCtrlFor(index)` → PV nutzt unseren
+- In `dispose()`: alle Controller disposed
 
 ---
 
-## 🔴 Gerätetest erforderlich (S23 — alle 4 Muss-Punkte + Extras!)
+## 🔴 Gerätetest erforderlich (S23 — mehrfach hintereinander!)
 
 ```
-[ ] 1. Pinch greift beim ERSTEN Touch
-[ ] 2. Doppeltipp: zoom-in (covering) → nochmals: zoom-out (contained)
-       Mehrfach hintereinander testen — jeder Doppeltipp muss reagieren
-[ ] 3. Bei Basis-Scale: Wischen wechselt Bild direkt
-[ ] 4. Gezoomt: frei panbar, alle Bildteile erreichbar
-[ ] Hintergrund-Blur sieht gut aus (weichgezeichnet, kein harter Rand)
-[ ] _kBlurredBackdrop = false → schwarzer Hintergrund ohne Blur
-[ ] Lautsprecher: dimmt nur WÄHREND Vorlesen; danach wieder aktiv
-[ ] Overlays korrekt (Zurück, Speaker, ⓘ, Caption, Zähler)
+[ ] 1. Doppeltipp: zoom-in → zoom-out → zoom-in → ... (beliebig oft, nie hängen)
+[ ] 2. Wischen bei Basis-Scale funktioniert direkt nach Doppeltipp-Zoom-out
+[ ] 3. Wischen bei Basis-Scale funktioniert nach Pinch-zoom-in + Pinch-zoom-out
+[ ] 4. Pinch greift beim ERSTEN Touch
+[ ] 5. Panning im gezoomten Zustand: frei, alle Bildteile erreichbar
+[ ] 6. Seitennavigation (Wischen) funktioniert zuverlässig auf frisch geladenem Bild
+[ ] Hintergrund-Blur, Lautsprecher, Overlays — keine Regressionen
 ```
 
 ---

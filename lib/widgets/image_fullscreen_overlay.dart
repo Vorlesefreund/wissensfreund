@@ -51,11 +51,16 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   Timer? _rotateHintTimer;
   bool _showRotateHint = false;
 
-  final _imageRatios    = <String, double?>{};
-  final _imageSizes     = <String, Size>{};
-  final _pvControllers  = <int, PhotoViewController>{};
-  final _loadedBytes    = <String, Uint8List>{};
-  final _startedLoading = <String>{};
+  final _imageRatios             = <String, double?>{};
+  final _imageSizes              = <String, Size>{};
+  final _pvControllers           = <int, PhotoViewController>{};
+  final _pvScaleStateControllers = <int, PhotoViewScaleStateController>{};
+  final _loadedBytes             = <String, Uint8List>{};
+  final _startedLoading          = <String>{};
+
+  // Double-tap detection (via onTapDown timing, works even when DTGR wins arena).
+  DateTime? _lastTapDownTime;
+  int?      _lastTapIndex;
 
   @override
   void initState() {
@@ -81,6 +86,7 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   void dispose() {
     _pageCtrl.dispose();
     for (final c in _pvControllers.values) { c.dispose(); }
+    for (final c in _pvScaleStateControllers.values) { c.dispose(); }
     _rotateHintTimer?.cancel();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     restoreSystemUI();
@@ -89,6 +95,10 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
 
   PhotoViewController _ctrlFor(int i) =>
       _pvControllers.putIfAbsent(i, () => PhotoViewController());
+
+  PhotoViewScaleStateController _scaleStateCtrlFor(int i) =>
+      _pvScaleStateControllers.putIfAbsent(
+          i, () => PhotoViewScaleStateController());
 
   // Startet Ladevorgang für ein Bild (einmalig; speichert Bytes + triggert Rebuild).
   void _startLoading(String fn, WissensfreundProvider provider) {
@@ -132,8 +142,10 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   void _resetController(int index) {
     final ctrl = _pvControllers[index];
     if (ctrl == null) return;
-    ctrl.updateMultiple(
-        scale: _initialScaleFor(index), position: Offset.zero);
+    ctrl.updateMultiple(scale: _initialScaleFor(index), position: Offset.zero);
+    // Reset scaleState to initial so PV recognises true rest state:
+    // shouldMove → false, double-tap cycle re-arms, _blindScaleListener silent.
+    _pvScaleStateControllers[index]?.reset();
   }
 
   void _onPageChanged(int index) {
@@ -160,6 +172,50 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     _rotateHintTimer = Timer(const Duration(seconds: 3), () {
       if (mounted) setState(() => _showRotateHint = false);
     });
+  }
+
+  // Manual double-tap via onTapDown timing. TGR fires onTapDown for EVERY
+  // pointer-down (even for the 2nd tap of a double-tap where DTGR wins arena).
+  // Min 80ms guards against pinch (2 fingers within <40ms).
+  void _onImageTapDown(int index, TapDownDetails details) {
+    final now = DateTime.now();
+    if (_lastTapIndex == index &&
+        _lastTapDownTime != null &&
+        now.difference(_lastTapDownTime!) > const Duration(milliseconds: 80) &&
+        now.difference(_lastTapDownTime!) < const Duration(milliseconds: 300)) {
+      _lastTapDownTime = null;
+      _lastTapIndex    = null;
+      _handleDoubleTap(index);
+    } else {
+      _lastTapDownTime = now;
+      _lastTapIndex    = index;
+    }
+  }
+
+  void _handleDoubleTap(int index) {
+    final ssCtrl  = _scaleStateCtrlFor(index);
+    final atBase  = ssCtrl.scaleState == PhotoViewScaleState.initial ||
+                    ssCtrl.scaleState == PhotoViewScaleState.zoomedOut;
+    if (atBase) {
+      // Zoom in: trigger PV's animation by advancing scaleState to covering.
+      // _blindScaleStateListener fires: !isZooming → animateOnScaleStateUpdate.
+      ssCtrl.scaleState = PhotoViewScaleState.covering;
+      if (mounted) setState(() => _isZoomed = true);
+    } else {
+      // Zoom out: trigger PV's animation back to initial scale + Offset.zero.
+      ssCtrl.scaleState = PhotoViewScaleState.initial;
+      if (mounted) setState(() => _isZoomed = false);
+    }
+  }
+
+  // After pinch-out reaching base: reset scaleState so PV recognises rest state.
+  void _onScaleEnd(int index, ScaleEndDetails details, PhotoViewControllerValue value) {
+    final minScale = _initialScaleFor(index);
+    final s = value.scale;
+    if (s != null && s <= minScale * 1.01) {
+      _pvScaleStateControllers[index]?.reset();
+      if (mounted) setState(() => _isZoomed = false);
+    }
   }
 
   @override
@@ -194,15 +250,19 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
           }
 
           return PhotoViewGalleryPageOptions(
-            pageKey:         ValueKey(img.filename),
-            imageProvider:   MemoryImage(bytes),
-            controller:      _ctrlFor(index),
-            initialScale:    PhotoViewComputedScale.contained,
-            minScale:        PhotoViewComputedScale.contained,
-            maxScale:        PhotoViewComputedScale.covered   * 4.0,
-            strictScale:     true,
-            filterQuality:   FilterQuality.high,
-            scaleStateCycle: _scaleStateCycle,
+            pageKey:              ValueKey(img.filename),
+            imageProvider:        MemoryImage(bytes),
+            controller:           _ctrlFor(index),
+            scaleStateController: _scaleStateCtrlFor(index),
+            initialScale:         PhotoViewComputedScale.contained,
+            minScale:             PhotoViewComputedScale.contained,
+            maxScale:             PhotoViewComputedScale.covered * 4.0,
+            strictScale:          true,
+            filterQuality:        FilterQuality.high,
+            scaleStateCycle:      _scaleStateCycle,
+            disableDoubleTap:     true,
+            onTapDown: (ctx, details, value) => _onImageTapDown(index, details),
+            onScaleEnd: (ctx, details, value) => _onScaleEnd(index, details, value),
           );
         });
 
