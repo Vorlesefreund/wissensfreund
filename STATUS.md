@@ -1,59 +1,46 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-04T14:37:26Z -->
+<!-- updated: 2026-06-04T15:38:04Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Vollbild-Viewer — photo_view_plus Migration + 3-Stufen-Doppeltipp**
-Branch `spike/photo-view-plus`, letzter Commit `3ce0359`. Auf S23 getestet: ✅
+**Vollbild-Viewer — komplett, auf main gemergt (e0906eb → merge)**
 
-Was funktioniert:
-- Pinch beim 1. Touch (Gesture-Arena-Lösung out-of-box mit PhotoViewGallery)
-- 3-Stufen-Doppeltipp: Basis → Stufe1 (minScale×2.5) → Max (covered×4) → Basis — deterministisch
-- Wischen/Panning, Seiten-Navigation
-- Rotation (Reset auf Basis + Position-Zero)
-- Weichgezeichneter Hintergrund-Füller, Lautsprecher-Icon kein Flackern
-
-Root-Cause-Fix (erratischer Doppeltipp): `_onScaleEnd` stoppte Animation bei jedem Finger-Heben
-→ `_zoomAnimCtrl.stop()` entfernt; Pinch-Stop in `_onPointerDown` multi-touch branch.
+- PhotoViewGallery (photo_view_plus 1.1.1) ersetzt InteractiveViewer — Pinch-Arena gelöst
+- 3-Stufen-Doppeltipp: Basis → Stufe1 (minScale×2.5) → Max (covered×4) → Basis, deterministisch
+- Caption: an Bildunterkante verankert (Letterbox vs. Overlay, je nach freiem Raum)
+- Pinch-Fix: Doppeltipp in Future.microtask — 2-Finger-Geste kann nicht mehr als Tap fehlgedeutet werden
+- Wischen/Panning, Rotation, Blur-Hintergrund, Lautsprecher ohne Flackern — alles auf S23 getestet ✅
+- Branch spike/photo-view-plus gelöscht
 
 ---
 
-## 🔴 Nächste Session — Vollbild-Viewer (in Reihenfolge)
+## 🔴 Offene Punkte (nach Priorität)
 
-**(a) Caption-Platzierung**
-Unter dem Bild wenn Letterbox-Raum darunter (Querformat-Bild im Hochformat-Screen).
-Overlay wenn Bild die volle Höhe füllt.
-
-**(b) Pinch-Zoom greift gelegentlich nicht**
-Verdacht: 2-Finger-Touch als Doppeltipp missdeutet.
-Prüfen: bei `_activePointers >= 2` Tap-State sofort löschen (Timing-Problem?).
-
-**(c) Regressionslauf S23 → merge spike/photo-view-plus → main**
-Erst wenn (a) + (b) erledigt.
-
----
-
-## 🟡 Ausstehend (niedrigere Prio)
-
-- Mode B Lupe: Bold entfernen + `_ttsCursor` erst im progressHandler updaten
-- Epoch-Guard TTS-Callbacks (wissensfreund_repo-Branch, separater Refactor)
-
----
-
-## 🔴 Offene To-Dos
+### Hoch
+- **Bilder-Patch** (`patch_article_images_v1.py` in wissensfreund_repo): Artikel von R2
+  laden (`rclone sync r2:wissensfreund-articles/articles/ articles_production/`),
+  Patch laufen lassen, zurück nach R2. (ANTHROPIC_API_KEY in GitHub Secrets)
+- **Selbst produzierte Artikel** — neue JSON-Artikel mit echten Inhalten, Quiz-Checkpoint
+  löschen + Run neu starten
 
 ### Mittel
-- Selbst produzierte Artikel, Quiz-Checkpoint + Run neu
-- Bilder-Patch (patch_article_images_v1.py) nach Quiz-Fertigstellung
+- **Epoch-Guard TTS-Callbacks**: `_ttsStopPending` hat Zeitfenster auf langsamen Geräten.
+  Lösung: Generations-Zähler (Closure capturt Epoch-ID) bei jedem `speak()`. ~5 Stellen.
+- **Mode B Lupe**: Bold entfernen + `_ttsCursor` erst im progressHandler updaten
+- **Sound-Thumbnails**: Audio-Infrastruktur fertig; wartet auf Audio-Pipeline-Run-Ergebnis
 
-### Niedrig
-- ZIM→JSON Decode-Cap, Kiosk→Screen Pinning, STT-Routing, Fire-OS-Entscheidung
-- Links/Gemini/Topic-Tree, Upgrade-Dialog, Plus/Premium-Design, Sound-Thumbnails
+### Niedrig (große Architekturaufgaben)
+- **ZIM→JSON Decode-Auflösungs-Cap**: Bilder beim Decode auf sinnvolle Max-Größe begrenzen
+- **Kiosk → Screen Pinning**: DevicePolicyManager durch Android Screen Pinning ersetzen
+- **STT-Routing**: Mikrofon-Eingabe robuster (AudioFocus, verschiedene Geräte)
+- **Fire-OS-Entscheidung**: App auf Fire-Tablets testen / Entscheidung ob Support
+- **Bild-Tier-Werte vereinheitlichen**: thumb/standard/pro-Pixel-Werte in einer Konstanten-Datei
 
 ---
 
 ## 🔵 Verschoben auf Version 1.1
 - Gallery-Artikel (111 Artikel, 540 Bilder), Audio-Pipeline
+- Links/Gemini/Topic-Tree, Upgrade-Dialog, Plus/Premium-Design

@@ -1,8 +1,4 @@
-# Wissensfreund — CI/Scripts-Repo
-
-## ZWECK
-Python-Skripte (scripts/) + GitHub Actions (.github/workflows/) für die monatliche
-Medien-Pipeline: ZIM → Bilder (3 Tiers, Pillow-Resize) + Audio → Cloudflare R2.
+# Wissensfreund App — Claude Code Anweisungen
 
 ## EISERNE REGEL (App-Kernprinzip)
 KI darf NIEMALS aus Trainingswissen antworten.
@@ -20,54 +16,42 @@ Kein Treffer → "Das können Mama oder Papa erklären!" — kein KI-Fallback
 ## BUILD & DEPLOY (Bash, nicht PowerShell)
 flutter build apk --debug
 adb install -r build/app/outputs/flutter-apk/app-debug.apk
-gh workflow run update_image_licenses.yml
 
 ## SESSION-START (Reihenfolge einhalten)
 1. CLAUDE.md lesen
-2. CLAUDE_CHAT_NOTIZEN.md lesen — offene Aufträge prüfen und umsetzen
-3. STATUS.md lesen — aktuellen Stand kennen
+2. STATUS.md lesen — aktuellen Stand kennen
+   Pfad (einzige Quelle der Wahrheit):
+   C:\Users\Andreas\Wissensfreund\wissensfreund_app\STATUS.md
 
-## STATUS.md ABLAGE (PFLICHT)
-Kanonisch: wissensfreund_app/STATUS.md (Quelle der Wahrheit, wird committet/gepusht).
-Nach JEDER Aktualisierung BYTE-IDENTISCH kopieren nach:
-  C:\Users\Andreas\Wissensfreund\Status\STATUS.md
-Beide Orte müssen bei jedem Schreiben übereinstimmen.
+## SESSION-ENDE (Pflicht, keine Ausnahme)
+1. STATUS.md neu schreiben — aktueller Stand, max. 60 Zeilen
+   Format: Zuletzt abgeschlossen / Gerade in Arbeit / Offen nach Priorität
+   Zeile 2: <!-- updated: YYYY-MM-DDTHH:MM:SSZ --> aktualisieren
+   Bash: date -u +"%Y-%m-%dT%H:%M:%SZ"
+2. Bei neuen Erkenntnissen: WISSEN_*.md ergänzen (nicht überschreiben)
+   - App/Flutter → WISSEN_APP_ARCHITEKTUR.md
+   - Artikel/Pipeline → WISSEN_ARTIKEL_PIPELINE.md
+   - Bilder → WISSEN_BILDER.md
+3. Committen + pushen:
+   git add STATUS.md WISSEN_*.md [geänderte Dateien]
+   git commit -m "STATUS.md [Datum] [Beschreibung]"
+   git push origin main
+
+## BRANCHES
+Standardbranch: main. Branch nur für riskante Experimente, sofort nach Test zurück nach main.
 
 ## STATUS.md TIMESTAMP
 Zeile 2: <!-- updated: 2026-06-01T00:00:00Z --> — bei JEDEM Schreiben aktualisieren.
 Bash: date -u +"%Y-%m-%dT%H:%M:%SZ"
-STATUS.md ist Kommunikationskanal zu Claude Chat (nicht CHANGES.md — wird gecacht).
 
-## TOKEN OPTIMIZATION RULES (Claude Code & Claude Chat)
-- Niemals ganzen Code ungefragt ausgeben — nur relevante Diffs/Zeilen ändern
-- Aufgaben bündeln: Code + Tests + Error-Handling in einer Nachricht fordern
+## TOKEN OPTIMIZATION RULES
+- Niemals ganzen Code ungefragt ausgeben — nur relevante Diffs/Zeilen
+- Aufgaben bündeln: Code + Tests + Error-Handling in einer Nachricht
 - Read-Tool nur gezielt einsetzen (offset + limit nutzen)
 - Keine Wiederholung bekannter Codeblöcke im Output
 
 ## COMPACTION & HANDOVER RULES
-- Bei /compact (Claude Code) oder Handover-Briefing (Claude Chat):
-  Alte Terminal-Logs und gelöschten Code herausfiltern
-- Summary bewahrt NUR:
-  1. Aktuelle Architekturlogik
-  2. Exakter Zustand offener To-Dos
-  3. Globale Schnittstellen / Typdefinitionen
-
-## WISSENSDOKUMENTE & SESSION-ABSCHLUSS
-
-Am Ende JEDER Session (Pflicht, keine Ausnahme):
-1. STATUS.md vollständig neu schreiben — nur aktueller Stand, max. 60 Zeilen
-   Format: Zuletzt abgeschlossen / Gerade in Arbeit / Offen nach Priorität
-2. Wenn neue Erkenntnisse, Entscheidungen oder verworfene Ansätze entstanden:
-   entsprechende WISSEN_*.md ergänzen (nicht überschreiben, nur ergänzen)
-   - Bild-Themen → WISSEN_BILDER.md
-   - Artikel/Pipeline-Themen → WISSEN_ARTIKEL_PIPELINE.md
-   - App/Flutter-Themen → WISSEN_APP_ARCHITEKTUR.md
-3. Alle 4 Dateien committen:
-   git add STATUS.md WISSEN_*.md CLAUDE_CHAT_NOTIZEN.md [geänderte Dart/Python-Dateien]
-   git commit -m "STATUS.md [Datum] [Beschreibung]"
-   git push origin main
-
-BEIM SESSION-START (nach CLAUDE.md):
-- STATUS.md lesen (Pflicht)
-- Relevante WISSEN_*.md nur lesen wenn das Thema der Session es erfordert
-- CLAUDE_CHAT_NOTIZEN.md lesen (offene Aufträge prüfen)
+Summary bewahrt NUR:
+1. Aktuelle Architekturlogik
+2. Exakter Zustand offener To-Dos
+3. Globale Schnittstellen / Typdefinitionen

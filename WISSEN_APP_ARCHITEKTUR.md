@@ -462,9 +462,9 @@ Alle 4 Kriterien erfüllt. `MemoryImage(bytes)` funktioniert out-of-box als imag
 
 ---
 
-## Vollbild-Viewer: Implementierung abgeschlossen (2026-06-04, Branch spike/photo-view-plus)
+## Vollbild-Viewer: Implementierung abgeschlossen (2026-06-04, auf main gemergt)
 
-Letzter Commit: `3ce0359`. Nicht gemergt — 3 offene Punkte (siehe STATUS.md).
+Letzter Feature-Commit: `e0906eb`. Vollständig abgeschlossen, auf main gemergt.
 
 ### Endarchitektur `image_fullscreen_overlay.dart`
 
@@ -525,8 +525,14 @@ p1 = Offset(p1.dx.clamp(-halfX,halfX), p1.dy.clamp(-halfY,halfY))
 - Lautsprecher-Icon gebunden an `provider.isCaptionPlaying` (kein Flackern bei TTS)
 - Reset auf Basis + Position-Zero bei Orientierungswechsel (`_onOrientationChanged`)
 
-### Offene Punkte (nächste Session)
-(a) Caption-Platzierung: unter dem Bild bei Letterbox, Overlay wenn Bild Höhe füllt.
-(b) Pinch-Zoom gelegentlich nicht erkannt — Verdacht: 2-Finger fälschlicherweise als Doppeltipp;
-    bei `_activePointers >= 2` Tap-State sofort löschen (bereits in Code, Timing prüfen).
-(c) Regressionslauf S23, dann merge `spike/photo-view-plus → main`.
+**Caption-Platzierung (e0906eb):**
+`letterboxBelow = max(0, (outerH - imgH*minScale) / 2)` — Entscheidung ob Raum unter Bild:
+- `letterboxBelow > 30`: `Positioned(top: outerH - letterboxBelow + 8)` — direkt unter Bildunterkante, kein Gradient.
+- Sonst: `Positioned(bottom: 12 + bottomInset)` mit Gradient-Overlay — Bild füllt Höhe.
+`_outerSize` kommt aus LayoutBuilder; Wert vom Vorframe ist für Layout-Entscheidung stabil genug.
+
+**Pinch-Erkennung (e0906eb):**
+Erster Pinch-Finger fiel gelegentlich ins Doppeltipp-Zeitfenster (80–300ms nach Einzeltap).
+Fix: `_handleDoubleTap` in `Future.microtask` verpackt. Zweiter Pinch-Finger setzt
+`_activePointers > 1` noch in derselben Event-Batch — Microtask prüft vor Ausführung.
+Null wahrnehmbare Latenz (Microtask feuert am Ende der Pointer-Batch-Verarbeitung).
