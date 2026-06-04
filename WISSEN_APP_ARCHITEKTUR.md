@@ -459,3 +459,74 @@ Dann `controller.updateMultiple(position, scale)` in AnimationController-Listene
 
 **Gesamtbewertung: Phase 2 Migration empfohlen.**
 Alle 4 Kriterien erfüllt. `MemoryImage(bytes)` funktioniert out-of-box als imageProvider.
+
+---
+
+## Vollbild-Viewer: Implementierung abgeschlossen (2026-06-04, Branch spike/photo-view-plus)
+
+Letzter Commit: `3ce0359`. Nicht gemergt — 3 offene Punkte (siehe STATUS.md).
+
+### Endarchitektur `image_fullscreen_overlay.dart`
+
+**Package:** `photo_view_plus: 1.1.1` (exakter Pin, kein `^`).
+`PhotoViewGallery` ersetzt `InteractiveViewer` vollständig.
+
+**Scale-Konfiguration:**
+```dart
+initialScale: PhotoViewComputedScale.contained
+minScale:     PhotoViewComputedScale.contained
+maxScale:     PhotoViewComputedScale.covered * 4.0
+strictScale:  true
+```
+`LimitedCoverScale` aus Phase-1-Evaluation NICHT verbaut — `covered * 4.0` reicht für Praxis.
+
+**outerSize — korrekte Quelle:**
+`LayoutBuilder` um Gallery → `constraints.biggest` → `_outerSize`.
+NICHT `MediaQuery.sizeOf(context)` (stimmt nicht mit PVs internem `scaleBoundaries` überein).
+
+**Doppeltipp — 3-Stufen-Zyklus:**
+- Basis = `min(outerW/imgW, outerH/imgH)` (= `PhotoViewComputedScale.contained`)
+- Stufe1 = `base * 2.5`
+- Max = `max(outerW/imgW, outerH/imgH) * 4.0` (= `covered * 4.0`)
+- Zyklus: Basis → Stufe1 → Max → Basis → …
+- Entscheidung per `ctrl.scale` (absoluter Wert) gegen `base * 1.05` und `stufe1 * 1.05`
+
+**Tap-Erkennung — raw Listener (nicht PV-onTapDown):**
+PVs `onTapDown` feuert nicht im Zoom/Pan-Modus (Gesture-Arena-Problem).
+Lösung: `Listener(onPointerDown/Up/Cancel)` um die Gallery.
+`_activePointers`-Counter: bei ≥2 Pointern Tap-State sofort verwerfen + Animation stoppen.
+
+**Animation:**
+`AnimationController` 220ms easeOut, treibt `ctrl.updateMultiple(scale, position)`.
+`_animateTo()` setzt From/To-Felder und ruft `.forward()`.
+
+**Kritischer Bug (onScaleEnd) — Root Cause + Fix:**
+PV feuert `onScaleEnd` beim Finger-Heben nach JEDEM Tap, nicht nur nach Pan/Pinch.
+`_zoomAnimCtrl.stop()` in `onScaleEnd` → Animation nach 2. Tap-Lift abgebrochen →
+`AnimationStatus.completed` nie gefeuert → Scale eingefroren (Beweis aus WISS-Logs).
+Fix: `_zoomAnimCtrl.stop()` aus `onScaleEnd` entfernt. Pinch-Stop: in `_onPointerDown`
+multi-touch branch (`_activePointers > 1`).
+
+**Basis-Animation ohne Endsprung (setInvisibly):**
+`ssCtrl.reset()` notifiziert IGNORABLE Listener → `_blindScaleStateListener` →
+`animateOnScaleStateUpdate` → sichtbarer Endsprung.
+Fix: `ssCtrl.setInvisibly(PhotoViewScaleState.initial)` + `ctrl.updateMultiple(minScale, Offset.zero)`.
+
+**Focal-Point-Formel:**
+```
+center = Offset(outerW/2, outerH/2)
+p1 = tapPos - center - (tapPos - center - p0) * (s1/s0)
+halfX = max(0, (imgW*s1 - outerW)/2)
+p1 = Offset(p1.dx.clamp(-halfX,halfX), p1.dy.clamp(-halfY,halfY))
+```
+
+**Weitere Features:**
+- Weichgezeichneter Hintergrund-Füller (`_kBlurredBackdrop`, `ImageFilter.blur sigma=18`)
+- Lautsprecher-Icon gebunden an `provider.isCaptionPlaying` (kein Flackern bei TTS)
+- Reset auf Basis + Position-Zero bei Orientierungswechsel (`_onOrientationChanged`)
+
+### Offene Punkte (nächste Session)
+(a) Caption-Platzierung: unter dem Bild bei Letterbox, Overlay wenn Bild Höhe füllt.
+(b) Pinch-Zoom gelegentlich nicht erkannt — Verdacht: 2-Finger fälschlicherweise als Doppeltipp;
+    bei `_activePointers >= 2` Tap-State sofort löschen (bereits in Code, Timing prüfen).
+(c) Regressionslauf S23, dann merge `spike/photo-view-plus → main`.
