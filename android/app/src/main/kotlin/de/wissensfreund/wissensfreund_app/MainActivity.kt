@@ -258,16 +258,21 @@ class MainActivity : FlutterFragmentActivity() {
             val win = window ?: return@runOnUiThread
             val lp = win.attributes
             when (mode) {
-                "awake" -> {
+                // Active TTS reading — screen stays on, brightness untouched (system controls it)
+                "reading" -> {
                     win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     lp.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
                 }
+                // Reading finished — explicitly release screen control back to system
+                "awake" -> {
+                    win.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    lp.screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE
+                }
+                // App-idle dim/off: only manage brightness, system controls when to sleep
                 "dim" -> {
-                    win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     lp.screenBrightness = 0.04f
                 }
                 "off" -> {
-                    win.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     lp.screenBrightness = 0.0f
                 }
             }

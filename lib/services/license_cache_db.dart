@@ -181,9 +181,13 @@ class LicenseCacheDb {
           await _createProfileTables(db);
         }
         if (oldVersion < 8) {
-          await db.execute(
-            'ALTER TABLE profiles ADD COLUMN age_level INTEGER NOT NULL DEFAULT 2',
-          );
+          try {
+            await db.execute(
+              'ALTER TABLE profiles ADD COLUMN age_level INTEGER NOT NULL DEFAULT 2',
+            );
+          } on DatabaseException catch (_) {
+            // Column already present — created by _createProfileTables in v7 migration
+          }
         }
       },
     );

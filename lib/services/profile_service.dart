@@ -134,10 +134,10 @@ class ProfileService extends ChangeNotifier {
 
   Future<UserProfile> createProfile({
     required String name,
-    required int birthYear,
     required String avatarId,
     required String languageLevel,
     int ageLevel = 2,
+    int birthYear = 0,
   }) async {
     final profile = await LicenseCacheDb.instance.insertProfile(
       name:          name,

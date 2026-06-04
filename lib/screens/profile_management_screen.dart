@@ -121,7 +121,7 @@ class ProfileManagementScreen extends StatelessWidget {
                     ],
                   ),
                   subtitle: Text(
-                    '${profile.age} Jahre · ${_levelLabel(profile.languageLevel)}',
+                    'Stufe ${profile.ageLevel}',
                     style: const TextStyle(
                       fontSize: 13,
                       color: Color(0xFF888888),
@@ -224,11 +224,6 @@ class ProfileManagementScreen extends StatelessWidget {
     );
   }
 
-  static String _levelLabel(String level) => switch (level) {
-    'easy'     => 'Einfach',
-    'advanced' => 'Fortgeschritten',
-    _          => 'Mittel',
-  };
 }
 
 // ── Edit Profile Dialog ────────────────────────────────────────────────────────
@@ -245,17 +240,15 @@ class _EditProfileDialog extends StatefulWidget {
 
 class _EditProfileDialogState extends State<_EditProfileDialog> {
   late final TextEditingController _nameCtrl;
-  late int _birthYear;
   late String _avatarId;
-  late String _languageLevel;
+  late int _ageLevel;
 
   @override
   void initState() {
     super.initState();
-    _nameCtrl       = TextEditingController(text: widget.profile.name);
-    _birthYear      = widget.profile.birthYear;
-    _avatarId       = widget.profile.avatarId;
-    _languageLevel  = widget.profile.languageLevel;
+    _nameCtrl = TextEditingController(text: widget.profile.name);
+    _avatarId = widget.profile.avatarId;
+    _ageLevel = widget.profile.ageLevel;
   }
 
   @override
@@ -266,7 +259,6 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now().year;
     return AlertDialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       title: const Text('Profil bearbeiten'),
@@ -275,38 +267,37 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Avatar row
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  '🦁','🐼','🦊','🐸','🐙',
-                  '🦋','🦄','🐬','🦅','🐘',
-                  '🐯','🦓','🦒','🦜','🐳',
-                  '🐺','🦔','🐢','🦕','⭐',
-                ].map((a) {
-                  final sel = a == _avatarId;
-                  return GestureDetector(
-                    onTap: () => setState(() => _avatarId = a),
-                    child: Container(
-                      margin: const EdgeInsets.only(right: 6),
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: sel ? const Color(0xFFE8F5E9) : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(
-                          color: sel ? const Color(0xFF4CAF50) : Colors.transparent,
-                          width: 2,
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(a, style: const TextStyle(fontSize: 22)),
+            // Avatar grid — alle 20
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                '🦁','🐼','🦊','🐸','🐙',
+                '🦋','🦄','🐬','🦅','🐘',
+                '🐯','🦓','🦒','🦜','🐳',
+                '🐺','🦔','🐢','🦕','⭐',
+              ].map((a) {
+                final sel = a == _avatarId;
+                return GestureDetector(
+                  onTap: () => setState(() => _avatarId = a),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: sel ? const Color(0xFFE8F5E9) : Colors.transparent,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: sel ? const Color(0xFF4CAF50) : const Color(0xFFDDDDDD),
+                        width: sel ? 2 : 1,
                       ),
                     ),
-                  );
-                }).toList(),
-              ),
+                    child: Center(
+                      child: Text(a, style: const TextStyle(fontSize: 24)),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
             const SizedBox(height: 16),
             // Name
@@ -317,32 +308,44 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
                 border: OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 12),
-            // Birth year slider
-            Text('Alter: ${now - _birthYear} Jahre',
-                style: const TextStyle(fontSize: 14)),
-            Slider(
-              value: _birthYear.toDouble(),
-              min: (now - 18).toDouble(),
-              max: (now - 3).toDouble(),
-              divisions: 15,
-              activeColor: const Color(0xFF4CAF50),
-              onChanged: (v) => setState(() => _birthYear = v.round()),
+            const SizedBox(height: 16),
+            const Text(
+              'Altersstufe',
+              style: TextStyle(fontSize: 14, color: Color(0xFF555555)),
             ),
-            const SizedBox(height: 4),
-            // Language level
-            DropdownButtonFormField<String>(
-              initialValue: _languageLevel,
-              decoration: const InputDecoration(
-                labelText: 'Sprachniveau',
-                border: OutlineInputBorder(),
-              ),
-              items: const [
-                DropdownMenuItem(value: 'easy',     child: Text('Einfach')),
-                DropdownMenuItem(value: 'medium',   child: Text('Mittel')),
-                DropdownMenuItem(value: 'advanced', child: Text('Fortgeschritten')),
-              ],
-              onChanged: (v) => setState(() => _languageLevel = v!),
+            const SizedBox(height: 8),
+            Row(
+              children: [1, 2, 3].map((lvl) {
+                final labels = {1: '🌟 Stufe 1', 2: '🔍 Stufe 2', 3: '🚀 Stufe 3'};
+                final sel = lvl == _ageLevel;
+                return Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _ageLevel = lvl),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      margin: EdgeInsets.only(right: lvl < 3 ? 8 : 0),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: sel ? const Color(0xFFE8F5E9) : Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: sel ? const Color(0xFF4CAF50) : const Color(0xFFDDDDDD),
+                          width: sel ? 2 : 1,
+                        ),
+                      ),
+                      child: Text(
+                        labels[lvl]!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: sel ? FontWeight.w700 : FontWeight.w400,
+                          color: sel ? const Color(0xFF2E7D32) : const Color(0xFF555555),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ],
         ),
@@ -356,10 +359,9 @@ class _EditProfileDialogState extends State<_EditProfileDialog> {
           style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
           onPressed: () async {
             final updated = widget.profile.copyWith(
-              name:          _nameCtrl.text.trim(),
-              birthYear:     _birthYear,
-              avatarId:      _avatarId,
-              languageLevel: _languageLevel,
+              name:     _nameCtrl.text.trim(),
+              avatarId: _avatarId,
+              ageLevel: _ageLevel,
             );
             await context.read<ProfileService>().updateProfile(updated);
             if (context.mounted) Navigator.pop(context);

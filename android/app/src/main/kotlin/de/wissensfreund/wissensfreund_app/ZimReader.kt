@@ -432,7 +432,7 @@ class ZimReader(private val filePath: String) {
                 val altText  = altPattern.find(imgTag)?.groupValues?.get(1)?.trim()?.ifEmpty { null }
                 Log.d(TAG, "TABLE IMG '$filename': cellCaption='$cellText' alt='${altText?.take(60)}'")
                 caption = cellText ?: altText
-                if (caption == null) continue
+                // No caption is fine — image is still worth showing.
 
                 lastTableFilename = filename
             } else {

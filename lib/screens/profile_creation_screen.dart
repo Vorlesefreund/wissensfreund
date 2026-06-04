@@ -15,12 +15,12 @@ const _avatars = [
   '🐺', '🦔', '🐢', '🦕', '⭐',
 ];
 
-// ── Language level options ────────────────────────────────────────────────────
+// ── Age level options ─────────────────────────────────────────────────────────
 
-const _levels = [
-  (id: 'easy',     label: 'Einfach',        emoji: '🌱', desc: 'Kurze, klare Sätze'),
-  (id: 'medium',   label: 'Mittel',         emoji: '📚', desc: 'Ausführliche Erklärungen'),
-  (id: 'advanced', label: 'Fortgeschritten', emoji: '🚀', desc: 'Vollständige Artikel'),
+const _ageLevels = [
+  (level: 1, emoji: '🌟', label: 'Kleine Forscher',  desc: 'Für Kinder bis 6 Jahre'),
+  (level: 2, emoji: '🔍', label: 'Entdecker',         desc: 'Für Kinder von 7–9 Jahren'),
+  (level: 3, emoji: '🚀', label: 'Wissensprofis',     desc: 'Für Kinder ab 10 Jahren'),
 ];
 
 // ── Confetti particle ──────────────────────────────────────────────────────────
@@ -52,7 +52,10 @@ class _ConfettiPainter extends CustomPainter {
     final paint = Paint();
     for (final p in particles) {
       paint.color = p.color;
-      canvas.drawRect(Rect.fromCenter(center: Offset(p.x, p.y), width: p.size, height: p.size * 0.5), paint);
+      canvas.drawRect(
+        Rect.fromCenter(center: Offset(p.x, p.y), width: p.size, height: p.size * 0.5),
+        paint,
+      );
     }
   }
 
@@ -77,9 +80,9 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
 
   // Form state
   final _nameController = TextEditingController();
-  int _birthYear = DateTime.now().year - 8;
   String _avatarId = _avatars[0];
   static const _languageLevel = 'medium';
+  int _ageLevel = 2;
 
   // Confetti
   late AnimationController _confettiCtrl;
@@ -107,11 +110,9 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
     if (!mounted) return;
     final size = MediaQuery.of(context).size;
     setState(() {
-      // Spawn
       if (_particles.length < 80 && _confettiCtrl.value < 0.5) {
         _particles.add(_Particle(_rng, size.width));
       }
-      // Advance
       for (final p in _particles) {
         p.x += p.vx;
         p.y += p.vy;
@@ -123,7 +124,6 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
 
   void _next() {
     if (_step < 3) {
-      // Dismiss keyboard before transitioning (step 1 has an autofocus TextField).
       FocusScope.of(context).unfocus();
       setState(() => _step++);
       _pageController.animateToPage(
@@ -151,9 +151,9 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
     final ps = context.read<ProfileService>();
     final profile = await ps.createProfile(
       name:          _nameController.text.trim(),
-      birthYear:     _birthYear,
       avatarId:      _avatarId,
       languageLevel: _languageLevel,
+      ageLevel:      _ageLevel,
     );
     await ps.setActiveProfile(profile);
     if (!mounted) return;
@@ -165,54 +165,59 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      // Block Android back-button on first-profile creation — no way out until done.
       canPop: !widget.isFirstProfile,
       child: Scaffold(
-      backgroundColor: const Color(0xFFFFF8EE),
-      body: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(),
-                _buildStepIndicator(),
-                Expanded(
-                  child: PageView(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      _NameStep(controller: _nameController, onChange: () => setState(() {})),
-                      _BirthYearStep(
-                        value: _birthYear,
-                        onChange: (v) => setState(() => _birthYear = v),
-                      ),
-                      _AvatarStep(
-                        selected: _avatarId,
-                        onChange: (v) => setState(() => _avatarId = v),
-                      ),
-                      _DoneStep(name: _nameController.text.trim(), avatar: _avatarId),
-                    ],
+        backgroundColor: const Color(0xFFFFF8EE),
+        body: Stack(
+          children: [
+            SafeArea(
+              child: Column(
+                children: [
+                  _buildHeader(),
+                  _buildStepIndicator(),
+                  Expanded(
+                    child: PageView(
+                      controller: _pageController,
+                      physics: const NeverScrollableScrollPhysics(),
+                      children: [
+                        _NameStep(
+                          controller: _nameController,
+                          onChange: () => setState(() {}),
+                        ),
+                        _AgeLevelStep(
+                          selected: _ageLevel,
+                          onChange: (v) => setState(() => _ageLevel = v),
+                        ),
+                        _AvatarStep(
+                          selected: _avatarId,
+                          onChange: (v) => setState(() => _avatarId = v),
+                        ),
+                        _DoneStep(
+                          name: _nameController.text.trim(),
+                          avatar: _avatarId,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                _buildButtons(),
-                const SizedBox(height: 24),
-              ],
-            ),
-          ),
-          // Confetti overlay
-          if (_step == 3)
-            IgnorePointer(
-              child: AnimatedBuilder(
-                animation: _confettiCtrl,
-                builder: (_, __) => CustomPaint(
-                  size: MediaQuery.of(context).size,
-                  painter: _ConfettiPainter(List.of(_particles)),
-                ),
+                  _buildButtons(),
+                  const SizedBox(height: 24),
+                ],
               ),
             ),
-        ],
+            if (_step == 3)
+              IgnorePointer(
+                child: AnimatedBuilder(
+                  animation: _confettiCtrl,
+                  builder: (_, __) => CustomPaint(
+                    size: MediaQuery.of(context).size,
+                    painter: _ConfettiPainter(List.of(_particles)),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
-    ));
+    );
   }
 
   Widget _buildHeader() {
@@ -336,8 +341,11 @@ class _NameStep extends StatelessWidget {
         children: [
           const Text('Wie heißt du?', style: _titleStyle),
           const SizedBox(height: 8),
-          const Text('Gib deinen Namen oder Spitznamen ein.',
-              style: _subtitleStyle, textAlign: TextAlign.center),
+          const Text(
+            'Gib deinen Namen oder Spitznamen ein.',
+            style: _subtitleStyle,
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 32),
           TextField(
             controller: controller,
@@ -370,59 +378,79 @@ class _NameStep extends StatelessWidget {
   }
 }
 
-// ── Step 2: Birth year ────────────────────────────────────────────────────────
+// ── Step 2: Age level ─────────────────────────────────────────────────────────
 
-class _BirthYearStep extends StatelessWidget {
-  final int value;
+class _AgeLevelStep extends StatelessWidget {
+  final int selected;
   final ValueChanged<int> onChange;
-  const _BirthYearStep({required this.value, required this.onChange});
+  const _AgeLevelStep({required this.selected, required this.onChange});
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now().year;
-    final age = now - value;
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 32),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('Wie alt bist du?', style: _titleStyle),
+          const Text('Welche Stufe?', style: _titleStyle),
           const SizedBox(height: 8),
-          const Text('Schiebe den Regler auf dein Alter.',
-              style: _subtitleStyle, textAlign: TextAlign.center),
-          const SizedBox(height: 40),
-          Text(
-            '$age Jahre',
-            style: const TextStyle(
-              fontSize: 48,
-              fontWeight: FontWeight.w900,
-              color: Color(0xFF2E7D32),
-            ),
+          const Text(
+            'Eltern wählen die passende Lernstufe.\nDie Stufe kann jederzeit geändert werden.',
+            style: _subtitleStyle,
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 8),
-          Text(
-            'Geburtsjahr: $value',
-            style: const TextStyle(fontSize: 16, color: Color(0xFF888888)),
-          ),
-          const SizedBox(height: 24),
-          Slider(
-            value: age.toDouble(),
-            min: 3,
-            max: 18,
-            divisions: 15,
-            activeColor: const Color(0xFF4CAF50),
-            onChanged: (v) => onChange(now - v.round()),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('3 Jahre',  style: TextStyle(color: Color(0xFF888888), fontSize: 13)),
-                const Text('18 Jahre', style: TextStyle(color: Color(0xFF888888), fontSize: 13)),
-              ],
-            ),
-          ),
+          const SizedBox(height: 32),
+          ..._ageLevels.map((lvl) {
+            final isSelected = lvl.level == selected;
+            return GestureDetector(
+              onTap: () => onChange(lvl.level),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                decoration: BoxDecoration(
+                  color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: isSelected ? const Color(0xFF4CAF50) : const Color(0xFFDDDDDD),
+                    width: isSelected ? 2.5 : 1,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Text(lvl.emoji, style: const TextStyle(fontSize: 28)),
+                    const SizedBox(width: 16),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Stufe ${lvl.level} — ${lvl.label}',
+                          style: TextStyle(
+                            fontSize: 17,
+                            fontWeight: FontWeight.w700,
+                            color: isSelected
+                                ? const Color(0xFF2E7D32)
+                                : const Color(0xFF333333),
+                          ),
+                        ),
+                        Text(
+                          lvl.desc,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Color(0xFF888888),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const Spacer(),
+                    if (isSelected)
+                      const Icon(Icons.check_circle_rounded,
+                          color: Color(0xFF4CAF50), size: 24),
+                  ],
+                ),
+              ),
+            );
+          }),
         ],
       ),
     );
@@ -445,8 +473,11 @@ class _AvatarStep extends StatelessWidget {
           const SizedBox(height: 8),
           const Text('Wähle dein Tier!', style: _titleStyle),
           const SizedBox(height: 4),
-          const Text('Das ist dein Begleiter in Wissensfreund.',
-              style: _subtitleStyle, textAlign: TextAlign.center),
+          const Text(
+            'Das ist dein Begleiter in Wissensfreund.',
+            style: _subtitleStyle,
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 24),
           Expanded(
             child: GridView.builder(
@@ -464,14 +495,10 @@ class _AvatarStep extends StatelessWidget {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     decoration: BoxDecoration(
-                      color: isSelected
-                          ? const Color(0xFFE8F5E9)
-                          : Colors.white,
+                      color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
                       borderRadius: BorderRadius.circular(14),
                       border: Border.all(
-                        color: isSelected
-                            ? const Color(0xFF4CAF50)
-                            : Colors.transparent,
+                        color: isSelected ? const Color(0xFF4CAF50) : Colors.transparent,
                         width: 2.5,
                       ),
                       boxShadow: isSelected
@@ -496,83 +523,7 @@ class _AvatarStep extends StatelessWidget {
   }
 }
 
-// ── Step 4: Language level ────────────────────────────────────────────────────
-
-class _LevelStep extends StatelessWidget {
-  final String selected;
-  final ValueChanged<String> onChange;
-  const _LevelStep({required this.selected, required this.onChange});
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Text('Wie magst du es?', style: _titleStyle),
-          const SizedBox(height: 8),
-          const Text('Wissensfreund passt die Erklärungen für dich an.',
-              style: _subtitleStyle, textAlign: TextAlign.center),
-          const SizedBox(height: 32),
-          ..._levels.map((level) {
-            final isSelected = level.id == selected;
-            return GestureDetector(
-              onTap: () => onChange(level.id),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFFE8F5E9) : Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: isSelected ? const Color(0xFF4CAF50) : const Color(0xFFDDDDDD),
-                    width: isSelected ? 2.5 : 1,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Text(level.emoji, style: const TextStyle(fontSize: 28)),
-                    const SizedBox(width: 16),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          level.label,
-                          style: TextStyle(
-                            fontSize: 17,
-                            fontWeight: FontWeight.w700,
-                            color: isSelected
-                                ? const Color(0xFF2E7D32)
-                                : const Color(0xFF333333),
-                          ),
-                        ),
-                        Text(
-                          level.desc,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Color(0xFF888888),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Spacer(),
-                    if (isSelected)
-                      const Icon(Icons.check_circle_rounded,
-                          color: Color(0xFF4CAF50), size: 24),
-                  ],
-                ),
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Step 5: Done ──────────────────────────────────────────────────────────────
+// ── Step 4: Done ──────────────────────────────────────────────────────────────
 
 class _DoneStep extends StatelessWidget {
   final String name;

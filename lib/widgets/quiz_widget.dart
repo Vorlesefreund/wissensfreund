@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/wf_article.dart';
+import '../providers/wissensfreund_provider.dart';
+import '../utils/professor_phrases.dart';
 
 class QuizWidget extends StatefulWidget {
   final WfQuiz quiz;
@@ -15,6 +18,18 @@ class _QuizWidgetState extends State<QuizWidget> {
   bool _answered = false;
   int _correctCount = 0;
   bool _finished = false;
+
+  // Each question gets a stable "Weiter" phrase so it doesn't change on rebuild.
+  late final List<String> _nextPhrases = List.generate(
+    widget.quiz.questions.length,
+    (_) => ProfessorPhrases.pick(ProfessorPhrases.quizNextQuestion),
+  );
+  late final String _result100Phrase =
+      ProfessorPhrases.pick(ProfessorPhrases.quizResult100);
+  late final String _resultGoodPhrase =
+      ProfessorPhrases.pick(ProfessorPhrases.quizResultGood);
+  late final String _resultTryPhrase =
+      ProfessorPhrases.pick(ProfessorPhrases.quizResultTryAgain);
 
   WfQuizQuestion get _question => widget.quiz.questions[_questionIdx];
 
@@ -32,6 +47,7 @@ class _QuizWidgetState extends State<QuizWidget> {
     final total = widget.quiz.questions.length;
     if (_questionIdx >= total - 1) {
       setState(() => _finished = true);
+      _speakResult();
     } else {
       setState(() {
         _questionIdx++;
@@ -41,11 +57,35 @@ class _QuizWidgetState extends State<QuizWidget> {
     }
   }
 
-  String _resultEmoji() {
+  void _speakQuestion() {
+    final q = _question;
+    final optionTexts = q.options
+        .map((o) => '${o.key.toUpperCase()}: ${o.text}')
+        .join('. ');
+    final text = '${q.question} $optionTexts';
+    context.read<WissensfreundProvider>().speakInterrupt(text);
+  }
+
+  void _speakResult() {
     final total = widget.quiz.questions.length;
-    if (_correctCount == total) return '🎉';
-    if (_correctCount >= (total / 2).ceil()) return '👍';
-    return '🤔';
+    final String phrase;
+    if (_correctCount == total) {
+      phrase = _result100Phrase;
+    } else if (_correctCount >= (total / 2).ceil()) {
+      phrase = '$_resultGoodPhrase $_correctCount von $total richtig!';
+    } else {
+      phrase = '$_resultTryPhrase $_correctCount von $total richtig!';
+    }
+    context.read<WissensfreundProvider>().speakInterrupt(phrase);
+  }
+
+  String _resultText() {
+    final total = widget.quiz.questions.length;
+    if (_correctCount == total) return _result100Phrase;
+    if (_correctCount >= (total / 2).ceil()) {
+      return '$_resultGoodPhrase $_correctCount von $total richtig!';
+    }
+    return '$_resultTryPhrase $_correctCount von $total richtig!';
   }
 
   @override
@@ -63,27 +103,20 @@ class _QuizWidgetState extends State<QuizWidget> {
 
   Widget _buildResult() {
     final total = widget.quiz.questions.length;
+    final emoji = _correctCount == total
+        ? '🎉'
+        : _correctCount >= (total / 2).ceil()
+            ? '👍'
+            : '🤔';
     return Column(
       children: [
-        Text(
-          _resultEmoji(),
-          style: const TextStyle(fontSize: 48),
-        ),
+        Text(emoji, style: const TextStyle(fontSize: 48)),
         const SizedBox(height: 12),
         Text(
-          'Du hast $_correctCount von $total richtig!',
+          _resultText(),
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
-        if (_correctCount == total)
-          const Padding(
-            padding: EdgeInsets.only(top: 8),
-            child: Text(
-              'Perfekt! Du weißt alles über Elefanten!',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, color: Color(0xFF2D6A4F)),
-            ),
-          ),
       ],
     );
   }
@@ -93,16 +126,19 @@ class _QuizWidgetState extends State<QuizWidget> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        // Header row with progress
+        // Header row: 🔊 links, Fortschritt rechts
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              widget.quiz.heading,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF2D6A4F),
+            GestureDetector(
+              onTap: _speakQuestion,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFE3F2FD),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Text('🔊', style: TextStyle(fontSize: 18)),
               ),
             ),
             Text(
@@ -116,7 +152,8 @@ class _QuizWidgetState extends State<QuizWidget> {
         // Question text
         Text(
           _question.question,
-          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, height: 1.4),
+          style: const TextStyle(
+              fontSize: 17, fontWeight: FontWeight.w600, height: 1.4),
         ),
         const SizedBox(height: 14),
 
@@ -138,7 +175,8 @@ class _QuizWidgetState extends State<QuizWidget> {
           const SizedBox(height: 4),
           Text(
             _question.explanation,
-            style: const TextStyle(fontSize: 13, color: Color(0xFF455A64), height: 1.4),
+            style: const TextStyle(
+                fontSize: 13, color: Color(0xFF455A64), height: 1.4),
           ),
           const SizedBox(height: 12),
         ] else if (_answered) ...[
@@ -148,16 +186,20 @@ class _QuizWidgetState extends State<QuizWidget> {
         // Weiter button
         if (_answered)
           SizedBox(
-            height: 48,
+            height: 52,
             child: FilledButton(
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF2D6A4F),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10)),
               ),
               onPressed: _next,
               child: Text(
-                _questionIdx >= total - 1 ? 'Ergebnis anzeigen' : 'Weiter →',
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                _questionIdx >= total - 1
+                    ? 'Ergebnis anzeigen'
+                    : _nextPhrases[_questionIdx],
+                style: const TextStyle(
+                    fontSize: 15, fontWeight: FontWeight.w600),
               ),
             ),
           ),
@@ -191,11 +233,11 @@ class _AnswerButton extends StatelessWidget {
 
     if (answered) {
       if (correct) {
-        fillColor = const Color(0xFF4CAF50);
+        fillColor = Colors.green.shade400;
         borderColor = const Color(0xFF388E3C);
         textColor = Colors.white;
       } else if (selected) {
-        fillColor = const Color(0xFFE53935);
+        fillColor = Colors.red.shade400;
         borderColor = const Color(0xFFC62828);
         textColor = Colors.white;
       }
@@ -203,14 +245,14 @@ class _AnswerButton extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      height: 48,
+      height: 52,
       child: GestureDetector(
         onTap: answered ? null : onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
             color: fillColor ?? Colors.white,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(color: borderColor, width: 1.5),
           ),
           alignment: Alignment.centerLeft,
@@ -232,7 +274,9 @@ class _AnswerButton extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: fillColor != null ? textColor : const Color(0xFF607D8B),
+                    color: fillColor != null
+                        ? textColor
+                        : const Color(0xFF607D8B),
                   ),
                 ),
               ),

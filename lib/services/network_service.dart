@@ -47,6 +47,17 @@ class NetworkService {
 
   /// Gate check before any download.
   ///
+  /// For small, content-critical fetches (e.g. article thumbnails):
+  /// only checks connectivity + mobile-data permission, never blocks on data limit.
+  Future<bool> isContentFetchAllowed() async {
+    final conn = await getCurrentConnectionType();
+    if (conn == ConnectionType.none) return false;
+    if (conn == ConnectionType.mobile) {
+      return await NetworkSettingsService.instance.mobileAllowed;
+    }
+    return true;
+  }
+
   /// When [trackUsage] is false (ZIM downloads), only connectivity is checked —
   /// no data-limit enforcement.
   Future<NetworkCheckResult> canUseNetwork({
