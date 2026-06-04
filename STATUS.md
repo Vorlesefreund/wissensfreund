@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-04T20:12:59Z -->
+<!-- updated: 2026-06-04T20:42:08Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -17,6 +17,8 @@
   Interessantheits-Methodik, Wortgrenzen interest-gestaffelt (inkl. Boxen, ohne Quiz)
   gegen genaue Werte S1 50-100/100-150/150-250 etc. prüfen
 - quiz_and_upload.yml: Auto-Trigger entfernt, nur noch manuell (commit 2cc9779, Hedge)
+- CLAUDE_CHAT_NOTIZEN.md aufgelöst (commit a047c75); STATUS.md ist ab sofort einziger
+  Handover-Kanal Code→Chat; Aufträge Chat→Code laufen über eingefügte Prompts
 
 **Vollbild-Viewer — komplett, auf main gemergt (e0906eb → merge)**
 - PhotoViewGallery (photo_view_plus 1.1.1) ersetzt InteractiveViewer — Pinch-Arena gelöst
