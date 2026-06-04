@@ -52,3 +52,9 @@ android/local.properties
 
 # ZIM knowledge base (large binary, distributed separately)
 *.zim
+
+# Pipeline outputs / large local data (nicht versionieren, Dateien bleiben lokal)
+scrape_out/
+dry_run_out/
+scrape_image_results.json
+dumpstate-*.zip
