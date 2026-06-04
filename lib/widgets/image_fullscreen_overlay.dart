@@ -58,9 +58,10 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   final _loadedBytes             = <String, Uint8List>{};
   final _startedLoading          = <String>{};
 
-  // Double-tap detection (via onTapDown timing, works even when DTGR wins arena).
+  // Double-tap detection via raw Listener (state-independent, works in pan mode).
   DateTime? _lastTapDownTime;
   int?      _lastTapIndex;
+  int       _activePointers = 0;
 
   // Custom zoom animation (3-step cycle, drives ctrl.updateMultiple directly).
   late final AnimationController _zoomAnimCtrl;
@@ -164,6 +165,8 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
 
   void _onPageChanged(int index) {
     _zoomAnimCtrl.stop();
+    _lastTapDownTime = null;
+    _lastTapIndex    = null;
     _resetController(_currentIndex);
     _resetController(index);
     setState(() {
@@ -189,23 +192,35 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     });
   }
 
-  // Manual double-tap via onTapDown timing. TGR fires onTapDown for EVERY
-  // pointer-down (even for the 2nd tap of a double-tap where DTGR wins arena).
-  // Min 80ms guards against pinch (2 fingers within <40ms).
-  void _onImageTapDown(int index, TapDownDetails details) {
-    final now = DateTime.now();
+  // Raw pointer detection — fires in any zoom state, arena-independent.
+  // Multi-touch guard: 2nd simultaneous finger invalidates tap tracking.
+  void _onPointerDown(PointerDownEvent event) {
+    _activePointers++;
+    if (_activePointers > 1) {
+      // Pinch/multi-touch: cancel tap tracking so we don't misfire after.
+      _lastTapDownTime = null;
+      _lastTapIndex    = null;
+      return;
+    }
+    final now   = DateTime.now();
+    final index = _currentIndex;
+    final s     = _pvControllers[index]?.scale;
+    debugPrint('WISS ptr↓ idx=$index scale=${s?.toStringAsFixed(3) ?? "?"} zoomed=$_isZoomed');
     if (_lastTapIndex == index &&
         _lastTapDownTime != null &&
         now.difference(_lastTapDownTime!) > const Duration(milliseconds: 80) &&
         now.difference(_lastTapDownTime!) < const Duration(milliseconds: 300)) {
       _lastTapDownTime = null;
       _lastTapIndex    = null;
-      _handleDoubleTap(index, details.localPosition);
+      _handleDoubleTap(index, event.localPosition);
     } else {
       _lastTapDownTime = now;
       _lastTapIndex    = index;
     }
   }
+
+  void _onPointerUp(PointerUpEvent event)       { if (_activePointers > 0) _activePointers--; }
+  void _onPointerCancel(PointerCancelEvent event){ if (_activePointers > 0) _activePointers--; }
 
   // 3-step cycle: Basis → Stufe 1 (2.5×) → Max (covered*4) → Basis → …
   // Reads ctrl.scale directly → zustandslos, funktioniert nach jedem Pinch.
@@ -214,6 +229,9 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     final minScale = _initialScaleFor(index);
     final maxScale = _computeMaxScale(index);
     final s0       = ctrl.scale ?? minScale;
+    final branch   = s0 <= minScale * 1.05 ? '→Stufe1'
+                   : s0 <= minScale * 2.625 ? '→Max' : '→Basis';
+    debugPrint('WISS DT fired idx=$index scale=${s0.toStringAsFixed(3)} min=${minScale.toStringAsFixed(3)} $branch');
 
     if (s0 <= minScale * 1.05) {
       final s1 = minScale * 2.5;
@@ -340,7 +358,6 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
             filterQuality:        FilterQuality.high,
             scaleStateCycle:      _scaleStateCycle,
             disableDoubleTap:     true,
-            onTapDown:   (ctx, details, value) => _onImageTapDown(index, details),
             onScaleStart:(ctx, details, value) => _zoomAnimCtrl.stop(),
             onScaleEnd:  (ctx, details, value) => _onScaleEnd(index, details, value),
           );
@@ -376,22 +393,28 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
                   ],
 
                   // ── PhotoViewGallery ─────────────────────────────────────
-                  // Verwaltet PageView + PhotoViewGestureDetectorScope intern.
-                  // disableDoubleTap nicht gesetzt → PV nutzt scaleStateCycle.
-                  PhotoViewGallery(
-                    pageOptions:       pageOptions,
-                    pageController:    _pageCtrl,
-                    onPageChanged:     _onPageChanged,
-                    backgroundDecoration: _kBlurredBackdrop
-                        ? const BoxDecoration(color: Colors.transparent)
-                        : const BoxDecoration(color: Colors.black),
-                    scaleStateChangedCallback: (state) {
-                      final zoomed = state != PhotoViewScaleState.initial &&
-                          state != PhotoViewScaleState.zoomedOut;
-                      if (zoomed != _isZoomed && mounted) {
-                        setState(() => _isZoomed = zoomed);
-                      }
-                    },
+                  // Listener: empfängt alle Pointer-Events zustandsunabhängig
+                  // (auch im Pan-Modus, wo PVs onTapDown nicht zuverlässig feuert).
+                  Listener(
+                    behavior:        HitTestBehavior.translucent,
+                    onPointerDown:   _onPointerDown,
+                    onPointerUp:     _onPointerUp,
+                    onPointerCancel: _onPointerCancel,
+                    child: PhotoViewGallery(
+                      pageOptions:       pageOptions,
+                      pageController:    _pageCtrl,
+                      onPageChanged:     _onPageChanged,
+                      backgroundDecoration: _kBlurredBackdrop
+                          ? const BoxDecoration(color: Colors.transparent)
+                          : const BoxDecoration(color: Colors.black),
+                      scaleStateChangedCallback: (state) {
+                        final zoomed = state != PhotoViewScaleState.initial &&
+                            state != PhotoViewScaleState.zoomedOut;
+                        if (zoomed != _isZoomed && mounted) {
+                          setState(() => _isZoomed = zoomed);
+                        }
+                      },
+                    ),
                   ),
 
                   // ── Caption-Gradient + Text ──────────────────────────────
