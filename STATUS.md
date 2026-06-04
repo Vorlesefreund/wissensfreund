@@ -1,52 +1,52 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-04T12:48:05Z -->
+<!-- updated: 2026-06-04T13:06:17Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## ✅ Zuletzt abgeschlossen (Session 2026-06-04, 5. Teil)
+## ✅ Zuletzt abgeschlossen (Session 2026-06-04, 6. Teil)
 
-**Vollbild-Viewer — Doppeltipp-Erkennung auf Listener umgestellt**
+**Vollbild-Viewer — Doppeltipp Scale-Werte + onScaleStart-Bug gefixt**
 Branch `spike/photo-view-plus`, auf S23 installiert.
 
-### Root Cause (Diagnose)
-PVs `onTapDown`-Callback feuert im Pan-Modus (gezoomt) NICHT zuverlässig.
-Im Ruhezustand klappt es (Basis→Stufe1 funktioniert), nach Zoom-in wird `onTapDown`
-von PVs Gesture-Routing nicht mehr durchgeleitet.
+### Root Causes (beide gefixt)
 
-### Fix
-`Listener` (Raw-Pointer-Events) außen um `PhotoViewGallery`:
-- `onPointerDown`: feuert IMMER, zustandsunabhängig (Basis, Stufe1, Max, Pinch)
-- `_activePointers`-Zähler: 2. Finger invalidiert Doppeltipp-Tracking → kein Pinch-Fehlalarm
-- `_onPointerUp` / `_onPointerCancel`: dekrementieren Zähler
-- `_onPageChanged`: `_lastTapDownTime = null` → kein Fehlschlag beim Blättern
-- `onTapDown` aus pageOptions entfernt (nicht mehr gebraucht)
+**Bug 1: onScaleStart stoppte Animation beim zweiten Tap**
+`onScaleStart: _zoomAnimCtrl.stop()` feuert für JEDEN Pointer-Down (auch einfachen Tap).
+Zweiter Tap der Doppel-Geste → Animation startet → onScaleStart stoppt sie sofort.
+Fix: `if (_activePointers > 1) _zoomAnimCtrl.stop()` — nur bei echtem Pinch stoppen.
+`_onPointerDown` (Multi-Touch-Branch) stoppt ebenfalls.
 
-### Logging (zum Verifizieren, bleibt bis Test bestätigt)
+**Bug 2: Skalenwerte rechneten mit falschen Bezugswerten**
+`_initialScaleFor` und `_computeMaxScale` nutzten `MediaQuery.sizeOf(context)` statt der
+echten Layout-Größe, die PV intern verwendet. Fix: `LayoutBuilder` um `Listener`+Gallery →
+`_outerSize = constraints.biggest` (identisch mit PVs scaleBoundaries.outerSize).
+Alle Scale-Berechnungen (baseScale, maxScale, Focal-Point-Clamp) verwenden nun `_outerSize`.
+
+### Logging noch aktiv
 ```
 adb logcat | grep WISS
 ```
-Zeigt: `WISS ptr↓ idx=0 scale=0.204 zoomed=false`
-Dann: `WISS DT fired idx=0 scale=0.204 min=0.204 →Stufe1`
+Erwartet: `scale≈0.2xx` bei Basis, `scale≈0.5xx` bei Stufe1, `scale≈3.xx` bei Max.
+Branch immer korrekt (`→Stufe1`, `→Max`, `→Basis`).
 
 ---
 
 ## 🔴 Gerätetest — S23
 
 ```
-[ ] 1. Basis → Stufe1 → Max → Basis → Stufe1 → … (beliebig oft, kein Hängen)
+[ ] 1. Basis → Stufe1 → Max → Basis → Stufe1 → … (beliebig oft, deutliche Stufen)
 [ ] 2. Fokalpunkt: Bildbereich unter Finger bleibt beim Zoom-in stehen
-[ ] 3. Pinch zoomen → dann Doppeltipp → sinnvolle Stufe (kein Einfrieren)
+[ ] 3. Pinch zoomen → dann Doppeltipp → sinnvolle Stufe, kein Einfrieren
 [ ] 4. Wischen direkt nach Zoom-out (Basis) funktioniert
 [ ] 5. Panning frei, Seitennavigation zuverlässig
-[ ] Logging bestätigt: ptr↓ UND DT fired auch wenn zoomed=true
 ```
 
 ---
 
 ## 🔴 Nach bestandenem Test
-- debugPrint-Zeilen entfernen, neu committen
+- `debugPrint`-Zeilen entfernen, neu committen
 - `spike/photo-view-plus` → `main` mergen, Branch löschen
 
 ---

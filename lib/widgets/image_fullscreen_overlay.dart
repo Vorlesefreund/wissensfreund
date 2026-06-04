@@ -63,6 +63,9 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   int?      _lastTapIndex;
   int       _activePointers = 0;
 
+  // Outer size captured from LayoutBuilder — same constraints PV uses internally.
+  Size _outerSize = Size.zero;
+
   // Custom zoom animation (3-step cycle, drives ctrl.updateMultiple directly).
   late final AnimationController _zoomAnimCtrl;
   int    _zoomAnimIndex    = -1;
@@ -143,15 +146,13 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     });
   }
 
-  // Numerisch konsistent mit PhotoViewComputedScale.contained * 1.18.
+  // baseScale = contained: min(outerW/imgW, outerH/imgH) — absoluter Faktor.
+  // Verwendet _outerSize aus LayoutBuilder (identisch mit PVs internem outerSize).
   double _initialScaleFor(int index) {
-    if (index >= widget.images.length) return 1.0;
+    if (index >= widget.images.length || _outerSize == Size.zero) return 1.0;
     final imgSize = _imageSizes[widget.images[index].filename];
     if (imgSize == null) return 1.0;
-    final outer = MediaQuery.sizeOf(context);
-    final sc = math.min(
-        outer.width / imgSize.width, outer.height / imgSize.height);
-    return sc;
+    return math.min(_outerSize.width / imgSize.width, _outerSize.height / imgSize.height);
   }
 
   void _resetController(int index) {
@@ -197,7 +198,8 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   void _onPointerDown(PointerDownEvent event) {
     _activePointers++;
     if (_activePointers > 1) {
-      // Pinch/multi-touch: cancel tap tracking so we don't misfire after.
+      // Pinch: Zoom-Animation abbrechen + Tap-Tracking zurücksetzen.
+      _zoomAnimCtrl.stop();
       _lastTapDownTime = null;
       _lastTapIndex    = null;
       return;
@@ -248,26 +250,25 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     }
   }
 
+  // coverScale * 4 — identisch mit maxScale in pageOptions.
   double _computeMaxScale(int index) {
-    if (index >= widget.images.length) return 4.0;
+    if (index >= widget.images.length || _outerSize == Size.zero) return 4.0;
     final imgSize = _imageSizes[widget.images[index].filename];
     if (imgSize == null) return 4.0;
-    final outer = MediaQuery.sizeOf(context);
-    return math.max(outer.width / imgSize.width, outer.height / imgSize.height) * 4.0;
+    return math.max(_outerSize.width / imgSize.width, _outerSize.height / imgSize.height) * 4.0;
   }
 
   // Berechnet Zielposition so dass tapLocalPos unter dem Finger bleibt.
   Offset _focalPos(int index, Offset tapLocalPos, double s0, double s1) {
-    if (index >= widget.images.length) return Offset.zero;
+    if (index >= widget.images.length || _outerSize == Size.zero) return Offset.zero;
     final imgSize = _imageSizes[widget.images[index].filename];
     if (imgSize == null) return Offset.zero;
-    final outer  = MediaQuery.sizeOf(context);
-    final center = Offset(outer.width / 2, outer.height / 2);
+    final center = Offset(_outerSize.width / 2, _outerSize.height / 2);
     final p0     = _ctrlFor(index).position;
     final p1     = tapLocalPos - center - (tapLocalPos - center - p0) * (s1 / s0);
     // Clampen auf PVs gültige Pan-Range (gleiche Formel wie photo_view_layout.dart cornersX/Y).
-    final halfX  = math.max(0.0, (imgSize.width  * s1 - outer.width)  / 2);
-    final halfY  = math.max(0.0, (imgSize.height * s1 - outer.height) / 2);
+    final halfX  = math.max(0.0, (imgSize.width  * s1 - _outerSize.width)  / 2);
+    final halfY  = math.max(0.0, (imgSize.height * s1 - _outerSize.height) / 2);
     return Offset(p1.dx.clamp(-halfX, halfX), p1.dy.clamp(-halfY, halfY));
   }
 
@@ -358,7 +359,10 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
             filterQuality:        FilterQuality.high,
             scaleStateCycle:      _scaleStateCycle,
             disableDoubleTap:     true,
-            onScaleStart:(ctx, details, value) => _zoomAnimCtrl.stop(),
+            onScaleStart:(ctx, details, value) {
+              // Nur bei Pinch (≥2 Finger) stoppen — nicht beim einfachen Tap.
+              if (_activePointers > 1) _zoomAnimCtrl.stop();
+            },
             onScaleEnd:  (ctx, details, value) => _onScaleEnd(index, details, value),
           );
         });
@@ -393,9 +397,11 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
                   ],
 
                   // ── PhotoViewGallery ─────────────────────────────────────
-                  // Listener: empfängt alle Pointer-Events zustandsunabhängig
-                  // (auch im Pan-Modus, wo PVs onTapDown nicht zuverlässig feuert).
-                  Listener(
+                  // LayoutBuilder: erfasst exakt dieselbe outerSize die PV intern
+                  // für scaleBoundaries nutzt — kein MediaQuery-Versatz.
+                  LayoutBuilder(builder: (_, constraints) {
+                    _outerSize = constraints.biggest;
+                    return Listener(
                     behavior:        HitTestBehavior.translucent,
                     onPointerDown:   _onPointerDown,
                     onPointerUp:     _onPointerUp,
@@ -415,7 +421,8 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
                         }
                       },
                     ),
-                  ),
+                  );
+                  }),
 
                   // ── Caption-Gradient + Text ──────────────────────────────
                   if (hasCaption) ...[
