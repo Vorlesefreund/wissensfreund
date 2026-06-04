@@ -11,14 +11,20 @@ import 'package:provider/provider.dart';
 import '../providers/wissensfreund_provider.dart';
 import '../utils/system_ui.dart';
 
-// Doppeltipp-Cycle: initial/zoomedOut → covering (füllt Bildschirm) → zoomedOut (Basis)
+// Doppeltipp-Cycle: zoom-in → covering (füllt Bildschirm), zoom-out → initial.
+// WICHTIG: nie zoomedOut zurückgeben — PV's _blindScaleStateListener prüft
+// isZooming (= zoomedIn|zoomedOut) und überspringt Animation bei zoomedOut-Ziel.
+// 'initial' hat dieselbe Scale wie zoomedOut (= initialScale = contained),
+// ist aber nicht in isZooming → Animation läuft korrekt.
 PhotoViewScaleState _scaleStateCycle(PhotoViewScaleState state) {
   if (state == PhotoViewScaleState.initial ||
       state == PhotoViewScaleState.zoomedOut) {
     return PhotoViewScaleState.covering;
   }
-  return PhotoViewScaleState.zoomedOut;
+  return PhotoViewScaleState.initial;
 }
+
+const _kBlurredBackdrop = true;
 
 class ImageFullscreenOverlay extends StatefulWidget {
   final List<ArticleImageInfo> images;
@@ -41,8 +47,7 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   late final PageController _pageCtrl;
   late int _currentIndex;
 
-  bool _isZoomed    = false;
-  bool _speakerUsed = false;
+  bool _isZoomed = false;
   Timer? _rotateHintTimer;
   bool _showRotateHint = false;
 
@@ -121,7 +126,7 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     final outer = MediaQuery.sizeOf(context);
     final sc = math.min(
         outer.width / imgSize.width, outer.height / imgSize.height);
-    return sc * 1.18;
+    return sc;
   }
 
   void _resetController(int index) {
@@ -136,7 +141,6 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     _resetController(index);
     setState(() {
       _currentIndex = index;
-      _speakerUsed  = false;
       _isZoomed     = false;
     });
     _checkRotateHint(index);
@@ -189,14 +193,12 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
             );
           }
 
-          // Basis-Scale: contained * 1.18 → ~15% Crop, leichter Letterbox.
-          // Falls Wischen trotz Gallery-Arena blockiert wird: auf contained wechseln.
           return PhotoViewGalleryPageOptions(
             pageKey:         ValueKey(img.filename),
             imageProvider:   MemoryImage(bytes),
             controller:      _ctrlFor(index),
-            initialScale:    PhotoViewComputedScale.contained * 1.18,
-            minScale:        PhotoViewComputedScale.contained * 1.18,
+            initialScale:    PhotoViewComputedScale.contained,
+            minScale:        PhotoViewComputedScale.contained,
             maxScale:        PhotoViewComputedScale.covered   * 4.0,
             strictScale:     true,
             filterQuality:   FilterQuality.high,
@@ -211,6 +213,28 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
               return Stack(
                 fit: StackFit.expand,
                 children: [
+                  // ── Weichgezeichneter Hintergrund-Füller ─────────────────
+                  // Nur aktiv wenn _kBlurredBackdrop=true. Liegt unter Gallery,
+                  // keine Gesten. Starke Unschärfe kaschiert niedrige Auflösung.
+                  if (_kBlurredBackdrop) ...[
+                    if (_loadedBytes[cur.filename] != null)
+                      Positioned.fill(
+                        child: ImageFiltered(
+                          imageFilter: ui.ImageFilter.blur(
+                              sigmaX: 24,
+                              sigmaY: 24,
+                              tileMode: TileMode.mirror),
+                          child: Image.memory(
+                            _loadedBytes[cur.filename]!,
+                            fit: BoxFit.cover,
+                            cacheWidth: 96,
+                          ),
+                        ),
+                      ),
+                    const Positioned.fill(
+                        child: ColoredBox(color: Color(0x44000000))),
+                  ],
+
                   // ── PhotoViewGallery ─────────────────────────────────────
                   // Verwaltet PageView + PhotoViewGestureDetectorScope intern.
                   // disableDoubleTap nicht gesetzt → PV nutzt scaleStateCycle.
@@ -218,8 +242,9 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
                     pageOptions:       pageOptions,
                     pageController:    _pageCtrl,
                     onPageChanged:     _onPageChanged,
-                    backgroundDecoration:
-                        const BoxDecoration(color: Colors.black),
+                    backgroundDecoration: _kBlurredBackdrop
+                        ? const BoxDecoration(color: Colors.transparent)
+                        : const BoxDecoration(color: Colors.black),
                     scaleStateChangedCallback: (state) {
                       final zoomed = state != PhotoViewScaleState.initial &&
                           state != PhotoViewScaleState.zoomedOut;
@@ -347,13 +372,11 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
                           padding: const EdgeInsets.all(8),
                           child: _OverlayBtn(
                             icon:   Icons.volume_up_rounded,
-                            dimmed: _speakerUsed,
-                            onTap:  _speakerUsed
+                            dimmed: provider.isCaptionPlaying,
+                            onTap:  provider.isCaptionPlaying
                                 ? null
-                                : () {
-                                    setState(() => _speakerUsed = true);
-                                    provider.interruptForCaption(cur.caption!);
-                                  },
+                                : () => provider.interruptForCaption(
+                                    cur.caption!),
                           ),
                         ),
                       ),

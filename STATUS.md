@@ -1,44 +1,60 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-04T09:11:07Z -->
+<!-- updated: 2026-06-04T09:55:09Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## ✅ Zuletzt abgeschlossen (Session 2026-06-04)
+## ✅ Zuletzt abgeschlossen (Session 2026-06-04, 2. Teil)
 
-**PhotoViewGallery-Refactor** — `image_fullscreen_overlay.dart`, Branch `spike/photo-view-plus`:
+**Vollbild-Viewer fertiggestellt** — `image_fullscreen_overlay.dart` + Provider, Branch `spike/photo-view-plus`
 
-- `PhotoViewGallery` (non-builder) ersetzt manuelles `PageViewGestureDetectorScope + PageView.builder + PhotoView`
-- Gallery verwaltet `PageViewGestureDetectorScope` intern → Swipe-vs-Pinch-Arena korrekt gelöst
-- `disableDoubleTap` entfernt → `scaleStateCycle` (initial/zoomedOut → covering → zoomedOut)
-- Kein eigener Tap-Detektor mehr in der Arena — PV-nativer Doppeltipp
-- `_startLoading` + `_loadedBytes` Cache — keine Byte-Duplizierung, kein Flackern
-- Spinner via `PhotoViewGalleryPageOptions.customChild`, Bild via `PhotoViewGalleryPageOptions`
-- Alle Overlays im äußeren Stack (Zurück, Speaker, ⓘ, Caption, Zähler, Dreh-Hinweis)
-- `_resetController` nutzt `MediaQuery.sizeOf(context)` + `contained * 1.18`
-- Import `photo_view_plus_gallery.dart` separat (nicht in `photo_view_plus.dart` exportiert)
-- Entfernt: `_pvAnimControllers`, `_outerSizes`, `_futures`, `_lastTap*`, `_handleDoubleTap`, `_clampPosition`, `_trackPointerDown`
-- APK gebaut + auf S23 installiert (2026-06-04)
+### P1 — contained (kein Crop)
+- `initialScale` + `minScale`: `contained * 1.18` → `PhotoViewComputedScale.contained`
+- `_initialScaleFor()`: `sc * 1.18` → `sc` (konsistent mit PV-Scale)
+- Basis-Scale: Bild ganz sichtbar, kein Überstehen → Wischen zuverlässig
+
+### P2 — Weichgezeichneter Hintergrund-Füller
+- `const _kBlurredBackdrop = true;` — abschaltbar mit einer Zeile
+- `ImageFiltered(blur: 24)` + `Image.memory(cacheWidth: 96)` als 96px-Thumbnail
+- Schwarzer Scrim `0x44000000` (27%) für Caption-Lesbarkeit
+- Gallery `backgroundDecoration: Colors.transparent` damit Blur durchscheint
+- Liegt im Stack unter der Gallery, keine Gesten
+
+### P3 — Doppeltipp-Fix
+- Root Cause: `_blindScaleStateListener` prüft `isZooming = zoomedIn|zoomedOut` →
+  überspringt Animation wenn Zielstate `zoomedOut`. Zoom-out animierte nie.
+- Fix: `_scaleStateCycle` gibt jetzt `initial` statt `zoomedOut` zurück.
+  Gleiche Scale (= initialScale = contained), aber `initial ∉ isZooming` → Animation läuft.
+- Cycle korrekt: initial→covering→initial→covering (beliebig oft)
+
+### P4 — Lautsprecher-Button-Regression
+- `_speakerUsed`-Flag entfernt (blieb bis Seitenwechsel aktiv)
+- `bool get isCaptionPlaying => _isCaptionPlaying;` in WissensfreundProvider ergänzt
+- Button `dimmed: provider.isCaptionPlaying` → reaktiv auf TTS-Ende
+
+### Commit auf S23 installiert: 2026-06-04
 
 ---
 
-## 🔴 Gerätetest erforderlich (S23 — alle 4 Muss-Punkte!)
+## 🔴 Gerätetest erforderlich (S23 — alle 4 Muss-Punkte + Extras!)
 
 ```
-[ ] 1. Pinch greift beim ERSTEN Touch (kein Warten auf 2. Finger-Aufsetzen)
-[ ] 2. Doppeltipp zoomt rein → deckt Bildschirm (covering), nochmals → zurück zu Basis
-[ ] 3. Bei Basis-Scale: horizontales Wischen wechselt Bild direkt (kein Hängen)
+[ ] 1. Pinch greift beim ERSTEN Touch
+[ ] 2. Doppeltipp: zoom-in (covering) → nochmals: zoom-out (contained)
+       Mehrfach hintereinander testen — jeder Doppeltipp muss reagieren
+[ ] 3. Bei Basis-Scale: Wischen wechselt Bild direkt
 [ ] 4. Gezoomt: frei panbar, alle Bildteile erreichbar
-[ ] Zusatz: Crop-Test — ~15% Letterbox bei Basis-Scale sichtbar? (contained*1.18)
-[ ] Overlays (Zurück, Speaker, ⓘ, Caption, Zähler) korrekt
-[ ] Hintergrund schwarz | Spinner beim Laden
+[ ] Hintergrund-Blur sieht gut aus (weichgezeichnet, kein harter Rand)
+[ ] _kBlurredBackdrop = false → schwarzer Hintergrund ohne Blur
+[ ] Lautsprecher: dimmt nur WÄHREND Vorlesen; danach wieder aktiv
+[ ] Overlays korrekt (Zurück, Speaker, ⓘ, Caption, Zähler)
 ```
 
-**Fallback falls Muss-3 bricht (Wischen blockiert trotz Gallery-Arena):**
-`contained * 1.18` → `contained` in `PhotoViewGalleryPageOptions` (beide Scale-Werte, Z. 198-199)
+---
 
-**Nach bestandenem Test:** `spike/photo-view-plus` → `main` mergen, Branch löschen.
+## 🔴 Nach bestandenem Test
+`spike/photo-view-plus` → `main` mergen, Branch löschen.
 
 ---
 
