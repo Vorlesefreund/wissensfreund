@@ -17,11 +17,14 @@ Kein Treffer → "Das können Mama oder Papa erklären!" — kein KI-Fallback
 flutter build apk --debug
 adb install -r build/app/outputs/flutter-apk/app-debug.apk
 
+## Arbeitsverzeichnis
+Zu Session-Beginn das aktuelle Arbeitsverzeichnis ausgeben. Es MUSS
+C:\Users\Andreas\wissensfreund_repo sein — falls nicht, dorthin wechseln und bestätigen.
+
 ## SESSION-START (Reihenfolge einhalten)
 1. CLAUDE.md lesen
 2. STATUS.md lesen — aktuellen Stand kennen
-   Pfad (einzige Quelle der Wahrheit):
-   C:\Users\Andreas\Wissensfreund\wissensfreund_app\STATUS.md
+   Pfad (einzige Quelle der Wahrheit): ./STATUS.md
 
 ## SESSION-ENDE (Pflicht, keine Ausnahme)
 1. STATUS.md neu schreiben — aktueller Stand, max. 60 Zeilen
