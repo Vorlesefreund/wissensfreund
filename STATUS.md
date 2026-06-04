@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-04T19:41:15Z -->
+<!-- updated: 2026-06-04T19:47:29Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -7,13 +7,15 @@
 ## ✅ Zuletzt abgeschlossen
 
 **Dokumentations-Checkpoint (2026-06-04)**
-- WISSEN_ARTIKEL_PIPELINE.md reconciled: Wortgrenzen-Fix (Fließtext-only), Content-Safety
-  dokumentiert, Stimmt-Regel, living_being-Pflichtmuster, CONTENT_DEPTH/TOPIC_INTEREST
-  als implementiert bestätigt, R2-Koexistenz-Entscheidung, Mengenziele, Quiz-Strategie,
+- WISSEN_ARTIKEL_PIPELINE.md reconciled: Wortgrenzen-Fix (interest-gestaffelt, inkl.
+  Boxen ohne Quiz, MASSGEBLICHER STAND Entscheidung 02.06.), Content-Safety dokumentiert,
+  Stimmt-Regel, living_being-Pflichtmuster, CONTENT_DEPTH/TOPIC_INTEREST als implementiert
+  bestätigt, R2-Koexistenz-Entscheidung, Mengenziele, Quiz-Strategie,
   System-Prompt-Versionslinie v3.2→v3.3→v3.4
 - WISSEN_BILDER.md: Content-Sicherheit (Bilder) + Lizenz/Attribution ergänzt
 - System-Prompt v3.4 auditiert — 3 Lücken: Alterseignungs-Weglass-Regel,
-  Interessantheits-Methodik, Fließtext-Only-Klarstellung bei Wortgrenzen
+  Interessantheits-Methodik, Wortgrenzen interest-gestaffelt (inkl. Boxen, ohne Quiz)
+  gegen genaue Werte S1 50-100/100-150/150-250 etc. prüfen
 - quiz_and_upload.yml: Auto-Trigger entfernt, nur noch manuell (commit 2cc9779, Hedge)
 
 **Vollbild-Viewer — komplett, auf main gemergt (e0906eb → merge)**

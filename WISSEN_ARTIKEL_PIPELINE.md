@@ -47,14 +47,19 @@ Quiz: 3 Fragen (Stufe 3: 4 Fragen), Antworten A/B/C (für STT-Erkennung),
 
 ## Altersstufen + Wortgrenzen
 
-| Stufe | Alter | Fließtext-Ziel | Fließtext-Max | Besonderheiten |
-|---|---|---|---|---|
-| 1 | 4–6 J | ~200 Wörter | 250 | Max. 10 Wörter/Satz, Bilder-Quiz, keine Tabellen |
-| 2 | 7–9 J | ~500 Wörter | 650 | Einleitungssatz, Fachbegriffe mit Erklärung, myth-reveal auto |
-| 3 | 10–12 J | ~900 Wörter | 1.200 | Tabellen erlaubt, myth-reveal manuell |
+**ZÄHLREGEL: Fließtext + Boxen zusammen, OHNE Quiz.**
+Interest-gestaffelt über TOPIC_INTEREST (Pageviews): low / medium / high.
 
-**WICHTIG:** Wortgrenzen gelten ausschließlich für den Fließtext (sentences). Callouts/Boxen
-und Quiz kommen on top und zählen NICHT mit.
+| Stufe | Alter | low-interest | medium-interest | high-interest | Besonderheiten |
+|---|---|---|---|---|---|
+| 1 | 4–6 J | 50–100 | 100–150 | 150–250 | Max. 10 Wörter/Satz, Bilder-Quiz, keine Tabellen |
+| 2 | 7–9 J | 80–150 | 150–250 | 250–400 | Einleitungssatz, Fachbegriffe mit Erklärung, myth-reveal auto |
+| 3 | 10–12 J | 100–200 | 200–350 | 350–650 | Tabellen erlaubt, myth-reveal manuell |
+
+**WICHTIG (MASSGEBLICHER STAND, Entscheidung 02.06.):** Frühere Werte (~200/500/900 bzw.
+~200/400/700) und die alte „nur Fließtext, Boxen on top"-Regel sind ÜBERHOLT.
+Zählung: inkl. Boxen, ohne Quiz, obige Spannen.
+HINWEIS: low-interest bewusst niedrig — für wenig ergiebige Themen oder wo ein Verweis ausreicht.
 
 Genaue Zielwerte: CONTENT_DEPTH × TOPIC_APPEAL → siehe System-Prompt-Tabelle.
 
