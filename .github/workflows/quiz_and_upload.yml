@@ -1,15 +1,14 @@
 name: Quiz generieren + Upload → R2
 
-# Wird automatisch gestartet wenn convert_zim.yml erfolgreich war.
-# Kann auch manuell gestartet werden (z.B. nach Timeout, für Retry).
+# Nur manuell startbar (workflow_dispatch).
 # Checkpoint wird auf R2 gesichert → bei Neustart wird dort weitergemacht.
 # Benötigte GitHub Secrets: ANTHROPIC_API_KEY, CF_R2_ACCESS_KEY_ID,
 #                           CF_R2_SECRET_ACCESS_KEY, CF_ACCOUNT_ID
 
 on:
-  workflow_run:
-    workflows: ["ZIM → JSON Konvertierung"]
-    types: [completed]
+  # workflow_run-Auto-Trigger entfernt 2026-06-04: Quizze auf Eis (Hedge).
+  # Vor manueller Aktivierung R2-Checkpoint staging/checkpoints/quiz_checkpoint.json loeschen,
+  # sonst werden 609 Artikel uebersprungen und mit Platzhalter-Quizzen ausgeliefert.
   workflow_dispatch:
     inputs:
       dry_run:
@@ -33,9 +32,7 @@ jobs:
     name: "Quiz-Generierung (Claude API)"
     runs-on: ubuntu-latest
     timeout-minutes: 340
-    if: |
-      github.event_name == 'workflow_dispatch' ||
-      github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'workflow_dispatch'
 
     steps:
       - name: Checkout
