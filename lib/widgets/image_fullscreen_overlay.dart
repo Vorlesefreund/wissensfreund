@@ -62,12 +62,25 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   DateTime? _lastTapDownTime;
   int?      _lastTapIndex;
 
+  // Custom zoom animation (3-step cycle, drives ctrl.updateMultiple directly).
+  late final AnimationController _zoomAnimCtrl;
+  int    _zoomAnimIndex    = -1;
+  double _zoomAnimFromScale = 1.0;
+  double _zoomAnimToScale   = 1.0;
+  Offset _zoomAnimFromPos   = Offset.zero;
+  Offset _zoomAnimToPos     = Offset.zero;
+  bool   _zoomAnimToBase    = false;
+
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex.clamp(
         0, (widget.images.length - 1).clamp(0, widget.images.length));
     _pageCtrl = PageController(initialPage: _currentIndex);
+    _zoomAnimCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 220))
+      ..addListener(_onZoomAnimTick)
+      ..addStatusListener(_onZoomAnimStatus);
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -85,6 +98,7 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   @override
   void dispose() {
     _pageCtrl.dispose();
+    _zoomAnimCtrl.dispose();
     for (final c in _pvControllers.values) { c.dispose(); }
     for (final c in _pvScaleStateControllers.values) { c.dispose(); }
     _rotateHintTimer?.cancel();
@@ -149,6 +163,7 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   }
 
   void _onPageChanged(int index) {
+    _zoomAnimCtrl.stop();
     _resetController(_currentIndex);
     _resetController(index);
     setState(() {
@@ -185,31 +200,95 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
         now.difference(_lastTapDownTime!) < const Duration(milliseconds: 300)) {
       _lastTapDownTime = null;
       _lastTapIndex    = null;
-      _handleDoubleTap(index);
+      _handleDoubleTap(index, details.localPosition);
     } else {
       _lastTapDownTime = now;
       _lastTapIndex    = index;
     }
   }
 
-  void _handleDoubleTap(int index) {
-    final ssCtrl  = _scaleStateCtrlFor(index);
-    final atBase  = ssCtrl.scaleState == PhotoViewScaleState.initial ||
-                    ssCtrl.scaleState == PhotoViewScaleState.zoomedOut;
-    if (atBase) {
-      // Zoom in: trigger PV's animation by advancing scaleState to covering.
-      // _blindScaleStateListener fires: !isZooming → animateOnScaleStateUpdate.
-      ssCtrl.scaleState = PhotoViewScaleState.covering;
+  // 3-step cycle: Basis → Stufe 1 (2.5×) → Max (covered*4) → Basis → …
+  // Reads ctrl.scale directly → zustandslos, funktioniert nach jedem Pinch.
+  void _handleDoubleTap(int index, Offset tapLocalPos) {
+    final ctrl     = _ctrlFor(index);
+    final minScale = _initialScaleFor(index);
+    final maxScale = _computeMaxScale(index);
+    final s0       = ctrl.scale ?? minScale;
+
+    if (s0 <= minScale * 1.05) {
+      final s1 = minScale * 2.5;
+      _animateTo(index, s1, _focalPos(index, tapLocalPos, s0, s1));
+      if (mounted) setState(() => _isZoomed = true);
+    } else if (s0 <= minScale * 2.5 * 1.05) {
+      final s1 = maxScale;
+      _animateTo(index, s1, _focalPos(index, tapLocalPos, s0, s1));
       if (mounted) setState(() => _isZoomed = true);
     } else {
-      // Zoom out: trigger PV's animation back to initial scale + Offset.zero.
-      ssCtrl.scaleState = PhotoViewScaleState.initial;
+      // Über Stufe 1 (auch nach Pinch) → zurück zur Basis.
+      _animateTo(index, minScale, Offset.zero, toBase: true);
+      if (mounted) setState(() => _isZoomed = false);
+    }
+  }
+
+  double _computeMaxScale(int index) {
+    if (index >= widget.images.length) return 4.0;
+    final imgSize = _imageSizes[widget.images[index].filename];
+    if (imgSize == null) return 4.0;
+    final outer = MediaQuery.sizeOf(context);
+    return math.max(outer.width / imgSize.width, outer.height / imgSize.height) * 4.0;
+  }
+
+  // Berechnet Zielposition so dass tapLocalPos unter dem Finger bleibt.
+  Offset _focalPos(int index, Offset tapLocalPos, double s0, double s1) {
+    if (index >= widget.images.length) return Offset.zero;
+    final imgSize = _imageSizes[widget.images[index].filename];
+    if (imgSize == null) return Offset.zero;
+    final outer  = MediaQuery.sizeOf(context);
+    final center = Offset(outer.width / 2, outer.height / 2);
+    final p0     = _ctrlFor(index).position;
+    final p1     = tapLocalPos - center - (tapLocalPos - center - p0) * (s1 / s0);
+    // Clampen auf PVs gültige Pan-Range (gleiche Formel wie photo_view_layout.dart cornersX/Y).
+    final halfX  = math.max(0.0, (imgSize.width  * s1 - outer.width)  / 2);
+    final halfY  = math.max(0.0, (imgSize.height * s1 - outer.height) / 2);
+    return Offset(p1.dx.clamp(-halfX, halfX), p1.dy.clamp(-halfY, halfY));
+  }
+
+  void _animateTo(int index, double toScale, Offset toPos, {bool toBase = false}) {
+    final ctrl        = _ctrlFor(index);
+    _zoomAnimIndex    = index;
+    _zoomAnimFromScale = ctrl.scale ?? _initialScaleFor(index);
+    _zoomAnimToScale  = toScale;
+    _zoomAnimFromPos  = ctrl.position;
+    _zoomAnimToPos    = toPos;
+    _zoomAnimToBase   = toBase;
+    _zoomAnimCtrl
+      ..stop()
+      ..value = 0.0
+      ..forward();
+  }
+
+  void _onZoomAnimTick() {
+    final ctrl = _pvControllers[_zoomAnimIndex];
+    if (ctrl == null) return;
+    final t = Curves.easeOut.transform(_zoomAnimCtrl.value);
+    ctrl.updateMultiple(
+      scale:    _zoomAnimFromScale + (_zoomAnimToScale - _zoomAnimFromScale) * t,
+      position: _zoomAnimFromPos   + (_zoomAnimToPos   - _zoomAnimFromPos)   * t,
+    );
+  }
+
+  void _onZoomAnimStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed) return;
+    if (_zoomAnimToBase) {
+      // Exakter Reset: scaleState auf initial → PV erkennt Ruhezustand.
+      _pvScaleStateControllers[_zoomAnimIndex]?.reset();
       if (mounted) setState(() => _isZoomed = false);
     }
   }
 
   // After pinch-out reaching base: reset scaleState so PV recognises rest state.
   void _onScaleEnd(int index, ScaleEndDetails details, PhotoViewControllerValue value) {
+    _zoomAnimCtrl.stop();
     final minScale = _initialScaleFor(index);
     final s = value.scale;
     if (s != null && s <= minScale * 1.01) {
@@ -261,8 +340,9 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
             filterQuality:        FilterQuality.high,
             scaleStateCycle:      _scaleStateCycle,
             disableDoubleTap:     true,
-            onTapDown: (ctx, details, value) => _onImageTapDown(index, details),
-            onScaleEnd: (ctx, details, value) => _onScaleEnd(index, details, value),
+            onTapDown:   (ctx, details, value) => _onImageTapDown(index, details),
+            onScaleStart:(ctx, details, value) => _zoomAnimCtrl.stop(),
+            onScaleEnd:  (ctx, details, value) => _onScaleEnd(index, details, value),
           );
         });
 

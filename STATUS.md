@@ -1,60 +1,51 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-04T11:54:01Z -->
+<!-- updated: 2026-06-04T12:28:55Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## ✅ Zuletzt abgeschlossen (Session 2026-06-04, 3. Teil)
+## ✅ Zuletzt abgeschlossen (Session 2026-06-04, 4. Teil)
 
-**Vollbild-Viewer — Doppeltipp + Wischen-nach-Zoom gefixt**
-Branch `spike/photo-view-plus`, auf S23 installiert.
+**Vollbild-Viewer — 3-Stufen-Doppeltipp-Zoom implementiert**
+Branch `spike/photo-view-plus`, APK gebaut, Gerät-Install ausstehend (USB nicht verbunden).
 
-### Root Cause (bestätigt durch PV-Source-Analyse)
-Nach Zoom-out: `_blindScaleListener` setzt `scaleState = zoomedOut` (invisibly), weil
-`controller.scale == initialScale` → `scale > initialScale` false → `zoomedOut`.
-- `scaleState = zoomedOut` → `isZooming = true` → `_blindScaleStateListener` blockiert
-  Animation beim nächsten Doppeltipp (DTGR → `nextScaleState` → re-arm schlägt fehl)
-- Swipe klemmt: `shouldMove` ergibt `true` wenn `position` nicht exakt Offset.zero
-  (Floating-Point in `childWidth > outerWidth`)
+### 3-Stufen-Zyklus
+Basis → Stufe 1 (2.5×) → Max (covered×4) → Basis → …
+- Liest `ctrl.scale` direkt → zustandslos, funktioniert nach jedem Pinch
+- `_handleDoubleTap(index, tapLocalPos)`: 3 Schwellen (`minScale*1.05`, `minScale*2.625`)
+- Zoom-in: animiert zur Tippposition (Fokalpunkt bleibt unter dem Finger)
+- Zoom-out: animiert zu Basis, dann `ssCtrl.reset()` → scaleState=initial
 
-### Fixes implementiert
+### Animation
+- `AnimationController _zoomAnimCtrl` (220ms, easeOut, Vsync via TickerProviderStateMixin)
+- `_onZoomAnimTick()`: drives `ctrl.updateMultiple(scale, position)` auf jedem Frame
+- PVs `_blindScaleListener` klemmt Position auto. auf gültige Range (kein extra Clamp nötig)
+- `onScaleStart`: `_zoomAnimCtrl.stop()` → kein Konflikt mit Pinch
+- `_onScaleEnd`: ebenfalls `_zoomAnimCtrl.stop()` vor Reset-Logik
+- `_onPageChanged`: `_zoomAnimCtrl.stop()` beim Blättern
 
-**1. Exakter Reset (`_resetController`)**
-- `ctrl.updateMultiple(scale: initScale, position: Offset.zero)` — unverändert
-- **NEU**: `_pvScaleStateControllers[index]?.reset()` → setzt `scaleState = initial`
-  PV erkennt Ruhezustand: shouldMove=false, Doppeltipp-Zyklus re-armt
-
-**2. Manueller Doppeltipp via `onTapDown`-Timing**
-- `disableDoubleTap: true` in PageOptions → DTGR gewinnt Arena, ruft aber `nextScaleState`
-  NICHT auf (kein Callback) → kein Konflikt mit unserem Handler
-- `_onImageTapDown(index, details)`: Zeitfenster 80–300ms zwischen zwei Downs
-  Min 80ms filtert Pinch (2 Finger < 40ms auseinander)
-- `_handleDoubleTap(index)`: liest `ssCtrl.scaleState` statt `_isPageZoomedIn`:
-  - `initial || zoomedOut` → Zoom-in: `ssCtrl.scaleState = covering` → PV animiert
-  - sonst → Zoom-out: `ssCtrl.scaleState = initial` → PV animiert + Position → Offset.zero
-
-**3. Pinch-out Reset (`onScaleEnd`)**
-- `_onScaleEnd`: wenn `scale ≤ minScale * 1.01` → `ssCtrl.reset()` → `scaleState = initial`
-- Behebt `scaleState = zoomedOut` nach Pinch-out ohne Animation-Konflikt
-
-**4. `_pvScaleStateControllers` Map**
-- Pro Seite ein `PhotoViewScaleStateController` — extern gehalten
-- In `PageOptions`: `scaleStateController: _scaleStateCtrlFor(index)` → PV nutzt unseren
-- In `dispose()`: alle Controller disposed
+### Fokalpunkt-Formel
+`p1 = tapLocalPos - center - (tapLocalPos - center - p0) * (s1/s0)`
+Clamp: `halfX = max(0, (imgWidth * s1 - outerWidth) / 2)` — gleiche Formel wie PV cornersX.
 
 ---
 
-## 🔴 Gerätetest erforderlich (S23 — mehrfach hintereinander!)
+## 🔴 Gerätetest erforderlich — S23 verbinden + APK installieren
 
 ```
-[ ] 1. Doppeltipp: zoom-in → zoom-out → zoom-in → ... (beliebig oft, nie hängen)
-[ ] 2. Wischen bei Basis-Scale funktioniert direkt nach Doppeltipp-Zoom-out
-[ ] 3. Wischen bei Basis-Scale funktioniert nach Pinch-zoom-in + Pinch-zoom-out
-[ ] 4. Pinch greift beim ERSTEN Touch
-[ ] 5. Panning im gezoomten Zustand: frei, alle Bildteile erreichbar
-[ ] 6. Seitennavigation (Wischen) funktioniert zuverlässig auf frisch geladenem Bild
-[ ] Hintergrund-Blur, Lautsprecher, Overlays — keine Regressionen
+adb install -r build/app/outputs/flutter-apk/app-debug.apk
+```
+
+Testmatrix:
+```
+[ ] 1. Doppeltipp: Basis → Stufe1 → Max → Basis → Stufe1 → … (beliebig oft)
+[ ] 2. Fokalpunkt: Bild-Bereich unter Finger bleibt beim Zoom-in stehen
+[ ] 3. Zoom-out (Stufe3→Basis): sauber auf Ausgangsgröße + Wischen direkt danach OK
+[ ] 4. Erst Pinch zoomen, dann Doppeltipp → kein Einfrieren, sinnvolle Stufe
+[ ] 5. Pinch greift beim ERSTEN Touch
+[ ] 6. Panning frei, Seitennavigation zuverlässig
+[ ] Hintergrund-Blur, Lautsprecher — keine Regressionen
 ```
 
 ---
