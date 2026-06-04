@@ -1,57 +1,57 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-03T13:54:57Z -->
-<!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
+<!-- updated: 2026-06-04T14:37:26Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-03 — Mode A: Anker-Scan + Box-Seek)
+## ✅ Zuletzt abgeschlossen
 
-### Mode A: vollständiger Port von Mode B's Scroll-/Seek-Logik
-- `_boxKeys` + `_lastBoxKey` in `_ModeAContentState` ergänzt
-- `_insertSectionBoxes` in Mode A nun mit `boxKeys: _boxKeys` → Boxen haben GlobalKeys
-- `_jumpToTopSentence` komplett ersetzt: Live-Scan (Sätze + Boxen, `localY >= 0`)
-  - charOffset via `_splitSentenceStarts()` statt alter Längen-Summe
-  - `seekToChunk` für JSON, `seekWithDelay` + `\n`-Fix als ZIM-Fallback
-  - Box-Anker-Logik + `seekToChunk(topBoxChunkIdx)` — exakte Spiegelung Mode B
-  - „1–2 Sätze voraus"-Toleranz entfernt (A/B-Konsistenz)
-  - `!_cacheBuilt`-Guard entfernt (Live-Scan braucht keinen Cache)
-- `_smartScrollToBox` hinzugefügt (TTS-Auto-Scroll zu Boxen)
-- `_suspendAutoScrollOnce` mit Box-Tracking (wie Mode B)
-- `build()`: `rawIdx`/`scrollIdx`-Split, Box-Auto-Scroll-Block, `_boxKeys.clear()` bei Artikel-Reset
-- Getestet auf S23 ✅ — Satz-Seek, Box-Seek, Snap-Back-Szenarien alle bestanden
+**Vollbild-Viewer — photo_view_plus Migration + 3-Stufen-Doppeltipp**
+Branch `spike/photo-view-plus`, letzter Commit `3ce0359`. Auf S23 getestet: ✅
 
----
+Was funktioniert:
+- Pinch beim 1. Touch (Gesture-Arena-Lösung out-of-box mit PhotoViewGallery)
+- 3-Stufen-Doppeltipp: Basis → Stufe1 (minScale×2.5) → Max (covered×4) → Basis — deterministisch
+- Wischen/Panning, Seiten-Navigation
+- Rotation (Reset auf Basis + Position-Zero)
+- Weichgezeichneter Hintergrund-Füller, Lautsprecher-Icon kein Flackern
 
-## 🟡 Zum Testen (noch ausstehend)
-- Manuell testen — ImageFullscreenOverlay (aus voriger Session)
-- Mode B Lupe: Bold entfernen (wechselnde Zeilenumbrüche in Mode A)
-- Mode B Lupe: `_ttsCursor` erst im progressHandler updaten (zu früh springendes Highlight)
+Root-Cause-Fix (erratischer Doppeltipp): `_onScaleEnd` stoppte Animation bei jedem Finger-Heben
+→ `_zoomAnimCtrl.stop()` entfernt; Pinch-Stop in `_onPointerDown` multi-touch branch.
 
 ---
 
-## 🔴 Offene To-Dos (nach Priorität)
+## 🔴 Nächste Session — Vollbild-Viewer (in Reihenfolge)
 
-### Hoch — eigener Refactor nötig
-- **Epoch-Guard für TTS-Seek**: `_ttsStopPending`-Mirror hat auf sehr langsamen Geräten
-  ein Zeitfenster — feuert `stop()` sein `onDone` erst nach den 1200 ms, läuft es als
-  „neuer Chunk fertig" durch und der frische Satz wird abgeschnitten.
-  Echte Cross-Device-Lösung: Epoch-/Generations-Zähler (oder `awaitSpeakCompletion(true)`
-  + `await` statt globalem `setCompletionHandler`).
-  Betrifft 5+ Seek-Stellen im Provider — eigener Refactor.
+**(a) Caption-Platzierung**
+Unter dem Bild wenn Letterbox-Raum darunter (Querformat-Bild im Hochformat-Screen).
+Overlay wenn Bild die volle Höhe füllt.
+
+**(b) Pinch-Zoom greift gelegentlich nicht**
+Verdacht: 2-Finger-Touch als Doppeltipp missdeutet.
+Prüfen: bei `_activePointers >= 2` Tap-State sofort löschen (Timing-Problem?).
+
+**(c) Regressionslauf S23 → merge spike/photo-view-plus → main**
+Erst wenn (a) + (b) erledigt.
+
+---
+
+## 🟡 Ausstehend (niedrigere Prio)
+
+- Mode B Lupe: Bold entfernen + `_ttsCursor` erst im progressHandler updaten
+- Epoch-Guard TTS-Callbacks (wissensfreund_repo-Branch, separater Refactor)
+
+---
+
+## 🔴 Offene To-Dos
 
 ### Mittel
-- **Mode-B-ZIM-`\n`-Loch**: Mode B's `seekWithDelay`-Fallback (Zeile ~2670) hat keinen
-  `\n`-Fix für heading-merged Sätze, Mode A schon. Für A/B-Konsistenz angleichen.
-- **1-Satz-Toleranz**: Ohne die alte „1–2 Sätze voraus"-Toleranz löst jeder kleine
-  Korrektur-Scroll Unterbrechen+Seek aus. Falls ruckelig: 1-Element-Toleranz zurückbauen.
-- **Selbst produzierte Artikel** (neue JSON-Artikel mit echten Inhalten)
-- **Quiz-Checkpoint löschen + Run neu starten**
-- **Bilder-Patch** (`patch_article_images_v1.py`)
+- Selbst produzierte Artikel, Quiz-Checkpoint + Run neu
+- Bilder-Patch (patch_article_images_v1.py) nach Quiz-Fertigstellung
 
 ### Niedrig
-- **Links in JSON-Artikeln**, **Gemini-Integration**, **Topic-Tree**
-- Upgrade-Dialog, Plus/Premium-Design, Sound-Thumbnails
+- ZIM→JSON Decode-Cap, Kiosk→Screen Pinning, STT-Routing, Fire-OS-Entscheidung
+- Links/Gemini/Topic-Tree, Upgrade-Dialog, Plus/Premium-Design, Sound-Thumbnails
 
 ---
 

@@ -1,20 +1,40 @@
 import 'dart:async';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:photo_view_plus/photo_view_plus.dart';
+import 'package:photo_view_plus/photo_view_plus_gallery.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/wissensfreund_provider.dart';
 import '../utils/system_ui.dart';
 
+// Doppeltipp-Cycle: zoom-in → covering (füllt Bildschirm), zoom-out → initial.
+// WICHTIG: nie zoomedOut zurückgeben — PV's _blindScaleStateListener prüft
+// isZooming (= zoomedIn|zoomedOut) und überspringt Animation bei zoomedOut-Ziel.
+// 'initial' hat dieselbe Scale wie zoomedOut (= initialScale = contained),
+// ist aber nicht in isZooming → Animation läuft korrekt.
+PhotoViewScaleState _scaleStateCycle(PhotoViewScaleState state) {
+  if (state == PhotoViewScaleState.initial ||
+      state == PhotoViewScaleState.zoomedOut) {
+    return PhotoViewScaleState.covering;
+  }
+  return PhotoViewScaleState.initial;
+}
+
+const _kBlurredBackdrop = true;
+
 class ImageFullscreenOverlay extends StatefulWidget {
   final List<ArticleImageInfo> images;
   final int initialIndex;
+  final void Function(BuildContext ctx, int imageIndex)? onLicenseInfo;
 
   const ImageFullscreenOverlay({
     required this.images,
     required this.initialIndex,
+    this.onLicenseInfo,
     super.key,
   });
 
@@ -28,15 +48,32 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   late int _currentIndex;
 
   bool _isZoomed = false;
-  bool _speakerUsed = false;
   Timer? _rotateHintTimer;
   bool _showRotateHint = false;
 
-  final _futures = <String, Future<Uint8List?>>{};
-  final _imageRatios = <String, double?>{};
+  final _imageRatios             = <String, double?>{};
+  final _imageSizes              = <String, Size>{};
+  final _pvControllers           = <int, PhotoViewController>{};
+  final _pvScaleStateControllers = <int, PhotoViewScaleStateController>{};
+  final _loadedBytes             = <String, Uint8List>{};
+  final _startedLoading          = <String>{};
 
-  final _transformControllers = <int, TransformationController>{};
-  final _animControllers = <int, AnimationController>{};
+  // Double-tap detection via raw Listener (state-independent, works in pan mode).
+  DateTime? _lastTapDownTime;
+  int?      _lastTapIndex;
+  int       _activePointers = 0;
+
+  // Outer size captured from LayoutBuilder — same constraints PV uses internally.
+  Size _outerSize = Size.zero;
+
+  // Custom zoom animation (3-step cycle, drives ctrl.updateMultiple directly).
+  late final AnimationController _zoomAnimCtrl;
+  int    _zoomAnimIndex    = -1;
+  double _zoomAnimFromScale = 1.0;
+  double _zoomAnimToScale   = 1.0;
+  Offset _zoomAnimFromPos   = Offset.zero;
+  Offset _zoomAnimToPos     = Offset.zero;
+  bool   _zoomAnimToBase    = false;
 
   @override
   void initState() {
@@ -44,6 +81,10 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     _currentIndex = widget.initialIndex.clamp(
         0, (widget.images.length - 1).clamp(0, widget.images.length));
     _pageCtrl = PageController(initialPage: _currentIndex);
+    _zoomAnimCtrl = AnimationController(
+        vsync: this, duration: const Duration(milliseconds: 220))
+      ..addListener(_onZoomAnimTick)
+      ..addStatusListener(_onZoomAnimStatus);
 
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
@@ -61,70 +102,84 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   @override
   void dispose() {
     _pageCtrl.dispose();
-    for (final tc in _transformControllers.values) { tc.dispose(); }
-    for (final ac in _animControllers.values) { ac.dispose(); }
+    _zoomAnimCtrl.dispose();
+    for (final c in _pvControllers.values) { c.dispose(); }
+    for (final c in _pvScaleStateControllers.values) { c.dispose(); }
     _rotateHintTimer?.cancel();
     SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
     restoreSystemUI();
     super.dispose();
   }
 
-  TransformationController _tcFor(int i) =>
-      _transformControllers.putIfAbsent(i, () {
-        final tc = TransformationController();
-        tc.addListener(() {
-          final zoomed = tc.value.getMaxScaleOnAxis() > 1.05;
-          if (zoomed != _isZoomed && mounted) setState(() => _isZoomed = zoomed);
-        });
-        return tc;
-      });
+  PhotoViewController _ctrlFor(int i) =>
+      _pvControllers.putIfAbsent(i, () => PhotoViewController());
 
-  AnimationController _acFor(int i) => _animControllers.putIfAbsent(
-        i,
-        () => AnimationController(
-            vsync: this, duration: const Duration(milliseconds: 230)),
-      );
+  PhotoViewScaleStateController _scaleStateCtrlFor(int i) =>
+      _pvScaleStateControllers.putIfAbsent(
+          i, () => PhotoViewScaleStateController());
 
-  void _doubleTap(int index, TapDownDetails details) {
-    final tc = _tcFor(index);
-    final ac = _acFor(index);
-    if (tc.value.getMaxScaleOnAxis() > 1.05) {
-      _animateTo(tc, ac, Matrix4.identity());
-    } else {
-      final dx = details.localPosition.dx;
-      final dy = details.localPosition.dy;
-      const s = 2.5;
-      final target = Matrix4.translationValues(-dx * (s - 1), -dy * (s - 1), 0)
-        ..multiply(Matrix4.diagonal3Values(s, s, 1.0));
-      _animateTo(tc, ac, target);
-    }
+  // Startet Ladevorgang für ein Bild (einmalig; speichert Bytes + triggert Rebuild).
+  void _startLoading(String fn, WissensfreundProvider provider) {
+    if (_startedLoading.contains(fn)) return;
+    _startedLoading.add(fn);
+    provider.getImageBytes(fn).then((bytes) {
+      if (!mounted || bytes == null) return;
+      _onBytesLoaded(fn, bytes.toList());
+      setState(() => _loadedBytes[fn] = bytes);
+    });
   }
 
-  void _animateTo(
-      TransformationController tc, AnimationController ac, Matrix4 target) {
-    final begin = tc.value.clone();
-    final tween = Matrix4Tween(begin: begin, end: target);
-    ac.reset();
-    final animation =
-        tween.animate(CurvedAnimation(parent: ac, curve: Curves.easeOut));
-    animation.addListener(() => tc.value = animation.value);
-    ac.forward();
+  void _onBytesLoaded(String filename, List<int> bytes) {
+    if (_imageRatios.containsKey(filename)) return;
+    _imageRatios[filename] = null;
+    ui.decodeImageFromList(Uint8List.fromList(bytes), (image) {
+      if (!mounted) return;
+      setState(() {
+        _imageRatios[filename] = image.width / image.height;
+        _imageSizes[filename]  = Size(
+            image.width.toDouble(), image.height.toDouble());
+      });
+      if (_currentIndex < widget.images.length &&
+          widget.images[_currentIndex].filename == filename) {
+        _checkRotateHint(_currentIndex);
+      }
+    });
+  }
+
+  // baseScale = contained: min(outerW/imgW, outerH/imgH) — absoluter Faktor.
+  // Verwendet _outerSize aus LayoutBuilder (identisch mit PVs internem outerSize).
+  double _initialScaleFor(int index) {
+    if (index >= widget.images.length || _outerSize == Size.zero) return 1.0;
+    final imgSize = _imageSizes[widget.images[index].filename];
+    if (imgSize == null) return 1.0;
+    return math.min(_outerSize.width / imgSize.width, _outerSize.height / imgSize.height);
+  }
+
+  void _resetController(int index) {
+    final ctrl = _pvControllers[index];
+    if (ctrl == null) return;
+    ctrl.updateMultiple(scale: _initialScaleFor(index), position: Offset.zero);
+    // Reset scaleState to initial so PV recognises true rest state:
+    // shouldMove → false, double-tap cycle re-arms, _blindScaleListener silent.
+    _pvScaleStateControllers[index]?.reset();
   }
 
   void _onPageChanged(int index) {
+    _zoomAnimCtrl.stop();
+    _lastTapDownTime = null;
+    _lastTapIndex    = null;
+    _resetController(_currentIndex);
+    _resetController(index);
     setState(() {
       _currentIndex = index;
-      _speakerUsed = false;
-      _isZoomed = false;
+      _isZoomed     = false;
     });
-    _transformControllers[index]?.value = Matrix4.identity();
     _checkRotateHint(index);
   }
 
   void _checkRotateHint(int index) {
     if (index >= widget.images.length) return;
-    final filename = widget.images[index].filename;
-    final ratio = _imageRatios[filename];
+    final ratio = _imageRatios[widget.images[index].filename];
     if (ratio == null) return;
     final orient = MediaQuery.of(context).orientation;
     if (ratio > 1.3 && orient == Orientation.portrait) _showHint();
@@ -138,21 +193,150 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     });
   }
 
-  void _onBytesLoaded(String filename, Uint8List bytes) {
-    if (_imageRatios.containsKey(filename)) return;
-    _imageRatios[filename] = null;
-    ui.decodeImageFromList(bytes, (image) {
-      if (!mounted) return;
-      _imageRatios[filename] = image.width / image.height;
-      if (_currentIndex < widget.images.length &&
-          widget.images[_currentIndex].filename == filename) {
-        _checkRotateHint(_currentIndex);
-      }
-    });
+  // Raw pointer detection — fires in any zoom state, arena-independent.
+  // Multi-touch guard: 2nd simultaneous finger invalidates tap tracking.
+  void _onPointerDown(PointerDownEvent event) {
+    _activePointers++;
+    if (_activePointers > 1) {
+      // Pinch: Zoom-Animation abbrechen + Tap-Tracking zurücksetzen.
+      _zoomAnimCtrl.stop();
+      _lastTapDownTime = null;
+      _lastTapIndex    = null;
+      return;
+    }
+    final now   = DateTime.now();
+    final index = _currentIndex;
+    final s     = _pvControllers[index]?.scale;
+    debugPrint('WISS ptr↓ idx=$index scale=${s?.toStringAsFixed(3) ?? "?"} zoomed=$_isZoomed');
+    if (_lastTapIndex == index &&
+        _lastTapDownTime != null &&
+        now.difference(_lastTapDownTime!) > const Duration(milliseconds: 80) &&
+        now.difference(_lastTapDownTime!) < const Duration(milliseconds: 300)) {
+      _lastTapDownTime = null;
+      _lastTapIndex    = null;
+      // Microtask-Defer: zweiter Pinch-Finger setzt _activePointers>1 noch in
+      // derselben Event-Batch → Microtask überspringt Doppeltipp-Ausführung.
+      final tapPos = event.localPosition;
+      Future.microtask(() {
+        if (!mounted || _activePointers > 1) return;
+        _handleDoubleTap(index, tapPos);
+      });
+    } else {
+      _lastTapDownTime = now;
+      _lastTapIndex    = index;
+    }
   }
 
-  Future<Uint8List?> _futureFor(String fn, WissensfreundProvider p) =>
-      _futures.putIfAbsent(fn, () => p.getImageBytes(fn));
+  void _onPointerUp(PointerUpEvent event)       { if (_activePointers > 0) _activePointers--; }
+  void _onPointerCancel(PointerCancelEvent event){ if (_activePointers > 0) _activePointers--; }
+
+  // 3-step cycle: Basis → Stufe 1 (2.5×) → Max (covered*4) → Basis → …
+  // Reads ctrl.scale directly → zustandslos, funktioniert nach jedem Pinch.
+  void _handleDoubleTap(int index, Offset tapLocalPos) {
+    final ctrl     = _ctrlFor(index);
+    final minScale = _initialScaleFor(index);
+    final maxScale = _computeMaxScale(index);
+    final s0       = ctrl.scale ?? minScale;
+    final branch   = s0 <= minScale * 1.05 ? '→Stufe1'
+                   : s0 <= minScale * 2.625 ? '→Max' : '→Basis';
+    final imgSize  = index < widget.images.length
+        ? _imageSizes[widget.images[index].filename] : null;
+    debugPrint('WISS DT idx=$index s0=${s0.toStringAsFixed(4)} '
+        'base=${minScale.toStringAsFixed(4)} max=${maxScale.toStringAsFixed(4)} '
+        'outer=${_outerSize.width.toStringAsFixed(1)}×${_outerSize.height.toStringAsFixed(1)} '
+        'img=${imgSize?.width.toInt()}×${imgSize?.height.toInt()} $branch');
+
+    if (s0 <= minScale * 1.05) {
+      final s1 = minScale * 2.5;
+      _animateTo(index, s1, _focalPos(index, tapLocalPos, s0, s1));
+      if (mounted) setState(() => _isZoomed = true);
+    } else if (s0 <= minScale * 2.5 * 1.05) {
+      final s1 = maxScale;
+      _animateTo(index, s1, _focalPos(index, tapLocalPos, s0, s1));
+      if (mounted) setState(() => _isZoomed = true);
+    } else {
+      // Über Stufe 1 (auch nach Pinch) → zurück zur Basis.
+      _animateTo(index, minScale, Offset.zero, toBase: true);
+      if (mounted) setState(() => _isZoomed = false);
+    }
+  }
+
+  // coverScale * 4 — identisch mit maxScale in pageOptions.
+  double _computeMaxScale(int index) {
+    if (index >= widget.images.length || _outerSize == Size.zero) return 4.0;
+    final imgSize = _imageSizes[widget.images[index].filename];
+    if (imgSize == null) return 4.0;
+    return math.max(_outerSize.width / imgSize.width, _outerSize.height / imgSize.height) * 4.0;
+  }
+
+  // Berechnet Zielposition so dass tapLocalPos unter dem Finger bleibt.
+  Offset _focalPos(int index, Offset tapLocalPos, double s0, double s1) {
+    if (index >= widget.images.length || _outerSize == Size.zero) return Offset.zero;
+    final imgSize = _imageSizes[widget.images[index].filename];
+    if (imgSize == null) return Offset.zero;
+    final center = Offset(_outerSize.width / 2, _outerSize.height / 2);
+    final p0     = _ctrlFor(index).position;
+    final p1     = tapLocalPos - center - (tapLocalPos - center - p0) * (s1 / s0);
+    // Clampen auf PVs gültige Pan-Range (gleiche Formel wie photo_view_layout.dart cornersX/Y).
+    final halfX  = math.max(0.0, (imgSize.width  * s1 - _outerSize.width)  / 2);
+    final halfY  = math.max(0.0, (imgSize.height * s1 - _outerSize.height) / 2);
+    return Offset(p1.dx.clamp(-halfX, halfX), p1.dy.clamp(-halfY, halfY));
+  }
+
+  void _animateTo(int index, double toScale, Offset toPos, {bool toBase = false}) {
+    final ctrl        = _ctrlFor(index);
+    _zoomAnimIndex    = index;
+    _zoomAnimFromScale = ctrl.scale ?? _initialScaleFor(index);
+    _zoomAnimToScale  = toScale;
+    _zoomAnimFromPos  = ctrl.position;
+    _zoomAnimToPos    = toPos;
+    _zoomAnimToBase   = toBase;
+    _zoomAnimCtrl
+      ..stop()
+      ..value = 0.0
+      ..forward();
+  }
+
+  void _onZoomAnimTick() {
+    final ctrl = _pvControllers[_zoomAnimIndex];
+    if (ctrl == null) return;
+    final t = Curves.easeOut.transform(_zoomAnimCtrl.value);
+    ctrl.updateMultiple(
+      scale:    _zoomAnimFromScale + (_zoomAnimToScale - _zoomAnimFromScale) * t,
+      position: _zoomAnimFromPos   + (_zoomAnimToPos   - _zoomAnimFromPos)   * t,
+    );
+  }
+
+  void _onZoomAnimStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed) return;
+    final ctrl  = _pvControllers[_zoomAnimIndex];
+    final ssCtrl = _pvScaleStateControllers[_zoomAnimIndex];
+    if (_zoomAnimToBase) {
+      // Exakter Basis-Reset: erst Zielwerte forcen (Floating-Point-Sicherheit),
+      // dann setInvisibly statt reset() — kein animateOnScaleStateUpdate → kein Endsprung.
+      final minScale = _initialScaleFor(_zoomAnimIndex);
+      ctrl?.updateMultiple(scale: minScale, position: Offset.zero);
+      ssCtrl?.setInvisibly(PhotoViewScaleState.initial);
+      if (mounted) setState(() => _isZoomed = false);
+    } else {
+      // Auch für Stufe1/Max: finale Zielwerte exakt setzen.
+      ctrl?.updateMultiple(scale: _zoomAnimToScale, position: _zoomAnimToPos);
+      debugPrint('WISS anim done scale=${ctrl?.scale?.toStringAsFixed(4)} target=${_zoomAnimToScale.toStringAsFixed(4)}');
+    }
+  }
+
+  // After pinch-out reaching base: reset scaleState so PV recognises rest state.
+  // KEIN _zoomAnimCtrl.stop() hier — onScaleEnd feuert beim Finger-Heben nach jedem Tap
+  // und würde die laufende 220ms-Animation abbrechen bevor completed feuert.
+  // Pinch (≥2 Finger) wird bereits in _onPointerDown gestoppt.
+  void _onScaleEnd(int index, ScaleEndDetails details, PhotoViewControllerValue value) {
+    final minScale = _initialScaleFor(index);
+    final s = value.scale;
+    if (s != null && s <= minScale * 1.01) {
+      _pvScaleStateControllers[index]?.reset();
+      if (mounted) setState(() => _isZoomed = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -161,12 +345,58 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
         final images = widget.images;
         if (images.isEmpty) {
           return const Scaffold(
-            backgroundColor: Colors.black,
-            body: SizedBox.shrink(),
-          );
+              backgroundColor: Colors.black, body: SizedBox.shrink());
         }
-        final cur = images[_currentIndex];
-        final hasCaption = cur.caption != null && cur.caption!.isNotEmpty;
+
+        final cur         = images[_currentIndex];
+        final hasCaption  = cur.caption != null && cur.caption!.isNotEmpty;
+        final imgCount    = images.length;
+        final bottomInset = MediaQuery.of(context).padding.bottom;
+
+        // Letterbox-Berechnung: freier Raum unter dem contained Bild.
+        // _outerSize kommt aus LayoutBuilder (vorheriger Frame, stabil nach 1. Layout).
+        final _curImgSz = _imageSizes[cur.filename];
+        final _curMs    = _initialScaleFor(_currentIndex);
+        final letterboxBelow = (_curImgSz != null && _outerSize != Size.zero)
+            ? math.max(0.0, (_outerSize.height - _curImgSz.height * _curMs) / 2)
+            : 0.0;
+        final captionInLetterbox = letterboxBelow > 30;
+
+        // Seitenoptionen aufbauen; Ladevorgang pro Bild starten.
+        // PhotoViewGallery (non-builder) cached NICHT → pageOptions werden
+        // bei jedem Rebuild neu ausgewertet → Spinner → Bild-Transition korrekt.
+        final pageOptions = List.generate(images.length, (index) {
+          final img = images[index];
+          _startLoading(img.filename, provider);
+          final bytes = _loadedBytes[img.filename];
+
+          if (bytes == null) {
+            return PhotoViewGalleryPageOptions.customChild(
+              pageKey: ValueKey('loading_$index'),
+              child: const Center(
+                  child: CircularProgressIndicator(color: Colors.white54)),
+            );
+          }
+
+          return PhotoViewGalleryPageOptions(
+            pageKey:              ValueKey(img.filename),
+            imageProvider:        MemoryImage(bytes),
+            controller:           _ctrlFor(index),
+            scaleStateController: _scaleStateCtrlFor(index),
+            initialScale:         PhotoViewComputedScale.contained,
+            minScale:             PhotoViewComputedScale.contained,
+            maxScale:             PhotoViewComputedScale.covered * 4.0,
+            strictScale:          true,
+            filterQuality:        FilterQuality.high,
+            scaleStateCycle:      _scaleStateCycle,
+            disableDoubleTap:     true,
+            onScaleStart:(ctx, details, value) {
+              // Nur bei Pinch (≥2 Finger) stoppen — nicht beim einfachen Tap.
+              if (_activePointers > 1) _zoomAnimCtrl.stop();
+            },
+            onScaleEnd:  (ctx, details, value) => _onScaleEnd(index, details, value),
+          );
+        });
 
         return Scaffold(
           backgroundColor: Colors.black,
@@ -175,33 +405,155 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
               return Stack(
                 fit: StackFit.expand,
                 children: [
-                  // ── PageView ──────────────────────────────────────────────
-                  PageView.builder(
-                    controller: _pageCtrl,
-                    physics: _isZoomed
-                        ? const NeverScrollableScrollPhysics()
-                        : const AlwaysScrollableScrollPhysics(),
-                    onPageChanged: _onPageChanged,
-                    itemCount: images.length,
-                    itemBuilder: (_, i) =>
-                        _buildPage(i, images[i], provider),
-                  ),
+                  // ── Weichgezeichneter Hintergrund-Füller ─────────────────
+                  // Nur aktiv wenn _kBlurredBackdrop=true. Liegt unter Gallery,
+                  // keine Gesten. Starke Unschärfe kaschiert niedrige Auflösung.
+                  if (_kBlurredBackdrop) ...[
+                    if (_loadedBytes[cur.filename] != null)
+                      Positioned.fill(
+                        child: ImageFiltered(
+                          imageFilter: ui.ImageFilter.blur(
+                              sigmaX: 24,
+                              sigmaY: 24,
+                              tileMode: TileMode.mirror),
+                          child: Image.memory(
+                            _loadedBytes[cur.filename]!,
+                            fit: BoxFit.cover,
+                            cacheWidth: 96,
+                          ),
+                        ),
+                      ),
+                    const Positioned.fill(
+                        child: ColoredBox(color: Color(0x44000000))),
+                  ],
 
-                  // ── ← Zurück (oben links) ─────────────────────────────────
+                  // ── PhotoViewGallery ─────────────────────────────────────
+                  // LayoutBuilder: erfasst exakt dieselbe outerSize die PV intern
+                  // für scaleBoundaries nutzt — kein MediaQuery-Versatz.
+                  LayoutBuilder(builder: (_, constraints) {
+                    _outerSize = constraints.biggest;
+                    return Listener(
+                    behavior:        HitTestBehavior.translucent,
+                    onPointerDown:   _onPointerDown,
+                    onPointerUp:     _onPointerUp,
+                    onPointerCancel: _onPointerCancel,
+                    child: PhotoViewGallery(
+                      pageOptions:       pageOptions,
+                      pageController:    _pageCtrl,
+                      onPageChanged:     _onPageChanged,
+                      backgroundDecoration: _kBlurredBackdrop
+                          ? const BoxDecoration(color: Colors.transparent)
+                          : const BoxDecoration(color: Colors.black),
+                      scaleStateChangedCallback: (state) {
+                        final zoomed = state != PhotoViewScaleState.initial &&
+                            state != PhotoViewScaleState.zoomedOut;
+                        if (zoomed != _isZoomed && mounted) {
+                          setState(() => _isZoomed = zoomed);
+                        }
+                      },
+                    ),
+                  );
+                  }),
+
+                  // ── Caption-Gradient + Text ──────────────────────────────
+                  // captionInLetterbox: freier Raum unter Bild → kein Gradient,
+                  // Text direkt unter Bildunterkante verankert.
+                  // Sonst (Bild füllt Höhe): Gradient-Overlay auf Bildunterkante.
+                  if (hasCaption) ...[
+                    if (!captionInLetterbox)
+                      Positioned(
+                        left: 0, right: 0, bottom: 0,
+                        height: 80 + bottomInset,
+                        child: DecoratedBox(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin:  Alignment.topCenter,
+                              end:    Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withValues(alpha: 0.6),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    captionInLetterbox
+                      ? Positioned(
+                          left: 60, right: 12,
+                          top: _outerSize.height - letterboxBelow + 8,
+                          child: _CaptionRow(
+                            caption:  cur.caption!,
+                            current:  _currentIndex,
+                            total:    imgCount,
+                          ),
+                        )
+                      : Positioned(
+                          left: 60, right: 12,
+                          bottom: 12 + bottomInset,
+                          child: _CaptionRow(
+                            caption:  cur.caption!,
+                            current:  _currentIndex,
+                            total:    imgCount,
+                          ),
+                        ),
+                  ],
+
+                  // ── Zähler ohne Caption ──────────────────────────────────
+                  if (!hasCaption && imgCount > 1)
+                    Positioned(
+                      right: 46, bottom: 12 + bottomInset,
+                      child: Text(
+                        '${_currentIndex + 1} / $imgCount',
+                        style: const TextStyle(
+                          color:      Colors.white70,
+                          fontSize:   12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+
+                  // ── ⓘ Lizenz (nur ungezoomt) ─────────────────────────────
+                  if (!_isZoomed && widget.onLicenseInfo != null)
+                    Positioned(
+                      right:  12,
+                      bottom: captionInLetterbox
+                          ? letterboxBelow + 4
+                          : (hasCaption ? 88 : 12) + bottomInset,
+                      child: GestureDetector(
+                        onTap: () =>
+                            widget.onLicenseInfo!(context, _currentIndex),
+                        child: Container(
+                          width: 28, height: 28,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.50),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: Text('ⓘ',
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 14,
+                                    height: 1.1)),
+                          ),
+                        ),
+                      ),
+                    ),
+
+                  // ── ← Zurück ─────────────────────────────────────────────
                   SafeArea(
                     child: Align(
                       alignment: Alignment.topLeft,
                       child: Padding(
                         padding: const EdgeInsets.all(8),
                         child: _OverlayBtn(
-                          icon: Icons.arrow_back_rounded,
+                          icon:  Icons.arrow_back_rounded,
                           onTap: () => Navigator.of(context).pop(),
                         ),
                       ),
                     ),
                   ),
 
-                  // ── 🔊 Speaker (oben rechts) ──────────────────────────────
+                  // ── 🔊 Speaker (Bildunterschrift vorlesen) ────────────────
                   if (hasCaption)
                     SafeArea(
                       child: Align(
@@ -209,58 +561,28 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
                         child: Padding(
                           padding: const EdgeInsets.all(8),
                           child: _OverlayBtn(
-                            icon: Icons.volume_up_rounded,
-                            dimmed: _speakerUsed,
-                            onTap: _speakerUsed
+                            icon:   Icons.volume_up_rounded,
+                            dimmed: provider.isCaptionPlaying,
+                            onTap:  provider.isCaptionPlaying
                                 ? null
-                                : () {
-                                    setState(() => _speakerUsed = true);
-                                    provider.interruptForCaption(cur.caption!);
-                                  },
+                                : () => provider.interruptForCaption(
+                                    cur.caption!),
                           ),
                         ),
                       ),
                     ),
 
-                  // ── Zähler (oben mitte) ───────────────────────────────────
-                  if (images.length > 1)
-                    SafeArea(
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 14),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 5),
-                            decoration: BoxDecoration(
-                              color: Colors.black54,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text(
-                              '${_currentIndex + 1} / ${images.length}',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-
-                  // ── Dreh-Hinweis (unten mitte) ────────────────────────────
+                  // ── Dreh-Hinweis ─────────────────────────────────────────
                   if (_showRotateHint && orientation == Orientation.portrait)
                     Positioned(
-                      bottom: 100,
-                      left: 0,
-                      right: 0,
+                      bottom: MediaQuery.of(context).padding.bottom + 60,
+                      left: 0, right: 0,
                       child: Center(
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 14, vertical: 8),
                           decoration: BoxDecoration(
-                            color: Colors.black54,
+                            color:        Colors.black54,
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: const Row(
@@ -269,11 +591,9 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
                               Icon(Icons.screen_rotation_rounded,
                                   color: Colors.white70, size: 18),
                               SizedBox(width: 6),
-                              Text(
-                                'Handy drehen',
-                                style: TextStyle(
-                                    color: Colors.white70, fontSize: 13),
-                              ),
+                              Text('Handy drehen',
+                                  style: TextStyle(
+                                      color: Colors.white70, fontSize: 13)),
                             ],
                           ),
                         ),
@@ -287,116 +607,74 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
       },
     );
   }
+}
 
-  Widget _buildPage(
-      int index, ArticleImageInfo img, WissensfreundProvider provider) {
-    final future = _futureFor(img.filename, provider);
-    final hasCaption = img.caption != null && img.caption!.isNotEmpty;
-    final tc = _tcFor(index);
+class _CaptionRow extends StatelessWidget {
+  final String caption;
+  final int    current;
+  final int    total;
 
-    return FutureBuilder<Uint8List?>(
-      key: ValueKey(img.filename),
-      future: future,
-      builder: (ctx, snap) {
-        final bytes = snap.data;
-        if (bytes == null) {
-          return const Center(
-              child: CircularProgressIndicator(color: Colors.white54));
-        }
+  const _CaptionRow({
+    required this.caption,
+    required this.current,
+    required this.total,
+  });
 
-        _onBytesLoaded(img.filename, bytes);
-
-        return Stack(
-          fit: StackFit.expand,
-          children: [
-            GestureDetector(
-              onDoubleTapDown: (d) => _doubleTap(index, d),
-              onDoubleTap: () {},
-              child: InteractiveViewer(
-                transformationController: tc,
-                minScale: 1.0,
-                maxScale: 4.0,
-                panEnabled: true,
-                boundaryMargin: EdgeInsets.zero,
-                child: SizedBox.expand(
-                  child: Image.memory(bytes, fit: BoxFit.contain),
-                ),
-              ),
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      children: [
+        Expanded(
+          child: Text(
+            caption,
+            textAlign: TextAlign.center,
+            maxLines:  2,
+            overflow:  TextOverflow.ellipsis,
+            style: const TextStyle(
+              color:     Colors.white,
+              fontSize:  13,
+              height:    1.4,
+              fontStyle: FontStyle.italic,
+              shadows:   [Shadow(color: Colors.black87, blurRadius: 4)],
             ),
-
-            // Bildunterschrift mit Gradient
-            if (hasCaption) ...[
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: 0,
-                height: 80,
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.transparent,
-                        Colors.black.withValues(alpha: 0.6),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                left: 60,
-                right: 60,
-                bottom: 12,
-                child: Text(
-                  img.caption!,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 13,
-                    height: 1.4,
-                    fontStyle: FontStyle.italic,
-                    shadows: [Shadow(color: Colors.black87, blurRadius: 4)],
-                  ),
-                ),
-              ),
-            ],
-          ],
-        );
-      },
+          ),
+        ),
+        if (total > 1) ...[
+          const SizedBox(width: 8),
+          Text(
+            '${current + 1} / $total',
+            style: const TextStyle(
+              color:      Colors.white60,
+              fontSize:   12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ],
     );
   }
 }
 
 class _OverlayBtn extends StatelessWidget {
-  final IconData icon;
+  final IconData      icon;
   final VoidCallback? onTap;
-  final bool dimmed;
+  final bool          dimmed;
 
-  const _OverlayBtn({
-    required this.icon,
-    this.onTap,
-    this.dimmed = false,
-  });
+  const _OverlayBtn({required this.icon, this.onTap, this.dimmed = false});
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 44,
-        height: 44,
+        width: 44, height: 44,
         decoration: BoxDecoration(
-          color: Colors.black54,
+          color:        Colors.black54,
           borderRadius: BorderRadius.circular(22),
         ),
-        child: Icon(
-          icon,
-          color: dimmed ? Colors.white38 : Colors.white,
-          size: 24,
-        ),
+        child: Icon(icon,
+            color: dimmed ? Colors.white38 : Colors.white, size: 24),
       ),
     );
   }

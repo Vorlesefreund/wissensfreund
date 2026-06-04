@@ -270,6 +270,7 @@ class WissensfreundProvider extends ChangeNotifier {
   }
   int get ttsCursor           => _ttsCursor;
   bool get isPaused                  => _isPaused;
+  bool get isCaptionPlaying         => _isCaptionPlaying;
   bool get showCaptionResumePrompt  => _showCaptionResumePrompt;
   ArticleViewMode get viewMode => _viewMode;
   bool   get zimReady        => _zimReady;

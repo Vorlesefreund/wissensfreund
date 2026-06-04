@@ -27,6 +27,12 @@ gh workflow run update_image_licenses.yml
 2. CLAUDE_CHAT_NOTIZEN.md lesen — offene Aufträge prüfen und umsetzen
 3. STATUS.md lesen — aktuellen Stand kennen
 
+## STATUS.md ABLAGE (PFLICHT)
+Kanonisch: wissensfreund_app/STATUS.md (Quelle der Wahrheit, wird committet/gepusht).
+Nach JEDER Aktualisierung BYTE-IDENTISCH kopieren nach:
+  C:\Users\Andreas\Wissensfreund\Status\STATUS.md
+Beide Orte müssen bei jedem Schreiben übereinstimmen.
+
 ## STATUS.md TIMESTAMP
 Zeile 2: <!-- updated: 2026-06-01T00:00:00Z --> — bei JEDEM Schreiben aktualisieren.
 Bash: date -u +"%Y-%m-%dT%H:%M:%SZ"

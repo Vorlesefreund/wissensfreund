@@ -394,3 +394,139 @@ Mode B hat das Problem nie gehabt: Mode B hat kein `extraRightPad` und kein
 Gemischter Zustand (live in `_jumpToTopSentence`, cached in `_computeProfessorZone`) ist
 stabil: eine minimale Positions-Diskrepanz durch aktives Padding ist möglich (wenige Pixel),
 aber kein Stabilitätsproblem.
+
+---
+
+## Vollbild-Zoom: InteractiveViewer → photo_view_plus (2026-06-03)
+
+### Warum InteractiveViewer aufgegeben wurde
+
+Drei überlappende Probleme — alle architekturell unlösbar:
+
+1. **Gesture Arena** (Hauptursache): PageView (HorizontalDragRecognizer) vs. InteractiveViewer
+   (ScaleGestureRecognizer). Erster Pointer wird als Drag eingeordnet → PageView gewinnt →
+   Pinch wird nie registriert. Nicht fixbar ohne PageView zu ersetzen.
+
+2. **boundaryMargin-Paradox**: `constrained: false` + `boundaryMargin: EdgeInsets.zero` ist
+   strukturell unlösbar wenn `displayH < screenH`. Workaround `EdgeInsets.all(double.infinity)`
+   + eigenes `_clampedMatrix` in `onInteractionUpdate` kämpft gegen IVs Focal-Point-Mathematik.
+
+3. **Animation-Gesture-Konflikt**: onInteractionEnd-Animation vs. neu beginnender Pinch.
+
+### photo_view_plus Evaluation — Phase 1 Spike (2026-06-03)
+
+Package: `photo_view_plus: ^1.1.1`
+
+**1. Gesture Arena — ✅ GELÖST**
+`PhotoViewGestureRecognizer._decideIfWeAcceptEvent`:
+- 2 Pointer → always accept → Pinch gewinnt immer
+- 1 Pointer → nur accept wenn nicht am Rand (`hitDetector.shouldMove`) → PageView bekommt Edge-Swipes
+- `PhotoViewGallery` wraps `PageView.builder` in `PhotoViewGestureDetectorScope` → out-of-box
+
+**2. InteractionPolicy Clamp-Hook — ✅ VORHANDEN**
+```dart
+PhotoViewInteractionPolicy(
+  clampPosition: (metrics, nextPos) => metrics.clampPosition(nextPos),  // Standard reicht
+  onGestureEnd: (ctx) => defaultGestureEndPolicy(ctx),  // Spring-Back + Fling
+)
+```
+
+**3. Limited Cover max 15% Crop — ✅ IMPLEMENTIERBAR**
+```dart
+class LimitedCoverScale extends PhotoViewScale {
+  const LimitedCoverScale();
+  @override
+  double resolve(Size outerSize, Size childSize) {
+    final sc = math.min(outerSize.width / childSize.width, outerSize.height / childSize.height);
+    final sk = math.max(outerSize.width / childSize.width, outerSize.height / childSize.height);
+    return math.min(sk, sc * 1.18);
+  }
+}
+```
+`initialScale: const LimitedCoverScale()`, `minScale: const LimitedCoverScale()`, `strictScale: true`
+PV berechnet childSize intern aus `MemoryImage` — kein manuelles imgRatio-Decode nötig!
+
+**4. Doppeltipp 1x↔2.5x an Tippposition — ⚠️ IMPLEMENTIERBAR (~30 Zeilen)**
+`disableDoubleTap: true` + `onTapUp` mit Zeit/Distanz-Debounce + eigener AnimController.
+Positionsformel (PhotoView-Koordinaten, basePosition=center):
+```
+outerCenter = Offset(outerSize.width/2, outerSize.height/2)
+r = targetScale / currentScale
+newPosition = (tapPos - outerCenter) * (1 - r) + currentPosition * r
+newPosition = metrics.clampPosition(newPosition)
+```
+Dann `controller.updateMultiple(position, scale)` in AnimationController-Listener aufrufen.
+
+**Gesamtbewertung: Phase 2 Migration empfohlen.**
+Alle 4 Kriterien erfüllt. `MemoryImage(bytes)` funktioniert out-of-box als imageProvider.
+
+---
+
+## Vollbild-Viewer: Implementierung abgeschlossen (2026-06-04, Branch spike/photo-view-plus)
+
+Letzter Commit: `3ce0359`. Nicht gemergt — 3 offene Punkte (siehe STATUS.md).
+
+### Endarchitektur `image_fullscreen_overlay.dart`
+
+**Package:** `photo_view_plus: 1.1.1` (exakter Pin, kein `^`).
+`PhotoViewGallery` ersetzt `InteractiveViewer` vollständig.
+
+**Scale-Konfiguration:**
+```dart
+initialScale: PhotoViewComputedScale.contained
+minScale:     PhotoViewComputedScale.contained
+maxScale:     PhotoViewComputedScale.covered * 4.0
+strictScale:  true
+```
+`LimitedCoverScale` aus Phase-1-Evaluation NICHT verbaut — `covered * 4.0` reicht für Praxis.
+
+**outerSize — korrekte Quelle:**
+`LayoutBuilder` um Gallery → `constraints.biggest` → `_outerSize`.
+NICHT `MediaQuery.sizeOf(context)` (stimmt nicht mit PVs internem `scaleBoundaries` überein).
+
+**Doppeltipp — 3-Stufen-Zyklus:**
+- Basis = `min(outerW/imgW, outerH/imgH)` (= `PhotoViewComputedScale.contained`)
+- Stufe1 = `base * 2.5`
+- Max = `max(outerW/imgW, outerH/imgH) * 4.0` (= `covered * 4.0`)
+- Zyklus: Basis → Stufe1 → Max → Basis → …
+- Entscheidung per `ctrl.scale` (absoluter Wert) gegen `base * 1.05` und `stufe1 * 1.05`
+
+**Tap-Erkennung — raw Listener (nicht PV-onTapDown):**
+PVs `onTapDown` feuert nicht im Zoom/Pan-Modus (Gesture-Arena-Problem).
+Lösung: `Listener(onPointerDown/Up/Cancel)` um die Gallery.
+`_activePointers`-Counter: bei ≥2 Pointern Tap-State sofort verwerfen + Animation stoppen.
+
+**Animation:**
+`AnimationController` 220ms easeOut, treibt `ctrl.updateMultiple(scale, position)`.
+`_animateTo()` setzt From/To-Felder und ruft `.forward()`.
+
+**Kritischer Bug (onScaleEnd) — Root Cause + Fix:**
+PV feuert `onScaleEnd` beim Finger-Heben nach JEDEM Tap, nicht nur nach Pan/Pinch.
+`_zoomAnimCtrl.stop()` in `onScaleEnd` → Animation nach 2. Tap-Lift abgebrochen →
+`AnimationStatus.completed` nie gefeuert → Scale eingefroren (Beweis aus WISS-Logs).
+Fix: `_zoomAnimCtrl.stop()` aus `onScaleEnd` entfernt. Pinch-Stop: in `_onPointerDown`
+multi-touch branch (`_activePointers > 1`).
+
+**Basis-Animation ohne Endsprung (setInvisibly):**
+`ssCtrl.reset()` notifiziert IGNORABLE Listener → `_blindScaleStateListener` →
+`animateOnScaleStateUpdate` → sichtbarer Endsprung.
+Fix: `ssCtrl.setInvisibly(PhotoViewScaleState.initial)` + `ctrl.updateMultiple(minScale, Offset.zero)`.
+
+**Focal-Point-Formel:**
+```
+center = Offset(outerW/2, outerH/2)
+p1 = tapPos - center - (tapPos - center - p0) * (s1/s0)
+halfX = max(0, (imgW*s1 - outerW)/2)
+p1 = Offset(p1.dx.clamp(-halfX,halfX), p1.dy.clamp(-halfY,halfY))
+```
+
+**Weitere Features:**
+- Weichgezeichneter Hintergrund-Füller (`_kBlurredBackdrop`, `ImageFilter.blur sigma=18`)
+- Lautsprecher-Icon gebunden an `provider.isCaptionPlaying` (kein Flackern bei TTS)
+- Reset auf Basis + Position-Zero bei Orientierungswechsel (`_onOrientationChanged`)
+
+### Offene Punkte (nächste Session)
+(a) Caption-Platzierung: unter dem Bild bei Letterbox, Overlay wenn Bild Höhe füllt.
+(b) Pinch-Zoom gelegentlich nicht erkannt — Verdacht: 2-Finger fälschlicherweise als Doppeltipp;
+    bei `_activePointers >= 2` Tap-State sofort löschen (bereits in Code, Timing prüfen).
+(c) Regressionslauf S23, dann merge `spike/photo-view-plus → main`.
