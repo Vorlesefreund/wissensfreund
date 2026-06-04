@@ -320,8 +320,10 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   }
 
   // After pinch-out reaching base: reset scaleState so PV recognises rest state.
+  // KEIN _zoomAnimCtrl.stop() hier — onScaleEnd feuert beim Finger-Heben nach jedem Tap
+  // und würde die laufende 220ms-Animation abbrechen bevor completed feuert.
+  // Pinch (≥2 Finger) wird bereits in _onPointerDown gestoppt.
   void _onScaleEnd(int index, ScaleEndDetails details, PhotoViewControllerValue value) {
-    _zoomAnimCtrl.stop();
     final minScale = _initialScaleFor(index);
     final s = value.scale;
     if (s != null && s <= minScale * 1.01) {
