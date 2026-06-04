@@ -10,26 +10,6 @@ import 'package:provider/provider.dart';
 import '../providers/wissensfreund_provider.dart';
 import '../utils/system_ui.dart';
 
-// Limited-Cover: immer mindestens cover-Größe, aber max 18% größer als contained.
-// → max ~9% Crop pro Seite. Kein Letterbox. Bewusste Entscheidung:
-// Extremes Panorama (z.B. 3:1): sk >> sc → limitiert auf sc*1.18 → leichter Letterbox
-// akzeptiert (unkontrolliertes Beschneiden wäre schlimmer für Kinderperspektive).
-class _LimitedCoverScale extends PhotoViewScale {
-  const _LimitedCoverScale();
-
-  @override
-  double resolve(Size outerSize, Size childSize) {
-    if (childSize.width <= 0 || childSize.height <= 0) return 1.0;
-    final sc = math.min(
-        outerSize.width / childSize.width, outerSize.height / childSize.height);
-    final sk = math.max(
-        outerSize.width / childSize.width, outerSize.height / childSize.height);
-    // min(sk, sc*1.18): nimmt cover wenn crop < 18%, sonst contain*1.18
-    return math.min(sk, sc * 1.18);
-  }
-}
-
-const _limitedCoverScale = _LimitedCoverScale();
 
 class ImageFullscreenOverlay extends StatefulWidget {
   final List<ArticleImageInfo> images;
@@ -65,7 +45,7 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
   final _pvAnimControllers = <int, AnimationController>{};
   final _outerSizes        = <int, Size>{};
 
-  // Double-tap-Erkennung via onTapUp-Debounce (disableDoubleTap:true in PhotoView)
+  // Double-tap via Listener (raw pointer down) — kein GestureArena-Teilnehmer
   DateTime? _lastTapTime;
   Offset?   _lastTapPos;
   int?      _lastTapIndex;
@@ -172,29 +152,32 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     );
   }
 
-  // Löst den initialen Scale für Double-tap-Ziel (zoom-out Rückkehr).
-  double? _initialScaleFor(int index) {
-    if (index >= widget.images.length) return null;
+  // Cover-Scale: max(w/W, h/H) — Bild füllt Viewport immer aus.
+  double _coverScaleFor(int index) {
+    if (index >= widget.images.length) return 1.0;
     final imgSize   = _imageSizes[widget.images[index].filename];
     final outerSize = _outerSizes[index];
-    if (imgSize == null || outerSize == null) return null;
-    return _limitedCoverScale.resolve(outerSize, imgSize);
+    if (imgSize == null || outerSize == null) return 1.0;
+    return math.max(
+        outerSize.width / imgSize.width, outerSize.height / imgSize.height);
   }
 
-  // Doppeltipp via onTapUp-Debounce: 300ms / 40px Toleranz
-  void _onTapUp(BuildContext ctx, TapUpDetails details,
-      PhotoViewControllerValue value, int index) {
+  // Doppeltipp via Listener.onPointerDown (kein GestureArena-Konflikt):
+  // erster Pointer DOWN → speichert Zeit/Position;
+  // zweiter Pointer DOWN (≤300ms, ≤40px) → löst _handleDoubleTap aus.
+  void _trackPointerDown(PointerDownEvent event, int index) {
     final now = DateTime.now();
     if (_lastTapIndex == index &&
         _lastTapTime != null &&
         now.difference(_lastTapTime!) < const Duration(milliseconds: 300) &&
         _lastTapPos != null &&
-        (details.localPosition - _lastTapPos!).distance < 40) {
+        (event.localPosition - _lastTapPos!).distance < 40) {
       _lastTapTime = null;
-      _handleDoubleTap(details.localPosition, value, _ctrlFor(index), index);
+      final ctrl = _ctrlFor(index);
+      _handleDoubleTap(event.localPosition, ctrl.value, ctrl, index);
     } else {
       _lastTapTime  = now;
-      _lastTapPos   = details.localPosition;
+      _lastTapPos   = event.localPosition;
       _lastTapIndex = index;
     }
   }
@@ -205,7 +188,7 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
     final currentPos   = value.position;
     final outerSize    = _outerSizes[index] ?? Size.zero;
     final outerCenter  = Offset(outerSize.width / 2, outerSize.height / 2);
-    final initScale    = _initialScaleFor(index) ?? currentScale;
+    final initScale    = _coverScaleFor(index);
 
     _pvAnimControllers.remove(index)?.dispose();
     final ac = AnimationController(
@@ -375,37 +358,39 @@ class _ImageFullscreenOverlayState extends State<ImageFullscreenOverlay>
           return Stack(
             fit: StackFit.expand,
             children: [
-              // ── PhotoView ───────────────────────────────────────────────
-              PhotoView(
-                key:               ValueKey('pv_${img.filename}'),
-                imageProvider:     MemoryImage(bytes),
-                controller:        _ctrlFor(index),
-                initialScale:      _limitedCoverScale,
-                minScale:          _limitedCoverScale,
-                maxScale:          PhotoViewComputedScale.covered * 4.0,
-                strictScale:       true,
-                backgroundDecoration:
-                    const BoxDecoration(color: Colors.black),
-                // high = bicubic bei Ruhe; PV-Policy droppt auto auf medium während Gesture
-                filterQuality:     FilterQuality.high,
-                disableDoubleTap:  true,
-                onTapUp: (ctx, details, value) =>
-                    _onTapUp(ctx, details, value, index),
-                onScaleStart: (ctx, details, value) {
-                  // Laufende Double-tap-Animation stoppen, sonst kämpft sie mit Pinch
-                  _pvAnimControllers.remove(index)?.dispose();
-                },
-                scaleStateChangedCallback: (state) {
-                  // Nur für die sichtbare Seite auswerten
-                  if (index != _currentIndex) return;
-                  final zoomed = state != PhotoViewScaleState.initial &&
-                      state != PhotoViewScaleState.zoomedOut;
-                  if (zoomed != _isZoomed && mounted) {
-                    setState(() => _isZoomed = zoomed);
-                  }
-                },
-                loadingBuilder: (ctx, event) => const Center(
-                    child: CircularProgressIndicator(color: Colors.white54)),
+              // ── PhotoView (in Listener für Double-tap via raw pointer) ────
+              // Listener nimmt NICHT am GestureArena teil → kein Pinch-Konflikt.
+              // disableDoubleTap:true verhindert PV-eigene nextScaleState-Logik.
+              // onTapUp entfernt → kein TapGestureRecognizer in der Arena.
+              Listener(
+                behavior: HitTestBehavior.translucent,
+                onPointerDown: (event) => _trackPointerDown(event, index),
+                child: PhotoView(
+                  key:               ValueKey('pv_${img.filename}'),
+                  imageProvider:     MemoryImage(bytes),
+                  controller:        _ctrlFor(index),
+                  initialScale:      PhotoViewComputedScale.covered,
+                  minScale:          PhotoViewComputedScale.covered,
+                  maxScale:          PhotoViewComputedScale.covered * 4.0,
+                  strictScale:       true,
+                  backgroundDecoration:
+                      const BoxDecoration(color: Colors.black),
+                  filterQuality:     FilterQuality.high,
+                  disableDoubleTap:  true,
+                  onScaleStart: (ctx, details, value) {
+                    _pvAnimControllers.remove(index)?.dispose();
+                  },
+                  scaleStateChangedCallback: (state) {
+                    if (index != _currentIndex) return;
+                    final zoomed = state != PhotoViewScaleState.initial &&
+                        state != PhotoViewScaleState.zoomedOut;
+                    if (zoomed != _isZoomed && mounted) {
+                      setState(() => _isZoomed = zoomed);
+                    }
+                  },
+                  loadingBuilder: (ctx, event) => const Center(
+                      child: CircularProgressIndicator(color: Colors.white54)),
+                ),
               ),
 
               // ── Caption-Gradient + Text ──────────────────────────────────

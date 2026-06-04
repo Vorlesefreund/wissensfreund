@@ -1,17 +1,27 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-03T18:22:24Z -->
+<!-- updated: 2026-06-04T08:04:27Z -->
 <!-- Dieser File wird von Claude Code bei jeder Session aktualisiert. -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## 🟢 Zuletzt abgeschlossen (Session 2026-06-03 — photo_view_plus Migration)
+## 🟡 Gerade in Arbeit (Session 2026-06-04 — R1/R2/R3 Fixes)
 
-**Branch:** `spike/photo-view-plus` — APK auf S23 installiert.
-- InteractiveViewer → photo_view_plus 1.1.1 (PhotoViewGestureDetectorScope fix)
-- _LimitedCoverScale: resolve() = min(sk, sc*1.18) | strictScale | maxScale=covered*4
-- Double-tap: disableDoubleTap+onTapUp-Debounce+AnimController+_clampPosition()
-- bottomInset für alle Bottom-Elemente | filterQuality.high | Flutter 3.44.0 / Dart 3.12.0
+**Branch:** `spike/photo-view-plus` — APK auf S23 installiert, wartet auf Gerätetest.
+
+### Fixes implementiert (lib/widgets/image_fullscreen_overlay.dart)
+**R1 (Letterbox):** `_LimitedCoverScale` entfernt → `PhotoViewComputedScale.covered` für
+`initialScale` + `minScale`. Formel `min(sk, sc*1.18)` produzierte Letterbox für fast alle
+Nicht-Quadrat-Bilder (sk/sc >> 1.18 → Ergebnis ≈ contained). Fix: covered füllt Viewport immer.
+
+**R2 (Pinch erst beim 2. Touch):** `onTapUp` aus PhotoView entfernt → kein TapGestureRecognizer
+in der GestureArena. DoubleTapGestureRecognizer (mit null-Callback von disableDoubleTap:true)
+bleibt, gibt aber bei 2-Pointer-Event (Pinch) sofort auf.
+
+**R3 (Doppeltipp tut nichts):** `Listener(onPointerDown:)` um PhotoView gewickelt.
+`Listener` nimmt NICHT am GestureArena teil → kein Konflikt mit PV-internem DTGR.
+Debounce-Logik (300ms/40px) auf PointerDown des 2. Taps → `_handleDoubleTap` mit
+`ctrl.value` für aktuellen Scale/Position. Animiert 1x↔2.5x zur Tippposition.
 
 ---
 
@@ -24,7 +34,7 @@
 [ ] Doppeltipp 1x↔2.5x zentriert auf Tippposition
 [ ] Zurück- / Speaker- / ⓘ-Lizenz-Button funktionsgleich
 [ ] Bildunterschrift + "1 / 3"-Zähler korrekt
-[ ] Limited cover max ~15% Crop, kein Letterbox
+[ ] Bild füllt Viewport (kein Letterbox)
 [ ] Schwarzer Hintergrund | Seitenverhältnis-Randfälle
 ```
 
