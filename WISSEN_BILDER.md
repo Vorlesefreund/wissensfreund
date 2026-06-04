@@ -1,6 +1,6 @@
 # WISSEN: Bild-Pipeline
 <!-- Thematisches Wissensdokument — wird nicht täglich gelesen, nur bei Bild-Themen -->
-<!-- Letztes Update: 2026-06-01 -->
+<!-- Letztes Update: 2026-06-04 -->
 
 ## Status: ABGESCHLOSSEN ✅
 
@@ -48,6 +48,50 @@ deshalb ist `SKIP_COMMONS=1` verlustlos möglich.
 - `prop=images` + Caption-Matching → nur ~30% Konfidenz
 - `action=parse` + Count-Matching → 37–82%, zu unzuverlässig
 - mwoffliner (openzim) → nur als Notfall-Fallback wenn Scraping scheitert
+
+---
+
+## Content-Sicherheit (Bilder) — KINDERSCHUTZ
+
+Geplante dreistufige Filterung (Konzept); tatsächlicher Stand aus Code-Analyse 2026-06-04:
+
+- **Stufe 1 — Lizenz-Whitelist** (nur CC0, CC-BY, CC-BY-SA): **✅ aktiv implementiert.**
+  `_is_free_license()` in `generate_articles.py`; Commons-API `LicenseShortName`-Filter
+  in `patch_article_images_v1.py`. Nicht-freie Lizenzen werden vor Aufnahme ausgeschlossen.
+
+- **Stufe 2 — Kategorie-Blacklist** (Human_sexuality, War_photographs, Medical_imaging,
+  Nudity u.a.): **❌ NICHT implementiert.** `global_exclusions.topics` in der
+  Kategorien-Whitelist-JSON enthält eine entsprechende Liste, aber **kein Code fragt
+  Wikipedia-Bildkategorien ab oder prüft diese topics-Liste**. Bilder aus expliziten
+  Kategorien werden nicht aktiv ausgeschlossen.
+
+- **Stufe 3 — Automatische Bildanalyse** (Content-Moderation, Safe-Search-artig):
+  **⚠️ partiell.** `call_claude_image_filter()` in `patch_article_images_v1.py` sendet
+  altersgerechte Filterregeln im Prompt:
+  - Stufe 1: „Keine Skelette, Fossilien, Anatomie, tote Tiere, Jagdszenen, verstörende Inhalte"
+  - Stufe 2: „Skelette und anatomische Darstellungen ok wenn lehrreich"
+  - Stufe 3: „Alle sachlich korrekten Bilder erlaubt"
+  Claude sieht jedoch nur **Dateinamen** — kein Vision-Modell, keine Safe-Search-API.
+  Dateinamen-Matching ist schwach (z.B. `Anatomy_of_the_vulva.jpg` wird nicht erkannt).
+  Patch noch nicht produktiv gelaufen.
+
+**⚠️ OFFEN (Kinderschutz, Hoch):** Stufen 2 und 3 fehlen als aktiver Code-Filter.
+Vor dem ersten produktiven Bild-Patch-Run entscheiden:
+Reicht der dateiname-basierte Claude-Filter, oder braucht es Wikipedia-Kategorienabruf
+(per `prop=categories` auf Commons) + Vision-API (z.B. Google Safe Search)?
+Diese Entscheidung ist kinderschutz-relevant und sollte vor dem Pilot getroffen werden.
+
+---
+
+## Lizenz / Attribution
+
+`scrape_klexikon_images.py` speichert **keine** Lizenz/Autor-Information (nur Dateiname + Caption).
+
+`patch_article_images_v1.py` holt über Commons-API: `Artist` + `LicenseShortName` + `source_url`.
+
+**CC-BY / CC-BY-SA verlangen Urhebernennung** — die App braucht eine Attributionsanzeige
+(Foto-Credit im Vollbild oder Footer). Für ZIM-Artikel-Bilder ist die Attribution noch
+offen (Patch nicht produktiv gelaufen, Anzeige nicht implementiert).
 
 ---
 

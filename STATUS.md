@@ -1,10 +1,20 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-04T16:58:42Z -->
+<!-- updated: 2026-06-04T19:41:15Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
+
+**Dokumentations-Checkpoint (2026-06-04)**
+- WISSEN_ARTIKEL_PIPELINE.md reconciled: Wortgrenzen-Fix (Fließtext-only), Content-Safety
+  dokumentiert, Stimmt-Regel, living_being-Pflichtmuster, CONTENT_DEPTH/TOPIC_INTEREST
+  als implementiert bestätigt, R2-Koexistenz-Entscheidung, Mengenziele, Quiz-Strategie,
+  System-Prompt-Versionslinie v3.2→v3.3→v3.4
+- WISSEN_BILDER.md: Content-Sicherheit (Bilder) + Lizenz/Attribution ergänzt
+- System-Prompt v3.4 auditiert — 3 Lücken: Alterseignungs-Weglass-Regel,
+  Interessantheits-Methodik, Fließtext-Only-Klarstellung bei Wortgrenzen
+- quiz_and_upload.yml: Auto-Trigger entfernt, nur noch manuell (commit 2cc9779, Hedge)
 
 **Vollbild-Viewer — komplett, auf main gemergt (e0906eb → merge)**
 - PhotoViewGallery (photo_view_plus 1.1.1) ersetzt InteractiveViewer — Pinch-Arena gelöst
@@ -13,12 +23,8 @@
 - Getestet auf S23 ✅; Branch spike/photo-view-plus gelöscht
 
 **Repo-Hygiene — beide Klone auf main vereint (2026-06-04)**
-- Uncommitted work aus wissensfreund_app gesichert + nach main gemergt (profile_creation_screen,
-  quiz_widget, profile_management_screen, network_service, license_cache_db,
-  MainActivity, ZimReader, professor_phrases.dart, device_admin.xml, image_index.json,
-  test-images, Pipeline-Skripte, System-Prompt v3.4, Referenz-Testartikel)
+- Uncommitted work aus wissensfreund_app gesichert + nach main gemergt
 - Arbeitsverzeichnis/Keeper: **C:\Users\Andreas\wissensfreund_repo**
-- CLAUDE.md: absoluter STATUS.md-Pfad → ./STATUS.md; Arbeitsverzeichnis-Regel ergänzt
 
 ---
 
@@ -37,24 +43,45 @@ können nach Entfernung von wissensfreund_app ebenfalls gelöscht werden.
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch
+- **Content-Sicherheitsfilter Bilder entscheiden (Kinderschutz):**
+  Vor Bilder-Patch-Run klären: Reicht dateiname-basierter Claude-Filter, oder braucht es
+  Wikipedia-Kategorienabruf (prop=categories auf Commons) + Vision-API?
+  Stufe 2 + 3 der dreistufigen Filterung fehlen als aktiver Code-Filter.
+  Details: WISSEN_BILDER.md § Content-Sicherheit, WISSEN_ARTIKEL_PIPELINE.md § Content-Sicherheit (Bilder)
 - **Bilder-Patch** (`patch_article_images_v1.py`): Artikel von R2 laden, Patch laufen lassen,
-  zurück nach R2. (ANTHROPIC_API_KEY in GitHub Secrets)
-- **Selbst produzierte Artikel** — Quiz-Checkpoint löschen + Run neu starten
+  zurück nach R2. (ANTHROPIC_API_KEY in GitHub Secrets) — erst nach Kinderschutz-Entscheidung
+- **Selbst produzierte Artikel** — Pipeline starten (Skripte fertig, Code↔Prompt-Abgleich
+  erst beenden)
 
 ### Mittel
+- **Code↔v3.4-Prompt-Abgleich:** `generate_articles.py` sendet v3.2-Felder; v3.4 erwartet
+  TOPIC_APPEAL, TOPIC_FAMILIARITY, WIKIPEDIA_LINKS, ARTICLE_INDEX, IMAGE_METADATA.
+  Details: WISSEN_ARTIKEL_PIPELINE.md § System-Prompt-Versionslinie
+- **Fehlende kanonische Prompt-Datei:** `wissensfreund_system_prompt.md` (ohne Versionssuffix)
+  existiert nicht im Repo; Workflow-Variable zeigt darauf → Pipeline würde scheitern.
+- **R2-Koexistenz:** upload_articles.py nutzt rclone sync → ZIM + Wikipedia-Artikel
+  würden sich überschreiben. Entscheidung: getrennte Präfixe implementieren, vor Pilot.
 - **Epoch-Guard TTS-Callbacks**: Generations-Zähler statt `_ttsStopPending` (~5 Stellen)
 - **Mode B Lupe**: Bold entfernen + `_ttsCursor` erst im progressHandler updaten
 - **Sound-Thumbnails**: wartet auf Audio-Pipeline-Run-Ergebnis
 
-### Niedrig (große Architekturaufgaben)
-- **ZIM→JSON Decode-Auflösungs-Cap**: Bilder beim Decode auf sinnvolle Max-Größe begrenzen
-- **Kiosk → Screen Pinning**: DevicePolicyManager durch Android Screen Pinning ersetzen
-- **STT-Routing**: Mikrofon-Eingabe robuster (AudioFocus, verschiedene Geräte)
-- **Fire-OS-Entscheidung**: App auf Fire-Tablets testen / Entscheidung ob Support
-- **Bild-Tier-Werte vereinheitlichen**: thumb/standard/pro-Pixel-Werte in Konstanten-Datei
+### Niedrig / Klärungsbedarf
+- **Primärkategorie-Konvention + Hierarchie-Ebenen:** erste in Liste vs. primary:true;
+  alle Hierarchieebenen explizit speichern? (Konzeptchat nie final entschieden)
+- **Box-Key Klärung:** myth vs. stimmt vs. stimmt_das — kanonischer Key noch nicht festgeklopft
+- **ZIM→JSON Decode-Auflösungs-Cap**, **Kiosk → Screen Pinning**, **STT-Routing**,
+  **Fire-OS-Entscheidung**, **Bild-Tier-Werte vereinheitlichen**
+
+---
+
+## 🧊 Reserve / auf Eis
+
+- **Klexikon-Quiz-Run** (`generate_quizzes.py`): Hedge, falls selbst produzierte Artikel
+  zu teuer/langsam. Auto-Trigger entfernt (commit 2cc9779). Checkpoint (609 Einträge)
+  auf R2 — vor Aktivierung löschen.
 
 ---
 
 ## 🔵 Verschoben auf Version 1.1
-- Gallery-Artikel (111 Artikel, 540 Bilder), Audio-Pipeline
-- Links/Gemini/Topic-Tree, Upgrade-Dialog, Plus/Premium-Design
+- Gallery-Artikel (111 Artikel, 540 Bilder), Audio-Pipeline, Gemini-TTS-Idee
+- Links/Topic-Tree, Upgrade-Dialog, Plus/Premium-Design
