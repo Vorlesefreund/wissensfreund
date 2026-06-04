@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-04T19:47:29Z -->
+<!-- updated: 2026-06-04T20:12:59Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
