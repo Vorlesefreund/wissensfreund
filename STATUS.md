@@ -1,10 +1,18 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-05T20:58:37Z -->
+<!-- updated: 2026-06-05T21:09:13Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
+
+**v3.7-Vertrag: generate_articles.py + Prompt-Archiv bereinigt (2026-06-05)**
+- build_user_message() auf v3.7: entfernt ARTICLE_PATTERN/CONTENT_DEPTH/TOPIC_INTEREST/THEME_COLOR/SOURCE_URL
+  (Modell leitet in Schritt 0 selbst ab); ergänzt KLEXIKON_AUFRUF_QUARTIL, WIKIPEDIA_LINKS,
+  ARTICLE_INDEX (alle optional), IMAGES→IMAGE_METADATA umbenannt
+- wissensfreund_system_prompt_v3_7.md als kanonische Datei ins Repo; v3_2/v3_4 → _alt/ archiviert
+- SLUG_ALIASES: einstein, mozart, beethoven, kolumbus u.a. → richtige Quartil-Einträge;
+  JSON: 1000→1018 Einträge; WF-Lücken: 64→46
 
 **klexikon_appeal_quartil.json + Pipeline-Integration (2026-06-05)**
 - 1.000 Einträge: Q1/high (>5.000 Views 2022 + Top-10 2025) = 277; Q2/medium = 723
@@ -40,14 +48,12 @@
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch
-- **Code↔v3.4-Prompt-Abgleich (nächste Aufgabe):** `generate_articles.py` sendet v3.2-Felder;
-  v3.4 erwartet TOPIC_APPEAL, TOPIC_FAMILIARITY, WIKIPEDIA_LINKS, ARTICLE_INDEX, IMAGE_METADATA.
-  Details: WISSEN_ARTIKEL_PIPELINE.md § System-Prompt-Versionslinie.
-  Mapping: KLEXIKON_AUFRUF_QUARTIL → TOPIC_APPEAL (quartil 1 → "high", 2 → "medium", fehlt → "low")
-  Außerdem: TOPIC_INTEREST → TOPIC_FAMILIARITY umbenennen? Klären.
-- **Selbst produzierte Artikel** — Pipeline starten nach Prompt-Abgleich
-- **Fehlende kanonische Prompt-Datei:** wissensfreund_system_prompt.md (ohne Versionssuffix)
-  existiert nicht → Workflow-Variable zeigt darauf → Pipeline würde scheitern
+- **WIKIPEDIA_LINKS + ARTICLE_INDEX in prepare_articles.py** — generate_articles.py erwartet sie
+  als optionale Job-Felder, prepare_articles.py setzt sie noch nicht. Nächster Schritt:
+  WIKIPEDIA_LINKS aus Wikipedia `prop=links` + ARTICLE_INDEX aus dem bekannten Slug-Raum befüllen.
+- **Selbst produzierte Artikel** — Pipeline starten (generate_articles.py jetzt auf v3.7)
+- **Kanonische Prompt-Datei für CI/Workflow:** `--system-prompt` braucht expliziten Pfad.
+  Aktuell: `wissensfreund_system_prompt_v3_7.md`. Workflow-Datei (falls vorhanden) prüfen + anpassen.
 
 ### Mittel
 - **Content-Sicherheitsfilter Bilder entscheiden (Kinderschutz):**
