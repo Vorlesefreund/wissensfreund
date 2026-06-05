@@ -181,7 +181,9 @@ def fetch_wikimedia_images(session: requests.Session, title: str, max_images: in
 
 def _is_free_license(s: str) -> bool:
     s = s.upper()
-    return any(k in s for k in ("CC0", "CC BY", "PUBLIC DOMAIN", "PD"))
+    if "-NC" in s or "-ND" in s:
+        return False
+    return any(k in s for k in ("CC0", "CC BY", "PUBLIC DOMAIN", "PD", "FAL", "LAL", "FREE ART", "ART LIBRE"))
 
 
 def _normalize_license(s: str) -> str:
@@ -282,6 +284,7 @@ def build_article_queue(
     age_levels: list[int],
     min_length: int,
     max_length: int,
+    appeal_lookup: dict[str, int] | None = None,
 ) -> list[dict]:
     """
     Iteriert über alle Whitelist-Kategorien, fragt Wikipedia ab,
@@ -289,6 +292,7 @@ def build_article_queue(
     """
     seen_page_ids: set[int] = set()
     queue: list[dict] = []
+    appeal_lookup = appeal_lookup or {}
 
     pipeline_rules = whitelist.get("pipeline_rules", {})
     effective_min = max(min_length, pipeline_rules.get("min_wikipedia_text_length", 500))
@@ -370,10 +374,12 @@ def build_article_queue(
                 topic_interest = compute_topic_interest(pageviews, sub_id)
 
                 # Job-Eintrag für alle angeforderten Altersgruppen ≥ sub_min_level
+                quartil = lookup_appeal_quartile(member["title"], appeal_lookup)
+
                 for level in age_levels:
                     if level < sub_min_level:
                         continue
-                    queue.append({
+                    job: dict = {
                         "article_id":       f"{_slugify(member['title'])}_l{level}",
                         "title":            member["title"],
                         "page_id":          pid,
@@ -390,7 +396,10 @@ def build_article_queue(
                         "content_depth":    content_depth,
                         "topic_interest":   topic_interest,
                         "pageviews_month":  pageviews,
-                    })
+                    }
+                    if quartil is not None:
+                        job["klexikon_aufruf_quartil"] = str(quartil)
+                    queue.append(job)
 
     log.info("Queue fertig: %d Jobs (%d eindeutige Artikel × Stufen)", len(queue), len(seen_page_ids))
     return queue
@@ -402,6 +411,36 @@ def _slugify(title: str) -> str:
     slug = re.sub(r"[äöüß]", lambda m: {"ä":"ae","ö":"oe","ü":"ue","ß":"ss"}[m.group()], slug)
     slug = re.sub(r"[^a-z0-9_]", "", slug)
     return slug[:60]
+
+
+def load_appeal_quartile(path: Path) -> dict[str, int]:
+    """
+    Lädt klexikon_appeal_quartil.json → dict: normierter_slug → quartil (1 oder 2).
+    Indiziert nach 'slug' UND nach normiertem 'klexikon_titel' für robusteres Matching.
+    """
+    if not path.exists():
+        log.warning("klexikon_appeal_quartil.json nicht gefunden: %s — KLEXIKON_AUFRUF_QUARTIL wird nicht gesetzt", path)
+        return {}
+    lookup: dict[str, int] = {}
+    with open(path, encoding="utf-8") as f:
+        entries = json.load(f)
+    for e in entries:
+        q = e.get("quartil")
+        if q is None:
+            continue
+        lookup[e["slug"]] = q
+        # Auch den normalisierten Klexikon-Titel als Schlüssel
+        norm = _slugify(e.get("klexikon_titel", ""))
+        if norm and norm not in lookup:
+            lookup[norm] = q
+    log.info("Appeal-Quartil geladen: %d Eintraege aus %s", len(lookup), path)
+    return lookup
+
+
+def lookup_appeal_quartile(title: str, lookup: dict[str, int]) -> int | None:
+    """Wikipedia-Titel → Quartil (1/2) oder None wenn kein Treffer."""
+    slug = _slugify(title)
+    return lookup.get(slug)
 
 
 # ─────────────────────────────────────────────
@@ -482,12 +521,17 @@ def main() -> None:
 
     session = wp_session()
 
+    # Appeal-Quartil-Lookup laden (optional, kein Fehler wenn Datei fehlt)
+    appeal_path   = Path(__file__).parent.parent / "klexikon_appeal_quartil.json"
+    appeal_lookup = load_appeal_quartile(appeal_path)
+
     queue = build_article_queue(
-        whitelist    = whitelist,
-        session      = session,
-        age_levels   = args.age_levels,
-        min_length   = args.min_length,
-        max_length   = args.max_length,
+        whitelist     = whitelist,
+        session       = session,
+        age_levels    = args.age_levels,
+        min_length    = args.min_length,
+        max_length    = args.max_length,
+        appeal_lookup = appeal_lookup,
     )
 
     # Bereits fertige Artikel herausfiltern (Resume)
