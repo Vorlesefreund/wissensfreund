@@ -1,42 +1,30 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-05T07:28:31Z -->
+<!-- updated: 2026-06-05T20:58:37Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
+**klexikon_appeal_quartil.json + Pipeline-Integration (2026-06-05)**
+- 1.000 Einträge: Q1/high (>5.000 Views 2022 + Top-10 2025) = 277; Q2/medium = 723
+- Kein Wikipedia-Proxy — nur Klexikon-eigene Daten (Hilfe:Meistbesuchte_Artikel_2022 + Top-10-2025)
+- ~2.600+ Artikel ohne Signal bekommen null (Feld weggelassen; Generator schätzt selbst)
+- Slug-Normierung: Umlaute + Sonderzeichen; bekannte Plural→Singular-Mappings
+- `scripts/build_klexikon_appeal.py`: einmaliges Build-Skript (Daten eingebettet), Dry-Run-Option
+- `scripts/prepare_articles.py`: lädt JSON beim Start, setzt KLEXIKON_AUFRUF_QUARTIL="1"/"2"
+  pro Job-Eintrag, lässt Feld weg bei kein Treffer. Auch _is_free_license() auf FAL+NC/ND-Stand
+- Commit: 6254a21, gepusht
+
 **FAL-Lizenz in Bild-Whitelist + NC/ND-Ausschluss (2026-06-05)**
-- Kalibrier-Harness (test_image_safety_filter.py, Pilot Elefant) fand: `Elephant_feces_in_the_wildlife.jpg`
-  hat Lizenz FAL — stand falsch auf reject, obwohl Bild im echten Klexikon-Artikel steht.
-- FAL/LAL/Free Art/Licence Art Libre in `_is_free_license()` ergänzt (generate_articles.py,
-  patch_article_images_v1.py neu, test_image_safety_filter.py). NC/ND-Ausschluss an allen 3 Stellen.
-- patch_article_images_v1.py: fehlenden Lizenzfilter-Schritt nach fetch_commons_metadata() ergänzt.
-- WISSEN_BILDER.md: Doku-Fehler korrigiert + Kalibrier-Notiz Pilot Elefant ergänzt.
+- Kalibrier-Harness fand: Elephant_feces_in_the_wildlife.jpg (FAL) war fälschlich reject
+- FAL/LAL/Free Art/Licence Art Libre in _is_free_license() ergänzt (3 Stellen)
+- patch_article_images_v1.py: Lizenzfilter-Schritt nach fetch_commons_metadata() neu ergänzt
+- WISSEN_BILDER.md: Doku-Fehler korrigiert + Kalibrier-Notiz Pilot Elefant
 
 **Dokumentations-Checkpoint (2026-06-04)**
-- WISSEN_ARTIKEL_PIPELINE.md reconciled: Wortgrenzen-Fix (interest-gestaffelt, inkl.
-  Boxen ohne Quiz, MASSGEBLICHER STAND Entscheidung 02.06.), Content-Safety dokumentiert,
-  Stimmt-Regel, living_being-Pflichtmuster, CONTENT_DEPTH/TOPIC_INTEREST als implementiert
-  bestätigt, R2-Koexistenz-Entscheidung, Mengenziele, Quiz-Strategie,
-  System-Prompt-Versionslinie v3.2→v3.3→v3.4
-- WISSEN_BILDER.md: Content-Sicherheit (Bilder) + Lizenz/Attribution ergänzt
-- System-Prompt v3.4 auditiert — 3 Lücken: Alterseignungs-Weglass-Regel,
-  Interessantheits-Methodik, Wortgrenzen interest-gestaffelt (inkl. Boxen, ohne Quiz)
-  gegen genaue Werte S1 50-100/100-150/150-250 etc. prüfen
-- quiz_and_upload.yml: Auto-Trigger entfernt, nur noch manuell (commit 2cc9779, Hedge)
-- CLAUDE_CHAT_NOTIZEN.md aufgelöst (commit a047c75); STATUS.md ist ab sofort einziger
-  Handover-Kanal Code→Chat; Aufträge Chat→Code laufen über eingefügte Prompts
-
-**Vollbild-Viewer — komplett, auf main gemergt (e0906eb → merge)**
-- PhotoViewGallery (photo_view_plus 1.1.1) ersetzt InteractiveViewer — Pinch-Arena gelöst
-- 3-Stufen-Doppeltipp: Basis → Stufe1 (minScale×2.5) → Max (covered×4) → Basis, deterministisch
-- Caption an Bildunterkante verankert; Pinch-Fix via Future.microtask
-- Getestet auf S23 ✅; Branch spike/photo-view-plus gelöscht
-
-**Repo-Hygiene — beide Klone auf main vereint (2026-06-04)**
-- Uncommitted work aus wissensfreund_app gesichert + nach main gemergt
-- Arbeitsverzeichnis/Keeper: **C:\Users\Andreas\wissensfreund_repo**
+- WISSEN_ARTIKEL_PIPELINE.md reconciled, WISSEN_BILDER.md ergänzt
+- STATUS.md ist einziger Handover-Kanal
 
 ---
 
@@ -47,50 +35,39 @@
 2. 30-Sek-Check: `git status` + `git status --ignored` in wissensfreund_app
 3. Dann Ordner löschen
 
-**C:\Users\Andreas\Wissensfreund\CLAUDE.md + STATUS.md** — verwaiste Nicht-Git-Kopien,
-können nach Entfernung von wissensfreund_app ebenfalls gelöscht werden.
-
 ---
 
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch
-- **Content-Sicherheitsfilter Bilder entscheiden (Kinderschutz):**
-  Vor Bilder-Patch-Run klären: Reicht dateiname-basierter Claude-Filter, oder braucht es
-  Wikipedia-Kategorienabruf (prop=categories auf Commons) + Vision-API?
-  Stufe 2 + 3 der dreistufigen Filterung fehlen als aktiver Code-Filter.
-  Details: WISSEN_BILDER.md § Content-Sicherheit, WISSEN_ARTIKEL_PIPELINE.md § Content-Sicherheit (Bilder)
-- **Bilder-Patch** (`patch_article_images_v1.py`): Artikel von R2 laden, Patch laufen lassen,
-  zurück nach R2. (ANTHROPIC_API_KEY in GitHub Secrets) — erst nach Kinderschutz-Entscheidung
-- **Selbst produzierte Artikel** — Pipeline starten (Skripte fertig, Code↔Prompt-Abgleich
-  erst beenden)
+- **Code↔v3.4-Prompt-Abgleich (nächste Aufgabe):** `generate_articles.py` sendet v3.2-Felder;
+  v3.4 erwartet TOPIC_APPEAL, TOPIC_FAMILIARITY, WIKIPEDIA_LINKS, ARTICLE_INDEX, IMAGE_METADATA.
+  Details: WISSEN_ARTIKEL_PIPELINE.md § System-Prompt-Versionslinie.
+  Mapping: KLEXIKON_AUFRUF_QUARTIL → TOPIC_APPEAL (quartil 1 → "high", 2 → "medium", fehlt → "low")
+  Außerdem: TOPIC_INTEREST → TOPIC_FAMILIARITY umbenennen? Klären.
+- **Selbst produzierte Artikel** — Pipeline starten nach Prompt-Abgleich
+- **Fehlende kanonische Prompt-Datei:** wissensfreund_system_prompt.md (ohne Versionssuffix)
+  existiert nicht → Workflow-Variable zeigt darauf → Pipeline würde scheitern
 
 ### Mittel
-- **Code↔v3.4-Prompt-Abgleich:** `generate_articles.py` sendet v3.2-Felder; v3.4 erwartet
-  TOPIC_APPEAL, TOPIC_FAMILIARITY, WIKIPEDIA_LINKS, ARTICLE_INDEX, IMAGE_METADATA.
-  Details: WISSEN_ARTIKEL_PIPELINE.md § System-Prompt-Versionslinie
-- **Fehlende kanonische Prompt-Datei:** `wissensfreund_system_prompt.md` (ohne Versionssuffix)
-  existiert nicht im Repo; Workflow-Variable zeigt darauf → Pipeline würde scheitern.
-- **R2-Koexistenz:** upload_articles.py nutzt rclone sync → ZIM + Wikipedia-Artikel
-  würden sich überschreiben. Entscheidung: getrennte Präfixe implementieren, vor Pilot.
-- **Epoch-Guard TTS-Callbacks**: Generations-Zähler statt `_ttsStopPending` (~5 Stellen)
-- **Mode B Lupe**: Bold entfernen + `_ttsCursor` erst im progressHandler updaten
-- **Sound-Thumbnails**: wartet auf Audio-Pipeline-Run-Ergebnis
+- **Content-Sicherheitsfilter Bilder entscheiden (Kinderschutz):**
+  Stufen 2+3 fehlen als aktiver Code-Filter. Vor Bilder-Patch-Run klären.
+  Details: WISSEN_BILDER.md § Content-Sicherheit
+- **Bilder-Patch** (patch_article_images_v1.py): erst nach Kinderschutz-Entscheidung
+- **R2-Koexistenz:** upload_articles.py nutzt rclone sync → ZIM + WF-Artikel überschreiben sich.
+  Getrennte Präfixe implementieren vor Pilot.
+- **Epoch-Guard TTS-Callbacks**, **Mode B Lupe**, **Sound-Thumbnails** (App-Feinschliff)
 
 ### Niedrig / Klärungsbedarf
-- **Primärkategorie-Konvention + Hierarchie-Ebenen:** erste in Liste vs. primary:true;
-  alle Hierarchieebenen explizit speichern? (Konzeptchat nie final entschieden)
-- **Box-Key Klärung:** myth vs. stimmt vs. stimmt_das — kanonischer Key noch nicht festgeklopft
-- **ZIM→JSON Decode-Auflösungs-Cap**, **Kiosk → Screen Pinning**, **STT-Routing**,
-  **Fire-OS-Entscheidung**, **Bild-Tier-Werte vereinheitlichen**
+- Primärkategorie-Konvention, Box-Key (myth/stimmt/stimmt_das), ZIM→JSON Decode-Cap,
+  Kiosk/Screen-Pinning, STT-Routing, Fire-OS, Bild-Tier-Werte
 
 ---
 
 ## 🧊 Reserve / auf Eis
 
-- **Klexikon-Quiz-Run** (`generate_quizzes.py`): Hedge, falls selbst produzierte Artikel
-  zu teuer/langsam. Auto-Trigger entfernt (commit 2cc9779). Checkpoint (609 Einträge)
-  auf R2 — vor Aktivierung löschen.
+- **Klexikon-Quiz-Run** (generate_quizzes.py): Auto-Trigger entfernt (2cc9779).
+  Checkpoint (609 Einträge) auf R2 — vor Aktivierung löschen.
 
 ---
 
