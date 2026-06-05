@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-05T21:09:13Z -->
+<!-- updated: 2026-06-05T21:14:00Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -48,9 +48,9 @@
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch
-- **WIKIPEDIA_LINKS + ARTICLE_INDEX in prepare_articles.py** — generate_articles.py erwartet sie
-  als optionale Job-Felder, prepare_articles.py setzt sie noch nicht. Nächster Schritt:
-  WIKIPEDIA_LINKS aus Wikipedia `prop=links` + ARTICLE_INDEX aus dem bekannten Slug-Raum befüllen.
+- **Related Terms (nicht-blockierend, nach Generierung→Lektorat-Validierung):**
+  prepare_articles.py befüllt WIKIPEDIA_LINKS und ARTICLE_INDEX noch nicht;
+  generate_articles.py überspringt sie lautlos (optional). Details + Aufgabe: CLAUDE_CHAT_NOTIZEN.md
 - **Selbst produzierte Artikel** — Pipeline starten (generate_articles.py jetzt auf v3.7)
 - **Kanonische Prompt-Datei für CI/Workflow:** `--system-prompt` braucht expliziten Pfad.
   Aktuell: `wissensfreund_system_prompt_v3_7.md`. Workflow-Datei (falls vorhanden) prüfen + anpassen.
