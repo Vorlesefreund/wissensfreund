@@ -92,6 +92,19 @@ img_index verweist auf die Position im images[]-Array (0-basiert). Jeder Satz mu
 Maximale Bildanzahl nach Interesse: high=15, medium=10, low=6"""
 
 
+# ─── Lizenz-Whitelist ────────────────────────────────────────────────────────
+
+def _is_free_license(s: str) -> bool:
+    """Lizenz-Whitelist — spiegelt generate_articles._is_free_license() 1:1."""
+    s = s.upper()
+    if "-NC" in s or "-ND" in s:
+        return False
+    return any(k in s for k in (
+        "CC0", "CC BY", "PUBLIC DOMAIN", "PD",
+        "FAL", "LAL", "FREE ART", "ART LIBRE",
+    ))
+
+
 # ─── Checkpoint ──────────────────────────────────────────────────────────────
 
 def load_checkpoint(path: Path) -> set[str]:
@@ -363,6 +376,12 @@ def patch_article(
 
     meta_map = fetch_commons_metadata(candidates, session)
     time.sleep(RATE_PAUSE)
+
+    # Lizenzfilter: nur freie Lizenzen in den KI-Pool
+    candidates = [fn for fn in candidates if _is_free_license(meta_map.get(fn, {}).get("license", ""))]
+    if not candidates:
+        log.warning("  Keine Bilder mit freier Lizenz — Artikel übersprungen")
+        return False
 
     # ── KI-Filter ────────────────────────────────────────────────────────────
     selected_filenames = candidates  # Fallback: alle Kandidaten

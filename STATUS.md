@@ -1,10 +1,18 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-04T20:42:08Z -->
+<!-- updated: 2026-06-05T07:28:31Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
+
+**FAL-Lizenz in Bild-Whitelist + NC/ND-Ausschluss (2026-06-05)**
+- Kalibrier-Harness (test_image_safety_filter.py, Pilot Elefant) fand: `Elephant_feces_in_the_wildlife.jpg`
+  hat Lizenz FAL — stand falsch auf reject, obwohl Bild im echten Klexikon-Artikel steht.
+- FAL/LAL/Free Art/Licence Art Libre in `_is_free_license()` ergänzt (generate_articles.py,
+  patch_article_images_v1.py neu, test_image_safety_filter.py). NC/ND-Ausschluss an allen 3 Stellen.
+- patch_article_images_v1.py: fehlenden Lizenzfilter-Schritt nach fetch_commons_metadata() ergänzt.
+- WISSEN_BILDER.md: Doku-Fehler korrigiert + Kalibrier-Notiz Pilot Elefant ergänzt.
 
 **Dokumentations-Checkpoint (2026-06-04)**
 - WISSEN_ARTIKEL_PIPELINE.md reconciled: Wortgrenzen-Fix (interest-gestaffelt, inkl.

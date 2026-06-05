@@ -1,6 +1,6 @@
 # WISSEN: Bild-Pipeline
 <!-- Thematisches Wissensdokument — wird nicht täglich gelesen, nur bei Bild-Themen -->
-<!-- Letztes Update: 2026-06-04 -->
+<!-- Letztes Update: 2026-06-05 -->
 
 ## Status: ABGESCHLOSSEN ✅
 
@@ -55,9 +55,15 @@ deshalb ist `SKIP_COMMONS=1` verlustlos möglich.
 
 Geplante dreistufige Filterung (Konzept); tatsächlicher Stand aus Code-Analyse 2026-06-04:
 
-- **Stufe 1 — Lizenz-Whitelist** (nur CC0, CC-BY, CC-BY-SA): **✅ aktiv implementiert.**
-  `_is_free_license()` in `generate_articles.py`; Commons-API `LicenseShortName`-Filter
-  in `patch_article_images_v1.py`. Nicht-freie Lizenzen werden vor Aufnahme ausgeschlossen.
+- **Stufe 1 — Lizenz-Whitelist** (CC0, CC-BY, CC-BY-SA, **FAL/LAL**): **✅ aktiv implementiert.**
+  `_is_free_license()` in `generate_articles.py` und `patch_article_images_v1.py` (je eigene
+  Funktion, identische Logik). FAL (Free Art License / Licence Art Libre, SPDX LAL-1.x) am
+  2026-06-05 ergänzt: FSF-anerkannt, copyleft, kommerziell nutzbar, CC-BY-SA-4.0-kompatibel —
+  gleiche Attribution+Share-Alike-Pflicht wie CC-BY-SA. CC-BY-NC / CC-BY-ND werden explizit
+  ausgeschlossen (NC = nicht kommerziell; ND = keine Bearbeitung, Resizing wäre Bearbeitung).
+  Fund durch Kalibrier-Harness (`Elephant_feces_in_the_wildlife.jpg`, FAL, steht im echten
+  Klexikon-Artikel). **Hinweis:** `patch_article_images_v1.py` hatte zuvor keinen Lizenzfilter
+  (Doku-Fehler 2026-06-04); der Filter wurde mit diesem Commit ergänzt.
 
 - **Stufe 2 — Kategorie-Blacklist** (Human_sexuality, War_photographs, Medical_imaging,
   Nudity u.a.): **❌ NICHT implementiert.** `global_exclusions.topics` in der
@@ -81,6 +87,9 @@ Reicht der dateiname-basierte Claude-Filter, oder braucht es Wikipedia-Kategorie
 (per `prop=categories` auf Commons) + Vision-API (z.B. Google Safe Search)?
 Diese Entscheidung ist kinderschutz-relevant und sollte vor dem Pilot getroffen werden.
 
+**Kalibrierung 2026-06-05, Pilot Elefant:** Stufenfilter bestätigt; Skelett S1 reject /
+S2+S3 keep, Elfenbein S1 reject / S3 keep; S2-Skelett bewusst keep.
+
 ---
 
 ## Lizenz / Attribution
@@ -88,10 +97,14 @@ Diese Entscheidung ist kinderschutz-relevant und sollte vor dem Pilot getroffen 
 `scrape_klexikon_images.py` speichert **keine** Lizenz/Autor-Information (nur Dateiname + Caption).
 
 `patch_article_images_v1.py` holt über Commons-API: `Artist` + `LicenseShortName` + `source_url`.
+Freie Lizenzen: CC0, CC-BY, CC-BY-SA, FAL/LAL (alle Varianten: "FAL", "LAL", "Free Art License",
+"Licence Art Libre", LAL-1.2, LAL-1.3). CC-BY-NC / CC-BY-ND werden vor KI-Verarbeitung
+herausgefiltert (NC nicht kommerziell, ND keine Bearbeitung).
 
-**CC-BY / CC-BY-SA verlangen Urhebernennung** — die App braucht eine Attributionsanzeige
+**CC-BY / CC-BY-SA / FAL verlangen Urhebernennung** — die App braucht eine Attributionsanzeige
 (Foto-Credit im Vollbild oder Footer). Für ZIM-Artikel-Bilder ist die Attribution noch
 offen (Patch nicht produktiv gelaufen, Anzeige nicht implementiert).
+Der offene Punkt „Attributionsanzeige" deckt FAL vollständig mit ab (gleiche Urhebernennungspflicht).
 
 ---
 

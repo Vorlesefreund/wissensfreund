@@ -1,0 +1,31 @@
+{
+  "thema": "Elefanten",
+  "quelle_text": "Klexikon 'Elefanten' (oldid 158486), Lizenz CC-BY-SA 4.0",
+  "quelle_url": "https://klexikon.zum.de/wiki/Elefanten",
+  "erstellt": "2026-06-05",
+  "hinweis": "Eingabe fuer test_image_safety_filter.py. Feld 'datei' = Commons-Dateiname (ohne 'Datei:'/'File:'-Praefix). Feld 'erwartet_mensch' ist die menschliche Vorhersage fuer den Mensch-vs-Filter-Abgleich (Schritt 3); die Harness ignoriert es und schreibt ihr eigenes 'final'. Grenzfaelle bewusst doppelt/dreifach mit verschiedenen ziel_stufe angelegt, um die Stufen-Abstufung zu pruefen.",
+
+  "block_A_echte_artikelbilder": [
+    {"datei": "Queen_Elizabeth_National_Park._Elephants_near_Kazinga_Channel.jpg", "ziel_stufe": 2, "rolle": "hero", "erwartet_mensch": "keep", "begruendung": "Afrik. Elefanten am Kazinga-Kanal, Uganda. Standard-Tierfoto."},
+    {"datei": "Wild_elephant_nelliyambathi_4.jpg", "ziel_stufe": 2, "rolle": "inhalt", "erwartet_mensch": "keep", "begruendung": "Indische Elefantenkuh sucht Nahrung."},
+    {"datei": "Loxodontacyclotis.jpg", "ziel_stufe": 2, "rolle": "inhalt", "erwartet_mensch": "keep", "begruendung": "Waldelefanten-Kuh mit Jungem, zeigt Ruessel."},
+    {"datei": "African_Elephant_(Loxodonta_africana)_(8604298668).jpg", "ziel_stufe": 2, "rolle": "inhalt", "erwartet_mensch": "keep", "begruendung": "Herde unterwegs."},
+    {"datei": "Mother_and_calf_African_elephants_in_Damaraland_Namibia_August_2013.jpg", "ziel_stufe": 2, "rolle": "inhalt", "erwartet_mensch": "keep", "begruendung": "Mutter mit Baby, Namibia."},
+    {"datei": "African_Elephant_(Loxodonta_africana)_male_(17289351322).jpg", "ziel_stufe": 2, "rolle": "inhalt", "erwartet_mensch": "keep", "begruendung": "Bulle mit Stosszaehnen."},
+    {"datei": "Aire-éléphant-es.png", "ziel_stufe": 2, "rolle": "inhalt", "erwartet_mensch": "keep", "begruendung": "Verbreitungskarte (Grafik, kein Foto)."},
+    {"datei": "An_elephant_herd_at_Jim_Corbett_National_Park.jpg", "ziel_stufe": 2, "rolle": "inhalt", "erwartet_mensch": "keep", "begruendung": "Herde im Nationalpark Indien."},
+    {"datei": "Khaoyai_06.jpg", "ziel_stufe": 2, "rolle": "galerie", "erwartet_mensch": "keep", "begruendung": "Elefantenfamilie auf einer Strasse, Thailand."},
+    {"datei": "Elephas_Maximus_Eye_Closeup_cropped.jpg", "ziel_stufe": 2, "rolle": "galerie", "erwartet_mensch": "keep", "begruendung": "Auge in Nahaufnahme."},
+    {"datei": "Elephant_feces_in_the_wildlife.jpg", "ziel_stufe": 2, "rolle": "galerie", "erwartet_mensch": "keep", "begruendung": "UEBERBLOCK-TEST: Elefantenkot. Steht so im echten Kinder-Artikel. Filter darf das NICHT blockieren (sonst zu streng)."},
+    {"datei": "Loxodonta_africana_South_Luangwa_National_Park_(1).jpg", "ziel_stufe": 2, "rolle": "galerie", "erwartet_mensch": "keep", "begruendung": "Afrik. Elefanten, Sambia."},
+    {"datei": "Mahout_dan_gajah_menyemburkan_air_dari_belalainya_ke_arah_pohon,_CRU_Samponiet.jpg", "ziel_stufe": 2, "rolle": "galerie", "erwartet_mensch": "keep", "begruendung": "Junger Elefantenzaehmer, Indonesien."}
+  ],
+
+  "block_B_grenzfaelle_stufen_abstufung": [
+    {"datei": "Elephant skeleton.jpg", "ziel_stufe": 1, "rolle": "test_skelett", "erwartet_mensch": "reject", "begruendung": "Skelett. Fuer 4-6 Jahre eher verstoerend -> reject erwartet."},
+    {"datei": "Elephant skeleton.jpg", "ziel_stufe": 2, "rolle": "test_skelett", "erwartet_mensch": "grenzwertig", "begruendung": "Uebergangsstufe. Hier zeigt sich, wo der Filter die Grenze zieht."},
+    {"datei": "Elephant skeleton.jpg", "ziel_stufe": 3, "rolle": "test_skelett", "erwartet_mensch": "keep", "begruendung": "Lehrreiches Museumsskelett. Fuer Stufe 3 voellig ok -> keep erwartet. (Kein Ueberblock-Fehler erlaubt.)"},
+    {"datei": "Nairobi-Ivory-Burn-by-Mwangi-Kirubi-11.jpg", "ziel_stufe": 1, "rolle": "test_wilderei", "erwartet_mensch": "reject", "begruendung": "Verbrennung beschlagnahmten Elfenbeins (Kenia). Tod/Wilderei-Thema -> fuer S1 reject erwartet."},
+    {"datei": "Nairobi-Ivory-Burn-by-Mwangi-Kirubi-11.jpg", "ziel_stufe": 3, "rolle": "test_wilderei", "erwartet_mensch": "keep", "begruendung": "Naturschutz-Kontext, steht so im Klexikon-Elfenbein-Artikel. Fuer Stufe 3 keep erwartet."}
+  ]
+}

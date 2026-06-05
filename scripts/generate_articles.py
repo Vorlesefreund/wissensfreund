@@ -174,7 +174,12 @@ def fetch_images_for_article(session: requests.Session, title: str, max_images: 
 
 def _is_free_license(s: str) -> bool:
     s = s.upper()
-    return any(k in s for k in ("CC0", "CC BY", "PUBLIC DOMAIN", "PD"))
+    if "-NC" in s or "-ND" in s:
+        return False
+    return any(k in s for k in (
+        "CC0", "CC BY", "PUBLIC DOMAIN", "PD",
+        "FAL", "LAL", "FREE ART", "ART LIBRE",
+    ))
 
 
 def _normalize_license(s: str) -> str:
