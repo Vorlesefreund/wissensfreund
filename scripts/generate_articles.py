@@ -208,20 +208,34 @@ def load_system_prompt(path: Path) -> str:
 
 
 def build_user_message(job: dict, wikipedia_text: str, images: list[dict]) -> str:
-    return f"""WIKIPEDIA_TEXT:
-{wikipedia_text}
+    """Baut den User-Message-String nach v3.7-Vertrag.
 
-ARTICLE_TITLE: {job['title']}
-AGE_LEVEL: {job['age_level']}
-ARTICLE_PATTERN: {job['pattern']}
-CONTENT_DEPTH: {job.get('content_depth', 2)}
-TOPIC_INTEREST: {job.get('topic_interest', 'medium')}
-THEME_COLOR: {job['theme_color']}
-SOURCE_URL: {job['source_url']}
-SOURCE_REV: {job.get('source_rev', '')}
+    Pflicht: WIKIPEDIA_TEXT, ARTICLE_TITLE, AGE_LEVEL
+    Optional: WIKIPEDIA_LINKS, ARTICLE_INDEX, KLEXIKON_AUFRUF_QUARTIL, IMAGE_METADATA
+    Nicht mehr übergeben (Modell leitet selbst ab in Schritt 0):
+      ARTICLE_PATTERN, CONTENT_DEPTH, TOPIC_APPEAL/TOPIC_INTEREST
+    """
+    parts = [
+        "WIKIPEDIA_TEXT:",
+        wikipedia_text,
+        "",
+        f"ARTICLE_TITLE: {job['title']}",
+        f"AGE_LEVEL: {job['age_level']}",
+    ]
 
-IMAGES:
-{json.dumps(images, ensure_ascii=False, indent=2)}"""
+    # Optionale Felder — nur wenn im Job vorhanden
+    if job.get("wikipedia_links"):
+        parts.append(f"WIKIPEDIA_LINKS: {json.dumps(job['wikipedia_links'], ensure_ascii=False)}")
+    if job.get("article_index"):
+        parts.append(f"ARTICLE_INDEX: {json.dumps(job['article_index'], ensure_ascii=False)}")
+    if job.get("klexikon_aufruf_quartil"):
+        parts.append(f"KLEXIKON_AUFRUF_QUARTIL: {job['klexikon_aufruf_quartil']}")
+
+    # Bild-Metadaten (von Commons-API vorgeladen)
+    if images:
+        parts += ["", "IMAGE_METADATA:", json.dumps(images, ensure_ascii=False, indent=2)]
+
+    return "\n".join(parts)
 
 
 def call_claude_api(

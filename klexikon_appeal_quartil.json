@@ -80,6 +80,14 @@
     "jahr": "2022"
   },
   {
+    "slug": "einstein",
+    "klexikon_titel": "Albert Einstein",
+    "aufrufe_oder_rang": ">5000",
+    "quartil": 1,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
     "slug": "alpen",
     "klexikon_titel": "Alpen",
     "aufrufe_oder_rang": ">5000",
@@ -377,6 +385,14 @@
   },
   {
     "slug": "christoph_kolumbus",
+    "klexikon_titel": "Christoph Kolumbus",
+    "aufrufe_oder_rang": ">10000",
+    "quartil": 1,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
+    "slug": "kolumbus",
     "klexikon_titel": "Christoph Kolumbus",
     "aufrufe_oder_rang": ">10000",
     "quartil": 1,
@@ -944,6 +960,14 @@
     "jahr": "2022"
   },
   {
+    "slug": "gutenberg",
+    "klexikon_titel": "Johannes Gutenberg",
+    "aufrufe_oder_rang": ">5000",
+    "quartil": 1,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
     "slug": "judentum",
     "klexikon_titel": "Judentum",
     "aufrufe_oder_rang": ">10000",
@@ -1153,6 +1177,14 @@
   },
   {
     "slug": "ludwig_van_beethoven",
+    "klexikon_titel": "Ludwig van Beethoven",
+    "aufrufe_oder_rang": ">5000",
+    "quartil": 1,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
+    "slug": "beethoven",
     "klexikon_titel": "Ludwig van Beethoven",
     "aufrufe_oder_rang": ">5000",
     "quartil": 1,
@@ -1464,6 +1496,14 @@
     "jahr": "2022"
   },
   {
+    "slug": "pharaonen",
+    "klexikon_titel": "Pharao",
+    "aufrufe_oder_rang": ">5000",
+    "quartil": 1,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
     "slug": "photosynthese",
     "klexikon_titel": "Photosynthese",
     "aufrufe_oder_rang": ">5000",
@@ -1520,6 +1560,14 @@
     "jahr": "2022"
   },
   {
+    "slug": "nordlicht",
+    "klexikon_titel": "Polarlicht",
+    "aufrufe_oder_rang": ">5000",
+    "quartil": 1,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
     "slug": "polen",
     "klexikon_titel": "Polen",
     "aufrufe_oder_rang": ">5000",
@@ -1553,6 +1601,14 @@
   },
   {
     "slug": "pyramiden_von_gizeh",
+    "klexikon_titel": "Pyramiden von Gizeh",
+    "aufrufe_oder_rang": ">5000",
+    "quartil": 1,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
+    "slug": "pyramiden",
     "klexikon_titel": "Pyramiden von Gizeh",
     "aufrufe_oder_rang": ">5000",
     "quartil": 1,
@@ -2152,6 +2208,14 @@
     "jahr": "2022/2025"
   },
   {
+    "slug": "mozart",
+    "klexikon_titel": "Wolfgang Amadeus Mozart",
+    "aufrufe_oder_rang": "top10_2025+>10000",
+    "quartil": 1,
+    "quelle": "klexikon_top10_2025+liste_2022",
+    "jahr": "2022/2025"
+  },
+  {
     "slug": "zehn_gebote",
     "klexikon_titel": "Zehn Gebote",
     "aufrufe_oder_rang": ">20000",
@@ -2457,6 +2521,14 @@
   },
   {
     "slug": "apollo_11",
+    "klexikon_titel": "Apollo 11",
+    "aufrufe_oder_rang": ">2000",
+    "quartil": 2,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
+    "slug": "mondlandung",
     "klexikon_titel": "Apollo 11",
     "aufrufe_oder_rang": ">2000",
     "quartil": 2,
@@ -3264,6 +3336,14 @@
     "jahr": "2022"
   },
   {
+    "slug": "dodo",
+    "klexikon_titel": "Dodo-Vogel",
+    "aufrufe_oder_rang": ">1000",
+    "quartil": 2,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
     "slug": "donau",
     "klexikon_titel": "Donau",
     "aufrufe_oder_rang": ">2000",
@@ -3593,6 +3673,14 @@
   },
   {
     "slug": "ferdinand_magellan",
+    "klexikon_titel": "Ferdinand Magellan",
+    "aufrufe_oder_rang": ">2000",
+    "quartil": 2,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
+    "slug": "magellan",
     "klexikon_titel": "Ferdinand Magellan",
     "aufrufe_oder_rang": ">2000",
     "quartil": 2,
@@ -4512,6 +4600,14 @@
     "jahr": "2022"
   },
   {
+    "slug": "newton",
+    "klexikon_titel": "Isaac Newton",
+    "aufrufe_oder_rang": ">2000",
+    "quartil": 2,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
     "slug": "island",
     "klexikon_titel": "Island",
     "aufrufe_oder_rang": ">4000",
@@ -5104,6 +5200,14 @@
     "jahr": "2022"
   },
   {
+    "slug": "da_vinci",
+    "klexikon_titel": "Leonardo da Vinci",
+    "aufrufe_oder_rang": ">4000",
+    "quartil": 2,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
     "slug": "liberalismus",
     "klexikon_titel": "Liberalismus",
     "aufrufe_oder_rang": ">3000",
@@ -5248,6 +5352,14 @@
     "jahr": "2022"
   },
   {
+    "slug": "gandhi",
+    "klexikon_titel": "Mahatma Gandhi",
+    "aufrufe_oder_rang": ">3000",
+    "quartil": 2,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
     "slug": "mais",
     "klexikon_titel": "Mais",
     "aufrufe_oder_rang": ">3000",
@@ -5257,6 +5369,14 @@
   },
   {
     "slug": "malala_yousafzai",
+    "klexikon_titel": "Malala Yousafzai",
+    "aufrufe_oder_rang": ">4000",
+    "quartil": 2,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
+    "slug": "malala",
     "klexikon_titel": "Malala Yousafzai",
     "aufrufe_oder_rang": ">4000",
     "quartil": 2,
@@ -5321,6 +5441,14 @@
   },
   {
     "slug": "martin_luther_king",
+    "klexikon_titel": "Martin Luther King",
+    "aufrufe_oder_rang": ">3000",
+    "quartil": 2,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
+    "slug": "mlk",
     "klexikon_titel": "Martin Luther King",
     "aufrufe_oder_rang": ">3000",
     "quartil": 2,
@@ -7040,6 +7168,14 @@
     "jahr": "2022"
   },
   {
+    "slug": "solarenergie",
+    "klexikon_titel": "Sonnenenergie",
+    "aufrufe_oder_rang": ">3000",
+    "quartil": 2,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
     "slug": "sonnenfinsternis",
     "klexikon_titel": "Sonnenfinsternis",
     "aufrufe_oder_rang": ">4000",
@@ -7793,6 +7929,14 @@
   },
   {
     "slug": "windkraft",
+    "klexikon_titel": "Windkraft",
+    "aufrufe_oder_rang": ">3000",
+    "quartil": 2,
+    "quelle": "klexikon_liste_2022",
+    "jahr": "2022"
+  },
+  {
+    "slug": "windkraftanlage",
     "klexikon_titel": "Windkraft",
     "aufrufe_oder_rang": ">3000",
     "quartil": 2,

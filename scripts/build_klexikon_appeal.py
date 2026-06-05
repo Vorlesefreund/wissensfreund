@@ -347,6 +347,35 @@ def to_slug(title: str) -> str:
     return PLURAL_SINGULAR.get(slug, slug)
 
 
+# Kurzform-Slug → kanonischer Klexikon-Titel.
+# Zweck: WF-Artikel die mit Kurzform-Slug (z.B. "einstein") generiert werden,
+# sollen trotzdem ein Quartil-Signal bekommen, auch wenn der Klexikon-Eintrag
+# den vollen Namen trägt ("Albert Einstein").
+SLUG_ALIASES: dict[str, str] = {
+    # Personen
+    "einstein":          "Albert Einstein",           # Band 3, Q1
+    "beethoven":         "Ludwig van Beethoven",       # Band 3, Q1
+    "mozart":            "Wolfgang Amadeus Mozart",    # Band 2, Q1
+    "kolumbus":          "Christoph Kolumbus",         # Band 2, Q1
+    "gutenberg":         "Johannes Gutenberg",         # Band 3, Q1
+    "da_vinci":          "Leonardo da Vinci",          # Band 4, Q2
+    "newton":            "Isaac Newton",               # Band 6, Q2
+    "gandhi":            "Mahatma Gandhi",             # Band 5, Q2
+    "mlk":               "Martin Luther King",         # Band 5, Q2
+    "malala":            "Malala Yousafzai",           # Band 4, Q2
+    "magellan":          "Ferdinand Magellan",         # Band 6, Q2
+    "humboldt":          "Alexander von Humboldt",     # ggf. nicht in 2022-Liste
+    # Orte / Themen mit abweichender WF-Benennung
+    "pyramiden":         "Pyramiden von Gizeh",        # Band 3, Q1
+    "pharaonen":         "Pharao",                     # Band 3, Q1
+    "nordlicht":         "Polarlicht",                 # Band 3, Q1
+    "mondlandung":       "Apollo 11",                  # Band 6, Q2
+    "solarenergie":      "Sonnenenergie",              # Band 5, Q2
+    "windkraftanlage":   "Windkraft",                  # Band 4, Q2
+    "dodo":              "Dodo-Vogel",                 # Band 7, Q2
+}
+
+
 # ─── Mapping aufbauen ─────────────────────────────────────────────────────────
 
 def build_entries() -> list[dict]:
@@ -396,6 +425,23 @@ def build_entries() -> list[dict]:
                 "quelle":          quelle,
                 "jahr":            "2022",
             }
+
+    # Alias-Einträge: Kurzform-Slug → Quartil des kanonischen Eintrags
+    for alias_slug, klexikon_titel in SLUG_ALIASES.items():
+        canonical_slug = to_slug(klexikon_titel)
+        if alias_slug in entries:
+            continue  # bereits direkt vorhanden
+        canonical = entries.get(canonical_slug)
+        if canonical is None:
+            continue  # kanonischer Titel nicht in der 2022-Liste
+        entries[alias_slug] = {
+            "slug":            alias_slug,
+            "klexikon_titel":  canonical["klexikon_titel"],
+            "aufrufe_oder_rang": canonical["aufrufe_oder_rang"],
+            "quartil":         canonical["quartil"],
+            "quelle":          canonical["quelle"],
+            "jahr":            canonical["jahr"],
+        }
 
     return sorted(entries.values(), key=lambda e: (e["quartil"], e["klexikon_titel"]))
 
@@ -454,10 +500,12 @@ def print_report(entries: list[dict], wf_slugs: set[str]) -> None:
         print(f"  {q:<45} {n:>4}")
     print()
 
-    # Top-20
-    print("TOP-20 (Q1, Top-10-2025 zuerst, dann alphabetisch):")
-    top10_entries = [e for e in q1 if "top10" in e["quelle"]]
-    rest_q1       = [e for e in q1 if "top10" not in e["quelle"]]
+    # Top-20 (Aliasse überspringen — nur kanonischen Slug zeigen)
+    alias_slugs = set(SLUG_ALIASES.keys())
+    q1_canon = [e for e in q1 if e["slug"] not in alias_slugs]
+    print("TOP-20 (Q1, Top-10-2025 zuerst, dann alphabetisch; ohne Alias-Duplikate):")
+    top10_entries = [e for e in q1_canon if "top10" in e["quelle"]]
+    rest_q1       = [e for e in q1_canon if "top10" not in e["quelle"]]
     shown = top10_entries[:10] + rest_q1[:10]
     for i, e in enumerate(shown, 1):
         flag = "[TOP10]" if "top10" in e["quelle"] else "       "
