@@ -1,38 +1,30 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-05T21:14:00Z -->
+<!-- updated: 2026-06-06T14:02:30Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
+**Pipeline v3.8 + Lektorat v2 (2026-06-06)**
+- wissensfreund_system_prompt_v3.8.md erstellt (Basis: v3.7(4), alle 5 Änderungen aus Änderungsdokument)
+  1. Belegtreue: Gedächtnis-Sonderregel (Einzelleistung ≠ allgemeine Fähigkeit)
+  2. Callout-Regeln: Box-Eigenständigkeit (kein Satzfortsatz des Vorgängerabsatzes)
+  3. Häufige Fehler #7 (Intro↔stimmt_das-Widerspruch) + #8 (Konfabulierte Komposita) + Kurz-Check erweitert
+  4. Schlussschritt: 4-Zeilen-Fließtext → strukturierte 15-Zeilen-Checkliste
+  5. Sprachregeln: Prosa-Rhythmus-Bullet nach „Handwerk:"
+- generate_articles.py Docstring: --system-prompt Beispiel auf v3.8 aktualisiert
+- wissensfreund_lektorat_v2.md liegt korrekt im Repo (kein Archivieren nötig, keine v1 vorhanden)
+- KORREKTUR: Lektorat war nie in generate_articles.py integriert — nur ein call_claude_api()-Aufruf.
+  Lektorat läuft als manueller Standalone-Prompt.
+
 **v3.7-Vertrag: generate_articles.py + Prompt-Archiv bereinigt (2026-06-05)**
-- build_user_message() auf v3.7: entfernt ARTICLE_PATTERN/CONTENT_DEPTH/TOPIC_INTEREST/THEME_COLOR/SOURCE_URL
-  (Modell leitet in Schritt 0 selbst ab); ergänzt KLEXIKON_AUFRUF_QUARTIL, WIKIPEDIA_LINKS,
-  ARTICLE_INDEX (alle optional), IMAGES→IMAGE_METADATA umbenannt
-- wissensfreund_system_prompt_v3_7.md als kanonische Datei ins Repo; v3_2/v3_4 → _alt/ archiviert
-- SLUG_ALIASES: einstein, mozart, beethoven, kolumbus u.a. → richtige Quartil-Einträge;
-  JSON: 1000→1018 Einträge; WF-Lücken: 64→46
+- build_user_message() auf v3.7; wissensfreund_system_prompt_v3.7(4).md als kanonische v3.7-Datei
+- SLUG_ALIASES: einstein, mozart, beethoven u.a.; JSON: 1000→1018 Einträge; WF-Lücken: 64→46
 
 **klexikon_appeal_quartil.json + Pipeline-Integration (2026-06-05)**
-- 1.000 Einträge: Q1/high (>5.000 Views 2022 + Top-10 2025) = 277; Q2/medium = 723
-- Kein Wikipedia-Proxy — nur Klexikon-eigene Daten (Hilfe:Meistbesuchte_Artikel_2022 + Top-10-2025)
-- ~2.600+ Artikel ohne Signal bekommen null (Feld weggelassen; Generator schätzt selbst)
-- Slug-Normierung: Umlaute + Sonderzeichen; bekannte Plural→Singular-Mappings
-- `scripts/build_klexikon_appeal.py`: einmaliges Build-Skript (Daten eingebettet), Dry-Run-Option
-- `scripts/prepare_articles.py`: lädt JSON beim Start, setzt KLEXIKON_AUFRUF_QUARTIL="1"/"2"
-  pro Job-Eintrag, lässt Feld weg bei kein Treffer. Auch _is_free_license() auf FAL+NC/ND-Stand
-- Commit: 6254a21, gepusht
-
-**FAL-Lizenz in Bild-Whitelist + NC/ND-Ausschluss (2026-06-05)**
-- Kalibrier-Harness fand: Elephant_feces_in_the_wildlife.jpg (FAL) war fälschlich reject
-- FAL/LAL/Free Art/Licence Art Libre in _is_free_license() ergänzt (3 Stellen)
-- patch_article_images_v1.py: Lizenzfilter-Schritt nach fetch_commons_metadata() neu ergänzt
-- WISSEN_BILDER.md: Doku-Fehler korrigiert + Kalibrier-Notiz Pilot Elefant
-
-**Dokumentations-Checkpoint (2026-06-04)**
-- WISSEN_ARTIKEL_PIPELINE.md reconciled, WISSEN_BILDER.md ergänzt
-- STATUS.md ist einziger Handover-Kanal
+- 1.000 Einträge: Q1/high = 277; Q2/medium = 723
+- prepare_articles.py: setzt KLEXIKON_AUFRUF_QUARTIL pro Job-Eintrag
 
 ---
 
@@ -48,17 +40,16 @@
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch
-- **Related Terms (nicht-blockierend, nach Generierung→Lektorat-Validierung):**
-  prepare_articles.py befüllt WIKIPEDIA_LINKS und ARTICLE_INDEX noch nicht;
-  generate_articles.py überspringt sie lautlos (optional). Details + Aufgabe: CLAUDE_CHAT_NOTIZEN.md
-- **Selbst produzierte Artikel** — Pipeline starten (generate_articles.py jetzt auf v3.7)
+- **Mozart-Neulauf mit v3.8 + Lektorat v2 ausstehend** — erster Validierungsrun der neuen Prompts
+- **Lektorat-Pipeline-Integration zurückgestellt** bis Generator- und Lektorats-Prompt stabil
+  (Lektorat läuft vorerst als manueller Standalone-Prompt)
+- **Related Terms** (WIKIPEDIA_LINKS + ARTICLE_INDEX): prepare_articles.py befüllt sie noch nicht;
+  generate_articles.py überspringt sie lautlos. Details: CLAUDE_CHAT_NOTIZEN.md
 - **Kanonische Prompt-Datei für CI/Workflow:** `--system-prompt` braucht expliziten Pfad.
-  Aktuell: `wissensfreund_system_prompt_v3_7.md`. Workflow-Datei (falls vorhanden) prüfen + anpassen.
+  Aktuell: `wissensfreund_system_prompt_v3.8.md`.
 
 ### Mittel
-- **Content-Sicherheitsfilter Bilder entscheiden (Kinderschutz):**
-  Stufen 2+3 fehlen als aktiver Code-Filter. Vor Bilder-Patch-Run klären.
-  Details: WISSEN_BILDER.md § Content-Sicherheit
+- **Content-Sicherheitsfilter Bilder** (Stufen 2+3 fehlen als Code-Filter, vor Bilder-Patch-Run klären)
 - **Bilder-Patch** (patch_article_images_v1.py): erst nach Kinderschutz-Entscheidung
 - **R2-Koexistenz:** upload_articles.py nutzt rclone sync → ZIM + WF-Artikel überschreiben sich.
   Getrennte Präfixe implementieren vor Pilot.

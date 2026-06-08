@@ -11,7 +11,7 @@ Verwendung:
     python generate_articles.py \
         --jobs-dir   jobs/ \
         --out-dir    articles/ \
-        --system-prompt wissensfreund_system_prompt.md \
+        --system-prompt wissensfreund_system_prompt_v3.8.md \
         --batch      0001 \
         --dry-run
 
