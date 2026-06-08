@@ -180,25 +180,29 @@ def fetch_image_candidates(session: requests.Session, wikipedia_title: str, max_
         if not _is_free_license(license_str):
             continue
         title = cpage.get("title", "")
+        raw_author = (meta.get("Artist", {}).get("value", "")
+                      or meta.get("Credit", {}).get("value", ""))
+        clean_author = re.sub(r"<[^>]+>", "", raw_author).strip()[:80]
         images.append({
             "wikimedia_id": title,
             "filename": _filename_from_title(title),
             "thumb_url": thumb_url,
             "license": license_str,
-            "license_author": meta.get("Artist", {}).get("value", "")
-                              or meta.get("Credit", {}).get("value", ""),
+            "license_author": clean_author,
         })
 
     return images
 
 
+_DOWNLOAD_WAIT = [10, 30, 60]  # Exponentielles Backoff bei 429 (Wikimedia-Rate-Limit)
+
 def download_image(session: requests.Session, url: str) -> bytes | None:
-    for attempt in range(1, 4):
+    for attempt in range(1, 5):
         try:
             resp = session.get(url, timeout=30)
             if resp.status_code == 429:
-                wait = 5 * attempt
-                log.warning("  Download 429 (Versuch %d/3) — warte %ds", attempt, wait)
+                wait = _DOWNLOAD_WAIT[min(attempt - 1, len(_DOWNLOAD_WAIT) - 1)]
+                log.warning("  Download 429 (Versuch %d/4) -- warte %ds", attempt, wait)
                 time.sleep(wait)
                 continue
             resp.raise_for_status()
@@ -207,8 +211,8 @@ def download_image(session: requests.Session, url: str) -> bytes | None:
                 return None
             return resp.content
         except Exception as e:
-            if attempt < 3:
-                time.sleep(3)
+            if attempt < 4 and "429" not in str(e):
+                time.sleep(5)
                 continue
             log.warning("  Download-Fehler: %s -- %s", url, e)
             return None
@@ -217,38 +221,44 @@ def download_image(session: requests.Session, url: str) -> bytes | None:
 
 def analyze_with_vision(client: genai.Client, image_bytes: bytes, mime_type: str, thema: str) -> dict | None:
     prompt = VISION_PROMPT_TEMPLATE.format(thema=thema)
-    try:
-        response = client.models.generate_content(
-            model=GEMINI_MODEL,
-            contents=[
-                types.Part(inline_data=types.Blob(mime_type=mime_type, data=image_bytes)),
-                types.Part(text=prompt),
-            ],
-            config=types.GenerateContentConfig(
-                system_instruction=VISION_SYSTEM_PROMPT,
-                temperature=0.1,
-                thinking_config=types.ThinkingConfig(thinking_budget=0),
-            ),
-        )
-        text = response.text
-        if text is None:
-            parts = []
-            for cand in getattr(response, "candidates", []):
-                for part in getattr(getattr(cand, "content", None), "parts", []) or []:
-                    if not getattr(part, "thought", False) and getattr(part, "text", None):
-                        parts.append(part.text)
-            text = "".join(parts) or ""
-        text = text.strip()
-        # Strip markdown fences if model adds them anyway
-        text = re.sub(r"^```[a-zA-Z]*\n?", "", text)
-        text = re.sub(r"\n?```$", "", text)
-        return json.loads(text)
-    except json.JSONDecodeError as e:
-        log.warning("  JSON-Parse-Fehler: %s", e)
-        return None
-    except Exception as e:
-        log.warning("  Vision-Fehler: %s", e)
-        return None
+    for attempt in range(1, 3):
+        try:
+            response = client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=[
+                    types.Part(inline_data=types.Blob(mime_type=mime_type, data=image_bytes)),
+                    types.Part(text=prompt),
+                ],
+                config=types.GenerateContentConfig(
+                    system_instruction=VISION_SYSTEM_PROMPT,
+                    temperature=0.1,
+                    thinking_config=types.ThinkingConfig(thinking_budget=0),
+                ),
+            )
+            text = response.text
+            if text is None:
+                parts = []
+                for cand in getattr(response, "candidates", []):
+                    for part in getattr(getattr(cand, "content", None), "parts", []) or []:
+                        if not getattr(part, "thought", False) and getattr(part, "text", None):
+                            parts.append(part.text)
+                text = "".join(parts) or ""
+            text = text.strip()
+            text = re.sub(r"^```[a-zA-Z]*\n?", "", text)
+            text = re.sub(r"\n?```$", "", text)
+            return json.loads(text)
+        except json.JSONDecodeError as e:
+            log.warning("  JSON-Parse-Fehler: %s", e)
+            return None
+        except Exception as e:
+            err = str(e)
+            if attempt < 2 and ("503" in err or "unavailable" in err.lower()):
+                log.warning("  Vision 503 (Versuch 1/2) -- warte 30s ...")
+                time.sleep(30)
+                continue
+            log.warning("  Vision-Fehler: %s", e)
+            return None
+    return None
 
 
 def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
@@ -261,7 +271,8 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
     print(f"\n=== Bild-Filter: {thema} (Wikipedia: \"{wikipedia_title}\") ===\n")
 
     session = requests.Session()
-    session.headers["User-Agent"] = "WissensfreundImageFilter/1.0"
+    # Wikimedia verlangt User-Agent mit Kontaktangabe (https://meta.wikimedia.org/wiki/User-Agent_policy)
+    session.headers["User-Agent"] = "WissensfreundImageFilter/1.0 (az@expansionssupport.de; Kinderwissens-App)"
     client = genai.Client(api_key=api_key)
 
     # 1. Kandidaten laden
@@ -287,7 +298,7 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
         if image_bytes is None:
             rejected.append({**img, "reason": "Download fehlgeschlagen", "ablehnungsgrund": "Download fehlgeschlagen"})
             print("    [X] Download fehlgeschlagen")
-            time.sleep(1.0)
+            time.sleep(2.0)
             continue
 
         mime = _mime_from_url(img["thumb_url"])
@@ -316,7 +327,7 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
         hero_marker = " [HERO]" if hero else ""
         print(f"    [OK] [{relevanz}] {beschreibung[:80]}{hero_marker}")
 
-        time.sleep(1.0)
+        time.sleep(2.0)
 
     # 3. Sortieren + Hero bestimmen
     accepted.sort(key=lambda x: (-x["relevanz"], -int(x["hero_tauglich"])))

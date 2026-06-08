@@ -1,11 +1,11 @@
 {
   "thema": "biene",
   "wikipedia_title": "Biene",
-  "generated_at": "2026-06-08T19:02:58.345444+00:00",
+  "generated_at": "2026-06-08T19:18:40.984640+00:00",
   "stats": {
     "candidates_in": 12,
-    "vision_checked": 8,
-    "accepted": 4,
+    "vision_checked": 10,
+    "accepted": 6,
     "rejected": 4
   },
   "hero": {
@@ -22,7 +22,7 @@
       "hero_tauglich": true,
       "beschreibung": "Eine Biene sitzt auf einer rosa Blüte und sammelt Pollen. Man sieht deutlich die Pollenhöschen an ihren Beinen.",
       "license": "CC BY-SA 3.0",
-      "license_author": "<a href=\"//commons.wikimedia.org/wiki/User:Sputniktilt\" title=\"User:Sputniktilt\">Sputniktilt</a>",
+      "license_author": "Sputniktilt",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Bee_on_Echinacea.jpg/960px-Bee_on_Echinacea.jpg",
       "wikimedia_id": "File:Bee on Echinacea.jpg"
     },
@@ -31,59 +31,81 @@
       "filename": "Diphaglossa_gayi,_f,_side,_chile_2014-08-04-18.17.33_ZS_PMax_(14732584979).jpg",
       "relevanz": 8,
       "hero_tauglich": true,
-      "beschreibung": "Eine Nahaufnahme einer pelzigen, gelb-braunen Biene vor einem schwarzen Hintergrund. Man sieht ihre Augen, den Rüssel und die Flügel.",
+      "beschreibung": "Eine Nahaufnahme einer pelzigen, gelb-braunen Biene mit durchsichtigen Flügeln vor einem schwarzen Hintergrund. Die Biene ist seitlich abgebildet und scheint zu schweben.",
       "license": "Public domain",
-      "license_author": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.flickr.com/people/54563451@N08\">USGS Bee Inventory and Monitoring Lab</a> from Beltsville, Maryland, USA",
+      "license_author": "USGS Bee Inventory and Monitoring Lab from Beltsville, Maryland, USA",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Diphaglossa_gayi%2C_f%2C_side%2C_chile_2014-08-04-18.17.33_ZS_PMax_%2814732584979%29.jpg/960px-Diphaglossa_gayi%2C_f%2C_side%2C_chile_2014-08-04-18.17.33_ZS_PMax_%2814732584979%29.jpg",
       "wikimedia_id": "File:Diphaglossa gayi, f, side, chile 2014-08-04-18.17.33 ZS PMax (14732584979).jpg"
     },
     {
       "rank": 3,
-      "filename": "Bienenschwarm_Okavangodelta_(2019).jpg",
-      "relevanz": 7,
+      "filename": "Sleeping_Anthidium_manicatum_8808.jpg",
+      "relevanz": 8,
       "hero_tauglich": false,
-      "beschreibung": "Das Bild zeigt eine große Gruppe kleiner, dunkler Insekten, die vor einem hellblauen Himmel fliegen. Am rechten Bildrand ist die Silhouette eines Baumes mit einigen Blättern zu sehen.",
-      "license": "CC BY-SA 4.0",
-      "license_author": "<a href=\"//commons.wikimedia.org/wiki/User:Hp.Baumeler\" title=\"User:Hp.Baumeler\">Hp.Baumeler</a>",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Bienenschwarm_Okavangodelta_%282019%29.jpg/960px-Bienenschwarm_Okavangodelta_%282019%29.jpg",
-      "wikimedia_id": "File:Bienenschwarm Okavangodelta (2019).jpg"
+      "beschreibung": "Eine Biene mit gelb-schwarzem Körper und Flügeln sitzt auf einer lila Blütenknospe, die von feinen Härchen bedeckt ist. Der Stiel der Pflanze ist grün und ebenfalls behaart.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "soebe, optimisation by Ralf. Thank you very much for doing this, Ralf.",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Sleeping_Anthidium_manicatum_8808.jpg/960px-Sleeping_Anthidium_manicatum_8808.jpg",
+      "wikimedia_id": "File:Sleeping Anthidium manicatum 8808.jpg"
     },
     {
       "rank": 4,
-      "filename": "Osmia_rufa_couple_(aka).jpg",
+      "filename": "Bau_einer_Biene.png",
       "relevanz": 7,
       "hero_tauglich": false,
-      "beschreibung": "Zwei Bienen sind eng beieinander auf einer Oberfläche zu sehen. Ihre pelzigen Körper und Flügel sind detailliert erkennbar, wobei eine Biene auf der anderen liegt.",
-      "license": "CC BY-SA 2.5",
-      "license_author": "<p>André Karwath aka <a href=\"//commons.wikimedia.org/wiki/User:Aka\" title=\"User:Aka\">Aka</a>\n</p>",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Osmia_rufa_couple_%28aka%29.jpg/960px-Osmia_rufa_couple_%28aka%29.jpg",
-      "wikimedia_id": "File:Osmia rufa couple (aka).jpg"
+      "beschreibung": "Eine Biene ist auf einem grünen Blatt zu sehen, wobei verschiedene Körperteile und Flügelstrukturen mit Pfeilen und Beschriftungen detailliert dargestellt sind.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Julie Weissmann",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/47/Bau_einer_Biene.png",
+      "wikimedia_id": "File:Bau einer Biene.png"
+    },
+    {
+      "rank": 5,
+      "filename": "Systropha_planidens.jpg",
+      "relevanz": 7,
+      "hero_tauglich": false,
+      "beschreibung": "Eine schwarze Biene mit Pollen auf dem Körper sitzt in einer weißen Blüte. Die Biene ist von oben zu sehen und füllt einen Großteil des Bildes aus.",
+      "license": "CC BY-SA 2.0 de",
+      "license_author": "",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Systropha_planidens.jpg",
+      "wikimedia_id": "File:Systropha planidens.jpg"
+    },
+    {
+      "rank": 6,
+      "filename": "Hairs_of_Bees_(by_David_Sharp,_1901).jpg",
+      "relevanz": 5,
+      "hero_tauglich": false,
+      "beschreibung": "Das Bild zeigt fünf verschiedene schematische Darstellungen von Haaren oder Borsten, beschriftet mit A bis E. Die Formen variieren von einfachen, glatten Linien bis zu verzweigten oder gedrehten Strukturen.",
+      "license": "Public domain",
+      "license_author": "David Sharp (1840 – 1922)",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Hairs_of_Bees_%28by_David_Sharp%2C_1901%29.jpg/960px-Hairs_of_Bees_%28by_David_Sharp%2C_1901%29.jpg",
+      "wikimedia_id": "File:Hairs of Bees (by David Sharp, 1901).jpg"
     }
   ],
   "rejected": [
     {
-      "filename": "Bau_einer_Biene.png",
-      "reason": "Download fehlgeschlagen",
-      "ablehnungsgrund": "Download fehlgeschlagen",
-      "wikimedia_id": "File:Bau einer Biene.png"
+      "filename": "Bienenschwarm_Okavangodelta_(2019).jpg",
+      "reason": "Vision-Fehler",
+      "ablehnungsgrund": "Vision-API-Fehler",
+      "wikimedia_id": "File:Bienenschwarm Okavangodelta (2019).jpg"
     },
     {
       "filename": "DasypodaHirtipesFemale2.jpg",
-      "reason": "Download fehlgeschlagen",
-      "ablehnungsgrund": "Download fehlgeschlagen",
+      "reason": "Vision-Fehler",
+      "ablehnungsgrund": "Vision-API-Fehler",
       "wikimedia_id": "File:DasypodaHirtipesFemale2.jpg"
     },
     {
-      "filename": "Hairs_of_Bees_(by_David_Sharp,_1901).jpg",
+      "filename": "Honigbiene-Basilikum-04.jpg",
       "reason": "Vision-Fehler",
       "ablehnungsgrund": "Vision-API-Fehler",
-      "wikimedia_id": "File:Hairs of Bees (by David Sharp, 1901).jpg"
+      "wikimedia_id": "File:Honigbiene-Basilikum-04.jpg"
     },
     {
-      "filename": "Honigbiene-Basilikum-04.jpg",
-      "reason": "Download fehlgeschlagen",
-      "ablehnungsgrund": "Download fehlgeschlagen",
-      "wikimedia_id": "File:Honigbiene-Basilikum-04.jpg"
+      "filename": "Osmia_rufa_couple_(aka).jpg",
+      "reason": "Vision-Fehler",
+      "ablehnungsgrund": "Vision-API-Fehler",
+      "wikimedia_id": "File:Osmia rufa couple (aka).jpg"
     }
   ]
 }

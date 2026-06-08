@@ -422,17 +422,41 @@ Das bedeutet: **"Verwendete Artikel" im Output ist eine Schätzung, kein Beweis.
 Das Lektorat darf sich NICHT auf diese Liste verlassen — es muss gegen den tatsächlich
 injizierten Text prüfen.
 
+### Empirischer Befund url_context-Tool (2026-06-08)
+
+Test mit `types.Tool(url_context=types.UrlContext())` auf "Bienen" (biene_l3):
+
+**Schritt 1 (Primärartikel):** Flash fetcht `https://de.wikipedia.org/wiki/Bienen` erfolgreich.
+`url_context_metadata` zeigt `URL_RETRIEVAL_STATUS_SUCCESS` — echter Fetch, kein Training.
+
+**Schritt 2 (interne Links):** Flash versucht, Sekundärartikel zu laden
+(`Westliche_Honigbiene`, `Wildbienen`, `Honigbiene`) — bekommt aber vom Tool:
+> "The provided url does not match the one in the prompt"
+
+**Befund:** Das url_context-Tool fetcht AUSSCHLIESSLICH URLs, die im ursprünglichen
+User-Prompt wörtlich stehen. Dynamisch konstruierte Wikipedia-Links werden abgelehnt.
+Eigenständiges Link-Folgen (Flash entscheidet selbst) ist API-seitig gesperrt.
+
+**`url_context_metadata` bei unserem Produktions-Setup (Option B, kein url_context):**
+Leer — Flash kann keine URLs fetchen. "Verwendete Artikel" im Output = Schätzung.
+
 ### Was NICHT brechen
 
 - `tools=` NIEMALS unbeabsichtigt zur `GenerateContentConfig` hinzufügen.
   Sobald `tools=[types.Tool(url_context=types.UrlContext())]` gesetzt ist, wird Flash
-  wirklich URLs fetchen (teurer, langsamer, non-deterministisch).
+  wirklich URLs fetchen — aber NUR explizit im Prompt genannte URLs.
 - Bei Option-B-Betrieb: Der injizierte Text ist die einzige Wahrheitsquelle.
   Kein Trainingswissen, kein URL-Zugriff.
 
-### Ausbau-Pfad (optional, offen)
+### Ausbau-Pfad (korrekte Implementierung)
 
-Option B vollständig implementieren: `generate_articles.py` soll 1–2 Begleitartikel
-(aus den Wikipedia-Links des Primärartikels) pre-fetchen und als `WIKIPEDIA_TEXT_2` etc.
-injizieren. Flash kann dann aus echten Quellen vertiefende Inhalte beziehen —
-ohne URLs zur Laufzeit zu fetchen.
+Für echtes Multi-Artikel-Grounding gibt es zwei Wege:
+
+**Weg A — Option B komplett:** `generate_articles.py` pre-fetcht 1–2 Begleitartikel
+aus den Wikipedia-Links und injiziert sie als `WIKIPEDIA_TEXT_2`, `WIKIPEDIA_TEXT_3`.
+Flash bekommt alles als Text — kein URL-Tool nötig. **Empfohlen.**
+
+**Weg B — Option A explizit:** `generate_articles.py` legt 2–3 Wikipedia-URLs
+in den User-Message (`COMPANION_URL_1: https://...`), aktiviert url_context-Tool.
+Flash fetcht explizit genannte URLs zur Laufzeit. Teurer + langsamer als Weg A,
+aber ohne pre-fetch nötig. url_context_metadata gibt echten Beweis zurück.
