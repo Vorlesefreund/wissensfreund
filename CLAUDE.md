@@ -1,5 +1,8 @@
 # Wissensfreund App — Claude Code Anweisungen
 
+## GRUNDREGEL QUELLENPRÜFUNG (nicht verhandelbar)
+Vor jedem Faktencheck den vollständigen echten Wikipedia-Quelltext beschaffen und ausschließlich daran prüfen. Kein Faktenurteil ohne wörtliches Belegzitat. "Nicht gefunden" ≠ "falsch". Lange Artikel schneiden beim Abruf ab — den GANZEN Text sichern. Immer gegen den Quelltext-Snapshot der Generierungszeit prüfen, nie gegen ein später nachgeladenes Exemplar. Ohne Volltext keinen Check vortäuschen. Details: QUELLEN_GRUNDREGEL.md.
+
 ## EISERNE REGEL (App-Kernprinzip)
 KI darf NIEMALS aus Trainingswissen antworten.
 Nur aus geladenem Klexikon-Artikeltext. Kein Ausnahmefall. Kein Fallback.

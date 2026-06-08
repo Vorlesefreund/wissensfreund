@@ -1,10 +1,16 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-06T14:02:30Z -->
+<!-- updated: 2026-06-07T21:07:26Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
+
+**Generator-Prompt v3.15 + Lektorat v2.6 + QUELLEN_GRUNDREGEL (2026-06-07)**
+- wissensfreund_generator_prompt_v3.15_neutral.md: Mensch-Bezug-Regel neu; aktive Produktionsversion
+- wissensfreund_lektorat_v2.md (v2.6): Mensch-Bezug-Prüfpunkt in Durchgang B; aktive Lektorats-Version
+- QUELLEN_GRUNDREGEL.md: Truncation-Regel (Abruf langer Artikel) + Snapshot-Regel (Generierungszeitpunkt)
+- CLAUDE.md: GRUNDREGEL QUELLENPRÜFUNG-Block direkt nach erster Überschrift eingefügt
 
 **Pipeline v3.8 + Lektorat v2 (2026-06-06)**
 - wissensfreund_system_prompt_v3.8.md erstellt (Basis: v3.7(4), alle 5 Änderungen aus Änderungsdokument)
