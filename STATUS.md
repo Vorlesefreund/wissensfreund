@@ -1,17 +1,17 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-08T12:02:37Z -->
+<!-- updated: 2026-06-08T12:10:23Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Generator v3.19 — Bereicherungs-Links (2026-06-08)** ← AKTIV
-- wissensfreund_generator_prompt_v3.19_neutral.md: allgemeine Bereicherungs-Link-Logik (themenneutral);
-  neues BEREICHERUNGS_LINKS-Feld im planung-Block; Primärartikel-Regel bei Begriffsklärung;
-  allgemeiner Salienz-Check
-- wissensfreund_generator_prompt_v3.18_neutral.md → _alt/ archiviert (war nie in main gemergt;
-  enthielt: planung-Block, XML-Tags grounding_rules/output_format, Option-B-Hinweis)
+**Generator v3.19 + Lektorat v2.9 in main gemergt (2026-06-08)** ← AKTIV
+- Generator v3.19 + Lektorat v2.9 sind in main gemergt. Beide Feature-Branches gelöscht.
+- v3.19: allgemeine Bereicherungs-Link-Logik (themenneutral); BEREICHERUNGS_LINKS-Feld im
+  planung-Block; Primärartikel-Regel bei Begriffsklärung; allgemeiner Salienz-Check
+- v2.9: Planungs-Check prüft planung-Block-Konsistenz vor Durchgang A
+- wissensfreund_generator_prompt_v3.18_neutral.md → _alt/ archiviert
 - Nächster Schritt: Flash (mittel) mit v3.19 auf Römer re-testen, dann Modellentscheidung
 
 **Generator v3.16 + Lektorat v2.7: Einzel-Quelle/Boxen/nur-Trigger (2026-06-08)** ← überholt
@@ -36,7 +36,6 @@
 
 ### Hoch
 - **Flash-Testlauf v3.19 auf Römer (mittel)** — dann Modellentscheidung
-- **Lektorat v2.9 nach main bringen** (liegt auf unmergtem Branch docs/generator-v318-lektorat-v29)
 - **Lektorat-Pipeline-Integration zurückgestellt** (manueller Standalone-Prompt)
 - **Related Terms** (WIKIPEDIA_LINKS + ARTICLE_INDEX): prepare_articles.py befüllt sie noch nicht
 - **Kanonische Prompt-Datei für CI:** `wissensfreund_system_prompt_v3.8.md`
