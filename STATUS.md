@@ -1,10 +1,17 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-05T21:14:00Z -->
+<!-- updated: 2026-06-08T07:47:58Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
+
+**Generator v3.16 + Lektorat v2.7: Einzel-Quelle/Boxen/nur-Trigger (2026-06-08)**
+- wissensfreund_generator_prompt_v3.16_neutral.md: verschärfte Einzel-Quelle (keine verlinkten
+  Nachbarartikel), Box-Budget pro Stufe×Appeal, Box-Nicht-Doppelung, „Irrglaube hat einen Ort",
+  „nur"+geschlossene Aufzählung als Hochrisiko-PFLICHT-TRIGGER
+- wissensfreund_lektorat_v2.md (v2.7): spiegelt dieselben Regeln in Durchgang A + B
+- wissensfreund_generator_prompt_v3.15_neutral.md → _alt/ archiviert
 
 **v3.7-Vertrag: generate_articles.py + Prompt-Archiv bereinigt (2026-06-05)**
 - build_user_message() auf v3.7: entfernt ARTICLE_PATTERN/CONTENT_DEPTH/TOPIC_INTEREST/THEME_COLOR/SOURCE_URL
