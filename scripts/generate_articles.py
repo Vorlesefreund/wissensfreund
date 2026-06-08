@@ -499,8 +499,11 @@ def process_batch(
             stats.validation_errors += 1
             continue
 
+        # meta.id auf Job-Slug fixieren (Modell generiert sonst Wikipedia-basierte IDs)
+        article.setdefault("meta", {})["id"] = article_id
+
         # generated_at setzen (Pflicht)
-        article.setdefault("meta", {})["generated_at"] = datetime.now(timezone.utc).isoformat()
+        article["meta"]["generated_at"] = datetime.now(timezone.utc).isoformat()
 
         # review_flag aus Job übernehmen wenn KI keines gesetzt hat
         if job.get("review_flag") and not article["meta"].get("review_flag"):

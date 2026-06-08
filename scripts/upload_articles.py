@@ -292,7 +292,7 @@ def upload_to_r2(staging_dir: Path, bucket: str, endpoint: str,
     })
 
     cmd = [
-        "rclone", "sync",
+        "rclone", "copy",
         str(staging_dir),
         f"r2:{bucket}/",
         "--transfers", "20",
@@ -302,7 +302,7 @@ def upload_to_r2(staging_dir: Path, bucket: str, endpoint: str,
         "--log-level", "INFO",
     ]
 
-    log.info("rclone sync → r2:%s/", bucket)
+    log.info("rclone copy → r2:%s/", bucket)
     result = subprocess.run(cmd, env=env)
 
     if result.returncode != 0:
