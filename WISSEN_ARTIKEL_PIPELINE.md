@@ -369,3 +369,70 @@ Muster (pattern) je Kategorie:
 - Primärkategorie-Konvention: erste in der Liste vs. KI entscheidet via `primary: true`
 - Hierarchie-Ebenen: werden alle Ebenen (top + sub) explizit gespeichert?
 - Beide Fragen wurden im Konzeptchat nie final entschieden.
+
+---
+
+## Flash Link-Folgen-Mechanismus (NICHT brechen)
+
+**Stand: 2026-06-08 — Befund aus Produktions-Pipeline-Analyse**
+
+### Zwei Modi im System-Prompt (v3.17+)
+
+Der System-Prompt beschreibt zwei Betriebsmodi:
+
+- **Option A (URL-Context-Tool):** Flash bekommt nur den Artikeltitel, nutzt das `url_context`-Tool
+  um Wikipedia-Seiten zu laden und folgt internen Links aktiv. Nur für interaktive Tests / AI Studio.
+- **Option B (Injected Text):** Das Backend injiziert Primär- und Begleitartikel als fertigen Text
+  (`WIKIPEDIA_TEXT_1`, `WIKIPEDIA_TEXT_2` …). Kein URL-Tool nötig.
+  Prompt-Kommentar: *"Das URL-Context-Tool ist nur für Tests aktiv."*
+
+### Was unsere Pipeline tatsächlich macht
+
+`gemini_client.py` → `call_gemini()` übergibt an `GenerateContentConfig` ausschließlich:
+```python
+types.GenerateContentConfig(
+    system_instruction=system_prompt,
+    temperature=0.6,
+    thinking_config=types.ThinkingConfig(thinking_budget=8192),
+)
+```
+Kein `tools=`, kein `tool_config=`, kein `google_search_retrieval`, kein `url_context`.
+Flash erhält den Primärtext (injiziert von `generate_articles.py` in den `user_message`)
+und hat keinen Netz-Zugriff.
+
+**→ Unsere Pipeline ist Option B — aber aktuell ohne Begleitartikel-Injektion.**
+Nur der Primärtext wird injiziert. Begleitartikel noch nicht implementiert (offen).
+
+### "AFC is enabled with max remote calls: 10" — was dieser Log bedeutet
+
+Erscheint in den Logs VOR jedem API-Call. Kommt aus SDK-Interna (`google.genai`-Bibliothek) —
+AFC = Automatic Function Calling, der SDK-seitige Handler für Tool-Aufrufe in Antworten.
+Da wir keine Tools konfigurieren, ist AFC zwar "bereit", kann aber nie feuern.
+**Kein Handlungsbedarf, kein eigener Code dahinter.**
+
+### "Verwendete Artikel" im Flash-Output
+
+Der System-Prompt schreibt vor: *"Liste am Ende der Ausgabe ALLE verwendeten Artikel."*
+Ohne URL-Context-Tool kann Flash keine Links wirklich folgen.
+Die Quellenliste im Output entsteht durch:
+1. den injizierten Wikipedia-Primärtext (einzige echte Quelle)
+2. Trainings-Wissen über Wikipedia-Verlinkungen (Flash kennt de.Wikipedia aus dem Training)
+
+Das bedeutet: **"Verwendete Artikel" im Output ist eine Schätzung, kein Beweis.**
+Das Lektorat darf sich NICHT auf diese Liste verlassen — es muss gegen den tatsächlich
+injizierten Text prüfen.
+
+### Was NICHT brechen
+
+- `tools=` NIEMALS unbeabsichtigt zur `GenerateContentConfig` hinzufügen.
+  Sobald `tools=[types.Tool(url_context=types.UrlContext())]` gesetzt ist, wird Flash
+  wirklich URLs fetchen (teurer, langsamer, non-deterministisch).
+- Bei Option-B-Betrieb: Der injizierte Text ist die einzige Wahrheitsquelle.
+  Kein Trainingswissen, kein URL-Zugriff.
+
+### Ausbau-Pfad (optional, offen)
+
+Option B vollständig implementieren: `generate_articles.py` soll 1–2 Begleitartikel
+(aus den Wikipedia-Links des Primärartikels) pre-fetchen und als `WIKIPEDIA_TEXT_2` etc.
+injizieren. Flash kann dann aus echten Quellen vertiefende Inhalte beziehen —
+ohne URLs zur Laufzeit zu fetchen.

@@ -1,0 +1,89 @@
+{
+  "thema": "biene",
+  "wikipedia_title": "Biene",
+  "generated_at": "2026-06-08T19:02:58.345444+00:00",
+  "stats": {
+    "candidates_in": 12,
+    "vision_checked": 8,
+    "accepted": 4,
+    "rejected": 4
+  },
+  "hero": {
+    "filename": "Bee_on_Echinacea.jpg",
+    "relevanz": 9,
+    "beschreibung": "Eine Biene sitzt auf einer rosa Blüte und sammelt Pollen. Man sieht deutlich die Pollenhöschen an ihren Beinen.",
+    "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Bee_on_Echinacea.jpg/960px-Bee_on_Echinacea.jpg"
+  },
+  "accepted": [
+    {
+      "rank": 1,
+      "filename": "Bee_on_Echinacea.jpg",
+      "relevanz": 9,
+      "hero_tauglich": true,
+      "beschreibung": "Eine Biene sitzt auf einer rosa Blüte und sammelt Pollen. Man sieht deutlich die Pollenhöschen an ihren Beinen.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "<a href=\"//commons.wikimedia.org/wiki/User:Sputniktilt\" title=\"User:Sputniktilt\">Sputniktilt</a>",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Bee_on_Echinacea.jpg/960px-Bee_on_Echinacea.jpg",
+      "wikimedia_id": "File:Bee on Echinacea.jpg"
+    },
+    {
+      "rank": 2,
+      "filename": "Diphaglossa_gayi,_f,_side,_chile_2014-08-04-18.17.33_ZS_PMax_(14732584979).jpg",
+      "relevanz": 8,
+      "hero_tauglich": true,
+      "beschreibung": "Eine Nahaufnahme einer pelzigen, gelb-braunen Biene vor einem schwarzen Hintergrund. Man sieht ihre Augen, den Rüssel und die Flügel.",
+      "license": "Public domain",
+      "license_author": "<a rel=\"nofollow\" class=\"external text\" href=\"https://www.flickr.com/people/54563451@N08\">USGS Bee Inventory and Monitoring Lab</a> from Beltsville, Maryland, USA",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Diphaglossa_gayi%2C_f%2C_side%2C_chile_2014-08-04-18.17.33_ZS_PMax_%2814732584979%29.jpg/960px-Diphaglossa_gayi%2C_f%2C_side%2C_chile_2014-08-04-18.17.33_ZS_PMax_%2814732584979%29.jpg",
+      "wikimedia_id": "File:Diphaglossa gayi, f, side, chile 2014-08-04-18.17.33 ZS PMax (14732584979).jpg"
+    },
+    {
+      "rank": 3,
+      "filename": "Bienenschwarm_Okavangodelta_(2019).jpg",
+      "relevanz": 7,
+      "hero_tauglich": false,
+      "beschreibung": "Das Bild zeigt eine große Gruppe kleiner, dunkler Insekten, die vor einem hellblauen Himmel fliegen. Am rechten Bildrand ist die Silhouette eines Baumes mit einigen Blättern zu sehen.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "<a href=\"//commons.wikimedia.org/wiki/User:Hp.Baumeler\" title=\"User:Hp.Baumeler\">Hp.Baumeler</a>",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Bienenschwarm_Okavangodelta_%282019%29.jpg/960px-Bienenschwarm_Okavangodelta_%282019%29.jpg",
+      "wikimedia_id": "File:Bienenschwarm Okavangodelta (2019).jpg"
+    },
+    {
+      "rank": 4,
+      "filename": "Osmia_rufa_couple_(aka).jpg",
+      "relevanz": 7,
+      "hero_tauglich": false,
+      "beschreibung": "Zwei Bienen sind eng beieinander auf einer Oberfläche zu sehen. Ihre pelzigen Körper und Flügel sind detailliert erkennbar, wobei eine Biene auf der anderen liegt.",
+      "license": "CC BY-SA 2.5",
+      "license_author": "<p>André Karwath aka <a href=\"//commons.wikimedia.org/wiki/User:Aka\" title=\"User:Aka\">Aka</a>\n</p>",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Osmia_rufa_couple_%28aka%29.jpg/960px-Osmia_rufa_couple_%28aka%29.jpg",
+      "wikimedia_id": "File:Osmia rufa couple (aka).jpg"
+    }
+  ],
+  "rejected": [
+    {
+      "filename": "Bau_einer_Biene.png",
+      "reason": "Download fehlgeschlagen",
+      "ablehnungsgrund": "Download fehlgeschlagen",
+      "wikimedia_id": "File:Bau einer Biene.png"
+    },
+    {
+      "filename": "DasypodaHirtipesFemale2.jpg",
+      "reason": "Download fehlgeschlagen",
+      "ablehnungsgrund": "Download fehlgeschlagen",
+      "wikimedia_id": "File:DasypodaHirtipesFemale2.jpg"
+    },
+    {
+      "filename": "Hairs_of_Bees_(by_David_Sharp,_1901).jpg",
+      "reason": "Vision-Fehler",
+      "ablehnungsgrund": "Vision-API-Fehler",
+      "wikimedia_id": "File:Hairs of Bees (by David Sharp, 1901).jpg"
+    },
+    {
+      "filename": "Honigbiene-Basilikum-04.jpg",
+      "reason": "Download fehlgeschlagen",
+      "ablehnungsgrund": "Download fehlgeschlagen",
+      "wikimedia_id": "File:Honigbiene-Basilikum-04.jpg"
+    }
+  ]
+}
