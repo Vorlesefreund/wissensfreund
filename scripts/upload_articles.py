@@ -292,7 +292,7 @@ def upload_to_r2(staging_dir: Path, bucket: str, endpoint: str,
     })
 
     cmd = [
-        "rclone", "copy",
+        _find_rclone(), "copy",
         str(staging_dir),
         f"r2:{bucket}/",
         "--transfers", "20",
@@ -313,9 +313,25 @@ def upload_to_r2(staging_dir: Path, bucket: str, endpoint: str,
     return True
 
 
+_RCLONE_WINGET = (
+    Path.home() / "AppData/Local/Microsoft/WinGet/Packages"
+)
+
+def _find_rclone() -> str:
+    """Returns 'rclone' if in PATH, otherwise searches WinGet packages."""
+    import shutil
+    if shutil.which("rclone"):
+        return "rclone"
+    # WinGet install location on Windows
+    if _RCLONE_WINGET.exists():
+        for exe in _RCLONE_WINGET.rglob("rclone.exe"):
+            return str(exe)
+    return "rclone"
+
+
 def check_rclone() -> bool:
     try:
-        subprocess.run(["rclone", "--version"], capture_output=True, check=True)
+        subprocess.run([_find_rclone(), "--version"], capture_output=True, check=True)
         return True
     except (FileNotFoundError, subprocess.CalledProcessError):
         return False

@@ -1,0 +1,453 @@
+{
+  "meta": {
+    "id": "dschungel_l3",
+    "title": "Tropischer Regenwald",
+    "subtitle": "Ein riesiger Wald voller Leben am Äquator",
+    "emoji": "🌳",
+    "age_level": 3,
+    "pattern": "place_geography",
+    "theme_color": "#228B22",
+    "word_count": 605,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Tropischer_Regenwald",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "natur",
+    "category_sub": "landschaften",
+    "generated_at": "2026-06-08T16:17:02.507077+00:00"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Aerial view of the Amazon Rainforest.jpg",
+      "alt": "Aerial View Of The Amazon Rainforest",
+      "caption": "",
+      "license": "CC BY-SA 2.0",
+      "license_author": "lubasi",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_the_Amazon_Rainforest.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Aerial_view_of_the_Amazon_Rainforest.jpg/960px-Aerial_view_of_the_Amazon_Rainforest.jpg"
+    },
+    {
+      "index": 1,
+      "filename": "Amazon Rainforest.jpg",
+      "alt": "Amazon Rainforest",
+      "caption": "",
+      "license": "CC BY 2.0",
+      "license_author": "Antonio Campoy",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Amazon_Rainforest.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Amazon_Rainforest.jpg/960px-Amazon_Rainforest.jpg"
+    },
+    {
+      "index": 2,
+      "filename": "Ara ararauna Luc Viatour filtered.jpg",
+      "alt": "Ara Ararauna Luc Viatour Filtered",
+      "caption": "",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Ara_ararauna_Luc_Viatour.jpg: Luc Viatour\nderivative work: JovanCormac",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Ara_ararauna_Luc_Viatour_filtered.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Ara_ararauna_Luc_Viatour_filtered.jpg/960px-Ara_ararauna_Luc_Viatour_filtered.jpg"
+    },
+    {
+      "index": 3,
+      "filename": "Atta cephalotes (Costa Rica) 1.jpg",
+      "alt": "Atta Cephalotes (Costa Rica)",
+      "caption": "",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Hans Hillewaert",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Atta_cephalotes_(Costa_Rica)_1.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Atta_cephalotes_%28Costa_Rica%29_1.jpg/960px-Atta_cephalotes_%28Costa_Rica%29_1.jpg"
+    },
+    {
+      "index": 4,
+      "filename": "Bosque dos Jequitibás - IMG 9971.jpg",
+      "alt": "Bosque Dos Jequitibás   Img",
+      "caption": "",
+      "license": "Public domain",
+      "license_author": "Daderot",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Bosque_dos_Jequitib%C3%A1s_-_IMG_9971.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Bosque_dos_Jequitib%C3%A1s_-_IMG_9971.jpg/960px-Bosque_dos_Jequitib%C3%A1s_-_IMG_9971.jpg"
+    },
+    {
+      "index": 5,
+      "filename": "Forest around MLC.jpg",
+      "alt": "Forest Around Mlc",
+      "caption": "",
+      "license": "CC BY 3.0",
+      "license_author": "CREES-MANU",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Forest_around_MLC.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Forest_around_MLC.jpg/960px-Forest_around_MLC.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Ein Wald, der niemals schläft",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir einen Ort vor, wo es immer warm ist, die Sonne jeden Tag gleich lang scheint und es fast täglich regnet. Das ist der Tropische Regenwald!",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Er ist riesig, voller Leben und so wichtig für unsere Erde, dass er oft als „grüne Lunge“ des Planeten bezeichnet wird.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Diese Wälder liegen rund um den Äquator, wo das Klima besonders feucht und warm ist.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Wo die Bäume in den Himmel wachsen",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s004",
+          "text": "Das Besondere am Regenwald ist sein Aufbau: Die Bäume sind nicht alle gleich hoch, sondern bilden verschiedene „Stockwerke“.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Ganz unten am Boden leben Moose und Farne, die wenig Licht brauchen.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Darüber wachsen Sträucher und junge Bäume.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Das Hauptdach des Waldes bildet sich in etwa 40 Metern Höhe, aber einzelne „Urwaldriesen“ ragen sogar über 60 Meter hoch in den Himmel!",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "In jedem Stockwerk leben andere Tiere und Pflanzen, die sich perfekt an die Licht- und Feuchtigkeitsverhältnisse angepasst haben.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Viele Bäume haben sogenannte Brett- oder Stelzwurzeln, die ihnen helfen, auf den oft flachen Böden stabil zu stehen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Obwohl tropische Regenwälder nur etwa 7 Prozent der Landfläche der Erde bedecken, leben dort schätzungsweise zwischen 40 und über 70 Prozent aller Tier- und Pflanzenarten der Welt – das sind möglicherweise mehr als 30 Millionen Arten!"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Ein Wetter wie kein anderes",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s010",
+          "text": "Im Regenwald gibt es keine Jahreszeiten, wie wir sie kennen.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Die Tage und Nächte sind das ganze Jahr über fast gleich lang, und die Temperaturen schwanken kaum, meist zwischen 24 und 28 Grad Celsius.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Deshalb nennt man es auch „Tageszeitenklima“, weil die größten Unterschiede zwischen Tag und Nacht liegen.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Es regnet unglaublich viel, oft zwischen 2000 und 4000 Millimeter pro Jahr – das ist fünfmal mehr als in Mitteleuropa!",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Meistens verdunstet das Wasser am Morgen, steigt als feuchte Luft nach oben, bildet dicke Wolken und regnet dann am Nachmittag oder Abend als Gewitter ab.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Dieser Kreislauf ist so stark, dass die Pflanzen selbst mithelfen, neuen Regen zu erzeugen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Tiere und Pflanzen in Hülle und Fülle",
+      "section_role": "human_animal",
+      "sentences": [
+        {
+          "id": "s016",
+          "text": "Die Vielfalt der Lebewesen im Regenwald ist atemberaubend.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Von winzigen Insekten und bunten Schmetterlingen bis zu großen Jaguaren und Waldelefanten – hier wimmelt es nur so vor Leben.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Auffällig gefärbte Baumsteigerfrösche leben ihr ganzes Leben in den Baumkronen, und in den Flüssen schwimmen Piranhas und Flussdelfine.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Auch viele Affenarten wie Gorillas, Schimpansen und Orang-Utans haben hier ihre Heimat.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Die Pflanzenwelt ist ebenso vielfältig: Lianen schlingen sich um die Bäume, und viele Aufsitzerpflanzen wie Bromelien und Orchideen wachsen hoch oben in den Ästen, wo sie das Licht nutzen.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Sie sammeln Wasser in ihren Blättern oder haben spezielle Luftwurzeln, um zu überleben.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Menschen im grünen Paradies",
+      "section_role": "human_animal",
+      "sentences": [
+        {
+          "id": "s022",
+          "text": "Auch heute noch leben viele indigene Völker im Tropischen Regenwald.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Sie leben oft sehr isoliert und im Einklang mit der Natur, indem sie jagen, Früchte sammeln und Obst und Gemüse anbauen.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Einige Völker, wie die Pygmäen in Zentralafrika oder die Yanomami im Amazonasgebiet, sehen sich selbst als „Waldvölker“.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "Sie kennen den Wald und seine Geheimnisse wie kaum jemand sonst.",
+          "img_index": -1
+        },
+        {
+          "id": "s026",
+          "text": "Doch ihre Lebensweise und ihr Zuhause sind stark bedroht, weil der Regenwald immer kleiner wird.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec6",
+      "heading": "Warum der Regenwald so wichtig ist – und was ihn bedroht",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s027",
+          "text": "Regenwälder spielen eine entscheidende Rolle für das Klima auf der ganzen Welt.",
+          "img_index": -1
+        },
+        {
+          "id": "s028",
+          "text": "Sie nehmen riesige Mengen des Treibhausgases Kohlendioxid (CO₂) aus der Luft auf und speichern es in ihren Bäumen und Böden.",
+          "img_index": -1
+        },
+        {
+          "id": "s029",
+          "text": "So helfen sie, die Erde kühl zu halten.",
+          "img_index": -1
+        },
+        {
+          "id": "s030",
+          "text": "Außerdem sind sie wie riesige Wasserpumpen, die täglich unzählige Liter Wasser in die Atmosphäre abgeben und so für Regen sorgen – nicht nur vor Ort, sondern auch in weit entfernten Regionen.",
+          "img_index": -1
+        },
+        {
+          "id": "s031",
+          "text": "Leider ist der Regenwald stark gefährdet.",
+          "img_index": -1
+        },
+        {
+          "id": "s032",
+          "text": "Jedes Jahr werden riesige Flächen abgeholzt, um Platz für Viehzucht, Soja-Anbau oder Palmölplantagen zu schaffen.",
+          "img_index": -1
+        },
+        {
+          "id": "s033",
+          "text": "Auch der illegale Holzhandel und der Bergbau zerstören große Teile.",
+          "img_index": -1
+        },
+        {
+          "id": "s034",
+          "text": "In Südostasien ist schon mehr als die Hälfte der Regenwälder verschwunden, und auch im Amazonasgebiet werden immer größere Flächen gerodet.",
+          "img_index": -1
+        },
+        {
+          "id": "s035",
+          "text": "Das hat schlimme Folgen: Viele Tiere und Pflanzen verlieren ihre Heimat, und die Erde heizt sich weiter auf, weil weniger CO₂ gespeichert wird.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Ein einziger tropischer Baum kann täglich bis zu 300 Liter Wasser an die Atmosphäre abgeben! Das ist so viel wie 20 volle Badewannen."
+        },
+        {
+          "type": "warnung",
+          "text": "Studien zeigen, dass die Regenwälder der Erde wegen des Klimawandels und der Abholzung immer weniger Kohlendioxid speichern können. Wenn das so weitergeht, könnten sie sogar zu CO₂-Produzenten werden, was die Erderwärmung noch beschleunigen würde."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec7",
+      "heading": "Was wir tun können",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s036",
+          "text": "Es gibt viele Bemühungen, den Regenwald zu schützen.",
+          "img_index": -1
+        },
+        {
+          "id": "s037",
+          "text": "Große Schutzgebiete sollen Tiere und Pflanzen bewahren, aber oft fehlt das Geld, um sie wirksam zu kontrollieren.",
+          "img_index": -1
+        },
+        {
+          "id": "s038",
+          "text": "Du kannst auch helfen, indem du zum Beispiel Produkte kaufst, die kein Palmöl enthalten oder aus nachhaltigem Anbau stammen.",
+          "img_index": -1
+        },
+        {
+          "id": "s039",
+          "text": "Auch wenn ein Wald abgeholzt wurde, gibt es Hoffnung: Wenn die Flächen in Ruhe gelassen werden, kann der Regenwald erstaunlich schnell wieder nachwachsen.",
+          "img_index": -1
+        },
+        {
+          "id": "s040",
+          "text": "Nach etwa 20 Jahren haben solche „Sekundärwälder“ schon fast 80 Prozent der Merkmale eines ursprünglichen Regenwaldes zurückgewonnen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was ist das Besondere am Klima im Tropischen Regenwald?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Es gibt vier deutlich unterschiedliche Jahreszeiten."
+          },
+          {
+            "key": "B",
+            "text": "Die Temperaturen sind das ganze Jahr über konstant warm und es regnet fast täglich."
+          },
+          {
+            "key": "C",
+            "text": "Es ist immer kalt und trocken, aber die Sonne scheint stark."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Welche Rolle spielen die Bäume im Regenwald für das Klima?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie speichern Wasser im Boden, aber haben keinen Einfluss auf die Luftfeuchtigkeit."
+          },
+          {
+            "key": "B",
+            "text": "Sie geben viel Wasser an die Luft ab und nehmen Kohlendioxid auf."
+          },
+          {
+            "key": "C",
+            "text": "Sie erzeugen Wind, der die Wolken vertreibt."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Warum ist der Boden im Tropischen Regenwald oft nicht sehr nährstoffreich?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Weil es dort zu viele Pflanzen gibt, die alle Nährstoffe verbrauchen."
+          },
+          {
+            "key": "B",
+            "text": "Weil die Nährstoffe durch den vielen Regen schnell weggewaschen werden und im Kreislauf bleiben."
+          },
+          {
+            "key": "C",
+            "text": "Weil die Bäume ihre Wurzeln nicht tief genug in den Boden stecken können."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q4",
+        "text": "Was ist eine der größten Bedrohungen für den Tropischen Regenwald?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Der Bau von Windparks zur Energieerzeugung."
+          },
+          {
+            "key": "B",
+            "text": "Die Umwandlung in Ackerland für Palmöl und Soja."
+          },
+          {
+            "key": "C",
+            "text": "Die zunehmende Anzahl von Touristen, die den Wald besuchen."
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Äquator",
+      "Klima",
+      "Artenvielfalt",
+      "Abholzung"
+    ],
+    "discover": [
+      "Palmöl",
+      "Kohlendioxid",
+      "Indigene Völker",
+      "Ökosystem"
+    ]
+  }
+}

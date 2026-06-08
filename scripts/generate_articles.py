@@ -294,7 +294,13 @@ def parse_article_json(raw: str) -> dict:
     # Markdown-Fences entfernen falls vorhanden
     cleaned = re.sub(r"^```json\s*", "", cleaned.strip())
     cleaned = re.sub(r"```\s*$", "", cleaned)
-    return json.loads(cleaned.strip())
+    article = json.loads(cleaned.strip())
+    # Fehlende/null img_index normalisieren → -1 (Gemini lässt key manchmal weg)
+    for sec in article.get("sections", []):
+        for s in sec.get("sentences", []):
+            if s.get("img_index") is None:
+                s["img_index"] = -1
+    return article
 
 
 def validate_article(article: dict, job: dict) -> list[str]:

@@ -1,28 +1,30 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-08T15:34:33Z -->
+<!-- updated: 2026-06-08T16:28:00Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**R2-Koexistenz + meta.id-Fix (2026-06-08)** ← AKTUELL
-- upload_articles.py: rclone sync → rclone copy (löscht nie Bestandsdaten)
-- generate_articles.py: meta.id = article_id aus dem Job-Batch erzwungen
-- indigene_voelker_l3.json: meta.id korrigiert + altes indigene_voelker_amerikas_l3.json aus R2 gelöscht
-- R2 articles/ Verzeichnis jetzt konsistent (10 Artikel, alle korrekt benannt)
+**Complete 5-topic batch: alle 15 Artikel in R2 (2026-06-08)** ← AKTUELL
+- Alle 15 Artikel generiert (Flash), Bilder gepatcht, in R2 hochgeladen
+- img_index None→-1 Normalisierung in parse_article_json (generate_articles.py)
+- motor_l3: aus _errors/ gerettet (38× img_index None normalisiert)
+- rclone auto-discovery in upload_articles.py (WinGet-Pfad fallback)
+- upload_articles.py: rclone copy (nie sync) — R2-Bestandsdaten bleiben erhalten
 
-**R2-Zustand (wissensfreund-articles, Basis-URL: https://pub-a4cddbe0f7104b91ae193707a08ff0d2.r2.dev)**
-- articles/bienen_l1.json
-- articles/demokratie_l1.json · l2.json · l3.json
-- articles/indigene_voelker_l1.json · l2.json · l3.json
-- articles/motor_l1.json · l2.json
-- articles/tropischer_regenwald_l1.json
+**R2-Zustand (wissensfreund-articles)**
+Basis-URL: https://pub-a4cddbe0f7104b91ae193707a08ff0d2.r2.dev
 
-**Pipeline v3.20: 10/15 Artikel generiert (2026-06-08)**
-- 5 Artikel fehlgeschlagen: biene_l2 (JSON-Fehler), biene_l3 (_errors/),
-  motor_l3/dschungel_l2/l3 (Gemini Free-Tier Quota: 20 req/Tag)
-- Nach Quota-Reset nachgenerieren (Checkpoint überspringt erledigte 10)
+articles/
+- biene_l1.json · biene_l2.json · biene_l3.json
+- demokratie_l1.json · demokratie_l2.json · demokratie_l3.json
+- dschungel_l1.json · dschungel_l2.json · dschungel_l3.json
+- indianer_l1.json · indianer_l2.json · indianer_l3.json
+- motor_l1.json · motor_l2.json · motor_l3.json
+
+index/global.json · level_1/2/3.json · cat_*.json · sub_*.json · new.json · topic_tree.json
+meta/pipeline_run.json
 
 ---
 
@@ -34,9 +36,7 @@
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch
-- **5 fehlende Artikel nachgenerieren** (nach Quota-Reset):
-  `python scripts/generate_articles.py --model flash --jobs-dir jobs/test_5topics
-  --out-dir articles/test_5topics --batch 0001`
+- **Flutter-App: R2-Artikel anzeigen** — App auf die neuen JSON-Endpunkte umstellen
 - **Lektorat-Pipeline-Integration** (manueller Standalone-Prompt)
 - **Related Terms**: prepare_articles.py befüllt sie noch nicht
 

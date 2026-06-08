@@ -1,57 +1,57 @@
 {
   "meta": {
-    "id": "bienen_l1",
+    "id": "biene_l1",
     "title": "Bienen",
-    "subtitle": "Die fleißigen Blumenbesucher",
+    "subtitle": "Die kleinen Brummer, die summend von Blume zu Blume fliegen",
     "emoji": "🐝",
     "age_level": 1,
     "pattern": "living_being",
     "theme_color": "#FFD700",
-    "word_count": 199,
+    "word_count": 178,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Bienen",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "tiere",
     "category_sub": "insekten",
-    "generated_at": "2026-06-08T14:39:58.774643+00:00"
+    "generated_at": "2026-06-08T16:09:53.478553+00:00"
   },
   "images": [
     {
       "index": 0,
-      "filename": "Biene_auf_Blume.jpg",
-      "alt": "Eine Biene sitzt auf einer bunten Blume und sammelt Nektar.",
-      "caption": "",
+      "filename": "Honey_bee_with_pollen.jpg",
+      "alt": "Eine Honigbiene mit Pollen an den Beinen fliegt zu einer gelben Blume.",
+      "caption": "Eine Biene sammelt Pollen von einer Blume.",
       "license": "CC BY-SA 4.0",
-      "license_author": "Unbekannt",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Biene_auf_Blume.jpg",
-      "wikimedia_id": "File:Biene_auf_Blume.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Biene_auf_Blume.jpg/640px-Biene_auf_Blume.jpg"
+      "license_author": "Jon Sullivan",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Honey_bee_with_pollen.jpg",
+      "wikimedia_id": "File:Honey_bee_with_pollen.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Honey_bee_with_pollen.jpg/640px-Honey_bee_with_pollen.jpg"
     }
   ],
   "sections": [
     {
       "id": "sec1",
-      "heading": "Was sind Bienen?",
+      "heading": "Was ist eine Biene?",
       "section_role": "intro",
       "sentences": [
         {
           "id": "s001",
-          "text": "Summ, summ, summ! Wenn du eine Biene siehst, ist sie bestimmt ganz fleißig.",
-          "img_index": 0
-        },
-        {
-          "id": "s002",
-          "text": "Bienen fliegen von Blume zu Blume.",
+          "text": "Wenn du im Sommer draußen bist, hörst du oft ein leises Summen. Dann ist meistens eine Biene in der Nähe!",
           "img_index": -1
         },
         {
+          "id": "s002",
+          "text": "Bienen sind kleine Insekten, die fliegen können.",
+          "img_index": 0
+        },
+        {
           "id": "s003",
-          "text": "Dabei sammeln sie süßen Nektar für Honig und gelben Blütenstaub für ihre Babys.",
+          "text": "Sie haben sechs Beine und vier Flügel.",
           "img_index": -1
         },
         {
           "id": "s004",
-          "text": "Es gibt ganz viele verschiedene Bienenarten, nicht nur die Honigbiene.",
+          "text": "Viele Bienen leben zusammen in einem großen Zuhause und machen leckeren Honig.",
           "img_index": -1
         }
       ],
@@ -60,71 +60,90 @@
     },
     {
       "id": "sec2",
-      "heading": "So sehen Bienen aus",
-      "section_role": "appearance_equipment",
+      "heading": "Warum sind Bienen wichtig?",
+      "section_role": "behavior_life",
       "sentences": [
         {
           "id": "s005",
-          "text": "Die meisten Bienen sind klein, aber manche sind so lang wie dein Daumen.",
+          "text": "Bienen sind wie kleine Gärtner für unsere Blumen und Bäume.",
           "img_index": -1
         },
         {
           "id": "s006",
-          "text": "Sie haben vier Flügel und oft gelbe oder orange Streifen.",
+          "text": "Wenn sie von Blüte zu Blüte fliegen, sammeln sie Pollen.",
           "img_index": -1
         },
         {
           "id": "s007",
-          "text": "Ihr Körper ist ein bisschen pelzig, damit der Blütenstaub gut hängen bleibt.",
+          "text": "Dabei helfen sie den Pflanzen, Früchte zu bilden und Samen zu machen.",
           "img_index": -1
         },
         {
           "id": "s008",
-          "text": "Mit ihrem langen Rüssel saugen sie den Nektar aus den Blüten.",
+          "text": "Ohne Bienen gäbe es viel weniger Obst und Gemüse!",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Der Stachel der Biene",
+      "section_role": "human_animal",
+      "sentences": [
+        {
+          "id": "s009",
+          "text": "Manchmal hast du vielleicht Angst vor einem Bienenstich.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Aber nur die weiblichen Bienen haben einen Stachel und können stechen.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Männliche Bienen, die nennt man Drohnen, können das nicht.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Bienen stechen nur, wenn sie sich bedroht fühlen oder ihr Zuhause verteidigen wollen.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
-          "type": "warnung",
-          "text": "⚠️ Wusstest du, dass nur Bienen-Mamas stechen können? Denn der Stachel ist wie ein Werkzeug, das nur die weiblichen Bienen haben. Wenn eine Honigbiene sticht, bleibt ihr Stachel oft stecken. Dann stirbt sie leider. Viele Wildbienen stechen aber nur, wenn sie sich sehr bedroht fühlen, und ihr Stich tut nicht so weh."
+          "type": "wow",
+          "text": "🌟 Wenn eine Honigbiene einen Menschen sticht, bleibt ihr Stachel stecken. Das ist traurig, denn die Biene stirbt danach."
         }
       ],
       "table": null
     },
     {
-      "id": "sec3",
-      "heading": "Was Bienen alles können",
-      "section_role": "behavior_life",
+      "id": "sec4",
+      "heading": "Viele verschiedene Bienen",
+      "section_role": "curiosity",
       "sentences": [
         {
-          "id": "s009",
-          "text": "Bienen helfen den Pflanzen sehr.",
-          "img_index": -1
-        },
-        {
-          "id": "s010",
-          "text": "Wenn sie von Blüte zu Blüte fliegen, tragen sie den Blütenstaub mit.",
-          "img_index": -1
-        },
-        {
-          "id": "s011",
-          "text": "So können die Blumen Früchte und Samen machen.",
-          "img_index": -1
-        },
-        {
-          "id": "s012",
-          "text": "Manche Bienen leben ganz allein, wie kleine Einzelkämpfer.",
-          "img_index": -1
-        },
-        {
           "id": "s013",
-          "text": "Andere leben in großen Familien zusammen, das nennt man ein Bienenvolk.",
+          "text": "Es gibt nicht nur die eine Honigbiene, die Honig macht.",
           "img_index": -1
         },
         {
           "id": "s014",
-          "text": "Dort gibt es dann viele Bienen, die zusammen Honig machen und sich um die Babys kümmern.",
+          "text": "Auf der Welt gibt es über 20.000 verschiedene Bienenarten!",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Viele davon sind Wildbienen und leben ganz alleine in kleinen Nestern.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Sie sind auch sehr wichtig für die Natur, auch wenn sie keinen Honig für uns machen.",
           "img_index": -1
         }
       ],
@@ -136,60 +155,60 @@
     "questions": [
       {
         "id": "q1",
-        "text": "Was sammeln Bienen für Honig?",
+        "text": "Was ist eine Biene?",
         "options": [
           {
             "key": "A",
-            "text": "Süßen Nektar"
+            "text": "Ein kleines Insekt, das fliegen kann."
           },
           {
             "key": "B",
-            "text": "Grüne Blätter"
+            "text": "Ein Vogel, der singt."
           },
           {
             "key": "C",
-            "text": "Wasser aus Pfützen"
+            "text": "Ein Fisch, der im Wasser schwimmt."
           }
         ],
         "correct_key": "A"
       },
       {
         "id": "q2",
-        "text": "Wer hat einen Stachel bei den Bienen?",
+        "text": "Warum sind Bienen für Blumen wichtig?",
         "options": [
           {
             "key": "A",
-            "text": "Nur Bienen-Mamas"
+            "text": "Sie fressen die Blumen auf."
           },
           {
             "key": "B",
-            "text": "Nur Bienen-Papas"
+            "text": "Sie helfen den Blumen, Früchte zu bekommen."
           },
           {
             "key": "C",
-            "text": "Alle Bienen"
+            "text": "Sie malen die Blumen bunt an."
           }
         ],
-        "correct_key": "A"
+        "correct_key": "B"
       },
       {
         "id": "q3",
-        "text": "Wofür sind Bienen wichtig?",
+        "text": "Wer kann bei den Bienen stechen?",
         "options": [
           {
             "key": "A",
-            "text": "Sie helfen Blumen, Früchte zu machen."
+            "text": "Nur die männlichen Bienen."
           },
           {
             "key": "B",
-            "text": "Sie bauen große Nester."
+            "text": "Nur die weiblichen Bienen."
           },
           {
             "key": "C",
-            "text": "Sie fressen kleine Käfer."
+            "text": "Alle Bienen können stechen."
           }
         ],
-        "correct_key": "A"
+        "correct_key": "B"
       }
     ]
   },

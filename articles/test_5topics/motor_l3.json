@@ -1,0 +1,405 @@
+{
+  "meta": {
+    "id": "motor_l3",
+    "title": "Motor",
+    "subtitle": "Wie ein Motor Dinge in Bewegung setzt",
+    "emoji": "⚙️",
+    "age_level": 3,
+    "pattern": "tech_science",
+    "theme_color": "#808080",
+    "word_count": 558,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Motor",
+    "schema_version": "1.0",
+    "category_top": "technik",
+    "category_sub": "maschinen",
+    "generated_at": "2026-06-08T16:22:13.694790+00:00",
+    "review_flag": false
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Four stroke engine diagram.jpg",
+      "alt": "Four Stroke Engine Diagram",
+      "caption": "",
+      "license": "CC BY-SA 3.0",
+      "license_author": "User:Wapcaplet",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Four_stroke_engine_diagram.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/47/Four_stroke_engine_diagram.jpg"
+    },
+    {
+      "index": 1,
+      "filename": "Mercedes V6 DTM Rennmotor 1996.jpg",
+      "alt": "Mercedes V6 Dtm Rennmotor",
+      "caption": "",
+      "license": "CC BY-SA 3.0",
+      "license_author": "",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Mercedes_V6_DTM_Rennmotor_1996.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Mercedes_V6_DTM_Rennmotor_1996.jpg"
+    },
+    {
+      "index": 2,
+      "filename": "Motors01CJC.jpg",
+      "alt": "Motors01Cjc",
+      "caption": "",
+      "license": "CC BY-SA 3.0",
+      "license_author": "en:User:C_J_Cowie",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Motors01CJC.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/8/89/Motors01CJC.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Was ist ein Motor?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Was bringt ein Auto zum Fahren, ein Flugzeug zum Fliegen oder ein Spielzeug zum Bewegen?",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Oft ist es ein Motor.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Ein Motor ist eine Maschine, die Energie umwandelt, damit sich etwas bewegt.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Er kann zum Beispiel Wärme, Strom oder die Kraft von Benzin in Bewegung verwandeln.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Meistens hat ein Motor eine Welle, die sich dreht und so andere Teile antreibt, wie zum Beispiel die Räder eines Autos.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Es gibt aber auch Ausnahmen, wie Raketenmotoren, die etwas direkt wegstoßen, oder Linearmotoren, die etwas in einer geraden Linie bewegen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": []
+    },
+    {
+      "id": "sec2",
+      "heading": "Die ersten Motoren",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s007",
+          "text": "Schon vor langer Zeit haben Menschen versucht, Dinge mit Kraft zu bewegen.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Um das Jahr 100 soll es schon frühe Dampfexperimente gegeben haben, zum Beispiel zum Öffnen großer Tore.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Ein wichtiger Schritt war die Dampfmaschine, die um 1700 erfunden und später von James Watt verbessert wurde.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Sie war so stark, dass sie ganze Fabriken antreiben konnte und die Industrielle Revolution auslöste.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Dampfmaschinen gab es nicht nur in Fabriken, sondern auch in Lokomotiven, Schiffen und sogar in Dampftraktoren.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Später, im 19. Jahrhundert, wurden die ersten Verbrennungsmotoren entwickelt, die viel kleiner und leichter waren.",
+          "img_index": -1
+        }
+      ],
+      "boxes": []
+    },
+    {
+      "id": "sec3",
+      "heading": "So funktioniert eine Dampfmaschine",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s013",
+          "text": "Eine Dampfmaschine braucht einen großen Kessel, in dem Wasser mit Kohle oder Holz erhitzt wird.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Dabei entsteht heißer Wasserdampf unter hohem Druck.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Dieser Dampf drückt einen Kolben hin und her.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Eine Stange wandelt diese Hin- und Her-Bewegung des Kolbens in eine Drehbewegung um, die zum Beispiel die Räder einer Lokomotive antreibt.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Der verbrauchte Dampf wird dann als Rauch aus dem Schornstein geblasen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": []
+    },
+    {
+      "id": "sec4",
+      "heading": "Verbrennungsmotoren – das Benzin-Geheimnis",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s018",
+          "text": "Verbrennungsmotoren, wie du sie aus Autos kennst, wandeln die Energie von Kraftstoffen wie Benzin oder Diesel in Bewegung um.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Im Inneren des Motors wird der Kraftstoff mit Luft vermischt und verbrannt.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Die dabei entstehenden heißen Gase drücken auf einen Kolben.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Auch hier wird die Kolbenbewegung über eine Kurbelwelle in eine Drehbewegung umgewandelt.",
+          "img_index": -1
+        },
+        {
+          "id": "s022",
+          "text": "Es gibt Ottomotoren (Benzin), die eine Zündkerze brauchen, um das Gemisch zu entzünden, und Dieselmotoren, die sich selbst durch den hohen Druck entzünden.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Verbrennungsmotoren sind heute in fast allen Fahrzeugen, kleinen Flugzeugen und vielen Geräten wie Rasenmähern zu finden.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Sind alle Motoren Verbrennungsmotoren?",
+          "reveal_text": "Nein! Es gibt viele verschiedene Arten von Motoren. Verbrennungsmotoren sind nur eine davon, auch wenn sie sehr bekannt sind.",
+          "reveal_mode": "auto"
+        }
+      ]
+    },
+    {
+      "id": "sec5",
+      "heading": "Elektromotoren – der leise Antrieb",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s024",
+          "text": "Elektromotoren sind heute die am häufigsten eingesetzten Motoren.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "Sie wandeln elektrischen Strom direkt in Bewegung um.",
+          "img_index": -1
+        },
+        {
+          "id": "s026",
+          "text": "Du findest sie überall: in deinem Spielzeug, im Computer (Lüfter, Festplatte), in Haushaltsgeräten, in Elektroautos und sogar in großen Industrieanlagen.",
+          "img_index": -1
+        },
+        {
+          "id": "s027",
+          "text": "Ein toller Vorteil ist, dass viele Elektromotoren auch andersherum funktionieren können: Wenn man sie mechanisch antreibt, erzeugen sie Strom.",
+          "img_index": -1
+        },
+        {
+          "id": "s028",
+          "text": "Das nennt man Rekuperation und wird zum Beispiel beim Bremsen von Elektroautos genutzt, um Energie zurückzugewinnen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": []
+    },
+    {
+      "id": "sec6",
+      "heading": "Gasturbinen – die Kraft der Düsenjets",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s029",
+          "text": "Gasturbinen sind Motoren, die vor allem in Flugzeugen und in Kraftwerken eingesetzt werden.",
+          "img_index": -1
+        },
+        {
+          "id": "s030",
+          "text": "Sie saugen Luft an, verdichten sie und verbrennen dann Treibstoff bei sehr hohen Temperaturen (bis zu 1500 °C).",
+          "img_index": -1
+        },
+        {
+          "id": "s031",
+          "text": "Die heißen, schnell ausströmenden Gase treiben eine Turbine an.",
+          "img_index": -1
+        },
+        {
+          "id": "s032",
+          "text": "Bei Flugzeugen, den sogenannten Strahltriebwerken, erzeugen diese Gase einen starken Rückstoß, der das Flugzeug vorwärts schiebt.",
+          "img_index": -1
+        },
+        {
+          "id": "s033",
+          "text": "Gasturbinen sind sehr leistungsstark und können schnell hochfahren, was sie ideal für Hubschrauber oder als Notstromaggregate in Krankenhäusern macht.",
+          "img_index": -1
+        }
+      ],
+      "boxes": []
+    },
+    {
+      "id": "sec7",
+      "heading": "Was Motoren können sollen",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s034",
+          "text": "Moderne Motoren sollen nicht nur viel Kraft haben, sondern auch sparsam sein und die Umwelt schonen.",
+          "img_index": -1
+        },
+        {
+          "id": "s035",
+          "text": "Das bedeutet, sie sollen wenig Kraftstoff oder Strom verbrauchen und möglichst wenige schädliche Abgase ausstoßen.",
+          "img_index": -1
+        },
+        {
+          "id": "s036",
+          "text": "Auch sollen sie möglichst leicht sein und lange halten.",
+          "img_index": -1
+        },
+        {
+          "id": "s037",
+          "text": "Deshalb suchen Forscher immer nach neuen Wegen, Motoren zu verbessern, zum Beispiel mit Wasserstoff als Brennstoff oder durch Hybridantriebe, die verschiedene Motoren kombinieren.",
+          "img_index": -1
+        },
+        {
+          "id": "s038",
+          "text": "Auch Wasserräder und Windräder sind übrigens Motoren, die die Kraft von Wasser oder Wind in Bewegung umwandeln.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "fakt",
+          "text": "Der Wirkungsgrad eines Motors gibt an, wie gut er die Energie umwandelt. Ein Wirkungsgrad von 50% bedeutet, dass die Hälfte der Energie in Bewegung umgewandelt wird und die andere Hälfte zum Beispiel als Wärme verloren geht. Moderne Schiffsmotoren können unter optimalen Bedingungen bis zu 55% erreichen, während PKW-Motoren im Leerlauf unter 10% liegen können.",
+          "reveal_mode": "auto"
+        }
+      ]
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was ist die Hauptaufgabe eines Motors?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Energie in Bewegung umwandeln"
+          },
+          {
+            "key": "B",
+            "text": "Lärm erzeugen"
+          },
+          {
+            "key": "C",
+            "text": "Dinge warm halten"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Welcher Motor war der erste, der eine große Veränderung in der Geschichte bewirkte und die Industrielle Revolution auslöste?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Der Elektromotor"
+          },
+          {
+            "key": "B",
+            "text": "Die Dampfmaschine"
+          },
+          {
+            "key": "C",
+            "text": "Der Benzinmotor"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Welche Art von Motor findest du am häufigsten in Spielzeugen, Computern und Haushaltsgeräten?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Einen Dieselmotor"
+          },
+          {
+            "key": "B",
+            "text": "Eine Gasturbine"
+          },
+          {
+            "key": "C",
+            "text": "Einen Elektromotor"
+          }
+        ],
+        "correct_key": "C"
+      },
+      {
+        "id": "q4",
+        "text": "Warum ist es wichtig, dass moderne Motoren einen hohen Wirkungsgrad haben?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Damit sie lauter sind"
+          },
+          {
+            "key": "B",
+            "text": "Damit sie weniger Energie verbrauchen und die Umwelt schonen"
+          },
+          {
+            "key": "C",
+            "text": "Damit sie schneller kaputt gehen"
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Dampfmaschine",
+      "Elektromotor",
+      "Verbrennungsmotor",
+      "Gasturbine"
+    ],
+    "discover": [
+      "Kraftwerk",
+      "Industrielle Revolution",
+      "Hybridantrieb",
+      "Rakete"
+    ]
+  }
+}
