@@ -1,0 +1,19 @@
+{
+  "jobs": [
+    {"article_id": "biene_l1",      "title": "Bienen",                   "age_level": 1},
+    {"article_id": "biene_l2",      "title": "Bienen",                   "age_level": 2},
+    {"article_id": "biene_l3",      "title": "Bienen",                   "age_level": 3},
+    {"article_id": "indianer_l1",   "title": "Indigene Völker Amerikas", "age_level": 1},
+    {"article_id": "indianer_l2",   "title": "Indigene Völker Amerikas", "age_level": 2},
+    {"article_id": "indianer_l3",   "title": "Indigene Völker Amerikas", "age_level": 3},
+    {"article_id": "motor_l1",      "title": "Motor",                    "age_level": 1},
+    {"article_id": "motor_l2",      "title": "Motor",                    "age_level": 2},
+    {"article_id": "motor_l3",      "title": "Motor",                    "age_level": 3},
+    {"article_id": "demokratie_l1", "title": "Demokratie",               "age_level": 1},
+    {"article_id": "demokratie_l2", "title": "Demokratie",               "age_level": 2},
+    {"article_id": "demokratie_l3", "title": "Demokratie",               "age_level": 3},
+    {"article_id": "dschungel_l1",  "title": "Tropischer Regenwald",     "age_level": 1},
+    {"article_id": "dschungel_l2",  "title": "Tropischer Regenwald",     "age_level": 2},
+    {"article_id": "dschungel_l3",  "title": "Tropischer Regenwald",     "age_level": 3}
+  ]
+}

@@ -285,8 +285,10 @@ def call_claude_api(
 
 def parse_article_json(raw: str) -> dict:
     """Extrahiert und parst JSON aus der Claude-Antwort."""
+    # <planung>-Block vor dem JSON entfernen (Backend-Filter)
+    cleaned = re.sub(r"<planung>.*?</planung>", "", raw, flags=re.DOTALL)
     # Markdown-Fences entfernen falls vorhanden
-    cleaned = re.sub(r"^```json\s*", "", raw.strip())
+    cleaned = re.sub(r"^```json\s*", "", cleaned.strip())
     cleaned = re.sub(r"```\s*$", "", cleaned)
     return json.loads(cleaned.strip())
 
@@ -302,7 +304,7 @@ def validate_article(article: dict, job: dict) -> list[str]:
     # Pflichtfelder meta
     meta = article.get("meta", {})
     for field in ["id", "title", "subtitle", "emoji", "age_level", "pattern",
-                  "theme_color", "word_count", "source_wikipedia_url", "generated_at", "schema_version"]:
+                  "theme_color", "word_count", "source_wikipedia_url", "schema_version"]:
         if not meta.get(field):
             errors.append(f"meta.{field} fehlt")
 
@@ -329,10 +331,10 @@ def validate_article(article: dict, job: dict) -> list[str]:
             errors.append(f"Satz-ID '{sid}' an Position {i+1}, erwartet '{expected}'")
             break  # nur ersten Fehler melden
 
-    # img_index range
+    # img_index range: -1 = kein Bild (gültig), 0–5 = Index in images[]
     for s in all_sentences:
         idx = s.get("img_index")
-        if idx is None or not (0 <= idx <= 5):
+        if idx is None or not (idx == -1 or 0 <= idx <= 5):
             errors.append(f"Satz '{s.get('id')}' hat ungültigen img_index: {idx}")
             break
 
@@ -539,7 +541,7 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Wissensfreund Artikel-Pipeline — Schritt 2: generate_articles")
     p.add_argument("--jobs-dir",      required=True,  type=Path)
     p.add_argument("--out-dir",       default="articles", type=Path)
-    p.add_argument("--system-prompt", required=True,  type=Path)
+    p.add_argument("--system-prompt", default=Path("wissensfreund_generator_prompt_v3.20_production.md"), type=Path)
     p.add_argument("--batch",         default=None,   help="Nur diese Batch-Nummer verarbeiten, z.B. '0001'")
     p.add_argument("--checkpoint",    type=Path, default=Path("checkpoint_done.json"))
     p.add_argument("--dry-run",       action="store_true")
