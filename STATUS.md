@@ -1,14 +1,21 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-07T21:07:26Z -->
+<!-- updated: 2026-06-08T07:47:58Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Generator-Prompt v3.15 + Lektorat v2.6 + QUELLEN_GRUNDREGEL (2026-06-07)**
-- wissensfreund_generator_prompt_v3.15_neutral.md: Mensch-Bezug-Regel neu; aktive Produktionsversion
-- wissensfreund_lektorat_v2.md (v2.6): Mensch-Bezug-Prüfpunkt in Durchgang B; aktive Lektorats-Version
+**Generator v3.16 + Lektorat v2.7: Einzel-Quelle/Boxen/nur-Trigger (2026-06-08)** ← AKTIV
+- wissensfreund_generator_prompt_v3.16_neutral.md: verschärfte Einzel-Quelle (keine verlinkten
+  Nachbarartikel), Box-Budget pro Stufe×Appeal, Box-Nicht-Doppelung, „Irrglaube hat einen Ort",
+  „nur"+geschlossene Aufzählung als Hochrisiko-PFLICHT-TRIGGER
+- wissensfreund_lektorat_v2.md (v2.7): spiegelt dieselben Regeln in Durchgang A + B
+- wissensfreund_generator_prompt_v3.15_neutral.md → _alt/ archiviert
+
+**Generator-Prompt v3.15 + Lektorat v2.6 + QUELLEN_GRUNDREGEL (2026-06-07)** ← überholt (v3.16/v2.7 aktiv)
+- wissensfreund_generator_prompt_v3.15_neutral.md: Mensch-Bezug-Regel; jetzt in _alt/
+- wissensfreund_lektorat_v2.md (v2.6): Mensch-Bezug-Prüfpunkt in Durchgang B; jetzt v2.7
 - QUELLEN_GRUNDREGEL.md: Truncation-Regel (Abruf langer Artikel) + Snapshot-Regel (Generierungszeitpunkt)
 - CLAUDE.md: GRUNDREGEL QUELLENPRÜFUNG-Block direkt nach erster Überschrift eingefügt
 
@@ -20,7 +27,6 @@
   4. Schlussschritt: 4-Zeilen-Fließtext → strukturierte 15-Zeilen-Checkliste
   5. Sprachregeln: Prosa-Rhythmus-Bullet nach „Handwerk:"
 - generate_articles.py Docstring: --system-prompt Beispiel auf v3.8 aktualisiert
-- wissensfreund_lektorat_v2.md liegt korrekt im Repo (kein Archivieren nötig, keine v1 vorhanden)
 - KORREKTUR: Lektorat war nie in generate_articles.py integriert — nur ein call_claude_api()-Aufruf.
   Lektorat läuft als manueller Standalone-Prompt.
 
@@ -46,7 +52,7 @@
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch
-- **Mozart-Neulauf mit v3.8 + Lektorat v2 ausstehend** — erster Validierungsrun der neuen Prompts
+- **Mozart-Neulauf mit v3.16 + Lektorat v2.7 ausstehend** — erster Validierungsrun der neuen Prompts
 - **Lektorat-Pipeline-Integration zurückgestellt** bis Generator- und Lektorats-Prompt stabil
   (Lektorat läuft vorerst als manueller Standalone-Prompt)
 - **Related Terms** (WIKIPEDIA_LINKS + ARTICLE_INDEX): prepare_articles.py befüllt sie noch nicht;

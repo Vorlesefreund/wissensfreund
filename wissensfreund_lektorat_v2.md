@@ -13,7 +13,11 @@ strukturell erzwungen.)
 ================================================================================
 
 WISSENSFREUND — LEKTORATS-PASS
-Version 2.6
+Version 2.7
+<!-- v2.7: (A) „nur"+geschlossene Aufzählung als benannter Hochrisiko-Trigger in Durchgang A; verlinkte
+     Nachbarartikel explizit als NICHT_BELEGT (auch wenn wahr). (B) Box-Budget-Check + Irrglaube-an-EINEM-Ort
+     + „🤔 nicht erzwungen" in Durchgang B. Spiegelt Generator v3.16. Anlass: Andreas fand manuell „nur Könige
+     und Kirchen" (Lektor hatte es übersehen) und eine 🤔-Box, die den Fließtext doppelte. -->
 <!-- v2.6: Mensch-Bezug-Prüfpunkt in Durchgang B (Detail-Salienz) — Befund, wenn die Bedeutung/Beziehung
      zum Menschen deutlich dünner ausgearbeitet ist, als die Quelle hergibt. Spiegelt Generator-Regel v3.15. -->
 
@@ -93,9 +97,17 @@ BELEGZITAT-PFLICHT (zentral gegen False Positives):
 - **Ein Faktenurteil ohne Belegzitat aus dem WIKIPEDIA_TEXT ist ungültig — es ist selbst eine Halluzination.**
   Kannst du kein Zitat finden, lautet das Urteil „IM QUELLTEXT NICHT GEFUNDEN — unentscheidbar", NICHT „falsch".
 - „Nicht gefunden" ist KEIN Beweis für „falsch". Trenne beides streng.
+- **Verlinkte Nachbarartikel zählen NICHT als Beleg.** Ist ein Detail (Zahl, Name, Vorgang) zwar wahr und
+  stünde in einem verlinkten Artikel („Gutenberg-Bibel", „Schriftguss", „Johannes Gutenberg" …), aber NICHT in
+  DIESEM WIKIPEDIA_TEXT, dann ist es gegen diesen Text NICHT_BELEGT — auch wenn es stimmt. (Häufigstes
+  Einfallstor günstiger Modelle: Druckfarben-Zusammensetzung, Schriftguss-Legierung, Bibel-Auflagenzahlen.)
 
 Hochrisiko-Aussagen — strengster Maßstab, immer prüfen:
-- Superlative, „sogar", „einzige", „immer", „nie", „alle"
+- Superlative, „sogar", „einzige", „nur", „immer", „nie", „alle"
+- Geschlossene „nur"-Aufzählung ohne Beleg (PFLICHT-TRIGGER): „nur X und Y konnten/besaßen/durften …",
+  wenn die Quelle diese Liste NICHT nennt → ÜBERTRIEGEN, breiter/offener fassen.
+  → FALSCH „nur Könige und reiche Kirchen besaßen Bücher" (steht so nicht in der Quelle)
+  → RICHTIG „Bücher waren teuer; vor allem wohlhabende Menschen, Klöster und Kirchen besaßen sie".
 - Klinische oder diagnostische Begriffe (Depressionen, Schizophrenie, Trauma ...)
 - Gedächtnis- und Leistungsbehauptungen (fehlerfrei, jedes Stück, immer)
   → Wikipedia belegt oft eine Einzelleistung. Diese nie auf eine allgemeine Fähigkeit ausweiten.
@@ -196,10 +208,15 @@ Ton und Wertung:
     RICHTIG: „Dass Mozart arm gestorben sei — das hört man oft."
 
 Boxen:
+[ ] Box-Anzahl im Budget (S1 1, Appeal hoch 1–2 · S2 1–2 · S3 1–2 bis 2–3 je Appeal)?
+    Nicht überzogen, keine schwache Füll-Box?
 [ ] Jede Box grammatikalisch und inhaltlich eigenständig?
     (Box darf kein Satzfortsatz des vorangehenden Absatzes sein — auch ohne den Vorgängersatz
     verständlich und sinnvoll)
-[ ] Jede Box bringt etwas Neues, das nicht schon im Fließtext steht?
+[ ] Jede Box bringt etwas Neues, das nicht schon im Fließtext derselben Stufe steht?
+    (Doppelt eine Box nur den Absatz daneben → streichen oder den Inhalt aus dem Fließtext nehmen.)
+[ ] Irrglaube nur an EINEM Ort? Keine 🤔-Box, wenn der Fließtext die Richtigstellung schon ausspricht;
+    🤔 nicht pro Stufe erzwungen (lieber keine als eine doppelnde).
 [ ] Kein Callout im Intro-Abschnitt?
 [ ] Stufe 1 ausschließlich wow + warnung?
 [ ] warnung-Box nur für heikle/sensible Inhalte (Gefahr, Aussterben, Umwelt, Krankheit, Tod)?
