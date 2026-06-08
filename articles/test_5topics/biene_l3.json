@@ -2,79 +2,107 @@
   "meta": {
     "id": "biene_l3",
     "title": "Bienen",
-    "subtitle": "Die fleißigen Bestäuber unserer Welt",
+    "subtitle": "Summende Helfer: Eine riesige Familie mit vielen Geheimnissen",
     "emoji": "🐝",
     "age_level": 3,
     "pattern": "living_being",
     "theme_color": "#FFD700",
-    "word_count": 593,
+    "word_count": 598,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Bienen",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "tiere",
     "category_sub": "insekten",
-    "generated_at": "2026-06-08T16:11:51.137182+00:00"
+    "generated_at": "2026-06-08T17:39:19.923964+00:00"
   },
   "images": [
     {
       "index": 0,
-      "filename": "Bau einer Biene.png",
-      "alt": "Bau Einer Biene",
-      "caption": "",
-      "license": "CC BY-SA 4.0",
-      "license_author": "Julie Weissmann",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Bau_einer_Biene.png",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/47/Bau_einer_Biene.png"
-    },
-    {
-      "index": 1,
-      "filename": "Bee on Echinacea.jpg",
-      "alt": "Bee On Echinacea",
-      "caption": "",
-      "license": "CC BY-SA 3.0",
+      "filename": "Bee_on_Echinacea.jpg",
+      "alt": "Eine Biene sitzt auf einer lila Blüte und sammelt Nektar.",
+      "caption": "Eine Biene bei der Arbeit: Sie sammelt Nektar und Pollen.",
+      "license": "CC BY-SA",
       "license_author": "Sputniktilt",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Bee_on_Echinacea.jpg",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Bee_on_Echinacea.jpg/960px-Bee_on_Echinacea.jpg",
+      "wikimedia_id": "File:Bee_on_Echinacea.jpg",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Bee_on_Echinacea.jpg/960px-Bee_on_Echinacea.jpg"
     },
     {
-      "index": 2,
-      "filename": "Bienenschwarm Okavangodelta (2019).jpg",
-      "alt": "Bienenschwarm Okavangodelta (2019)",
-      "caption": "",
+      "index": 1,
+      "filename": "Bau_einer_Biene.png",
+      "alt": "Eine schematische Zeichnung des Körperbaus einer Biene mit Beschriftungen.",
+      "caption": "Der Körper einer Biene ist in Kopf, Brust und Hinterleib unterteilt.",
       "license": "CC BY-SA 4.0",
-      "license_author": "Hp.Baumeler",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Bienenschwarm_Okavangodelta_(2019).jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Bienenschwarm_Okavangodelta_%282019%29.jpg/960px-Bienenschwarm_Okavangodelta_%282019%29.jpg"
+      "license_author": "Julie Weissmann",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/47/Bau_einer_Biene.png",
+      "wikimedia_id": "File:Bau_einer_Biene.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/47/Bau_einer_Biene.png"
+    },
+    {
+      "index": 2,
+      "filename": "Hairs_of_Bees_(by_David_Sharp,_1901).jpg",
+      "alt": "Eine Nahaufnahme von gefiederten Haaren einer Biene unter dem Mikroskop.",
+      "caption": "Die gefiederten Haare der Bienen sind perfekt, um Pollen zu transportieren.",
+      "license": "Public Domain",
+      "license_author": "David Sharp (1840 – 1922)",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Hairs_of_Bees_%28by_David_Sharp%2C_1901%29.jpg/960px-Hairs_of_Bees_%28by_David_Sharp%2C_1901%29.jpg",
+      "wikimedia_id": "File:Hairs_of_Bees_(by_David_Sharp,_1901).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Hairs_of_Bees_%28by_David_Sharp%2C_1901%29.jpg/960px-Hairs_of_Bees_%28by_David_Sharp%2C_1901%29.jpg"
     },
     {
       "index": 3,
-      "filename": "DasypodaHirtipesFemale2.jpg",
-      "alt": "Dasypodahirtipesfemale2",
-      "caption": "",
-      "license": "CC BY-SA 3.0",
-      "license_author": "Christian Fischer",
-      "source_url": "https://commons.wikimedia.org/wiki/File:DasypodaHirtipesFemale2.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/DasypodaHirtipesFemale2.jpg/960px-DasypodaHirtipesFemale2.jpg"
+      "filename": "Wildbienen.jpg",
+      "alt": "Zwei Wildbienenarten, eine mit gelben Streifen, die andere dunkler und haariger.",
+      "caption": "Es gibt viele verschiedene Wildbienenarten, die oft allein leben.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Neptuul",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Wildbienen.jpg/960px-Wildbienen.jpg",
+      "wikimedia_id": "File:Wildbienen.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Wildbienen.jpg/960px-Wildbienen.jpg"
     },
     {
       "index": 4,
-      "filename": "Diphaglossa gayi, f, side, chile 2014-08-04-18.17.33 ZS PMax (14732584979).jpg",
-      "alt": "Diphaglossa Gayi, F, Side, Chile 2014 08 04 18.17.33 Zs Pmax (14732584979)",
-      "caption": "",
-      "license": "Public domain",
-      "license_author": "USGS Bee Inventory and Monitoring Lab from Beltsville, Maryland, USA",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Diphaglossa_gayi,_f,_side,_chile_2014-08-04-18.17.33_ZS_PMax_(14732584979).jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Diphaglossa_gayi%2C_f%2C_side%2C_chile_2014-08-04-18.17.33_ZS_PMax_%2814732584979%29.jpg/960px-Diphaglossa_gayi%2C_f%2C_side%2C_chile_2014-08-04-18.17.33_ZS_PMax_%2814732584979%29.jpg"
+      "filename": "DasypodaHirtipesFemale2.jpg",
+      "alt": "Eine haarige Biene mit langen Hinterbeinen, die Pollen sammelt.",
+      "caption": "Diese Hosenbiene hat besonders viele Haare an den Beinen, um Pollen zu transportieren.",
+      "license": "CC BY-SA",
+      "license_author": "Christian Fischer",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/DasypodaHirtipesFemale2.jpg/960px-DasypodaHirtipesFemale2.jpg",
+      "wikimedia_id": "File:DasypodaHirtipesFemale2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/DasypodaHirtipesFemale2.jpg/960px-DasypodaHirtipesFemale2.jpg"
     },
     {
       "index": 5,
-      "filename": "Hairs of Bees (by David Sharp, 1901).jpg",
-      "alt": "Hairs Of Bees (By David Sharp, 1901)",
-      "caption": "",
-      "license": "Public domain",
-      "license_author": "David Sharp (1840 – 1922)",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Hairs_of_Bees_(by_David_Sharp,_1901).jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Hairs_of_Bees_%28by_David_Sharp%2C_1901%29.jpg/960px-Hairs_of_Bees_%28by_David_Sharp%2C_1901%29.jpg"
+      "filename": "Bienenschwarm_Okavangodelta_(2019).jpg",
+      "alt": "Ein großer Schwarm Bienen, der an einem Ast hängt.",
+      "caption": "Ein Bienenschwarm ist eine große Gruppe von Bienen, die zusammenleben.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Hp.Baumeler",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Bienenschwarm_Okavangodelta_%282019%29.jpg/960px-Bienenschwarm_Okavangodelta_%282019%29.jpg",
+      "wikimedia_id": "File:Bienenschwarm_Okavangodelta_(2019).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Bienenschwarm_Okavangodelta_%282019%29.jpg/960px-Bienenschwarm_Okavangodelta_%282019%29.jpg"
+    },
+    {
+      "index": 6,
+      "filename": "The_bee_collects_nectar.jpg",
+      "alt": "Eine Biene steckt ihren Rüssel tief in eine Blüte, um Nektar zu sammeln.",
+      "caption": "Mit ihrem langen Rüssel saugen Bienen den süßen Nektar aus den Blüten.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Bgelo777",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/The_bee_collects_nectar.jpg/960px-The_bee_collects_nectar.jpg",
+      "wikimedia_id": "File:The_bee_collects_nectar.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/The_bee_collects_nectar.jpg/960px-The_bee_collects_nectar.jpg"
+    },
+    {
+      "index": 7,
+      "filename": "Sleeping_Anthidium_manicatum_8808.jpg",
+      "alt": "Eine Biene schläft kopfüber an einem Pflanzenstiel.",
+      "caption": "Manche Bienenmännchen schlafen in Gruppen an Pflanzenstängeln.",
+      "license": "CC BY-SA",
+      "license_author": "soebe, optimisation by Ralf. Thank you very much f",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Sleeping_Anthidium_manicatum_8808.jpg/960px-Sleeping_Anthidium_manicatum_8808.jpg",
+      "wikimedia_id": "File:Sleeping_Anthidium_manicatum_8808.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Sleeping_Anthidium_manicatum_8808.jpg/960px-Sleeping_Anthidium_manicatum_8808.jpg"
     }
   ],
   "sections": [
@@ -85,22 +113,22 @@
       "sentences": [
         {
           "id": "s001",
-          "text": "Wenn du „Bienen“ hörst, denkst du sicher zuerst an die kleinen, gestreiften Insekten, die fleißig Honig sammeln und manchmal stechen.",
-          "img_index": -1
+          "text": "Wenn du das Wort „Biene“ hörst, denkst du wahrscheinlich an die Honigbiene, die leckeren Honig macht und manchmal sticht.",
+          "img_index": 0
         },
         {
           "id": "s002",
-          "text": "Aber wusstest du, dass es viel mehr Bienen gibt als nur die Honigbiene?",
+          "text": "Aber wusstest du, dass es weltweit über 20.000 verschiedene Bienenarten gibt?",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Die Bienen sind eine riesige Familie von über 20.000 verschiedenen Arten, die fast überall auf der Welt leben.",
+          "text": "Das ist eine riesige Familie von Insekten, die nicht nur Honig produzieren, sondern auch unglaublich wichtig für unsere Natur und unser Essen sind.",
           "img_index": -1
         },
         {
           "id": "s004",
-          "text": "Sie sind unglaublich wichtig für unsere Natur, denn sie bestäuben Pflanzen und sorgen dafür, dass wir Obst, Gemüse und Blumen haben.",
+          "text": "Von winzig klein bis fast so groß wie dein Daumen, von allein lebend bis in riesigen Völkern – Bienen sind echte Überlebenskünstler mit vielen Geheimnissen.",
           "img_index": -1
         }
       ],
@@ -109,125 +137,135 @@
     },
     {
       "id": "sec2",
-      "heading": "So sehen Bienen aus",
+      "heading": "So ist eine Biene aufgebaut",
       "section_role": "appearance_equipment",
       "sentences": [
         {
           "id": "s005",
-          "text": "Die meisten Bienen sind etwa einen Zentimeter lang, aber es gibt auch ganz winzige Arten, die nur 1,5 Millimeter messen, und riesige Holzbienen, die bis zu 2,8 Zentimeter groß werden können.",
-          "img_index": -1
+          "text": "Alle Bienen haben einen Körper, der in drei Teile geteilt ist: Kopf, Brust und Hinterleib.",
+          "img_index": 1
         },
         {
           "id": "s006",
-          "text": "Die größte Biene der Welt ist sogar fast 4 Zentimeter lang!",
+          "text": "Sie besitzen vier Flügel, die sie schnell durch die Luft tragen, und eine schmale „Wespentaille“, wie viele andere Stechinsekten auch.",
           "img_index": -1
         },
         {
           "id": "s007",
-          "text": "Wie andere Insekten haben Bienen ihren Körper in drei Teile geteilt und besitzen vier Flügel.",
-          "img_index": -1
+          "text": "Ein besonderes Merkmal der Bienen sind ihre Haare: Sie sind nicht glatt, sondern oft gefiedert, also wie kleine Äste verzweigt.",
+          "img_index": 2
         },
         {
           "id": "s008",
-          "text": "Ein besonderes Merkmal ist ihr pelziges Aussehen: Viele Bienen haben kleine, verzweigte Härchen am Körper, an denen der Blütenstaub, der Pollen, hängen bleibt.",
+          "text": "An diesen Härchen bleiben Pollen besonders gut hängen, die die Biene von Blüte zu Blüte trägt.",
           "img_index": -1
         },
         {
           "id": "s009",
-          "text": "Manche Bienen haben besonders viele Haare an den Hinterbeinen oder unter dem Bauch, um den Pollen zu transportieren.",
-          "img_index": -1
-        },
-        {
-          "id": "s010",
-          "text": "Ihre Mundwerkzeuge sind zu einem Rüssel geformt, mit dem sie den süßen Nektar aus den Blüten saugen können.",
-          "img_index": -1
+          "text": "Ihre Mundwerkzeuge sind zu einem Rüssel umgeformt, mit dem sie Nektar aufsaugen können, aber sie haben auch kräftige Kiefer zum Beißen.",
+          "img_index": 6
         }
       ],
       "boxes": [
         {
           "type": "wow",
-          "text": "Die größte Biene der Welt ist die Megachile pluto aus Indonesien. Sie ist fast 4 Zentimeter lang und damit so groß wie dein Daumen!"
+          "text": "Nur weibliche Bienen haben einen Stachel! Er hat sich im Laufe der Evolution aus einem Eilegeapparat entwickelt. Männliche Bienen können also gar nicht stechen!"
         }
       ],
       "table": null
     },
     {
       "id": "sec3",
-      "heading": "Fleißige Bestäuber",
-      "section_role": "human_animal",
+      "heading": "Allein, zu zweit oder im Riesenstaat?",
+      "section_role": "behavior_life",
       "sentences": [
         {
+          "id": "s010",
+          "text": "Die meisten Bienen leben als sogenannte Solitärbienen ganz allein.",
+          "img_index": 3
+        },
+        {
           "id": "s011",
-          "text": "Bienen ernähren sich rein vegetarisch: Sie brauchen den süßen Nektar als Energie und den Pollen als Eiweiß.",
-          "img_index": -1
+          "text": "Das bedeutet, jedes Weibchen baut ein eigenes Nest, legt Eier und versorgt seine Brut mit Nahrung, ohne Hilfe von anderen Bienen.",
+          "img_index": 4
         },
         {
           "id": "s012",
-          "text": "Wenn sie von Blüte zu Blüte fliegen, um Nahrung zu sammeln, bleiben Pollenkörner an ihren Haaren hängen und werden zur nächsten Blüte getragen.",
+          "text": "Etwa 15 Prozent der Bienen sind sogenannte Kuckucksbienen: Sie bauen keine eigenen Nester, sondern legen ihre Eier heimlich in die Nester anderer Bienenarten.",
           "img_index": -1
         },
         {
           "id": "s013",
-          "text": "Dieser Vorgang nennt sich Bestäubung und ist extrem wichtig, damit Pflanzen Früchte tragen oder Samen bilden können.",
+          "text": "Dort fressen ihre Larven dann den Nahrungsvorrat der Wirtslarven auf.",
           "img_index": -1
         },
         {
           "id": "s014",
-          "text": "Bienen sind weltweit die wichtigsten Bestäuber und tragen maßgeblich dazu bei, dass wir genug zu essen haben.",
-          "img_index": -1
+          "text": "Nur wenige Bienenarten, wie die Honigbienen und Hummeln, leben in großen, hochsozialen Staaten mit Tausenden von Tieren.",
+          "img_index": 5
         },
         {
           "id": "s015",
-          "text": "Ohne sie gäbe es viel weniger Obst, Gemüse und bunte Blumen.",
+          "text": "Dort gibt es eine Königin, die Eier legt, und viele Arbeiterinnen, die sich um alles andere kümmern: Nestbau, Nahrungssuche und Brutpflege.",
           "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Es gibt auch viele Zwischenformen, zum Beispiel Bienen, die in großen Gruppen zusammen überwintern oder ihre Nesteingänge teilen.",
+          "img_index": 7
         }
       ],
       "boxes": [
         {
           "type": "fakt",
-          "text": "Fachleute schätzen, dass die Bestäubungsarbeit der Bienen weltweit einen Wert von rund 265 Milliarden Dollar pro Jahr hat. Das ist so viel Geld, dass man sich davon viele, viele Schulen bauen könnte!"
+          "text": "Honigbienen haben eine erstaunliche Art, sich zu verständigen: den Schwänzeltanz. Damit zeigen sie anderen Bienen im Stock genau, wo sich die besten Futterquellen befinden!"
         }
       ],
       "table": null
     },
     {
       "id": "sec4",
-      "heading": "Alleine oder im Team?",
-      "section_role": "behavior_life",
+      "heading": "Was Bienen fressen und woher sie kommen",
+      "section_role": "body_functions",
       "sentences": [
         {
-          "id": "s016",
-          "text": "Die meisten Bienen leben nicht in großen Völkern wie die Honigbienen, sondern sind sogenannte Wildbienen.",
-          "img_index": -1
-        },
-        {
           "id": "s017",
-          "text": "Etwa drei Viertel aller Bienenarten sind Solitärbienen, was bedeutet, dass jedes Weibchen allein für sich und ihren Nachwuchs sorgt.",
+          "text": "Bienen ernähren sich ausschließlich vegetarisch.",
           "img_index": -1
         },
         {
           "id": "s018",
-          "text": "Sie legen ihre Eier mit einem Nahrungsvorrat in kleine Nester und verschließen sie fest.",
+          "text": "Ihre Hauptnahrung sind der süße Nektar von Blüten, der ihnen Energie gibt, und Pollen, der wichtig für ihre Eiweißversorgung ist.",
           "img_index": -1
         },
         {
           "id": "s019",
-          "text": "Andere Wildbienen sind Kuckucksbienen, die ihre Eier heimlich in die Nester anderer Bienen legen.",
+          "text": "Soziale Bienen wie Honigbienen und Hummeln legen Futtervorräte an, um als ganzes Volk den Winter oder regenreiche Zeiten zu überstehen.",
           "img_index": -1
         },
         {
           "id": "s020",
-          "text": "Dort töten ihre Larven die Bienenlarven des Wirts und fressen deren Nahrungsvorrat auf.",
+          "text": "Manche Bienen sind sehr wählerisch und sammeln Pollen nur von ganz bestimmten Pflanzenarten – diese nennt man dann „oligolektisch“ oder sogar „monolektisch“.",
           "img_index": -1
         },
         {
           "id": "s021",
-          "text": "Nur wenige Bienenarten, wie die Honigbienen oder Hummeln, leben in großen Staaten mit vielen Tieren, die zusammenarbeiten und sich um die Brut kümmern.",
+          "text": "Bienen sind schon sehr alte Insekten.",
           "img_index": -1
         },
         {
           "id": "s022",
-          "text": "Dort gibt es eine Königin, die Eier legt, und Arbeiterinnen, die das Nest bauen, Futter sammeln und Wache halten.",
+          "text": "Sie stammen von Wespenarten ab, die ihre Beute stechen, um sie als Nahrung für ihre Larven zu verwenden.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Vor etwa 110 Millionen Jahren entwickelten sich Bienen und Blütenpflanzen gemeinsam: Die Pflanzen lockten die Bienen mit Nektar an, und die Bienen halfen den Pflanzen bei der Bestäubung.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Das älteste Bienenfossil, das man gefunden hat, ist etwa 75 bis 92 Millionen Jahre alt und war in Bernstein eingeschlossen.",
           "img_index": -1
         }
       ],
@@ -236,131 +274,97 @@
     },
     {
       "id": "sec5",
-      "heading": "Der Stachel der Bienen",
-      "section_role": "appearance_equipment",
+      "heading": "Warum Bienen so wichtig sind",
+      "section_role": "human_animal",
       "sentences": [
         {
-          "id": "s023",
-          "text": "Der Stachel einer Biene ist eigentlich ein umgebautes Legewerkzeug.",
-          "img_index": -1
-        },
-        {
-          "id": "s024",
-          "text": "Deshalb haben nur weibliche Bienen einen Stachel – die Männchen können nicht stechen.",
-          "img_index": -1
-        },
-        {
           "id": "s025",
-          "text": "Bei den Honigbienen hat der Stachel kleine Widerhaken.",
+          "text": "Bienen gehören zu den wichtigsten Bestäubern der Welt.",
           "img_index": -1
         },
         {
           "id": "s026",
-          "text": "Wenn eine Honigbiene einen Menschen oder ein anderes Warmblüter sticht, bleibt der Stachel in der Haut stecken und die Biene stirbt dabei.",
+          "text": "Wenn sie von Blüte zu Blüte fliegen, tragen sie Pollen weiter und sorgen so dafür, dass Wild- und Kulturpflanzen Früchte tragen und Samen bilden können.",
           "img_index": -1
         },
         {
           "id": "s027",
-          "text": "Die meisten Wildbienen haben jedoch einen glatten Stachel.",
+          "text": "Ohne Bienen gäbe es viel weniger Obst, Gemüse und andere Pflanzen, die wir zum Leben brauchen.",
           "img_index": -1
         },
         {
           "id": "s028",
-          "text": "Sie stechen nur, wenn sie sich wirklich bedroht fühlen, zum Beispiel, wenn man sie zwischen den Fingern festhält.",
+          "text": "Ihre Arbeit ist so wertvoll, dass ihr Nutzen für die weltweite Landwirtschaft auf viele Milliarden Dollar pro Jahr geschätzt wird.",
           "img_index": -1
         },
         {
           "id": "s029",
-          "text": "Ihre Stiche sind meist nicht sehr schmerzhaft und harmlos, da der Stachel oft nicht einmal die menschliche Haut durchdringen kann.",
+          "text": "Leider gibt es seit einigen Jahren ein großes Problem: das „Bienensterben“.",
+          "img_index": -1
+        },
+        {
+          "id": "s030",
+          "text": "Damit ist gemeint, dass ganze Bienenvölker verschwinden oder im Winter sterben, was für unsere Natur sehr gefährlich ist.",
+          "img_index": -1
+        },
+        {
+          "id": "s031",
+          "text": "Deshalb gibt es seit 2017 einen „Welttag der Bienen“ am 20. Mai, um auf ihre Bedeutung aufmerksam zu machen und sie zu schützen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec6",
+      "heading": "Der Stachel und die Hummeln",
+      "section_role": "curiosity",
+      "sentences": [
+        {
+          "id": "s032",
+          "text": "Der Stachel der Honigbiene hat kleine Widerhaken.",
+          "img_index": -1
+        },
+        {
+          "id": "s033",
+          "text": "Wenn eine Honigbiene in die Haut eines Menschen oder eines anderen Warmblüters sticht, bleibt der Stachel stecken und die Biene stirbt dabei.",
+          "img_index": -1
+        },
+        {
+          "id": "s034",
+          "text": "Die meisten Wildbienen stechen nur, wenn sie sich wirklich bedroht fühlen, zum Beispiel wenn man sie festhält.",
+          "img_index": -1
+        },
+        {
+          "id": "s035",
+          "text": "Ihr Stich ist meistens nicht sehr schmerzhaft und harmlos, bei manchen Arten ist der Stachel sogar zu schwach, um die menschliche Haut zu durchdringen.",
+          "img_index": -1
+        },
+        {
+          "id": "s036",
+          "text": "In den Tropen gibt es sogar „Stachellose Bienen“, die sich mit Bissen oder speziellen Flüssigkeiten wehren.",
+          "img_index": -1
+        },
+        {
+          "id": "s037",
+          "text": "Hummeln sind nahe Verwandte der Honigbienen und leben auch in Staaten, allerdings sind ihre Völker kleiner.",
+          "img_index": -1
+        },
+        {
+          "id": "s038",
+          "text": "Im Gegensatz zur Honigbiene können Hummeln mehrmals stechen, weil ihr Stachel keine Widerhaken hat.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
           "type": "stimmt_das",
-          "text": "Stimmt es, dass alle Bienen stechen können?",
-          "reveal_text": "Nein! Nur die weiblichen Bienen haben einen Stachel. Die männlichen Bienen, auch Drohnen genannt, können nicht stechen. Außerdem stechen Wildbienen viel seltener und weniger schmerzhaft als Honigbienen.",
+          "text": "Brummen Hummeln nur, weil sie so dick sind?",
+          "reveal_text": "Nein! Das typische Brummen der Hummeln entsteht durch die Vibration ihrer Flugmuskeln. Diese Vibration hilft ihnen auch, ihren Körper warm zu halten, damit sie auch bei kühlerem Wetter fliegen und Blüten bestäuben können.",
           "reveal_mode": "auto"
         }
       ],
-      "table": null
-    },
-    {
-      "id": "sec6",
-      "heading": "Warum Bienen in Gefahr sind",
-      "section_role": "human_animal",
-      "sentences": [
-        {
-          "id": "s030",
-          "text": "In den letzten Jahren ist das sogenannte „Bienensterben“ ein großes Problem geworden.",
-          "img_index": -1
-        },
-        {
-          "id": "s031",
-          "text": "Damit ist gemeint, dass ganze Honigbienenvölker verschwinden oder im Winter ungewöhnlich viele Bienen sterben.",
-          "img_index": -1
-        },
-        {
-          "id": "s032",
-          "text": "Das ist sehr besorgniserregend, weil Bienen so wichtig für unsere Umwelt und die Landwirtschaft sind.",
-          "img_index": -1
-        },
-        {
-          "id": "s033",
-          "text": "Viele Menschen und Organisationen setzen sich dafür ein, die Bienen zu schützen und ihre Lebensräume zu erhalten.",
-          "img_index": -1
-        },
-        {
-          "id": "s034",
-          "text": "Deshalb gibt es seit 2017 sogar einen „Welttag der Bienen“ am 20. Mai, um auf ihre Bedeutung aufmerksam zu machen.",
-          "img_index": -1
-        }
-      ],
-      "boxes": [
-        {
-          "type": "warnung",
-          "text": "Das Bienensterben ist ein ernstes Problem für die Natur und die Menschen. Es wird durch verschiedene Faktoren verursacht, wie den Einsatz von bestimmten Pflanzenschutzmitteln, den Verlust von Lebensräumen und Krankheiten. Wenn Bienen verschwinden, hat das große Auswirkungen auf die Bestäubung von Pflanzen und damit auf unsere Nahrungsmittelproduktion."
-        }
-      ],
-      "table": null
-    },
-    {
-      "id": "sec7",
-      "heading": "Wie Bienen und Blumen zusammenfanden",
-      "section_role": "historical_context",
-      "sentences": [
-        {
-          "id": "s035",
-          "text": "Bienen und Blütenpflanzen haben sich im Laufe der Erdgeschichte gemeinsam entwickelt.",
-          "img_index": -1
-        },
-        {
-          "id": "s036",
-          "text": "Vor etwa 110 Millionen Jahren, als die ersten Blütenpflanzen auftauchten, haben sich auch die Bienen entwickelt.",
-          "img_index": -1
-        },
-        {
-          "id": "s037",
-          "text": "Sie haben sich gegenseitig geholfen: Die Bienen trugen den Pollen von Pflanze zu Pflanze und sorgten so für bessere Fortpflanzung.",
-          "img_index": -1
-        },
-        {
-          "id": "s038",
-          "text": "Die Pflanzen entwickelten im Gegenzug süßen Nektar, um die Bienen anzulocken.",
-          "img_index": -1
-        },
-        {
-          "id": "s039",
-          "text": "So passten sich beide immer besser aneinander an: Die Blumen bekamen ihre heutigen Formen mit tiefen Nektarkelchen, und die Bienen entwickelten lange Rüssel, um besser an den Nektar zu kommen, und ihr pelziges Haarkleid für den Pollentransport.",
-          "img_index": -1
-        },
-        {
-          "id": "s040",
-          "text": "Die älteste bekannte fossile Biene ist etwa 75 bis 92 Millionen Jahre alt und wurde in Bernstein gefunden.",
-          "img_index": -1
-        }
-      ],
-      "boxes": [],
       "table": null
     }
   ],
@@ -368,79 +372,79 @@
     "questions": [
       {
         "id": "q1",
-        "text": "Was ist das Besondere an der Behaarung von Bienen?",
+        "text": "Was ist das Besondere an den Haaren der Bienen?",
         "options": [
           {
             "key": "A",
-            "text": "Sie haben keine Haare, sondern einen glatten Panzer."
+            "text": "Sie sind gefiedert und halten Pollen gut fest."
           },
           {
             "key": "B",
-            "text": "Ihre Haare sind gefiedert und helfen beim Pollentransport."
+            "text": "Sie sind glatt und glänzend, damit kein Staub hängen bleibt."
           },
           {
             "key": "C",
-            "text": "Sie haben nur Haare am Kopf, um besser zu sehen."
+            "text": "Sie sind sehr kurz und unsichtbar, um schneller zu fliegen."
           }
         ],
-        "correct_key": "B"
+        "correct_key": "A"
       },
       {
         "id": "q2",
-        "text": "Was ist der Hauptunterschied zwischen Honigbienen und den meisten Wildbienen?",
+        "text": "Was bedeutet es, wenn eine Biene „monolektisch“ ist?",
         "options": [
           {
             "key": "A",
-            "text": "Honigbienen sind viel größer als Wildbienen."
+            "text": "Sie kann nur einmal im Leben Eier legen."
           },
           {
             "key": "B",
-            "text": "Honigbienen leben in großen Staaten, Wildbienen meist allein."
+            "text": "Sie sammelt Pollen nur von Pflanzen einer einzigen Gattung."
           },
           {
             "key": "C",
-            "text": "Honigbienen stechen nicht, Wildbienen stechen oft."
+            "text": "Sie lebt immer allein und hat keine Freunde."
           }
         ],
         "correct_key": "B"
       },
       {
         "id": "q3",
-        "text": "Wozu dient der Stachel einer Biene ursprünglich?",
+        "text": "Warum stirbt eine Honigbiene oft, nachdem sie einen Menschen gestochen hat?",
         "options": [
           {
             "key": "A",
-            "text": "Zum Graben von Nestern in der Erde."
+            "text": "Sie ist zu erschöpft vom Stechen und kann nicht mehr fliegen."
           },
           {
             "key": "B",
-            "text": "Als Werkzeug zum Zerkleinern von Nahrung."
+            "text": "Das Gift ist für sie selbst tödlich."
           },
           {
             "key": "C",
-            "text": "Er hat sich aus einem Legewerkzeug für Eier entwickelt."
+            "text": "Ihr Stachel hat Widerhaken und bleibt in der Haut stecken."
           }
         ],
         "correct_key": "C"
       },
       {
         "id": "q4",
-        "text": "Welche Rolle spielen Bienen für die Pflanzenwelt?",
+        "text": "Was ist der „Schwänzeltanz“ der Honigbienen?",
         "options": [
           {
             "key": "A",
-            "text": "Sie fressen schädliche Insekten von den Pflanzen."
+            "text": "Eine Art, wie Bienen anderen Bienen zeigen, wo es Futter gibt."
           },
           {
             "key": "B",
-            "text": "Sie bestäuben die Pflanzen, damit diese Früchte tragen."
+            "text": "Ein Tanz, den sie aufführen, um Feinde abzuschrecken."
           },
           {
             "key": "C",
-            "text": "Sie gießen die Pflanzen mit Nektar."
+            "text": "Ein Ritual, um eine neue Königin zu wählen."
           }
         ],
-        "correct_key": "B"
+        "correct_key": "A"
       }
     ]
   },
@@ -450,14 +454,14 @@
       "Wildbiene",
       "Bestäubung",
       "Nektar",
-      "Pollen"
+      "Pollen",
+      "Stachel"
     ],
     "discover": [
       "Hummel",
-      "Wespe",
-      "Imker",
-      "Blütenpflanzen",
-      "Insektenschutz"
+      "Grabwespe",
+      "Bienensterben",
+      "Kuckucksbiene"
     ]
   }
 }

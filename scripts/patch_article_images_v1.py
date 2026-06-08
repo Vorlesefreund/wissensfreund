@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+# NOTE: Ab generate_articles.py mit IMAGE_METADATA-Prompt (Juni 2026) befüllt
+# Flash images[] direkt — dieser Patch wird für neue Artikel NICHT mehr benötigt.
+# Nur noch für Legacy-Artikel ohne Bilder verwenden.
 """
 patch_article_images_v1.py
 Wissensfreund — Bilder-Patch für bestehende Artikel-JSONs

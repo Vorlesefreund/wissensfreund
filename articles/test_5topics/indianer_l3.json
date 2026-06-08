@@ -1,319 +1,345 @@
 {
   "meta": {
-    "id": "indigene_voelker_l3",
-    "title": "Indigene Völker Amerikas",
-    "subtitle": "Die ersten Bewohner eines Kontinents",
-    "emoji": "🌎",
+    "id": "indianer_l3",
+    "title": "Indigene Völker",
+    "subtitle": "Die Ureinwohner der Erde und ihr Kampf für Rechte",
+    "emoji": "🌍",
     "age_level": 3,
     "pattern": "place_geography",
-    "theme_color": "#8B4513",
-    "word_count": 597,
+    "theme_color": "#2E8B57",
+    "word_count": 550,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Indigene_Völker",
     "schema_version": "1.0",
     "review_flag": false,
-    "category_top": "geschichte",
-    "category_sub": "völker",
-    "generated_at": "2026-06-08T14:49:09.068235+00:00"
+    "category_top": "gesellschaft",
+    "category_sub": "kulturen",
+    "generated_at": "2026-06-08T17:43:39.650011+00:00"
   },
   "images": [
     {
       "index": 0,
       "filename": "3NorwSamiPresidents-2.jpg",
-      "alt": "3Norwsamipresidents",
-      "caption": "",
-      "license": "Public domain",
-      "license_author": "3NorwSamiPresidents.jpg: Trond Trosterud\nderivative work: Bff (talk)",
-      "source_url": "https://commons.wikimedia.org/wiki/File:3NorwSamiPresidents-2.jpg",
+      "alt": "Drei samische Präsidenten in traditioneller Kleidung",
+      "caption": "Die Samen sind ein indigenes Volk im Norden Europas.",
+      "license": "Public Domain",
+      "license_author": "Trond Trosterud",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/1/17/3NorwSamiPresidents-2.jpg",
+      "wikimedia_id": "File:3NorwSamiPresidents-2.jpg",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/17/3NorwSamiPresidents-2.jpg"
     },
     {
       "index": 1,
-      "filename": "James Anaya and Vicky Tauli-Corpuz in Kuala-Lumpur.jpg",
-      "alt": "James Anaya And Vicky Tauli Corpuz In Kuala Lumpur",
-      "caption": "",
-      "license": "CC BY-SA 3.0",
+      "filename": "James_Anaya_and_Vicky_Tauli-Corpuz_in_Kuala-Lumpur.jpg",
+      "alt": "James Anaya und Vicky Tauli-Corpuz bei einer Konferenz",
+      "caption": "James Anaya (ehemaliger UN-Sonderberichterstatter) und Vicky Tauli-Corpuz (indigene Aktivistin) setzen sich für die Rechte indigener Völker ein.",
+      "license": "CC BY-SA",
       "license_author": "Johannes Rohr",
-      "source_url": "https://commons.wikimedia.org/wiki/File:James_Anaya_and_Vicky_Tauli-Corpuz_in_Kuala-Lumpur.jpg",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/James_Anaya_and_Vicky_Tauli-Corpuz_in_Kuala-Lumpur.jpg/960px-James_Anaya_and_Vicky_Tauli-Corpuz_in_Kuala-Lumpur.jpg",
+      "wikimedia_id": "File:James_Anaya_and_Vicky_Tauli-Corpuz_in_Kuala-Lumpur.jpg",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/James_Anaya_and_Vicky_Tauli-Corpuz_in_Kuala-Lumpur.jpg/960px-James_Anaya_and_Vicky_Tauli-Corpuz_in_Kuala-Lumpur.jpg"
-    },
-    {
-      "index": 2,
-      "filename": "NZ delegation UN Forum on Indigenous Issues.jpg",
-      "alt": "Nz Delegation Un Forum On Indigenous Issues",
-      "caption": "",
-      "license": "CC BY-SA 2.0",
-      "license_author": "Broddi Sigurðarson",
-      "source_url": "https://commons.wikimedia.org/wiki/File:NZ_delegation_UN_Forum_on_Indigenous_Issues.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/NZ_delegation_UN_Forum_on_Indigenous_Issues.jpg/960px-NZ_delegation_UN_Forum_on_Indigenous_Issues.jpg"
     }
   ],
   "sections": [
     {
-      "id": "intro",
-      "heading": "Die ersten Menschen Amerikas",
+      "id": "sec1",
+      "heading": "Wer sind die Indigenen Völker?",
       "section_role": "intro",
       "sentences": [
         {
           "id": "s001",
-          "text": "Stell dir vor, du lebst in einem Land, das deine Familie schon seit Tausenden von Jahren bewohnt.",
+          "text": "Stell dir vor, du lebst in einem Land, das schon immer deiner Familie gehört hat.",
           "img_index": -1
         },
         {
           "id": "s002",
-          "text": "Ihr habt eure eigenen Geschichten, Lieder und eine besondere Art zu leben, die von euren Vorfahren stammt.",
+          "text": "Du hast eigene Geschichten, Lieder und Regeln, die von Generation zu Generation weitergegeben werden.",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Genau das beschreibt das Leben der indigenen Völker Amerikas.",
+          "text": "Doch plötzlich kommen Fremde und wollen dein Land und deine Art zu leben verändern.",
           "img_index": -1
         },
         {
           "id": "s004",
-          "text": "Das sind die Menschen, die diesen riesigen Kontinent schon bewohnten, lange bevor die Europäer kamen.",
+          "text": "Das ist die Geschichte vieler indigener Völker auf der ganzen Welt.",
           "img_index": -1
         },
         {
           "id": "s005",
-          "text": "Sie werden auch Ureinwohner genannt und haben eine tiefe Verbindung zu ihrem Land und ihrer Kultur.",
-          "img_index": -1
-        }
-      ],
-      "boxes": []
-    },
-    {
-      "id": "was_sind_indigene_völker",
-      "heading": "Was sind indigene Völker?",
-      "section_role": null,
-      "sentences": [
+          "text": "Indigene Völker sind Menschengruppen, die als Erste in einem bestimmten Gebiet lebten, lange bevor andere Menschen kamen und das Land eroberten oder Staaten gründeten.",
+          "img_index": 0
+        },
         {
           "id": "s006",
-          "text": "Indigene Völker sind Gruppen von Menschen, die sich als Nachkommen der Bewohner eines Gebiets sehen, die dort schon vor der Eroberung oder Kolonisierung durch Fremde lebten.",
+          "text": "Sie haben eine tiefe Verbindung zu ihrem Land und bewahren ihre eigene Kultur, Sprache und Lebensweise.",
           "img_index": -1
         },
         {
           "id": "s007",
-          "text": "Sie haben eine enge Beziehung zu ihrem Lebensraum und ihre ganz eigene Kultur, Sprache und Traditionen.",
+          "text": "Oft werden sie von der Mehrheitsgesellschaft an den Rand gedrängt oder diskriminiert.",
           "img_index": -1
         },
         {
           "id": "s008",
-          "text": "Weltweit gibt es etwa 350 Millionen indigene Menschen.",
-          "img_index": -1
-        },
-        {
-          "id": "s009",
-          "text": "Allein auf der Insel Neuguinea gibt es über 830 verschiedene indigene Völker mit jeweils eigener Sprache!",
+          "text": "Heute leben schätzungsweise 350 bis 500 Millionen indigene Menschen auf der Erde.",
           "img_index": -1
         }
       ],
-      "boxes": [
-        {
-          "type": "fakt",
-          "text": "Die Vereinten Nationen (UN) haben vier Kriterien für indigene Völker festgelegt: Sie waren die „ersten“ Bewohner eines Gebiets, bewahren ihre Kultur, identifizieren sich selbst als indigen und haben oft Erfahrungen mit Unterdrückung gemacht."
-        }
-      ]
+      "boxes": [],
+      "table": null
     },
     {
-      "id": "die_indianer_und_inuit",
-      "heading": "Die Indianer und Inuit",
-      "section_role": null,
+      "id": "sec2",
+      "heading": "Ihre besondere Kultur und Verbindung zur Natur",
+      "section_role": "appearance_equipment",
       "sentences": [
         {
+          "id": "s009",
+          "text": "Ein wichtiges Merkmal indigener Völker ist ihre einzigartige Kultur.",
+          "img_index": -1
+        },
+        {
           "id": "s010",
-          "text": "In Nord- und Südamerika sind die bekanntesten indigenen Völker die Indianer und die Inuit, die früher oft Eskimo genannt wurden.",
+          "text": "Dazu gehören ihre Sprachen, ihre Gesellschaftsform, ihre Religion und ihre spirituellen Werte.",
           "img_index": -1
         },
         {
           "id": "s011",
-          "text": "Der Name „Indianer“ entstand durch einen Irrtum von Christoph Kolumbus, der dachte, er sei in Indien gelandet.",
+          "text": "Viele indigene Kulturen haben ihr Wissen früher nur mündlich weitergegeben, ohne Bücher zu schreiben.",
           "img_index": -1
         },
         {
           "id": "s012",
-          "text": "Dabei gibt es nicht „die Indianer“, sondern viele hundert verschiedene Völker mit ganz unterschiedlichen Kulturen, Sprachen und Lebensweisen.",
+          "text": "Sie leben oft in enger Verbindung mit der Natur und sehen sich als Teil davon.",
           "img_index": -1
         },
         {
           "id": "s013",
-          "text": "Manche waren Jäger und Sammler, andere bauten Mais oder Bohnen an.",
+          "text": "Deshalb sind ihre Religionen und Weltanschauungen oft eng mit der natürlichen Umwelt verbunden.",
           "img_index": -1
         },
         {
           "id": "s014",
-          "text": "Die Sioux lebten in Tipis, die Irokesen in Langhäusern, und die Maya oder Azteken bauten sogar große Städte und Tempel.",
+          "text": "Indigene Völker betrachten Landbesitz häufig als ein Recht der ganzen Gemeinschaft, das nicht verkauft werden darf.",
           "img_index": -1
         },
         {
           "id": "s015",
-          "text": "Die Inuit leben in den kalten Regionen der Arktis und sind Meister im Jagen von Robben und Fischen.",
-          "img_index": -1
-        },
-        {
-          "id": "s016",
-          "text": "Ihre traditionellen Behausungen, die Iglus, sind geniale Bauwerke aus Schnee.",
+          "text": "Sie nutzen das Land gemeinsam und geben es an die nächste Generation weiter.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
-          "type": "stimmt_das",
-          "text": "Sind „Indianer“ ein einziges Volk?",
-          "reveal_text": "Nein, der Begriff „Indianer“ ist ein Sammelbegriff für viele hundert verschiedene indigene Völker in Amerika. Jedes dieser Völker hat seine eigene Geschichte, Sprache und Kultur. Es ist, als würde man alle Europäer „Europäer“ nennen, obwohl es Deutsche, Franzosen, Spanier und viele mehr gibt."
+          "type": "wow",
+          "text": "Auf der Insel Neuguinea leben über 1000 verschiedene indigene Völker – das ist die höchste Dichte indigener Völker weltweit!"
         }
-      ]
+      ],
+      "table": null
     },
     {
-      "id": "kampf_um_rechte_und_sprachen",
-      "heading": "Kampf um Rechte und Sprachen",
-      "section_role": null,
+      "id": "sec3",
+      "heading": "Ihre Geschichte und ihre Kämpfe",
+      "section_role": "historical_context",
       "sentences": [
         {
+          "id": "s016",
+          "text": "Als die Europäer im Zeitalter der Entdeckungen andere Kontinente besiedelten, begann für viele indigene Völker eine schwere Zeit.",
+          "img_index": -1
+        },
+        {
           "id": "s017",
-          "text": "Viele indigene Völker wurden über Jahrhunderte unterdrückt und an den Rand der Gesellschaft gedrängt.",
+          "text": "Man versuchte, ihre Kulturen zu verändern und sie an die europäische Lebensweise anzupassen.",
           "img_index": -1
         },
         {
           "id": "s018",
-          "text": "Sie kämpfen heute für ihre Rechte, besonders um ihr Land und ihre Ressourcen.",
+          "text": "Dabei wurden viele indigene Sprachen unterdrückt oder ausgelöscht, was ein großer Verlust für die Menschheit ist.",
           "img_index": -1
         },
         {
           "id": "s019",
-          "text": "Denn oft liegen wertvolle Rohstoffe wie Öl, Gold oder Uran in ihren angestammten Gebieten.",
+          "text": "Heute sind zwischen 50 und 90 Prozent aller lebenden Sprachen bedroht, und die meisten davon sind indigene Sprachen.",
           "img_index": -1
         },
         {
           "id": "s020",
-          "text": "Auch ihre Sprachen sind stark bedroht: Viele sind schon ausgestorben, und noch mehr könnten verschwinden.",
+          "text": "Viele indigene Völker leben in Gebieten, die reich an Rohstoffen wie Uran, Erdöl oder Gold sind.",
           "img_index": -1
         },
         {
           "id": "s021",
-          "text": "Dabei ist die Sprache ein wichtiger Teil ihrer Identität und Kultur.",
+          "text": "Das führt oft zu Konflikten, wenn große Firmen oder Staaten diese Rohstoffe abbauen wollen.",
           "img_index": -1
         },
         {
           "id": "s022",
-          "text": "Die Vereinten Nationen haben eine Erklärung zum Schutz der Rechte indigener Völker verabschiedet und unterstützen sie in ihrem Kampf.",
+          "text": "Manchmal werden indigene Gruppen sogar von ihrem angestammten Land vertrieben, um Nationalparks einzurichten oder Staudämme zu bauen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Gefährliche Isolation",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s023",
+          "text": "Weltweit gibt es über hundert indigene Gruppen, die sich dafür entschieden haben, isoliert von der Außenwelt zu leben.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Oft ist diese Isolation keine freiwillige Wahl, sondern eine Folge von schlimmen Erfahrungen mit Fremden.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "Diese sogenannten „unkontaktierten Völker“ leben meist in Regenwäldern, zum Beispiel in Peru und Brasilien.",
+          "img_index": -1
+        },
+        {
+          "id": "s026",
+          "text": "Sie haben oft keinen Schutz vor Krankheiten, die für uns harmlos sind, aber für sie tödlich sein können.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
           "type": "warnung",
-          "text": "Manche indigene Gruppen, die in völliger Isolation leben, sind besonders gefährdet. Sie haben oft keine Abwehrkräfte gegen Krankheiten, die für uns harmlos sind, und ihr Lebensraum wird durch Rodungen oder Bergbau bedroht."
+          "text": "Unkontaktierte Völker sind besonders gefährdet, da sie keine Abwehrkräfte gegen viele Krankheiten der modernen Welt besitzen. Jeder ungewollte Kontakt kann für sie lebensbedrohlich sein."
         }
-      ]
+      ],
+      "table": null
     },
     {
-      "id": "religion_und_traditionen",
-      "heading": "Religion und Traditionen",
-      "section_role": null,
+      "id": "sec5",
+      "heading": "Heute: Rechte und Hoffnungen",
+      "section_role": "today_legacy",
       "sentences": [
         {
-          "id": "s023",
-          "text": "Die meisten indigenen Völker haben eigene Religionen und Weltanschauungen, die oft eng mit der Natur verbunden sind.",
-          "img_index": -1
-        },
-        {
-          "id": "s024",
-          "text": "Sie glauben, dass alles in der Natur – Bäume, Tiere, Flüsse – eine Seele hat und dass die Geisterwelt das Leben beeinflusst.",
-          "img_index": -1
-        },
-        {
-          "id": "s025",
-          "text": "Diese Geschichten und Rituale wurden meist mündlich überliefert, von Generation zu Generation.",
-          "img_index": -1
-        },
-        {
-          "id": "s026",
-          "text": "Obwohl viele dieser Kulturen durch die Kolonisierung beeinflusst wurden, konnten sich viele traditionelle Religionen bis heute halten.",
-          "img_index": -1
-        },
-        {
           "id": "s027",
-          "text": "Sie bieten oft nachhaltige Lebensweisen an, die Alternativen zu unserer modernen Welt aufzeigen können.",
+          "text": "Viele indigene Völker kämpfen heute für die Anerkennung ihrer Menschenrechte und das Recht auf Selbstbestimmung.",
+          "img_index": 1
+        },
+        {
+          "id": "s028",
+          "text": "Das bedeutet, dass sie selbst über ihr Land und ihre Zukunft entscheiden wollen.",
+          "img_index": -1
+        },
+        {
+          "id": "s029",
+          "text": "Die Vereinten Nationen (UN) haben eine Erklärung verabschiedet, die die Rechte indigener Völker schützt und fördert.",
+          "img_index": -1
+        },
+        {
+          "id": "s030",
+          "text": "Sie haben auch spezielle Einrichtungen, die sich um die Anliegen der indigenen Menschen kümmern.",
+          "img_index": -1
+        },
+        {
+          "id": "s031",
+          "text": "Indigene Kulturen bieten oft nachhaltige Wege, mit der Natur zu leben, die eine gute Alternative zu unserer modernen Lebensweise sein könnten.",
+          "img_index": -1
+        },
+        {
+          "id": "s032",
+          "text": "Deshalb ist es wichtig, ihre Weisheit und ihr Wissen zu bewahren und von ihnen zu lernen.",
+          "img_index": -1
+        },
+        {
+          "id": "s033",
+          "text": "Seit 1994 wird der 9. August jedes Jahr als Internationaler Tag der indigenen Völker gefeiert, um auf ihre Situation aufmerksam zu machen.",
           "img_index": -1
         }
       ],
-      "boxes": []
+      "boxes": [
+        {
+          "type": "fakt",
+          "text": "Wenn Projekte auf indigenem Land geplant sind, fordern die Völker ein Mitspracherecht. Das nennt man „Free, Prior and Informed Consent“ (FPIC), also eine freie, vorherige und informierte Zustimmung."
+        }
+      ],
+      "table": null
     }
   ],
   "quiz": {
     "questions": [
       {
         "id": "q1",
-        "text": "Was ist KEIN Merkmal indigener Völker?",
+        "text": "Was ist ein Hauptmerkmal indigener Völker?",
         "options": [
           {
             "key": "A",
-            "text": "Sie sind die ersten Bewohner eines Gebiets."
+            "text": "Sie leben erst seit Kurzem in einem Gebiet."
           },
           {
             "key": "B",
-            "text": "Sie haben eine eigene Kultur und Sprache."
+            "text": "Sie waren die ersten Bewohner eines Gebiets und haben eine eigene Kultur."
           },
           {
             "key": "C",
-            "text": "Sie leben immer in Isolation von der Außenwelt."
+            "text": "Sie haben keine eigene Sprache oder Traditionen."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Warum ist der Landbesitz für indigene Völker oft ein Streitpunkt?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie wollen ihr Land verkaufen, um reich zu werden."
+          },
+          {
+            "key": "B",
+            "text": "Sie sehen Land als persönliches Eigentum, das sie verstecken."
+          },
+          {
+            "key": "C",
+            "text": "Sie betrachten Land als gemeinschaftlichen Besitz, der nicht verkauft werden soll, während andere es wirtschaftlich nutzen wollen."
           }
         ],
         "correct_key": "C"
       },
       {
-        "id": "q2",
-        "text": "Warum ist der Begriff „Indianer“ historisch problematisch?",
-        "options": [
-          {
-            "key": "A",
-            "text": "Er wurde von Kolumbus aus Versehen vergeben."
-          },
-          {
-            "key": "B",
-            "text": "Er beschreibt nur eine kleine Gruppe von Völkern."
-          },
-          {
-            "key": "C",
-            "text": "Er ist ein alter Name für die Inuit."
-          }
-        ],
-        "correct_key": "A"
-      },
-      {
         "id": "q3",
-        "text": "Wofür kämpfen indigene Völker heute besonders stark?",
+        "text": "Was ist eine große Gefahr für unkontaktierte indigene Völker?",
         "options": [
           {
             "key": "A",
-            "text": "Für mehr Autos und moderne Städte."
+            "text": "Sie haben zu viele Freunde."
           },
           {
             "key": "B",
-            "text": "Für den Schutz ihres Landes und ihrer Sprachen."
+            "text": "Sie sind anfällig für Krankheiten, gegen die sie keine Abwehrkräfte haben."
           },
           {
             "key": "C",
-            "text": "Für die Einführung einer neuen Weltreligion."
+            "text": "Sie leben in zu großen Häusern."
           }
         ],
         "correct_key": "B"
       },
       {
         "id": "q4",
-        "text": "Was ist typisch für die Religionen vieler indigener Völker?",
+        "text": "Was bedeutet „Selbstbestimmung“ für indigene Völker?",
         "options": [
           {
             "key": "A",
-            "text": "Sie haben nur einen einzigen, allmächtigen Gott."
+            "text": "Sie wollen sich immer von anderen abschotten."
           },
           {
             "key": "B",
-            "text": "Sie sind eng mit der Natur und Geistern verbunden."
+            "text": "Sie möchten selbst über ihr Land und ihre Zukunft entscheiden."
           },
           {
             "key": "C",
-            "text": "Sie haben viele heilige Bücher und feste Regeln."
+            "text": "Sie wollen nur die Regeln der Mehrheitsgesellschaft übernehmen."
           }
         ],
         "correct_key": "B"
@@ -323,26 +349,38 @@
   "related_terms": {
     "core": [
       {
-        "id": "eskimo",
-        "title": "Eskimo",
-        "description": "Ein Sammelbegriff für die indigenen Völker der Arktis, die auch Inuit genannt werden."
+        "term": "Selbstbestimmung",
+        "url": "https://de.wikipedia.org/wiki/Selbstbestimmungsrecht_der_Völker"
       },
       {
-        "id": "indianer",
-        "title": "Indianer",
-        "description": "Ein Sammelbegriff für die indigenen Völker Amerikas, der durch einen Irrtum von Kolumbus entstand."
+        "term": "Kolonialismus",
+        "url": "https://de.wikipedia.org/wiki/Kolonialismus"
+      },
+      {
+        "term": "Menschenrechte",
+        "url": "https://de.wikipedia.org/wiki/Menschenrechte"
+      },
+      {
+        "term": "Ureinwohner",
+        "url": "https://de.wikipedia.org/wiki/Ureinwohner"
       }
     ],
     "discover": [
       {
-        "id": "kolonialismus",
-        "title": "Kolonialismus",
-        "description": "Die Herrschaft eines Landes über andere Länder oder Gebiete, oft mit Ausbeutung und Unterdrückung verbunden."
+        "term": "Sprachen",
+        "url": "https://de.wikipedia.org/wiki/Sprache"
       },
       {
-        "id": "vereinte_nationen",
-        "title": "Vereinte Nationen",
-        "description": "Eine Organisation, in der fast alle Länder der Welt zusammenarbeiten, um Frieden und Gerechtigkeit zu fördern."
+        "term": "Vereinte Nationen",
+        "url": "https://de.wikipedia.org/wiki/Vereinte_Nationen"
+      },
+      {
+        "term": "Rohstoffe",
+        "url": "https://de.wikipedia.org/wiki/Rohstoff"
+      },
+      {
+        "term": "Naturvölker",
+        "url": "https://de.wikipedia.org/wiki/Naturvölker"
       }
     ]
   }

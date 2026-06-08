@@ -40,7 +40,7 @@ def call_gemini(system_prompt: str, user_message: str) -> str:
                 config=types.GenerateContentConfig(
                     system_instruction=system_prompt,
                     temperature=0.6,
-                    thinking_config=types.ThinkingConfig(thinking_budget=0),
+                    thinking_config=types.ThinkingConfig(thinking_budget=8192),
                 ),
             )
             # Thinking-Mode kann response.text=None liefern → Parts direkt auslesen

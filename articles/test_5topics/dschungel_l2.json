@@ -2,105 +2,121 @@
   "meta": {
     "id": "dschungel_l2",
     "title": "Tropischer Regenwald",
-    "subtitle": "Ein grünes Wunder voller Leben",
-    "emoji": "🌳",
+    "subtitle": "Ein riesiger Wald, in dem es fast jeden Tag regnet",
+    "emoji": "🌳🌧️🐒",
     "age_level": 2,
     "pattern": "place_geography",
     "theme_color": "#228B22",
-    "word_count": 357,
+    "word_count": 350,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Tropischer_Regenwald",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "natur",
     "category_sub": "landschaften",
-    "generated_at": "2026-06-08T16:16:39.252639+00:00"
+    "generated_at": "2026-06-08T17:52:54.523476+00:00"
   },
   "images": [
     {
       "index": 0,
-      "filename": "Aerial view of the Amazon Rainforest.jpg",
-      "alt": "Aerial View Of The Amazon Rainforest",
-      "caption": "",
-      "license": "CC BY-SA 2.0",
+      "filename": "Aerial_view_of_the_Amazon_Rainforest.jpg",
+      "alt": "Luftaufnahme des Amazonas-Regenwalds mit dichtem Grün und einem Fluss",
+      "caption": "Der Amazonas-Regenwald ist der größte tropische Regenwald der Welt.",
+      "license": "CC BY-SA",
       "license_author": "lubasi",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_the_Amazon_Rainforest.jpg",
+      "source_url": "https://commons.wikimedia.org/wikipedia/commons/thumb/d/d0/Aerial_view_of_the_Amazon_Rainforest.jpg/960px-Aerial_view_of_the_Amazon_Rainforest.jpg",
+      "wikimedia_id": "File:Aerial_view_of_the_Amazon_Rainforest.jpg",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Aerial_view_of_the_Amazon_Rainforest.jpg/960px-Aerial_view_of_the_Amazon_Rainforest.jpg"
     },
     {
       "index": 1,
-      "filename": "Amazon Rainforest.jpg",
-      "alt": "Amazon Rainforest",
-      "caption": "",
-      "license": "CC BY 2.0",
-      "license_author": "Antonio Campoy",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Amazon_Rainforest.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Amazon_Rainforest.jpg/960px-Amazon_Rainforest.jpg"
+      "filename": "Stockwerke_wald.png",
+      "alt": "Grafik, die die verschiedenen Schichten oder Stockwerke eines Regenwaldes zeigt",
+      "caption": "Im Regenwald wachsen Pflanzen in verschiedenen Stockwerken.",
+      "license": "Public Domain",
+      "license_author": "Elke Freese",
+      "source_url": "https://commons.wikimedia.org/wikipedia/5/5e/Stockwerke_wald.png",
+      "wikimedia_id": "File:Stockwerke_wald.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/5/5e/Stockwerke_wald.png"
     },
     {
       "index": 2,
-      "filename": "Ara ararauna Luc Viatour filtered.jpg",
-      "alt": "Ara Ararauna Luc Viatour Filtered",
-      "caption": "",
-      "license": "CC BY-SA 3.0",
-      "license_author": "Ara_ararauna_Luc_Viatour.jpg: Luc Viatour\nderivative work: JovanCormac",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Ara_ararauna_Luc_Viatour_filtered.jpg",
+      "filename": "Ara_ararauna_Luc_Viatour_filtered.jpg",
+      "alt": "Ein bunter Ara-Papagei mit blauen und gelben Federn",
+      "caption": "Viele bunte Vögel wie dieser Ara leben im Regenwald.",
+      "license": "CC BY-SA",
+      "license_author": "Ara_ararauna_Luc_Viatour.jpg: Luc Viatour derivati",
+      "source_url": "https://commons.wikimedia.org/wikipedia/commons/thumb/5/5e/Ara_ararauna_Luc_Viatour_filtered.jpg/960px-Ara_ararauna_Luc_Viatour_filtered.jpg",
+      "wikimedia_id": "File:Ara_ararauna_Luc_Viatour_filtered.jpg",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Ara_ararauna_Luc_Viatour_filtered.jpg/960px-Ara_ararauna_Luc_Viatour_filtered.jpg"
     },
     {
       "index": 3,
-      "filename": "Atta cephalotes (Costa Rica) 1.jpg",
-      "alt": "Atta Cephalotes (Costa Rica)",
-      "caption": "",
-      "license": "CC BY-SA 4.0",
-      "license_author": "Hans Hillewaert",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Atta_cephalotes_(Costa_Rica)_1.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Atta_cephalotes_%28Costa_Rica%29_1.jpg/960px-Atta_cephalotes_%28Costa_Rica%29_1.jpg"
+      "filename": "Pygmy_house_outsideview.jpg",
+      "alt": "Ein kleines, rundes Haus aus Naturmaterialien im Wald",
+      "caption": "Manche Völker leben tief im Regenwald.",
+      "license": "Public Domain",
+      "license_author": null,
+      "source_url": "https://commons.wikimedia.org/wikipedia/commons/5/5f/Pygmy_house_outsideview.jpg",
+      "wikimedia_id": "File:Pygmy_house_outsideview.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/5/5f/Pygmy_house_outsideview.jpg"
     },
     {
       "index": 4,
-      "filename": "Bosque dos Jequitibás - IMG 9971.jpg",
-      "alt": "Bosque Dos Jequitibás   Img",
-      "caption": "",
-      "license": "Public domain",
-      "license_author": "Daderot",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Bosque_dos_Jequitib%C3%A1s_-_IMG_9971.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Bosque_dos_Jequitib%C3%A1s_-_IMG_9971.jpg/960px-Bosque_dos_Jequitib%C3%A1s_-_IMG_9971.jpg"
+      "filename": "MadeiraDesmatamento2WilsonDiasAgenciaBrasil.jpg",
+      "alt": "Abgeholzte Waldfläche mit Baumstämmen und einem einzelnen Arbeiter",
+      "caption": "Leider wird viel Regenwald abgeholzt.",
+      "license": "CC BY",
+      "license_author": "Wilson Dias/Agência Brasil",
+      "source_url": "https://commons.wikimedia.org/wikipedia/commons/thumb/2/2c/MadeiraDesmatamento2WilsonDiasAgenciaBrasil.jpg/960px-MadeiraDesmatamento2WilsonDiasAgenciaBrasil.jpg",
+      "wikimedia_id": "File:MadeiraDesmatamento2WilsonDiasAgenciaBrasil.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/MadeiraDesmatamento2WilsonDiasAgenciaBrasil.jpg/960px-MadeiraDesmatamento2WilsonDiasAgenciaBrasil.jpg"
     },
     {
       "index": 5,
-      "filename": "Forest around MLC.jpg",
-      "alt": "Forest Around Mlc",
-      "caption": "",
-      "license": "CC BY 3.0",
-      "license_author": "CREES-MANU",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Forest_around_MLC.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Forest_around_MLC.jpg/960px-Forest_around_MLC.jpg"
+      "filename": "Oil_palm_plantation_in_Cigudeg-05.jpg",
+      "alt": "Reihen von Ölpalmen auf einer Plantage",
+      "caption": "Für Palmöl-Plantagen wird viel Regenwald zerstört.",
+      "license": "CC BY",
+      "license_author": "Achmad Rabin Taim from Jakarta, Indonesia",
+      "source_url": "https://commons.wikimedia.org/wikipedia/commons/thumb/8/80/Oil_palm_plantation_in_Cigudeg-05.jpg/960px-Oil_palm_plantation_in_Cigudeg-05.jpg",
+      "wikimedia_id": "File:Oil_palm_plantation_in_Cigudeg-05.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Oil_palm_plantation_in_Cigudeg-05.jpg/960px-Oil_palm_plantation_in_Cigudeg-05.jpg"
     }
   ],
   "sections": [
     {
       "id": "sec1",
-      "heading": "Ein Wald, in dem es jeden Tag regnet",
+      "heading": "Was ist ein tropischer Regenwald?",
       "section_role": "intro",
       "sentences": [
         {
           "id": "s001",
-          "text": "Stell dir einen Ort vor, wo die Sonne fast immer scheint und es trotzdem fast jeden Tag regnet: Das ist der tropische Regenwald!",
-          "img_index": -1
+          "text": "Stell dir vor, du stehst in einem riesigen, grünen Dschungel.",
+          "img_index": 0
         },
         {
           "id": "s002",
-          "text": "Diese riesigen Wälder liegen rund um den Äquator, das ist die gedachte Linie, die die Erde in der Mitte teilt.",
+          "text": "Um dich herum wachsen Bäume, die so hoch sind wie Wolkenkratzer.",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Dort ist es das ganze Jahr über warm und die Luft ist immer feucht.",
+          "text": "Es ist immer warm und feucht, und fast jeden Tag regnet es kräftig.",
           "img_index": -1
         },
         {
           "id": "s004",
-          "text": "Oft gibt es am Nachmittag ein kräftiges Gewitter mit viel Regen, der den Wald erfrischt.",
+          "text": "Das ist ein tropischer Regenwald!",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Diese besonderen Wälder liegen nah am Äquator, dem gedachten Gürtel um die Mitte der Erde.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Dort ist die Sonne das ganze Jahr über stark und sorgt für viel Wärme.",
           "img_index": -1
         }
       ],
@@ -109,71 +125,81 @@
     },
     {
       "id": "sec2",
-      "heading": "Bäume wie Hochhäuser und viele Tiere",
-      "section_role": "appearance_equipment",
+      "heading": "Warum regnet es so oft?",
+      "section_role": "daily_weather",
       "sentences": [
         {
-          "id": "s005",
-          "text": "Im Regenwald wachsen die Bäume ganz unterschiedlich hoch, wie in einem Haus mit vielen Stockwerken.",
-          "img_index": -1
-        },
-        {
-          "id": "s006",
-          "text": "Ganz unten am Boden gibt es kleine Pflanzen, weiter oben Büsche, dann normale Bäume und darüber riesige Urwaldriesen.",
-          "img_index": -1
-        },
-        {
           "id": "s007",
-          "text": "Manche Bäume sind so hoch wie ein Hochhaus und reichen bis zu 60 Meter in den Himmel!",
+          "text": "Jeden Morgen wärmt die Sonne den Boden und die Pflanzen auf.",
           "img_index": -1
         },
         {
           "id": "s008",
-          "text": "In jedem Stockwerk leben andere Tiere, die sich dort besonders wohlfühlen.",
+          "text": "Das viele Wasser aus dem Boden und von den Blättern steigt als feuchter Dampf nach oben.",
           "img_index": -1
         },
         {
           "id": "s009",
-          "text": "Deshalb gibt es im Regenwald unglaublich viele verschiedene Tier- und Pflanzenarten – mehr als irgendwo sonst auf der Erde.",
+          "text": "Dort bildet es dichte Wolken.",
           "img_index": -1
         },
         {
           "id": "s010",
-          "text": "Denke an bunte Papageien, Affen, Schlangen oder winzige Insekten.",
+          "text": "Am Nachmittag oder Abend regnen diese Wolken dann meistens aus, oft mit einem Gewitter.",
           "img_index": -1
-        }
-      ],
-      "boxes": [
-        {
-          "type": "wow",
-          "text": "Im Regenwald leben schätzungsweise zwischen 40 und 70 Prozent aller Tier- und Pflanzenarten der Erde – das sind über 30 Millionen verschiedene Arten!"
-        }
-      ],
-      "table": null
-    },
-    {
-      "id": "sec3",
-      "heading": "Wichtige Flüsse und ihre Bewohner",
-      "section_role": "place_geography",
-      "sentences": [
+        },
         {
           "id": "s011",
-          "text": "Weil es so viel regnet, fließen durch viele Regenwälder große Flüsse.",
+          "text": "Deshalb ist es im Regenwald immer so nass.",
           "img_index": -1
         },
         {
           "id": "s012",
-          "text": "Der bekannteste ist der Amazonas in Südamerika, aber auch der Kongo in Afrika ist riesig.",
+          "text": "Die Bäume geben sogar so viel Wasser ab, dass sie selbst für neuen Regen sorgen.",
           "img_index": -1
-        },
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Ein Wald mit vielen Etagen",
+      "section_role": "many_layers",
+      "sentences": [
         {
           "id": "s013",
-          "text": "In diesen Flüssen leben viele Fische, aber auch besondere Tiere wie Flussdelfine oder riesige Otter.",
-          "img_index": -1
+          "text": "Im Regenwald wachsen die Pflanzen nicht nur nebeneinander, sondern auch übereinander.",
+          "img_index": 1
         },
         {
           "id": "s014",
-          "text": "Auch Menschen leben im Regenwald, oft in kleinen Gruppen, die sich gut mit der Natur auskennen und vom Wald leben.",
+          "text": "Man nennt das Stockwerkbau.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Ganz unten am Boden leben Moose und kleine Pflanzen, die wenig Licht brauchen.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Darüber wachsen Sträucher und junge Bäume.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Noch höher ist das dichte Blätterdach der großen Bäume, die bis zu 40 Meter hoch werden.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Und dann gibt es noch einzelne Urwaldriesen, die bis zu 60 Meter in den Himmel ragen!",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "In jeder dieser Etagen leben andere Tiere und Pflanzen.",
           "img_index": -1
         }
       ],
@@ -182,41 +208,177 @@
     },
     {
       "id": "sec4",
-      "heading": "Gefahr für den Regenwald",
-      "section_role": "warnung",
+      "heading": "Ein Zuhause für unzählige Tiere",
+      "section_role": "amazing_animals_plants",
       "sentences": [
         {
-          "id": "s015",
-          "text": "Leider sind die Regenwälder sehr in Gefahr.",
+          "id": "s020",
+          "text": "Der tropische Regenwald ist wie ein riesiger Zoo und Garten zugleich.",
+          "img_index": 2
+        },
+        {
+          "id": "s021",
+          "text": "Hier leben unglaublich viele verschiedene Tier- und Pflanzenarten.",
           "img_index": -1
         },
         {
-          "id": "s016",
-          "text": "Jedes Jahr werden riesige Flächen abgeholzt, um Platz für Felder zu schaffen, zum Beispiel für Palmöl oder Soja.",
+          "id": "s022",
+          "text": "Man schätzt, dass 40 bis 70 Prozent aller Arten auf der Erde hier zu Hause sind.",
           "img_index": -1
         },
         {
-          "id": "s017",
-          "text": "Auch Bäume werden gefällt, um Holz zu gewinnen.",
+          "id": "s023",
+          "text": "Das sind viele Millionen Arten!",
           "img_index": -1
         },
         {
-          "id": "s018",
-          "text": "Das ist schlimm, denn wenn der Regenwald verschwindet, verlieren viele Tiere und Pflanzen ihr Zuhause.",
+          "id": "s024",
+          "text": "Dazu gehören bunte Papageien, Affen, Jaguare und riesige Schlangen wie die Anakonda.",
           "img_index": -1
         },
         {
-          "id": "s019",
-          "text": "Und auch für unser Klima ist das nicht gut, denn die Bäume helfen, die Luft sauber zu halten.",
+          "id": "s025",
+          "text": "Auch viele Insekten, Spinnen und Frösche tummeln sich hier.",
+          "img_index": -1
+        },
+        {
+          "id": "s026",
+          "text": "Jede Art hat sich perfekt an das Leben in den verschiedenen Stockwerken angepasst.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
-          "type": "stimmt_das",
-          "text": "Manche Leute glauben, der Boden im Regenwald sei besonders fruchtbar, weil dort so viele Pflanzen wachsen. Stimmt das?",
-          "reveal_text": "Nein! Der Boden ist eigentlich nährstoffarm. Die Pflanzen wachsen so gut, weil sie die Nährstoffe direkt aus dem sich zersetzenden Laub aufnehmen, bevor sie in den Boden gelangen können.",
+          "type": "wow",
+          "text": "Wusstest du, dass in den tropischen Regenwäldern zwischen 40 und 70 von 100 aller Tier- und Pflanzenarten der Welt leben? Das ist mehr als die Hälfte!",
           "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Menschen und große Flüsse",
+      "section_role": "people_and_rivers",
+      "sentences": [
+        {
+          "id": "s027",
+          "text": "Durch viele Regenwälder fließen sehr große Flüsse.",
+          "img_index": -1
+        },
+        {
+          "id": "s028",
+          "text": "Der bekannteste ist der Amazonas in Südamerika, aber auch der Kongo in Afrika ist riesig.",
+          "img_index": -1
+        },
+        {
+          "id": "s029",
+          "text": "Diese Flüsse sind wichtig für die Tiere und Pflanzen und auch für die Menschen, die dort leben.",
+          "img_index": -1
+        },
+        {
+          "id": "s030",
+          "text": "In den Regenwäldern leben auch viele indigene Völker.",
+          "img_index": 3
+        },
+        {
+          "id": "s031",
+          "text": "Das sind Menschen, die schon sehr lange dort wohnen und oft eng mit dem Wald verbunden sind.",
+          "img_index": -1
+        },
+        {
+          "id": "s032",
+          "text": "Sie leben vom Jagen, Sammeln und bauen Obst und Gemüse an.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec6",
+      "heading": "Warum der Regenwald wichtig ist",
+      "section_role": "why_it_is_important",
+      "sentences": [
+        {
+          "id": "s033",
+          "text": "Der Regenwald ist nicht nur für die Tiere und Menschen dort wichtig, sondern für uns alle.",
+          "img_index": -1
+        },
+        {
+          "id": "s034",
+          "text": "Die Bäume nehmen ein Gas namens Kohlendioxid aus der Luft auf.",
+          "img_index": -1
+        },
+        {
+          "id": "s035",
+          "text": "Das hilft, die Erde nicht zu heiß werden zu lassen.",
+          "img_index": -1
+        },
+        {
+          "id": "s036",
+          "text": "Außerdem sorgt der Regenwald für viel Regen und beeinflusst das Wetter auf der ganzen Welt.",
+          "img_index": -1
+        },
+        {
+          "id": "s037",
+          "text": "Er ist wie die grüne Lunge unserer Erde.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec7",
+      "heading": "Der Regenwald ist in Gefahr",
+      "section_role": "in_danger",
+      "sentences": [
+        {
+          "id": "s038",
+          "text": "Leider sind die tropischen Regenwälder stark bedroht.",
+          "img_index": 4
+        },
+        {
+          "id": "s039",
+          "text": "Jeden Tag werden große Flächen abgeholzt.",
+          "img_index": -1
+        },
+        {
+          "id": "s040",
+          "text": "Das passiert oft, um Platz für Felder zu schaffen, auf denen zum Beispiel Palmöl-Bäume oder Soja angebaut werden.",
+          "img_index": 5
+        },
+        {
+          "id": "s041",
+          "text": "Auch für Weideflächen für Kühe oder für Holz werden die Wälder gerodet.",
+          "img_index": -1
+        },
+        {
+          "id": "s042",
+          "text": "Manche Bäume werden auch gefällt, um Straßen zu bauen.",
+          "img_index": -1
+        },
+        {
+          "id": "s043",
+          "text": "Wenn der Wald verschwindet, verlieren viele Tiere und Pflanzen ihr Zuhause.",
+          "img_index": -1
+        },
+        {
+          "id": "s044",
+          "text": "Und auch die Menschen, die dort leben, leiden darunter.",
+          "img_index": -1
+        },
+        {
+          "id": "s045",
+          "text": "Deshalb ist es wichtig, den Regenwald zu schützen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "In den letzten Jahrzehnten ist schon ein Drittel der tropischen Regenwälder verschwunden. Sie werden oft abgeholzt, um Platz für Palmölplantagen, Sojafelder oder Weiden für Rinder zu schaffen. Auch durch Brände gehen große Flächen verloren."
         }
       ],
       "table": null
@@ -226,57 +388,57 @@
     "questions": [
       {
         "id": "q1",
-        "text": "Wo auf der Erde findest du tropische Regenwälder?",
+        "text": "Wo auf der Erde findet man tropische Regenwälder?",
         "options": [
           {
             "key": "A",
-            "text": "Am Nordpol und Südpol"
+            "text": "Nah am Äquator"
           },
           {
             "key": "B",
-            "text": "Rund um den Äquator"
+            "text": "An den Nord- und Südpolen"
           },
           {
             "key": "C",
-            "text": "In Wüsten und Steppen"
+            "text": "In Wüsten und sehr trockenen Gebieten"
           }
         ],
-        "correct_key": "B"
+        "correct_key": "A"
       },
       {
         "id": "q2",
-        "text": "Was ist besonders an den Bäumen im Regenwald?",
+        "text": "Warum regnet es im tropischen Regenwald fast jeden Tag?",
         "options": [
           {
             "key": "A",
-            "text": "Sie sind alle gleich hoch"
+            "text": "Weil die Wolken vom Meer herüberwehen und immer dort hängen bleiben."
           },
           {
             "key": "B",
-            "text": "Sie wachsen in verschiedenen Stockwerken"
+            "text": "Weil die Sonne viel Wasser verdunsten lässt, das dann als Regen zurückfällt."
           },
           {
             "key": "C",
-            "text": "Sie haben keine Blätter"
+            "text": "Weil die Menschen dort jeden Tag die Pflanzen gießen müssen."
           }
         ],
         "correct_key": "B"
       },
       {
         "id": "q3",
-        "text": "Warum sind die Regenwälder für viele Tiere und Pflanzen so wichtig?",
+        "text": "Welche große Gefahr bedroht die tropischen Regenwälder am meisten?",
         "options": [
           {
             "key": "A",
-            "text": "Sie bieten nur wenigen Arten ein Zuhause"
+            "text": "Zu viele Touristen, die die Bäume zertrampeln."
           },
           {
             "key": "B",
-            "text": "Dort gibt es die größte Artenvielfalt der Erde"
+            "text": "Abholzung für Farmen und Holz."
           },
           {
             "key": "C",
-            "text": "Sie sind sehr kalt und trocken"
+            "text": "Riesige Schneestürme, die die Bäume umknicken."
           }
         ],
         "correct_key": "B"
@@ -284,7 +446,15 @@
     ]
   },
   "related_terms": {
-    "core": [],
-    "discover": []
+    "core": [
+      "Äquator",
+      "Amazonas",
+      "Kohlendioxid"
+    ],
+    "discover": [
+      "Artenvielfalt",
+      "Palmöl",
+      "indigene Völker"
+    ]
   }
 }

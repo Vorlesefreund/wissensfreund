@@ -2,48 +2,29 @@
   "meta": {
     "id": "motor_l1",
     "title": "Motor",
-    "subtitle": "Was Dinge in Bewegung bringt",
+    "subtitle": "Die Kraftpakete, die alles bewegen",
     "emoji": "⚙️",
     "age_level": 1,
     "pattern": "tech_science",
-    "theme_color": "#607D8B",
-    "word_count": 143,
+    "theme_color": "#FFD700",
+    "word_count": 178,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Motor",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "technik",
     "category_sub": "maschinen",
-    "generated_at": "2026-06-08T14:42:09.991087+00:00"
+    "generated_at": "2026-06-08T17:43:58.401228+00:00"
   },
   "images": [
     {
       "index": 0,
-      "filename": "Four stroke engine diagram.jpg",
-      "alt": "Four Stroke Engine Diagram",
-      "caption": "",
-      "license": "CC BY-SA 3.0",
-      "license_author": "User:Wapcaplet",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Four_stroke_engine_diagram.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/47/Four_stroke_engine_diagram.jpg"
-    },
-    {
-      "index": 1,
-      "filename": "Mercedes V6 DTM Rennmotor 1996.jpg",
-      "alt": "Mercedes V6 Dtm Rennmotor",
-      "caption": "",
-      "license": "CC BY-SA 3.0",
-      "license_author": "",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Mercedes_V6_DTM_Rennmotor_1996.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Mercedes_V6_DTM_Rennmotor_1996.jpg"
-    },
-    {
-      "index": 2,
       "filename": "Motors01CJC.jpg",
-      "alt": "Motors01Cjc",
-      "caption": "",
-      "license": "CC BY-SA 3.0",
+      "alt": "Viele kleine Motoren nebeneinander",
+      "caption": "Motoren gibt es in vielen Größen und Formen.",
+      "license": "CC BY-SA",
       "license_author": "en:User:C_J_Cowie",
       "source_url": "https://commons.wikimedia.org/wiki/File:Motors01CJC.jpg",
+      "wikimedia_id": "File:Motors01CJC.jpg",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/8/89/Motors01CJC.jpg"
     }
   ],
@@ -55,17 +36,17 @@
       "sentences": [
         {
           "id": "s001",
-          "text": "Was bringt dein Spielzeugauto zum Rollen?",
+          "text": "Stell dir vor, du hast ein Spielzeugauto, das von alleine fährt.",
           "img_index": -1
         },
         {
           "id": "s002",
-          "text": "Oder den Zug zum Fahren?",
+          "text": "Oder ein großes Schiff, das über das Meer gleitet.",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Das ist ein Motor!",
+          "text": "Dahinter steckt immer ein Motor!",
           "img_index": -1
         },
         {
@@ -77,6 +58,16 @@
           "id": "s005",
           "text": "Er kann Dinge bewegen.",
           "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Dafür braucht er Energie, zum Beispiel von Benzin oder Strom.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Diese Energie macht der Motor zu Bewegung.",
+          "img_index": 0
         }
       ],
       "boxes": [],
@@ -84,90 +75,75 @@
     },
     {
       "id": "sec2",
-      "heading": "Was ein Motor macht",
+      "heading": "Wie ein Motor arbeitet",
       "section_role": "process_how",
       "sentences": [
         {
-          "id": "s006",
-          "text": "Ein Motor verwandelt Energie in Bewegung.",
-          "img_index": -1
-        },
-        {
-          "id": "s007",
-          "text": "Stell dir vor, du drückst einen Knopf.",
-          "img_index": -1
-        },
-        {
           "id": "s008",
-          "text": "Dann bekommt der Motor Strom.",
+          "text": "Viele Motoren haben ein Teil, das sich dreht.",
           "img_index": -1
         },
         {
           "id": "s009",
-          "text": "Oder er verbrennt Benzin, wie im großen Auto.",
+          "text": "Das ist wie eine Stange, die sich ganz schnell im Kreis bewegt.",
           "img_index": -1
         },
         {
           "id": "s010",
-          "text": "Aus dieser Energie macht der Motor Kraft.",
+          "text": "Diese Drehung kann dann Räder antreiben oder etwas anderes in Gang setzen.",
           "img_index": -1
         },
         {
           "id": "s011",
-          "text": "Diese Kraft lässt dann zum Beispiel Räder drehen.",
-          "img_index": -1
-        }
-      ],
-      "boxes": [],
-      "table": null
-    },
-    {
-      "id": "sec3",
-      "heading": "Viele Arten von Motoren",
-      "section_role": "today_legacy",
-      "sentences": [
-        {
-          "id": "s012",
-          "text": "Es gibt ganz viele Motoren.",
-          "img_index": -1
-        },
-        {
-          "id": "s013",
-          "text": "Elektromotoren brauchen Strom.",
-          "img_index": -1
-        },
-        {
-          "id": "s014",
-          "text": "Die findest du in Spielsachen oder in Elektroautos.",
-          "img_index": -1
-        },
-        {
-          "id": "s015",
-          "text": "Verbrennungsmotoren nutzen Benzin oder Diesel.",
-          "img_index": -1
-        },
-        {
-          "id": "s016",
-          "text": "Sie sind in fast allen Autos und Lastwagen.",
-          "img_index": -1
-        },
-        {
-          "id": "s017",
-          "text": "Auch alte Züge fuhren mit Dampfmotoren.",
-          "img_index": -1
-        },
-        {
-          "id": "s018",
-          "text": "Motoren sind überall, wo sich etwas bewegen soll!",
+          "text": "Es gibt auch Motoren, die anders arbeiten, zum Beispiel bei einer Rakete.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
           "type": "wow",
-          "text": "🌟 Schon vor über 2000 Jahren gab es Motoren! Sie haben Dampf genutzt, um große Türen zu öffnen. Stell dir das mal vor!"
+          "text": "🌟 Motoren sind überall! Sie stecken in deinen Spielzeugen, in Mamas oder Papas Auto, in großen Lastwagen, in Flugzeugen und in Schiffen! Was für ein Kraftpaket!"
         }
       ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Motoren früher und heute",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s012",
+          "text": "Ganz früher gab es Dampfmaschinen.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Die haben mit heißem Dampf gearbeitet und waren riesig!",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Heute gibt es viele verschiedene Motoren.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Die wichtigsten sind Elektromotoren und Motoren, die Benzin verbrennen.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Elektromotoren findest du zum Beispiel in deinem Spielzeug oder in manchen Fahrrädern.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Motoren, die Benzin verbrennen, sind oft in Autos oder Motorrollern.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
       "table": null
     }
   ],
@@ -179,56 +155,56 @@
         "options": [
           {
             "key": "A",
-            "text": "Er macht Musik."
+            "text": "Dinge bewegen"
           },
           {
             "key": "B",
-            "text": "Er macht Bewegung."
+            "text": "Lieder singen"
           },
           {
             "key": "C",
-            "text": "Er macht Licht."
+            "text": "Bilder malen"
           }
         ],
-        "correct_key": "B"
+        "correct_key": "A"
       },
       {
         "id": "q2",
-        "text": "Wo findest du oft einen Motor?",
+        "text": "Wo findest du Motoren?",
         "options": [
           {
             "key": "A",
-            "text": "In einem Baum."
+            "text": "In großen Bäumen"
           },
           {
             "key": "B",
-            "text": "In einem Spielzeugauto."
+            "text": "In Spielzeugautos und echten Autos"
           },
           {
             "key": "C",
-            "text": "In einer Wolke."
+            "text": "In deinen Schuhen"
           }
         ],
         "correct_key": "B"
       },
       {
         "id": "q3",
-        "text": "Welche Energie kann ein Motor zum Bewegen nutzen?",
+        "text": "Woraus kann ein Motor seine Kraft bekommen?",
         "options": [
           {
             "key": "A",
-            "text": "Den Geruch von Blumen."
+            "text": "Von Gras oder Blättern"
           },
           {
             "key": "B",
-            "text": "Den Geschmack von Kuchen."
+            "text": "Von Benzin oder Strom"
           },
           {
             "key": "C",
-            "text": "Strom oder Benzin."
+            "text": "Von Sand oder Steinen"
           }
         ],
-        "correct_key": "C"
+        "correct_key": "B"
       }
     ]
   },

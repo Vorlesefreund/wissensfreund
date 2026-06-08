@@ -2,79 +2,63 @@
   "meta": {
     "id": "demokratie_l1",
     "title": "Demokratie",
-    "subtitle": "Wenn alle mitentscheiden dürfen!",
+    "subtitle": "Wenn alle mitentscheiden dürfen",
     "emoji": "🗳️",
     "age_level": 1,
     "pattern": "tech_science",
-    "theme_color": "#FFD700",
-    "word_count": 140,
+    "theme_color": "#87CEEB",
+    "word_count": 144,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Demokratie",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "gesellschaft",
-    "category_sub": "politik",
-    "generated_at": "2026-06-08T14:52:41.208040+00:00"
+    "category_sub": "staat_und_recht",
+    "generated_at": "2026-06-08T17:58:38.857068+00:00"
   },
   "images": [
     {
       "index": 0,
-      "filename": "2020-02-13 Deutscher Bundestag IMG 3438 by Stepro.jpg",
-      "alt": "2020 02 13 Deutscher Bundestag Img 3438 By Stepro",
-      "caption": "",
+      "filename": "2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg",
+      "alt": "Ein großes Gebäude, in dem wichtige Entscheidungen getroffen werden.",
+      "caption": "Hier arbeiten die Menschen, die wir wählen, für unser Land.",
       "license": "CC BY-SA 4.0",
       "license_author": "Steffen Prößdorf",
-      "source_url": "https://commons.wikimedia.org/wiki/File:2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg",
+      "source_url": "https://commons.wikimedia.org/wikipedia/commons/thumb/3/3f/2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg/960px-2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg",
+      "wikimedia_id": "File:2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg/960px-2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg"
     },
     {
       "index": 1,
-      "filename": "AGMA Kleroterion.jpg",
-      "alt": "Agma Kleroterion",
-      "caption": "",
-      "license": "CC BY-SA 2.5",
-      "license_author": "Marsyas",
-      "source_url": "https://commons.wikimedia.org/wiki/File:AGMA_Kleroterion.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/AGMA_Kleroterion.jpg/960px-AGMA_Kleroterion.jpg"
+      "filename": "Election_MG_3455.JPG",
+      "alt": "Hände, die Stimmzettel in eine Wahlurne werfen.",
+      "caption": "Bei einer Wahl dürfen alle Erwachsenen ihre Stimme abgeben.",
+      "license": "CC BY-SA",
+      "license_author": "Rama",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Election_MG_3455.JPG/960px-Election_MG_3455.JPG",
+      "wikimedia_id": "File:Election MG 3455.JPG",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Election_MG_3455.JPG/960px-Election_MG_3455.JPG"
     },
     {
       "index": 2,
-      "filename": "An Advertisement of The Federalist - Project Gutenberg eText 16960.jpg",
-      "alt": "An Advertisement Of The Federalist   Project Gutenberg Etext",
-      "caption": "",
-      "license": "Public domain",
-      "license_author": "",
-      "source_url": "https://commons.wikimedia.org/wiki/File:An_Advertisement_of_The_Federalist_-_Project_Gutenberg_eText_16960.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/b/b6/An_Advertisement_of_The_Federalist_-_Project_Gutenberg_eText_16960.jpg"
+      "filename": "Landsgemeinde_Glarus_2006.jpg",
+      "alt": "Viele Menschen stehen draußen und heben die Hände.",
+      "caption": "Manchmal dürfen Menschen direkt abstimmen, indem sie die Hand heben.",
+      "license": "CC BY-SA",
+      "license_author": "Adrian Sulc",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Landsgemeinde_Glarus_2006.jpg/960px-Landsgemeinde_Glarus_2006.jpg",
+      "wikimedia_id": "File:Landsgemeinde Glarus 2006.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/Landsgemeinde_Glarus_2006.jpg/960px-Landsgemeinde_Glarus_2006.jpg"
     },
     {
       "index": 3,
-      "filename": "BL Papyrus 131-10v Constitution of Athens.jpg",
-      "alt": "Bl Papyrus 131 10V Constitution Of Athens",
-      "caption": "",
-      "license": "Public domain",
-      "license_author": "AnonymousUnknown author",
-      "source_url": "https://commons.wikimedia.org/wiki/File:BL_Papyrus_131-10v_Constitution_of_Athens.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/BL_Papyrus_131-10v_Constitution_of_Athens.jpg/960px-BL_Papyrus_131-10v_Constitution_of_Athens.jpg"
-    },
-    {
-      "index": 4,
-      "filename": "Bundesarchiv Bild 147-0978, Reichstag, Plenarsitzungssaal.jpg",
-      "alt": "Bundesarchiv Bild 147 0978, Reichstag, Plenarsitzungssaal",
-      "caption": "",
-      "license": "Public domain",
-      "license_author": "Julius Braatz",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Bundesarchiv_Bild_147-0978,_Reichstag,_Plenarsitzungssaal.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/b/be/Bundesarchiv_Bild_147-0978%2C_Reichstag%2C_Plenarsitzungssaal.jpg"
-    },
-    {
-      "index": 5,
-      "filename": "Double-sided herm of Aristotle at the National Archaeological Museum of Athens on 27 March 2018.jpg",
-      "alt": "Double Sided Herm Of Aristotle At The National Archaeological Museum Of Athens On 27 March",
-      "caption": "",
-      "license": "CC BY-SA 4.0",
-      "license_author": "George E. Koronaios",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Double-sided_herm_of_Aristotle_at_the_National_Archaeological_Museum_of_Athens_on_27_March_2018.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Double-sided_herm_of_Aristotle_at_the_National_Archaeological_Museum_of_Athens_on_27_March_2018.jpg/960px-Double-sided_herm_of_Aristotle_at_the_National_Archaeological_Museum_of_Athens_on_27_March_2018.jpg"
+      "filename": "Wooden_ballot_box_-_Smithsonian.jpg",
+      "alt": "Eine alte Holzkiste, in die man Zettel wirft.",
+      "caption": "In einer Wahlurne sammeln sich alle Stimmen.",
+      "license": "Public Domain",
+      "license_author": "National Museum of American History",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Wooden_ballot_box_-_Smithsonian.jpg",
+      "wikimedia_id": "File:Wooden ballot box - Smithsonian.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/b/bd/Wooden_ballot_box_-_Smithsonian.jpg"
     }
   ],
   "sections": [
@@ -85,67 +69,88 @@
       "sentences": [
         {
           "id": "s001",
-          "text": "Stell dir vor, du spielst mit deinen Freunden und ihr müsst entscheiden, was ihr als Nächstes macht.",
+          "text": "Stell dir vor, du spielst ein Spiel mit deinen Freunden.",
           "img_index": -1
         },
         {
           "id": "s002",
-          "text": "Wer darf das bestimmen?",
+          "text": "Damit es fair ist, überlegt ihr zusammen die Regeln.",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "In einer Demokratie dürfen alle mitreden und wählen, wer die Regeln macht.",
-          "img_index": -1
+          "text": "Genau so ist es in einem Land mit Demokratie!",
+          "img_index": 0
         },
         {
           "id": "s004",
-          "text": "Das ist wie ein großes Spiel, wo alle mitbestimmen, und der Ball nicht nur einem gehört.",
+          "text": "Hier dürfen alle erwachsenen Menschen mitbestimmen, was wichtig ist.",
           "img_index": -1
         },
         {
           "id": "s005",
-          "text": "Demokratie ist eine Art, wie Menschen in einem Land zusammenleben und wichtige Dinge entscheiden.",
+          "text": "Sie wählen Leute aus, die für alle im Land die Regeln machen.",
+          "img_index": 1
+        },
+        {
+          "id": "s006",
+          "text": "So können viele Menschen zusammen entscheiden, wie das Land sein soll.",
           "img_index": -1
         }
       ],
-      "boxes": []
+      "boxes": [],
+      "table": null
     },
     {
-      "id": "alle_stimmen_zaehlen",
-      "heading": "Alle Stimmen zählen!",
-      "section_role": "process_how",
+      "id": "sec1",
+      "heading": "Gemeinsam entscheiden",
+      "section_role": "general",
       "sentences": [
         {
-          "id": "s006",
-          "text": "In einer Demokratie wählen die Menschen andere Menschen, die dann für sie sprechen.",
-          "img_index": -1
-        },
-        {
           "id": "s007",
-          "text": "Diese gewählten Leute überlegen dann, welche Regeln und Gesetze für alle gut sind.",
-          "img_index": -1
+          "text": "In einer Demokratie darf jeder Erwachsene wählen gehen.",
+          "img_index": 3
         },
         {
           "id": "s008",
-          "text": "Sie müssen aber immer daran denken, was die Leute wollen, die sie gewählt haben.",
+          "text": "Seine Stimme ist dabei genauso viel wert wie jede andere.",
           "img_index": -1
         },
         {
           "id": "s009",
-          "text": "Das Wort Demokratie kommt übrigens aus einem alten Land namens Griechenland.",
+          "text": "Das ist sehr wichtig und macht es gerecht.",
           "img_index": -1
         },
         {
           "id": "s010",
-          "text": "Dort haben sie schon vor langer Zeit gesagt, dass das Volk die Macht haben soll.",
+          "text": "Man darf auch frei sagen, was man denkt und sich mit anderen austauschen.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Wenn viele Menschen etwas nicht gut finden, können sie gemeinsam versuchen, es zu ändern.",
+          "img_index": 2
+        },
+        {
+          "id": "s012",
+          "text": "Das ist anders als in einer Diktatur.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Dort entscheidet nur ein einziger Mensch alles.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Er sagt den Leuten, was sie tun sollen, und sie dürfen nicht mitbestimmen.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
           "type": "wow",
-          "text": "🌟 In einer Demokratie dürfen alle Erwachsenen bei wichtigen Entscheidungen mitmachen, indem sie wählen gehen. So kann niemand allein bestimmen!"
+          "text": "Das Wort Demokratie kommt aus einem alten Land, das Griechenland heißt. Es bedeutet so viel wie „Volksherrschaft“."
         }
       ],
       "table": null
@@ -155,60 +160,60 @@
     "questions": [
       {
         "id": "q1",
-        "text": "Was bedeutet Demokratie?",
+        "text": "Was ist eine Demokratie?",
         "options": [
           {
             "key": "A",
-            "text": "Einer bestimmt alles."
+            "text": "Ein Land, in dem nur ein König entscheidet."
           },
           {
             "key": "B",
-            "text": "Alle dürfen mitentscheiden."
+            "text": "Ein Land, in dem alle erwachsenen Menschen mitbestimmen dürfen."
           },
           {
             "key": "C",
-            "text": "Nur die Reichen dürfen bestimmen."
+            "text": "Ein Land, in dem immer die Kinder die Regeln machen."
           }
         ],
         "correct_key": "B"
       },
       {
         "id": "q2",
-        "text": "Woher kommt das Wort Demokratie?",
+        "text": "Wer macht in einer Demokratie die Regeln?",
         "options": [
           {
             "key": "A",
-            "text": "Aus dem alten Rom."
+            "text": "Ein Zauberer mit einem Zauberstab."
           },
           {
             "key": "B",
-            "text": "Aus dem alten Ägypten."
+            "text": "Die Tiere im Wald."
           },
           {
             "key": "C",
-            "text": "Aus dem alten Griechenland."
+            "text": "Gewählte Menschen, die das Volk aussucht."
           }
         ],
         "correct_key": "C"
       },
       {
         "id": "q3",
-        "text": "Wer macht in einer Demokratie die Regeln?",
+        "text": "Was ist das Gegenteil von Demokratie?",
         "options": [
           {
             "key": "A",
-            "text": "Nur der König oder die Königin."
+            "text": "Eine Diktatur, wo nur einer entscheidet."
           },
           {
             "key": "B",
-            "text": "Die Menschen, die vom Volk gewählt wurden."
+            "text": "Ein Spielplatz, wo alle spielen dürfen."
           },
           {
             "key": "C",
-            "text": "Die stärksten Sportler des Landes."
+            "text": "Ein großer Wald."
           }
         ],
-        "correct_key": "B"
+        "correct_key": "A"
       }
     ]
   },

@@ -106,45 +106,78 @@ def _clean_wikipedia_text(text: str) -> str:
     return cleaned.strip()
 
 
-def fetch_images_for_article(session: requests.Session, title: str, max_images: int = 6) -> list[dict]:
+_IMG_SKIP_PREFIXES = (
+    "File:Commons-logo", "File:Wikidata", "File:Question",
+    "File:Symbol", "File:OOjs", "File:Portal", "File:Flag_of",
+    "File:Nuvola", "File:Gnome-", "File:Red_Pencil", "File:Emblem",
+    "File:Pictogram", "File:P_", "File:Disambig",
+)
+_IMG_SKIP_LOWER = (
+    "_map.", "_karte.", "locator_map", "location_map",
+    "_logo.", "logo_of", "_icon.", "icon_of",
+    "pictogram", "emblem_of", "coat_of_arms", "wappen",
+    "flag_of", "flagge_", "national_flag",
+)
+_IMG_SKIP_EXT = (".webm", ".ogv", ".ogg", ".svg")  # Keine Videos, keine reinen Vektorgrafiken
+
+
+def _normalize_file_title(t: str) -> str:
+    """'Datei:Foo.jpg' → 'File:Foo.jpg' (de.wikipedia → Commons)."""
+    if t.startswith("Datei:"):
+        return "File:" + t[6:]
+    return t
+
+
+def fetch_images_for_article(session: requests.Session, title: str, max_images: int = 30) -> list[dict]:
     """
     Holt Bild-Metadaten von Wikimedia Commons für einen Artikel.
-    Gibt eine fertige images[]-Liste für das Article-JSON zurück.
+    Gibt bis zu max_images Einträge zurück (für AVAILABLE_IMAGES im Prompt).
+    Flash wählt daraus die besten aus und befüllt images[] direkt.
     """
-    # Bilder aus dem Artikel ermitteln
     params = {
-        "action":  "query",
-        "titles":  title,
-        "prop":    "images",
-        "imlimit": 20,
-        "format":  "json",
+        "action":    "query",
+        "titles":    title,
+        "redirects": "1",
+        "prop":      "images",
+        "imlimit":   50,
+        "format":    "json",
     }
     resp = session.get(WIKIPEDIA_API, params=params, timeout=30)
+    if resp.status_code == 429:
+        time.sleep(5)
+        resp = session.get(WIKIPEDIA_API, params=params, timeout=30)
     resp.raise_for_status()
     pages = resp.json().get("query", {}).get("pages", {})
     raw_titles = []
     for page in pages.values():
         for img in page.get("images", []):
-            t = img.get("title", "")
-            if not any(t.startswith(skip) for skip in (
-                "File:Commons-logo", "File:Wikidata", "File:Question",
-                "File:Symbol", "File:OOjs", "File:Portal",
-            )):
-                raw_titles.append(t)
+            t = _normalize_file_title(img.get("title", ""))  # Datei: → File:
+            t_lower = t.lower()
+            if t_lower.endswith(_IMG_SKIP_EXT):
+                continue
+            if any(t.startswith(skip) for skip in _IMG_SKIP_PREFIXES):
+                continue
+            if any(sub in t_lower for sub in _IMG_SKIP_LOWER):
+                continue
+            raw_titles.append(t)
 
     if not raw_titles:
         return []
 
-    # Commons-API für Lizenz + URL
+    time.sleep(0.5)  # Commons-API schonen
+    # Commons-API für Lizenz + URL (800px thumb)
     params2 = {
         "action":     "query",
-        "titles":     "|".join(raw_titles[:max_images]),
+        "titles":     "|".join(raw_titles[:50]),
         "prop":       "imageinfo",
         "iiprop":     "url|extmetadata",
         "iiurlwidth": 800,
         "format":     "json",
     }
     resp2 = session.get("https://commons.wikimedia.org/w/api.php", params=params2, timeout=30)
+    if resp2.status_code == 429:
+        time.sleep(5)
+        resp2 = session.get("https://commons.wikimedia.org/w/api.php", params=params2, timeout=30)
     resp2.raise_for_status()
     cpages = resp2.json().get("query", {}).get("pages", {})
 
@@ -152,6 +185,9 @@ def fetch_images_for_article(session: requests.Session, title: str, max_images: 
     idx = 0
     for page in cpages.values():
         ii = page.get("imageinfo", [{}])[0]
+        thumb_url = ii.get("thumburl", "")
+        if not thumb_url:
+            continue  # kein 800px-Thumb → überspringen
         meta = ii.get("extmetadata", {})
         license_raw = meta.get("LicenseShortName", {}).get("value", "")
         if not _is_free_license(license_raw):
@@ -165,7 +201,7 @@ def fetch_images_for_article(session: requests.Session, title: str, max_images: 
             "license_author": _strip_html(meta.get("Artist", {}).get("value", ""))[:100],
             "source_url":     ii.get("descriptionurl", ""),
             "wikimedia_id":   page.get("title", ""),
-            "thumb_url":      ii.get("thumburl", ""),
+            "thumb_url":      thumb_url,
         })
         idx += 1
         if idx >= max_images:
@@ -193,7 +229,7 @@ def _normalize_license(s: str) -> str:
 
 
 def _filename_from_title(title: str) -> str:
-    return title.replace("File:", "").replace(" ", "_").lower()
+    return title.replace("File:", "").replace("Datei:", "").replace(" ", "_")
 
 
 def _strip_html(s: str) -> str:
@@ -233,9 +269,26 @@ def build_user_message(job: dict, wikipedia_text: str, images: list[dict]) -> st
     if job.get("klexikon_aufruf_quartil"):
         parts.append(f"KLEXIKON_AUFRUF_QUARTIL: {job['klexikon_aufruf_quartil']}")
 
-    # Bild-Metadaten (von Commons-API vorgeladen)
+    # Bild-Metadaten als lesbare Liste für Flash (AVAILABLE_IMAGES)
     if images:
-        parts += ["", "IMAGE_METADATA:", json.dumps(images, ensure_ascii=False, indent=2)]
+        parts.append("")
+        parts.append("AVAILABLE_IMAGES (wähle die passendsten Fotos für diesen Artikel):")
+        for img in images:
+            author = img.get("license_author", "")[:50]
+            line = f"[{img['index']}] {img['filename']} | {img['thumb_url']} | {img['license']}"
+            if author:
+                line += f" | {author}"
+            parts.append(line)
+        parts += [
+            "",
+            "Bildauswahl-Regeln:",
+            "- images[0] = Hero-Bild: das repräsentativste Foto des Themas",
+            "- thumb_url in images[] = URL aus AVAILABLE_IMAGES (exakt übernehmen)",
+            "- img_index in sentences = 0-basierter Index in DEINEM images[]-Array",
+            "- Kein Bild doppelt verwenden",
+            "- High-appeal-Themen: 8–12 Bilder gesamt; Low-appeal: 4–6 Bilder",
+            "- Für jedes Bild in images[]: filename, alt, caption, license, license_author, source_url, thumb_url befüllen",
+        ]
 
     return "\n".join(parts)
 
@@ -341,11 +394,15 @@ def validate_article(article: dict, job: dict) -> list[str]:
             errors.append(f"Satz-ID '{sid}' an Position {i+1}, erwartet '{expected}'")
             break  # nur ersten Fehler melden
 
-    # img_index range: -1 = kein Bild (gültig), 0–5 = Index in images[]
+    # img_index range: -1 = kein Bild (gültig), 0..n-1 = Index in images[]
+    n_images = len(article.get("images", []))
     for s in all_sentences:
         idx = s.get("img_index")
-        if idx is None or not (idx == -1 or 0 <= idx <= 5):
-            errors.append(f"Satz '{s.get('id')}' hat ungültigen img_index: {idx}")
+        if idx is None:
+            errors.append(f"Satz '{s.get('id')}' hat img_index=None")
+            break
+        if idx != -1 and (idx < 0 or (n_images > 0 and idx >= n_images)):
+            errors.append(f"Satz '{s.get('id')}' hat img_index {idx} außerhalb [0,{n_images-1}]")
             break
 
     # Quiz
@@ -471,6 +528,7 @@ def process_batch(
         # Bilder holen
         try:
             images = fetch_images_for_article(session, job["title"])
+            log.info("  %d AVAILABLE_IMAGES für '%s'", len(images), job["title"])
         except Exception as e:
             log.warning("  Bilder konnten nicht geladen werden: %s", e)
             images = []

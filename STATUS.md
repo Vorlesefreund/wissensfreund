@@ -1,30 +1,33 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-08T16:28:00Z -->
+<!-- updated: 2026-06-08T18:11:18Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Complete 5-topic batch: alle 15 Artikel in R2 (2026-06-08)** ← AKTUELL
-- Alle 15 Artikel generiert (Flash), Bilder gepatcht, in R2 hochgeladen
-- img_index None→-1 Normalisierung in parse_article_json (generate_articles.py)
-- motor_l3: aus _errors/ gerettet (38× img_index None normalisiert)
-- rclone auto-discovery in upload_articles.py (WinGet-Pfad fallback)
-- upload_articles.py: rclone copy (nie sync) — R2-Bestandsdaten bleiben erhalten
+**Flash thinking=medium + IMAGE_METADATA im Generator (2026-06-08)** ← AKTUELL
+- gemini_client.py: thinking_budget=0 → 8192 (Medium)
+- generate_articles.py: AVAILABLE_IMAGES im Prompt — Flash wählt Bilder direkt
+- Bug fix: Datei: → File: Normalisierung für Wikimedia-Commons-API
+- Bug fix: .webm/.ogv/.svg gefiltert, stärkere Prefix/Substring-Filter
+- fetch_images_for_article: max 30 Bilder, 429-Retry eingebaut
+- validate_article: img_index-Obergrenze dynamisch (len(images[])-1)
+- patch_article_images_v1.py: als Legacy-Tool markiert (nicht mehr für neue Artikel)
+- 15 Artikel neu generiert mit echten Wikimedia-Bildern (Ø 4,2/Artikel, alle mit Hero)
+- upload_articles.py: rclone auto-discovery (WinGet) — kein manueller PATH nötig
 
 **R2-Zustand (wissensfreund-articles)**
 Basis-URL: https://pub-a4cddbe0f7104b91ae193707a08ff0d2.r2.dev
 
-articles/
-- biene_l1.json · biene_l2.json · biene_l3.json
-- demokratie_l1.json · demokratie_l2.json · demokratie_l3.json
-- dschungel_l1.json · dschungel_l2.json · dschungel_l3.json
-- indianer_l1.json · indianer_l2.json · indianer_l3.json
-- motor_l1.json · motor_l2.json · motor_l3.json
+articles/ — 15 Artikel mit echten Bildern:
+- biene_l1 (7) · biene_l2 (5) · biene_l3 (8)
+- demokratie_l1 (4) · demokratie_l2 (3) · demokratie_l3 (5)
+- dschungel_l1 (2) · dschungel_l2 (6) · dschungel_l3 (10)
+- indianer_l1 (1) · indianer_l2 (3, review) · indianer_l3 (2)
+- motor_l1 (1) · motor_l2 (3) · motor_l3 (3)
 
 index/global.json · level_1/2/3.json · cat_*.json · sub_*.json · new.json · topic_tree.json
-meta/pipeline_run.json
 
 ---
 
@@ -36,13 +39,13 @@ meta/pipeline_run.json
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch
-- **Flutter-App: R2-Artikel anzeigen** — App auf die neuen JSON-Endpunkte umstellen
+- **Flutter-App testen**: WfArticleListScreen mit R2-Artikeln + Bilder prüfen
 - **Lektorat-Pipeline-Integration** (manueller Standalone-Prompt)
 - **Related Terms**: prepare_articles.py befüllt sie noch nicht
 
 ### Mittel
-- **Bilder-Patch mit KI** (braucht ANTHROPIC_API_KEY für call_claude_image_filter)
-- **Content-Sicherheitsfilter Bilder** (Stufen 2+3 fehlen als Code-Filter)
+- **indianer_l2 review**: 14 Sätze statt 15 Minimum — ggf. Prompt-Tuning oder Minimum senken
+- **Bilder-Qualität**: indianer_l1-l3 haben nur 1-3 Bilder (Wikipedia arm an Fotos)
 - **Epoch-Guard TTS-Callbacks**, **Mode B Lupe**, **Sound-Thumbnails**
 
 ### Niedrig / Klärungsbedarf

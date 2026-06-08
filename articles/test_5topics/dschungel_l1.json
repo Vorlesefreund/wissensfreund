@@ -2,162 +2,154 @@
   "meta": {
     "id": "dschungel_l1",
     "title": "Tropischer Regenwald",
-    "subtitle": "Ein riesiges grünes Haus",
-    "emoji": "🌳",
+    "subtitle": "Ein riesiger, grüner Ort voller Leben",
+    "emoji": "🌳🌧️🐒",
     "age_level": 1,
     "pattern": "place_geography",
     "theme_color": "#228B22",
-    "word_count": 204,
+    "word_count": 196,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Tropischer_Regenwald",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "natur",
     "category_sub": "landschaften",
-    "generated_at": "2026-06-08T16:21:46.203012+00:00"
+    "generated_at": "2026-06-08T17:52:20.110292+00:00"
   },
   "images": [
     {
       "index": 0,
-      "filename": "Rainforest_in_Brazil.jpg",
-      "alt": "Ein dichter tropischer Regenwald mit vielen grünen Bäumen und Pflanzen",
-      "caption": "So sieht es in einem tropischen Regenwald aus.",
-      "license": "CC BY 2.0",
-      "license_author": "Neil Palmer/CIAT",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Rainforest_in_Brazil.jpg",
-      "wikimedia_id": "File:Rainforest_in_Brazil.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c9/Rainforest_in_Brazil.jpg/1280px-Rainforest_in_Brazil.jpg"
+      "filename": "Aerial_view_of_the_Amazon_Rainforest.jpg",
+      "alt": "Blick von oben auf einen großen, grünen Regenwald",
+      "caption": "Der Amazonas-Regenwald ist der größte Regenwald der Welt.",
+      "license": "CC BY-SA",
+      "license_author": "lubasi",
+      "source_url": "https://commons.wikimedia.org/wikipedia/commons/thumb/d/d0/Aerial_view_of_the_Amazon_Rainforest.jpg/960px-Aerial_view_of_the_Amazon_Rainforest.jpg",
+      "wikimedia_id": "File:Aerial_view_of_the_Amazon_Rainforest.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Aerial_view_of_the_Amazon_Rainforest.jpg/960px-Aerial_view_of_the_Amazon_Rainforest.jpg"
+    },
+    {
+      "index": 1,
+      "filename": "Regenwald_am_Río_Cuyabeno,_nahe_Laguna_Grande.jpg",
+      "alt": "Dichte Pflanzen und hohe Bäume im Regenwald",
+      "caption": "Im Regenwald wachsen die Pflanzen sehr dicht beieinander.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Fährtenleser",
+      "source_url": "https://commons.wikimedia.org/wikipedia/commons/thumb/a/a3/Regenwald_am_R%C3%ADo_Cuyabeno%2C_nahe_Laguna_Grande.jpg/960px-Regenwald_am_R%C3%ADo_Cuyabeno%2C_nahe_Laguna_Grande.jpg",
+      "wikimedia_id": "File:Regenwald_am_Río_Cuyabeno,_nahe_Laguna_Grande.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Regenwald_am_R%C3%ADo_Cuyabeno%2C_nahe_Laguna_Grande.jpg/960px-Regenwald_am_R%C3%ADo_Cuyabeno%2C_nahe_Laguna_Grande.jpg"
     }
   ],
   "sections": [
     {
-      "id": "intro",
-      "heading": "Was ist ein Tropischer Regenwald?",
+      "id": "sec1",
+      "heading": "Ein Wald, der immer nass ist",
       "section_role": "intro",
       "sentences": [
         {
           "id": "s001",
-          "text": "Stell dir vor, du bist in einem riesigen Wald, in dem es immer warm ist und fast jeden Tag regnet.",
-          "img_index": -1
+          "text": "Stell dir einen riesigen Wald vor, der fast jeden Tag Regen bekommt.",
+          "img_index": 0
         },
         {
           "id": "s002",
-          "text": "Das ist ein Tropischer Regenwald!",
+          "text": "Dort ist es immer warm und feucht.",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Diese besonderen Wälder gibt es in warmen Ländern rund um den Bauch der Erde, in der Nähe vom Äquator.",
+          "text": "So ein Wald heißt Tropischer Regenwald.",
           "img_index": -1
         },
         {
           "id": "s004",
-          "text": "Sie sind immer grün und voller Leben.",
-          "img_index": 0
+          "text": "Du findest ihn in warmen Ländern nahe am Äquator, das ist die Mitte der Erde.",
+          "img_index": -1
         }
       ],
       "boxes": [],
       "table": null
     },
     {
-      "id": "immer-regen",
-      "heading": "Warum regnet es so viel?",
+      "id": "sec2",
+      "heading": "Hohe Bäume und viele Tiere",
       "section_role": "appearance_equipment",
       "sentences": [
         {
           "id": "s005",
-          "text": "Weil die Sonne dort jeden Tag stark scheint, steigt viel Wasser als Dampf in den Himmel.",
-          "img_index": -1
+          "text": "Im Regenwald wachsen Bäume sehr hoch, höher als viele Häuser.",
+          "img_index": 1
         },
         {
           "id": "s006",
-          "text": "Dieser Dampf bildet dicke Wolken.",
+          "text": "Manche Bäume sind sogar so groß, dass sie über alle anderen hinausgucken.",
           "img_index": -1
         },
         {
           "id": "s007",
-          "text": "Am Nachmittag oder Abend regnen die Wolken dann oft mit einem kleinen Gewitter ab.",
+          "text": "Zwischen den Bäumen leben ganz viele verschiedene Tiere.",
           "img_index": -1
         },
         {
           "id": "s008",
-          "text": "So bekommen die Pflanzen genug Wasser, um immer grün zu sein.",
+          "text": "Bunte Papageien fliegen herum, Affen schwingen sich von Ast zu Ast.",
           "img_index": -1
-        }
-      ],
-      "boxes": [],
-      "table": null
-    },
-    {
-      "id": "viele-tiere",
-      "heading": "Ein Haus mit vielen Stockwerken",
-      "section_role": "behavior_life",
-      "sentences": [
+        },
         {
           "id": "s009",
-          "text": "Die Bäume im Regenwald sind sehr, sehr hoch.",
-          "img_index": -1
-        },
-        {
-          "id": "s010",
-          "text": "Manche sind so hoch wie ein Haus mit 20 Stockwerken!",
-          "img_index": -1
-        },
-        {
-          "id": "s011",
-          "text": "Sie bilden verschiedene Schichten, wie die Stockwerke in einem Haus.",
-          "img_index": -1
-        },
-        {
-          "id": "s012",
-          "text": "Ganz unten wachsen kleine Pflanzen, weiter oben Büsche und ganz oben die Baumkronen.",
-          "img_index": -1
-        },
-        {
-          "id": "s013",
-          "text": "In jedem Stockwerk leben andere Tiere und Pflanzen.",
+          "text": "Auch kleine Frösche und große Schlangen wohnen hier.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
           "type": "wow",
-          "text": "🌟 Im Regenwald leben so viele verschiedene Tiere und Pflanzen, dass es mehr sind als in allen anderen Wäldern der Erde zusammen!"
+          "text": "🌟 Im Regenwald regnet es oft fünfmal mehr als bei uns in Deutschland! Das ist richtig viel Wasser!"
         }
       ],
       "table": null
     },
     {
-      "id": "menschen-und-gefahr",
-      "heading": "Menschen und die Gefahr für den Wald",
-      "section_role": "human_animal",
+      "id": "sec3",
+      "heading": "Menschen und der Regenwald",
+      "section_role": "behavior_life",
       "sentences": [
         {
+          "id": "s010",
+          "text": "Auch Menschen leben im Regenwald.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Sie wissen viel über die Pflanzen und Tiere dort.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Sie bauen ihr Essen an und suchen im Wald, was sie brauchen.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Der Regenwald ist ihr Zuhause.",
+          "img_index": -1
+        },
+        {
           "id": "s014",
-          "text": "Auch Menschen wohnen im Regenwald.",
+          "text": "Aber leider wird der Regenwald immer kleiner.",
           "img_index": -1
         },
         {
           "id": "s015",
-          "text": "Sie leben vom Wald und seinen Früchten.",
-          "img_index": -1
-        },
-        {
-          "id": "s016",
-          "text": "Aber der Regenwald ist in Gefahr.",
-          "img_index": -1
-        },
-        {
-          "id": "s017",
-          "text": "Viele Bäume werden gefällt, damit man dort Felder anlegen kann.",
-          "img_index": -1
-        },
-        {
-          "id": "s018",
-          "text": "Das ist schlecht für die Tiere, die Pflanzen und auch für uns alle, weil der Regenwald wichtig für das Klima auf der Erde ist.",
+          "text": "Das ist schlecht für die Tiere, die Pflanzen und die Menschen, die dort wohnen.",
           "img_index": -1
         }
       ],
-      "boxes": [],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Viele Bäume im Regenwald werden abgeholzt. Darum schrumpft der Wald leider immer mehr."
+        }
+      ],
       "table": null
     }
   ],
@@ -165,60 +157,60 @@
     "questions": [
       {
         "id": "q1",
-        "text": "Wo auf der Erde findest du die meisten Tropischen Regenwälder?",
+        "text": "Wo findest du Tropische Regenwälder?",
         "options": [
           {
             "key": "A",
-            "text": "Nah am Äquator, wo es immer warm ist."
+            "text": "In warmen Ländern nahe am Äquator"
           },
           {
             "key": "B",
-            "text": "Am Nordpol, wo es sehr kalt ist."
+            "text": "Am Nordpol, wo es sehr kalt ist"
           },
           {
             "key": "C",
-            "text": "In Wüsten, wo es kaum regnet."
+            "text": "In Wüsten, wo es kaum regnet"
           }
         ],
         "correct_key": "A"
       },
       {
         "id": "q2",
-        "text": "Warum regnet es im Regenwald fast jeden Tag?",
+        "text": "Was ist typisch für einen Tropischen Regenwald?",
         "options": [
           {
             "key": "A",
-            "text": "Weil dort viele Flüsse sind, die überlaufen."
+            "text": "Dort regnet es fast nie"
           },
           {
             "key": "B",
-            "text": "Weil die Sonne viel Wasser verdunsten lässt, das dann als Regen zurückkommt."
+            "text": "Es ist immer warm und es regnet viel"
           },
           {
             "key": "C",
-            "text": "Weil die Tiere dort Wasser in die Luft spritzen."
+            "text": "Die Bäume verlieren im Winter ihre Blätter"
           }
         ],
         "correct_key": "B"
       },
       {
         "id": "q3",
-        "text": "Was bedeutet es, dass der Regenwald wie ein Haus mit Stockwerken ist?",
+        "text": "Warum ist es wichtig, den Regenwald zu schützen?",
         "options": [
           {
             "key": "A",
-            "text": "Dort leben Menschen in großen Häusern übereinander."
+            "text": "Damit die Tiere, Pflanzen und Menschen dort ein Zuhause haben"
           },
           {
             "key": "B",
-            "text": "Die Bäume sind unterschiedlich hoch und bilden verschiedene Schichten."
+            "text": "Damit wir mehr Platz für Häuser bekommen"
           },
           {
             "key": "C",
-            "text": "Es gibt viele Treppen, um nach oben zu kommen."
+            "text": "Damit es bei uns mehr regnet"
           }
         ],
-        "correct_key": "B"
+        "correct_key": "A"
       }
     ]
   },

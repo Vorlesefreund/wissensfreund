@@ -1,31 +1,97 @@
 {
   "meta": {
     "id": "biene_l1",
-    "title": "Bienen",
-    "subtitle": "Die kleinen Brummer, die summend von Blume zu Blume fliegen",
+    "title": "Die Biene",
+    "subtitle": "Kleine Flieger, große Helfer",
     "emoji": "🐝",
     "age_level": 1,
     "pattern": "living_being",
     "theme_color": "#FFD700",
-    "word_count": 178,
+    "word_count": 167,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Bienen",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "tiere",
     "category_sub": "insekten",
-    "generated_at": "2026-06-08T16:09:53.478553+00:00"
+    "generated_at": "2026-06-08T17:36:07.341300+00:00"
   },
   "images": [
     {
       "index": 0,
-      "filename": "Honey_bee_with_pollen.jpg",
-      "alt": "Eine Honigbiene mit Pollen an den Beinen fliegt zu einer gelben Blume.",
-      "caption": "Eine Biene sammelt Pollen von einer Blume.",
+      "filename": "Bee_on_Echinacea.jpg",
+      "alt": "Eine Biene sitzt auf einer lila Blume und sammelt Nektar.",
+      "caption": "Bienen sammeln Nektar von Blumen.",
+      "license": "CC BY-SA",
+      "license_author": "Sputniktilt",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Bee_on_Echinacea.jpg/960px-Bee_on_Echinacea.jpg",
+      "wikimedia_id": "File:Bee_on_Echinacea.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/52/Bee_on_Echinacea.jpg/960px-Bee_on_Echinacea.jpg"
+    },
+    {
+      "index": 1,
+      "filename": "Honigbiene-Basilikum-04.jpg",
+      "alt": "Eine Honigbiene auf einer grünen Pflanze.",
+      "caption": "Auf der Suche nach süßem Nektar.",
+      "license": "FAL",
+      "license_author": "Chianti",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Honigbiene-Basilikum-04.jpg/960px-Honigbiene-Basilikum-04.jpg",
+      "wikimedia_id": "File:Honigbiene-Basilikum-04.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Honigbiene-Basilikum-04.jpg/960px-Honigbiene-Basilikum-04.jpg"
+    },
+    {
+      "index": 2,
+      "filename": "Bau_einer_Biene.png",
+      "alt": "Eine Zeichnung zeigt den Körperbau einer Biene mit Kopf, Brust und Hinterleib.",
+      "caption": "So sieht eine Biene aus.",
       "license": "CC BY-SA 4.0",
-      "license_author": "Jon Sullivan",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Honey_bee_with_pollen.jpg",
-      "wikimedia_id": "File:Honey_bee_with_pollen.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Honey_bee_with_pollen.jpg/640px-Honey_bee_with_pollen.jpg"
+      "license_author": "Julie Weissmann",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/47/Bau_einer_Biene.png",
+      "wikimedia_id": "File:Bau_einer_Biene.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/47/Bau_einer_Biene.png"
+    },
+    {
+      "index": 3,
+      "filename": "DasypodaHirtipesFemale2.jpg",
+      "alt": "Eine sehr haarige Biene mit gelben Pollen an den Beinen.",
+      "caption": "Diese Biene hat viele Härchen.",
+      "license": "CC BY-SA",
+      "license_author": "Christian Fischer",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/DasypodaHirtipesFemale2.jpg/960px-DasypodaHirtipesFemale2.jpg",
+      "wikimedia_id": "File:DasypodaHirtipesFemale2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/DasypodaHirtipesFemale2.jpg/960px-DasypodaHirtipesFemale2.jpg"
+    },
+    {
+      "index": 4,
+      "filename": "The_bee_collects_nectar.jpg",
+      "alt": "Eine Biene steckt ihren Rüssel in eine Blüte.",
+      "caption": "So sammelt die Biene Nektar.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Bgelo777",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/The_bee_collects_nectar.jpg/960px-The_bee_collects_nectar.jpg",
+      "wikimedia_id": "File:The_bee_collects_nectar.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/The_bee_collects_nectar.jpg/960px-The_bee_collects_nectar.jpg"
+    },
+    {
+      "index": 5,
+      "filename": "Wildbienen.jpg",
+      "alt": "Verschiedene Wildbienenarten auf einer Blüte.",
+      "caption": "Es gibt viele verschiedene Wildbienen.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Neptuul",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Wildbienen.jpg/960px-Wildbienen.jpg",
+      "wikimedia_id": "File:Wildbienen.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Wildbienen.jpg/960px-Wildbienen.jpg"
+    },
+    {
+      "index": 6,
+      "filename": "Sleeping_Anthidium_manicatum_8808.jpg",
+      "alt": "Eine Biene schläft an einem Pflanzenstiel.",
+      "caption": "Diese Biene macht ein Nickerchen.",
+      "license": "CC BY-SA",
+      "license_author": "soebe, optimisation by Ralf. Thank you very much f",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Sleeping_Anthidium_manicatum_8808.jpg/960px-Sleeping_Anthidium_manicatum_8808.jpg",
+      "wikimedia_id": "File:Sleeping_Anthidium_manicatum_8808.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Sleeping_Anthidium_manicatum_8808.jpg/960px-Sleeping_Anthidium_manicatum_8808.jpg"
     }
   ],
   "sections": [
@@ -36,23 +102,33 @@
       "sentences": [
         {
           "id": "s001",
-          "text": "Wenn du im Sommer draußen bist, hörst du oft ein leises Summen. Dann ist meistens eine Biene in der Nähe!",
-          "img_index": -1
-        },
-        {
-          "id": "s002",
-          "text": "Bienen sind kleine Insekten, die fliegen können.",
+          "text": "Was ist das für ein kleines Tier, das so fleißig von Blume zu Blume fliegt?",
           "img_index": 0
         },
         {
+          "id": "s002",
+          "text": "Das ist die Biene!",
+          "img_index": -1
+        },
+        {
           "id": "s003",
+          "text": "Bienen sind kleine Insekten.",
+          "img_index": 2
+        },
+        {
+          "id": "s004",
           "text": "Sie haben sechs Beine und vier Flügel.",
           "img_index": -1
         },
         {
-          "id": "s004",
-          "text": "Viele Bienen leben zusammen in einem großen Zuhause und machen leckeren Honig.",
-          "img_index": -1
+          "id": "s005",
+          "text": "Sie besuchen viele bunte Blumen.",
+          "img_index": 1
+        },
+        {
+          "id": "s006",
+          "text": "Dort sammeln sie etwas Süßes.",
+          "img_index": 4
         }
       ],
       "boxes": [],
@@ -60,94 +136,126 @@
     },
     {
       "id": "sec2",
-      "heading": "Warum sind Bienen wichtig?",
+      "heading": "Bienen sind Blumen-Helfer",
       "section_role": "behavior_life",
       "sentences": [
         {
-          "id": "s005",
-          "text": "Bienen sind wie kleine Gärtner für unsere Blumen und Bäume.",
-          "img_index": -1
-        },
-        {
-          "id": "s006",
-          "text": "Wenn sie von Blüte zu Blüte fliegen, sammeln sie Pollen.",
-          "img_index": -1
-        },
-        {
           "id": "s007",
-          "text": "Dabei helfen sie den Pflanzen, Früchte zu bilden und Samen zu machen.",
+          "text": "Wenn Bienen von Blume zu Blume fliegen, helfen sie den Blumen.",
           "img_index": -1
         },
         {
           "id": "s008",
-          "text": "Ohne Bienen gäbe es viel weniger Obst und Gemüse!",
+          "text": "Sie tragen kleine Blütenstaub-Körner mit sich.",
           "img_index": -1
-        }
-      ],
-      "boxes": [],
-      "table": null
-    },
-    {
-      "id": "sec3",
-      "heading": "Der Stachel der Biene",
-      "section_role": "human_animal",
-      "sentences": [
+        },
         {
           "id": "s009",
-          "text": "Manchmal hast du vielleicht Angst vor einem Bienenstich.",
+          "text": "So können neue Blumen wachsen.",
           "img_index": -1
         },
         {
           "id": "s010",
-          "text": "Aber nur die weiblichen Bienen haben einen Stachel und können stechen.",
+          "text": "Das ist wie ein Zauber!",
           "img_index": -1
         },
         {
           "id": "s011",
-          "text": "Männliche Bienen, die nennt man Drohnen, können das nicht.",
-          "img_index": -1
-        },
-        {
-          "id": "s012",
-          "text": "Bienen stechen nur, wenn sie sich bedroht fühlen oder ihr Zuhause verteidigen wollen.",
+          "text": "Bienen sind sehr wichtig für unsere Natur.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
           "type": "wow",
-          "text": "🌟 Wenn eine Honigbiene einen Menschen sticht, bleibt ihr Stachel stecken. Das ist traurig, denn die Biene stirbt danach."
+          "text": "🌟 Wusstest du, dass Bienen ganz viele kleine Härchen haben? Daran bleiben die Blütenstaub-Körner wie in kleinen Taschen hängen!",
+          "reveal_mode": "auto"
         }
       ],
       "table": null
     },
     {
-      "id": "sec4",
-      "heading": "Viele verschiedene Bienen",
-      "section_role": "curiosity",
+      "id": "sec3",
+      "heading": "Manche Bienen machen Honig",
+      "section_role": "human_animal",
       "sentences": [
         {
+          "id": "s012",
+          "text": "Es gibt ganz viele verschiedene Bienenarten.",
+          "img_index": 5
+        },
+        {
           "id": "s013",
-          "text": "Es gibt nicht nur die eine Honigbiene, die Honig macht.",
+          "text": "Die Honigbienen sind bekannt.",
           "img_index": -1
         },
         {
           "id": "s014",
-          "text": "Auf der Welt gibt es über 20.000 verschiedene Bienenarten!",
+          "text": "Sie leben in großen Familien.",
           "img_index": -1
         },
         {
           "id": "s015",
-          "text": "Viele davon sind Wildbienen und leben ganz alleine in kleinen Nestern.",
+          "text": "Sie bauen Waben und machen leckeren Honig für uns.",
           "img_index": -1
         },
         {
           "id": "s016",
-          "text": "Sie sind auch sehr wichtig für die Natur, auch wenn sie keinen Honig für uns machen.",
+          "text": "Andere Bienen leben lieber allein.",
+          "img_index": 6
+        },
+        {
+          "id": "s017",
+          "text": "Sie nennt man Wildbienen.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Sie machen keinen Honig für uns.",
           "img_index": -1
         }
       ],
       "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Der kleine Stachel",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s019",
+          "text": "Manchmal haben Bienen auch einen kleinen Stachel.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Aber nur die weiblichen Bienen haben einen.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Wenn sie sich sehr erschrecken, können sie damit stechen.",
+          "img_index": -1
+        },
+        {
+          "id": "s022",
+          "text": "Die meisten Wildbienen stechen aber nur ganz selten.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Und es tut dann nicht doll weh.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Nur die weiblichen Bienen haben einen Stachel. Männliche Bienen können nicht stechen.",
+          "reveal_mode": "auto"
+        }
+      ],
       "table": null
     }
   ],
@@ -155,45 +263,45 @@
     "questions": [
       {
         "id": "q1",
-        "text": "Was ist eine Biene?",
+        "text": "Was sammeln Bienen von Blumen?",
         "options": [
           {
             "key": "A",
-            "text": "Ein kleines Insekt, das fliegen kann."
+            "text": "Süßes Wasser"
           },
           {
             "key": "B",
-            "text": "Ein Vogel, der singt."
+            "text": "Kleine Steine"
           },
           {
             "key": "C",
-            "text": "Ein Fisch, der im Wasser schwimmt."
+            "text": "Bunte Blätter"
           }
         ],
         "correct_key": "A"
       },
       {
         "id": "q2",
-        "text": "Warum sind Bienen für Blumen wichtig?",
+        "text": "Wozu sind Bienen wichtig für Blumen?",
         "options": [
           {
             "key": "A",
-            "text": "Sie fressen die Blumen auf."
+            "text": "Sie singen Lieder für sie."
           },
           {
             "key": "B",
-            "text": "Sie helfen den Blumen, Früchte zu bekommen."
+            "text": "Sie helfen ihnen beim Wachsen."
           },
           {
             "key": "C",
-            "text": "Sie malen die Blumen bunt an."
+            "text": "Sie gießen die Blumen."
           }
         ],
         "correct_key": "B"
       },
       {
         "id": "q3",
-        "text": "Wer kann bei den Bienen stechen?",
+        "text": "Wer von den Bienen hat einen Stachel?",
         "options": [
           {
             "key": "A",
@@ -205,7 +313,7 @@
           },
           {
             "key": "C",
-            "text": "Alle Bienen können stechen."
+            "text": "Alle Bienen haben einen Stachel."
           }
         ],
         "correct_key": "B"

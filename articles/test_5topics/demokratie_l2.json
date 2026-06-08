@@ -2,79 +2,52 @@
   "meta": {
     "id": "demokratie_l2",
     "title": "Demokratie",
-    "subtitle": "Wenn viele Menschen gemeinsam entscheiden",
+    "subtitle": "Wenn alle mitbestimmen dürfen",
     "emoji": "🗳️",
     "age_level": 2,
     "pattern": "tech_science",
-    "theme_color": "#2196F3",
-    "word_count": 277,
+    "theme_color": "#4CAF50",
+    "word_count": 224,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Demokratie",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "gesellschaft",
     "category_sub": "politik",
-    "generated_at": "2026-06-08T14:43:09.791058+00:00"
+    "generated_at": "2026-06-08T17:49:48.981827+00:00"
   },
   "images": [
     {
       "index": 0,
-      "filename": "2020-02-13 Deutscher Bundestag IMG 3438 by Stepro.jpg",
-      "alt": "2020 02 13 Deutscher Bundestag Img 3438 By Stepro",
-      "caption": "",
+      "filename": "2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg",
+      "alt": "Sitzungssaal des Deutschen Bundestages mit vielen Abgeordneten",
+      "caption": "In einer Demokratie wählen wir Abgeordnete, die für uns im Parlament entscheiden.",
       "license": "CC BY-SA 4.0",
       "license_author": "Steffen Prößdorf",
-      "source_url": "https://commons.wikimedia.org/wiki/File:2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg/960px-2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg",
+      "wikimedia_id": "File:2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg/960px-2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg"
     },
     {
       "index": 1,
-      "filename": "AGMA Kleroterion.jpg",
-      "alt": "Agma Kleroterion",
-      "caption": "",
-      "license": "CC BY-SA 2.5",
-      "license_author": "Marsyas",
-      "source_url": "https://commons.wikimedia.org/wiki/File:AGMA_Kleroterion.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/AGMA_Kleroterion.jpg/960px-AGMA_Kleroterion.jpg"
+      "filename": "Election_MG_3455.JPG",
+      "alt": "Hände werfen Stimmzettel in eine Wahlurne",
+      "caption": "Bei Wahlen können alle Erwachsenen mitentscheiden, wer regieren soll.",
+      "license": "CC BY-SA",
+      "license_author": "Rama",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Election_MG_3455.JPG/960px-Election_MG_3455.JPG",
+      "wikimedia_id": "File:Election_MG_3455.JPG",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fc/Election_MG_3455.JPG/960px-Election_MG_3455.JPG"
     },
     {
       "index": 2,
-      "filename": "An Advertisement of The Federalist - Project Gutenberg eText 16960.jpg",
-      "alt": "An Advertisement Of The Federalist   Project Gutenberg Etext",
-      "caption": "",
-      "license": "Public domain",
-      "license_author": "",
-      "source_url": "https://commons.wikimedia.org/wiki/File:An_Advertisement_of_The_Federalist_-_Project_Gutenberg_eText_16960.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/b/b6/An_Advertisement_of_The_Federalist_-_Project_Gutenberg_eText_16960.jpg"
-    },
-    {
-      "index": 3,
-      "filename": "BL Papyrus 131-10v Constitution of Athens.jpg",
-      "alt": "Bl Papyrus 131 10V Constitution Of Athens",
-      "caption": "",
-      "license": "Public domain",
-      "license_author": "AnonymousUnknown author",
-      "source_url": "https://commons.wikimedia.org/wiki/File:BL_Papyrus_131-10v_Constitution_of_Athens.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/BL_Papyrus_131-10v_Constitution_of_Athens.jpg/960px-BL_Papyrus_131-10v_Constitution_of_Athens.jpg"
-    },
-    {
-      "index": 4,
-      "filename": "Bundesarchiv Bild 147-0978, Reichstag, Plenarsitzungssaal.jpg",
-      "alt": "Bundesarchiv Bild 147 0978, Reichstag, Plenarsitzungssaal",
-      "caption": "",
-      "license": "Public domain",
-      "license_author": "Julius Braatz",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Bundesarchiv_Bild_147-0978,_Reichstag,_Plenarsitzungssaal.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/b/be/Bundesarchiv_Bild_147-0978%2C_Reichstag%2C_Plenarsitzungssaal.jpg"
-    },
-    {
-      "index": 5,
-      "filename": "Double-sided herm of Aristotle at the National Archaeological Museum of Athens on 27 March 2018.jpg",
-      "alt": "Double Sided Herm Of Aristotle At The National Archaeological Museum Of Athens On 27 March",
-      "caption": "",
-      "license": "CC BY-SA 4.0",
-      "license_author": "George E. Koronaios",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Double-sided_herm_of_Aristotle_at_the_National_Archaeological_Museum_of_Athens_on_27_March_2018.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Double-sided_herm_of_Aristotle_at_the_National_Archaeological_Museum_of_Athens_on_27_March_2018.jpg/960px-Double-sided_herm_of_Aristotle_at_the_National_Archaeological_Museum_of_Athens_on_27_March_2018.jpg"
+      "filename": "Pnyx_te_Athene_Athène_La_Pnyx_Athen_Die_Pnyx_(titel_op_object),_RP-F-00-195.jpg",
+      "alt": "Alte Steintribüne in Athen, Griechenland",
+      "caption": "Schon im alten Griechenland trafen sich die Menschen an Orten wie der Pnyx, um wichtige Entscheidungen zu treffen.",
+      "license": "CC0",
+      "license_author": "Rijksmuseum",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Pnyx_te_Athene_Ath%C3%A8ne_La_Pnyx_Athen_Die_Pnyx_%28titel_op_object%29%2C_RP-F-00-195.jpg/960px-Pnyx_te_Athene_Ath%C3%A8ne_La_Pnyx_Athen_Die_Pnyx_%28titel_op_object%29%2C_RP-F-00-195.jpg",
+      "wikimedia_id": "File:Pnyx_te_Athene_Athène_La_Pnyx_Athen_Die_Pnyx_(titel_op_object),_RP-F-00-195.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Pnyx_te_Athene_Ath%C3%A8ne_La_Pnyx_Athen_Die_Pnyx_%28titel_op_object%29%2C_RP-F-00-195.jpg/960px-Pnyx_te_Athene_Ath%C3%A8ne_La_Pnyx_Athen_Die_Pnyx_%28titel_op_object%29%2C_RP-F-00-195.jpg"
     }
   ],
   "sections": [
@@ -85,27 +58,56 @@
       "sentences": [
         {
           "id": "s001",
-          "text": "Hast du schon mal bei einer Schulsprecherwahl mitgemacht oder in der Klasse abgestimmt?",
+          "text": "Stell dir vor, ihr müsst in der Schule entscheiden, was ihr im nächsten Ausflug macht.",
           "img_index": -1
         },
         {
           "id": "s002",
-          "text": "So ähnlich entscheiden die Menschen in einer Demokratie, wer das Land regiert.",
+          "text": "Wenn alle mitreden und abstimmen dürfen, dann ist das schon ein bisschen wie Demokratie!",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Demokratie bedeutet, dass das Volk – also alle Bürger zusammen – bestimmen, wie ihr Land geführt wird.",
+          "text": "Demokratie ist eine Art, wie ein Land regiert wird.",
           "img_index": -1
         },
         {
           "id": "s004",
-          "text": "Das Wort kommt aus einer sehr alten Sprache, dem Griechischen.",
+          "text": "Das Wichtigste dabei ist: Das Volk, also alle erwachsenen Menschen im Land, hat die Macht und darf mitentscheiden.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Das Wort Demokratie kommt aus dem Altgriechischen und bedeutet wörtlich 'Volksherrschaft'. Das Volk (Demos) hat die Macht (Kratos)!"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Wählen und Mitbestimmen",
+      "section_role": null,
+      "sentences": [
+        {
+          "id": "s005",
+          "text": "In einer Demokratie wählen die Menschen Vertreter, die für sie im Parlament sitzen.",
+          "img_index": 1
+        },
+        {
+          "id": "s006",
+          "text": "Diese Vertreter nennt man Abgeordnete und sie treffen die wichtigen Entscheidungen für das ganze Land.",
           "img_index": -1
         },
         {
-          "id": "s005",
-          "text": "„Demos“ bedeutet „Volk“ und „Kratos“ heißt „Macht“ oder „Herrschaft“.",
+          "id": "s007",
+          "text": "Jeder Erwachsene darf bei Wahlen seine Stimme abgeben, und das ist immer frei und geheim.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "So können alle mitbestimmen, wer regiert und welche Regeln gemacht werden.",
           "img_index": -1
         }
       ],
@@ -113,120 +115,71 @@
       "table": null
     },
     {
-      "id": "sec2",
-      "heading": "Wie funktioniert es?",
-      "section_role": "process_how",
+      "id": "sec3",
+      "heading": "Wichtige Regeln und Rechte",
+      "section_role": null,
       "sentences": [
         {
-          "id": "s006",
-          "text": "In einer Demokratie wählen die erwachsenen Bürger Politiker.",
-          "img_index": -1
-        },
-        {
-          "id": "s007",
-          "text": "Diese Politiker sind dann ihre Vertreter und entscheiden für sie im Parlament.",
-          "img_index": -1
-        },
-        {
-          "id": "s008",
-          "text": "Die Wahlen sind besonders wichtig: Jeder darf frei und geheim abstimmen, wen er oder sie wählen möchte.",
-          "img_index": -1
-        },
-        {
           "id": "s009",
-          "text": "Das bedeutet, niemand darf dir vorschreiben, wen du wählen sollst, und niemand erfährt, was du gewählt hast.",
+          "text": "Damit eine Demokratie gut funktioniert, gibt es wichtige Regeln.",
           "img_index": -1
         },
         {
           "id": "s010",
-          "text": "So können alle Menschen mitbestimmen, auch wenn sie nicht selbst im Parlament sitzen.",
+          "text": "Dazu gehören Grundrechte, die alle Menschen schützen.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Jeder darf zum Beispiel seine Meinung frei sagen und schreiben, und Zeitungen dürfen berichten, was sie wollen.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Auch Parteien, die nicht regieren, haben eine wichtige Aufgabe: Sie kontrollieren die Regierung und bieten andere Ideen an.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Man nennt sie Opposition.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
           "type": "fakt",
-          "text": "Damit die Macht nicht zu groß wird, ist sie in einer Demokratie aufgeteilt: Eine Gruppe macht die Gesetze, eine andere regiert das Land und eine dritte schaut als Gericht, dass die Regeln eingehalten werden. Das nennt man Gewaltenteilung."
-        }
-      ],
-      "table": null
-    },
-    {
-      "id": "sec3",
-      "heading": "Regeln für alle",
-      "section_role": "today_legacy",
-      "sentences": [
-        {
-          "id": "s011",
-          "text": "In einer Demokratie gibt es Regeln, die für alle Menschen gleich sind.",
-          "img_index": -1
-        },
-        {
-          "id": "s012",
-          "text": "Diese Regeln nennt man Gesetze.",
-          "img_index": -1
-        },
-        {
-          "id": "s013",
-          "text": "Sie gelten auch für die Politiker und die Regierung selbst.",
-          "img_index": -1
-        },
-        {
-          "id": "s014",
-          "text": "Jeder darf seine Meinung sagen, und die Presse darf frei berichten.",
-          "img_index": -1
-        },
-        {
-          "id": "s015",
-          "text": "Das ist wichtig, damit alle gut informiert sind und mitreden können.",
-          "img_index": -1
-        },
-        {
-          "id": "s016",
-          "text": "Auch wenn es Streit gibt, muss er friedlich gelöst werden.",
-          "img_index": -1
-        }
-      ],
-      "boxes": [
-        {
-          "type": "wow",
-          "text": "Das erste Mal gab es so etwas Ähnliches wie Demokratie vor über 2400 Jahren in der Stadt Athen im alten Griechenland. Damals durften aber nur freie Männer mitmachen, keine Frauen oder Sklaven!"
+          "text": "💡 Damit niemand zu viel Macht hat, wird sie geteilt: Eine Gruppe macht die Gesetze, eine andere regiert, und Richter passen auf, dass alles fair zugeht. Das nennt man Gewaltenteilung."
         }
       ],
       "table": null
     },
     {
       "id": "sec4",
-      "heading": "Das Gegenteil von Demokratie",
-      "section_role": "curiosity",
+      "heading": "Demokratie früher und heute",
+      "section_role": null,
       "sentences": [
         {
+          "id": "s014",
+          "text": "Die Idee der Demokratie ist schon sehr alt.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Vor über 2000 Jahren gab es im alten Griechenland, in der Stadt Athen, eine frühe Form der Demokratie.",
+          "img_index": 2
+        },
+        {
+          "id": "s016",
+          "text": "Dort durften aber nur freie Männer mitmachen und abstimmen, keine Frauen oder Sklaven.",
+          "img_index": -1
+        },
+        {
           "id": "s017",
-          "text": "Das Gegenteil einer Demokratie ist eine Diktatur.",
-          "img_index": -1
-        },
-        {
-          "id": "s018",
-          "text": "Dort entscheidet nur eine Person oder eine kleine Gruppe, was im Land passiert.",
-          "img_index": -1
-        },
-        {
-          "id": "s019",
-          "text": "Die Bürger dürfen nicht mitbestimmen und oft nicht einmal ihre Meinung frei sagen.",
-          "img_index": -1
-        },
-        {
-          "id": "s020",
-          "text": "Deshalb ist Demokratie so wertvoll: Weil sie jedem Menschen eine Stimme gibt.",
+          "text": "Heute ist das anders: In modernen Demokratien dürfen alle erwachsenen Menschen, Männer und Frauen, wählen und mitentscheiden.",
           "img_index": -1
         }
       ],
-      "boxes": [
-        {
-          "type": "warnung",
-          "text": "In einer Diktatur hat oft eine einzige Person die ganze Macht. Sie kann Gesetze machen, wie sie will, und niemand darf widersprechen. Das ist nicht fair und oft gefährlich für die Menschen."
-        }
-      ],
+      "boxes": [],
       "table": null
     }
   ],
@@ -234,57 +187,57 @@
     "questions": [
       {
         "id": "q1",
-        "text": "Was ist die Hauptidee der Demokratie?",
+        "text": "Was bedeutet das Wort 'Demokratie'?",
         "options": [
           {
             "key": "A",
-            "text": "Einer entscheidet alles alleine"
+            "text": "Herrschaft des Königs"
           },
           {
             "key": "B",
-            "text": "Das Volk entscheidet mit"
+            "text": "Volksherrschaft"
           },
           {
             "key": "C",
-            "text": "Nur reiche Leute dürfen entscheiden"
+            "text": "Macht der Stärksten"
           }
         ],
         "correct_key": "B"
       },
       {
         "id": "q2",
-        "text": "Woher kommt das Wort 'Demokratie' ursprünglich?",
+        "text": "Wer darf in einer modernen Demokratie wählen?",
         "options": [
           {
             "key": "A",
-            "text": "Aus dem alten Rom"
+            "text": "Nur Männer"
           },
           {
             "key": "B",
-            "text": "Aus dem alten Griechenland"
+            "text": "Nur reiche Leute"
           },
           {
             "key": "C",
-            "text": "Aus dem Mittelalter"
+            "text": "Alle erwachsenen Bürger"
           }
         ],
-        "correct_key": "B"
+        "correct_key": "C"
       },
       {
         "id": "q3",
-        "text": "Was passiert in einer Diktatur?",
+        "text": "Warum ist die Gewaltenteilung in einer Demokratie wichtig?",
         "options": [
           {
             "key": "A",
-            "text": "Alle dürfen ihre Meinung frei sagen"
+            "text": "Damit die Regierung schneller entscheiden kann"
           },
           {
             "key": "B",
-            "text": "Nur eine Person oder kleine Gruppe bestimmt"
+            "text": "Damit niemand zu viel Macht hat"
           },
           {
             "key": "C",
-            "text": "Es gibt viele Parteien, die um Wähler werben"
+            "text": "Damit es mehr Gesetze gibt"
           }
         ],
         "correct_key": "B"
@@ -292,15 +245,7 @@
     ]
   },
   "related_terms": {
-    "core": [
-      "Wahlen",
-      "Gesetze",
-      "Diktatur"
-    ],
-    "discover": [
-      "Parlament",
-      "Grundrechte",
-      "Gewaltenteilung"
-    ]
+    "core": [],
+    "discover": []
   }
 }

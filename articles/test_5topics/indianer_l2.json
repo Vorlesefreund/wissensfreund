@@ -1,62 +1,80 @@
 {
   "meta": {
-    "id": "indigene_voelker_l2",
-    "title": "Indigene Völker",
+    "id": "indianer_l2",
+    "title": "Indigene Völker Amerikas",
     "subtitle": "Die ersten Menschen eines Landes",
-    "emoji": "🌍",
+    "emoji": "🌎",
     "age_level": 2,
-    "pattern": "place_geography",
-    "theme_color": "#4CAF50",
-    "word_count": 311,
+    "pattern": "history_person",
+    "theme_color": "#8B4513",
+    "word_count": 242,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Indigene_Völker",
     "schema_version": "1.0",
-    "review_flag": false,
+    "review_flag": true,
     "category_top": "gesellschaft",
-    "category_sub": "völker",
-    "generated_at": "2026-06-08T14:48:49.209075+00:00"
+    "category_sub": "kulturen",
+    "generated_at": "2026-06-08T18:04:48.324384+00:00",
+    "review_reason": "validation_errors: 14 Sätze außerhalb [15,60] für Stufe 2"
   },
   "images": [
     {
       "index": 0,
-      "filename": "Aboriginal_children.jpg",
-      "alt": "Indigene Kinder in Australien",
-      "caption": "Indigene Völker leben auf allen Kontinenten, zum Beispiel die Aborigines in Australien.",
-      "license": "CC BY-SA 4.0",
-      "license_author": "Bidgee",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Aboriginal_children_at_Mungo_National_Park.jpg",
-      "wikimedia_id": "File:Aboriginal_children_at_Mungo_National_Park.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Aboriginal_children_at_Mungo_National_Park.jpg/512px-Aboriginal_children_at_Mungo_National_Park.jpg"
+      "filename": "James_Anaya_and_Vicky_Tauli-Corpuz_in_Kuala-Lumpur.jpg",
+      "alt": "Zwei Menschen bei einem Treffen zu indigenen Rechten.",
+      "caption": "James Anaya und Vicky Tauli-Corpuz setzen sich für die Rechte der indigenen Völker ein.",
+      "license": "CC BY-SA",
+      "license_author": "Johannes Rohr",
+      "source_url": "https://commons.wikimedia.org/wikipedia/commons/thumb/a/a9/James_Anaya_and_Vicky_Tauli-Corpuz_in_Kuala-Lumpur.jpg/960px-James_Anaya_and_Vicky_Tauli-Corpuz_in_Kuala-Lumpur.jpg",
+      "wikimedia_id": "File:James_Anaya_and_Vicky_Tauli-Corpuz_in_Kuala-Lumpur.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/James_Anaya_and_Vicky_Tauli-Corpuz_in_Kuala-Lumpur.jpg/960px-James_Anaya_and_Vicky_Tauli-Corpuz_in_Kuala-Lumpur.jpg"
+    },
+    {
+      "index": 1,
+      "filename": "NZ_delegation_UN_Forum_on_Indigenous_Issues.jpg",
+      "alt": "Menschen in traditioneller Kleidung bei einer Konferenz.",
+      "caption": "Vertreter indigener Völker aus Neuseeland beim UN-Forum für indigene Angelegenheiten.",
+      "license": "CC BY-SA",
+      "license_author": "Broddi Sigurðarson",
+      "source_url": "https://commons.wikimedia.org/wikipedia/commons/thumb/f/f9/NZ_delegation_UN_Forum_on_Indigenous_Issues.jpg/960px-NZ_delegation_UN_Forum_on_Indigenous_Issues.jpg",
+      "wikimedia_id": "File:NZ_delegation_UN_Forum_on_Indigenous_Issues.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/NZ_delegation_UN_Forum_on_Indigenous_Issues.jpg/960px-NZ_delegation_UN_Forum_on_Indigenous_Issues.jpg"
+    },
+    {
+      "index": 2,
+      "filename": "3NorwSamiPresidents-2.jpg",
+      "alt": "Drei Personen in traditioneller Kleidung.",
+      "caption": "Drei Präsidenten der Sámi, eines indigenen Volkes aus dem Norden Europas.",
+      "license": "Public Domain",
+      "license_author": "Trond Trosterud",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/1/17/3NorwSamiPresidents-2.jpg",
+      "wikimedia_id": "File:3NorwSamiPresidents-2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/17/3NorwSamiPresidents-2.jpg"
     }
   ],
   "sections": [
     {
-      "id": "intro",
-      "heading": "Was sind indigene Völker?",
+      "id": "sec1",
+      "heading": "Wer sind indigene Völker?",
       "section_role": "intro",
       "sentences": [
         {
           "id": "s001",
-          "text": "Stell dir vor, deine Familie hat schon immer an einem ganz besonderen Ort gelebt.",
+          "text": "Stell dir vor, du bist der allererste Mensch, der in einem Land lebt und dort ein Zuhause baut.",
           "img_index": -1
         },
         {
           "id": "s002",
-          "text": "Indigene Völker sind genau solche Gruppen von Menschen.",
+          "text": "Genau das sind indigene Völker: Sie lebten schon in einem Gebiet, bevor andere Menschen kamen und es eroberten.",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Sie sind die Nachfahren der ersten Bewohner eines Gebiets.",
+          "text": "Sie haben ihre ganz eigenen Sprachen, Geschichten und Wege, wie sie mit der Natur leben.",
           "img_index": -1
         },
         {
           "id": "s004",
-          "text": "Das bedeutet, sie lebten dort schon, bevor andere Menschen das Land erobert oder besiedelt haben.",
-          "img_index": -1
-        },
-        {
-          "id": "s005",
-          "text": "Sie haben eine sehr enge Verbindung zu ihrem Land und bewahren ihre eigene Kultur, Sprache und Traditionen.",
+          "text": "Indigen bedeutet so viel wie „eingeboren“ oder „ursprünglich“.",
           "img_index": -1
         }
       ],
@@ -64,89 +82,80 @@
       "table": null
     },
     {
-      "id": "weltweit_und_amerika",
-      "heading": "Indigene Völker auf der ganzen Welt",
-      "section_role": "place_geography",
+      "id": "sec2",
+      "heading": "Besondere Merkmale",
+      "section_role": "appearance_equipment",
       "sentences": [
         {
+          "id": "s005",
+          "text": "Indigene Völker halten an ihrer besonderen Kultur fest.",
+          "img_index": -1
+        },
+        {
           "id": "s006",
-          "text": "Auf der ganzen Erde gibt es etwa 500 Millionen indigene Menschen.",
+          "text": "Dazu gehören ihre Sprache, ihre Religion und wie sie zusammenleben.",
           "img_index": -1
         },
         {
           "id": "s007",
-          "text": "Das ist ungefähr jeder 15.",
-          "img_index": -1
+          "text": "Sie fühlen sich als eine eigene Gemeinschaft und werden auch von anderen als solche angesehen.",
+          "img_index": 0
         },
         {
           "id": "s008",
-          "text": "Besonders viele indigene Völker leben in Amerika, wo sie oft als „Indianer“ bezeichnet wurden.",
+          "text": "Ein ganz wichtiger Punkt ist ihre sehr enge Verbindung zu ihrem Land.",
           "img_index": -1
         },
         {
           "id": "s009",
-          "text": "Auch auf der Insel Neuguinea im Pazifik gibt es sehr viele verschiedene indigene Völker, über 800 Stück, jedes mit eigener Sprache.",
+          "text": "Das Land ist für sie oft nicht nur ein Ort zum Wohnen, sondern auch ein heiliger Ort.",
           "img_index": -1
-        },
-        {
-          "id": "s010",
-          "text": "In Australien nennt man sie Aborigines.",
-          "img_index": 0
         }
       ],
-      "boxes": [
-        {
-          "type": "wow",
-          "text": "Es gibt über 7.000 Sprachen auf der Welt. Mehr als die Hälfte davon sind indigene Sprachen. Viele davon sind aber bedroht und könnten bald verschwinden."
-        }
-      ],
+      "boxes": [],
       "table": null
     },
     {
-      "id": "probleme_und_rechte",
-      "heading": "Probleme und Rechte",
-      "section_role": "human_animal",
+      "id": "sec3",
+      "heading": "Kämpfe und Rechte",
+      "section_role": "today_legacy",
       "sentences": [
         {
+          "id": "s010",
+          "text": "Leider wurden und werden viele indigene Völker unterdrückt oder diskriminiert.",
+          "img_index": -1
+        },
+        {
           "id": "s011",
-          "text": "Leider werden indigene Völker oft benachteiligt und nicht fair behandelt.",
+          "text": "Das bedeutet, sie wurden schlecht behandelt oder an den Rand der Gesellschaft gedrängt.",
           "img_index": -1
         },
         {
           "id": "s012",
-          "text": "Ihr Land ist oft reich an Bodenschätzen wie Gold oder Öl.",
-          "img_index": -1
+          "text": "Deshalb kämpfen sie für ihre Rechte, zum Beispiel für das Recht auf ihr eigenes Land und ihre Lebensweise.",
+          "img_index": 1
         },
         {
           "id": "s013",
-          "text": "Deswegen wollen große Firmen dort oft Bergbau betreiben oder Straßen bauen.",
+          "text": "Die Vereinten Nationen helfen dabei, diese Rechte zu schützen.",
           "img_index": -1
         },
         {
           "id": "s014",
-          "text": "Das führt zu Konflikten, weil die indigenen Völker ihr Land schützen wollen.",
-          "img_index": -1
-        },
-        {
-          "id": "s015",
-          "text": "Auch Nationalparks können manchmal dazu führen, dass indigene Gruppen von ihrem Land vertrieben werden.",
-          "img_index": -1
-        },
-        {
-          "id": "s016",
-          "text": "Die Vereinten Nationen (UN) setzen sich dafür ein, dass die Rechte indigener Völker überall auf der Welt geachtet werden.",
-          "img_index": -1
-        },
-        {
-          "id": "s017",
-          "text": "Dazu gehört das Recht, selbst über ihr Land und ihr Leben zu bestimmen.",
+          "text": "Auf der ganzen Welt gibt es heute etwa 350 Millionen Menschen, die zu indigenen Völkern gehören.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
+          "type": "stimmt_das",
+          "text": "Stimmt es, dass man die Ureinwohner Amerikas „Indianer“ nennt?",
+          "reveal_text": "Früher nannte man sie so, weil Christoph Kolumbus dachte, er sei in Indien gelandet. Heute ist dieser Name veraltet und wird nicht mehr benutzt. Man sagt besser „Indigene Völker Amerikas“ oder zum Beispiel „First Nations“ in Kanada.",
+          "reveal_mode": "auto"
+        },
+        {
           "type": "warnung",
-          "text": "Manche indigene Völker leben ganz abgeschirmt von der Außenwelt. Wenn Menschen von außen zu ihnen kommen, können sie Krankheiten einschleppen, gegen die die Indigenen keine Abwehrkräfte haben. Das kann für sie sehr gefährlich sein."
+          "text": "Manche indigene Völker leben ganz abgeschirmt von der Außenwelt. Das tun sie oft, weil sie schlechte Erfahrungen gemacht haben. Der Kontakt mit Fremden kann für sie gefährlich sein, weil sie sich leicht mit Krankheiten anstecken können, gegen die sie keinen Schutz haben."
         }
       ],
       "table": null
@@ -156,57 +165,57 @@
     "questions": [
       {
         "id": "q1",
-        "text": "Was macht indigene Völker besonders?",
+        "text": "Was bedeutet das Wort „indigen“?",
         "options": [
           {
             "key": "A",
-            "text": "Sie sind die ersten Bewohner eines Gebiets und haben ihre eigene Kultur bewahrt."
+            "text": "Aus Indien stammend"
           },
           {
             "key": "B",
-            "text": "Sie leben nur in Städten und haben keine besonderen Traditionen."
+            "text": "Eingeboren oder ursprünglich"
           },
           {
             "key": "C",
-            "text": "Sie sind neu in einem Land und suchen eine neue Heimat."
+            "text": "Von fremder Herkunft"
           }
         ],
-        "correct_key": "A"
+        "correct_key": "B"
       },
       {
         "id": "q2",
-        "text": "Warum gibt es oft Streit um das Land indigener Völker?",
+        "text": "Warum ist das Land für indigene Völker oft besonders wichtig?",
         "options": [
           {
             "key": "A",
-            "text": "Weil dort viele Tiere leben, die gejagt werden sollen."
+            "text": "Weil sie dort viele Geschäfte machen können."
           },
           {
             "key": "B",
-            "text": "Weil ihr Land oft Rohstoffe wie Gold oder Öl enthält."
+            "text": "Weil es für sie ein heiliger Ort und ihr Zuhause ist."
           },
           {
             "key": "C",
-            "text": "Weil sie ihr Land nicht mit anderen teilen wollen."
+            "text": "Weil sie dort die meisten Schätze finden."
           }
         ],
         "correct_key": "B"
       },
       {
         "id": "q3",
-        "text": "Was bedeutet es, wenn eine indigene Sprache bedroht ist?",
+        "text": "Warum kämpfen indigene Völker für ihre Rechte?",
         "options": [
           {
             "key": "A",
-            "text": "Es gibt nur noch wenige Menschen, die diese Sprache sprechen."
+            "text": "Weil sie oft unterdrückt oder diskriminiert wurden."
           },
           {
             "key": "B",
-            "text": "Die Sprache ist sehr schwer zu lernen und niemand versteht sie."
+            "text": "Weil sie ein eigenes Land gründen wollen."
           },
           {
             "key": "C",
-            "text": "Die Sprache wird von vielen Menschen gesprochen, aber sie ist nicht wichtig."
+            "text": "Weil sie keine eigenen Sprachen sprechen dürfen."
           }
         ],
         "correct_key": "A"
@@ -214,7 +223,15 @@
     ]
   },
   "related_terms": {
-    "core": [],
-    "discover": []
+    "core": [
+      "Kultur",
+      "Rechte",
+      "Kolonialismus"
+    ],
+    "discover": [
+      "First Nations",
+      "Sámi",
+      "Aborigines"
+    ]
   }
 }

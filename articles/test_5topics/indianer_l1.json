@@ -1,57 +1,56 @@
 {
   "meta": {
-    "id": "indigene_voelker_l1",
-    "title": "Indigene Völker",
-    "subtitle": "Die ersten Menschen eines Landes",
-    "emoji": "🌍",
+    "id": "indianer_l1",
+    "title": "Indigene Völker Amerikas",
+    "subtitle": "Wer sind die ersten Bewohner Amerikas?",
+    "emoji": "🏞️",
     "age_level": 1,
-    "pattern": "place_geography",
+    "pattern": "history_person",
     "theme_color": "#4CAF50",
-    "word_count": 140,
+    "word_count": 95,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Indigene_Völker",
     "schema_version": "1.0",
     "review_flag": false,
-    "category_top": "gesellschaft",
-    "category_sub": "völker",
-    "generated_at": "2026-06-08T14:48:33.785266+00:00"
+    "category_top": "völker",
+    "category_sub": "geschichte_und_gesellschaft",
+    "generated_at": "2026-06-08T17:41:59.240206+00:00"
   },
   "images": [
     {
       "index": 0,
-      "filename": "Sitting Bull - NPG.jpg",
-      "alt": "Ein alter Mann mit langen Zöpfen und Federhaube blickt ernst in die Kamera.",
-      "caption": "Sitting Bull war ein berühmter Anführer der Lakota-Indianer.",
+      "filename": "3NorwSamiPresidents-2.jpg",
+      "alt": "Drei Menschen in bunten, traditionellen Kleidern, die zu indigenen Völkern gehören.",
+      "caption": "Die Samen sind ein indigenes Volk in Nordeuropa. Auch in Amerika gibt es viele indigene Völker.",
       "license": "Public Domain",
-      "license_author": "David Frances Barry",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Sitting_Bull_-_NPG.jpg",
-      "wikimedia_id": "File:Sitting_Bull_-_NPG.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Sitting_Bull_-_NPG.jpg/256px-Sitting_Bull_-_NPG.jpg"
+      "license_author": "Trond Trosterud",
+      "source_url": "https://commons.wikimedia.org/wikipedia/commons/1/17/3NorwSamiPresidents-2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/17/3NorwSamiPresidents-2.jpg"
     }
   ],
   "sections": [
     {
-      "id": "sec1",
-      "heading": "Wer sind indigene Völker?",
+      "id": "intro",
+      "heading": "Die ersten Menschen Amerikas",
       "section_role": "intro",
       "sentences": [
         {
           "id": "s001",
-          "text": "Stell dir vor, du bist der allererste Mensch, der an einem Ort lebt.",
-          "img_index": -1
+          "text": "Stell dir vor, es gibt Menschen, die schon vor ganz langer Zeit in Amerika gelebt haben.",
+          "img_index": 0
         },
         {
           "id": "s002",
-          "text": "Du baust dort dein Haus, findest Essen und lernst alles über die Natur um dich herum.",
+          "text": "Sie waren dort, lange bevor andere Menschen dorthin kamen.",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Genau das sind indigene Völker: Sie sind die ersten Menschen, die in einem Land gelebt haben.",
+          "text": "Man nennt sie indigene Völker.",
           "img_index": -1
         },
         {
           "id": "s004",
-          "text": "Sie waren schon da, bevor andere Menschen kamen und dort Häuser bauten oder Städte gründeten.",
+          "text": "Oft werden sie auch Indianer oder First Nations genannt.",
           "img_index": -1
         }
       ],
@@ -59,71 +58,42 @@
       "table": null
     },
     {
-      "id": "sec2",
-      "heading": "Besondere Verbindung zur Natur",
+      "id": "ihre_welt",
+      "heading": "Ihre eigene Welt",
       "section_role": "behavior_life",
       "sentences": [
         {
           "id": "s005",
-          "text": "Indigene Völker haben eine ganz besondere Verbindung zu ihrem Land.",
+          "text": "Diese Menschen haben ihre ganz eigenen Sprachen.",
           "img_index": -1
         },
         {
           "id": "s006",
-          "text": "Sie passen gut auf die Natur auf, weil sie wissen, wie wichtig sie ist.",
+          "text": "Sie haben auch besondere Bräuche und Geschichten, die sie sich erzählen.",
           "img_index": -1
         },
         {
           "id": "s007",
-          "text": "Oft glauben sie, dass Bäume, Flüsse und Tiere eine Seele haben.",
+          "text": "Ihr Land und die Natur sind ihnen sehr, sehr wichtig.",
           "img_index": -1
         },
         {
           "id": "s008",
-          "text": "Sie leben oft anders als viele andere Menschen.",
+          "text": "Sie passen gut darauf auf, so wie du auf deine Spielsachen aufpasst.",
           "img_index": -1
         },
         {
           "id": "s009",
-          "text": "Sie haben ihre eigenen Sprachen, Geschichten und Feste.",
-          "img_index": 0
+          "text": "Manchmal haben indigene Völker es schwer, weil ihr Land weggenommen wird.",
+          "img_index": -1
         }
       ],
       "boxes": [
         {
           "type": "wow",
-          "text": "🌟 Es gibt über 800 verschiedene indigene Völker allein auf der Insel Neuguinea! Und jedes Volk hat seine eigene Sprache."
+          "text": "🌟 In Amerika gibt es viele, viele verschiedene indigene Völker. Jedes hat seine eigenen besonderen Bräuche und Geschichten!"
         }
       ],
-      "table": null
-    },
-    {
-      "id": "sec3",
-      "heading": "Viele indigene Völker",
-      "section_role": "today_legacy",
-      "sentences": [
-        {
-          "id": "s010",
-          "text": "Auf der ganzen Welt gibt es heute noch viele indigene Völker.",
-          "img_index": -1
-        },
-        {
-          "id": "s011",
-          "text": "Manche leben in großen Wäldern, andere in Wüsten oder am Meer.",
-          "img_index": -1
-        },
-        {
-          "id": "s012",
-          "text": "Sie möchten, dass ihre alten Traditionen und ihre besonderen Lebensweisen erhalten bleiben.",
-          "img_index": -1
-        },
-        {
-          "id": "s013",
-          "text": "Darum setzen sich viele Menschen dafür ein, dass indigene Völker gut leben können und ihre Rechte geachtet werden.",
-          "img_index": -1
-        }
-      ],
-      "boxes": [],
       "table": null
     }
   ],
@@ -131,60 +101,60 @@
     "questions": [
       {
         "id": "q1",
-        "text": "Was macht indigene Völker besonders?",
+        "text": "Was ist typisch für indigene Völker?",
         "options": [
           {
             "key": "A",
-            "text": "Sie sind die ersten Menschen, die in einem Gebiet gelebt haben."
+            "text": "Sie leben schon sehr lange an einem Ort."
           },
           {
             "key": "B",
-            "text": "Sie wohnen alle in großen Städten."
+            "text": "Sie haben alle die gleiche Sprache."
           },
           {
             "key": "C",
-            "text": "Sie sprechen alle dieselbe Sprache."
+            "text": "Sie tragen immer die gleiche Kleidung."
           }
         ],
         "correct_key": "A"
       },
       {
         "id": "q2",
-        "text": "Welche Verbindung haben indigene Völker oft zur Natur?",
+        "text": "Wie nennen wir indigene Völker in Amerika oft?",
         "options": [
           {
             "key": "A",
-            "text": "Sie mögen die Natur nicht besonders."
+            "text": "Seefahrer"
           },
           {
             "key": "B",
-            "text": "Sie haben eine sehr enge und besondere Verbindung zu ihr."
+            "text": "Astronauten"
           },
           {
             "key": "C",
-            "text": "Sie benutzen die Natur nur, um Dinge zu verkaufen."
-          }
-        ],
-        "correct_key": "B"
-      },
-      {
-        "id": "q3",
-        "text": "Was ist wichtig für indigene Völker?",
-        "options": [
-          {
-            "key": "A",
-            "text": "Dass ihre alten Traditionen und Lebensweisen vergessen werden."
-          },
-          {
-            "key": "B",
-            "text": "Dass sie alle so leben wie andere Menschen."
-          },
-          {
-            "key": "C",
-            "text": "Dass ihre Kulturen und Rechte erhalten bleiben."
+            "text": "Indianer oder First Nations"
           }
         ],
         "correct_key": "C"
+      },
+      {
+        "id": "q3",
+        "text": "Was ist indigenen Völkern besonders wichtig?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ihr Land und die Natur."
+          },
+          {
+            "key": "B",
+            "text": "Nur neue, moderne Dinge."
+          },
+          {
+            "key": "C",
+            "text": "Ganz viele Autos haben."
+          }
+        ],
+        "correct_key": "A"
       }
     ]
   },
