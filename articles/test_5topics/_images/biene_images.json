@@ -1,12 +1,13 @@
 {
   "thema": "biene",
   "wikipedia_title": "Biene",
-  "generated_at": "2026-06-08T19:18:40.984640+00:00",
+  "generated_at": "2026-06-08T19:59:00.412844+00:00",
   "stats": {
     "candidates_in": 12,
-    "vision_checked": 10,
-    "accepted": 6,
-    "rejected": 4
+    "vision_checked": 12,
+    "accepted": 12,
+    "rejected": 0,
+    "wikimedia_api_requests": 1
   },
   "hero": {
     "filename": "Bee_on_Echinacea.jpg",
@@ -29,9 +30,9 @@
     {
       "rank": 2,
       "filename": "Diphaglossa_gayi,_f,_side,_chile_2014-08-04-18.17.33_ZS_PMax_(14732584979).jpg",
-      "relevanz": 8,
+      "relevanz": 9,
       "hero_tauglich": true,
-      "beschreibung": "Eine Nahaufnahme einer pelzigen, gelb-braunen Biene mit durchsichtigen Flügeln vor einem schwarzen Hintergrund. Die Biene ist seitlich abgebildet und scheint zu schweben.",
+      "beschreibung": "Eine Nahaufnahme einer pelzigen, gelb-braunen Biene vor schwarzem Hintergrund. Man sieht deutlich ihre Augen, den Rüssel, die Flügel und die behaarten Beine.",
       "license": "Public domain",
       "license_author": "USGS Bee Inventory and Monitoring Lab from Beltsville, Maryland, USA",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/70/Diphaglossa_gayi%2C_f%2C_side%2C_chile_2014-08-04-18.17.33_ZS_PMax_%2814732584979%29.jpg/960px-Diphaglossa_gayi%2C_f%2C_side%2C_chile_2014-08-04-18.17.33_ZS_PMax_%2814732584979%29.jpg",
@@ -39,39 +40,105 @@
     },
     {
       "rank": 3,
+      "filename": "Honigbiene-Basilikum-04.jpg",
+      "relevanz": 9,
+      "hero_tauglich": true,
+      "beschreibung": "Eine Biene ist im Profil zu sehen, wie sie Nektar aus einer kleinen weißen Blüte sammelt. Ihre pelzigen Körperteile und transparenten Flügel sind gut erkennbar.",
+      "license": "FAL",
+      "license_author": "Chianti",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/78/Honigbiene-Basilikum-04.jpg/960px-Honigbiene-Basilikum-04.jpg",
+      "wikimedia_id": "File:Honigbiene-Basilikum-04.jpg"
+    },
+    {
+      "rank": 4,
+      "filename": "The_bee_collects_nectar.jpg",
+      "relevanz": 9,
+      "hero_tauglich": true,
+      "beschreibung": "Eine Biene fliegt mit Pollen an ihren Beinen auf eine rosa Blüte zu. Der Hintergrund ist unscharf und hellbraun.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Bgelo777",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/The_bee_collects_nectar.jpg/960px-The_bee_collects_nectar.jpg",
+      "wikimedia_id": "File:The bee collects nectar.jpg"
+    },
+    {
+      "rank": 5,
       "filename": "Sleeping_Anthidium_manicatum_8808.jpg",
       "relevanz": 8,
       "hero_tauglich": false,
-      "beschreibung": "Eine Biene mit gelb-schwarzem Körper und Flügeln sitzt auf einer lila Blütenknospe, die von feinen Härchen bedeckt ist. Der Stiel der Pflanze ist grün und ebenfalls behaart.",
+      "beschreibung": "Eine Biene mit gelb-schwarzem Körper und pelzigen Beinen klammert sich an eine lila Blütenknospe, die ebenfalls mit feinen Härchen bedeckt ist. Der Hintergrund ist unscharf, wodurch der Fokus auf die Biene und die Knospe gelegt wird.",
       "license": "CC BY-SA 3.0",
       "license_author": "soebe, optimisation by Ralf. Thank you very much for doing this, Ralf.",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/02/Sleeping_Anthidium_manicatum_8808.jpg/960px-Sleeping_Anthidium_manicatum_8808.jpg",
       "wikimedia_id": "File:Sleeping Anthidium manicatum 8808.jpg"
     },
     {
-      "rank": 4,
+      "rank": 6,
       "filename": "Bau_einer_Biene.png",
       "relevanz": 7,
       "hero_tauglich": false,
-      "beschreibung": "Eine Biene ist auf einem grünen Blatt zu sehen, wobei verschiedene Körperteile und Flügelstrukturen mit Pfeilen und Beschriftungen detailliert dargestellt sind.",
+      "beschreibung": "Eine Biene ist auf einem grünen Blatt zu sehen. Verschiedene Körperteile der Biene sind mit Pfeilen und Beschriftungen in deutscher Sprache markiert, um ihre Anatomie zu erklären.",
       "license": "CC BY-SA 4.0",
       "license_author": "Julie Weissmann",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/47/Bau_einer_Biene.png",
       "wikimedia_id": "File:Bau einer Biene.png"
     },
     {
-      "rank": 5,
+      "rank": 7,
+      "filename": "Bienenschwarm_Okavangodelta_(2019).jpg",
+      "relevanz": 7,
+      "hero_tauglich": false,
+      "beschreibung": "Das Bild zeigt eine große Gruppe kleiner, dunkler Insekten, die vor einem hellblauen Himmel fliegen. Am rechten Bildrand ist die Silhouette eines Baumes mit einigen Blättern zu sehen.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Hp.Baumeler",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/01/Bienenschwarm_Okavangodelta_%282019%29.jpg/960px-Bienenschwarm_Okavangodelta_%282019%29.jpg",
+      "wikimedia_id": "File:Bienenschwarm Okavangodelta (2019).jpg"
+    },
+    {
+      "rank": 8,
+      "filename": "DasypodaHirtipesFemale2.jpg",
+      "relevanz": 7,
+      "hero_tauglich": false,
+      "beschreibung": "Eine Biene mit pelzigem, orange-braunem Thorax und schwarz-weiß gestreiftem Hinterleib sitzt auf sandigem Boden vor einem Erdloch. Der Sand ist mit kleinen Steinen und Kieselsteinen durchsetzt.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Christian Fischer",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d6/DasypodaHirtipesFemale2.jpg/960px-DasypodaHirtipesFemale2.jpg",
+      "wikimedia_id": "File:DasypodaHirtipesFemale2.jpg"
+    },
+    {
+      "rank": 9,
       "filename": "Systropha_planidens.jpg",
       "relevanz": 7,
       "hero_tauglich": false,
-      "beschreibung": "Eine schwarze Biene mit Pollen auf dem Körper sitzt in einer weißen Blüte. Die Biene ist von oben zu sehen und füllt einen Großteil des Bildes aus.",
+      "beschreibung": "Eine schwarze Biene mit leicht behaartem Körper und durchsichtigen Flügeln sitzt in einer weißen Blüte. Auf dem Körper der Biene sind Pollenkörner zu sehen.",
       "license": "CC BY-SA 2.0 de",
       "license_author": "",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Systropha_planidens.jpg",
       "wikimedia_id": "File:Systropha planidens.jpg"
     },
     {
-      "rank": 6,
+      "rank": 10,
+      "filename": "Wildbienen.jpg",
+      "relevanz": 7,
+      "hero_tauglich": false,
+      "beschreibung": "Das Bild zeigt den Eingang zu einem Bienenstock in einem Baumstamm, umgeben von Moos und Laub. Mehrere Bienen sind am Eingang und in der Nähe zu sehen.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Neptuul",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/Wildbienen.jpg/960px-Wildbienen.jpg",
+      "wikimedia_id": "File:Wildbienen.jpg"
+    },
+    {
+      "rank": 11,
+      "filename": "Osmia_rufa_couple_(aka).jpg",
+      "relevanz": 7,
+      "hero_tauglich": false,
+      "beschreibung": "Zwei Bienen sind eng beieinander auf einer Oberfläche zu sehen. Ihre pelzigen Körper und Flügel sind detailliert erkennbar, wobei eine Biene auf der anderen liegt.",
+      "license": "CC BY-SA 2.5",
+      "license_author": "André Karwath aka Aka",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Osmia_rufa_couple_%28aka%29.jpg/960px-Osmia_rufa_couple_%28aka%29.jpg",
+      "wikimedia_id": "File:Osmia rufa couple (aka).jpg"
+    },
+    {
+      "rank": 12,
       "filename": "Hairs_of_Bees_(by_David_Sharp,_1901).jpg",
       "relevanz": 5,
       "hero_tauglich": false,
@@ -82,30 +149,5 @@
       "wikimedia_id": "File:Hairs of Bees (by David Sharp, 1901).jpg"
     }
   ],
-  "rejected": [
-    {
-      "filename": "Bienenschwarm_Okavangodelta_(2019).jpg",
-      "reason": "Vision-Fehler",
-      "ablehnungsgrund": "Vision-API-Fehler",
-      "wikimedia_id": "File:Bienenschwarm Okavangodelta (2019).jpg"
-    },
-    {
-      "filename": "DasypodaHirtipesFemale2.jpg",
-      "reason": "Vision-Fehler",
-      "ablehnungsgrund": "Vision-API-Fehler",
-      "wikimedia_id": "File:DasypodaHirtipesFemale2.jpg"
-    },
-    {
-      "filename": "Honigbiene-Basilikum-04.jpg",
-      "reason": "Vision-Fehler",
-      "ablehnungsgrund": "Vision-API-Fehler",
-      "wikimedia_id": "File:Honigbiene-Basilikum-04.jpg"
-    },
-    {
-      "filename": "Osmia_rufa_couple_(aka).jpg",
-      "reason": "Vision-Fehler",
-      "ablehnungsgrund": "Vision-API-Fehler",
-      "wikimedia_id": "File:Osmia rufa couple (aka).jpg"
-    }
-  ]
+  "rejected": []
 }

@@ -1,12 +1,21 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-08T19:20:12Z -->
+<!-- updated: 2026-06-08T19:59:11Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**url_context-Test + image_vision_filter.py (2026-06-08)** ← AKTUELL
+**image_vision_filter.py: Rate-Limit-Fix v2 (2026-06-08)** ← AKTUELL
+- generator=images: 1 API-Request pro Artikel statt 2 (Wikipedia+Commons→nur Wikipedia)
+- Lokaler Download-Cache: .cache/downloads/{md5}{ext} — Biene-Test: 12/12 aus Cache
+- Lokaler Metadaten-Cache: .cache/image_meta_cache.json
+- maxlag=5 + Retry-After-Header-Handling
+- 2 parallele Download-Worker (ThreadPoolExecutor)
+- Ergebnis "Biene": 1 Wikimedia-API-Request gesamt, 0 Wikimedia-Downloads, 0 429s
+- Vergleich: vorher 2 Requests + bis zu 160s Retry-Schleife pro Bild
+
+**url_context-Test + image_vision_filter.py (2026-06-08)**
 - TEIL A: url_context empirisch verifiziert (commit 84041a8)
   - Primär-Fetch: URL_RETRIEVAL_STATUS_SUCCESS bestätigt
   - Sekundär-Links: Tool lehnt ab ("url does not match prompt")
