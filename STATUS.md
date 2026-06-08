@@ -1,24 +1,27 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-08T13:41:15Z -->
+<!-- updated: 2026-06-08T14:30:15Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Pipeline v3.20 Setup abgeschlossen (2026-06-08)** ← AKTUELL
-- `wissensfreund_generator_prompt_v3.20_production.md`: JSON-Ausgabeformat, planung-Block zuerst,
-  Schema v1.0, s001 global fortlaufend, img_index -1 erlaubt
-- `scripts/generate_articles.py`: 4 Fixes: planung-Strip vor JSON-Parse, --system-prompt Default,
-  img_index -1 im Validator erlaubt, generated_at aus Validator-Pflichtfeldern entfernt
-- `scripts/test_batch_5topics.json`: 5 Themen als Referenz-Format
-- `jobs/test_5topics/batch_0001.json`: 15 Jobs (5 × 3 Stufen) für generate_articles.py
-- `articles/test_5topics/`: Output-Verzeichnis angelegt
-- SCHRITT 4–6 ausstehend: brauchen ANTHROPIC_API_KEY + R2-Credentials
+**Gemini Flash API integriert (2026-06-08)** ← AKTUELL
+- `scripts/gemini_client.py`: call_gemini(system_prompt, user_message) via google-genai
+  Modell: gemini-2.5-flash · temperature=0.6 · GEMINI_API_KEY aus .env
+- `scripts/generate_articles.py`: --model sonnet|flash (Standard: sonnet)
+  + --test-connection Flag für schnellen API-Check
+- `.gitignore`: .env-Eintrag hinzugefügt (war vorher nicht ignoriert)
+- Test erfolgreich: `--model flash --test-connection` → "Gemini Flash OK: OK"
+- Nächster Schritt: Flash-Testlauf auf 5-Themen-Batch (ANTHROPIC_API_KEY für Sonnet noch offen)
+
+**Pipeline v3.20 Setup abgeschlossen (2026-06-08)**
+- `wissensfreund_generator_prompt_v3.20_production.md`: JSON-Ausgabeformat, planung-Block zuerst
+- `scripts/generate_articles.py`: planung-Strip, --system-prompt Default, img_index -1 erlaubt
+- `jobs/test_5topics/batch_0001.json`: 15 Jobs (5 × 3 Stufen)
 
 **Generator v3.19 + Lektorat v2.9 in main gemergt (2026-06-08)**
-- v3.19: themenneutrale Bereicherungs-Links, BEREICHERUNGS_LINKS-Feld, Primärartikel-Regel
-- v2.9: Planungs-Check prüft planung-Block-Konsistenz vor Durchgang A
+- v3.19: themenneutrale Bereicherungs-Links · v2.9: Planungs-Check
 
 ---
 
@@ -26,19 +29,19 @@
 
 **C:\Users\Andreas\Wissensfreund\wissensfreund_app** — Spare-Klon, vorher:
 1. Prüfen ob `scrape_out/` (1,6 GB) noch gebraucht wird
-2. 30-Sek-Check: `git status` + `git status --ignored`
-3. Dann Ordner löschen
+2. `git status` + `git status --ignored`, dann löschen
 
 ---
 
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch — Pipeline-Testlauf ausstehend
-- **SCHRITT 4**: 15 Artikel generieren — `! $env:ANTHROPIC_API_KEY="sk-..."` setzen, dann:
-  `python scripts/generate_articles.py --jobs-dir jobs/test_5topics --out-dir articles/test_5topics --batch 0001`
+- **Flash-Testlauf 5 Themen**: `python scripts/generate_articles.py --model flash
+  --jobs-dir jobs/test_5topics --out-dir articles/test_5topics --batch 0001`
+  (kein ANTHROPIC_API_KEY nötig, GEMINI_API_KEY in .env vorhanden)
+- **Sonnet-Testlauf**: `! $env:ANTHROPIC_API_KEY="sk-..."` setzen, dann --model sonnet
 - **SCHRITT 5**: Bilder patchen — `python scripts/patch_article_images_v1.py --articles-dir articles/test_5topics/`
-- **SCHRITT 6**: R2-Upload — `python scripts/upload_articles.py --articles-dir articles/test_5topics/` (CF_R2_* setzen)
-- **Flash-Testlauf v3.19 auf Römer** — dann Modellentscheidung
+- **SCHRITT 6**: R2-Upload — CF_R2_* Credentials setzen, dann upload_articles.py
 - **Lektorat-Pipeline-Integration** (manueller Standalone-Prompt)
 - **Related Terms**: prepare_articles.py befüllt sie noch nicht
 
@@ -56,4 +59,4 @@
 - **Klexikon-Quiz-Run**: Checkpoint (609 Einträge) auf R2 — vor Aktivierung löschen
 
 ## 🔵 Verschoben auf Version 1.1
-- Gallery-Artikel, Audio-Pipeline, Gemini-TTS-Idee, Links/Topic-Tree, Upgrade-Dialog
+- Gallery-Artikel, Audio-Pipeline, Links/Topic-Tree, Upgrade-Dialog

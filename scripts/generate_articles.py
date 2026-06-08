@@ -16,7 +16,8 @@ Verwendung:
         --dry-run
 
 Umgebungsvariablen:
-    ANTHROPIC_API_KEY  — Claude API Key (Pflicht)
+    ANTHROPIC_API_KEY  — Claude API Key (Pflicht für --model sonnet)
+    GEMINI_API_KEY     — Google API Key (Pflicht für --model flash, via .env)
 """
 
 import argparse
@@ -409,6 +410,7 @@ def process_batch(
     api_key: str,
     checkpoint_path: Path,
     dry_run: bool = False,
+    model: str = "sonnet",
 ) -> RunStats:
     stats = RunStats()
     done = load_checkpoint(checkpoint_path)
@@ -469,12 +471,16 @@ def process_batch(
             stats.ok += 1
             continue
 
-        # Claude API
+        # API-Aufruf (Claude oder Gemini)
         user_msg = build_user_message(job, wp_text, images)
         try:
-            raw_response = call_claude_api(api_key, system_prompt, user_msg)
+            if model == "flash":
+                import gemini_client
+                raw_response = gemini_client.call_gemini(system_prompt, user_msg)
+            else:
+                raw_response = call_claude_api(api_key, system_prompt, user_msg)
         except Exception as e:
-            log.error("  Claude-API-Fehler: %s", e)
+            log.error("  API-Fehler (%s): %s", model, e)
             stats.api_errors += 1
             continue
         finally:
@@ -539,21 +545,43 @@ def process_batch(
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Wissensfreund Artikel-Pipeline — Schritt 2: generate_articles")
-    p.add_argument("--jobs-dir",      required=True,  type=Path)
-    p.add_argument("--out-dir",       default="articles", type=Path)
-    p.add_argument("--system-prompt", default=Path("wissensfreund_generator_prompt_v3.20_production.md"), type=Path)
-    p.add_argument("--batch",         default=None,   help="Nur diese Batch-Nummer verarbeiten, z.B. '0001'")
-    p.add_argument("--checkpoint",    type=Path, default=Path("checkpoint_done.json"))
-    p.add_argument("--dry-run",       action="store_true")
+    p.add_argument("--jobs-dir",        default=None,  type=Path)
+    p.add_argument("--out-dir",         default="articles", type=Path)
+    p.add_argument("--system-prompt",   default=Path("wissensfreund_generator_prompt_v3.20_production.md"), type=Path)
+    p.add_argument("--batch",           default=None,  help="Nur diese Batch-Nummer verarbeiten, z.B. '0001'")
+    p.add_argument("--checkpoint",      type=Path, default=Path("checkpoint_done.json"))
+    p.add_argument("--dry-run",         action="store_true")
+    p.add_argument("--model",           choices=["sonnet", "flash"], default="sonnet",
+                                        help="Modell: sonnet (Claude, Standard) oder flash (Gemini 2.5 Flash)")
+    p.add_argument("--test-connection", action="store_true",
+                                        help="Testet API-Verbindung mit Minimal-Prompt und beendet")
     return p.parse_args()
 
 
 def main() -> None:
     args = parse_args()
 
+    # Verbindungstest: minimaler API-Call, dann exit
+    if args.test_connection:
+        system_prompt = load_system_prompt(args.system_prompt)
+        if args.model == "flash":
+            import gemini_client
+            resp = gemini_client.call_gemini(system_prompt[:500], "Antworte mit OK")
+            print(f"Gemini Flash OK: {resp.strip()[:120]}")
+        else:
+            api_key = os.environ.get("ANTHROPIC_API_KEY")
+            if not api_key:
+                raise SystemExit("ANTHROPIC_API_KEY nicht gesetzt")
+            resp = call_claude_api(api_key, system_prompt[:500], "Antworte mit OK")
+            print(f"Claude Sonnet OK: {resp.strip()[:120]}")
+        return
+
     api_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not api_key and not args.dry_run:
+    if not api_key and not args.dry_run and args.model == "sonnet":
         raise SystemExit("ANTHROPIC_API_KEY nicht gesetzt")
+
+    if args.jobs_dir is None:
+        raise SystemExit("--jobs-dir ist Pflicht (außer bei --test-connection)")
 
     system_prompt = load_system_prompt(args.system_prompt)
     log.info("System-Prompt geladen: %d Zeichen", len(system_prompt))
@@ -573,12 +601,13 @@ def main() -> None:
             log.error("Batch-Datei nicht gefunden: %s", batch_path)
             continue
         s = process_batch(
-            batch_path     = batch_path,
-            out_dir        = args.out_dir,
-            system_prompt  = system_prompt,
-            api_key        = api_key or "",
+            batch_path      = batch_path,
+            out_dir         = args.out_dir,
+            system_prompt   = system_prompt,
+            api_key         = api_key or "",
             checkpoint_path = args.checkpoint,
-            dry_run        = args.dry_run,
+            dry_run         = args.dry_run,
+            model           = args.model,
         )
         total_stats.ok               += s.ok
         total_stats.skipped          += s.skipped
