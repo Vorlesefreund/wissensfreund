@@ -1,0 +1,200 @@
+{
+  "meta": {
+    "id": "bienen_l1",
+    "title": "Bienen",
+    "subtitle": "Die fleißigen Blumenbesucher",
+    "emoji": "🐝",
+    "age_level": 1,
+    "pattern": "living_being",
+    "theme_color": "#FFD700",
+    "word_count": 199,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Bienen",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "tiere",
+    "category_sub": "insekten",
+    "generated_at": "2026-06-08T14:39:58.774643+00:00"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Biene_auf_Blume.jpg",
+      "alt": "Eine Biene sitzt auf einer bunten Blume und sammelt Nektar.",
+      "caption": "",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Unbekannt",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Biene_auf_Blume.jpg",
+      "wikimedia_id": "File:Biene_auf_Blume.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Biene_auf_Blume.jpg/640px-Biene_auf_Blume.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Was sind Bienen?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Summ, summ, summ! Wenn du eine Biene siehst, ist sie bestimmt ganz fleißig.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Bienen fliegen von Blume zu Blume.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Dabei sammeln sie süßen Nektar für Honig und gelben Blütenstaub für ihre Babys.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Es gibt ganz viele verschiedene Bienenarten, nicht nur die Honigbiene.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "So sehen Bienen aus",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s005",
+          "text": "Die meisten Bienen sind klein, aber manche sind so lang wie dein Daumen.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Sie haben vier Flügel und oft gelbe oder orange Streifen.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Ihr Körper ist ein bisschen pelzig, damit der Blütenstaub gut hängen bleibt.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Mit ihrem langen Rüssel saugen sie den Nektar aus den Blüten.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Wusstest du, dass nur Bienen-Mamas stechen können? Denn der Stachel ist wie ein Werkzeug, das nur die weiblichen Bienen haben. Wenn eine Honigbiene sticht, bleibt ihr Stachel oft stecken. Dann stirbt sie leider. Viele Wildbienen stechen aber nur, wenn sie sich sehr bedroht fühlen, und ihr Stich tut nicht so weh."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Was Bienen alles können",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s009",
+          "text": "Bienen helfen den Pflanzen sehr.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Wenn sie von Blüte zu Blüte fliegen, tragen sie den Blütenstaub mit.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "So können die Blumen Früchte und Samen machen.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Manche Bienen leben ganz allein, wie kleine Einzelkämpfer.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Andere leben in großen Familien zusammen, das nennt man ein Bienenvolk.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Dort gibt es dann viele Bienen, die zusammen Honig machen und sich um die Babys kümmern.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was sammeln Bienen für Honig?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Süßen Nektar"
+          },
+          {
+            "key": "B",
+            "text": "Grüne Blätter"
+          },
+          {
+            "key": "C",
+            "text": "Wasser aus Pfützen"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Wer hat einen Stachel bei den Bienen?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Nur Bienen-Mamas"
+          },
+          {
+            "key": "B",
+            "text": "Nur Bienen-Papas"
+          },
+          {
+            "key": "C",
+            "text": "Alle Bienen"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Wofür sind Bienen wichtig?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie helfen Blumen, Früchte zu machen."
+          },
+          {
+            "key": "B",
+            "text": "Sie bauen große Nester."
+          },
+          {
+            "key": "C",
+            "text": "Sie fressen kleine Käfer."
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [],
+    "discover": []
+  }
+}

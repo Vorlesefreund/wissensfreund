@@ -1,0 +1,239 @@
+{
+  "meta": {
+    "id": "motor_l1",
+    "title": "Motor",
+    "subtitle": "Was Dinge in Bewegung bringt",
+    "emoji": "⚙️",
+    "age_level": 1,
+    "pattern": "tech_science",
+    "theme_color": "#607D8B",
+    "word_count": 143,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Motor",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "technik",
+    "category_sub": "maschinen",
+    "generated_at": "2026-06-08T14:42:09.991087+00:00"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Four stroke engine diagram.jpg",
+      "alt": "Four Stroke Engine Diagram",
+      "caption": "",
+      "license": "CC BY-SA 3.0",
+      "license_author": "User:Wapcaplet",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Four_stroke_engine_diagram.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/47/Four_stroke_engine_diagram.jpg"
+    },
+    {
+      "index": 1,
+      "filename": "Mercedes V6 DTM Rennmotor 1996.jpg",
+      "alt": "Mercedes V6 Dtm Rennmotor",
+      "caption": "",
+      "license": "CC BY-SA 3.0",
+      "license_author": "",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Mercedes_V6_DTM_Rennmotor_1996.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Mercedes_V6_DTM_Rennmotor_1996.jpg"
+    },
+    {
+      "index": 2,
+      "filename": "Motors01CJC.jpg",
+      "alt": "Motors01Cjc",
+      "caption": "",
+      "license": "CC BY-SA 3.0",
+      "license_author": "en:User:C_J_Cowie",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Motors01CJC.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/8/89/Motors01CJC.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Was ist ein Motor?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Was bringt dein Spielzeugauto zum Rollen?",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Oder den Zug zum Fahren?",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Das ist ein Motor!",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Ein Motor ist eine besondere Maschine.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Er kann Dinge bewegen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Was ein Motor macht",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s006",
+          "text": "Ein Motor verwandelt Energie in Bewegung.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Stell dir vor, du drückst einen Knopf.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Dann bekommt der Motor Strom.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Oder er verbrennt Benzin, wie im großen Auto.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Aus dieser Energie macht der Motor Kraft.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Diese Kraft lässt dann zum Beispiel Räder drehen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Viele Arten von Motoren",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s012",
+          "text": "Es gibt ganz viele Motoren.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Elektromotoren brauchen Strom.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Die findest du in Spielsachen oder in Elektroautos.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Verbrennungsmotoren nutzen Benzin oder Diesel.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Sie sind in fast allen Autos und Lastwagen.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Auch alte Züge fuhren mit Dampfmotoren.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Motoren sind überall, wo sich etwas bewegen soll!",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Schon vor über 2000 Jahren gab es Motoren! Sie haben Dampf genutzt, um große Türen zu öffnen. Stell dir das mal vor!"
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was ist die Hauptaufgabe eines Motors?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Er macht Musik."
+          },
+          {
+            "key": "B",
+            "text": "Er macht Bewegung."
+          },
+          {
+            "key": "C",
+            "text": "Er macht Licht."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Wo findest du oft einen Motor?",
+        "options": [
+          {
+            "key": "A",
+            "text": "In einem Baum."
+          },
+          {
+            "key": "B",
+            "text": "In einem Spielzeugauto."
+          },
+          {
+            "key": "C",
+            "text": "In einer Wolke."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Welche Energie kann ein Motor zum Bewegen nutzen?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Den Geruch von Blumen."
+          },
+          {
+            "key": "B",
+            "text": "Den Geschmack von Kuchen."
+          },
+          {
+            "key": "C",
+            "text": "Strom oder Benzin."
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [],
+    "discover": []
+  }
+}

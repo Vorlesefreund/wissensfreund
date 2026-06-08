@@ -1,0 +1,220 @@
+{
+  "meta": {
+    "id": "indigene_voelker_l2",
+    "title": "Indigene Völker",
+    "subtitle": "Die ersten Menschen eines Landes",
+    "emoji": "🌍",
+    "age_level": 2,
+    "pattern": "place_geography",
+    "theme_color": "#4CAF50",
+    "word_count": 311,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Indigene_Völker",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "gesellschaft",
+    "category_sub": "völker",
+    "generated_at": "2026-06-08T14:48:49.209075+00:00"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Aboriginal_children.jpg",
+      "alt": "Indigene Kinder in Australien",
+      "caption": "Indigene Völker leben auf allen Kontinenten, zum Beispiel die Aborigines in Australien.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Bidgee",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Aboriginal_children_at_Mungo_National_Park.jpg",
+      "wikimedia_id": "File:Aboriginal_children_at_Mungo_National_Park.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Aboriginal_children_at_Mungo_National_Park.jpg/512px-Aboriginal_children_at_Mungo_National_Park.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "heading": "Was sind indigene Völker?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir vor, deine Familie hat schon immer an einem ganz besonderen Ort gelebt.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Indigene Völker sind genau solche Gruppen von Menschen.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Sie sind die Nachfahren der ersten Bewohner eines Gebiets.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Das bedeutet, sie lebten dort schon, bevor andere Menschen das Land erobert oder besiedelt haben.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Sie haben eine sehr enge Verbindung zu ihrem Land und bewahren ihre eigene Kultur, Sprache und Traditionen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "weltweit_und_amerika",
+      "heading": "Indigene Völker auf der ganzen Welt",
+      "section_role": "place_geography",
+      "sentences": [
+        {
+          "id": "s006",
+          "text": "Auf der ganzen Erde gibt es etwa 500 Millionen indigene Menschen.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Das ist ungefähr jeder 15.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Besonders viele indigene Völker leben in Amerika, wo sie oft als „Indianer“ bezeichnet wurden.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Auch auf der Insel Neuguinea im Pazifik gibt es sehr viele verschiedene indigene Völker, über 800 Stück, jedes mit eigener Sprache.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "In Australien nennt man sie Aborigines.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Es gibt über 7.000 Sprachen auf der Welt. Mehr als die Hälfte davon sind indigene Sprachen. Viele davon sind aber bedroht und könnten bald verschwinden."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "probleme_und_rechte",
+      "heading": "Probleme und Rechte",
+      "section_role": "human_animal",
+      "sentences": [
+        {
+          "id": "s011",
+          "text": "Leider werden indigene Völker oft benachteiligt und nicht fair behandelt.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Ihr Land ist oft reich an Bodenschätzen wie Gold oder Öl.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Deswegen wollen große Firmen dort oft Bergbau betreiben oder Straßen bauen.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Das führt zu Konflikten, weil die indigenen Völker ihr Land schützen wollen.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Auch Nationalparks können manchmal dazu führen, dass indigene Gruppen von ihrem Land vertrieben werden.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Die Vereinten Nationen (UN) setzen sich dafür ein, dass die Rechte indigener Völker überall auf der Welt geachtet werden.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Dazu gehört das Recht, selbst über ihr Land und ihr Leben zu bestimmen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Manche indigene Völker leben ganz abgeschirmt von der Außenwelt. Wenn Menschen von außen zu ihnen kommen, können sie Krankheiten einschleppen, gegen die die Indigenen keine Abwehrkräfte haben. Das kann für sie sehr gefährlich sein."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was macht indigene Völker besonders?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie sind die ersten Bewohner eines Gebiets und haben ihre eigene Kultur bewahrt."
+          },
+          {
+            "key": "B",
+            "text": "Sie leben nur in Städten und haben keine besonderen Traditionen."
+          },
+          {
+            "key": "C",
+            "text": "Sie sind neu in einem Land und suchen eine neue Heimat."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Warum gibt es oft Streit um das Land indigener Völker?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Weil dort viele Tiere leben, die gejagt werden sollen."
+          },
+          {
+            "key": "B",
+            "text": "Weil ihr Land oft Rohstoffe wie Gold oder Öl enthält."
+          },
+          {
+            "key": "C",
+            "text": "Weil sie ihr Land nicht mit anderen teilen wollen."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Was bedeutet es, wenn eine indigene Sprache bedroht ist?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Es gibt nur noch wenige Menschen, die diese Sprache sprechen."
+          },
+          {
+            "key": "B",
+            "text": "Die Sprache ist sehr schwer zu lernen und niemand versteht sie."
+          },
+          {
+            "key": "C",
+            "text": "Die Sprache wird von vielen Menschen gesprochen, aber sie ist nicht wichtig."
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [],
+    "discover": []
+  }
+}

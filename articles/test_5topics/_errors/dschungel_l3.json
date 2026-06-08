@@ -1,0 +1,288 @@
+{
+  "meta": {
+    "id": "tropischer_regenwald_l3",
+    "title": "Tropischer Regenwald",
+    "subtitle": "Das grüne Herz der Erde",
+    "emoji": "🌳",
+    "age_level": 3,
+    "pattern": "place_geography",
+    "theme_color": "#228B22",
+    "word_count": 558,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Tropischer_Regenwald",
+    "schema_version": "1.0",
+    "review_flag": true,
+    "category_top": "natur",
+    "category_sub": "landschaften",
+    "generated_at": "2026-06-08T14:45:03.487359+00:00",
+    "review_reason": "validation_errors: Satz 's001' hat ungültigen img_index: None"
+  },
+  "images": [],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Das grüne Kraftwerk der Natur",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir vor, es gibt Orte auf der Erde, wo das Leben in allen Formen sprudelt und sogar seinen eigenen Regen macht! Das sind die tropischen Regenwälder, die grünen Kraftwerke unseres Planeten."
+        },
+        {
+          "id": "s002",
+          "text": "Sie liegen am Äquator, der gedachten Linie um die Mitte der Erde, wo es das ganze Jahr über warm und feucht ist."
+        },
+        {
+          "id": "s003",
+          "text": "Diese riesigen Wälder sind nicht nur eine Ansammlung von Bäumen, sondern komplexe, sich selbst erhaltende Welten, die entscheidend für das Klima und die Artenvielfalt der Erde sind."
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Ein Hochhaus aus Bäumen",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s004",
+          "text": "Ein besonderes Merkmal der Regenwälder ist ihr sogenannter Stockwerkbau: Die Pflanzen wachsen dort in bis zu sechs verschiedenen Schichten, wie in einem riesigen Hochhaus."
+        },
+        {
+          "id": "s005",
+          "text": "Ganz unten gibt es eine dünne Humusschicht und kleine Pflanzen, darüber Sträucher und mittelhohe Bäume."
+        },
+        {
+          "id": "s006",
+          "text": "Das Hauptdach des Waldes, das Kronendach, liegt in etwa 40 Metern Höhe, aber einzelne „Urwaldriesen“ ragen sogar bis zu 60 Meter oder höher darüber hinaus."
+        },
+        {
+          "id": "s007",
+          "text": "Jede dieser Schichten bietet spezielle Lebensbedingungen, an die sich unzählige Tier- und Pflanzenarten perfekt angepasst haben."
+        },
+        {
+          "id": "s008",
+          "text": "Zum Beispiel verbringen viele farbenfrohe Pfeilgiftfrösche ihr ganzes Leben hoch oben in den Baumkronen und nutzen das Wasser, das sich in den Blättern von Bromelien sammelt, für ihren Nachwuchs."
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Der größte Artenreichtum der Erde",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s009",
+          "text": "Obwohl tropische Regenwälder nur etwa sieben Prozent der Landfläche der Erde bedecken, beherbergen sie unglaubliche 40 bis 70 Prozent aller bekannten Tier- und Pflanzenarten – das sind möglicherweise über 30 Millionen verschiedene Lebewesen!"
+        },
+        {
+          "id": "s010",
+          "text": "Von winzigen Insekten über farbenprächtige Papageien und Affen bis hin zu mächtigen Jaguaren oder Waldelefanten – hier wimmelt es nur so vor Leben."
+        },
+        {
+          "id": "s011",
+          "text": "Besonders artenreich sind oft die Bergregenwälder, die in höheren Lagen wachsen."
+        },
+        {
+          "id": "s012",
+          "text": "Die Regenwälder sind auch Meister der Selbstversorgung: Etwa 75 Prozent des Regens im Amazonasgebiet stammt aus dem Wald selbst!"
+        },
+        {
+          "id": "s013",
+          "text": "Die Bäume geben riesige Mengen Wasser als Dampf an die Luft ab, der sich zu Wolken formt und dann als Regen wieder herabfällt."
+        },
+        {
+          "id": "s014",
+          "text": "So hält sich der Wald feucht und kühl."
+        },
+        {
+          "id": "s015",
+          "text": "Die Böden der Regenwälder, oft rot gefärbte Ferralsole, sind meist nährstoffarm, doch die Pflanzen haben gelernt, Nährstoffe aus abgestorbenen Blättern und Ästen blitzschnell aufzunehmen, bevor sie weggespült werden."
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Ein einziger großer Baum im Regenwald kann pro Tag bis zu 300 Liter Wasser an die Atmosphäre abgeben – so viel wie in zwei Badewannen passt!"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Menschen im Regenwald",
+      "section_role": "human_animal",
+      "sentences": [
+        {
+          "id": "s016",
+          "text": "Seit Tausenden von Jahren leben indigene Völker wie die Yanomami im Amazonas-Regenwald im Einklang mit der Natur."
+        },
+        {
+          "id": "s017",
+          "text": "Sie jagen, sammeln und betreiben eine nachhaltige Landwirtschaft, die an den Wald angepasst ist."
+        },
+        {
+          "id": "s018",
+          "text": "Ihr Wissen über die Pflanzen und Tiere ist riesig und ihre Lebensweise eng mit dem Überleben des Waldes verbunden."
+        },
+        {
+          "id": "s019",
+          "text": "Schutzgebiete, wie der Yanomami-Park in Brasilien, helfen dabei, ihre Rechte und den Wald zu bewahren, indem sie Holzfäller und Goldgräber fernhalten."
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Die große Bedrohung und was wir tun können",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s020",
+          "text": "Leider sind die tropischen Regenwälder stark gefährdet. Über 30 Prozent des ursprünglichen Waldes sind bereits verschwunden."
+        },
+        {
+          "id": "s021",
+          "text": "Die größten Bedrohungen kommen von der Landwirtschaft: riesige Flächen werden für Palmölplantagen, Sojaanbau (als Tierfutter) und Viehzucht abgeholzt."
+        },
+        {
+          "id": "s022",
+          "text": "Auch der legale und illegale Holzeinschlag sowie Waldbrände, die oft nach Rodungen entstehen, zerstören wertvolle Lebensräume."
+        },
+        {
+          "id": "s023",
+          "text": "Diese Abholzung hat schlimme Folgen, nicht nur für Tiere und Menschen, die dort leben, sondern auch für unser Klima."
+        },
+        {
+          "id": "s024",
+          "text": "Regenwälder speichern normalerweise riesige Mengen des Treibhausgases Kohlendioxid (CO₂)."
+        },
+        {
+          "id": "s025",
+          "text": "Doch durch die Zerstörung und den Klimawandel geben sie immer mehr CO₂ ab und könnten bald sogar selbst zu CO₂-Produzenten werden."
+        },
+        {
+          "id": "s026",
+          "text": "Schutzgebiete sind wichtig, aber oft unterfinanziert."
+        },
+        {
+          "id": "s027",
+          "text": "Jeder Einzelne kann helfen, indem er Produkte mit nachhaltigem Palmöl oder Holz kauft und sich über die Herkunft seiner Lebensmittel informiert."
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Ist der Regenwald die „grüne Lunge“ der Erde?",
+          "reveal_text": "Lange Zeit galt der Regenwald als die „grüne Lunge“, die viel CO₂ aufnimmt. Doch aktuelle Studien zeigen, dass er durch Abholzung und Klimawandel immer weniger CO₂ speichert und in einigen Regionen sogar schon mehr CO₂ abgibt, als er aufnimmt. Das ist ein Warnsignal für unser Klima!",
+          "reveal_mode": "auto"
+        },
+        {
+          "type": "warnung",
+          "text": "Allein in Indonesien sind zwei Drittel der Plantagen auf ehemaligen Regenwaldflächen für Palmöl. Die weltweite Nachfrage nach Palmöl wird sich in den nächsten 20 Jahren voraussichtlich verdoppeln, was die Zerstörung weiter vorantreibt."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was ist der Stockwerkbau im Regenwald?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Die Art, wie die Bäume in verschiedenen Höhenschichten wachsen."
+          },
+          {
+            "key": "B",
+            "text": "Ein System von Wegen, die durch den Wald führen."
+          },
+          {
+            "key": "C",
+            "text": "Ein besonderer Baustil für Häuser der indigenen Völker."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Wie viel Prozent aller bekannten Tier- und Pflanzenarten leben etwa in den tropischen Regenwäldern?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Weniger als 10 Prozent."
+          },
+          {
+            "key": "B",
+            "text": "Zwischen 40 und 70 Prozent."
+          },
+          {
+            "key": "C",
+            "text": "Über 90 Prozent."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Wie tragen die Regenwälder selbst zu ihrem Regen bei?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie haben spezielle Maschinen, die Wasser in die Luft pumpen."
+          },
+          {
+            "key": "B",
+            "text": "Die Pflanzen geben viel Wasser als Dampf an die Luft ab, der dann zu Regen wird."
+          },
+          {
+            "key": "C",
+            "text": "Sie ziehen Wolken vom Meer an, die dort abregnen."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q4",
+        "text": "Welche der folgenden Ursachen trägt am stärksten zur Zerstörung der Regenwälder bei?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Das Anpflanzen von neuen, vielfältigen Baumarten."
+          },
+          {
+            "key": "B",
+            "text": "Der Bau von nachhaltigen Ökotourismus-Anlagen."
+          },
+          {
+            "key": "C",
+            "text": "Große Plantagen für Palmöl und Sojaanbau."
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Äquator",
+      "Artenvielfalt",
+      "Ökosystem",
+      "Abholzung",
+      "Klimawandel",
+      "Palmöl"
+    ],
+    "discover": [
+      "Yanomami",
+      "Amazonas",
+      "Epiphyten",
+      "Ferralsol",
+      "Stockwerkbau"
+    ]
+  }
+}

@@ -61,12 +61,13 @@ MIN_QUIZ_QUESTIONS        = {"1": 3,  "2": 3,  "3": 4}
 def fetch_wikipedia_text(session: requests.Session, title: str, rev_id: str = "") -> str:
     """Holt den bereinigten Wikipedia-Plaintext (ohne Infoboxen, Templates)."""
     params = {
-        "action":        "query",
-        "titles":        title,
-        "prop":          "extracts",
-        "explaintext":   True,
+        "action":          "query",
+        "titles":          title,
+        "redirects":       "1",
+        "prop":            "extracts",
+        "explaintext":     True,
         "exsectionformat": "plain",
-        "format":        "json",
+        "format":          "json",
     }
     if rev_id:
         params["rvstartid"] = rev_id
@@ -286,6 +287,8 @@ def call_claude_api(
 
 def parse_article_json(raw: str) -> dict:
     """Extrahiert und parst JSON aus der Claude-Antwort."""
+    if not raw:
+        raise ValueError("Leere API-Antwort")
     # <planung>-Block vor dem JSON entfernen (Backend-Filter)
     cleaned = re.sub(r"<planung>.*?</planung>", "", raw, flags=re.DOTALL)
     # Markdown-Fences entfernen falls vorhanden
@@ -489,10 +492,10 @@ def process_batch(
         # JSON parsen
         try:
             article = parse_article_json(raw_response)
-        except json.JSONDecodeError as e:
+        except (json.JSONDecodeError, ValueError) as e:
             log.error("  JSON-Parse-Fehler: %s", e)
             err_path = errors_dir / f"{article_id}_raw.txt"
-            err_path.write_text(raw_response, encoding="utf-8")
+            err_path.write_text(raw_response or "", encoding="utf-8")
             stats.validation_errors += 1
             continue
 

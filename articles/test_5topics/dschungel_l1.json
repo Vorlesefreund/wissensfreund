@@ -1,0 +1,278 @@
+{
+  "meta": {
+    "id": "tropischer_regenwald_l1",
+    "title": "Tropischer Regenwald",
+    "subtitle": "Ein riesiger, grüner Wald",
+    "emoji": "🌳🌧️🐒",
+    "age_level": 1,
+    "pattern": "place_geography",
+    "theme_color": "#228B22",
+    "word_count": 198,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Tropischer_Regenwald",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "natur",
+    "category_sub": "landschaften",
+    "generated_at": "2026-06-08T14:44:07.686640+00:00"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Aerial view of the Amazon Rainforest.jpg",
+      "alt": "Aerial View Of The Amazon Rainforest",
+      "caption": "",
+      "license": "CC BY-SA 2.0",
+      "license_author": "lubasi",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_the_Amazon_Rainforest.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d0/Aerial_view_of_the_Amazon_Rainforest.jpg/960px-Aerial_view_of_the_Amazon_Rainforest.jpg"
+    },
+    {
+      "index": 1,
+      "filename": "Amazon Rainforest.jpg",
+      "alt": "Amazon Rainforest",
+      "caption": "",
+      "license": "CC BY 2.0",
+      "license_author": "Antonio Campoy",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Amazon_Rainforest.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Amazon_Rainforest.jpg/960px-Amazon_Rainforest.jpg"
+    },
+    {
+      "index": 2,
+      "filename": "Ara ararauna Luc Viatour filtered.jpg",
+      "alt": "Ara Ararauna Luc Viatour Filtered",
+      "caption": "",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Ara_ararauna_Luc_Viatour.jpg: Luc Viatour\nderivative work: JovanCormac",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Ara_ararauna_Luc_Viatour_filtered.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Ara_ararauna_Luc_Viatour_filtered.jpg/960px-Ara_ararauna_Luc_Viatour_filtered.jpg"
+    },
+    {
+      "index": 3,
+      "filename": "Atta cephalotes (Costa Rica) 1.jpg",
+      "alt": "Atta Cephalotes (Costa Rica)",
+      "caption": "",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Hans Hillewaert",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Atta_cephalotes_(Costa_Rica)_1.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Atta_cephalotes_%28Costa_Rica%29_1.jpg/960px-Atta_cephalotes_%28Costa_Rica%29_1.jpg"
+    },
+    {
+      "index": 4,
+      "filename": "Bosque dos Jequitibás - IMG 9971.jpg",
+      "alt": "Bosque Dos Jequitibás   Img",
+      "caption": "",
+      "license": "Public domain",
+      "license_author": "Daderot",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Bosque_dos_Jequitib%C3%A1s_-_IMG_9971.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Bosque_dos_Jequitib%C3%A1s_-_IMG_9971.jpg/960px-Bosque_dos_Jequitib%C3%A1s_-_IMG_9971.jpg"
+    },
+    {
+      "index": 5,
+      "filename": "Forest around MLC.jpg",
+      "alt": "Forest Around Mlc",
+      "caption": "",
+      "license": "CC BY 3.0",
+      "license_author": "CREES-MANU",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Forest_around_MLC.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Forest_around_MLC.jpg/960px-Forest_around_MLC.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Ein Wald voller Leben",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir vor, du bist in einem riesigen, grünen Wald, wo es fast jeden Tag regnet und ganz viele Tiere leben.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "So ist der tropische Regenwald!",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Er ist sehr warm, wie im Sommerurlaub.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Die Bäume sind immer grün und wachsen sehr hoch zum Himmel.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Es gibt dort so viele verschiedene Tiere und Pflanzen wie nirgendwo sonst auf der Erde.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Regen, Regen, jeden Tag",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s006",
+          "text": "Im Regenwald regnet es fast jeden Nachmittag.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Manchmal gibt es auch ein kleines Gewitter dazu.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Deshalb ist alles immer feucht und grün.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Die Pflanzen saugen das Wasser auf und geben es wieder in die Luft ab.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "So entstehen neue Wolken und es regnet wieder.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Ein Zuhause für viele Tiere",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s011",
+          "text": "Der Regenwald ist wie ein großes Haus mit vielen Stockwerken.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Ganz unten auf dem Boden leben kleine Tiere wie Käfer und Spinnen.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Etwas höher klettern Affen herum und bunte Vögel fliegen von Ast zu Ast.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Ganz oben in den Baumwipfeln wohnen Tiere, die fast nie den Boden berühren.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Auch Menschen leben in diesen Wäldern und passen gut auf sie auf.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Leider wird der Regenwald immer kleiner, weil Menschen Bäume fällen. Viele Tiere verlieren dann ihr Zuhause."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Wusstest du schon?",
+      "section_role": "curiosity",
+      "sentences": [
+        {
+          "id": "s016",
+          "text": "In den Regenwäldern gibt es die größten Flüsse der Welt, wie den Amazonas in Südamerika.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Dort schwimmen besondere Fische und sogar Flussdelfine.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Ein einziger Baum im Regenwald kann an einem Tag so viel Wasser in die Luft abgeben, wie in 300 großen Flaschen ist!"
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wie ist das Wetter im tropischen Regenwald meistens?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Es regnet fast jeden Tag."
+          },
+          {
+            "key": "B",
+            "text": "Es ist immer kalt und neblig."
+          },
+          {
+            "key": "C",
+            "text": "Es ist meistens trocken und sonnig."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Was ist besonders an den Bäumen im Regenwald?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie haben keine Blätter."
+          },
+          {
+            "key": "B",
+            "text": "Sie sind immer grün und sehr hoch."
+          },
+          {
+            "key": "C",
+            "text": "Sie wachsen nur im Winter."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Warum ist der Regenwald wie ein großes Haus?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Weil er ein Dach hat."
+          },
+          {
+            "key": "B",
+            "text": "Weil er viele Stockwerke für Tiere hat."
+          },
+          {
+            "key": "C",
+            "text": "Weil er eine Tür und Fenster hat."
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [],
+    "discover": []
+  }
+}

@@ -412,7 +412,7 @@ def _print_staging_summary(out_dir: Path) -> None:
     print("\nStaging-Inhalt:")
     for path in sorted(out_dir.rglob("*.json")):
         size_kb = path.stat().st_size / 1024
-        print(f"  {path.relative_to(out_dir):<55} {size_kb:6.1f} KB")
+        print(f"  {str(path.relative_to(out_dir)):<55} {size_kb:6.1f} KB")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,265 @@
+{
+  "meta": {
+    "id": "motor_l2",
+    "title": "Motor",
+    "subtitle": "Wie Maschinen Dinge in Bewegung setzen",
+    "emoji": "⚙️",
+    "age_level": 2,
+    "pattern": "tech_science",
+    "theme_color": "#FFD700",
+    "word_count": 279,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Motor",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "technik",
+    "category_sub": "maschinen",
+    "generated_at": "2026-06-08T14:49:23.294033+00:00"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Four stroke engine diagram.jpg",
+      "alt": "Four Stroke Engine Diagram",
+      "caption": "",
+      "license": "CC BY-SA 3.0",
+      "license_author": "User:Wapcaplet",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Four_stroke_engine_diagram.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/47/Four_stroke_engine_diagram.jpg"
+    },
+    {
+      "index": 1,
+      "filename": "Mercedes V6 DTM Rennmotor 1996.jpg",
+      "alt": "Mercedes V6 Dtm Rennmotor",
+      "caption": "",
+      "license": "CC BY-SA 3.0",
+      "license_author": "",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Mercedes_V6_DTM_Rennmotor_1996.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/1b/Mercedes_V6_DTM_Rennmotor_1996.jpg"
+    },
+    {
+      "index": 2,
+      "filename": "Motors01CJC.jpg",
+      "alt": "Motors01Cjc",
+      "caption": "",
+      "license": "CC BY-SA 3.0",
+      "license_author": "en:User:C_J_Cowie",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Motors01CJC.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/8/89/Motors01CJC.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Was ist ein Motor?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Ein Motor ist eine besondere Maschine, die etwas in Bewegung setzen kann.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Er wandelt verschiedene Arten von Energie in Bewegungsenergie um.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Das kann zum Beispiel Strom sein, Benzin oder sogar heißer Dampf.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Die meisten Motoren haben eine Art Stange, die sich dreht.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Sie wird Welle genannt und treibt dann andere Teile an, wie zum Beispiel die Räder eines Autos.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Die ersten Motoren",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s006",
+          "text": "Schon vor langer Zeit haben Menschen versucht, Dinge mit Motoren zu bewegen.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Die ersten richtigen Motoren, die viel bewegen konnten, waren die Dampfmaschinen.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Sie wurden vor über 200 Jahren erfunden und haben die Welt sehr verändert.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Mit Dampfmaschinen konnte man Züge fahren lassen, Schiffe antreiben und große Fabriken betreiben.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Dafür wurde Wasser mit Kohle oder Holz erhitzt, bis es zu heißem Dampf wurde.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Dieser Dampf drückte dann einen Kolben hin und her und setzte so die Maschine in Gang.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Motoren heute",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s012",
+          "text": "Heute gibt es viele verschiedene Arten von Motoren.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Verbrennungsmotoren sind zum Beispiel in Autos, Lastwagen und kleinen Flugzeugen zu finden.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Sie verbrennen Benzin oder Diesel im Inneren, um sich zu bewegen.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Elektromotoren sind fast überall: in Spielzeugen, Computern, Waschmaschinen und großen Industrieanlagen.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Sie nutzen elektrischen Strom, um sich zu drehen.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Auch Raketen haben Motoren, die sie ins Weltall schießen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Brauchen alle Motoren Benzin oder Diesel?",
+          "reveal_text": "Nein! Nur Verbrennungsmotoren brauchen Benzin oder Diesel. Elektromotoren laufen mit Strom, Dampfmaschinen mit heißem Dampf und Raketenmotoren mit speziellen Treibstoffen. Es gibt sogar Motoren, die mit Druckluft oder Wasser funktionieren!",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Was ein guter Motor kann",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s018",
+          "text": "Ein guter Motor ist sparsam, das heißt, er braucht nicht viel Energie, um viel zu leisten.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Er sollte auch möglichst wenig schädliche Abgase ausstoßen, damit unsere Umwelt sauber bleibt.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Außerdem ist es wichtig, dass ein Motor stark ist, aber nicht zu schwer.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Und natürlich soll er lange halten und nicht so schnell kaputtgehen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was macht ein Motor hauptsächlich?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Er wandelt Energie in Bewegung um."
+          },
+          {
+            "key": "B",
+            "text": "Er macht Geräusche und Lärm."
+          },
+          {
+            "key": "C",
+            "text": "Er speichert Wasser für später."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Welche Motorenart hat die industrielle Revolution ausgelöst?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Elektromotoren"
+          },
+          {
+            "key": "B",
+            "text": "Dampfmaschinen"
+          },
+          {
+            "key": "C",
+            "text": "Raketenmotoren"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Wo findest du heute am häufigsten Elektromotoren?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Nur in großen Kraftwerken."
+          },
+          {
+            "key": "B",
+            "text": "In Spielzeugen, Computern und Waschmaschinen."
+          },
+          {
+            "key": "C",
+            "text": "Nur in alten, historischen Fahrzeugen."
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [],
+    "discover": []
+  }
+}

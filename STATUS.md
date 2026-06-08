@@ -1,47 +1,44 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-08T14:30:15Z -->
+<!-- updated: 2026-06-08T14:57:56Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Gemini Flash API integriert (2026-06-08)** ← AKTUELL
-- `scripts/gemini_client.py`: call_gemini(system_prompt, user_message) via google-genai
-  Modell: gemini-2.5-flash · temperature=0.6 · GEMINI_API_KEY aus .env
-- `scripts/generate_articles.py`: --model sonnet|flash (Standard: sonnet)
-  + --test-connection Flag für schnellen API-Check
-- `.gitignore`: .env-Eintrag hinzugefügt (war vorher nicht ignoriert)
-- Test erfolgreich: `--model flash --test-connection` → "Gemini Flash OK: OK"
-- Nächster Schritt: Flash-Testlauf auf 5-Themen-Batch (ANTHROPIC_API_KEY für Sonnet noch offen)
+**Pipeline v3.20 production: 10/15 Artikel mit Flash generiert (2026-06-08)** ← AKTUELL
+- 10 Artikel in articles/test_5topics/ (biene_l1, demokratie_l1-l3, dschungel_l1,
+  indianer_l1-l3, motor_l1-l2) — Bilder gepacht (Fallback ohne KI)
+- Staging OK: upload_staging_test/ (10 Artikel, Indices für alle Kategorien)
+- **R2-Upload ausstehend**: CF_R2_ACCESS_KEY_ID / CF_R2_SECRET_ACCESS_KEY / CF_ACCOUNT_ID setzen
+  dann: `python scripts/upload_articles.py --articles-dir articles/test_5topics/
+  --topic-tree wissensfreund_topic_tree.json`
+- Fixes in dieser Session: redirects=1 in fetch_wikipedia_text, ThinkingConfig(budget=0)
+  in gemini_client, ValueError-Handler, upload_articles.py Windows-Path-Bug
 
-**Pipeline v3.20 Setup abgeschlossen (2026-06-08)**
-- `wissensfreund_generator_prompt_v3.20_production.md`: JSON-Ausgabeformat, planung-Block zuerst
-- `scripts/generate_articles.py`: planung-Strip, --system-prompt Default, img_index -1 erlaubt
-- `jobs/test_5topics/batch_0001.json`: 15 Jobs (5 × 3 Stufen)
+**5 Artikel fehlgeschlagen (Gemini Free-Tier Quota: 20 req/Tag erschöpft)**
+- biene_l2: JSON-Parse-Fehler (trailing comma im Modell-Output)
+- biene_l3: Validierungsfehler (img_index=None) → in _errors/
+- motor_l3, dschungel_l2, dschungel_l3: Quota erschöpft → morgen erneut ausführen
 
-**Generator v3.19 + Lektorat v2.9 in main gemergt (2026-06-08)**
-- v3.19: themenneutrale Bereicherungs-Links · v2.9: Planungs-Check
+**Gemini Flash API integriert (2026-06-08)**
+- gemini_client.py: call_gemini(), Rate-Limit-Retry (3×60s), ThinkingConfig(budget=0)
+- generate_articles.py: --model sonnet|flash, --test-connection, redirects=1
 
 ---
 
 ## ⏰ Offen: Spare-Klon entfernen (~2026-06-18)
-
-**C:\Users\Andreas\Wissensfreund\wissensfreund_app** — Spare-Klon, vorher:
-1. Prüfen ob `scrape_out/` (1,6 GB) noch gebraucht wird
-2. `git status` + `git status --ignored`, dann löschen
+**C:\Users\Andreas\Wissensfreund\wissensfreund_app** — `scrape_out/` prüfen, dann löschen
 
 ---
 
 ## 🔴 Offene Punkte (nach Priorität)
 
-### Hoch — Pipeline-Testlauf ausstehend
-- **Flash-Testlauf 5 Themen**: `python scripts/generate_articles.py --model flash
-  --jobs-dir jobs/test_5topics --out-dir articles/test_5topics --batch 0001`
-  (kein ANTHROPIC_API_KEY nötig, GEMINI_API_KEY in .env vorhanden)
-- **Sonnet-Testlauf**: `! $env:ANTHROPIC_API_KEY="sk-..."` setzen, dann --model sonnet
-- **SCHRITT 5**: Bilder patchen — `python scripts/patch_article_images_v1.py --articles-dir articles/test_5topics/`
-- **SCHRITT 6**: R2-Upload — CF_R2_* Credentials setzen, dann upload_articles.py
+### Hoch
+- **5 fehlende Artikel nachgenerieren** (morgen, Quota Reset):
+  `python scripts/generate_articles.py --model flash --jobs-dir jobs/test_5topics
+  --out-dir articles/test_5topics --batch 0001`
+- **R2-Upload**: CF_R2_ACCESS_KEY_ID / CF_R2_SECRET_ACCESS_KEY / CF_ACCOUNT_ID setzen
 - **Lektorat-Pipeline-Integration** (manueller Standalone-Prompt)
 - **Related Terms**: prepare_articles.py befüllt sie noch nicht
 
@@ -49,6 +46,7 @@
 - **Content-Sicherheitsfilter Bilder** (Stufen 2+3 fehlen als Code-Filter)
 - **R2-Koexistenz:** upload_articles.py rclone sync überschreibt ZIM + WF-Artikel
 - **Epoch-Guard TTS-Callbacks**, **Mode B Lupe**, **Sound-Thumbnails**
+- **Bilder-Patch mit KI** (braucht ANTHROPIC_API_KEY für call_claude_image_filter)
 
 ### Niedrig / Klärungsbedarf
 - Primärkategorie-Konvention, Box-Key, ZIM→JSON Decode-Cap, Kiosk/Screen-Pinning

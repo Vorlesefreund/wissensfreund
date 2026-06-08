@@ -1,0 +1,366 @@
+{
+  "meta": {
+    "id": "demokratie_l3",
+    "title": "Demokratie",
+    "subtitle": "Wie wir gemeinsam entscheiden, wer die Regeln macht",
+    "emoji": "🗳️",
+    "age_level": 3,
+    "pattern": "tech_science",
+    "theme_color": "#007bff",
+    "word_count": 598,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Demokratie",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "gesellschaft",
+    "category_sub": "politik",
+    "generated_at": "2026-06-08T14:43:46.077201+00:00"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "2020-02-13 Deutscher Bundestag IMG 3438 by Stepro.jpg",
+      "alt": "2020 02 13 Deutscher Bundestag Img 3438 By Stepro",
+      "caption": "",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Steffen Prößdorf",
+      "source_url": "https://commons.wikimedia.org/wiki/File:2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg/960px-2020-02-13_Deutscher_Bundestag_IMG_3438_by_Stepro.jpg"
+    },
+    {
+      "index": 1,
+      "filename": "AGMA Kleroterion.jpg",
+      "alt": "Agma Kleroterion",
+      "caption": "",
+      "license": "CC BY-SA 2.5",
+      "license_author": "Marsyas",
+      "source_url": "https://commons.wikimedia.org/wiki/File:AGMA_Kleroterion.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2b/AGMA_Kleroterion.jpg/960px-AGMA_Kleroterion.jpg"
+    },
+    {
+      "index": 2,
+      "filename": "An Advertisement of The Federalist - Project Gutenberg eText 16960.jpg",
+      "alt": "An Advertisement Of The Federalist   Project Gutenberg Etext",
+      "caption": "",
+      "license": "Public domain",
+      "license_author": "",
+      "source_url": "https://commons.wikimedia.org/wiki/File:An_Advertisement_of_The_Federalist_-_Project_Gutenberg_eText_16960.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/b/b6/An_Advertisement_of_The_Federalist_-_Project_Gutenberg_eText_16960.jpg"
+    },
+    {
+      "index": 3,
+      "filename": "BL Papyrus 131-10v Constitution of Athens.jpg",
+      "alt": "Bl Papyrus 131 10V Constitution Of Athens",
+      "caption": "",
+      "license": "Public domain",
+      "license_author": "AnonymousUnknown author",
+      "source_url": "https://commons.wikimedia.org/wiki/File:BL_Papyrus_131-10v_Constitution_of_Athens.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/BL_Papyrus_131-10v_Constitution_of_Athens.jpg/960px-BL_Papyrus_131-10v_Constitution_of_Athens.jpg"
+    },
+    {
+      "index": 4,
+      "filename": "Bundesarchiv Bild 147-0978, Reichstag, Plenarsitzungssaal.jpg",
+      "alt": "Bundesarchiv Bild 147 0978, Reichstag, Plenarsitzungssaal",
+      "caption": "",
+      "license": "Public domain",
+      "license_author": "Julius Braatz",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Bundesarchiv_Bild_147-0978,_Reichstag,_Plenarsitzungssaal.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/b/be/Bundesarchiv_Bild_147-0978%2C_Reichstag%2C_Plenarsitzungssaal.jpg"
+    },
+    {
+      "index": 5,
+      "filename": "Double-sided herm of Aristotle at the National Archaeological Museum of Athens on 27 March 2018.jpg",
+      "alt": "Double Sided Herm Of Aristotle At The National Archaeological Museum Of Athens On 27 March",
+      "caption": "",
+      "license": "CC BY-SA 4.0",
+      "license_author": "George E. Koronaios",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Double-sided_herm_of_Aristotle_at_the_National_Archaeological_Museum_of_Athens_on_27_March_2018.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/65/Double-sided_herm_of_Aristotle_at_the_National_Archaeological_Museum_of_Athens_on_27_March_2018.jpg/960px-Double-sided_herm_of_Aristotle_at_the_National_Archaeological_Museum_of_Athens_on_27_March_2018.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Was ist Demokratie?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir vor, du könntest mitentscheiden, wie die Regeln für alle aussehen, die in deinem Land leben. Genau das ist die Grundidee der Demokratie!",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Demokratie bedeutet, dass das Volk die Macht hat. Alle erwachsenen Menschen dürfen mitmachen und gemeinsam entscheiden, wie ihr Land regiert werden soll.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Meistens wählen sie dafür Vertreter, die dann für sie im Parlament sitzen und Gesetze machen. So wird sichergestellt, dass die Regierung die Interessen des Volkes vertritt.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Der US-Präsident Abraham Lincoln beschrieb die Demokratie einmal so: „Regierung des Volkes, durch das Volk, für das Volk.“ Das heißt, die Menschen bestimmen selbst, wer sie regiert und wofür.",
+          "reveal_text": null,
+          "reveal_mode": null
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Die Wurzeln der Demokratie",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s004",
+          "text": "Die Idee der Demokratie ist sehr alt. Schon vor über 2.000 Jahren gab es im antiken Griechenland, in der Stadt Athen, eine Form der Demokratie.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Dort trafen sich die Bürger in einer großen Versammlung und stimmten direkt über wichtige Entscheidungen ab.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Allerdings waren damals nur freie Männer, die in Athen geboren waren, Bürger. Frauen, Sklaven und Zugezogene durften nicht mitmachen.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Später hatte auch die Römische Republik demokratische Elemente, doch Adelige hatten dort viel mehr Einfluss als einfache Bürger.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Wie moderne Demokratien funktionieren",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s008",
+          "text": "Heutige Demokratien sind meist sogenannte „liberale und repräsentative Demokratien“.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "„Repräsentativ“ bedeutet, dass das Volk Politiker wählt, die es vertreten.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "„Liberal“ heißt, dass bestimmte Grundrechte garantiert sind, wie die Meinungsfreiheit, die Pressefreiheit und der Schutz von Minderheiten.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Ein wichtiges Prinzip ist die Gewaltenteilung: Die Staatsmacht wird aufgeteilt in die Regierung (die regiert), das Parlament (das Gesetze macht) und die Gerichte (die Recht sprechen).",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Diese drei Bereiche sollen sich gegenseitig kontrollieren, damit niemand zu viel Macht bekommt.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Außerdem gibt es freie und geheime Wahlen, bei denen jeder Erwachsene seine Stimme abgeben darf.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Im Laufe der Geschichte haben immer mehr Menschen das Wahlrecht erhalten, zum Beispiel erst im 20. Jahrhundert auch Frauen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Verschiedene Arten von Demokratien",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s015",
+          "text": "Es gibt nicht nur eine Form der Demokratie. In einer direkten Demokratie, wie sie zum Beispiel in der Schweiz stark ausgeprägt ist, stimmen die Bürger direkt über Gesetze und wichtige Fragen ab.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "In den meisten Ländern gibt es aber eine repräsentative Demokratie, bei der die gewählten Politiker die Entscheidungen treffen.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Oft sind es auch Mischformen, die Elemente von beidem verbinden.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "💡",
+          "text": "Direkte Demokratie: Das Volk stimmt selbst über Gesetze ab (z.B. bei Volksabstimmungen).<br>Repräsentative Demokratie: Das Volk wählt Vertreter, die für es entscheiden (z.B. im Parlament).",
+          "reveal_text": null,
+          "reveal_mode": null
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Herausforderungen für die Demokratie",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s018",
+          "text": "Auch wenn Demokratie als die beste Staatsform gilt, ist sie nicht perfekt und steht immer wieder vor Problemen.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Manche Menschen fühlen sich nicht gut genug vertreten, weil zum Beispiel Lobbyisten (Interessengruppen) viel Einfluss haben oder die Politik oft nur kurzfristig plant.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Auch die Digitalisierung bringt neue Herausforderungen mit sich: In sozialen Medien können sich schnell Falschinformationen oder Hassreden verbreiten, was die Meinungsbildung erschwert.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Populisten versuchen oft, die Menschen mit einfachen Parolen zu fangen und spalten die Gesellschaft, indem sie gegen Minderheiten hetzen oder behaupten, nur sie würden den „wahren Volkswillen“ vertreten.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Stimmt es, dass eine Demokratie immer fair und gerecht ist?",
+          "reveal_text": "Nein, leider nicht immer! Auch in Demokratien kann es zu Ungleichheiten kommen, zum Beispiel, wenn die Interessen von reichen Menschen stärker berücksichtigt werden als die von ärmeren. Oder wenn Ausländer, die lange im Land leben, nicht wählen dürfen. Demokratie ist ein ständiger Prozess, der immer wieder verbessert werden muss.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec6",
+      "heading": "Warum Demokratie wichtig ist",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s022",
+          "text": "Trotz aller Schwierigkeiten ist die Demokratie sehr wertvoll. Sie sorgt dafür, dass Konflikte friedlich gelöst werden, dass die Macht kontrolliert wird und dass alle Menschen frei leben können.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Damit eine Demokratie gut funktioniert, braucht sie mündige Bürger, die sich informieren, ihre Meinung bilden und sich engagieren.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Sie ist wie eine Pflanze, die Pflege braucht, um zu wachsen und stark zu bleiben.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "Das Gegenteil der Demokratie ist die Diktatur, bei der nur ein Einzelner oder eine kleine Gruppe die Macht hat und das Volk nichts zu sagen hat.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was ist die Hauptidee der Demokratie?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein König entscheidet alles allein."
+          },
+          {
+            "key": "B",
+            "text": "Das Volk bestimmt, wer die Regeln macht."
+          },
+          {
+            "key": "C",
+            "text": "Reiche Leute haben die meiste Macht."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Was bedeutet „Gewaltenteilung“ in einer Demokratie?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Dass das Militär die größte Macht hat."
+          },
+          {
+            "key": "B",
+            "text": "Dass die Staatsmacht auf Regierung, Parlament und Gerichte aufgeteilt ist."
+          },
+          {
+            "key": "C",
+            "text": "Dass jeder Bürger seine eigene Armee haben darf."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Wer durfte in der Attischen Demokratie im alten Griechenland abstimmen?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Alle Einwohner, inklusive Frauen und Sklaven."
+          },
+          {
+            "key": "B",
+            "text": "Nur freie Männer, die in Athen geboren waren."
+          },
+          {
+            "key": "C",
+            "text": "Nur die reichsten Bürger der Stadt."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q4",
+        "text": "Welche Aussage über moderne Demokratien ist richtig?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Alle Demokratien sind genau gleich aufgebaut."
+          },
+          {
+            "key": "B",
+            "text": "Es gibt nur direkte Demokratien, bei denen das Volk immer selbst abstimmt."
+          },
+          {
+            "key": "C",
+            "text": "Die meisten sind repräsentative Demokratien, in denen gewählte Vertreter entscheiden."
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [],
+    "discover": []
+  }
+}
