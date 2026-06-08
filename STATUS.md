@@ -1,42 +1,25 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-08T07:47:58Z -->
+<!-- updated: 2026-06-08T12:02:37Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Generator v3.16 + Lektorat v2.7: Einzel-Quelle/Boxen/nur-Trigger (2026-06-08)** ← AKTIV
-- wissensfreund_generator_prompt_v3.16_neutral.md: verschärfte Einzel-Quelle (keine verlinkten
-  Nachbarartikel), Box-Budget pro Stufe×Appeal, Box-Nicht-Doppelung, „Irrglaube hat einen Ort",
-  „nur"+geschlossene Aufzählung als Hochrisiko-PFLICHT-TRIGGER
-- wissensfreund_lektorat_v2.md (v2.7): spiegelt dieselben Regeln in Durchgang A + B
-- wissensfreund_generator_prompt_v3.15_neutral.md → _alt/ archiviert
+**Generator v3.19 — Bereicherungs-Links (2026-06-08)** ← AKTIV
+- wissensfreund_generator_prompt_v3.19_neutral.md: allgemeine Bereicherungs-Link-Logik (themenneutral);
+  neues BEREICHERUNGS_LINKS-Feld im planung-Block; Primärartikel-Regel bei Begriffsklärung;
+  allgemeiner Salienz-Check
+- wissensfreund_generator_prompt_v3.18_neutral.md → _alt/ archiviert (war nie in main gemergt;
+  enthielt: planung-Block, XML-Tags grounding_rules/output_format, Option-B-Hinweis)
+- Nächster Schritt: Flash (mittel) mit v3.19 auf Römer re-testen, dann Modellentscheidung
 
-**Generator-Prompt v3.15 + Lektorat v2.6 + QUELLEN_GRUNDREGEL (2026-06-07)** ← überholt (v3.16/v2.7 aktiv)
-- wissensfreund_generator_prompt_v3.15_neutral.md: Mensch-Bezug-Regel; jetzt in _alt/
-- wissensfreund_lektorat_v2.md (v2.6): Mensch-Bezug-Prüfpunkt in Durchgang B; jetzt v2.7
-- QUELLEN_GRUNDREGEL.md: Truncation-Regel (Abruf langer Artikel) + Snapshot-Regel (Generierungszeitpunkt)
-- CLAUDE.md: GRUNDREGEL QUELLENPRÜFUNG-Block direkt nach erster Überschrift eingefügt
+**Generator v3.16 + Lektorat v2.7: Einzel-Quelle/Boxen/nur-Trigger (2026-06-08)** ← überholt
+- wissensfreund_generator_prompt_v3.16_neutral.md: Einzel-Quelle, Box-Budget, nur-PFLICHT-TRIGGER
+- wissensfreund_lektorat_v2.md (v2.7): Durchgang A + B spiegeln Generator v3.16
 
 **Pipeline v3.8 + Lektorat v2 (2026-06-06)**
-- wissensfreund_system_prompt_v3.8.md erstellt (Basis: v3.7(4), alle 5 Änderungen aus Änderungsdokument)
-  1. Belegtreue: Gedächtnis-Sonderregel (Einzelleistung ≠ allgemeine Fähigkeit)
-  2. Callout-Regeln: Box-Eigenständigkeit (kein Satzfortsatz des Vorgängerabsatzes)
-  3. Häufige Fehler #7 (Intro↔stimmt_das-Widerspruch) + #8 (Konfabulierte Komposita) + Kurz-Check erweitert
-  4. Schlussschritt: 4-Zeilen-Fließtext → strukturierte 15-Zeilen-Checkliste
-  5. Sprachregeln: Prosa-Rhythmus-Bullet nach „Handwerk:"
-- generate_articles.py Docstring: --system-prompt Beispiel auf v3.8 aktualisiert
-- KORREKTUR: Lektorat war nie in generate_articles.py integriert — nur ein call_claude_api()-Aufruf.
-  Lektorat läuft als manueller Standalone-Prompt.
-
-**v3.7-Vertrag: generate_articles.py + Prompt-Archiv bereinigt (2026-06-05)**
-- build_user_message() auf v3.7; wissensfreund_system_prompt_v3.7(4).md als kanonische v3.7-Datei
-- SLUG_ALIASES: einstein, mozart, beethoven u.a.; JSON: 1000→1018 Einträge; WF-Lücken: 64→46
-
-**klexikon_appeal_quartil.json + Pipeline-Integration (2026-06-05)**
-- 1.000 Einträge: Q1/high = 277; Q2/medium = 723
-- prepare_articles.py: setzt KLEXIKON_AUFRUF_QUARTIL pro Job-Eintrag
+- wissensfreund_system_prompt_v3.8.md (5 Änderungen); Lektorat manueller Standalone-Prompt
 
 ---
 
@@ -44,7 +27,7 @@
 
 **C:\Users\Andreas\Wissensfreund\wissensfreund_app** — Spare-Klon, vorher:
 1. Prüfen ob `scrape_out/` (1,6 GB) noch gebraucht wird
-2. 30-Sek-Check: `git status` + `git status --ignored` in wissensfreund_app
+2. 30-Sek-Check: `git status` + `git status --ignored`
 3. Dann Ordner löschen
 
 ---
@@ -52,34 +35,25 @@
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch
-- **Mozart-Neulauf mit v3.16 + Lektorat v2.7 ausstehend** — erster Validierungsrun der neuen Prompts
-- **Lektorat-Pipeline-Integration zurückgestellt** bis Generator- und Lektorats-Prompt stabil
-  (Lektorat läuft vorerst als manueller Standalone-Prompt)
-- **Related Terms** (WIKIPEDIA_LINKS + ARTICLE_INDEX): prepare_articles.py befüllt sie noch nicht;
-  generate_articles.py überspringt sie lautlos. Details: CLAUDE_CHAT_NOTIZEN.md
-- **Kanonische Prompt-Datei für CI/Workflow:** `--system-prompt` braucht expliziten Pfad.
-  Aktuell: `wissensfreund_system_prompt_v3.8.md`.
+- **Flash-Testlauf v3.19 auf Römer (mittel)** — dann Modellentscheidung
+- **Lektorat v2.9 nach main bringen** (liegt auf unmergtem Branch docs/generator-v318-lektorat-v29)
+- **Lektorat-Pipeline-Integration zurückgestellt** (manueller Standalone-Prompt)
+- **Related Terms** (WIKIPEDIA_LINKS + ARTICLE_INDEX): prepare_articles.py befüllt sie noch nicht
+- **Kanonische Prompt-Datei für CI:** `wissensfreund_system_prompt_v3.8.md`
 
 ### Mittel
-- **Content-Sicherheitsfilter Bilder** (Stufen 2+3 fehlen als Code-Filter, vor Bilder-Patch-Run klären)
-- **Bilder-Patch** (patch_article_images_v1.py): erst nach Kinderschutz-Entscheidung
-- **R2-Koexistenz:** upload_articles.py nutzt rclone sync → ZIM + WF-Artikel überschreiben sich.
-  Getrennte Präfixe implementieren vor Pilot.
-- **Epoch-Guard TTS-Callbacks**, **Mode B Lupe**, **Sound-Thumbnails** (App-Feinschliff)
+- **Content-Sicherheitsfilter Bilder** (Stufen 2+3 fehlen als Code-Filter)
+- **Bilder-Patch**: erst nach Kinderschutz-Entscheidung
+- **R2-Koexistenz:** upload_articles.py rclone sync überschreibt ZIM + WF-Artikel
+- **Epoch-Guard TTS-Callbacks**, **Mode B Lupe**, **Sound-Thumbnails**
 
 ### Niedrig / Klärungsbedarf
-- Primärkategorie-Konvention, Box-Key (myth/stimmt/stimmt_das), ZIM→JSON Decode-Cap,
-  Kiosk/Screen-Pinning, STT-Routing, Fire-OS, Bild-Tier-Werte
+- Primärkategorie-Konvention, Box-Key, ZIM→JSON Decode-Cap, Kiosk/Screen-Pinning
 
 ---
 
 ## 🧊 Reserve / auf Eis
-
-- **Klexikon-Quiz-Run** (generate_quizzes.py): Auto-Trigger entfernt (2cc9779).
-  Checkpoint (609 Einträge) auf R2 — vor Aktivierung löschen.
-
----
+- **Klexikon-Quiz-Run**: Checkpoint (609 Einträge) auf R2 — vor Aktivierung löschen
 
 ## 🔵 Verschoben auf Version 1.1
-- Gallery-Artikel (111 Artikel, 540 Bilder), Audio-Pipeline, Gemini-TTS-Idee
-- Links/Topic-Tree, Upgrade-Dialog, Plus/Premium-Design
+- Gallery-Artikel, Audio-Pipeline, Gemini-TTS-Idee, Links/Topic-Tree, Upgrade-Dialog
