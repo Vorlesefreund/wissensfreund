@@ -1,38 +1,36 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-08T18:11:18Z -->
+<!-- updated: 2026-06-08T19:20:12Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Flash thinking=medium + IMAGE_METADATA im Generator (2026-06-08)** ← AKTUELL
-- gemini_client.py: thinking_budget=0 → 8192 (Medium)
-- generate_articles.py: AVAILABLE_IMAGES im Prompt — Flash wählt Bilder direkt
-- Bug fix: Datei: → File: Normalisierung für Wikimedia-Commons-API
-- Bug fix: .webm/.ogv/.svg gefiltert, stärkere Prefix/Substring-Filter
-- fetch_images_for_article: max 30 Bilder, 429-Retry eingebaut
-- validate_article: img_index-Obergrenze dynamisch (len(images[])-1)
-- patch_article_images_v1.py: als Legacy-Tool markiert (nicht mehr für neue Artikel)
-- 15 Artikel neu generiert mit echten Wikimedia-Bildern (Ø 4,2/Artikel, alle mit Hero)
-- upload_articles.py: rclone auto-discovery (WinGet) — kein manueller PATH nötig
+**url_context-Test + image_vision_filter.py (2026-06-08)** ← AKTUELL
+- TEIL A: url_context empirisch verifiziert (commit 84041a8)
+  - Primär-Fetch: URL_RETRIEVAL_STATUS_SUCCESS bestätigt
+  - Sekundär-Links: Tool lehnt ab ("url does not match prompt")
+  - Befund: url_context fetcht NUR explizit im Prompt genannte URLs
+  - Konsequenz: Option B (Text-Injektion) bleibt richtiger Produktions-Weg
+  - WISSEN_ARTIKEL_PIPELINE.md: Link-Folgen-Mechanismus + Befund dokumentiert
+- TEIL B: image_vision_filter.py Rate-Limit-Fix (commit 84041a8)
+  - User-Agent mit Kontakt-Mail (Wikimedia-Policy)
+  - Backoff 10/30/60s, 4 Versuche, 2s Pause, Gemini-503-Retry
+  - Test: 6/10 Bienen-Bilder akzeptiert, 0 Download-Fehler
+
+**image_vision_filter.py (2026-06-08):**
+- Neues Skript: Vision-basierter Bild-Filter via Gemini Flash (thinking_budget=0)
+- Kindgerecht + Relevanz(0-10) + hero_tauglich pro Bild
+- Dateiname-/Lizenz-Vorfilter, Hero-Auswahl, Ranking
+- Speichert: articles/test_5topics/_images/{thema}_images.json
+
+**Flash thinking=medium + IMAGE_METADATA im Generator (2026-06-08)**
+- 15 Artikel mit echten Wikimedia-Bildern (Ø 4,2/Artikel)
+- Datei: → File: Normalisierung für Wikimedia-Commons-API
 
 **R2-Zustand (wissensfreund-articles)**
 Basis-URL: https://pub-a4cddbe0f7104b91ae193707a08ff0d2.r2.dev
-
-articles/ — 15 Artikel mit echten Bildern:
-- biene_l1 (7) · biene_l2 (5) · biene_l3 (8)
-- demokratie_l1 (4) · demokratie_l2 (3) · demokratie_l3 (5)
-- dschungel_l1 (2) · dschungel_l2 (6) · dschungel_l3 (10)
-- indianer_l1 (1) · indianer_l2 (3, review) · indianer_l3 (2)
-- motor_l1 (1) · motor_l2 (3) · motor_l3 (3)
-
-index/global.json · level_1/2/3.json · cat_*.json · sub_*.json · new.json · topic_tree.json
-
----
-
-## ⏰ Offen: Spare-Klon entfernen (~2026-06-18)
-**C:\Users\Andreas\Wissensfreund\wissensfreund_app** — `scrape_out/` prüfen, dann löschen
+15 Artikel: biene/demokratie/dschungel/indianer/motor je l1/l2/l3
 
 ---
 
@@ -44,11 +42,15 @@ index/global.json · level_1/2/3.json · cat_*.json · sub_*.json · new.json ·
 - **Related Terms**: prepare_articles.py befüllt sie noch nicht
 
 ### Mittel
-- **indianer_l2 review**: 14 Sätze statt 15 Minimum — ggf. Prompt-Tuning oder Minimum senken
-- **Bilder-Qualität**: indianer_l1-l3 haben nur 1-3 Bilder (Wikipedia arm an Fotos)
+- **url_context Option A vollständig**: COMPANION_URL_1/2 in User-Message + url_context aktiv
+  (Alternative zu Option B; Aufwand: generate_articles.py + System-Prompt anpassen)
+- **Option B Begleitartikel**: generate_articles.py pre-fetcht 1-2 Wikipedia-Links,
+  injiziert als WIKIPEDIA_TEXT_2/3 (empfohlener Ausbau-Pfad)
+- **indianer_l2 review**: 14 Sätze statt 15 Minimum
+- **Bilder-Qualität**: indianer_l1-l3 nur 1-3 Bilder
 - **Epoch-Guard TTS-Callbacks**, **Mode B Lupe**, **Sound-Thumbnails**
 
-### Niedrig / Klärungsbedarf
+### Niedrig
 - Primärkategorie-Konvention, Box-Key, ZIM→JSON Decode-Cap, Kiosk/Screen-Pinning
 
 ---
