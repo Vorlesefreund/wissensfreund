@@ -812,6 +812,37 @@ def main() -> None:
             log.error("  Topic-Setup fehlgeschlagen: %s", e)
             continue
 
+        # Robustheit: Phase-1-Fehlschlag → LAUT abbrechen, KEIN Primär-only-Fallback
+        if not valid_companions:
+            log.error(
+                "  ABBRUCH: Phase 1 lieferte keine validierten Companions fuer '%s' "
+                "(503-Sturm oder kein Ergebnis). Kein Primaer-only-Fallback. "
+                "Alle %d Stufe(n) uebersprungen.",
+                thema, len(topic_jobs),
+            )
+            print(f"\n  *** FEHLER: Keine Companions fuer '{thema}' — Artikel NICHT generiert ***")
+            for job in topic_jobs:
+                err_report = {
+                    "article_id": job["article_id"],
+                    "thema": thema,
+                    "status": "FAILED_NO_COMPANIONS",
+                    "reason": "Phase 1 lieferte keine validierten Companions. Kein Primaer-only-Fallback.",
+                    "phase1": phase1_report,
+                    "errors": ["Phase 1: keine Companions nach allen Versuchen"],
+                }
+                report_path = out_dir / f"{job['article_id']}_report.json"
+                report_path.write_text(
+                    json.dumps(err_report, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
+                err_path = out_dir / "_errors" / f"{job['article_id']}_FAILED.json"
+                err_path.write_text(
+                    json.dumps(err_report, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
+                log.error("  FAILED: %s", job["article_id"])
+            continue
+
         # Befund Phase 1 ausgeben
         print(f"\n  [PHASE 1 — einmalig fuer '{thema}']")
         print(f"  Kompass-Vorschlag (roh): {phase1_report['raw_companions']}")
