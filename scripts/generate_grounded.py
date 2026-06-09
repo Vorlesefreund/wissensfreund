@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 """
 generate_grounded.py
-Zwei-Phasen-Artikel-Generierung mit validiertem Companion-Grounding + Vision-Bildpool.
+Zwei-Phasen-Artikel-Generierung mit Kompass-Companion-Grounding + Vision-Bildpool.
 
-FIX 1: thema (Anzeigetitel) vs. primaer_wikipedia (Quelle) getrennt.
-       meta.title kommt IMMER aus thema, nie aus dem Wikipedia-Quellnamen.
-FIX 2: Zwei-Phasen-Grounding (bereits vorhanden, erhalten).
-FIX 3: Bild-Deckelung: Primär max. 20, je Companion max. 6, Gesamt-Pool max. 40.
-       Batch-Download (parallel, Cache-first) vor Vision-Check.
+Phase 1 (KOMPASS, einmal pro Thema):
+  Gemini schlägt Begleitartikel frei aus Wissen vor (kein Link-Pool).
+  Validierung: Wikipedia-Existenz prüfen + Weiterleitungen auflösen.
+  Shared über alle Stufen desselben Themas.
 
-Phase 1: Flash wählt Begleitartikel aus Wikipedia-Link-Liste des Primärartikels.
-         Pipeline validiert: Link vorhanden + Artikel existiert auf Wikipedia.
-Phase 2: Pipeline holt Companion-Volltexte + Vision-geprüften Bildpool.
-         Flash generiert Artikel aus Primär + Companions + Pool.
+Phase 2 (je Stufe):
+  Primärtext + Companion-Volltexte als stabiler Prefix → Prompt-Caching.
+  Stufenspezifische AGE_LEVEL-Anweisung am Ende.
 
 Usage:
     python scripts/generate_grounded.py
@@ -26,6 +24,7 @@ import os
 import re
 import sys
 import time
+from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -44,7 +43,6 @@ logging.basicConfig(
 )
 log = logging.getLogger(__name__)
 
-# Imports aus bestehenden Modulen (nach logging-Setup)
 sys.path.insert(0, str(Path(__file__).parent))
 from generate_articles import (          # noqa: E402
     fetch_wikipedia_text,
@@ -66,13 +64,12 @@ GEMINI_MODEL       = "gemini-2.5-flash"
 OUT_DIR            = ROOT / "articles" / "test_grounded"
 SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v3.21_production.md"
 
-# Ziel-Bildanzahl nach Appeal (Cap — nie auffüllen)
 APPEAL_TARGET     = {"high": 15, "medium": 10, "low": 6}
-MAX_VISION_CHECKS = 40   # Gesamt-Obergrenze Kandidaten vor Vision
-MAX_IMG_PRIMARY   = 20   # Max. Bilder aus Primärartikel (FIX 3)
-MAX_IMG_COMPANION = 6    # Max. Bilder je Begleitartikel (FIX 3)
-MAX_COMPANIONS    = 4    # Max. Begleitartikel die Flash wählen darf
-MAX_LINK_LIST     = 300  # Max. Links im Companion-Prompt
+MAX_VISION_CHECKS = 40
+MAX_IMG_PRIMARY   = 20
+MAX_IMG_COMPANION = 6
+MAX_COMPANIONS    = 5
+MAX_LINK_LIST     = 300  # Legacy-Export — batch_run.py nutzt diesen Wert noch
 
 AGE_RANGES = {1: "4-6 Jahre", 2: "7-9 Jahre", 3: "10-12 Jahre"}
 
@@ -87,11 +84,8 @@ def _make_thinking_config(model: str, budget_for_2_5: int) -> types.ThinkingConf
     log.info("  ThinkingConfig: thinking_level=MEDIUM (Modell=%s)", model)
     return cfg
 
-# ── Test-Jobs (FIX 1: thema + primaer_wikipedia getrennt) ────────────────────
-#
-# thema            = kindgerechter Anzeigetitel → meta.title, ARTICLE_TITLE, Rahmung
-# primaer_wikipedia = exakter Wikipedia-Artikeltitel für Fakten-Fetch
-# title            = thema (Backward-Compat mit validate_article)
+
+# ── Test-Jobs ─────────────────────────────────────────────────────────────────
 
 TEST_JOBS: dict[str, dict] = {
     "indianer_l1": {
@@ -173,38 +167,34 @@ TEST_JOBS: dict[str, dict] = {
     },
 }
 
-# ── Phase-1-Prompt ───────────────────────────────────────────────────────────
+
+# ── Phase-1-Prompt (Kompass) ─────────────────────────────────────────────────
 
 COMPANION_SYSTEM_PROMPT = (
-    "Du wählst Wikipedia-Begleitartikel für einen Kinderwissens-Artikel aus.\n"
+    "Du waehlst Wikipedia-Begleitartikel fuer einen Kinderwissens-Artikel aus.\n"
     "Antworte ausschliesslich mit gueltigem JSON ohne Markdown.\n"
-    'Format: {"companions": ["Titel1", "Titel2"]}'
+    'Format: {"companions": ["Lemma1","Lemma2",...]}'
 )
 
 COMPANION_PROMPT_TMPL = """\
-THEMA: {thema} (Stufe {age_level}, {ages})
-APPEAL: {appeal}
+THEMA: {thema}
 
-PRIMAERTEXT (erste 2000 Zeichen):
-{excerpt}
+PRIMAERARTIKEL-EINLEITUNG:
+{lead}
 
-LINK_LISTE ({n_links} interne Wikipedia-Links aus dem Artikel):
-{link_list}
-
-Waehle 2-4 Begleitartikel die den Kinderartikel am meisten bereichern.
-Nur Artikel aus der LINK_LISTE. Kriterien:
-- Konkrete Inhalte fuer Kinder: Verhalten, Prozesse, Rekorde, Fakten
-- Thematisch nah am Primaer-Thema (vertiefen, nicht abweichen)
-- Bevorzuge Companions, die ans kindliche Vorwissen andocken und lebendige, konkrete,
-  anschauliche Inhalte ermoeglichen — auch solche, mit denen sich landläufige Vorstellungen
-  zum Thema aufgreifen und richtigstellen lassen.
-Antworte NUR mit JSON: {{"companions": ["Titel1", "Titel2"]}}"""
+Schlage bis zu 5 deutschsprachige Wikipedia-Begleitartikel vor, die diesen Kinderartikel bereichern.
+Kriterien:
+- Vertiefen das Thema fuer ein Kind: konkret, anschaulich, lebendig
+- Auch solche, mit denen sich laendlaeufige Vorstellungen aufgreifen und richtigstellen lassen
+- Fokuserhaltend: Thema vertiefen, NICHT zu Eltern-/Nachbarthemen wechseln
+- Lieber weniger als ungeeignete auffuellen (kein Mindestwert)
+Ausgabe NUR JSON: {{"companions": ["Lemma1","Lemma2",...]}}"""
 
 
-# ── Wikipedia-Hilfsfunktionen ─────────────────────────────────────────────────
+# ── Legacy-Funktionen (von batch_run.py importiert) ──────────────────────────
 
 def fetch_wikipedia_links(session: requests.Session, title: str) -> list[str]:
-    """Holt alle internen Links (Namespace 0) eines Wikipedia-Artikels."""
+    """Legacy: holt interne Links (Namespace 0). Noch von batch_run.py genutzt."""
     all_links: list[str] = []
     params = {
         "action": "query", "format": "json",
@@ -230,7 +220,7 @@ def fetch_wikipedia_links(session: requests.Session, title: str) -> list[str]:
 
 
 def check_articles_exist(session: requests.Session, titles: list[str]) -> dict[str, bool]:
-    """Prüft für eine Liste von Titeln ob die Wikipedia-Artikel existieren."""
+    """Legacy: prüft Artikel-Existenz ohne Redirect-Auflösung. Noch von batch_run.py genutzt."""
     result: dict[str, bool] = {}
     for i in range(0, len(titles), 20):
         chunk = titles[i:i+20]
@@ -265,30 +255,45 @@ def check_articles_exist(session: requests.Session, titles: list[str]) -> dict[s
     return result
 
 
-# ── Phase 1: Companion-Auswahl ────────────────────────────────────────────────
+def validate_companions(
+    session: requests.Session,
+    raw_companions: list[str],
+    link_set: set[str],
+) -> tuple[list[str], list[dict]]:
+    """Legacy: validiert gegen Link-Set. Noch von batch_run.py genutzt."""
+    valid: list[str] = []
+    rejected: list[dict] = []
+    link_set_lower = {t.lower() for t in link_set}
+    for comp in raw_companions:
+        if comp.lower() not in link_set_lower:
+            rejected.append({"title": comp, "reason": "nicht in Link-Liste des Primärartikels"})
+            continue
+        valid.append(comp)
+    if valid:
+        existence = check_articles_exist(session, valid)
+        confirmed: list[str] = []
+        for comp in valid:
+            if existence.get(comp, False):
+                confirmed.append(comp)
+            else:
+                rejected.append({"title": comp, "reason": "Wikipedia-Artikel nicht gefunden"})
+        valid = confirmed
+    return valid, rejected
+
+
+# ── Phase 1: Kompass-Auswahl ─────────────────────────────────────────────────
 
 def select_companions_raw(
     client: genai.Client,
     thema: str,
-    age_level: int,
-    appeal: str,
     primary_text: str,
-    link_list: list[str],
     model: str = GEMINI_MODEL,
 ) -> list[str]:
-    """Flash/Gemini wählt Begleitartikel aus. Gibt Roh-Liste zurück (noch nicht validiert)."""
-    link_sample = link_list[:MAX_LINK_LIST]
-    prompt = COMPANION_PROMPT_TMPL.format(
-        thema=thema,
-        age_level=age_level,
-        ages=AGE_RANGES.get(age_level, ""),
-        appeal=appeal,
-        excerpt=primary_text[:2000],
-        n_links=len(link_sample),
-        link_list=", ".join(link_sample),
-    )
+    """Kompass: Gemini schlägt Begleitartikel frei vor (kein Link-Pool)."""
+    lead = primary_text[:1500]
+    prompt = COMPANION_PROMPT_TMPL.format(thema=thema, lead=lead)
     thinking = _make_thinking_config(model, budget_for_2_5=1024)
-    log.info("  Phase 1 Companion-Auswahl mit Modell=%s", model)
+    log.info("  Phase 1 Kompass-Auswahl (Modell=%s)", model)
 
     for attempt in range(1, 4):
         try:
@@ -305,14 +310,14 @@ def select_companions_raw(
             text = re.sub(r"^```[a-zA-Z]*\n?", "", text)
             text = re.sub(r"\n?```$", "", text).strip()
             data = json.loads(text)
-            return [str(c) for c in data.get("companions", [])][:MAX_COMPANIONS]
+            return [str(c) for c in data.get("companions", [])][:10]
         except json.JSONDecodeError as e:
             log.warning("  Phase 1 JSON-Fehler (V%d): %s", attempt, e)
             return []
         except Exception as e:
             err = str(e)
             if attempt < 3 and ("503" in err or "unavailable" in err.lower()):
-                log.warning("  Phase 1 503 (V%d) — warte 60s ...", attempt)
+                log.warning("  Phase 1 503 (V%d) -- warte 60s ...", attempt)
                 time.sleep(60)
             else:
                 log.error("  Phase 1 Fehler: %s", e)
@@ -320,37 +325,87 @@ def select_companions_raw(
     return []
 
 
-def validate_companions(
+def validate_and_resolve_companions(
     session: requests.Session,
     raw_companions: list[str],
-    link_set: set[str],
+    primary_title: str,
 ) -> tuple[list[str], list[dict]]:
-    """Validiert Companion-Liste. Gibt (valid, rejected_log) zurück."""
+    """
+    Prüft Wikipedia-Existenz, löst Weiterleitungen auf, dedupliziert.
+    Gibt (valid_canonical, rejected_log) zurück.
+    """
+    if not raw_companions:
+        return [], []
+
+    params = {
+        "action": "query", "format": "json",
+        "titles": "|".join(raw_companions[:10]),
+        "redirects": "1",
+        "prop": "info",
+    }
+    try:
+        resp = session.get(WIKIPEDIA_API, params=params, timeout=30)
+        resp.raise_for_status()
+        query = resp.json().get("query", {})
+    except Exception as e:
+        log.error("  Companion-Validierung API-Fehler: %s", e)
+        return [], [{"title": c, "resolved": None, "reason": f"API-Fehler: {e}"}
+                    for c in raw_companions]
+
+    # Auflösungskette aufbauen: Normalisierung + Weiterleitungen
+    resolve: dict[str, str] = {}
+    for n in query.get("normalized", []):
+        resolve[n["from"]] = n["to"]
+    for r in query.get("redirects", []):
+        resolve[r["from"]] = r["to"]
+
+    def follow(title: str) -> str:
+        seen_chain: set[str] = set()
+        t = title
+        while t in resolve and t not in seen_chain:
+            seen_chain.add(t)
+            t = resolve[t]
+        return t
+
+    existing: set[str] = {
+        page["title"]
+        for page in query.get("pages", {}).values()
+        if "missing" not in page
+    }
+
     valid: list[str] = []
     rejected: list[dict] = []
-
-    link_set_lower = {t.lower() for t in link_set}
+    seen_resolved: set[str] = set()
+    primary_lower = primary_title.lower()
 
     for comp in raw_companions:
-        if comp.lower() not in link_set_lower:
-            rejected.append({"title": comp, "reason": "nicht in Link-Liste des Primärartikels"})
+        resolved = follow(comp)
+        resolved_lower = resolved.lower()
+        changed = resolved != comp
+
+        if resolved not in existing:
+            rejected.append({"title": comp, "resolved": resolved, "reason": "nicht gefunden"})
+            log.warning("  Verworfen: '%s'%s (nicht gefunden)", comp,
+                        f" -> '{resolved}'" if changed else "")
             continue
-        valid.append(comp)
+        if resolved_lower == primary_lower:
+            rejected.append({"title": comp, "resolved": resolved, "reason": "= Primaerartikel"})
+            log.warning("  Verworfen: '%s' (= Primaerartikel)", comp)
+            continue
+        if resolved_lower in seen_resolved:
+            rejected.append({"title": comp, "resolved": resolved, "reason": "Duplikat"})
+            log.warning("  Verworfen: '%s' (Duplikat nach Aufloesung)", comp)
+            continue
 
-    if valid:
-        existence = check_articles_exist(session, valid)
-        confirmed: list[str] = []
-        for comp in valid:
-            if existence.get(comp, False):
-                confirmed.append(comp)
-            else:
-                rejected.append({"title": comp, "reason": "Wikipedia-Artikel nicht gefunden"})
-        valid = confirmed
+        seen_resolved.add(resolved_lower)
+        if changed:
+            log.info("  Companion aufgeloest: '%s' -> '%s'", comp, resolved)
+        valid.append(resolved)
 
-    return valid, rejected
+    return valid[:MAX_COMPANIONS], rejected
 
 
-# ── Bildpool (FIX 3: Deckelung + Batch-Download) ──────────────────────────────
+# ── Bildpool ──────────────────────────────────────────────────────────────────
 
 def build_image_pool(
     session: requests.Session,
@@ -360,15 +415,9 @@ def build_image_pool(
     companion_titles: list[str],
     appeal: str,
 ) -> tuple[list[dict], dict]:
-    """
-    Sammelt Bilder aus Primär + Companions, cappt pro Quelle,
-    dedupliziert, batch-downloaded (Cache-first), vision-filtert.
-    Gibt (accepted_images, report_dict) zurück.
-    """
     all_candidates: list[dict] = []
     sources: dict[str, int] = {}
 
-    # Primär-Bilder: max. MAX_IMG_PRIMARY nach Dateiname-Vorfilter
     primary_imgs = fetch_image_candidates(
         session, primary_wikipedia, max_candidates=MAX_IMG_PRIMARY
     )
@@ -378,7 +427,6 @@ def build_image_pool(
     all_candidates.extend(primary_imgs)
     log.info("    Bilder aus '%s': %d (cap=%d)", primary_wikipedia, len(primary_imgs), MAX_IMG_PRIMARY)
 
-    # Companion-Bilder: max. MAX_IMG_COMPANION pro Artikel
     for comp_title in companion_titles:
         time.sleep(0.5)
         comp_imgs = fetch_image_candidates(
@@ -390,7 +438,6 @@ def build_image_pool(
         all_candidates.extend(comp_imgs)
         log.info("    Bilder aus '%s': %d (cap=%d)", comp_title, len(comp_imgs), MAX_IMG_COMPANION)
 
-    # Deduplizieren nach filename (primary first)
     seen: set[str] = set()
     unique: list[dict] = []
     for img in all_candidates:
@@ -399,12 +446,10 @@ def build_image_pool(
             seen.add(fn)
             unique.append(img)
 
-    # Gesamtdeckel
     to_check = unique[:MAX_VISION_CHECKS]
-    log.info("    Kandidaten gesamt (dedupliziert): %d, Vision-Check: %d", len(unique), len(to_check))
+    log.info("    Kandidaten gesamt (dedupliziert): %d, Vision-Check: %d",
+             len(unique), len(to_check))
 
-    # Vision-Check: sequenziell, 10s Pause — kein paralleles Batch-Download
-    # (parallele Downloads triggern Wikimedia Burst-Rate-Limit auf upload.wikimedia.org)
     accepted: list[dict] = []
     rejected_vision: list[dict] = []
     target = APPEAL_TARGET.get(appeal, 10)
@@ -412,7 +457,7 @@ def build_image_pool(
 
     for img in to_check:
         if len(accepted) >= target:
-            log.info("    Target %d erreicht — Vision-Check gestoppt", target)
+            log.info("    Target %d erreicht -- Vision-Check gestoppt", target)
             break
 
         img_bytes = download_image(session, img["thumb_url"])
@@ -420,7 +465,7 @@ def build_image_pool(
             rejected_vision.append({**img, "reason": "Download fehlgeschlagen"})
             _consecutive_dl_failures += 1
             if _consecutive_dl_failures >= 3:
-                log.warning("    3 Downloads fehlgeschlagen — 60s Wikimedia-Cooldown ...")
+                log.warning("    3 Downloads fehlgeschlagen -- 60s Wikimedia-Cooldown ...")
                 time.sleep(60)
                 _consecutive_dl_failures = 0
             else:
@@ -428,7 +473,7 @@ def build_image_pool(
             continue
 
         _consecutive_dl_failures = 0
-        mime = "image/jpeg"  # download_image skaliert immer zu JPEG
+        mime = "image/jpeg"
 
         result = analyze_with_vision(client, img_bytes, mime, thema)
         if result is None:
@@ -449,7 +494,7 @@ def build_image_pool(
                 "beschreibung":  result.get("beschreibung", ""),
             })
 
-        time.sleep(10.0)  # 10s zwischen Downloads — bleibt unter Wikimedia-Rate-Limit
+        time.sleep(10.0)
 
     accepted.sort(key=lambda x: (-x["relevanz"], -int(x["hero_tauglich"])))
     accepted = accepted[:target]
@@ -478,29 +523,29 @@ def build_grounded_user_message(
     companion_order: list[str],
     images: list[dict],
 ) -> str:
-    """Baut die User-Message mit Primär- + Companion-Texten + Vision-Bildpool."""
+    """
+    Baut die User-Message mit stabilem Quell-Prefix und variablem AGE_LEVEL am Ende.
+    Stabiler Prefix (gleich für alle Stufen eines Themas) → Prompt-Caching greift.
+    """
     thema = job.get("thema", job["title"])
     primaer_src = job.get("primaer_wikipedia", job["title"])
     parts: list[str] = []
 
-    # Wikipedia-Texte (Primär + Companions)
+    # ── Stabiler Prefix: Wikipedia-Texte ─────────────────────────────────────
     parts += [f"WIKIPEDIA_TEXT_1 (Primaarartikel: {primaer_src}):", primary_text, ""]
     for i, comp in enumerate(companion_order, 2):
         text = companion_texts.get(comp, "")
         if text:
             parts += [f"WIKIPEDIA_TEXT_{i} (Begleitartikel: {comp}):", text[:6000], ""]
 
-    # Pflichtfelder
-    parts += [
-        f"ARTICLE_TITLE: {thema}",
-        f"AGE_LEVEL: {job['age_level']}",
-    ]
+    # Stabile Metadaten
+    parts.append(f"ARTICLE_TITLE: {thema}")
     if job.get("topic_interest"):
         parts.append(f"TOPIC_INTEREST: {job['topic_interest']}")
     if companion_order:
         parts.append(f"VERWENDETE_BEGLEITTEXTE: {', '.join(companion_order)}")
 
-    # Bildpool mit Vision-Beschreibungen
+    # Bildpool (stabil — gleiche Images für alle Stufen)
     if images:
         parts += [
             "",
@@ -528,115 +573,111 @@ def build_grounded_user_message(
             "- Fuer jedes Bild: filename, alt, caption, license, license_author, source_url, thumb_url befuellen",
         ]
 
+    # ── Variabler Suffix: nur AGE_LEVEL wechselt je Stufe ───────────────────
+    parts.append(f"AGE_LEVEL: {job['age_level']}")
+
     return "\n".join(parts)
 
 
-# ── Haupt-Orchestrierung ──────────────────────────────────────────────────────
+# ── Phase-1-Orchestrierung: einmal pro Thema ─────────────────────────────────
 
-def run_grounded_article(
+def prepare_topic_sources(
     session: requests.Session,
     client: genai.Client,
-    system_prompt: str,
-    job: dict,
-    model: str = GEMINI_MODEL,
-    skip_images: bool = False,
-    out_dir: "Path | None" = None,
-) -> tuple[dict | None, dict]:
+    primary_wikipedia: str,
+    thema: str,
+    appeal: str,
+    model: str,
+    skip_images: bool,
+) -> tuple[str, list[str], dict[str, str], list[dict], dict]:
     """
-    Führt Zwei-Phasen-Generierung durch.
-    Gibt (article_dict_or_None, phase_report) zurück.
+    Phase 1 + Quellen-Fetch, einmalig pro Thema.
+    Gibt (primary_text, valid_companions, companion_texts, images, phase1_report) zurück.
     """
-    effective_out_dir = out_dir or OUT_DIR
-    article_id       = job["article_id"]
-    thema            = job.get("thema", job["title"])
-    primaer_wikipedia = job.get("primaer_wikipedia", job["title"])
-    appeal           = job.get("topic_interest", "medium")
-    model_slug       = model.replace("gemini-", "").replace(".", "-")
-    prompt_version   = SYSTEM_PROMPT_PATH.stem.split("_v")[-1].split("_")[0]  # z.B. "3.21"
-    generation_method = f"{model}/medium/v{prompt_version}"
-    log.info("  Modell: %s | skip_images=%s | out_dir=%s", model, skip_images, effective_out_dir)
-
-    report: dict = {
-        "article_id": article_id,
-        "thema":      thema,
-        "primaer_wikipedia": primaer_wikipedia,
-        "phase1":     {},
-        "phase2":     {},
-        "errors":     [],
-    }
-
-    # ── Primärtext ────────────────────────────────────────────────────────────
-    log.info("  Hole Primaertext: '%s' (thema='%s')", primaer_wikipedia, thema)
-    time.sleep(2.0)   # Wikipedia-Rate-Limit: Cooldown zwischen Artikeln
-    try:
-        primary_text = fetch_wikipedia_text(session, primaer_wikipedia)
-    except Exception as e:
-        report["errors"].append(f"Wikipedia-Fetch: {e}")
-        return None, report
-
-    if len(primary_text) < 300:
-        report["errors"].append(f"Primaertext zu kurz: {len(primary_text)} Zeichen")
-        return None, report
-
+    # Primärtext
+    log.info("  Hole Primaertext: '%s'", primary_wikipedia)
+    time.sleep(2.0)
+    primary_text = fetch_wikipedia_text(session, primary_wikipedia)
     log.info("  Primaertext: %d Zeichen", len(primary_text))
 
-    # ── Phase 1: Links holen + Flash-Companion-Auswahl ────────────────────────
-    log.info("  Phase 1: Link-Liste holen (%s) ...", primaer_wikipedia)
-    try:
-        link_list = fetch_wikipedia_links(session, primaer_wikipedia)
-    except Exception as e:
-        report["errors"].append(f"Links-Fetch: {e}")
-        link_list = []
+    if len(primary_text) < 300:
+        raise ValueError(f"Primaertext zu kurz: {len(primary_text)} Zeichen")
 
-    link_set = set(link_list)
-    log.info("  %d interne Links gefunden", len(link_list))
+    # Kompass-Auswahl
+    raw_companions = select_companions_raw(client, thema, primary_text, model)
+    log.info("  Kompass-Vorschlag: %s", raw_companions)
 
-    log.info("  Phase 1: waehlt Companions (Thema: %s, Modell: %s) ...", thema, model)
-    raw_companions = select_companions_raw(
-        client, thema, job["age_level"], appeal, primary_text, link_list, model=model
+    # Validierung + Weiterleitungsauflösung
+    valid_companions, rejected = validate_and_resolve_companions(
+        session, raw_companions, primary_wikipedia
     )
-    log.info("  Flash-Vorschlag: %s", raw_companions)
+    log.info("  Validiert (final): %s", valid_companions)
 
-    valid_companions, rejected_companions = validate_companions(
-        session, raw_companions, link_set
-    )
-    log.info("  Validiert: %s", valid_companions)
-    for r in rejected_companions:
-        log.warning("  Verworfen: %s (%s)", r["title"], r["reason"])
-
-    report["phase1"] = {
-        "link_count":       len(link_list),
+    phase1_report: dict = {
         "raw_companions":   raw_companions,
         "valid_companions": valid_companions,
-        "rejected":         rejected_companions,
+        "rejected":         rejected,
     }
 
-    # ── Phase 2: Companion-Texte holen ───────────────────────────────────────
+    # Companion-Volltexte holen
     companion_texts: dict[str, str] = {}
     for comp in valid_companions:
         try:
+            time.sleep(0.5)
             ct = fetch_wikipedia_text(session, comp)
             companion_texts[comp] = ct
             log.info("  Companion-Text '%s': %d Zeichen", comp, len(ct))
         except Exception as e:
             log.warning("  Companion-Text '%s' Fehler: %s", comp, e)
 
-    # ── Bildpool (optional: skip für Vergleichsläufe) ────────────────────────
+    # Bildpool (optional)
     if skip_images:
-        images = []
-        log.info("  Bildpool: übersprungen (--skip-images)")
-        report["phase2"]["images"] = {"skipped": True}
+        images: list[dict] = []
+        log.info("  Bildpool: uebersprungen (--skip-images)")
     else:
-        log.info("  Baue Bildpool (Primaer + %d Companions) ...", len(valid_companions))
+        fetched_companions = [c for c in valid_companions if c in companion_texts]
+        log.info("  Baue Bildpool (Primaer + %d Companions) ...", len(fetched_companions))
         images, img_report = build_image_pool(
-            session, client, thema,
-            primaer_wikipedia, valid_companions, appeal
+            session, client, thema, primary_wikipedia, fetched_companions, appeal
         )
-        log.info("  Bildpool: %d akzeptiert, Hero=%s", img_report["accepted"], img_report["hero"])
-        report["phase2"]["images"] = img_report
+        log.info("  Bildpool: %d akzeptiert, Hero=%s",
+                 img_report["accepted"], img_report["hero"])
+        phase1_report["images"] = img_report
 
-    # ── Phase 2: Artikel generieren ───────────────────────────────────────────
-    log.info("  Phase 2: Artikel generieren (Thema: %s, Stufe %d, Modell: %s) ...",
+    return primary_text, valid_companions, companion_texts, images, phase1_report
+
+
+# ── Phase-2-Generierung: je Stufe ────────────────────────────────────────────
+
+def generate_one_level(
+    client: genai.Client,
+    system_prompt: str,
+    job: dict,
+    primary_text: str,
+    companion_texts: dict[str, str],
+    valid_companions: list[str],
+    images: list[dict],
+    phase1_report: dict,
+    model: str,
+    skip_images: bool,
+    out_dir: Path,
+) -> tuple[dict | None, dict]:
+    """Phase 2: Artikel für eine Stufe generieren (shared sources)."""
+    article_id       = job["article_id"]
+    thema            = job.get("thema", job["title"])
+    prompt_version   = SYSTEM_PROMPT_PATH.stem.split("_v")[-1].split("_")[0]
+    generation_method = f"{model}/medium/v{prompt_version}"
+
+    report: dict = {
+        "article_id":        article_id,
+        "thema":             thema,
+        "primaer_wikipedia": job.get("primaer_wikipedia", thema),
+        "phase1":            phase1_report,
+        "phase2":            {"images": {"skipped": True} if skip_images else {}},
+        "errors":            [],
+    }
+
+    log.info("  Phase 2: Artikel generieren (Thema: %s, Stufe %d, Modell: %s)",
              thema, job["age_level"], model)
     user_msg = build_grounded_user_message(
         job, primary_text, companion_texts, valid_companions, images
@@ -656,27 +697,25 @@ def run_grounded_article(
         article = parse_article_json(raw_response)
     except (json.JSONDecodeError, ValueError) as e:
         report["errors"].append(f"JSON-Parse: {e}")
-        errors_dir = effective_out_dir / "_errors"
+        errors_dir = out_dir / "_errors"
         errors_dir.mkdir(parents=True, exist_ok=True)
         (errors_dir / f"{article_id}_raw.txt").write_text(raw_response or "", encoding="utf-8")
         return None, report
 
-    # Meta fixieren (FIX 1: title immer aus thema, nie aus Quellnamen)
-    article.setdefault("meta", {})["id"] = article_id
-    article["meta"]["title"] = thema                          # FIX 1: override
-    article["meta"]["generated_at"] = datetime.now(timezone.utc).isoformat()
-    article["meta"]["grounding_companions"] = valid_companions
-    article["meta"]["generation_method"] = generation_method
+    article.setdefault("meta", {})["id"]           = article_id
+    article["meta"]["title"]                        = thema
+    article["meta"]["generated_at"]                 = datetime.now(timezone.utc).isoformat()
+    article["meta"]["grounding_companions"]          = valid_companions
+    article["meta"]["generation_method"]             = generation_method
 
-    # Validieren
     val_errors = validate_article(article, job)
     if val_errors:
         for e in val_errors:
             log.warning("  Validierungsfehler: %s", e)
-        article["meta"]["review_flag"] = True
+        article["meta"]["review_flag"]   = True
         article["meta"]["review_reason"] = "; ".join(val_errors[:3])
 
-    report["phase2"]["validation_errors"] = val_errors
+    report["phase2"]["validation_errors"]  = val_errors
     report["phase2"]["companions_fetched"] = list(companion_texts.keys())
 
     return article, report
@@ -685,7 +724,7 @@ def run_grounded_article(
 # ── CLI ───────────────────────────────────────────────────────────────────────
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Zwei-Phasen-Grounding Artikel-Generator")
+    parser = argparse.ArgumentParser(description="Kompass-Grounding Artikel-Generator")
     parser.add_argument(
         "--articles", nargs="+",
         default=list(TEST_JOBS.keys()),
@@ -693,11 +732,11 @@ def main() -> None:
     )
     parser.add_argument(
         "--gen-model", default=None,
-        help="Gemini-Modell (z.B. gemini-2.5-flash, gemini-3.5-flash). Default: gemini-2.5-flash",
+        help="Gemini-Modell (z.B. gemini-2.5-flash, gemini-3.5-flash)",
     )
     parser.add_argument(
         "--skip-images", action="store_true",
-        help="Bildpipeline komplett überspringen (nur Text + Grounding)",
+        help="Bildpipeline komplett ueberspringen",
     )
     parser.add_argument(
         "--output-dir", default=None,
@@ -705,8 +744,8 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    model    = args.gen_model or GEMINI_MODEL
-    out_dir  = Path(args.output_dir).resolve() if args.output_dir else OUT_DIR
+    model      = args.gen_model or GEMINI_MODEL
+    out_dir    = Path(args.output_dir).resolve() if args.output_dir else OUT_DIR
     model_slug = model.replace("gemini-", "").replace(".", "-")
 
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -725,84 +764,102 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "_errors").mkdir(exist_ok=True)
 
+    # Jobs sammeln + Modell-Slug in article_id einbauen
+    resolved_jobs: list[dict] = []
     for article_id in args.articles:
         job = TEST_JOBS.get(article_id)
         if not job:
             log.error("Unbekannte article_id: %s (verfuegbar: %s)",
                       article_id, list(TEST_JOBS.keys()))
             continue
-
-        # Bei --gen-model: article_id und Dateinamen mit Modell-Slug versehen
         if args.gen_model:
-            # z.B. indianer_l3 → indianer_2-5-flash_l3
-            parts = article_id.rsplit("_", 1)      # ["indianer", "l3"]
+            parts = article_id.rsplit("_", 1)
             effective_id = f"{parts[0]}_{model_slug}_{parts[1]}"
         else:
             effective_id = article_id
+        resolved_jobs.append({**job, "article_id": effective_id})
 
-        job = {**job, "article_id": effective_id}  # Kopie, original unverändert
+    # Nach primaer_wikipedia gruppieren (Reihenfolge des ersten Auftretens bewahren)
+    topic_groups: dict[str, list[dict]] = defaultdict(list)
+    seen_topics: list[str] = []
+    for job in resolved_jobs:
+        primaer = job.get("primaer_wikipedia", job["title"])
+        if primaer not in topic_groups:
+            seen_topics.append(primaer)
+        topic_groups[primaer].append(job)
 
-        thema = job.get("thema", job["title"])
+    # ── Pro Thema: Phase 1 einmal, Phase 2 je Stufe ──────────────────────────
+    for primary_wikipedia in seen_topics:
+        topic_jobs = topic_groups[primary_wikipedia]
+        thema  = topic_jobs[0].get("thema", topic_jobs[0]["title"])
+        appeal = topic_jobs[0].get("topic_interest", "medium")
+        levels = [j["age_level"] for j in topic_jobs]
+
         print(f"\n{'='*60}")
-        print(f"GENERIERE: {effective_id} | Thema: {thema} | Stufe {job['age_level']}")
-        print(f"  Modell: {model} | primaer_wikipedia: {job.get('primaer_wikipedia', thema)}")
+        print(f"THEMA: {thema} | Primaer: {primary_wikipedia} | Modell: {model}")
+        print(f"Stufen: {levels} | Phase 1 laeuft EINMAL fuer alle Stufen")
         print(f"{'='*60}")
 
-        article, report = run_grounded_article(
-            session, client, system_prompt, job,
-            model=model, skip_images=args.skip_images, out_dir=out_dir,
-        )
+        try:
+            primary_text, valid_companions, companion_texts, images, phase1_report = (
+                prepare_topic_sources(
+                    session, client, primary_wikipedia, thema, appeal,
+                    model, args.skip_images
+                )
+            )
+        except Exception as e:
+            log.error("  Topic-Setup fehlgeschlagen: %s", e)
+            continue
 
-        # Report speichern (immer)
-        report_path = out_dir / f"{effective_id}_report.json"
-        report_path.write_text(
-            json.dumps(report, ensure_ascii=False, indent=2),
-            encoding="utf-8",
-        )
+        # Befund Phase 1 ausgeben
+        print(f"\n  [PHASE 1 — einmalig fuer '{thema}']")
+        print(f"  Kompass-Vorschlag (roh): {phase1_report['raw_companions']}")
+        for r in phase1_report["rejected"]:
+            resolved_hint = f" (aufgeloest: '{r['resolved']}')" if r.get("resolved") else ""
+            print(f"  Verworfen: '{r['title']}'{resolved_hint} — {r['reason']}")
+        print(f"  Validiert + aufgeloest:  {valid_companions}")
+        print(f"  [Quellblock wird fuer {len(topic_jobs)} Stufe(n) geteilt + gecacht]")
 
-        if article:
-            out_path = out_dir / f"{effective_id}.json"
-            out_path.write_text(
-                json.dumps(article, ensure_ascii=False, indent=2),
+        # Phase 2: je Stufe
+        for job in topic_jobs:
+            article_id = job["article_id"]
+            print(f"\n  --- Stufe {job['age_level']}: {article_id} ---")
+
+            article, report = generate_one_level(
+                client, system_prompt, job,
+                primary_text, companion_texts, valid_companions, images,
+                phase1_report, model, args.skip_images, out_dir,
+            )
+
+            report_path = out_dir / f"{article_id}_report.json"
+            report_path.write_text(
+                json.dumps(report, ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
-            meta_title = article.get("meta", {}).get("title", "?")
-            n_imgs = len(article.get("images", []))
-            n_sents = sum(
-                len(s.get("sentences", []))
-                for s in article.get("sections", [])
-            )
-            review = " [REVIEW]" if article["meta"].get("review_flag") else ""
-            gen_m  = article["meta"].get("generation_method", "?")
-            print(f"\n  Artikel gespeichert: {out_path.relative_to(ROOT)}")
-            print(f"  meta.title = '{meta_title}' | generation_method = '{gen_m}'")
-            print(f"  Bilder: {n_imgs} | Saetze: {n_sents}{review}")
-        else:
-            print(f"\n  FEHLER: {report.get('errors')}")
 
-        # Kompakter Bericht
-        p1 = report.get("phase1", {})
-        p2 = report.get("phase2", {})
-        print(f"\n  Phase 1:")
-        print(f"    Links gefunden:    {p1.get('link_count', 0)}")
-        print(f"    Modell-Vorschlag:  {p1.get('raw_companions', [])}")
-        print(f"    Validiert:         {p1.get('valid_companions', [])}")
-        for r in p1.get("rejected", []):
-            print(f"    Verworfen:         {r['title']} ({r['reason']})")
-        img = p2.get("images", {})
-        if img and not img.get("skipped"):
-            print(f"\n  Bildpool:")
-            for src, cnt in img.get("sources", {}).items():
-                print(f"    {src}: {cnt} Kandidaten")
-            print(f"    Vision-gecheckt: {img.get('vision_checked')}")
-            print(f"    Akzeptiert:      {img.get('accepted')} / Target {img.get('target')}")
-            print(f"    Hero-Bild:       {img.get('hero')}")
-        elif img.get("skipped"):
-            print(f"\n  Bildpool: übersprungen")
-        if report.get("errors"):
-            print(f"\n  Fehler: {report['errors']}")
+            if article:
+                out_path = out_dir / f"{article_id}.json"
+                out_path.write_text(
+                    json.dumps(article, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
+                meta_title = article.get("meta", {}).get("title", "?")
+                n_imgs = len(article.get("images", []))
+                n_sents = sum(
+                    len(s.get("sentences", []))
+                    for s in article.get("sections", [])
+                )
+                review = " [REVIEW]" if article["meta"].get("review_flag") else ""
+                gen_m  = article["meta"].get("generation_method", "?")
+                print(f"  Gespeichert: {out_path.relative_to(ROOT)}")
+                print(f"  meta.title='{meta_title}' | method='{gen_m}'")
+                print(f"  Bilder: {n_imgs} | Saetze: {n_sents}{review}")
+            else:
+                print(f"  FEHLER: {report.get('errors')}")
 
-        print(f"\n  Report: {report_path.relative_to(ROOT)}")
+            print(f"  Report: {report_path.relative_to(ROOT)}")
+
+        print(f"\n  Companions (geteilt): {valid_companions}")
 
 
 if __name__ == "__main__":
