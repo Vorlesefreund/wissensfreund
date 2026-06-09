@@ -1,46 +1,46 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-09T10:27:16Z -->
+<!-- updated: 2026-06-09T11:42:32Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Modell-Vergleichslauf: 4/4 Artikel generiert (2026-06-09)** ← AKTUELL
-- Themen: Indianer + Biene | Stufe 3 | Bild-Pipeline deaktiviert
-- Modelle: gemini-2.5-flash vs. gemini-3.5-flash (beide thinking=medium)
-- Output: `articles/test_compare/` (lokal, nicht committed)
-- Ergebnisse:
+**Modell-Vergleichslauf vollständig: 12/12 Artikel (2026-06-09)** ← AKTUELL
+- Themen: Indianer + Biene | Stufen 1–3 | beide Modelle | textonly (--skip-images)
+- Output: `articles/test_compare/_review.html` (lokal, 12 Artikel, Sortierung: Thema→Stufe→Modell)
+- 2 Artikel ohne Companions (Phase-1-503 nach 3×Retry): indianer_3-5-flash_l1, biene_3-5-flash_l2
 
-| Datei | Wörter | Sätze | Boxes | Companions |
-|---|---|---|---|---|
-| biene_2-5-flash_l3 | 558 | 38 | 3 | Westl. Honigbiene, Wildbiene, Hummeln, Bestäuber |
-| biene_3-5-flash_l3 | 465 | 31 | 3 | Bienenkönigin, Hummeln, Wildbiene, Imker |
-| indianer_2-5-flash_l3 | 587 | 31 | 4 | Kolumbus, Beringia, Ackerbau, Indianer Nordamerikas |
-| indianer_3-5-flash_l3 | 485 | 30 | 3 | Indianer Nordamerikas, Besiedlung Amerikas, Azteken |
+| Datei | L | Sätze | Companions |
+|---|---|---|---|
+| biene_2-5-flash_l1 | 1 | 18 | Westl. Honigbiene, Wildbiene, Bestäuber, Honig |
+| biene_2-5-flash_l2 | 2 | 25 | Westl. Honigbiene, Wildbiene (2 × 429) |
+| biene_2-5-flash_l3 | 3 | 38 | Westl. Honigbiene, Wildbiene, Hummeln, Bestäuber |
+| biene_3-5-flash_l1 | 1 | 22 | Honig, Hummeln, Bienenkönigin |
+| biene_3-5-flash_l2 | 2 | 24 | — (Phase-1-503) |
+| biene_3-5-flash_l3 | 3 | 31 | Bienenkönigin, Hummeln, Wildbiene, Imker |
+| indianer_2-5-flash_l1 | 1 | 25 | Ackerbau, Azteken, Kartoffel, Bisons |
+| indianer_2-5-flash_l2 | 2 | 20 | Kolumbus, Besiedlung Amerikas, Ackerbau, Azteken |
+| indianer_2-5-flash_l3 | 3 | 31 | Kolumbus, Beringia, Ackerbau, Indianer Nordamerikas |
+| indianer_3-5-flash_l1 | 1 | 23 | — (Phase-1-503) |
+| indianer_3-5-flash_l2 | 2 | 25 | Kolumbus, Amerikanischer Bison, Azteken |
+| indianer_3-5-flash_l3 | 3 | 30 | Indianer Nordamerikas, Besiedlung Amerikas, Azteken |
 
-- Review-HTML: `articles/test_compare/_review.html` — Chips zeigen Modell-Methode als Chip
-- Beobachtung: 2.5-flash wählt andere Companions als 3.5-flash, 2.5-flash schreibt ~20% mehr Wörter
-
-**generate_grounded.py + gemini_client.py: Modell wählbar (Commit ac9404b)**
-- `--gen-model`, `--skip-images`, `--output-dir` Args
-- ThinkingConfig modellspezifisch: 2.5-flash → `thinking_budget`, 3.5-flash → `thinking_level=MEDIUM`
-- `meta.generation_method` = "gemini-X.X-flash/medium" gesetzt
-
-**render_review_html.py: Report-JSONs werden jetzt gefiltert (Commit folgt)**
-- `*_report.json` werden beim Glob übersprungen
+**Beobachtungen:**
+- 2.5-flash: mehr Sätze (Biene L3: 38 vs. 31), tendenziell mehr Text
+- 3.5-flash: 503s auf Phase 1 häufiger als 2.5-flash bei Lastspitzen
+- ThinkingConfig korrekt geloggt: 2.5-flash → thinking_budget, 3.5-flash → thinking_level=MEDIUM
 
 ---
 
 ## 🔴 Nächster Schritt (Hoch)
 
 **Sichtung der Vergleichsartikel**:
-- Datei: `articles/test_compare/_review.html` (lokal, 46 KB, 4 Artikel)
-- Im Browser öffnen — 2.5-flash vs 3.5-flash direkt nebeneinander (Chip im Header)
+- Datei: `articles/test_compare/_review.html` (lokal, Thema→Stufe→Modell sortiert)
+- Stufenleiter je Modell direkt untereinander
 - ⛔ KEIN Upload vor Sichtung
 
 **batch_run.py Re-Run für biene_l3 + demokratie_l1** (test_grounded):
-- Fix für Wikipedia-429 bereits drin
 - `python scripts/batch_run.py`
 
 ---
@@ -50,13 +50,13 @@
 ### Hoch
 - **Sichtung** Vergleichsartikel (s.o.)
 - **Sichtung** indianer_l1/l2/l3 aus test_grounded
-- **batch_run.py Re-Run** für biene_l3 + demokratie_l1
+- **batch_run.py Re-Run** biene_l3 + demokratie_l1
 - **Flutter-App testen**: WfArticleListScreen mit R2-Artikeln
 
 ### Mittel
 - **Lektorat-Pipeline-Integration** (manueller Standalone-Prompt)
 - **Related Terms**: prepare_articles.py befüllt sie noch nicht
-- **indianer_l2**: 20 Sätze — über Minimum, kein review_flag
+- **biene_3-5-flash_l2 + indianer_3-5-flash_l1**: ggf. mit Companions neu generieren
 
 ### Niedrig
 - Primärkategorie-Konvention, Box-Key, ZIM→JSON Decode-Cap
@@ -64,7 +64,7 @@
 ---
 
 ## 🧊 Reserve / auf Eis
-- **Klexikon-Quiz-Run**: Checkpoint (609 Einträge) auf R2 — vor Aktivierung löschen
+- **Klexikon-Quiz-Run**: Checkpoint (609 Einträge) auf R2
 
 ## 🔵 Verschoben auf Version 1.1
 - Gallery-Artikel, Audio-Pipeline, Links/Topic-Tree, Upgrade-Dialog
