@@ -310,7 +310,7 @@ def fetch_image_candidates(
 
 # ── Download mit lokaler Datei-Cache ────────────────────────────────────────
 
-_DL_RETRY_WAITS = [30, 60, 120]
+_DL_RETRY_WAITS = [60, 120]   # 2 Versuche: Wikimedia Retry-After respektieren
 
 
 def download_image(session: requests.Session, url: str) -> bytes | None:
@@ -323,13 +323,13 @@ def download_image(session: requests.Session, url: str) -> bytes | None:
     if cache_file.exists():
         return cache_file.read_bytes()
 
-    for attempt in range(1, 4):
+    for attempt in range(1, 3):  # 2 Versuche
         try:
             resp = session.get(url, timeout=30)
             if resp.status_code == 429:
                 wait = float(resp.headers.get("Retry-After",
                              _DL_RETRY_WAITS[min(attempt - 1, len(_DL_RETRY_WAITS) - 1)]))
-                log.warning("  Download 429 (V%d/3) -- warte %ds", attempt, int(wait))
+                log.warning("  Download 429 (V%d/2) -- warte %ds", attempt, int(wait))
                 time.sleep(wait)
                 continue
             resp.raise_for_status()
@@ -348,7 +348,7 @@ def download_image(session: requests.Session, url: str) -> bytes | None:
     return None
 
 
-def _prefetch_images(session: requests.Session, candidates: list[dict], max_workers: int = 2) -> dict[str, bytes | None]:
+def prefetch_images(session: requests.Session, candidates: list[dict], max_workers: int = 2) -> dict[str, bytes | None]:
     """Laedt bis zu max_workers Bilder parallel (nutzt Cache)."""
     results: dict[str, bytes | None] = {}
 
@@ -443,7 +443,7 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
 
     # 2. Bilder parallel vorladen (2 Workers, Cache-First)
     print("   Lade Bilder (max. 2 parallel, lokaler Cache) ...")
-    image_cache = _prefetch_images(session, to_check, max_workers=2)
+    image_cache = prefetch_images(session, to_check, max_workers=2)
     req_after_dl = get_request_count()
     cached_count = sum(1 for img in to_check
                        if (_DL_CACHE_DIR / f"{hashlib.md5(img['thumb_url'].encode()).hexdigest()}{Path(urllib.parse.urlparse(img['thumb_url']).path).suffix or '.jpg'}").exists())

@@ -3,6 +3,12 @@
 generate_grounded.py
 Zwei-Phasen-Artikel-Generierung mit validiertem Companion-Grounding + Vision-Bildpool.
 
+FIX 1: thema (Anzeigetitel) vs. primaer_wikipedia (Quelle) getrennt.
+       meta.title kommt IMMER aus thema, nie aus dem Wikipedia-Quellnamen.
+FIX 2: Zwei-Phasen-Grounding (bereits vorhanden, erhalten).
+FIX 3: Bild-Deckelung: Primär max. 20, je Companion max. 6, Gesamt-Pool max. 40.
+       Batch-Download (parallel, Cache-first) vor Vision-Check.
+
 Phase 1: Flash wählt Begleitartikel aus Wikipedia-Link-Liste des Primärartikels.
          Pipeline validiert: Link vorhanden + Artikel existiert auf Wikipedia.
 Phase 2: Pipeline holt Companion-Volltexte + Vision-geprüften Bildpool.
@@ -10,7 +16,7 @@ Phase 2: Pipeline holt Companion-Volltexte + Vision-geprüften Bildpool.
 
 Usage:
     python scripts/generate_grounded.py
-    python scripts/generate_grounded.py --articles biene_l3
+    python scripts/generate_grounded.py --articles indianer_l1 indianer_l2 indianer_l3
 """
 
 import argparse
@@ -61,33 +67,76 @@ OUT_DIR            = ROOT / "articles" / "test_grounded"
 SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v3.20_production.md"
 
 # Ziel-Bildanzahl nach Appeal (Cap — nie auffüllen)
-APPEAL_TARGET = {"high": 15, "medium": 10, "low": 6}
-MAX_VISION_CHECKS = 40   # Vision-gecheckte Kandidaten gesamt
+APPEAL_TARGET     = {"high": 15, "medium": 10, "low": 6}
+MAX_VISION_CHECKS = 40   # Gesamt-Obergrenze Kandidaten vor Vision
+MAX_IMG_PRIMARY   = 20   # Max. Bilder aus Primärartikel (FIX 3)
+MAX_IMG_COMPANION = 6    # Max. Bilder je Begleitartikel (FIX 3)
 MAX_COMPANIONS    = 4    # Max. Begleitartikel die Flash wählen darf
 MAX_LINK_LIST     = 300  # Max. Links im Companion-Prompt
 
 AGE_RANGES = {1: "4-6 Jahre", 2: "7-9 Jahre", 3: "10-12 Jahre"}
 
-# ── Test-Jobs ────────────────────────────────────────────────────────────────
+# ── Test-Jobs (FIX 1: thema + primaer_wikipedia getrennt) ────────────────────
+#
+# thema            = kindgerechter Anzeigetitel → meta.title, ARTICLE_TITLE, Rahmung
+# primaer_wikipedia = exakter Wikipedia-Artikeltitel für Fakten-Fetch
+# title            = thema (Backward-Compat mit validate_article)
 
 TEST_JOBS: dict[str, dict] = {
+    "indianer_l1": {
+        "article_id":        "indianer_l1",
+        "thema":             "Indianer",
+        "primaer_wikipedia": "Indianer",
+        "title":             "Indianer",
+        "age_level":         1,
+        "topic_interest":    "high",
+        "pattern":           "history_person",
+        "category_top":      "laender_und_kulturen",
+        "category_sub":      "voelker_und_kulturen",
+    },
+    "indianer_l2": {
+        "article_id":        "indianer_l2",
+        "thema":             "Indianer",
+        "primaer_wikipedia": "Indianer",
+        "title":             "Indianer",
+        "age_level":         2,
+        "topic_interest":    "high",
+        "pattern":           "history_person",
+        "category_top":      "laender_und_kulturen",
+        "category_sub":      "voelker_und_kulturen",
+    },
+    "indianer_l3": {
+        "article_id":        "indianer_l3",
+        "thema":             "Indianer",
+        "primaer_wikipedia": "Indianer",
+        "title":             "Indianer",
+        "age_level":         3,
+        "topic_interest":    "high",
+        "pattern":           "history_person",
+        "category_top":      "laender_und_kulturen",
+        "category_sub":      "voelker_und_kulturen",
+    },
     "biene_l3": {
-        "article_id":  "biene_l3",
-        "title":       "Bienen",
-        "age_level":   3,
-        "topic_interest": "high",
-        "pattern":     "living_being",
-        "category_top": "tiere",
-        "category_sub": "insekten",
+        "article_id":        "biene_l3",
+        "thema":             "Biene",
+        "primaer_wikipedia": "Biene",
+        "title":             "Biene",
+        "age_level":         3,
+        "topic_interest":    "high",
+        "pattern":           "living_being",
+        "category_top":      "tiere",
+        "category_sub":      "insekten",
     },
     "demokratie_l1": {
-        "article_id":  "demokratie_l1",
-        "title":       "Demokratie",
-        "age_level":   1,
-        "topic_interest": "medium",
-        "pattern":     "tech_science",
-        "category_top": "gesellschaft",
-        "category_sub": "staat_und_recht",
+        "article_id":        "demokratie_l1",
+        "thema":             "Demokratie",
+        "primaer_wikipedia": "Demokratie",
+        "title":             "Demokratie",
+        "age_level":         1,
+        "topic_interest":    "medium",
+        "pattern":           "tech_science",
+        "category_top":      "gesellschaft",
+        "category_sub":      "staat_und_recht",
     },
 }
 
@@ -100,7 +149,7 @@ COMPANION_SYSTEM_PROMPT = (
 )
 
 COMPANION_PROMPT_TMPL = """\
-THEMA: {title} (Stufe {age_level}, {ages})
+THEMA: {thema} (Stufe {age_level}, {ages})
 APPEAL: {appeal}
 
 PRIMAERTEXT (erste 2000 Zeichen):
@@ -156,15 +205,15 @@ def check_articles_exist(session: requests.Session, titles: list[str]) -> dict[s
         }
         resp = session.get(WIKIPEDIA_API, params=params, timeout=30)
         resp.raise_for_status()
-        pages = resp.json().get("query", {}).get("pages", {})
-        # Normalisierungen (Redirects) berücksichtigen
+        data = resp.json()
+        pages = data.get("query", {}).get("pages", {})
         normalizations = {
             n["from"].lower(): n["to"]
-            for n in resp.json().get("query", {}).get("normalized", [])
+            for n in data.get("query", {}).get("normalized", [])
         }
         redirects = {
             r["from"].lower(): r["to"]
-            for r in resp.json().get("query", {}).get("redirects", [])
+            for r in data.get("query", {}).get("redirects", [])
         }
         for t in chunk:
             result[t] = any(
@@ -184,7 +233,7 @@ def check_articles_exist(session: requests.Session, titles: list[str]) -> dict[s
 
 def select_companions_raw(
     client: genai.Client,
-    title: str,
+    thema: str,
     age_level: int,
     appeal: str,
     primary_text: str,
@@ -193,7 +242,7 @@ def select_companions_raw(
     """Flash wählt Begleitartikel aus. Gibt Roh-Liste zurück (noch nicht validiert)."""
     link_sample = link_list[:MAX_LINK_LIST]
     prompt = COMPANION_PROMPT_TMPL.format(
-        title=title,
+        thema=thema,
         age_level=age_level,
         ages=AGE_RANGES.get(age_level, ""),
         appeal=appeal,
@@ -262,40 +311,45 @@ def validate_companions(
     return valid, rejected
 
 
-# ── Bildpool ──────────────────────────────────────────────────────────────────
+# ── Bildpool (FIX 3: Deckelung + Batch-Download) ──────────────────────────────
 
 def build_image_pool(
     session: requests.Session,
     client: genai.Client,
-    thema_display: str,
-    primary_title: str,
+    thema: str,
+    primary_wikipedia: str,
     companion_titles: list[str],
     appeal: str,
 ) -> tuple[list[dict], dict]:
     """
-    Sammelt Bilder aus Primär + Companions, dedupliziert, vision-filtert, cappt.
+    Sammelt Bilder aus Primär + Companions, cappt pro Quelle,
+    dedupliziert, batch-downloaded (Cache-first), vision-filtert.
     Gibt (accepted_images, report_dict) zurück.
     """
     all_candidates: list[dict] = []
     sources: dict[str, int] = {}
 
-    # Primär-Bilder
-    primary_imgs = fetch_image_candidates(session, primary_title, max_candidates=50)
-    sources[primary_title] = len(primary_imgs)
+    # Primär-Bilder: max. MAX_IMG_PRIMARY nach Dateiname-Vorfilter
+    primary_imgs = fetch_image_candidates(
+        session, primary_wikipedia, max_candidates=MAX_IMG_PRIMARY
+    )
+    sources[primary_wikipedia] = len(primary_imgs)
     for img in primary_imgs:
-        img["_source"] = primary_title
+        img["_source"] = primary_wikipedia
     all_candidates.extend(primary_imgs)
-    log.info("    Bilder aus '%s': %d", primary_title, len(primary_imgs))
+    log.info("    Bilder aus '%s': %d (cap=%d)", primary_wikipedia, len(primary_imgs), MAX_IMG_PRIMARY)
 
-    # Companion-Bilder
+    # Companion-Bilder: max. MAX_IMG_COMPANION pro Artikel
     for comp_title in companion_titles:
         time.sleep(0.5)
-        comp_imgs = fetch_image_candidates(session, comp_title, max_candidates=30)
+        comp_imgs = fetch_image_candidates(
+            session, comp_title, max_candidates=MAX_IMG_COMPANION
+        )
         sources[comp_title] = len(comp_imgs)
         for img in comp_imgs:
             img["_source"] = comp_title
         all_candidates.extend(comp_imgs)
-        log.info("    Bilder aus '%s': %d", comp_title, len(comp_imgs))
+        log.info("    Bilder aus '%s': %d (cap=%d)", comp_title, len(comp_imgs), MAX_IMG_COMPANION)
 
     # Deduplizieren nach filename (primary first)
     seen: set[str] = set()
@@ -306,13 +360,16 @@ def build_image_pool(
             seen.add(fn)
             unique.append(img)
 
-    log.info("    Kandidaten gesamt (dedupliziert): %d", len(unique))
-
-    # Vision-Check (cap bei MAX_VISION_CHECKS)
+    # Gesamtdeckel
     to_check = unique[:MAX_VISION_CHECKS]
+    log.info("    Kandidaten gesamt (dedupliziert): %d, Vision-Check: %d", len(unique), len(to_check))
+
+    # Vision-Check: sequenziell, 10s Pause — kein paralleles Batch-Download
+    # (parallele Downloads triggern Wikimedia Burst-Rate-Limit auf upload.wikimedia.org)
     accepted: list[dict] = []
     rejected_vision: list[dict] = []
     target = APPEAL_TARGET.get(appeal, 10)
+    _consecutive_dl_failures = 0
 
     for img in to_check:
         if len(accepted) >= target:
@@ -322,9 +379,16 @@ def build_image_pool(
         img_bytes = download_image(session, img["thumb_url"])
         if img_bytes is None:
             rejected_vision.append({**img, "reason": "Download fehlgeschlagen"})
-            time.sleep(1.0)
+            _consecutive_dl_failures += 1
+            if _consecutive_dl_failures >= 3:
+                log.warning("    3 Downloads fehlgeschlagen — 300s Wikimedia-Cooldown ...")
+                time.sleep(300)
+                _consecutive_dl_failures = 0
+            else:
+                time.sleep(10.0)
             continue
 
+        _consecutive_dl_failures = 0
         mime = "image/jpeg"
         url = img["thumb_url"].lower()
         if url.endswith(".png"):
@@ -332,7 +396,7 @@ def build_image_pool(
         elif url.endswith(".webp"):
             mime = "image/webp"
 
-        result = analyze_with_vision(client, img_bytes, mime, thema_display)
+        result = analyze_with_vision(client, img_bytes, mime, thema)
         if result is None:
             rejected_vision.append({**img, "reason": "Vision-Fehler"})
             time.sleep(2.0)
@@ -351,19 +415,19 @@ def build_image_pool(
                 "beschreibung":  result.get("beschreibung", ""),
             })
 
-        time.sleep(2.0)
+        time.sleep(10.0)  # 10s zwischen Downloads — bleibt unter Wikimedia-Rate-Limit
 
     accepted.sort(key=lambda x: (-x["relevanz"], -int(x["hero_tauglich"])))
     accepted = accepted[:target]
 
     report = {
-        "sources":           sources,
-        "candidates_total":  len(unique),
-        "vision_checked":    min(len(to_check), len(accepted) + len(rejected_vision)),
-        "accepted":          len(accepted),
-        "rejected":          len(rejected_vision),
-        "target":            target,
-        "hero":              next(
+        "sources":          sources,
+        "candidates_total": len(unique),
+        "vision_checked":   len(accepted) + len(rejected_vision),
+        "accepted":         len(accepted),
+        "rejected":         len(rejected_vision),
+        "target":           target,
+        "hero":             next(
             (a["filename"] for a in accepted if a["hero_tauglich"]),
             accepted[0]["filename"] if accepted else None,
         ),
@@ -381,10 +445,12 @@ def build_grounded_user_message(
     images: list[dict],
 ) -> str:
     """Baut die User-Message mit Primär- + Companion-Texten + Vision-Bildpool."""
+    thema = job.get("thema", job["title"])
+    primaer_src = job.get("primaer_wikipedia", job["title"])
     parts: list[str] = []
 
     # Wikipedia-Texte (Primär + Companions)
-    parts += [f"WIKIPEDIA_TEXT_1 (Primaarartikel: {job['title']}):", primary_text, ""]
+    parts += [f"WIKIPEDIA_TEXT_1 (Primaarartikel: {primaer_src}):", primary_text, ""]
     for i, comp in enumerate(companion_order, 2):
         text = companion_texts.get(comp, "")
         if text:
@@ -392,7 +458,7 @@ def build_grounded_user_message(
 
     # Pflichtfelder
     parts += [
-        f"ARTICLE_TITLE: {job['title']}",
+        f"ARTICLE_TITLE: {thema}",
         f"AGE_LEVEL: {job['age_level']}",
     ]
     if job.get("topic_interest"):
@@ -443,35 +509,38 @@ def run_grounded_article(
     Führt Zwei-Phasen-Generierung durch.
     Gibt (article_dict_or_None, phase_report) zurück.
     """
-    article_id = job["article_id"]
-    title      = job["title"]
-    appeal     = job.get("topic_interest", "medium")
+    article_id       = job["article_id"]
+    thema            = job.get("thema", job["title"])
+    primaer_wikipedia = job.get("primaer_wikipedia", job["title"])
+    appeal           = job.get("topic_interest", "medium")
+
     report: dict = {
         "article_id": article_id,
-        "title":      title,
+        "thema":      thema,
+        "primaer_wikipedia": primaer_wikipedia,
         "phase1":     {},
         "phase2":     {},
         "errors":     [],
     }
 
     # ── Primärtext ────────────────────────────────────────────────────────────
-    log.info("  Hole Primärtext: '%s'", title)
+    log.info("  Hole Primaertext: '%s' (thema='%s')", primaer_wikipedia, thema)
     try:
-        primary_text = fetch_wikipedia_text(session, title)
+        primary_text = fetch_wikipedia_text(session, primaer_wikipedia)
     except Exception as e:
         report["errors"].append(f"Wikipedia-Fetch: {e}")
         return None, report
 
     if len(primary_text) < 300:
-        report["errors"].append(f"Primärtext zu kurz: {len(primary_text)} Zeichen")
+        report["errors"].append(f"Primaertext zu kurz: {len(primary_text)} Zeichen")
         return None, report
 
-    log.info("  Primärtext: %d Zeichen", len(primary_text))
+    log.info("  Primaertext: %d Zeichen", len(primary_text))
 
     # ── Phase 1: Links holen + Flash-Companion-Auswahl ────────────────────────
-    log.info("  Phase 1: Link-Liste holen ...")
+    log.info("  Phase 1: Link-Liste holen (%s) ...", primaer_wikipedia)
     try:
-        link_list = fetch_wikipedia_links(session, title)
+        link_list = fetch_wikipedia_links(session, primaer_wikipedia)
     except Exception as e:
         report["errors"].append(f"Links-Fetch: {e}")
         link_list = []
@@ -479,9 +548,9 @@ def run_grounded_article(
     link_set = set(link_list)
     log.info("  %d interne Links gefunden", len(link_list))
 
-    log.info("  Phase 1: Flash wählt Companions ...")
+    log.info("  Phase 1: Flash waehlt Companions (Thema: %s) ...", thema)
     raw_companions = select_companions_raw(
-        client, title, job["age_level"], appeal, primary_text, link_list
+        client, thema, job["age_level"], appeal, primary_text, link_list
     )
     log.info("  Flash-Vorschlag: %s", raw_companions)
 
@@ -489,15 +558,14 @@ def run_grounded_article(
         session, raw_companions, link_set
     )
     log.info("  Validiert: %s", valid_companions)
-    if rejected_companions:
-        for r in rejected_companions:
-            log.warning("  Verworfen: %s (%s)", r["title"], r["reason"])
+    for r in rejected_companions:
+        log.warning("  Verworfen: %s (%s)", r["title"], r["reason"])
 
     report["phase1"] = {
-        "link_count":        len(link_list),
-        "raw_companions":    raw_companions,
-        "valid_companions":  valid_companions,
-        "rejected":          rejected_companions,
+        "link_count":       len(link_list),
+        "raw_companions":   raw_companions,
+        "valid_companions": valid_companions,
+        "rejected":         rejected_companions,
     }
 
     # ── Phase 2: Companion-Texte holen ───────────────────────────────────────
@@ -510,17 +578,17 @@ def run_grounded_article(
         except Exception as e:
             log.warning("  Companion-Text '%s' Fehler: %s", comp, e)
 
-    # ── Bildpool ─────────────────────────────────────────────────────────────
-    log.info("  Baue Bildpool (Primär + %d Companions) ...", len(valid_companions))
+    # ── Bildpool (FIX 3: Deckelung + Batch-Download) ─────────────────────────
+    log.info("  Baue Bildpool (Primaer + %d Companions) ...", len(valid_companions))
     images, img_report = build_image_pool(
-        session, client, title,
-        title, valid_companions, appeal
+        session, client, thema,
+        primaer_wikipedia, valid_companions, appeal
     )
     log.info("  Bildpool: %d akzeptiert, Hero=%s", img_report["accepted"], img_report["hero"])
     report["phase2"]["images"] = img_report
 
     # ── Phase 2: Artikel generieren ───────────────────────────────────────────
-    log.info("  Phase 2: Artikel generieren ...")
+    log.info("  Phase 2: Artikel generieren (Thema: %s, Stufe %d) ...", thema, job["age_level"])
     user_msg = build_grounded_user_message(
         job, primary_text, companion_texts, valid_companions, images
     )
@@ -541,8 +609,9 @@ def run_grounded_article(
         (errors_dir / f"{article_id}_raw.txt").write_text(raw_response or "", encoding="utf-8")
         return None, report
 
-    # Meta fixieren
+    # Meta fixieren (FIX 1: title immer aus thema, nie aus Quellnamen)
     article.setdefault("meta", {})["id"] = article_id
+    article["meta"]["title"] = thema                          # FIX 1: override
     article["meta"]["generated_at"] = datetime.now(timezone.utc).isoformat()
     article["meta"]["grounding_companions"] = valid_companions
 
@@ -589,11 +658,14 @@ def main() -> None:
     for article_id in args.articles:
         job = TEST_JOBS.get(article_id)
         if not job:
-            log.error("Unbekannte article_id: %s", article_id)
+            log.error("Unbekannte article_id: %s (verfuegbar: %s)",
+                      article_id, list(TEST_JOBS.keys()))
             continue
 
+        thema = job.get("thema", job["title"])
         print(f"\n{'='*60}")
-        print(f"GENERIERE: {article_id} ({job['title']}, Stufe {job['age_level']})")
+        print(f"GENERIERE: {article_id} | Thema: {thema} | Stufe {job['age_level']}")
+        print(f"  primaer_wikipedia: {job.get('primaer_wikipedia', thema)}")
         print(f"{'='*60}")
 
         article, report = run_grounded_article(session, client, system_prompt, job)
@@ -611,6 +683,7 @@ def main() -> None:
                 json.dumps(article, ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
+            meta_title = article.get("meta", {}).get("title", "?")
             n_imgs = len(article.get("images", []))
             n_sents = sum(
                 len(s.get("sentences", []))
@@ -618,6 +691,7 @@ def main() -> None:
             )
             review = " [REVIEW]" if article["meta"].get("review_flag") else ""
             print(f"\n  Artikel gespeichert: {out_path.relative_to(ROOT)}")
+            print(f"  meta.title = '{meta_title}' (erwartet: '{thema}')")
             print(f"  Bilder: {n_imgs} | Saetze: {n_sents}{review}")
         else:
             print(f"\n  FEHLER: {report.get('errors')}")
@@ -630,7 +704,7 @@ def main() -> None:
         print(f"    Flash-Vorschlag:   {p1.get('raw_companions', [])}")
         print(f"    Validiert:         {p1.get('valid_companions', [])}")
         for r in p1.get("rejected", []):
-            print(f"    Verworfen:        {r['title']} ({r['reason']})")
+            print(f"    Verworfen:         {r['title']} ({r['reason']})")
         img = p2.get("images", {})
         if img:
             print(f"\n  Bildpool:")
