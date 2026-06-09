@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-09T14:13:49Z -->
+<!-- updated: 2026-06-09T16:32:20Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -21,7 +21,13 @@
 - L1: 23 Sätze | L2: 28 Sätze | L3: 45 Sätze | alle ohne Fehler
 - Review-HTML: articles/test_compass/_review.html (lokal)
 
-**v3.22-Kerndefinition + test_compass2 (2026-06-09)** ← AKTUELL
+**test_compass3 (2026-06-09)** ← AKTUELL
+- Regionen-Kriterium aus Kompass entfernt — freie Auswahl
+- Phase 1: 503×3 (Modell-Last) → companions=[] — Befund "Sitting Bull/Bison zurück?" nicht auswertbar
+- L1: 20 Sätze | L2: 29 | L3: 31 | method='gemini-3.5-flash/medium/v3.22'
+- Review-HTML: articles/test_compass3/_review.html (lokal)
+
+**v3.22-Kerndefinition + test_compass2 (2026-06-09)**
 - Prompt v3.22: [Kerndefinition aus der Einleitung — Pflicht] + Kompass-Spannweite
 - Kompass-Vorschlag: Tipi, Totempfahl, Federhaube, Maya, Inka
 - Aufgelöst: Totempfahl → Wappenpfahl; Federhaube: nur 154 Zeichen (Stub-Artikel)
