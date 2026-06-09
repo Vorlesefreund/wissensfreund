@@ -186,9 +186,6 @@ Kriterien:
 - Vertiefen das Thema fuer ein Kind: konkret, anschaulich, lebendig
 - Auch solche, mit denen sich laendlaeufige Vorstellungen aufgreifen und richtigstellen lassen
 - Fokuserhaltend: Thema vertiefen, NICHT zu Eltern-/Nachbarthemen wechseln
-- Umfasst das Thema mehrere Regionen oder Grossgruppen, repraesentieren die Companions diese Spannweite
-  statt in einer Region zu clustern (z.B. bei Indianer: neben nordamerikanischen Icons auch meso-/
-  suedamerikanische wie Azteken, Maya oder Inka). Cap bleibt ≤5 — umverteilen, nicht erweitern.
 - Lieber weniger als ungeeignete auffuellen (kein Mindestwert)
 Ausgabe NUR JSON: {{"companions": ["Lemma1","Lemma2",...]}}"""
 
