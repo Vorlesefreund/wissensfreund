@@ -563,6 +563,7 @@ def run_grounded_article(
 
     # ── Primärtext ────────────────────────────────────────────────────────────
     log.info("  Hole Primaertext: '%s' (thema='%s')", primaer_wikipedia, thema)
+    time.sleep(2.0)   # Wikipedia-Rate-Limit: Cooldown zwischen Artikeln
     try:
         primary_text = fetch_wikipedia_text(session, primaer_wikipedia)
     except Exception as e:
