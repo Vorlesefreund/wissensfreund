@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-09T16:32:20Z -->
+<!-- updated: 2026-06-09T17:03:39Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -22,9 +22,10 @@
 - Review-HTML: articles/test_compass/_review.html (lokal)
 
 **test_compass3 (2026-06-09)** ← AKTUELL
-- Regionen-Kriterium aus Kompass entfernt — freie Auswahl
-- Phase 1: 503×3 (Modell-Last) → companions=[] — Befund "Sitting Bull/Bison zurück?" nicht auswertbar
-- L1: 20 Sätze | L2: 29 | L3: 31 | method='gemini-3.5-flash/medium/v3.22'
+- Regionen-Kriterium entfernt, freie Auswahl; Phase-1-Backoff: 6 Versuche, exp. (60/120/240/300s)
+- Kompass: Tipi, Totempfahl→Wappenpfahl, Christoph Kolumbus, Amerikanischer Bison, Maya
+- Sitting Bull nicht dabei; Bison JA, Pueblo NEIN — Kolumbus statt Pueblo/Sitting Bull
+- L1: 22 Sätze | L2: 28 | L3: 46 | method='gemini-3.5-flash/medium/v3.22'
 - Review-HTML: articles/test_compass3/_review.html (lokal)
 
 **v3.22-Kerndefinition + test_compass2 (2026-06-09)**
