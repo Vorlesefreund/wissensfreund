@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-09T14:02:59Z -->
+<!-- updated: 2026-06-09T14:13:49Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -20,6 +20,14 @@
 - Phase 1 lief EINMAL (nicht 3×); alle 3 Stufen teilen denselben Quellblock
 - L1: 23 Sätze | L2: 28 Sätze | L3: 45 Sätze | alle ohne Fehler
 - Review-HTML: articles/test_compass/_review.html (lokal)
+
+**v3.22-Kerndefinition + test_compass2 (2026-06-09)** ← AKTUELL
+- Prompt v3.22: [Kerndefinition aus der Einleitung — Pflicht] + Kompass-Spannweite
+- Kompass-Vorschlag: Tipi, Totempfahl, Federhaube, Maya, Inka
+- Aufgelöst: Totempfahl → Wappenpfahl; Federhaube: nur 154 Zeichen (Stub-Artikel)
+- Final: Tipi, Wappenpfahl, Federhaube, Maya, **Inka** — meso-/südamerikanisch vertreten
+- method='gemini-3.5-flash/medium/v3.22' | L1: 25 Sätze | L2: 25 | L3: 43
+- Review-HTML: articles/test_compass2/_review.html (lokal)
 
 **v3.21-Lebendigkeits-Paket + test_v321 (2026-06-09):**
 - Prompt v3.21, 3 Artikel Indianer L1/L2/L3 | companions=[] (Phase-1-503 wg. Modell-Last)
