@@ -1,12 +1,18 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-09T09:16:02Z -->
+<!-- updated: 2026-06-09T09:36:21Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Gemini Batch API POC: 3/3 Artikel generiert (2026-06-09)** ← AKTUELL
+**render_review_html.py: Sichtungs-HTML-Generator (2026-06-09)** ← AKTUELL
+- Wandelt Artikel-JSONs in druckfertige HTML-Sichtungsdatei um
+- Alle Box-Typen (wow/fakt/stimmt_das/warnung), Quiz mit Antwort-Markierung, Bildliste
+- Ausgabe: `articles/test_grounded/_review.html` (44 KB, 8 Artikel, nicht im Repo)
+- Usage: `python scripts/render_review_html.py [--input <ordner>]`
+
+**Gemini Batch API POC: 3/3 Artikel generiert (2026-06-09)**
 - batch_run.py + dashboard.html implementiert und erfolgreich gelaufen
 - **0 × 503 auf Batch-Calls** — Überlastungsproblem gelöst
 - Gesamtlaufzeit: ~2h 6min (09:09–11:15)
@@ -28,7 +34,8 @@
 ## 🔴 Nächster Schritt (Hoch)
 
 **Sichtung der 3 generierten Artikel** (vor Upload):
-- articles/test_grounded/indianer_l1.json / l2.json / l3.json
+- Datei: `articles/test_grounded/_review.html` (lokal, nicht im Repo)
+- Im Browser öffnen oder drucken — alle Artikel auf eigenen Seiten
 - Prüfen: Inhalt aus Wikipedia-Quelltext? Altersstufen-Sprache korrekt? Bilder sinnvoll?
 - ⛔ KEIN Upload vor manueller Sichtung
 

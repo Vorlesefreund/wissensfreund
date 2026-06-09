@@ -61,3 +61,4 @@ scrape_out/
 dry_run_out/
 scrape_image_results.json
 dumpstate-*.zip
+articles/**/_review.html
