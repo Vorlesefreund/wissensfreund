@@ -451,7 +451,7 @@ def main() -> None:
 
     json_files = sorted(
         f for f in input_dir.glob("*.json")
-        if not f.name.startswith("_")
+        if not f.name.startswith("_") and not f.stem.endswith("_report")
     )
     if not json_files:
         print(f"Keine *.json-Dateien in {input_dir}")

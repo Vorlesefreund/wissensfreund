@@ -1,56 +1,55 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-09T09:36:21Z -->
+<!-- updated: 2026-06-09T10:27:16Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**render_review_html.py: Sichtungs-HTML-Generator (2026-06-09)** ← AKTUELL
-- Wandelt Artikel-JSONs in druckfertige HTML-Sichtungsdatei um
-- Alle Box-Typen (wow/fakt/stimmt_das/warnung), Quiz mit Antwort-Markierung, Bildliste
-- Ausgabe: `articles/test_grounded/_review.html` (44 KB, 8 Artikel, nicht im Repo)
-- Usage: `python scripts/render_review_html.py [--input <ordner>]`
+**Modell-Vergleichslauf: 4/4 Artikel generiert (2026-06-09)** ← AKTUELL
+- Themen: Indianer + Biene | Stufe 3 | Bild-Pipeline deaktiviert
+- Modelle: gemini-2.5-flash vs. gemini-3.5-flash (beide thinking=medium)
+- Output: `articles/test_compare/` (lokal, nicht committed)
+- Ergebnisse:
 
-**Gemini Batch API POC: 3/3 Artikel generiert (2026-06-09)**
-- batch_run.py + dashboard.html implementiert und erfolgreich gelaufen
-- **0 × 503 auf Batch-Calls** — Überlastungsproblem gelöst
-- Gesamtlaufzeit: ~2h 6min (09:09–11:15)
-  - Phase 1 Batch (Companion-Auswahl): ~33 Min
-  - Bildpools + Companion-Texte: ~5 Min
-  - Phase 2 Batch (Artikel-Generierung): ~47 Min
-- Ergebnisse in articles/test_grounded/:
-  - indianer_l1: title=Indianer | 2 sections | 11 sätze | 11 bilder | hero=En-chief-sitting-bull.jpg
-  - indianer_l2: title=Indianer | 4 sections | 20 sätze | 9 bilder | hero=En-chief-sitting-bull.jpg
-  - indianer_l3: title=Indianer | 6 sections | 30 sätze | 8 bilder | hero=En-chief-sitting-bull.jpg
-  - review_flag=False bei allen drei — kein Lektorat-Pflicht-Flag
-- biene_l3 + demokratie_l1: Wikipedia-429 beim Fetch (Fix committed: Dedup + Delays)
+| Datei | Wörter | Sätze | Boxes | Companions |
+|---|---|---|---|---|
+| biene_2-5-flash_l3 | 558 | 38 | 3 | Westl. Honigbiene, Wildbiene, Hummeln, Bestäuber |
+| biene_3-5-flash_l3 | 465 | 31 | 3 | Bienenkönigin, Hummeln, Wildbiene, Imker |
+| indianer_2-5-flash_l3 | 587 | 31 | 4 | Kolumbus, Beringia, Ackerbau, Indianer Nordamerikas |
+| indianer_3-5-flash_l3 | 485 | 30 | 3 | Indianer Nordamerikas, Besiedlung Amerikas, Azteken |
 
-**image_vision_filter.py: Wurzelfix Wikimedia-Rate-Limit (Commit 6c4c159)**
-- Originale statt Thumbnails → 0×429, 30/30 Downloads, 1 API-Request
+- Review-HTML: `articles/test_compare/_review.html` — Chips zeigen Modell-Methode als Chip
+- Beobachtung: 2.5-flash wählt andere Companions als 3.5-flash, 2.5-flash schreibt ~20% mehr Wörter
+
+**generate_grounded.py + gemini_client.py: Modell wählbar (Commit ac9404b)**
+- `--gen-model`, `--skip-images`, `--output-dir` Args
+- ThinkingConfig modellspezifisch: 2.5-flash → `thinking_budget`, 3.5-flash → `thinking_level=MEDIUM`
+- `meta.generation_method` = "gemini-X.X-flash/medium" gesetzt
+
+**render_review_html.py: Report-JSONs werden jetzt gefiltert (Commit folgt)**
+- `*_report.json` werden beim Glob übersprungen
 
 ---
 
 ## 🔴 Nächster Schritt (Hoch)
 
-**Sichtung der 3 generierten Artikel** (vor Upload):
-- Datei: `articles/test_grounded/_review.html` (lokal, nicht im Repo)
-- Im Browser öffnen oder drucken — alle Artikel auf eigenen Seiten
-- Prüfen: Inhalt aus Wikipedia-Quelltext? Altersstufen-Sprache korrekt? Bilder sinnvoll?
-- ⛔ KEIN Upload vor manueller Sichtung
+**Sichtung der Vergleichsartikel**:
+- Datei: `articles/test_compare/_review.html` (lokal, 46 KB, 4 Artikel)
+- Im Browser öffnen — 2.5-flash vs 3.5-flash direkt nebeneinander (Chip im Header)
+- ⛔ KEIN Upload vor Sichtung
 
-**batch_run.py Re-Run für biene_l3 + demokratie_l1** (kurz nach Sichtung):
-```
-python scripts/batch_run.py
-```
-(Fix für Wikipedia-429 bereits drin — Dedup + 1s/0.5s Sleep)
+**batch_run.py Re-Run für biene_l3 + demokratie_l1** (test_grounded):
+- Fix für Wikipedia-429 bereits drin
+- `python scripts/batch_run.py`
 
 ---
 
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch
-- **Sichtung** indianer_l1/l2/l3 (s.o.)
+- **Sichtung** Vergleichsartikel (s.o.)
+- **Sichtung** indianer_l1/l2/l3 aus test_grounded
 - **batch_run.py Re-Run** für biene_l3 + demokratie_l1
 - **Flutter-App testen**: WfArticleListScreen mit R2-Artikeln
 
