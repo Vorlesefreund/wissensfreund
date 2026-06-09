@@ -76,6 +76,13 @@ MAX_LINK_LIST     = 300  # Max. Links im Companion-Prompt
 
 AGE_RANGES = {1: "4-6 Jahre", 2: "7-9 Jahre", 3: "10-12 Jahre"}
 
+
+def _make_thinking_config(model: str, budget_for_2_5: int) -> types.ThinkingConfig:
+    """Gibt das modellspezifische ThinkingConfig zurück (medium)."""
+    if "2.5" in model:
+        return types.ThinkingConfig(thinking_budget=budget_for_2_5)
+    return types.ThinkingConfig(thinking_level=types.ThinkingLevel.MEDIUM)
+
 # ── Test-Jobs (FIX 1: thema + primaer_wikipedia getrennt) ────────────────────
 #
 # thema            = kindgerechter Anzeigetitel → meta.title, ARTICLE_TITLE, Rahmung
@@ -238,8 +245,9 @@ def select_companions_raw(
     appeal: str,
     primary_text: str,
     link_list: list[str],
+    model: str = GEMINI_MODEL,
 ) -> list[str]:
-    """Flash wählt Begleitartikel aus. Gibt Roh-Liste zurück (noch nicht validiert)."""
+    """Flash/Gemini wählt Begleitartikel aus. Gibt Roh-Liste zurück (noch nicht validiert)."""
     link_sample = link_list[:MAX_LINK_LIST]
     prompt = COMPANION_PROMPT_TMPL.format(
         thema=thema,
@@ -250,16 +258,18 @@ def select_companions_raw(
         n_links=len(link_sample),
         link_list=", ".join(link_sample),
     )
+    thinking = _make_thinking_config(model, budget_for_2_5=1024)
+    log.info("  Phase 1 Companion-Auswahl mit Modell=%s", model)
 
     for attempt in range(1, 4):
         try:
             response = client.models.generate_content(
-                model=GEMINI_MODEL,
+                model=model,
                 contents=prompt,
                 config=types.GenerateContentConfig(
                     system_instruction=COMPANION_SYSTEM_PROMPT,
                     temperature=0.3,
-                    thinking_config=types.ThinkingConfig(thinking_budget=1024),
+                    thinking_config=thinking,
                 ),
             )
             text = (response.text or "").strip()
@@ -499,15 +509,22 @@ def run_grounded_article(
     client: genai.Client,
     system_prompt: str,
     job: dict,
+    model: str = GEMINI_MODEL,
+    skip_images: bool = False,
+    out_dir: "Path | None" = None,
 ) -> tuple[dict | None, dict]:
     """
     Führt Zwei-Phasen-Generierung durch.
     Gibt (article_dict_or_None, phase_report) zurück.
     """
+    effective_out_dir = out_dir or OUT_DIR
     article_id       = job["article_id"]
     thema            = job.get("thema", job["title"])
     primaer_wikipedia = job.get("primaer_wikipedia", job["title"])
     appeal           = job.get("topic_interest", "medium")
+    model_slug       = model.replace("gemini-", "").replace(".", "-")
+    generation_method = f"{model}/medium"
+    log.info("  Modell: %s | skip_images=%s | out_dir=%s", model, skip_images, effective_out_dir)
 
     report: dict = {
         "article_id": article_id,
@@ -543,9 +560,9 @@ def run_grounded_article(
     link_set = set(link_list)
     log.info("  %d interne Links gefunden", len(link_list))
 
-    log.info("  Phase 1: Flash waehlt Companions (Thema: %s) ...", thema)
+    log.info("  Phase 1: waehlt Companions (Thema: %s, Modell: %s) ...", thema, model)
     raw_companions = select_companions_raw(
-        client, thema, job["age_level"], appeal, primary_text, link_list
+        client, thema, job["age_level"], appeal, primary_text, link_list, model=model
     )
     log.info("  Flash-Vorschlag: %s", raw_companions)
 
@@ -573,24 +590,33 @@ def run_grounded_article(
         except Exception as e:
             log.warning("  Companion-Text '%s' Fehler: %s", comp, e)
 
-    # ── Bildpool (FIX 3: Deckelung + Batch-Download) ─────────────────────────
-    log.info("  Baue Bildpool (Primaer + %d Companions) ...", len(valid_companions))
-    images, img_report = build_image_pool(
-        session, client, thema,
-        primaer_wikipedia, valid_companions, appeal
-    )
-    log.info("  Bildpool: %d akzeptiert, Hero=%s", img_report["accepted"], img_report["hero"])
-    report["phase2"]["images"] = img_report
+    # ── Bildpool (optional: skip für Vergleichsläufe) ────────────────────────
+    if skip_images:
+        images = []
+        log.info("  Bildpool: übersprungen (--skip-images)")
+        report["phase2"]["images"] = {"skipped": True}
+    else:
+        log.info("  Baue Bildpool (Primaer + %d Companions) ...", len(valid_companions))
+        images, img_report = build_image_pool(
+            session, client, thema,
+            primaer_wikipedia, valid_companions, appeal
+        )
+        log.info("  Bildpool: %d akzeptiert, Hero=%s", img_report["accepted"], img_report["hero"])
+        report["phase2"]["images"] = img_report
 
     # ── Phase 2: Artikel generieren ───────────────────────────────────────────
-    log.info("  Phase 2: Artikel generieren (Thema: %s, Stufe %d) ...", thema, job["age_level"])
+    log.info("  Phase 2: Artikel generieren (Thema: %s, Stufe %d, Modell: %s) ...",
+             thema, job["age_level"], model)
     user_msg = build_grounded_user_message(
         job, primary_text, companion_texts, valid_companions, images
     )
     report["phase2"]["user_msg_len"] = len(user_msg)
 
+    phase2_thinking = _make_thinking_config(model, budget_for_2_5=8192)
     try:
-        raw_response = gemini_client.call_gemini(system_prompt, user_msg)
+        raw_response = gemini_client.call_gemini(
+            system_prompt, user_msg, model=model, thinking_config=phase2_thinking
+        )
     except Exception as e:
         report["errors"].append(f"Gemini-Fehler Phase 2: {e}")
         return None, report
@@ -599,7 +625,7 @@ def run_grounded_article(
         article = parse_article_json(raw_response)
     except (json.JSONDecodeError, ValueError) as e:
         report["errors"].append(f"JSON-Parse: {e}")
-        errors_dir = OUT_DIR / "_errors"
+        errors_dir = effective_out_dir / "_errors"
         errors_dir.mkdir(parents=True, exist_ok=True)
         (errors_dir / f"{article_id}_raw.txt").write_text(raw_response or "", encoding="utf-8")
         return None, report
@@ -609,6 +635,7 @@ def run_grounded_article(
     article["meta"]["title"] = thema                          # FIX 1: override
     article["meta"]["generated_at"] = datetime.now(timezone.utc).isoformat()
     article["meta"]["grounding_companions"] = valid_companions
+    article["meta"]["generation_method"] = generation_method
 
     # Validieren
     val_errors = validate_article(article, job)
@@ -633,7 +660,23 @@ def main() -> None:
         default=list(TEST_JOBS.keys()),
         help="Artikel-IDs zum Generieren (default: alle Test-Jobs)",
     )
+    parser.add_argument(
+        "--gen-model", default=None,
+        help="Gemini-Modell (z.B. gemini-2.5-flash, gemini-3.5-flash). Default: gemini-2.5-flash",
+    )
+    parser.add_argument(
+        "--skip-images", action="store_true",
+        help="Bildpipeline komplett überspringen (nur Text + Grounding)",
+    )
+    parser.add_argument(
+        "--output-dir", default=None,
+        help="Ausgabeverzeichnis (default: articles/test_grounded)",
+    )
     args = parser.parse_args()
+
+    model    = args.gen_model or GEMINI_MODEL
+    out_dir  = Path(args.output_dir) if args.output_dir else OUT_DIR
+    model_slug = model.replace("gemini-", "").replace(".", "-")
 
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
@@ -642,13 +685,14 @@ def main() -> None:
 
     system_prompt = SYSTEM_PROMPT_PATH.read_text(encoding="utf-8")
     log.info("System-Prompt: %d Zeichen", len(system_prompt))
+    log.info("Modell: %s | skip_images: %s | out_dir: %s", model, args.skip_images, out_dir)
 
     client = genai.Client(api_key=api_key)
     session = requests.Session()
     session.headers["User-Agent"] = USER_AGENT
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    (OUT_DIR / "_errors").mkdir(exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    (out_dir / "_errors").mkdir(exist_ok=True)
 
     for article_id in args.articles:
         job = TEST_JOBS.get(article_id)
@@ -657,23 +701,36 @@ def main() -> None:
                       article_id, list(TEST_JOBS.keys()))
             continue
 
+        # Bei --gen-model: article_id und Dateinamen mit Modell-Slug versehen
+        if args.gen_model:
+            # z.B. indianer_l3 → indianer_2-5-flash_l3
+            parts = article_id.rsplit("_", 1)      # ["indianer", "l3"]
+            effective_id = f"{parts[0]}_{model_slug}_{parts[1]}"
+        else:
+            effective_id = article_id
+
+        job = {**job, "article_id": effective_id}  # Kopie, original unverändert
+
         thema = job.get("thema", job["title"])
         print(f"\n{'='*60}")
-        print(f"GENERIERE: {article_id} | Thema: {thema} | Stufe {job['age_level']}")
-        print(f"  primaer_wikipedia: {job.get('primaer_wikipedia', thema)}")
+        print(f"GENERIERE: {effective_id} | Thema: {thema} | Stufe {job['age_level']}")
+        print(f"  Modell: {model} | primaer_wikipedia: {job.get('primaer_wikipedia', thema)}")
         print(f"{'='*60}")
 
-        article, report = run_grounded_article(session, client, system_prompt, job)
+        article, report = run_grounded_article(
+            session, client, system_prompt, job,
+            model=model, skip_images=args.skip_images, out_dir=out_dir,
+        )
 
         # Report speichern (immer)
-        report_path = OUT_DIR / f"{article_id}_report.json"
+        report_path = out_dir / f"{effective_id}_report.json"
         report_path.write_text(
             json.dumps(report, ensure_ascii=False, indent=2),
             encoding="utf-8",
         )
 
         if article:
-            out_path = OUT_DIR / f"{article_id}.json"
+            out_path = out_dir / f"{effective_id}.json"
             out_path.write_text(
                 json.dumps(article, ensure_ascii=False, indent=2),
                 encoding="utf-8",
@@ -685,8 +742,9 @@ def main() -> None:
                 for s in article.get("sections", [])
             )
             review = " [REVIEW]" if article["meta"].get("review_flag") else ""
+            gen_m  = article["meta"].get("generation_method", "?")
             print(f"\n  Artikel gespeichert: {out_path.relative_to(ROOT)}")
-            print(f"  meta.title = '{meta_title}' (erwartet: '{thema}')")
+            print(f"  meta.title = '{meta_title}' | generation_method = '{gen_m}'")
             print(f"  Bilder: {n_imgs} | Saetze: {n_sents}{review}")
         else:
             print(f"\n  FEHLER: {report.get('errors')}")
@@ -696,18 +754,20 @@ def main() -> None:
         p2 = report.get("phase2", {})
         print(f"\n  Phase 1:")
         print(f"    Links gefunden:    {p1.get('link_count', 0)}")
-        print(f"    Flash-Vorschlag:   {p1.get('raw_companions', [])}")
+        print(f"    Modell-Vorschlag:  {p1.get('raw_companions', [])}")
         print(f"    Validiert:         {p1.get('valid_companions', [])}")
         for r in p1.get("rejected", []):
             print(f"    Verworfen:         {r['title']} ({r['reason']})")
         img = p2.get("images", {})
-        if img:
+        if img and not img.get("skipped"):
             print(f"\n  Bildpool:")
             for src, cnt in img.get("sources", {}).items():
                 print(f"    {src}: {cnt} Kandidaten")
             print(f"    Vision-gecheckt: {img.get('vision_checked')}")
             print(f"    Akzeptiert:      {img.get('accepted')} / Target {img.get('target')}")
             print(f"    Hero-Bild:       {img.get('hero')}")
+        elif img.get("skipped"):
+            print(f"\n  Bildpool: übersprungen")
         if report.get("errors"):
             print(f"\n  Fehler: {report['errors']}")
 

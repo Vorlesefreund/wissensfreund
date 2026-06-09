@@ -1,6 +1,6 @@
 """
 gemini_client.py
-Schlankes Modul für Gemini 2.5 Flash API-Aufrufe in der Wissensfreund-Pipeline.
+Schlankes Modul für Gemini API-Aufrufe in der Wissensfreund-Pipeline.
 """
 
 import logging
@@ -20,8 +20,13 @@ RETRY_WAIT_SECONDS  = 60
 _DOTENV_PATH        = Path(__file__).parent.parent / ".env"
 
 
-def call_gemini(system_prompt: str, user_message: str) -> str:
-    """Ruft Gemini 2.5 Flash auf und gibt den Antworttext zurück."""
+def call_gemini(
+    system_prompt: str,
+    user_message: str,
+    model: str | None = None,
+    thinking_config: types.ThinkingConfig | None = None,
+) -> str:
+    """Ruft Gemini auf und gibt den Antworttext zurück. Modell + ThinkingConfig wählbar."""
     load_dotenv(_DOTENV_PATH)
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
@@ -30,17 +35,19 @@ def call_gemini(system_prompt: str, user_message: str) -> str:
             "Entweder in .env (GEMINI_API_KEY=...) oder als Umgebungsvariable."
         )
 
+    effective_model   = model or GEMINI_MODEL
+    effective_thinking = thinking_config or types.ThinkingConfig(thinking_budget=8192)
     client = genai.Client(api_key=api_key)
 
     for attempt in range(1, RETRY_ATTEMPTS + 1):
         try:
             response = client.models.generate_content(
-                model=GEMINI_MODEL,
+                model=effective_model,
                 contents=user_message,
                 config=types.GenerateContentConfig(
                     system_instruction=system_prompt,
                     temperature=0.6,
-                    thinking_config=types.ThinkingConfig(thinking_budget=8192),
+                    thinking_config=effective_thinking,
                 ),
             )
             # Thinking-Mode kann response.text=None liefern → Parts direkt auslesen
@@ -79,6 +86,6 @@ def call_gemini(system_prompt: str, user_message: str) -> str:
                 )
                 time.sleep(RETRY_WAIT_SECONDS)
                 continue
-            raise RuntimeError(f"Gemini API-Fehler ({GEMINI_MODEL}): {e}") from e
+            raise RuntimeError(f"Gemini API-Fehler ({effective_model}): {e}") from e
 
     raise RuntimeError(f"Gemini API: alle {RETRY_ATTEMPTS} Versuche ausgeschöpft")
