@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
 """
 batch_run.py
-POC: Gemini Batch API für Zwei-Phasen-Artikel-Generierung (5 Test-Artikel).
+POC (NICHT Produktionspfad): Gemini Batch API für Zwei-Phasen-Artikel-Generierung.
 
-Eliminiert 503-Überlastung durch offline Batch-Verarbeitung.
+Produktionspfad: prepare_articles.py → generate_articles.py → upload_articles.py
+                 (via .github/workflows/artikel_pipeline.yml)
+
+Dieses Skript ist ein lokales Experiment zur Umgehung von 503-Überlastung via
+Gemini Batch API. Phase-1-Logik (Link-Pool) entspricht NICHT mehr generate_grounded.py
+(Kompass). Bei Bedarf auf Kompass-Logik angleichen.
+
 Bilder: nur aus .cache/downloads/ (kein neuer Wikimedia-Download).
-
 Schreibt progress.json kontinuierlich.
 Startet HTTP-Server auf :8080 → http://localhost:8080/dashboard.html
 

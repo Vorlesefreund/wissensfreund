@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-09T13:28:53Z -->
+<!-- updated: 2026-06-09T14:02:59Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -38,16 +38,29 @@
 
 ### Hoch
 - **Sichtung** test_compass vs. test_v321 (ohne Companions) — Kompass-Effekt
-- **batch_run.py Re-Run** biene_l3 + demokratie_l1 (test_grounded)
+- **generate_grounded.py Re-Run** biene_l3 + demokratie_l1 (test_grounded)
 - **Flutter-App testen**: WfArticleListScreen mit R2-Artikeln
 
 ### Mittel
-- **batch_run.py auf Kompass umstellen** (noch Link-Pool-basiert)
 - **Lektorat-Pipeline-Integration** (manueller Standalone-Prompt)
 - **Related Terms**: prepare_articles.py befüllt sie noch nicht
 
 ### Niedrig
 - Primärkategorie-Konvention, Box-Key, ZIM→JSON Decode-Cap
+
+---
+
+## Pipeline-Architektur (Referenz)
+
+| Skript | Rolle | Status |
+|---|---|---|
+| `prepare_articles.py` | Batch-Vorbereitung (Job-JSONs) | Produktion |
+| `generate_articles.py` | Artikel-Generierung (Claude/Gemini) | Produktion |
+| `upload_articles.py` | Index + R2-Upload | Produktion |
+| `generate_grounded.py` | Lokaler Test: Kompass-Grounding + v3.21-Prompt | Aktiv (Entwicklung) |
+| `batch_run.py` | POC: Gemini Batch API (5 Testartikel) | Veraltet, nicht Produktionspfad |
+
+Produktions-Workflow: `.github/workflows/artikel_pipeline.yml` (Montag 03:00 UTC)
 
 ---
 
