@@ -465,6 +465,13 @@ def main() -> None:
         except Exception as exc:
             print(f"  Übersprungen ({jf.name}): {exc}")
 
+    # Sortierung: Thema → Stufe → Modell (für Stufenleiter-Vergleich)
+    articles.sort(key=lambda a: (
+        a.get("meta", {}).get("title", "").lower(),
+        a.get("meta", {}).get("age_level", 0),
+        a.get("meta", {}).get("generation_method", ""),
+    ))
+
     print(f"Lese {len(articles)} Artikel aus {input_dir} ...")
 
     out_path = input_dir / "_review.html"

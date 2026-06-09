@@ -80,8 +80,12 @@ AGE_RANGES = {1: "4-6 Jahre", 2: "7-9 Jahre", 3: "10-12 Jahre"}
 def _make_thinking_config(model: str, budget_for_2_5: int) -> types.ThinkingConfig:
     """Gibt das modellspezifische ThinkingConfig zurück (medium)."""
     if "2.5" in model:
-        return types.ThinkingConfig(thinking_budget=budget_for_2_5)
-    return types.ThinkingConfig(thinking_level=types.ThinkingLevel.MEDIUM)
+        cfg = types.ThinkingConfig(thinking_budget=budget_for_2_5)
+        log.info("  ThinkingConfig: thinking_budget=%d (Modell=%s)", budget_for_2_5, model)
+        return cfg
+    cfg = types.ThinkingConfig(thinking_level=types.ThinkingLevel.MEDIUM)
+    log.info("  ThinkingConfig: thinking_level=MEDIUM (Modell=%s)", model)
+    return cfg
 
 # ── Test-Jobs (FIX 1: thema + primaer_wikipedia getrennt) ────────────────────
 #
@@ -122,6 +126,28 @@ TEST_JOBS: dict[str, dict] = {
         "pattern":           "history_person",
         "category_top":      "laender_und_kulturen",
         "category_sub":      "voelker_und_kulturen",
+    },
+    "biene_l1": {
+        "article_id":        "biene_l1",
+        "thema":             "Biene",
+        "primaer_wikipedia": "Biene",
+        "title":             "Biene",
+        "age_level":         1,
+        "topic_interest":    "high",
+        "pattern":           "living_being",
+        "category_top":      "tiere",
+        "category_sub":      "insekten",
+    },
+    "biene_l2": {
+        "article_id":        "biene_l2",
+        "thema":             "Biene",
+        "primaer_wikipedia": "Biene",
+        "title":             "Biene",
+        "age_level":         2,
+        "topic_interest":    "high",
+        "pattern":           "living_being",
+        "category_top":      "tiere",
+        "category_sub":      "insekten",
     },
     "biene_l3": {
         "article_id":        "biene_l3",
@@ -675,7 +701,7 @@ def main() -> None:
     args = parser.parse_args()
 
     model    = args.gen_model or GEMINI_MODEL
-    out_dir  = Path(args.output_dir) if args.output_dir else OUT_DIR
+    out_dir  = Path(args.output_dir).resolve() if args.output_dir else OUT_DIR
     model_slug = model.replace("gemini-", "").replace(".", "-")
 
     api_key = os.environ.get("GEMINI_API_KEY")
