@@ -64,7 +64,7 @@ from image_vision_filter import (        # noqa: E402
 
 GEMINI_MODEL       = "gemini-2.5-flash"
 OUT_DIR            = ROOT / "articles" / "test_grounded"
-SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v3.20_production.md"
+SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v3.21_production.md"
 
 # Ziel-Bildanzahl nach Appeal (Cap — nie auffüllen)
 APPEAL_TARGET     = {"high": 15, "medium": 10, "low": 6}
@@ -195,6 +195,9 @@ Waehle 2-4 Begleitartikel die den Kinderartikel am meisten bereichern.
 Nur Artikel aus der LINK_LISTE. Kriterien:
 - Konkrete Inhalte fuer Kinder: Verhalten, Prozesse, Rekorde, Fakten
 - Thematisch nah am Primaer-Thema (vertiefen, nicht abweichen)
+- Bevorzuge Companions, die ans kindliche Vorwissen andocken und lebendige, konkrete,
+  anschauliche Inhalte ermoeglichen — auch solche, mit denen sich landläufige Vorstellungen
+  zum Thema aufgreifen und richtigstellen lassen.
 Antworte NUR mit JSON: {{"companions": ["Titel1", "Titel2"]}}"""
 
 
@@ -549,7 +552,8 @@ def run_grounded_article(
     primaer_wikipedia = job.get("primaer_wikipedia", job["title"])
     appeal           = job.get("topic_interest", "medium")
     model_slug       = model.replace("gemini-", "").replace(".", "-")
-    generation_method = f"{model}/medium"
+    prompt_version   = SYSTEM_PROMPT_PATH.stem.split("_v")[-1].split("_")[0]  # z.B. "3.21"
+    generation_method = f"{model}/medium/v{prompt_version}"
     log.info("  Modell: %s | skip_images=%s | out_dir=%s", model, skip_images, effective_out_dir)
 
     report: dict = {
