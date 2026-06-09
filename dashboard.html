@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wissensfreund Batch Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+           background: #f0f2f5; padding: 24px; color: #1a1a1a; }
+    h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+    .meta { font-size: 0.8rem; color: #666; margin-bottom: 20px; }
+    .meta span { margin-right: 16px; }
+    #countdown { font-weight: 600; color: #333; }
+
+    table { width: 100%; border-collapse: collapse; background: white;
+            border-radius: 10px; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,.08); }
+    th { background: #2d3748; color: white; padding: 12px 16px;
+         text-align: left; font-size: 0.8rem; font-weight: 600;
+         text-transform: uppercase; letter-spacing: .04em; }
+    td { padding: 12px 16px; border-bottom: 1px solid #e8ecf0;
+         font-size: 0.875rem; vertical-align: top; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f7f8fa; }
+
+    .article-id { font-weight: 600; font-size: 0.9rem; }
+
+    /* Status-Chips */
+    .chip { display: inline-block; padding: 3px 10px; border-radius: 12px;
+            font-size: 0.75rem; font-weight: 600; white-space: nowrap; }
+    .s-pending       { background: #edf2f7; color: #718096; }
+    .s-fetching_done { background: #ebf8ff; color: #2b6cb0; }
+    .s-submitted     { background: #fefcbf; color: #744210; }
+    .s-JOB_STATE_QUEUED, .s-JOB_STATE_PENDING { background: #fefcbf; color: #744210; }
+    .s-JOB_STATE_RUNNING, .s-retry_submitted   { background: #bee3f8; color: #2c5282; }
+    .s-done, .s-JOB_STATE_SUCCEEDED            { background: #c6f6d5; color: #22543d; }
+    .s-JOB_STATE_PARTIALLY_SUCCEEDED           { background: #fefcbf; color: #744210; }
+    .s-failed, .s-JOB_STATE_FAILED             { background: #fed7d7; color: #742a2a; }
+    .s-JOB_STATE_CANCELLED, .s-JOB_STATE_EXPIRED { background: #e2e8f0; color: #4a5568; }
+
+    .companions { font-size: 0.8rem; color: #4a5568; }
+    .companions strong { color: #2d3748; }
+    .no-comp { color: #a0aec0; font-style: italic; }
+
+    .batch-id { font-family: monospace; font-size: 0.72rem; color: #718096;
+                word-break: break-all; max-width: 200px; }
+
+    .file-link { color: #3182ce; font-size: 0.8rem; }
+    .error-text { color: #e53e3e; font-size: 0.8rem; }
+
+    #error-banner { display: none; background: #fff5f5; border: 1px solid #feb2b2;
+                    border-radius: 8px; padding: 12px 16px; margin-bottom: 16px;
+                    color: #c53030; font-size: 0.875rem; }
+    #error-banner code { background: #fed7d7; padding: 2px 6px; border-radius: 4px; }
+
+    .summary { display: flex; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+    .stat { background: white; border-radius: 8px; padding: 12px 20px;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06); min-width: 100px; text-align: center; }
+    .stat-val { font-size: 2rem; font-weight: 700; }
+    .stat-lbl { font-size: 0.75rem; color: #718096; margin-top: 2px; }
+    .stat-done  .stat-val { color: #38a169; }
+    .stat-fail  .stat-val { color: #e53e3e; }
+    .stat-run   .stat-val { color: #3182ce; }
+    .stat-total .stat-val { color: #2d3748; }
+  </style>
+</head>
+<body>
+  <h1>Wissensfreund Batch Dashboard</h1>
+  <div class="meta">
+    <span>Letzte Aktualisierung: <strong id="last-update">–</strong></span>
+    <span>Nächste in: <strong id="countdown">10</strong>s</span>
+  </div>
+
+  <div id="error-banner">
+    Kann <code>progress.json</code> nicht laden.
+    Starte den Server: <code>python -m http.server 8080</code> im Repo-Verzeichnis,
+    dann öffne <code>http://localhost:8080/dashboard.html</code>.
+  </div>
+
+  <div class="summary" id="summary"></div>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Artikel</th>
+        <th>Phase 1 (Batch)</th>
+        <th>Companions</th>
+        <th>Phase 2 (Batch)</th>
+        <th>Ergebnis</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+      <tr><td colspan="5" style="text-align:center;color:#a0aec0;padding:40px">
+        Lade progress.json …
+      </td></tr>
+    </tbody>
+  </table>
+
+<script>
+  let countdown = 10;
+  let timer = null;
+
+  function chipClass(status) {
+    if (!status) return 's-pending';
+    const s = status.trim().replace(/\s+/g, '_');
+    return 's-' + s;
+  }
+
+  function chip(status) {
+    if (!status) status = 'pending';
+    const label = status.replace('JOB_STATE_', '').replace(/_/g, ' ').toLowerCase();
+    return `<span class="chip ${chipClass(status)}">${label}</span>`;
+  }
+
+  function render(data) {
+    const tbody = document.getElementById('table-body');
+    const rows = [];
+    let nDone = 0, nFail = 0, nRun = 0;
+
+    for (const [aid, p] of Object.entries(data)) {
+      const p1   = p.phase1    || {};
+      const comp = p.companions || {};
+      const p2   = p.phase2    || {};
+      const fin  = p.final     || {};
+
+      // Count stats
+      const fs = fin.status || 'pending';
+      if (fs === 'done') nDone++;
+      else if (fs === 'failed') nFail++;
+      else if (fs !== 'pending') nRun++;
+
+      const compTitles = (comp.titles || []);
+      const compHtml   = compTitles.length
+        ? `<strong>${compTitles.length}</strong>: ${compTitles.join(', ')}`
+        : '<span class="no-comp">–</span>';
+
+      const batchId1 = p1.batch_job
+        ? `<div class="batch-id" title="${p1.batch_job}">${p1.batch_job.split('/').pop()}</div>` : '';
+      const batchId2 = p2.batch_job
+        ? `<div class="batch-id" title="${p2.batch_job}">${p2.batch_job.split('/').pop()}</div>` : '';
+
+      let resultHtml = chip(fin.status || 'pending');
+      if (fin.output_file) {
+        const fname = fin.output_file.split(/[\\/]/).pop();
+        resultHtml += `<div class="file-link">📄 ${fname}</div>`;
+      }
+      if (fin.error) {
+        resultHtml += `<div class="error-text" title="${fin.error}">⚠ ${fin.error.slice(0, 80)}</div>`;
+      }
+
+      rows.push(`<tr>
+        <td><div class="article-id">${aid}</div></td>
+        <td>${chip(p1.status)}${batchId1}</td>
+        <td><div class="companions">${compHtml}</div></td>
+        <td>${chip(p2.status)}${batchId2}${p2.image_count !== undefined ? `<div style="font-size:.75rem;color:#718096">${p2.image_count} Bilder</div>` : ''}</td>
+        <td>${resultHtml}</td>
+      </tr>`);
+    }
+
+    tbody.innerHTML = rows.join('');
+
+    // Summary
+    const total = Object.keys(data).length;
+    document.getElementById('summary').innerHTML = `
+      <div class="stat stat-total"><div class="stat-val">${total}</div><div class="stat-lbl">Gesamt</div></div>
+      <div class="stat stat-done"><div class="stat-val">${nDone}</div><div class="stat-lbl">Fertig</div></div>
+      <div class="stat stat-run"><div class="stat-val">${nRun}</div><div class="stat-lbl">Laufend</div></div>
+      <div class="stat stat-fail"><div class="stat-val">${nFail}</div><div class="stat-lbl">Fehlgeschlagen</div></div>
+    `;
+  }
+
+  async function loadProgress() {
+    try {
+      const resp = await fetch('progress.json?' + Date.now());
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      const data = await resp.json();
+      document.getElementById('error-banner').style.display = 'none';
+      render(data);
+      document.getElementById('last-update').textContent =
+        new Date().toLocaleTimeString('de-DE');
+    } catch (e) {
+      document.getElementById('error-banner').style.display = 'block';
+    }
+  }
+
+  function startCountdown() {
+    if (timer) clearInterval(timer);
+    countdown = 10;
+    document.getElementById('countdown').textContent = countdown;
+    timer = setInterval(() => {
+      countdown--;
+      document.getElementById('countdown').textContent = Math.max(0, countdown);
+      if (countdown <= 0) {
+        clearInterval(timer);
+        loadProgress().then(() => startCountdown());
+      }
+    }, 1000);
+  }
+
+  loadProgress().then(() => startCountdown());
+</script>
+</body>
+</html>

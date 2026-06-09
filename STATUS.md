@@ -1,61 +1,50 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-09T04:07:51Z -->
+<!-- updated: 2026-06-09T07:11:00Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**generate_grounded.py: FIX 1/2/3 implementiert + getestet (2026-06-08/09)** ← AKTUELL
-- FIX 1: thema (Anzeigetitel) vs. primaer_wikipedia (Faktenquelle) getrennt
-  - meta.title IMMER aus thema — "Indianer"-Bug verhindert
-  - build_user_message nutzt thema als ARTICLE_TITLE
-- FIX 2: Zwei-Phasen-Generierung bereits vorhanden, bestätigt
-- FIX 3: Bildpool-Caps: Primär max 20, Companion max 6, Gesamt max 40
-  - Sequentieller Download (kein prefetch_images) — verhindert Wikimedia-IP-Block
-  - 10s Sleep zwischen Downloads, 300s Cooldown nach 3 Fehlern
-- TEST (5 Artikel): 0 generiert — ausschließlich Infrastruktur-Fehler:
-  - indianer_l1/l2: Gemini Flash 503 ×3 um Mitternacht (Spitzenlast)
-  - indianer_l3/biene_l3/demokratie_l1: DNS-Fehler ab 01:09 (getaddrinfo failed)
-- Code-Korrektheit BESTÄTIGT durch Phase-1-Logs:
-  - Bildpool-Caps korrekt: Indianer=17(≤20), Kolumbus=6(≤6)
-  - Companion-Qualität top: l2=[Indianer Nordamerikas, Besiedlung Amerikas, Kolumbus, Ackerbau]
-  - thema="Indianer" in allen Headern
+**image_vision_filter.py: Wurzelfix Wikimedia-Rate-Limit (Commit 6c4c159, 2026-06-09)**
+- Originale statt Thumbnails laden → kein Thumb-Generierungs-Trigger → 0×429
+- Pillow LANCZOS lokal auf 800px + 300px skalieren, als JPEG cachen
+- 1 persistente requests.Session, User-Agent auf allen Requests
+- TIF/SVG: 1280px-Thumb als Fallback (_wikimedia_thumb_url, ohne API-Call)
+- Test: 30/30 Indianer-Originale, 0×429, 1 Wikimedia-API-Request
 
-**image_vision_filter.py: Rate-Limit-Fix v2 (2026-06-08)**
-- generator=images: 1 API-Request pro Artikel statt 2
-- Download-Cache .cache/downloads/{md5}{ext} + Metadaten-Cache image_meta_cache.json
-- maxlag=5, 2 parallele Worker (nur standalone run())
-- Biene-Test: 1 Wikimedia-API-Request, 12/12 aus Cache, 0 429s
+**batch_run.py + dashboard.html: Gemini Batch API POC (2026-06-09 LAUFEND)**
+- Batch API bestätigt: `client.batches.create(model, src=list[InlinedRequest])` funktioniert
+- Batch-Job läuft: batches/cjzuctd806xqvv45wsjwnjz2bng8kr915pkh (Phase 1, 3 Artikel)
+- Dashboard: http://localhost:8080/dashboard.html (HTTP-Server auf :8080)
+- Bekanntes Problem: Wikipedia-429 bei biene_l3 + demokratie_l1 (Fix: Dedup + Delays)
+- Fix bereits in batch_run.py: seen_wp-Dedup + 1s/0.5s Sleep zwischen Fetches
 
 ---
 
-## 🔴 Nächster Schritt (Hoch)
+## 🔄 Gerade in Arbeit
 
-**Re-Run generate_grounded.py** (tagsüber, nach Wikimedia-IP-Cooldown):
-```
-python scripts/generate_grounded.py --articles indianer_l1 indianer_l2 indianer_l3 biene_l3 demokratie_l1
-```
-- 17 Bilder im Cache (.cache/downloads/) → Indianer-Runs schneller
-- Erwartete Laufzeit: ~15-30 Min je Artikel (hauptsächlich Vision-Phase)
-- Prüfen: meta.title="Indianer", Companions, Bildanzahl, Inhalt aus Quelltext
+**batch_run.py Hintergrund-Run (brox0bax2)** — Phase 1 Batch PENDING (09:09 gestartet)
+- 3 Artikel in Phase 1: indianer_l1 + l2 + l3
+- biene_l3 + demokratie_l1 ausgefallen (Wikipedia-429, Fix im Code)
+- Warte auf JOB_STATE_SUCCEEDED
 
 ---
 
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch
-- **Re-Run generate_grounded.py** (s.o.) → Artikel fertigstellen
-- **Flutter-App testen**: WfArticleListScreen mit R2-Artikeln + Bilder
-- **Lektorat-Pipeline-Integration** (manueller Standalone-Prompt)
+- **batch_run.py Re-Run** (nach Fix): alle 5 Artikel, sobald laufender Batch abgeschlossen
+- **Sichtung generierter Artikel** (nach batch_run.py): meta.title, Companions, Bildpool
+- **Flutter-App testen**: WfArticleListScreen mit R2-Artikeln
 
 ### Mittel
+- **Lektorat-Pipeline-Integration** (manueller Standalone-Prompt)
 - **Related Terms**: prepare_articles.py befüllt sie noch nicht
-- **indianer_l2 review**: 14 Sätze statt 15 Minimum (nach Re-Run prüfen)
-- **Epoch-Guard TTS-Callbacks**, **Mode B Lupe**, **Sound-Thumbnails**
+- **indianer_l2 review**: 14 Sätze statt 15 Minimum
 
 ### Niedrig
-- Primärkategorie-Konvention, Box-Key, ZIM→JSON Decode-Cap, Kiosk/Screen-Pinning
+- Primärkategorie-Konvention, Box-Key, ZIM→JSON Decode-Cap
 
 ---
 
