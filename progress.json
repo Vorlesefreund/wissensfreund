@@ -1,0 +1,136 @@
+{
+  "indianer_l1": {
+    "phase1": {
+      "status": "done",
+      "batch_job": "batches/cjzuctd806xqvv45wsjwnjz2bng8kr915pkh",
+      "submitted_at": "2026-06-09T07:09:45.142869+00:00",
+      "polled_at": "2026-06-09T08:23:32.300436+00:00"
+    },
+    "companions": {
+      "status": "done",
+      "titles": [
+        "Indianer Nordamerikas",
+        "Besiedlung Amerikas",
+        "Ackerbau",
+        "Avocado"
+      ],
+      "error": null
+    },
+    "phase2": {
+      "status": "done",
+      "batch_job": "batches/14ml445w2wiy2t5v3q7otbpmu0xebwvr5gm1",
+      "submitted_at": "2026-06-09T08:28:38.861923+00:00",
+      "image_count": 15,
+      "polled_at": "2026-06-09T09:15:39.061113+00:00"
+    },
+    "final": {
+      "status": "done",
+      "output_file": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\test_grounded\\indianer_l1.json",
+      "error": null
+    }
+  },
+  "indianer_l2": {
+    "phase1": {
+      "status": "done",
+      "batch_job": "batches/cjzuctd806xqvv45wsjwnjz2bng8kr915pkh",
+      "submitted_at": "2026-06-09T07:09:45.142875+00:00",
+      "polled_at": "2026-06-09T08:23:32.300442+00:00"
+    },
+    "companions": {
+      "status": "done",
+      "titles": [
+        "Ackerbau",
+        "Besiedlung Amerikas",
+        "Amerikanischer Bison",
+        "Christoph Kolumbus"
+      ],
+      "error": null
+    },
+    "phase2": {
+      "status": "done",
+      "batch_job": "batches/14ml445w2wiy2t5v3q7otbpmu0xebwvr5gm1",
+      "submitted_at": "2026-06-09T08:28:38.861930+00:00",
+      "image_count": 15,
+      "polled_at": "2026-06-09T09:15:39.061121+00:00"
+    },
+    "final": {
+      "status": "done",
+      "output_file": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\test_grounded\\indianer_l2.json",
+      "error": null
+    }
+  },
+  "indianer_l3": {
+    "phase1": {
+      "status": "done",
+      "batch_job": "batches/cjzuctd806xqvv45wsjwnjz2bng8kr915pkh",
+      "submitted_at": "2026-06-09T07:09:45.142877+00:00",
+      "polled_at": "2026-06-09T08:23:32.300444+00:00"
+    },
+    "companions": {
+      "status": "done",
+      "titles": [
+        "Christoph Kolumbus",
+        "Besiedlung Amerikas",
+        "Ackerbau",
+        "Azteken"
+      ],
+      "error": null
+    },
+    "phase2": {
+      "status": "done",
+      "batch_job": "batches/14ml445w2wiy2t5v3q7otbpmu0xebwvr5gm1",
+      "submitted_at": "2026-06-09T08:28:38.861932+00:00",
+      "image_count": 15,
+      "polled_at": "2026-06-09T09:15:39.061123+00:00"
+    },
+    "final": {
+      "status": "done",
+      "output_file": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\test_grounded\\indianer_l3.json",
+      "error": null
+    }
+  },
+  "biene_l3": {
+    "phase1": {
+      "status": "failed",
+      "batch_job": null,
+      "submitted_at": null
+    },
+    "companions": {
+      "status": "pending",
+      "titles": [],
+      "error": null
+    },
+    "phase2": {
+      "status": "pending",
+      "batch_job": null,
+      "submitted_at": null
+    },
+    "final": {
+      "status": "pending",
+      "output_file": null,
+      "error": "Wikipedia-Fetch: 429 Client Error: Too Many Requests for url: https://de.wikipedia.org/w/api.php?action=query&format=json&titles=Biene&redirects=1&prop=links&plnamespace=0&pllimit=500"
+    }
+  },
+  "demokratie_l1": {
+    "phase1": {
+      "status": "failed",
+      "batch_job": null,
+      "submitted_at": null
+    },
+    "companions": {
+      "status": "pending",
+      "titles": [],
+      "error": null
+    },
+    "phase2": {
+      "status": "pending",
+      "batch_job": null,
+      "submitted_at": null
+    },
+    "final": {
+      "status": "pending",
+      "output_file": null,
+      "error": "Wikipedia-Fetch: 429 Client Error: Too Many Requests for url: https://de.wikipedia.org/w/api.php?action=query&titles=Demokratie&redirects=1&prop=extracts&explaintext=True&exsectionformat=plain&format=json"
+    }
+  }
+}
