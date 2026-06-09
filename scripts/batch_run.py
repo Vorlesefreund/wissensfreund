@@ -52,7 +52,6 @@ from generate_grounded import (         # noqa: E402
     COMPANION_PROMPT_TMPL,
     AGE_RANGES,
     MAX_COMPANIONS,
-    MAX_LINK_LIST,
     MAX_IMG_PRIMARY,
     MAX_IMG_COMPANION,
     MAX_VISION_CHECKS,
@@ -71,6 +70,7 @@ from image_vision_filter import (       # noqa: E402
 )
 
 GEMINI_MODEL   = "gemini-2.5-flash"
+MAX_LINK_LIST  = 300   # batch_run.py-intern: Link-Pool-Cap für Batch-Phase-1
 PROGRESS_FILE  = ROOT / "progress.json"
 DL_CACHE_DIR   = ROOT / ".cache" / "downloads"
 POLL_SECONDS   = 30

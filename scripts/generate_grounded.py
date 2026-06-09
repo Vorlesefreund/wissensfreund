@@ -69,7 +69,6 @@ MAX_VISION_CHECKS = 40
 MAX_IMG_PRIMARY   = 20
 MAX_IMG_COMPANION = 6
 MAX_COMPANIONS    = 5
-MAX_LINK_LIST     = 300  # Legacy-Export — batch_run.py nutzt diesen Wert noch
 
 AGE_RANGES = {1: "4-6 Jahre", 2: "7-9 Jahre", 3: "10-12 Jahre"}
 
