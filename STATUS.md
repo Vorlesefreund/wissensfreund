@@ -1,62 +1,45 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-09T11:42:32Z -->
+<!-- updated: 2026-06-09T12:59:11Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Modell-Vergleichslauf vollständig: 12/12 Artikel (2026-06-09)** ← AKTUELL
+**v3.21-Lebendigkeits-Paket: Prompt + Generierungs-Run (2026-06-09)** ← AKTUELL
+- Prompt: `wissensfreund_generator_prompt_v3.21_production.md` (HAKEN, Lebendige Überschriften, Lebenswelt-Brücke, Klischee-dann-Auflösung)
+- v3.20 archiviert → `_alt/`
+- 3 Artikel generiert: Indianer L1/L2/L3 | gemini-3.5-flash | --skip-images → `articles/test_v321/`
+- Phase 1: 503×3 für alle drei (Modell-Lastspitze) → companions=[] in allen drei
+- Phase 2: erfolgreich | Überschriften leben: "Ein großer Irrtum", "Geniale Bauern und große Städte"
+- Review-HTML: `articles/test_v321/_review.html` (lokal, 3 Artikel)
+
+**Modell-Vergleichslauf vollständig: 12/12 Artikel (2026-06-09)**
 - Themen: Indianer + Biene | Stufen 1–3 | beide Modelle | textonly (--skip-images)
 - Output: `articles/test_compare/_review.html` (lokal, 12 Artikel, Sortierung: Thema→Stufe→Modell)
-- 2 Artikel ohne Companions (Phase-1-503 nach 3×Retry): indianer_3-5-flash_l1, biene_3-5-flash_l2
-
-| Datei | L | Sätze | Companions |
-|---|---|---|---|
-| biene_2-5-flash_l1 | 1 | 18 | Westl. Honigbiene, Wildbiene, Bestäuber, Honig |
-| biene_2-5-flash_l2 | 2 | 25 | Westl. Honigbiene, Wildbiene (2 × 429) |
-| biene_2-5-flash_l3 | 3 | 38 | Westl. Honigbiene, Wildbiene, Hummeln, Bestäuber |
-| biene_3-5-flash_l1 | 1 | 22 | Honig, Hummeln, Bienenkönigin |
-| biene_3-5-flash_l2 | 2 | 24 | — (Phase-1-503) |
-| biene_3-5-flash_l3 | 3 | 31 | Bienenkönigin, Hummeln, Wildbiene, Imker |
-| indianer_2-5-flash_l1 | 1 | 25 | Ackerbau, Azteken, Kartoffel, Bisons |
-| indianer_2-5-flash_l2 | 2 | 20 | Kolumbus, Besiedlung Amerikas, Ackerbau, Azteken |
-| indianer_2-5-flash_l3 | 3 | 31 | Kolumbus, Beringia, Ackerbau, Indianer Nordamerikas |
-| indianer_3-5-flash_l1 | 1 | 23 | — (Phase-1-503) |
-| indianer_3-5-flash_l2 | 2 | 25 | Kolumbus, Amerikanischer Bison, Azteken |
-| indianer_3-5-flash_l3 | 3 | 30 | Indianer Nordamerikas, Besiedlung Amerikas, Azteken |
-
-**Beobachtungen:**
-- 2.5-flash: mehr Sätze (Biene L3: 38 vs. 31), tendenziell mehr Text
-- 3.5-flash: 503s auf Phase 1 häufiger als 2.5-flash bei Lastspitzen
-- ThinkingConfig korrekt geloggt: 2.5-flash → thinking_budget, 3.5-flash → thinking_level=MEDIUM
 
 ---
 
 ## 🔴 Nächster Schritt (Hoch)
 
-**Sichtung der Vergleichsartikel**:
-- Datei: `articles/test_compare/_review.html` (lokal, Thema→Stufe→Modell sortiert)
-- Stufenleiter je Modell direkt untereinander
-- ⛔ KEIN Upload vor Sichtung
-
-**batch_run.py Re-Run für biene_l3 + demokratie_l1** (test_grounded):
-- `python scripts/batch_run.py`
+**Sichtung Vorher-Nachher**: v3.20 (test_compare) vs. v3.21 (test_v321) — Indianer L1/L2/L3
+- ⛔ KEIN Lektorat, KEIN Upload vor Sichtung
+- Einschränkung: alle v3.21-Artikel ohne Companions (Phase-1-503) — reiner Prompt-Effekt sichtbar
 
 ---
 
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch
-- **Sichtung** Vergleichsartikel (s.o.)
-- **Sichtung** indianer_l1/l2/l3 aus test_grounded
-- **batch_run.py Re-Run** biene_l3 + demokratie_l1
+- **Sichtung** v3.20 vs. v3.21 Vergleich (s.o.)
+- **batch_run.py Re-Run** biene_l3 + demokratie_l1 (test_grounded)
 - **Flutter-App testen**: WfArticleListScreen mit R2-Artikeln
 
 ### Mittel
+- **v3.21-Re-Run mit Companions**: wenn 3.5-flash-Phase-1-503s nachlassen (oder auf 2.5-flash wechseln)
 - **Lektorat-Pipeline-Integration** (manueller Standalone-Prompt)
 - **Related Terms**: prepare_articles.py befüllt sie noch nicht
-- **biene_3-5-flash_l2 + indianer_3-5-flash_l1**: ggf. mit Companions neu generieren
+- **Phase-1-Robustheit**: MAX_LINK_LIST > 300 oder alphabetisch neu ordnen (Tipi/Prärieindianer nicht erreichbar)
 
 ### Niedrig
 - Primärkategorie-Konvention, Box-Key, ZIM→JSON Decode-Cap
