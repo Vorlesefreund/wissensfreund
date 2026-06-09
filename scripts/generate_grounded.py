@@ -294,7 +294,8 @@ def select_companions_raw(
     thinking = _make_thinking_config(model, budget_for_2_5=1024)
     log.info("  Phase 1 Kompass-Auswahl (Modell=%s)", model)
 
-    for attempt in range(1, 4):
+    max_attempts = 6
+    for attempt in range(1, max_attempts + 1):
         try:
             response = client.models.generate_content(
                 model=model,
@@ -315,9 +316,10 @@ def select_companions_raw(
             return []
         except Exception as e:
             err = str(e)
-            if attempt < 3 and ("503" in err or "unavailable" in err.lower()):
-                log.warning("  Phase 1 503 (V%d) -- warte 60s ...", attempt)
-                time.sleep(60)
+            if attempt < max_attempts and ("503" in err or "unavailable" in err.lower()):
+                wait = min(60 * (2 ** (attempt - 1)), 300)  # 60 / 120 / 240 / 300 / 300 s
+                log.warning("  Phase 1 503 (V%d/%d) -- warte %ds ...", attempt, max_attempts, wait)
+                time.sleep(wait)
             else:
                 log.error("  Phase 1 Fehler: %s", e)
                 return []
