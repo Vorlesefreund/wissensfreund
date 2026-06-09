@@ -381,20 +381,15 @@ def build_image_pool(
             rejected_vision.append({**img, "reason": "Download fehlgeschlagen"})
             _consecutive_dl_failures += 1
             if _consecutive_dl_failures >= 3:
-                log.warning("    3 Downloads fehlgeschlagen — 300s Wikimedia-Cooldown ...")
-                time.sleep(300)
+                log.warning("    3 Downloads fehlgeschlagen — 60s Wikimedia-Cooldown ...")
+                time.sleep(60)
                 _consecutive_dl_failures = 0
             else:
                 time.sleep(10.0)
             continue
 
         _consecutive_dl_failures = 0
-        mime = "image/jpeg"
-        url = img["thumb_url"].lower()
-        if url.endswith(".png"):
-            mime = "image/png"
-        elif url.endswith(".webp"):
-            mime = "image/webp"
+        mime = "image/jpeg"  # download_image skaliert immer zu JPEG
 
         result = analyze_with_vision(client, img_bytes, mime, thema)
         if result is None:

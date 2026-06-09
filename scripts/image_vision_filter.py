@@ -13,6 +13,7 @@ Output:
 
 import argparse
 import hashlib
+import io
 import json
 import logging
 import os
@@ -20,7 +21,6 @@ import re
 import sys
 import time
 import urllib.parse
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -28,6 +28,7 @@ import requests
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
+from PIL import Image
 
 ROOT = Path(__file__).parent.parent
 _DOTENV_PATH = ROOT / ".env"
@@ -36,6 +37,10 @@ OUTPUT_DIR = ROOT / "articles" / "test_5topics" / "_images"
 _CACHE_DIR = ROOT / ".cache"
 _META_CACHE_PATH = _CACHE_DIR / "image_meta_cache.json"
 _DL_CACHE_DIR = _CACHE_DIR / "downloads"
+
+_MAX_ORIG_BYTES = 15 * 1024 * 1024  # 15 MB: über dieser Grenze → 1280px-Fallback
+_DL_PAUSE = 0.4                      # Pause zwischen sequentiellen Downloads (s)
+_DL_RETRY_WAITS = [15, 30]           # 429-Wartezeiten; Originale selten gedrosselt
 
 logging.basicConfig(
     level=logging.INFO,
@@ -107,7 +112,7 @@ def get_request_count() -> int:
     return _wikimedia_req_count
 
 
-# ── Metadaten-Cache (persistent, filename -> {url_800, artist, license}) ────
+# ── Metadaten-Cache (persistent, filename -> {url_orig, artist, license}) ───
 _meta_cache: dict | None = None
 _meta_cache_dirty: bool = False
 
@@ -155,21 +160,7 @@ def _filename_from_title(title: str) -> str:
     return title.replace("File:", "").replace("Datei:", "").replace(" ", "_")
 
 
-def _mime_from_url(url: str) -> str:
-    lower = url.lower().split("?")[0]
-    if lower.endswith(".jpg") or lower.endswith(".jpeg"):
-        return "image/jpeg"
-    if lower.endswith(".png"):
-        return "image/png"
-    if lower.endswith(".webp"):
-        return "image/webp"
-    if lower.endswith(".gif"):
-        return "image/gif"
-    return "image/jpeg"
-
-
 def _handle_maxlag(resp: requests.Response) -> float:
-    """Prueft auf maxlag-Fehler. Gibt Wartezeit zurueck (0 = kein maxlag)."""
     if resp.status_code != 200:
         return 0.0
     try:
@@ -186,6 +177,35 @@ def _handle_maxlag(resp: requests.Response) -> float:
     return 0.0
 
 
+def _wikimedia_thumb_url(filename: str, width: int = 1280) -> str:
+    """Konstruiert Wikimedia-Thumb-URL ohne API-Request (fuer TIF/SVG/Groessen-Fallback)."""
+    name = filename.replace(" ", "_")
+    h = hashlib.md5(name.encode("utf-8")).hexdigest()
+    a, ab = h[0], h[:2]
+    ext = Path(name).suffix.lower()
+    if ext == ".svg":
+        thumb_name = f"{width}px-{name}.png"
+    elif ext in (".tif", ".tiff"):
+        thumb_name = f"{width}px-{name}.jpg"
+    else:
+        thumb_name = f"{width}px-{name}"
+    return f"https://upload.wikimedia.org/wikipedia/commons/thumb/{a}/{ab}/{name}/{thumb_name}"
+
+
+def _scale_image(raw_bytes: bytes, max_width: int) -> bytes:
+    """Skaliert Bild auf max. max_width px (LANCZOS), gibt JPEG-Bytes zurueck."""
+    img = Image.open(io.BytesIO(raw_bytes))
+    if img.mode not in ("RGB", "L"):
+        img = img.convert("RGB")
+    if img.width > max_width:
+        ratio = max_width / img.width
+        new_h = max(1, int(img.height * ratio))
+        img = img.resize((max_width, new_h), Image.LANCZOS)
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=85, optimize=True)
+    return buf.getvalue()
+
+
 # ── Metadaten holen: EINE Generator-API-Anfrage pro Artikel ─────────────────
 
 def fetch_image_candidates(
@@ -193,7 +213,8 @@ def fetch_image_candidates(
     wikipedia_title: str,
     max_candidates: int = 50,
 ) -> list[dict]:
-    """Laedt Bild-Metadaten via generator=images (1 Request statt 2)."""
+    """Laedt Bild-Metadaten via generator=images (1 Request).
+    Kein iiurlwidth → Original-URL (statisches CDN, kein Thumb-Generierungs-Trigger)."""
     global _wikimedia_req_count, _meta_cache_dirty
     cache = _ensure_meta_cache()
 
@@ -206,7 +227,7 @@ def fetch_image_candidates(
         "gimlimit": str(max_candidates),
         "prop": "imageinfo",
         "iiprop": "url|extmetadata",
-        "iiurlwidth": 800,
+        # KEIN iiurlwidth: Original-URL verwenden, kein serverseitiger Thumbnail-Generator
         "iiextmetadatafilter": "Artist|LicenseShortName|License",
         "maxlag": 5,
     }
@@ -259,14 +280,14 @@ def fetch_image_candidates(
 
         filename = _filename_from_title(title)
 
-        # Cache-Treffer: Metadaten bereits bekannt
-        if filename in cache:
+        # Cache-Treffer: nur neue url_orig-Eintraege verwenden (url_800-Eintraege neu laden)
+        if filename in cache and "url_orig" in cache[filename]:
             cached = cache[filename]
             images.append({
                 "wikimedia_id": title,
-                "filename": filename,
-                "thumb_url": cached["url_800"],
-                "license": cached["license"],
+                "filename":     filename,
+                "thumb_url":    cached["url_orig"],
+                "license":      cached["license"],
                 "license_author": cached["artist"],
             })
             continue
@@ -275,8 +296,8 @@ def fetch_image_candidates(
         if not ii_list:
             continue
         ii = ii_list[0]
-        thumb_url = ii.get("thumburl") or ii.get("url", "")
-        if not thumb_url:
+        orig_url = ii.get("url", "")
+        if not orig_url:
             continue
 
         meta = ii.get("extmetadata", {})
@@ -293,14 +314,14 @@ def fetch_image_candidates(
         )
         clean_author = re.sub(r"<[^>]+>", "", raw_author).strip()[:80]
 
-        cache[filename] = {"url_800": thumb_url, "artist": clean_author, "license": license_str}
+        cache[filename] = {"url_orig": orig_url, "artist": clean_author, "license": license_str}
         _meta_cache_dirty = True
 
         images.append({
             "wikimedia_id": title,
-            "filename": filename,
-            "thumb_url": thumb_url,
-            "license": license_str,
+            "filename":     filename,
+            "thumb_url":    orig_url,
+            "license":      license_str,
             "license_author": clean_author,
         })
 
@@ -308,24 +329,13 @@ def fetch_image_candidates(
     return images
 
 
-# ── Download mit lokaler Datei-Cache ────────────────────────────────────────
+# ── Download: Original + lokale Skalierung (300px + 800px) ──────────────────
 
-_DL_RETRY_WAITS = [60, 120]   # 2 Versuche: Wikimedia Retry-After respektieren
-
-
-def download_image(session: requests.Session, url: str) -> bytes | None:
-    """Laedt Bild herunter — lokaler Cache unter .cache/downloads/{md5}{ext}."""
-    url_path = urllib.parse.urlparse(url).path
-    ext = Path(url_path).suffix or ".jpg"
-    cache_key = hashlib.md5(url.encode()).hexdigest()
-    cache_file = _DL_CACHE_DIR / f"{cache_key}{ext}"
-
-    if cache_file.exists():
-        return cache_file.read_bytes()
-
-    for attempt in range(1, 3):  # 2 Versuche
+def _do_download(session: requests.Session, url: str) -> bytes | None:
+    """HTTP-Download mit 429-Retry und 20-MB-Abbruch. Gibt Rohbytes zurueck."""
+    for attempt in range(1, 3):
         try:
-            resp = session.get(url, timeout=30)
+            resp = session.get(url, timeout=60, stream=True)
             if resp.status_code == 429:
                 wait = float(resp.headers.get("Retry-After",
                              _DL_RETRY_WAITS[min(attempt - 1, len(_DL_RETRY_WAITS) - 1)]))
@@ -333,14 +343,16 @@ def download_image(session: requests.Session, url: str) -> bytes | None:
                 time.sleep(wait)
                 continue
             resp.raise_for_status()
-            if len(resp.content) > 18 * 1024 * 1024:
-                log.warning("  Bild >18 MB, uebersprungen: %s", url)
-                return None
-            _DL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-            cache_file.write_bytes(resp.content)
-            return resp.content
+            chunks, total = [], 0
+            for chunk in resp.iter_content(chunk_size=256 * 1024):
+                total += len(chunk)
+                if total > 20 * 1024 * 1024:
+                    log.warning("  Download >20 MB abgebrochen: %s", url[:80])
+                    return None
+                chunks.append(chunk)
+            return b"".join(chunks)
         except Exception as e:
-            if attempt < 3 and "429" not in str(e):
+            if attempt < 2 and "429" not in str(e):
                 time.sleep(5)
                 continue
             log.warning("  Download-Fehler: %s", e)
@@ -348,19 +360,59 @@ def download_image(session: requests.Session, url: str) -> bytes | None:
     return None
 
 
-def prefetch_images(session: requests.Session, candidates: list[dict], max_workers: int = 2) -> dict[str, bytes | None]:
-    """Laedt bis zu max_workers Bilder parallel (nutzt Cache)."""
+def download_image(session: requests.Session, url: str) -> bytes | None:
+    """Laedt Original-Bild, skaliert lokal auf 800px + 300px (LANCZOS).
+    Gibt 800px-JPEG-Bytes zurueck (fuer Vision-Analyse).
+    Cache: .cache/downloads/{md5(url)}_800.jpg + _300.jpg."""
+    cache_key = hashlib.md5(url.encode()).hexdigest()
+    cache_800 = _DL_CACHE_DIR / f"{cache_key}_800.jpg"
+
+    if cache_800.exists():
+        return cache_800.read_bytes()
+
+    # TIF/SVG: kein Riesen-Original — 1280px-Thumb via konstruierter URL
+    url_path = urllib.parse.urlparse(url).path
+    filename_part = Path(url_path).name
+    ext_lower = Path(url_path).suffix.lower()
+
+    use_fallback = ext_lower in (".tif", ".tiff", ".svg")
+    download_url = _wikimedia_thumb_url(filename_part, 1280) if use_fallback else url
+
+    raw = _do_download(session, download_url)
+    if raw is None:
+        return None
+
+    # Groessen-Schutz: Original >15 MB → 1280px-Fallback
+    if len(raw) > _MAX_ORIG_BYTES and not use_fallback:
+        log.warning("  Original %.1f MB > Limit → 1280px-Fallback: %s",
+                    len(raw) / (1024 * 1024), filename_part)
+        raw = _do_download(session, _wikimedia_thumb_url(filename_part, 1280))
+        if raw is None:
+            return None
+
+    try:
+        _DL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+        scaled_800 = _scale_image(raw, 800)
+        scaled_300 = _scale_image(raw, 300)
+        cache_800.write_bytes(scaled_800)
+        (_DL_CACHE_DIR / f"{cache_key}_300.jpg").write_bytes(scaled_300)
+        return scaled_800
+    except Exception as e:
+        log.warning("  Skalierung fehlgeschlagen: %s", e)
+        return None
+
+
+def prefetch_images(
+    session: requests.Session,
+    candidates: list[dict],
+    max_workers: int = 1,  # ignoriert: sequentieller Download
+) -> dict[str, bytes | None]:
+    """Laedt Bilder sequentiell mit kurzer Pause (max_workers ignoriert)."""
     results: dict[str, bytes | None] = {}
-
-    def _fetch(img: dict) -> tuple[str, bytes | None]:
-        data = download_image(session, img["thumb_url"])
-        return img["filename"], data
-
-    with ThreadPoolExecutor(max_workers=max_workers) as ex:
-        futures = {ex.submit(_fetch, img): img for img in candidates}
-        for fut in as_completed(futures):
-            fname, data = fut.result()
-            results[fname] = data
+    for i, img in enumerate(candidates):
+        results[img["filename"]] = download_image(session, img["thumb_url"])
+        if i < len(candidates) - 1:
+            time.sleep(_DL_PAUSE)
     return results
 
 
@@ -427,7 +479,7 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
 
     req_before = get_request_count()
 
-    # 1. Kandidaten laden (1 Generator-API-Request statt 2)
+    # 1. Kandidaten laden (1 Generator-API-Request)
     log.info("Lade Bild-Kandidaten via generator=images ...")
     candidates = fetch_image_candidates(session, wikipedia_title, max_candidates=50)
     req_after_meta = get_request_count()
@@ -439,56 +491,49 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
         return
 
     to_check = candidates[:max_images]
-    print(f"-> {len(to_check)} Bilder fuer Vision-Check")
+    print(f"-> {len(to_check)} Bilder fuer Vision-Check (sequentiell, {_DL_PAUSE}s Pause)\n")
 
-    # 2. Bilder parallel vorladen (2 Workers, Cache-First)
-    print("   Lade Bilder (max. 2 parallel, lokaler Cache) ...")
-    image_cache = prefetch_images(session, to_check, max_workers=2)
-    req_after_dl = get_request_count()
-    cached_count = sum(1 for img in to_check
-                       if (_DL_CACHE_DIR / f"{hashlib.md5(img['thumb_url'].encode()).hexdigest()}{Path(urllib.parse.urlparse(img['thumb_url']).path).suffix or '.jpg'}").exists())
-    print(f"   Wikimedia-Downloads: {sum(1 for v in image_cache.values() if v is not None)} "
-          f"(davon aus Cache: {cached_count})\n")
-
-    # 3. Vision-Check pro Bild
-    accepted = []
-    rejected = []
+    # 2+3. Download + Vision-Check sequentiell (integrierte Schleife)
+    accepted: list[dict] = []
+    rejected: list[dict] = []
+    dl_fresh = 0
 
     for i, img in enumerate(to_check, 1):
         fname = img["filename"]
         print(f"  [{i}/{len(to_check)}] {fname[:60]}")
 
-        image_bytes = image_cache.get(fname)
+        cache_key = hashlib.md5(img["thumb_url"].encode()).hexdigest()
+        was_cached = (_DL_CACHE_DIR / f"{cache_key}_800.jpg").exists()
+
+        image_bytes = download_image(session, img["thumb_url"])
+        if not was_cached:
+            dl_fresh += 1
+            if i < len(to_check):
+                time.sleep(_DL_PAUSE)
+
         if image_bytes is None:
-            rejected.append({**img, "reason": "Download fehlgeschlagen", "ablehnungsgrund": "Download fehlgeschlagen"})
+            rejected.append({**img, "reason": "Download fehlgeschlagen",
+                             "ablehnungsgrund": "Download fehlgeschlagen"})
             print("    [X] Download fehlgeschlagen")
             continue
 
-        mime = _mime_from_url(img["thumb_url"])
-        result = analyze_with_vision(client, image_bytes, mime, thema)
+        result = analyze_with_vision(client, image_bytes, "image/jpeg", thema)
 
         if result is None:
             rejected.append({**img, "reason": "Vision-Fehler", "ablehnungsgrund": "Vision-API-Fehler"})
             print("    [X] Vision-Fehler")
-            continue
-
-        if not result.get("kindgerecht", False):
+        elif not result.get("kindgerecht", False):
             grund = result.get("ablehnungsgrund", "")
             rejected.append({**img, "reason": f"kindgerecht=false: {grund}", "ablehnungsgrund": grund})
             print(f"    [X] ABGELEHNT: {grund}")
-            continue
-
-        relevanz = result.get("relevanz", 0)
-        hero = result.get("hero_tauglich", False)
-        beschreibung = result.get("beschreibung", "")
-        accepted.append({
-            **img,
-            "relevanz": relevanz,
-            "hero_tauglich": hero,
-            "beschreibung": beschreibung,
-        })
-        hero_marker = " [HERO]" if hero else ""
-        print(f"    [OK] [{relevanz}] {beschreibung[:80]}{hero_marker}")
+        else:
+            relevanz = result.get("relevanz", 0)
+            hero = result.get("hero_tauglich", False)
+            beschreibung = result.get("beschreibung", "")
+            accepted.append({**img, "relevanz": relevanz, "hero_tauglich": hero,
+                             "beschreibung": beschreibung})
+            hero_marker = " [HERO]" if hero else ""
+            print(f"    [OK] [{relevanz}] {beschreibung[:80]}{hero_marker}")
 
     # 4. Sortieren + Hero bestimmen
     accepted.sort(key=lambda x: (-x["relevanz"], -int(x["hero_tauglich"])))
@@ -499,8 +544,11 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
 
     # 5. Zusammenfassung
     total_req = get_request_count() - req_before
+    dl_total = len(to_check)
+    dl_cached = dl_total - dl_fresh
     print(f"\n{'='*60}")
     print(f"Ergebnis: {len(accepted)} akzeptiert / {len(rejected)} abgelehnt")
+    print(f"Downloads: {dl_total} gesamt ({dl_cached} aus Cache, {dl_fresh} frisch)")
     print(f"Wikimedia-API-Requests gesamt: {total_req}")
     if hero_img:
         print(f"Hero-Bild: {hero_img['filename']} (Relevanz: {hero_img['relevanz']})")
@@ -528,38 +576,40 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
         "wikipedia_title": wikipedia_title,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "stats": {
-            "candidates_in": len(candidates),
-            "vision_checked": len(to_check),
-            "accepted": len(accepted),
-            "rejected": len(rejected),
+            "candidates_in":       len(candidates),
+            "vision_checked":      len(to_check),
+            "accepted":            len(accepted),
+            "rejected":            len(rejected),
             "wikimedia_api_requests": total_req,
+            "downloads_fresh":     dl_fresh,
+            "downloads_cached":    dl_cached,
         },
         "hero": {
-            "filename": hero_img["filename"],
-            "relevanz": hero_img["relevanz"],
+            "filename":    hero_img["filename"],
+            "relevanz":    hero_img["relevanz"],
             "beschreibung": hero_img["beschreibung"],
-            "thumb_url": hero_img["thumb_url"],
+            "thumb_url":   hero_img["thumb_url"],
         } if hero_img else None,
         "accepted": [
             {
-                "rank": a["rank"],
-                "filename": a["filename"],
-                "relevanz": a["relevanz"],
-                "hero_tauglich": a["hero_tauglich"],
-                "beschreibung": a["beschreibung"],
-                "license": a["license"],
+                "rank":           a["rank"],
+                "filename":       a["filename"],
+                "relevanz":       a["relevanz"],
+                "hero_tauglich":  a["hero_tauglich"],
+                "beschreibung":   a["beschreibung"],
+                "license":        a["license"],
                 "license_author": a["license_author"],
-                "thumb_url": a["thumb_url"],
-                "wikimedia_id": a["wikimedia_id"],
+                "thumb_url":      a["thumb_url"],
+                "wikimedia_id":   a["wikimedia_id"],
             }
             for a in accepted
         ],
         "rejected": [
             {
-                "filename": r["filename"],
-                "reason": r.get("reason", ""),
+                "filename":       r["filename"],
+                "reason":         r.get("reason", ""),
                 "ablehnungsgrund": r.get("ablehnungsgrund", ""),
-                "wikimedia_id": r.get("wikimedia_id", ""),
+                "wikimedia_id":   r.get("wikimedia_id", ""),
             }
             for r in rejected
         ],
