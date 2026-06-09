@@ -62,7 +62,7 @@ from image_vision_filter import (        # noqa: E402
 
 GEMINI_MODEL       = "gemini-2.5-flash"
 OUT_DIR            = ROOT / "articles" / "test_grounded"
-SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v3.21_production.md"
+SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v3.22_production.md"
 
 APPEAL_TARGET     = {"high": 15, "medium": 10, "low": 6}
 MAX_VISION_CHECKS = 40
@@ -186,6 +186,9 @@ Kriterien:
 - Vertiefen das Thema fuer ein Kind: konkret, anschaulich, lebendig
 - Auch solche, mit denen sich laendlaeufige Vorstellungen aufgreifen und richtigstellen lassen
 - Fokuserhaltend: Thema vertiefen, NICHT zu Eltern-/Nachbarthemen wechseln
+- Umfasst das Thema mehrere Regionen oder Grossgruppen, repraesentieren die Companions diese Spannweite
+  statt in einer Region zu clustern (z.B. bei Indianer: neben nordamerikanischen Icons auch meso-/
+  suedamerikanische wie Azteken, Maya oder Inka). Cap bleibt ≤5 — umverteilen, nicht erweitern.
 - Lieber weniger als ungeeignete auffuellen (kein Mindestwert)
 Ausgabe NUR JSON: {{"companions": ["Lemma1","Lemma2",...]}}"""
 
