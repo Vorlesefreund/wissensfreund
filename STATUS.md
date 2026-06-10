@@ -1,12 +1,16 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-10T08:53:25Z -->
+<!-- updated: 2026-06-10T09:12:19Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**COMPANION_CHAR_CAP=30000 + Harness-Symmetrie (2026-06-10)** ← AKTUELL
+**artikel_pipeline.yml: schedule entfernt (2026-06-10)** ← AKTUELL
+- `on: schedule` (cron "0 3 * * 1") entfernt — Pipeline läuft nicht mehr automatisch.
+- `on: workflow_dispatch` bleibt erhalten — manueller Auslöser weiterhin verfügbar.
+
+**COMPANION_CHAR_CAP=30000 + Harness-Symmetrie (2026-06-10)**
 - generate_grounded.py: `COMPANION_CHAR_CAP = 30_000` als benannte Konstante (Z.76); `text[:COMPANION_CHAR_CAP]` ersetzt Magic Number `[:6000]` (Z.613)
 - run_lektorat_catchtest.py: importiert dieselbe Konstante aus generate_grounded (kein Duplikat).
   Logik in `_build_sources_block`: Artikel-Checks → Primär ungekürzt / Companions `[:30000]`;

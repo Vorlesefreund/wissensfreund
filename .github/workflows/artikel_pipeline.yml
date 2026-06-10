@@ -19,9 +19,6 @@ on:
         description: "Dry-Run (kein API-Call, keine Kosten)"
         type: boolean
         default: false
-  schedule:
-    # Jeden Montag 03:00 UTC — Stufe 2+3, alle Kategorien
-    - cron: "0 3 * * 1"
 
 env:
   PYTHON_VERSION: "3.11"
