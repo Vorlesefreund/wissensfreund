@@ -714,7 +714,7 @@ def try_create_gemini_cache(
             config=types.CreateCachedContentConfig(
                 system_instruction=system_prompt,
                 contents=[{"role": "user", "parts": [{"text": stable_prefix}]}],
-                ttl="3600s",
+                ttl="900s",
             ),
         )
         log.info("  Gemini-Cache erstellt: %s (~%d Zeichen stable_prefix)",
@@ -1108,89 +1108,98 @@ def main() -> None:
                 gemini_cache=gemini_cache,
             )
 
-        print(f"\n  Phase 2 startet {len(topic_jobs)} Stufe(n) parallel ...")
-        with concurrent.futures.ThreadPoolExecutor(max_workers=len(topic_jobs)) as pool:
-            futures = {pool.submit(_run_level, job): job for job in topic_jobs}
-            for fut in concurrent.futures.as_completed(futures):
-                job, article, report = fut.result()
+        try:
+            print(f"\n  Phase 2 startet {len(topic_jobs)} Stufe(n) parallel ...")
+            with concurrent.futures.ThreadPoolExecutor(max_workers=len(topic_jobs)) as pool:
+                futures = {pool.submit(_run_level, job): job for job in topic_jobs}
+                for fut in concurrent.futures.as_completed(futures):
+                    job, article, report = fut.result()
+                    article_id = job["article_id"]
+                    print(f"\n  --- Stufe {job['age_level']}: {article_id} ---")
+                    report_path = out_dir / f"{article_id}_report.json"
+                    report_path.write_text(
+                        json.dumps(report, ensure_ascii=False, indent=2),
+                        encoding="utf-8",
+                    )
+                    print(f"  Report: {report_path.relative_to(ROOT)}")
+                    if article:
+                        topic_articles.append((job, article, report))
+                    else:
+                        print(f"  FEHLER: {report.get('errors')}")
+
+            # Reihenfolge nach age_level für konsistente Lektorat-Verarbeitung
+            topic_articles.sort(key=lambda t: t[0]["age_level"])
+
+            # Lektorat (alle Stufen, Quellblock geteilt; sync=default, batch=--lektorat-batch)
+            if not skip_lektorat and topic_articles:
+                parts = {
+                    job["article_id"]: build_lektorat_parts(article, sources_block)
+                    for job, article, _ in topic_articles
+                }
+                if use_batch_lektorat:
+                    log.info("  Starte Lektorat-Batch fuer %d Artikel (Modell: claude-sonnet-4-6) ...",
+                             len(topic_articles))
+                    run_fn = run_lektorat_batch
+                else:
+                    log.info("  Starte Lektorat-Sync fuer %d Artikel (Modell: claude-sonnet-4-6) ...",
+                             len(topic_articles))
+                    run_fn = run_lektorat_sync
+                try:
+                    lektorat_results = run_fn(parts, anthropic_key)
+                    for job, article, _ in topic_articles:
+                        aid = job["article_id"]
+                        verdicts = lektorat_results.get(aid, [])
+                        annotate_article_lektorat(article, verdicts, primary_text)
+                        pb = article.get("pruefbericht", {})
+                        sm = pb.get("summary", {})
+                        log.info(
+                            "  Lektorat [%s]: %d Aussagen — angewandt:%d vorschlag:%d eskaliert:%d",
+                            aid, len(pb.get("findings", [])),
+                            sm.get("auto_angewandt", 0),
+                            sm.get("vorschlag_offen", 0),
+                            sm.get("eskaliert", 0),
+                        )
+                except Exception as exc:
+                    log.error("  Lektorat fehlgeschlagen: %s — Artikel ohne Lektorat-Feld", exc)
+
+            # Artikel schreiben (mit ggf. annotiertem lektorat-Feld)
+            for job, article, report in topic_articles:
                 article_id = job["article_id"]
-                print(f"\n  --- Stufe {job['age_level']}: {article_id} ---")
-                report_path = out_dir / f"{article_id}_report.json"
-                report_path.write_text(
-                    json.dumps(report, ensure_ascii=False, indent=2),
+                out_path = out_dir / f"{article_id}.json"
+                out_path.write_text(
+                    json.dumps(article, ensure_ascii=False, indent=2),
                     encoding="utf-8",
                 )
-                print(f"  Report: {report_path.relative_to(ROOT)}")
-                if article:
-                    topic_articles.append((job, article, report))
-                else:
-                    print(f"  FEHLER: {report.get('errors')}")
+                meta_title = article.get("meta", {}).get("title", "?")
+                n_imgs  = len(article.get("images", []))
+                n_sents = sum(
+                    len(s.get("sentences", []))
+                    for s in article.get("sections", [])
+                )
+                wc      = report["phase2"].get("word_count", "?")
+                wtarget = report["phase2"].get("word_target", "?")
+                retry   = " [RETRY]" if report["phase2"].get("retry_needed") else ""
+                review  = " [REVIEW]" if article["meta"].get("review_flag") else ""
+                pb      = article.get("pruefbericht", {})
+                sm      = pb.get("summary", {})
+                n_f     = len(pb.get("findings", []))
+                lekt_note = (
+                    f" [LEKTORAT {n_f}:{sm.get('auto_angewandt',0)}A"
+                    f"/{sm.get('vorschlag_offen',0)}V/{sm.get('eskaliert',0)}E]"
+                    if n_f else ""
+                )
+                gen_m   = article["meta"].get("generation_method", "?")
+                print(f"  Gespeichert: {out_path.relative_to(ROOT)}")
+                print(f"  meta.title='{meta_title}' | method='{gen_m}'")
+                print(f"  Bilder: {n_imgs} | Saetze: {n_sents} | Woerter: {wc} (Ziel {wtarget}){retry}{review}{lekt_note}")
 
-        # Reihenfolge nach age_level für konsistente Lektorat-Verarbeitung
-        topic_articles.sort(key=lambda t: t[0]["age_level"])
-
-        # Lektorat (alle Stufen, Quellblock geteilt; sync=default, batch=--lektorat-batch)
-        if not skip_lektorat and topic_articles:
-            parts = {
-                job["article_id"]: build_lektorat_parts(article, sources_block)
-                for job, article, _ in topic_articles
-            }
-            if use_batch_lektorat:
-                log.info("  Starte Lektorat-Batch fuer %d Artikel (Modell: claude-sonnet-4-6) ...",
-                         len(topic_articles))
-                run_fn = run_lektorat_batch
-            else:
-                log.info("  Starte Lektorat-Sync fuer %d Artikel (Modell: claude-sonnet-4-6) ...",
-                         len(topic_articles))
-                run_fn = run_lektorat_sync
-            try:
-                lektorat_results = run_fn(parts, anthropic_key)
-                for job, article, _ in topic_articles:
-                    aid = job["article_id"]
-                    verdicts = lektorat_results.get(aid, [])
-                    annotate_article_lektorat(article, verdicts, primary_text)
-                    pb = article.get("pruefbericht", {})
-                    sm = pb.get("summary", {})
-                    log.info(
-                        "  Lektorat [%s]: %d Aussagen — angewandt:%d vorschlag:%d eskaliert:%d",
-                        aid, len(pb.get("findings", [])),
-                        sm.get("auto_angewandt", 0),
-                        sm.get("vorschlag_offen", 0),
-                        sm.get("eskaliert", 0),
-                    )
-            except Exception as exc:
-                log.error("  Lektorat-Batch fehlgeschlagen: %s — Artikel ohne Lektorat-Feld", exc)
-
-        # Artikel schreiben (mit ggf. annotiertem lektorat-Feld)
-        for job, article, report in topic_articles:
-            article_id = job["article_id"]
-            out_path = out_dir / f"{article_id}.json"
-            out_path.write_text(
-                json.dumps(article, ensure_ascii=False, indent=2),
-                encoding="utf-8",
-            )
-            meta_title = article.get("meta", {}).get("title", "?")
-            n_imgs  = len(article.get("images", []))
-            n_sents = sum(
-                len(s.get("sentences", []))
-                for s in article.get("sections", [])
-            )
-            wc      = report["phase2"].get("word_count", "?")
-            wtarget = report["phase2"].get("word_target", "?")
-            retry   = " [RETRY]" if report["phase2"].get("retry_needed") else ""
-            review  = " [REVIEW]" if article["meta"].get("review_flag") else ""
-            pb      = article.get("pruefbericht", {})
-            sm      = pb.get("summary", {})
-            n_f     = len(pb.get("findings", []))
-            lekt_note = (
-                f" [LEKTORAT {n_f}:{sm.get('auto_angewandt',0)}A"
-                f"/{sm.get('vorschlag_offen',0)}V/{sm.get('eskaliert',0)}E]"
-                if n_f else ""
-            )
-            gen_m   = article["meta"].get("generation_method", "?")
-            print(f"  Gespeichert: {out_path.relative_to(ROOT)}")
-            print(f"  meta.title='{meta_title}' | method='{gen_m}'")
-            print(f"  Bilder: {n_imgs} | Saetze: {n_sents} | Woerter: {wc} (Ziel {wtarget}){retry}{review}{lekt_note}")
+        finally:
+            if gemini_cache:
+                try:
+                    client.caches.delete(name=gemini_cache)
+                    log.info("  Gemini-Cache geloescht: %s", gemini_cache)
+                except Exception as e:
+                    log.warning("  Gemini-Cache loeschen fehlgeschlagen (%s): %s", gemini_cache, e)
 
         print(f"\n  Appeal: {appeal} ({appeal_source}) | Companions ({len(valid_companions)}): {valid_companions}")
 

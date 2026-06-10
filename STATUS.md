@@ -1,12 +1,22 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-10T13:44:06Z -->
+<!-- updated: 2026-06-10T14:19:44Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Phase-2-Parallelisierung + Lektorat-Sync + Cache-Verifikation (2026-06-10)** ← AKTUELL
+**Gemini-Cache-Hygiene + Phase-2-Parallel + Lektorat-Sync (2026-06-10)** ← AKTUELL
+
+### Gemini-Cache-Hygiene
+- `generate_grounded.py`: Phase-2 + Lektorat + Artikel-Schreiben in `try/finally` eingewickelt.
+  `finally`: `client.caches.delete(name=gemini_cache)` — löscht Cache nach Themenlauf auch bei Fehler.
+  TTL von 3600s auf **900s (15 Min)** gesenkt — Backstop für harte Abstürze vor finally.
+- Verifikation: `DELETE .../cachedContents/... HTTP/1.1 200 OK` im Log ✓.
+  Nach Lauf: `client.caches.list()` → 0 verbleibende Caches ✓.
+  (API-Signatur-Fix: `client.caches.delete(name=...)` statt positivem Argument.)
+
+
 
 ### Phase 2 parallel (concurrent.futures)
 - `generate_grounded.py`: `ThreadPoolExecutor(max_workers=len(topic_jobs))` — alle Stufen gleichzeitig.
