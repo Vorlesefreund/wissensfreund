@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import re
+import sys
 import time
 from pathlib import Path
 
@@ -25,10 +26,10 @@ WIKIPEDIA_API = "https://de.wikipedia.org/w/api.php"
 logging.basicConfig(level=logging.INFO, format="%(levelname)-7s %(message)s")
 log = logging.getLogger(__name__)
 
-SOURCE_PREFIX = 4000   # immer die ersten N chars einer Quelle
-SOURCE_WINDOW = 2500   # zusätzliches Fenster um jeden match_begriff
-SOURCE_MAX    = 9000   # Gesamtlimit je Quelle im Prompt
-GEMINI_RETRY  = 4
+sys.path.insert(0, str(Path(__file__).parent))
+from generate_grounded import COMPANION_CHAR_CAP  # noqa: E402 — gleiche Konstante wie Generierung
+
+GEMINI_RETRY = 4
 
 LEKTORAT_SYSTEM = (
     "Du bist Faktenprüfer. Prüfe die vorgelegte(n) Aussage(n) AUSSCHLIESSLICH gegen die "
@@ -95,38 +96,6 @@ def fetch_wiki_full(session: requests.Session, title: str) -> str:
     return ""
 
 
-def extract_source_text(full_text: str, match_begriffe: list[str] | None = None) -> str:
-    """
-    Gibt einen Prompt-optimierten Auszug zurück:
-    - Immer die ersten SOURCE_PREFIX Zeichen
-    - Plus je SOURCE_WINDOW Zeichen um jeden match_begriff (falls weiter hinten)
-    - Gesamtlimit SOURCE_MAX
-    """
-    if not full_text:
-        return "[kein Text]"
-    prefix = full_text[:SOURCE_PREFIX]
-    if not match_begriffe or len(full_text) <= SOURCE_PREFIX:
-        return prefix[:SOURCE_MAX]
-
-    extra_parts = []
-    for term in match_begriffe:
-        idx = full_text.lower().find(term.lower())
-        if idx == -1 or idx < SOURCE_PREFIX:
-            continue
-        start = max(SOURCE_PREFIX, idx - 200)
-        end = min(len(full_text), idx + SOURCE_WINDOW)
-        snippet = full_text[start:end].strip()
-        if snippet:
-            extra_parts.append(f"[...]\n{snippet}")
-
-    result = prefix
-    for part in extra_parts:
-        if len(result) + len(part) > SOURCE_MAX:
-            break
-        result += "\n\n" + part
-    return result
-
-
 # ── Pre-cache all sources from goldset ───────────────────────────────────────
 
 def prefetch_all_sources(goldset: list[dict], session: requests.Session) -> None:
@@ -174,7 +143,7 @@ def build_article_prompt(item: dict) -> str:
 
     sources_block = _build_sources_block(item["deklarierte_quellen"],
                                           item.get("primaer_artikel"),
-                                          item.get("match_begriffe", []))
+                                          is_single_claim=False)
     return (
         f"PRÜF-ARTIKEL (Herkunft: {art_id}):\n{article_text}\n\n"
         f"{sources_block}\n\n"
@@ -188,19 +157,29 @@ def build_claim_prompt(item: dict) -> str:
     claim = item["claim"]
     sources_block = _build_sources_block(item["deklarierte_quellen"],
                                           item.get("primaer_artikel"),
-                                          item.get("match_begriffe", []))
+                                          is_single_claim=True)
     return f"AUSSAGE: {claim}\n\n{sources_block}\n\nPrüfe die Aussage gegen die deklarierten Quellen."
 
 
 def _build_sources_block(sources: list[str], primaer: str | None,
-                          match_begriffe: list[str]) -> str:
+                          is_single_claim: bool) -> str:
+    """
+    Symmetrisch zur Generierung:
+    - Artikel-Checks (is_single_claim=False): Primär ungekürzt, Companions[:COMPANION_CHAR_CAP]
+    - Einzelaussagen (is_single_claim=True): alle Quellen ungekürzt (keine Companion-Logik)
+    """
     all_sources = list(sources)
     if primaer and primaer not in all_sources:
         all_sources.append(primaer)
     parts = []
     for title in all_sources:
         full = _WIKI_CACHE.get(title.lower(), "[nicht gecacht]")
-        excerpt = extract_source_text(full, match_begriffe)
+        if is_single_claim:
+            excerpt = full  # Einzelaussage: voller Text, kein Cap
+        elif primaer and title.lower() == primaer.lower():
+            excerpt = full  # Primärartikel im Artikel-Check: ungekürzt
+        else:
+            excerpt = full[:COMPANION_CHAR_CAP]  # Companion: identisch zur Generierung
         parts.append(f"### Quelle: {title}\n{excerpt}")
     return "DEKLARIERTE QUELLEN:\n" + "\n\n".join(parts)
 

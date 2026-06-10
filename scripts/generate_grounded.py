@@ -72,6 +72,9 @@ MAX_IMG_COMPANION = 6
 # Companion-Cap gestaffelt nach Appeal (kein Auffüllen)
 COMPANION_CAP = {"low": 4, "medium": 5, "high": 6}
 
+# Zeichenlimit je Companion-Text im Generierungs-Prompt (positional slice)
+COMPANION_CHAR_CAP = 30_000
+
 # Wortziel-Tabelle: (age_level, appeal) → (min_wörter, max_wörter)
 WORTZIEL_TABLE: dict[tuple[int, str], tuple[int, int]] = {
     (1, "low"):    (50,  100),
@@ -607,7 +610,7 @@ def build_grounded_user_message(
     for i, comp in enumerate(companion_order, 2):
         text = companion_texts.get(comp, "")
         if text:
-            parts += [f"WIKIPEDIA_TEXT_{i} (Begleitartikel: {comp}):", text[:6000], ""]
+            parts += [f"WIKIPEDIA_TEXT_{i} (Begleitartikel: {comp}):", text[:COMPANION_CHAR_CAP], ""]
 
     # Stabile Metadaten
     parts.append(f"ARTICLE_TITLE: {thema}")

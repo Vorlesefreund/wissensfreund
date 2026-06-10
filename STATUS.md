@@ -1,12 +1,19 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-10T08:37:23Z -->
+<!-- updated: 2026-06-10T08:53:25Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Lektorat Catch-Test (2026-06-10)** ← AKTUELL
+**COMPANION_CHAR_CAP=30000 + Harness-Symmetrie (2026-06-10)** ← AKTUELL
+- generate_grounded.py: `COMPANION_CHAR_CAP = 30_000` als benannte Konstante (Z.76); `text[:COMPANION_CHAR_CAP]` ersetzt Magic Number `[:6000]` (Z.613)
+- run_lektorat_catchtest.py: importiert dieselbe Konstante aus generate_grounded (kein Duplikat).
+  Logik in `_build_sources_block`: Artikel-Checks → Primär ungekürzt / Companions `[:30000]`;
+  Einzelaussagen → alle Quellen ungekürzt (K5 Biden@59k + K6 16.000@25k vollständig abgedeckt).
+  `extract_source_text` + `SOURCE_PREFIX/WINDOW/MAX`-Konstanten entfernt.
+
+**Lektorat Catch-Test (2026-06-10)**
 Goldset: 4 Slips (L1–L4) × 6 Kontrollen (K1–K6), handverifiziert.
 Verifizierer-Ergebnis (tests/lektorat_catchtest_result.md, lokal):
 - Claude Sonnet 4.6: Catch 4/4 | FP 1/6 (K6 Beringia — Grenzfall Formulierung)
