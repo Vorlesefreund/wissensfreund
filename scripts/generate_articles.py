@@ -58,13 +58,92 @@ MIN_QUIZ_QUESTIONS        = {"1": 3,  "2": 3,  "3": 4}
 # Wikipedia Text-Fetcher
 # ─────────────────────────────────────────────
 
-def fetch_wikipedia_text(session: requests.Session, title: str, rev_id: str = "") -> str:
-    """Holt den bereinigten Wikipedia-Plaintext (ohne Infoboxen, Templates)."""
-    params = {
+# Präfixe, die keine inhaltlichen Artikel sind (BKS-Link-Filterung)
+_BKS_SKIP_PREFIXES = (
+    "Wikipedia:", "Hilfe:", "Portal:", "Vorlage:", "Kategorie:",
+    "Datei:", "File:", "MediaWiki:", "Benutzer:", "Diskussion:",
+    "WP:", "WT:", "Projekt:",
+)
+
+
+def _resolve_bks(session: requests.Session, bks_title: str) -> str | None:
+    """Wählt aus einer BKS-Seite den substanziellsten Artikel-Link.
+
+    Strategie: Wikitext in Erscheinungsreihenfolge parsen (nicht prop=links, das
+    alphabetisch sortiert) → erste 5 inhaltlichen NS-0-Links → größten nach
+    Seitengröße (prop=info) zurückgeben.
+    """
+    # Schritt 1: Wikitext der BKS holen (Reihenfolge bewahren)
+    resp = session.get(WIKIPEDIA_API, params={
+        "action": "query", "format": "json",
+        "titles": bks_title, "redirects": "1",
+        "prop": "revisions", "rvprop": "content", "rvslots": "main",
+    }, timeout=30)
+    resp.raise_for_status()
+    wikitext = ""
+    for page in resp.json().get("query", {}).get("pages", {}).values():
+        slots = page.get("revisions", [{}])[0].get("slots", {})
+        wikitext = (slots.get("main", {}) or {}).get("*", "") or ""
+
+    # Links in Reihenfolge extrahieren: [[Titel]] oder [[Titel|Anzeige]]
+    raw_links = re.findall(r"\[\[([^\]|#]+)", wikitext)
+    candidates: list[str] = []
+    seen: set[str] = set()
+    for link in raw_links:
+        link = link.strip()
+        # Namespace-Links (enthalten ":") und Meta-Präfixe überspringen
+        if ":" in link:
+            continue
+        if any(link.startswith(p.rstrip(":")) for p in _BKS_SKIP_PREFIXES):
+            continue
+        key = link.lower()
+        if key not in seen:
+            seen.add(key)
+            candidates.append(link)
+
+    if not candidates:
+        return None
+
+    # Schritt 2: Seitengröße für die ersten 5 Kandidaten (prop=info)
+    batch = candidates[:5]
+    resp2 = session.get(WIKIPEDIA_API, params={
+        "action": "query", "format": "json",
+        "titles": "|".join(batch), "redirects": "1",
+        "prop": "info",
+    }, timeout=30)
+    resp2.raise_for_status()
+    pages2 = resp2.json().get("query", {}).get("pages", {})
+    best_title: str | None = None
+    best_size = 0
+    for page in pages2.values():
+        if "missing" in page:
+            continue
+        size = page.get("length", 0)
+        if size > best_size:
+            best_size = size
+            best_title = page.get("title")
+    return best_title
+
+
+def fetch_wikipedia_text(
+    session: requests.Session,
+    title: str,
+    rev_id: str = "",
+    _bks_depth: int = 0,
+) -> str:
+    """Holt den bereinigten Wikipedia-Plaintext (ohne Infoboxen, Templates).
+
+    Erkennt Begriffsklärungsseiten (pageprops.disambiguation) und löst sie
+    automatisch auf den größten verlinkten Artikel auf. Nie silent:
+    - Redirect:  INFO-Log  "Redirect aufgeloest: X -> Y"
+    - BKS:       WARNING-Log "BKS aufgeloest: X -> Y — BITTE PRÜFEN"
+    - BKS ohne Ziel: ValueError
+    """
+    params: dict = {
         "action":          "query",
         "titles":          title,
         "redirects":       "1",
-        "prop":            "extracts",
+        "prop":            "extracts|pageprops",
         "explaintext":     True,
         "exsectionformat": "plain",
         "format":          "json",
@@ -74,8 +153,39 @@ def fetch_wikipedia_text(session: requests.Session, title: str, rev_id: str = ""
 
     resp = session.get(WIKIPEDIA_API, params=params, timeout=30)
     resp.raise_for_status()
-    pages = resp.json().get("query", {}).get("pages", {})
+    query = resp.json().get("query", {})
+
+    # Redirect sichtbar loggen
+    redirects = query.get("redirects", [])
+    if redirects:
+        resolved_title = redirects[-1]["to"]
+        log.info("  Redirect aufgeloest: '%s' -> '%s'", title, resolved_title)
+    else:
+        resolved_title = title
+
+    pages = query.get("pages", {})
     for page in pages.values():
+        props      = page.get("pageprops", {}) or {}
+        is_disambig = "disambiguation" in props
+
+        if is_disambig:
+            if _bks_depth > 0:
+                raise ValueError(
+                    f"BKS '{resolved_title}' nach Auflösung erneut BKS — abgebrochen"
+                )
+            log.warning(
+                "  Lemma '%s' ist Begriffsklärung — löse auf ...", resolved_title
+            )
+            best = _resolve_bks(session, resolved_title)
+            if best is None:
+                raise ValueError(
+                    f"BKS '{resolved_title}': kein substanzieller Artikel-Link gefunden"
+                )
+            log.warning(
+                "  BKS '%s' aufgeloest zu '%s' — BITTE PRUEFEN", resolved_title, best
+            )
+            return fetch_wikipedia_text(session, best, _bks_depth=1)
+
         text = page.get("extract", "")
         if text:
             return _clean_wikipedia_text(text)

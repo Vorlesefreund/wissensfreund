@@ -1,12 +1,25 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-10T14:56:19Z -->
+<!-- updated: 2026-06-10T19:46:31Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**503-Härtung + Robuste Phase-2-Generierung (2026-06-10)** ← AKTUELL
+**BKS-Guard in fetch_wikipedia_text (2026-06-10)** ← AKTUELL
+
+### BKS-Guard: Begriffsklärungsseiten erkennen + auflösen
+- `generate_articles.py`: `fetch_wikipedia_text` prüft jetzt `pageprops=disambiguation`.
+  Bei BKS: Wikitext holen, Links in Erscheinungsreihenfolge extrahieren (nicht prop=links,
+  das alphabetisch sortiert), erste 5 NS-0-Kandidaten per prop=info größenmäßig vergleichen,
+  größten Artikel neu fetchen.
+- Logging: Redirect immer sichtbar (INFO), BKS-Auflösung als WARNING + "BITTE PRÜFEN".
+- Guard-Tiefe: _bks_depth=1 verhindert verkettete BKS-Rekursion.
+- Verifiziert: Apfel→Kulturapfel (49K), Schmetterling→Schmetterlinge (81K).
+  Nicht-BKS-Themen (Vulkan, Hund, Dinosaurier) unverändert.
+  Redirect-Log "Hund -> Haushund" sichtbar.
+
+**503-Härtung + Robuste Phase-2-Generierung (2026-06-10)**
 
 ### 503-Härtung: Phase 2 sequenziell
 - `generate_grounded.py`: Phase-2-Loop von ThreadPoolExecutor auf sequenziell umgestellt.
