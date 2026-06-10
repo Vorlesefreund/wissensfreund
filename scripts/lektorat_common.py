@@ -122,16 +122,28 @@ def article_to_lektorat_text(article: dict) -> str:
 
 # ── Prompt-Builder ────────────────────────────────────────────────────────────
 
-def build_lektorat_prompt(article: dict, sources_block: str) -> str:
+def build_lektorat_parts(article: dict, sources_block: str) -> tuple[str, str]:
+    """Teilt Lektorat-Prompt in (sources_prefix, article_task).
+
+    sources_prefix: stabiler Quellblock, identisch für alle Stufen eines Themas
+                    → Anthropic cache_control: ephemeral greift über die 3 Batch-Calls.
+    article_task:   variabler Teil (Artikeltext je Stufe + Aufgabe).
+    """
     article_text = article_to_lektorat_text(article)
     level = article.get("meta", {}).get("age_level", "?")
     title = article.get("meta", {}).get("title", "?")
-    return (
+    article_task = (
         f"PRÜF-ARTIKEL (Stufe {level}, Titel: {title}):\n{article_text}\n\n"
-        f"{sources_block}\n\n"
         "Prüfe ALLE faktischen Aussagen im Artikel gegen die deklarierten Quellen. "
         "Liefere für jede Aussage alle sechs Felder im JSON-Array."
     )
+    return sources_block, article_task
+
+
+def build_lektorat_prompt(article: dict, sources_block: str) -> str:
+    """Backward-compat: ungecachte Volltext-Version (für Catch-Test / direkte Aufrufe)."""
+    sources, task = build_lektorat_parts(article, sources_block)
+    return f"{sources}\n\n{task}"
 
 
 # ── JSON-Parser ───────────────────────────────────────────────────────────────
@@ -418,28 +430,40 @@ def annotate_article_lektorat(
 # ── Anthropic Batch-API ───────────────────────────────────────────────────────
 
 def run_lektorat_batch(
-    prompts_by_id: dict[str, str],
+    parts_by_id: dict[str, tuple[str, str]],
     api_key: str,
 ) -> dict[str, list[dict]]:
-    """Reicht alle Lektorat-Anfragen als Anthropic Message Batch ein (50 % günstiger),
-    pollt bis abgeschlossen, gibt article_id → rohe Verdikt-Liste zurück.
+    """Reicht alle Lektorat-Anfragen als Anthropic Message Batch ein.
+
+    parts_by_id: {article_id: (sources_prefix, article_task)}
+      sources_prefix = stabiler Quellblock (cache_control: ephemeral)
+      article_task   = variabler Artikeltext + Aufgabe
+
+    Prompt-Caching: System-Prompt + sources_prefix sind über alle 3 Batch-Anfragen
+    identisch → Anthropic KV-Cache-Hit ab 2. Anfrage (~50 % Token-Einsparung).
     """
     import anthropic
 
     client = anthropic.Anthropic(api_key=api_key)
 
-    batch_requests = [
-        {
+    batch_requests = []
+    for aid, (sources_prefix, article_task) in parts_by_id.items():
+        batch_requests.append({
             "custom_id": aid,
             "params": {
                 "model":      LEKTORAT_MODEL,
                 "max_tokens": 16000,
-                "system":     LEKTORAT_SYSTEM,
-                "messages":   [{"role": "user", "content": prompt}],
+                "system": [
+                    {"type": "text", "text": LEKTORAT_SYSTEM,
+                     "cache_control": {"type": "ephemeral"}},
+                ],
+                "messages": [{"role": "user", "content": [
+                    {"type": "text", "text": sources_prefix,
+                     "cache_control": {"type": "ephemeral"}},
+                    {"type": "text", "text": article_task},
+                ]}],
             },
-        }
-        for aid, prompt in prompts_by_id.items()
-    ]
+        })
 
     batch = client.messages.batches.create(requests=batch_requests)
     log.info("  Lektorat-Batch gestartet: %s (%d Anfragen)", batch.id, len(batch_requests))
@@ -459,7 +483,16 @@ def run_lektorat_batch(
     for result in client.messages.batches.results(batch.id):
         rid = result.custom_id
         if result.result.type == "succeeded":
-            raw = result.result.message.content[0].text
+            msg = result.result.message
+            raw = msg.content[0].text
+            u   = msg.usage
+            log.info(
+                "  [%s] tokens in=%d create=%d read=%d out=%d",
+                rid, u.input_tokens,
+                getattr(u, "cache_creation_input_tokens", 0),
+                getattr(u, "cache_read_input_tokens", 0),
+                u.output_tokens,
+            )
             try:
                 results[rid] = parse_lektorat_json(raw)
             except Exception as exc:

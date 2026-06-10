@@ -63,7 +63,7 @@ from lektorat_common import (            # noqa: E402
     COMPANION_CHAR_CAP,
     PROBLEMATIC_VERDICTS,
     build_grounded_sources_block,
-    build_lektorat_prompt,
+    build_lektorat_parts,
     annotate_article_lektorat,
     run_lektorat_batch,
 )
@@ -665,6 +665,64 @@ def build_grounded_user_message(
     return "\n".join(parts)
 
 
+def _split_grounded_user_message(
+    job: dict,
+    primary_text: str,
+    companion_texts: dict[str, str],
+    companion_order: list[str],
+    images: list[dict],
+) -> tuple[str, str]:
+    """Teilt die User-Message in (stabiler_prefix, variabler_suffix).
+
+    stabiler_prefix: Wikipedia-Texte + Metadaten + Bilder (gleich für alle Stufen)
+    variabler_suffix: AGE_LEVEL + WORTZIEL (je Stufe verschieden)
+    """
+    full = build_grounded_user_message(
+        job, primary_text, companion_texts, companion_order, images
+    )
+    appeal = job.get("resolved_appeal", job.get("topic_interest", "medium"))
+    level  = job.get("age_level", 2)
+    wmin, wmax = WORTZIEL_TABLE.get((level, appeal), (100, 250))
+    variable = (
+        f"AGE_LEVEL: {job['age_level']}\n"
+        f"WORTZIEL: {wmin}–{wmax} Wörter "
+        f"(bei reichen Quellen Richtung Obergrenze; harte Obergrenze {wmax} Wörter nicht überschreiten)"
+    )
+    stable = full[: len(full) - len(variable)].rstrip("\n")
+    return stable, variable
+
+
+# ── Gemini Context Cache ─────────────────────────────────────────────────────
+
+def try_create_gemini_cache(
+    client: genai.Client,
+    model: str,
+    system_prompt: str,
+    stable_prefix: str,
+) -> str | None:
+    """Versucht, einen Gemini Context Cache für den stabilen Quellblock zu erstellen.
+
+    Gibt den Cache-Namen zurück (z.B. 'cachedContents/abc123') oder None bei Fehler.
+    Mindestens ~4 000 Tokens Inhalt nötig (je Modell); bei nicht unterstütztem Modell
+    oder Fehler: graceful fallback (None → volle Message senden).
+    """
+    try:
+        cache = client.caches.create(
+            model=model,
+            config=types.CreateCachedContentConfig(
+                system_instruction=system_prompt,
+                contents=[{"role": "user", "parts": [{"text": stable_prefix}]}],
+                ttl="3600s",
+            ),
+        )
+        log.info("  Gemini-Cache erstellt: %s (~%d Zeichen stable_prefix)",
+                 cache.name, len(stable_prefix))
+        return cache.name
+    except Exception as e:
+        log.info("  Gemini Context Cache nicht verfügbar (%s) — sende vollen Kontext", e)
+        return None
+
+
 # ── Phase-1-Orchestrierung: einmal pro Thema ─────────────────────────────────
 
 def prepare_topic_sources(
@@ -748,8 +806,14 @@ def generate_one_level(
     model: str,
     skip_images: bool,
     out_dir: Path,
+    gemini_cache: str | None = None,
 ) -> tuple[dict | None, dict]:
-    """Phase 2: Artikel für eine Stufe generieren (shared sources)."""
+    """Phase 2: Artikel für eine Stufe generieren (shared sources).
+
+    gemini_cache: Cache-Name aus try_create_gemini_cache (optional).
+    Wenn gesetzt: nur variabler Suffix (AGE_LEVEL + WORTZIEL) gesendet,
+    stabiler Prefix aus Cache gelesen → ~75 % Token-Einsparung auf cached Tokens.
+    """
     article_id       = job["article_id"]
     thema            = job.get("thema", job["title"])
     prompt_version   = SYSTEM_PROMPT_PATH.stem.split("_v")[-1].split("_")[0]
@@ -766,17 +830,28 @@ def generate_one_level(
 
     log.info("  Phase 2: Artikel generieren (Thema: %s, Stufe %d, Modell: %s)",
              thema, job["age_level"], model)
-    user_msg = build_grounded_user_message(
-        job, primary_text, companion_texts, valid_companions, images
-    )
-    report["phase2"]["user_msg_len"] = len(user_msg)
 
     phase2_thinking = _make_thinking_config(model, budget_for_2_5=8192)
     try:
-        raw_response = gemini_client.call_gemini(
-            system_prompt, user_msg, model=model, thinking_config=phase2_thinking,
-            response_mime_type="application/json",
-        )
+        if gemini_cache:
+            _, variable_suffix = _split_grounded_user_message(
+                job, primary_text, companion_texts, valid_companions, images
+            )
+            report["phase2"]["user_msg_len"] = len(variable_suffix)
+            log.info("  Phase 2: Cache-Hit — sende nur variable Suffix (%d Zeichen)", len(variable_suffix))
+            raw_response = gemini_client.call_gemini(
+                system_prompt, variable_suffix, model=model, thinking_config=phase2_thinking,
+                response_mime_type="application/json", cached_content=gemini_cache,
+            )
+        else:
+            user_msg = build_grounded_user_message(
+                job, primary_text, companion_texts, valid_companions, images
+            )
+            report["phase2"]["user_msg_len"] = len(user_msg)
+            raw_response = gemini_client.call_gemini(
+                system_prompt, user_msg, model=model, thinking_config=phase2_thinking,
+                response_mime_type="application/json",
+            )
     except Exception as e:
         report["errors"].append(f"Gemini-Fehler Phase 2: {e}")
         return None, report
@@ -1007,6 +1082,14 @@ def main() -> None:
         log.info("  Quellblock: %d Zeichen (Primaer + %d Companions)",
                  len(sources_block), len(valid_companions))
 
+        # Gemini Context Cache: stabilen Prefix (Quellblock) einmal je Thema cachen
+        gemini_cache: str | None = None
+        if topic_jobs:
+            stable_prefix, _ = _split_grounded_user_message(
+                topic_jobs[0], primary_text, companion_texts, valid_companions, images
+            )
+            gemini_cache = try_create_gemini_cache(client, model, system_prompt, stable_prefix)
+
         # Phase 2: alle Stufen generieren, Artikel sammeln
         topic_articles: list[tuple[dict, dict, dict]] = []  # (job, article, report)
 
@@ -1018,6 +1101,7 @@ def main() -> None:
                 client, system_prompt, job,
                 primary_text, companion_texts, valid_companions, images,
                 phase1_report, model, args.skip_images, out_dir,
+                gemini_cache=gemini_cache,
             )
 
             report_path = out_dir / f"{article_id}_report.json"
@@ -1036,12 +1120,12 @@ def main() -> None:
         if not skip_lektorat and topic_articles:
             log.info("  Starte Lektorat-Batch fuer %d Artikel (Modell: claude-sonnet-4-6) ...",
                      len(topic_articles))
-            prompts = {
-                job["article_id"]: build_lektorat_prompt(article, sources_block)
+            parts = {
+                job["article_id"]: build_lektorat_parts(article, sources_block)
                 for job, article, _ in topic_articles
             }
             try:
-                lektorat_results = run_lektorat_batch(prompts, anthropic_key)
+                lektorat_results = run_lektorat_batch(parts, anthropic_key)
                 for job, article, _ in topic_articles:
                     aid = job["article_id"]
                     verdicts = lektorat_results.get(aid, [])

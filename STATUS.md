@@ -1,47 +1,47 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-10T12:06:28Z -->
+<!-- updated: 2026-06-10T12:33:46Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Gegroundetes Lektorat Stufe 2 — Korrektur-Schicht + Catch-Test-Fix (2026-06-10)** ← AKTUELL
+**Prompt-Caching aktiviert — Kosten-Hebel (2026-06-10)** ← AKTUELL
 
-### Stufe 2 — Korrektur-Schicht
-- `scripts/lektorat_common.py`: Stufe-2-Prompt mit Färbungs-Regel, BELEGT-BEDINGUNG (kein Implizit-Beleg),
-  VERBUND-REGEL (zusammengesetzte Aussagen: ALLE Teile müssen einzeln direkt belegt sein).
-  `build_pruefbericht` + `annotate_article_lektorat` mit Status {auto_angewandt/vorschlag_offen/eskaliert}.
-  `_apply_auto_correction` (Jaccard ≥ 0.4), `_normalize_for_check` (NFKC).
-- `scripts/generate_grounded.py`: `annotate_article_lektorat(article, verdicts, primary_text)`.
-  Log: `angewandt:%d vorschlag:%d eskaliert:%d`. Naming-Fix: `effective_id = article_id` (deterministisch).
-- `scripts/render_review_html.py`: Stufe-2-Prüfbericht-Panel (Original→Neu, status-basiert).
+### A) Anthropic-Lektorat — Caching
+- `scripts/lektorat_common.py`:
+  - `build_lektorat_parts(article, sources_block) -> (sources_prefix, article_task)`: stabiler
+    Quellblock (System + Primär + Companions) als ERSTER Block mit `cache_control: ephemeral`.
+  - `run_lektorat_batch` auf `parts_by_id: dict[str, tuple[str,str]]` umgestellt.
+    System-Prompt ebenfalls mit `cache_control: ephemeral`.
+    Usage-Logging je Ergebnis: `tokens in=%d create=%d read=%d out=%d`.
+- `scripts/generate_grounded.py`: Lektorat-Aufruf nutzt `build_lektorat_parts` statt `build_lektorat_prompt`.
+- Catch-Test nach Umbau: **4/4** | K1–K4 stabil | K5/K6 borderline-FP (wie erwartet, pre-existing) ✓.
 
-Stufe-2-Smoke-Test Indianer L1–L3 (gemini-3.5-flash, Batch msgbatch_01YQS7tpyxobGq23gQm9enYb):
-- L1: 27 Aussagen | 0A/2V/1E | review_flag=True
-- L2: 22 Aussagen | 0A/1V/0E | review_flag=True
-- L3: 28 Aussagen | 0A/4V/1E | review_flag=True
+### B) Gemini-Generierung — Context Cache
+- `scripts/gemini_client.py`: `cached_content: str | None = None` Param in `call_gemini`; usage_metadata-Log.
+- `scripts/generate_grounded.py`:
+  - `_split_grounded_user_message(job, ...) -> (stable_prefix, variable_suffix)`: trennt stabilen
+    Quellblock (Artikeltexte) vom variablen Suffix (AGE_LEVEL + WORTZIEL).
+  - `try_create_gemini_cache(client, model, system_prompt, stable_prefix) -> str | None`:
+    erstellt Gemini Context Cache (TTL 1h), graceful Fallback bei Fehler.
+  - Hauptschleife: `try_create_gemini_cache` einmal je Thema nach Phase 1 aufgerufen.
+    `generate_one_level(gemini_cache=...)` — bei Cache-Hit: nur variable_suffix gesendet,
+    stabiler Prefix aus Cache gelesen (~75 % Token-Einsparung erwartet). Fallback = voller Kontext.
 
-### Catch-Test-Fix
-- `scripts/run_lektorat_catchtest.py`:
-  - Bug-Fix: `article_to_text` las `box.text` NICHT (nur `box.sentences`) → Slip L2 wurde nie geprüft.
-  - Goldset L2 `match_begriffe`: ["Maya","Schrift"] → ["Schrift"] (vermeidet falschen Match auf "Maya oder Inka").
-  - `--compare`-Flag: Standard-Lauf = nur Sonnet. Haiku/Gemini nur mit `--compare`.
-  - VERIFIER_DEFAULT = [Sonnet] / VERIFIER_COMPARE = [Sonnet, Haiku, Gemini].
-- Catch-Test Sonnet: **4/4** | FP 2/6 (K5 Grenzfall-wording, K6 Beringia-Grenzfall).
-  Nur api.anthropic.com-Calls, null googleapis, kein Haiku im Standard-Lauf ✓.
-- Mock/Stub-Befund bestätigt: Kein Mock/Stub/Offline-Fallback. Nur zwei bedingte Pfade:
-  - Fehlt ANTHROPIC_API_KEY: Lektorat übersprungen (kein Fake-Output), generate_grounded.py:900–902.
-  - Fehlt GEMINI_API_KEY: sys.exit(1), generate_grounded.py:895–897.
+### C) Vorgänger-Meilensteine (Stufe 2 + Catch-Test-Fix, 2026-06-10)
+- Stufe-2-Prompt: BELEGT-BEDINGUNG, VERBUND-REGEL, Färbungs-Regel.
+- Catch-Test-Fix: box.text-Bug, match_begriffe=["Schrift"], --compare-Flag, VERIFIER_DEFAULT=Sonnet.
+- Smoke-Test Indianer L1–L3: L1 0A/2V/1E | L2 0A/1V/0E | L3 0A/4V/1E.
 
 ---
 
 ## 🔴 Nächster Schritt (Hoch)
 
-**Laufzeit-Messung generate_grounded.py** (nach Abschluss aller laufenden Jobs, allein):
-- Phase 1 (Companion-Vorschlag, Wikipedia-Fetches), Phase 2 (Generierung L1-L3), Lektorat L1-L3.
-- Wandzeit je Phase, Batch-API vs. synchron, Prompt-Cache-Hits, Thinking-Anteil.
-- User-Anforderung: isoliert laufen lassen (keine API-Konkurrenz).
+**Caching-Verifikation** — Lauf mit `--skip-images` isoliert (keine API-Konkurrenz):
+- Bestätigen: Anthropic cache_read_input_tokens > 0 ab 2. Lektorat-Call im Batch.
+- Bestätigen: Gemini cached_content_token_count > 0 in Stufe 2+3 (wenn Cache verfügbar).
+- Baseline-Vergleich: Kosten vor/nach (Timing + Token-Log).
 
 ---
 
