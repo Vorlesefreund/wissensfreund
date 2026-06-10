@@ -62,15 +62,73 @@ from image_vision_filter import (        # noqa: E402
 
 GEMINI_MODEL       = "gemini-2.5-flash"
 OUT_DIR            = ROOT / "articles" / "test_grounded"
-SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v3.22_production.md"
+SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v3.23_production.md"
 
 APPEAL_TARGET     = {"high": 15, "medium": 10, "low": 6}
 MAX_VISION_CHECKS = 40
 MAX_IMG_PRIMARY   = 20
 MAX_IMG_COMPANION = 6
-MAX_COMPANIONS    = 5
+
+# Companion-Cap gestaffelt nach Appeal (kein Auffüllen)
+COMPANION_CAP = {"low": 4, "medium": 5, "high": 6}
+
+# Wortziel-Tabelle: (age_level, appeal) → (min_wörter, max_wörter)
+WORTZIEL_TABLE: dict[tuple[int, str], tuple[int, int]] = {
+    (1, "low"):    (50,  100),
+    (1, "medium"): (100, 150),
+    (1, "high"):   (150, 250),
+    (2, "low"):    (80,  150),
+    (2, "medium"): (150, 250),
+    (2, "high"):   (250, 400),
+    (3, "low"):    (100, 200),
+    (3, "medium"): (200, 350),
+    (3, "high"):   (350, 650),
+}
 
 AGE_RANGES = {1: "4-6 Jahre", 2: "7-9 Jahre", 3: "10-12 Jahre"}
+
+
+def _load_klexikon_appeal() -> dict[str, str]:
+    """Lädt klexikon_appeal_quartil.json → Titel/Slug → Appeal-Mapping."""
+    path = ROOT / "klexikon_appeal_quartil.json"
+    if not path.exists():
+        return {}
+    data = json.load(path.open(encoding="utf-8"))
+    mapping: dict[str, str] = {}
+    for entry in data:
+        q = entry.get("quartil", 3)
+        appeal = "high" if q == 1 else ("medium" if q == 2 else "low")
+        for key in (entry.get("slug", ""), entry.get("klexikon_titel", "")):
+            if key:
+                mapping[key.lower()] = appeal
+    return mapping
+
+_KLEXIKON_APPEAL: dict[str, str] = _load_klexikon_appeal()
+
+
+def resolve_appeal(thema: str, job_appeal: str | None) -> tuple[str, str]:
+    """
+    Löst Interessenstufe auf: Klexikon-Quartil → Job-Wert → Default 'medium'.
+    Gibt (appeal, source) zurück.
+    """
+    key = thema.lower()
+    if key in _KLEXIKON_APPEAL:
+        return _KLEXIKON_APPEAL[key], "klexikon-quartil"
+    if job_appeal in ("low", "medium", "high"):
+        return job_appeal, "job"
+    return "medium", "default"
+
+
+def count_article_words(article: dict) -> int:
+    """Zählt Wörter in Fließtext + Boxen (ohne Quiz, ohne Überschriften)."""
+    words = 0
+    for sec in article.get("sections", []):
+        for s in sec.get("sentences", []):
+            words += len(s.get("text", "").split())
+        for box in sec.get("boxes", []):
+            words += len(box.get("text", "").split())
+            words += len(box.get("reveal_text", "").split())
+    return words
 
 
 def _make_thinking_config(model: str, budget_for_2_5: int) -> types.ThinkingConfig:
@@ -330,6 +388,7 @@ def validate_and_resolve_companions(
     session: requests.Session,
     raw_companions: list[str],
     primary_title: str,
+    cap: int = 5,
 ) -> tuple[list[str], list[dict]]:
     """
     Prüft Wikipedia-Existenz, löst Weiterleitungen auf, dedupliziert.
@@ -403,7 +462,7 @@ def validate_and_resolve_companions(
             log.info("  Companion aufgeloest: '%s' -> '%s'", comp, resolved)
         valid.append(resolved)
 
-    return valid[:MAX_COMPANIONS], rejected
+    return valid[:cap], rejected
 
 
 # ── Bildpool ──────────────────────────────────────────────────────────────────
@@ -574,8 +633,15 @@ def build_grounded_user_message(
             "- Fuer jedes Bild: filename, alt, caption, license, license_author, source_url, thumb_url befuellen",
         ]
 
-    # ── Variabler Suffix: nur AGE_LEVEL wechselt je Stufe ───────────────────
+    # ── Variabler Suffix: AGE_LEVEL + WORTZIEL je Stufe ──────────────────────
     parts.append(f"AGE_LEVEL: {job['age_level']}")
+    appeal  = job.get("resolved_appeal", job.get("topic_interest", "medium"))
+    level   = job.get("age_level", 2)
+    wmin, wmax = WORTZIEL_TABLE.get((level, appeal), (100, 250))
+    parts.append(
+        f"WORTZIEL: {wmin}–{wmax} Wörter "
+        f"(bei reichen Quellen Richtung Obergrenze; harte Obergrenze {wmax} Wörter nicht überschreiten)"
+    )
 
     return "\n".join(parts)
 
@@ -608,9 +674,10 @@ def prepare_topic_sources(
     raw_companions = select_companions_raw(client, thema, primary_text, model)
     log.info("  Kompass-Vorschlag: %s", raw_companions)
 
-    # Validierung + Weiterleitungsauflösung
+    # Validierung + Weiterleitungsauflösung (cap gestaffelt nach Appeal)
+    companion_cap = COMPANION_CAP.get(appeal, 5)
     valid_companions, rejected = validate_and_resolve_companions(
-        session, raw_companions, primary_wikipedia
+        session, raw_companions, primary_wikipedia, cap=companion_cap
     )
     log.info("  Validiert (final): %s", valid_companions)
 
@@ -709,12 +776,61 @@ def generate_one_level(
     article["meta"]["grounding_companions"]          = valid_companions
     article["meta"]["generation_method"]             = generation_method
 
+    # ── Wortzahl-Check + ggf. Retry ──────────────────────────────────────────
+    appeal_for_wz = job.get("resolved_appeal", job.get("topic_interest", "medium"))
+    wmin, wmax = WORTZIEL_TABLE.get((job["age_level"], appeal_for_wz), (100, 250))
+    word_count = count_article_words(article)
+    report["phase2"]["word_count"]  = word_count
+    report["phase2"]["word_target"] = f"{wmin}–{wmax}"
+
+    if word_count < wmin:
+        log.warning("  Wortzahl zu kurz: %d Wörter (Ziel %d–%d) — Retry", word_count, wmin, wmax)
+        retry_hint = (
+            f"\n\nRETRY_FEEDBACK: Vorentwurf hatte {word_count} Wörter, Ziel {wmin}–{wmax}. "
+            f"Entwickle die deklarierten Quellen voller — konkrete Fakten, Beispiele, "
+            f"Mechanismen ausarbeiten. Harte Obergrenze {wmax} Wörter nicht überschreiten. "
+            f"Kein Auffüllen ohne Quellbasis."
+        )
+        retry_msg = user_msg + retry_hint
+        try:
+            raw_retry = gemini_client.call_gemini(
+                system_prompt, retry_msg, model=model, thinking_config=phase2_thinking
+            )
+            article_retry = parse_article_json(raw_retry)
+            wc_retry = count_article_words(article_retry)
+            report["phase2"]["retry_needed"]     = True
+            report["phase2"]["retry_word_count"] = wc_retry
+            log.info("  Retry Wortzahl: %d Wörter", wc_retry)
+            # Metadaten auf Retry-Artikel übertragen
+            article_retry.setdefault("meta", {})["id"]               = article_id
+            article_retry["meta"]["title"]                            = thema
+            article_retry["meta"]["generated_at"]                     = article["meta"]["generated_at"]
+            article_retry["meta"]["grounding_companions"]             = valid_companions
+            article_retry["meta"]["generation_method"]                = generation_method
+            article = article_retry
+            word_count = wc_retry
+            if word_count < wmin:
+                log.warning("  Nach Retry immer noch zu kurz: %d Wörter → review_flag", word_count)
+                article["meta"]["review_flag"]   = True
+                article["meta"]["review_reason"] = f"Wortzahl nach Retry {word_count} < {wmin}"
+        except Exception as e:
+            log.error("  Retry fehlgeschlagen: %s", e)
+            report["errors"].append(f"Retry fehlgeschlagen: {e}")
+            article["meta"]["review_flag"]   = True
+            article["meta"]["review_reason"] = f"Retry fehlgeschlagen: {e}"
+    else:
+        report["phase2"]["retry_needed"] = False
+
+    article["meta"]["word_count"] = word_count
+
     val_errors = validate_article(article, job)
     if val_errors:
         for e in val_errors:
             log.warning("  Validierungsfehler: %s", e)
-        article["meta"]["review_flag"]   = True
-        article["meta"]["review_reason"] = "; ".join(val_errors[:3])
+        article["meta"].setdefault("review_flag", True)
+        existing_reason = article["meta"].get("review_reason", "")
+        extra = "; ".join(val_errors[:3])
+        article["meta"]["review_reason"] = (existing_reason + "; " + extra).lstrip("; ")
 
     report["phase2"]["validation_errors"]  = val_errors
     report["phase2"]["companions_fetched"] = list(companion_texts.keys())
@@ -792,13 +908,19 @@ def main() -> None:
     # ── Pro Thema: Phase 1 einmal, Phase 2 je Stufe ──────────────────────────
     for primary_wikipedia in seen_topics:
         topic_jobs = topic_groups[primary_wikipedia]
-        thema  = topic_jobs[0].get("thema", topic_jobs[0]["title"])
-        appeal = topic_jobs[0].get("topic_interest", "medium")
-        levels = [j["age_level"] for j in topic_jobs]
+        thema      = topic_jobs[0].get("thema", topic_jobs[0]["title"])
+        levels     = [j["age_level"] for j in topic_jobs]
+
+        # Interessenstufe auflösen (Klexikon-Quartil → Job-Wert → Default)
+        appeal, appeal_source = resolve_appeal(thema, topic_jobs[0].get("topic_interest"))
+        for job in topic_jobs:
+            job["resolved_appeal"] = appeal
+            job["appeal_source"]   = appeal_source
 
         print(f"\n{'='*60}")
         print(f"THEMA: {thema} | Primaer: {primary_wikipedia} | Modell: {model}")
-        print(f"Stufen: {levels} | Phase 1 laeuft EINMAL fuer alle Stufen")
+        print(f"Stufen: {levels} | Appeal: {appeal} (Herkunft: {appeal_source})")
+        print(f"Phase 1 laeuft EINMAL fuer alle Stufen")
         print(f"{'='*60}")
 
         try:
@@ -876,22 +998,25 @@ def main() -> None:
                     encoding="utf-8",
                 )
                 meta_title = article.get("meta", {}).get("title", "?")
-                n_imgs = len(article.get("images", []))
+                n_imgs  = len(article.get("images", []))
                 n_sents = sum(
                     len(s.get("sentences", []))
                     for s in article.get("sections", [])
                 )
-                review = " [REVIEW]" if article["meta"].get("review_flag") else ""
-                gen_m  = article["meta"].get("generation_method", "?")
+                wc      = report["phase2"].get("word_count", "?")
+                wtarget = report["phase2"].get("word_target", "?")
+                retry   = " [RETRY]" if report["phase2"].get("retry_needed") else ""
+                review  = " [REVIEW]" if article["meta"].get("review_flag") else ""
+                gen_m   = article["meta"].get("generation_method", "?")
                 print(f"  Gespeichert: {out_path.relative_to(ROOT)}")
                 print(f"  meta.title='{meta_title}' | method='{gen_m}'")
-                print(f"  Bilder: {n_imgs} | Saetze: {n_sents}{review}")
+                print(f"  Bilder: {n_imgs} | Saetze: {n_sents} | Woerter: {wc} (Ziel {wtarget}){retry}{review}")
             else:
                 print(f"  FEHLER: {report.get('errors')}")
 
             print(f"  Report: {report_path.relative_to(ROOT)}")
 
-        print(f"\n  Companions (geteilt): {valid_companions}")
+        print(f"\n  Appeal: {appeal} ({appeal_source}) | Companions ({len(valid_companions)}): {valid_companions}")
 
 
 if __name__ == "__main__":
