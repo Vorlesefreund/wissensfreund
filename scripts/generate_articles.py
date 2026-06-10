@@ -339,16 +339,48 @@ def call_claude_api(
 # ─────────────────────────────────────────────
 
 def parse_article_json(raw: str) -> dict:
-    """Extrahiert und parst JSON aus der Claude-Antwort."""
+    """
+    Extrahiert und parst JSON aus der Modell-Antwort.
+    Robust gegen: <planung>-Prefix, Markdown-Fences, Trailing-Content nach }.
+    """
     if not raw:
         raise ValueError("Leere API-Antwort")
-    # <planung>-Block vor dem JSON entfernen (Backend-Filter)
+    # <planung>-Block entfernen (Backend-Filter)
     cleaned = re.sub(r"<planung>.*?</planung>", "", raw, flags=re.DOTALL)
-    # Markdown-Fences entfernen falls vorhanden
+    # Markdown-Fences entfernen
     cleaned = re.sub(r"^```json\s*", "", cleaned.strip())
-    cleaned = re.sub(r"```\s*$", "", cleaned)
-    article = json.loads(cleaned.strip())
-    # Fehlende/null img_index normalisieren → -1 (Gemini lässt key manchmal weg)
+    cleaned = re.sub(r"```\s*$", "", cleaned).strip()
+    # Erstes vollständiges JSON-Objekt extrahieren (ignoriert Trailing-Content)
+    start = cleaned.find("{")
+    if start == -1:
+        raise ValueError("Kein JSON-Objekt gefunden (kein '{' in Antwort)")
+    depth = 0
+    in_str = False
+    esc = False
+    end = -1
+    for i, ch in enumerate(cleaned[start:], start):
+        if esc:
+            esc = False
+            continue
+        if ch == "\\" and in_str:
+            esc = True
+            continue
+        if ch == '"':
+            in_str = not in_str
+            continue
+        if in_str:
+            continue
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                end = i
+                break
+    if end == -1:
+        raise ValueError("Unvollständiges JSON-Objekt (kein balanciertes '}')")
+    article = json.loads(cleaned[start:end + 1])
+    # Fehlende/null img_index normalisieren → -1
     for sec in article.get("sections", []):
         for s in sec.get("sentences", []):
             if s.get("img_index") is None:

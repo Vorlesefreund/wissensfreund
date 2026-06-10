@@ -350,7 +350,18 @@ def select_companions_raw(
     lead = primary_text[:1500]
     prompt = COMPANION_PROMPT_TMPL.format(thema=thema, lead=lead)
     thinking = _make_thinking_config(model, budget_for_2_5=1024)
-    log.info("  Phase 1 Kompass-Auswahl (Modell=%s)", model)
+    log.info("  Phase 1 Kompass-Auswahl (Modell=%s, structured_output=JSON)", model)
+
+    companions_schema = types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "companions": types.Schema(
+                type=types.Type.ARRAY,
+                items=types.Schema(type=types.Type.STRING),
+            )
+        },
+        required=["companions"],
+    )
 
     max_attempts = 6
     for attempt in range(1, max_attempts + 1):
@@ -362,20 +373,20 @@ def select_companions_raw(
                     system_instruction=COMPANION_SYSTEM_PROMPT,
                     temperature=0.3,
                     thinking_config=thinking,
+                    response_mime_type="application/json",
+                    response_schema=companions_schema,
                 ),
             )
             text = (response.text or "").strip()
-            text = re.sub(r"^```[a-zA-Z]*\n?", "", text)
-            text = re.sub(r"\n?```$", "", text).strip()
             data = json.loads(text)
             return [str(c) for c in data.get("companions", [])][:10]
         except json.JSONDecodeError as e:
-            log.warning("  Phase 1 JSON-Fehler (V%d): %s", attempt, e)
+            log.warning("  Phase 1 JSON-Fehler (V%d): %s | raw=%r", attempt, e, (response.text or "")[:120])
             return []
         except Exception as e:
             err = str(e)
             if attempt < max_attempts and ("503" in err or "unavailable" in err.lower()):
-                wait = min(60 * (2 ** (attempt - 1)), 300)  # 60 / 120 / 240 / 300 / 300 s
+                wait = min(60 * (2 ** (attempt - 1)), 300)
                 log.warning("  Phase 1 503 (V%d/%d) -- warte %ds ...", attempt, max_attempts, wait)
                 time.sleep(wait)
             else:
@@ -755,7 +766,8 @@ def generate_one_level(
     phase2_thinking = _make_thinking_config(model, budget_for_2_5=8192)
     try:
         raw_response = gemini_client.call_gemini(
-            system_prompt, user_msg, model=model, thinking_config=phase2_thinking
+            system_prompt, user_msg, model=model, thinking_config=phase2_thinking,
+            response_mime_type="application/json",
         )
     except Exception as e:
         report["errors"].append(f"Gemini-Fehler Phase 2: {e}")
@@ -794,7 +806,8 @@ def generate_one_level(
         retry_msg = user_msg + retry_hint
         try:
             raw_retry = gemini_client.call_gemini(
-                system_prompt, retry_msg, model=model, thinking_config=phase2_thinking
+                system_prompt, retry_msg, model=model, thinking_config=phase2_thinking,
+                response_mime_type="application/json",
             )
             article_retry = parse_article_json(raw_retry)
             wc_retry = count_article_words(article_retry)
