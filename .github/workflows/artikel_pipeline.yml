@@ -56,7 +56,7 @@ jobs:
         run: pip install requests
 
       - name: Checkpoint aus Cache laden
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.CHECKPOINT }}
           key: checkpoint-${{ github.run_id }}
@@ -159,7 +159,7 @@ jobs:
           path: ${{ env.JOBS_DIR }}/
 
       - name: Checkpoint laden
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ env.CHECKPOINT }}
           key: checkpoint-batch-${{ matrix.batch_num }}-${{ github.run_id }}
