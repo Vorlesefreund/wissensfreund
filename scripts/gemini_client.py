@@ -16,13 +16,13 @@ from google.genai import types
 log = logging.getLogger(__name__)
 
 GEMINI_MODEL        = "gemini-2.5-flash"
-RETRY_ATTEMPTS      = 6
+RETRY_ATTEMPTS      = 4
 _DOTENV_PATH        = Path(__file__).parent.parent / ".env"
 
 
 def _retry_wait(attempt: int) -> int:
-    """Exponentieller Backoff: 60 / 120 / 240 / 300 / 300 s."""
-    return min(60 * (2 ** (attempt - 1)), 300)
+    """Exponentieller Backoff: 30 / 60 / 120 / 240 s."""
+    return min(30 * (2 ** (attempt - 1)), 240)
 
 
 def call_gemini(
@@ -88,22 +88,31 @@ def call_gemini(
                 )
 
             # Thinking-Mode kann response.text=None liefern → Parts direkt auslesen
+            candidates = getattr(response, "candidates", [])
             text = response.text
             if text is None:
                 parts = []
-                for cand in getattr(response, "candidates", []):
+                for cand in candidates:
                     for part in getattr(getattr(cand, "content", None), "parts", []) or []:
                         if not getattr(part, "thought", False) and getattr(part, "text", None):
                             parts.append(part.text)
                 text = "".join(parts) or None
+
+            # finish_reason prüfen — MAX_TOKENS/SAFETY/leer → Antwort unvollständig
+            if candidates:
+                fr = str(getattr(candidates[0], "finish_reason", "") or "")
+                if fr and "STOP" not in fr:
+                    raise RuntimeError(
+                        f"Antwort unvollständig (finish_reason={fr})"
+                    )
+
             if not text:
-                candidates = getattr(response, "candidates", [])
-                finish_reason = (
+                fr_str = (
                     str(getattr(candidates[0], "finish_reason", "UNKNOWN"))
                     if candidates else "NO_CANDIDATES"
                 )
                 raise RuntimeError(
-                    f"Gemini gab keinen Text zurück (finish_reason: {finish_reason})"
+                    f"Gemini gab keinen Text zurück (finish_reason: {fr_str})"
                 )
             return text
         except Exception as e:
@@ -115,6 +124,8 @@ def call_gemini(
                 or "resource exhausted" in err_str.lower()
                 or "rate" in err_str.lower()
                 or "unavailable" in err_str.lower()
+                or "finish_reason" in err_str          # unvollständige Antwort
+                or "unvollständig" in err_str          # eigene RuntimeError-Meldung
             )
             if is_rate_limit and attempt < RETRY_ATTEMPTS:
                 wait = _retry_wait(attempt)

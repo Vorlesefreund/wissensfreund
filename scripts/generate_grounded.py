@@ -834,38 +834,74 @@ def generate_one_level(
              thema, job["age_level"], model)
 
     phase2_thinking = _make_thinking_config(model, budget_for_2_5=8192)
-    try:
-        if gemini_cache:
-            _, variable_suffix = _split_grounded_user_message(
-                job, primary_text, companion_texts, valid_companions, images
-            )
-            report["phase2"]["user_msg_len"] = len(variable_suffix)
-            log.info("  Phase 2: Cache-Hit — sende nur variable Suffix (%d Zeichen)", len(variable_suffix))
-            raw_response = gemini_client.call_gemini(
-                system_prompt, variable_suffix, model=model, thinking_config=phase2_thinking,
-                response_mime_type="application/json", cached_content=gemini_cache,
-            )
-        else:
-            user_msg = build_grounded_user_message(
-                job, primary_text, companion_texts, valid_companions, images
-            )
-            report["phase2"]["user_msg_len"] = len(user_msg)
-            raw_response = gemini_client.call_gemini(
-                system_prompt, user_msg, model=model, thinking_config=phase2_thinking,
-                response_mime_type="application/json",
-            )
-    except Exception as e:
-        report["errors"].append(f"Gemini-Fehler Phase 2: {e}")
-        return None, report
+    _GEN_MAX_ATTEMPTS = 4
+    _GEN_RETRY_WAITS  = [30, 60, 120, 240]
 
-    try:
-        article = parse_article_json(raw_response)
-    except (json.JSONDecodeError, ValueError) as e:
-        report["errors"].append(f"JSON-Parse: {e}")
-        errors_dir = out_dir / "_errors"
-        errors_dir.mkdir(parents=True, exist_ok=True)
-        (errors_dir / f"{article_id}_raw.txt").write_text(raw_response or "", encoding="utf-8")
-        return None, report
+    article     = None
+    user_msg: str | None = None  # lazy für Wortzahl-Retry
+
+    for gen_attempt in range(1, _GEN_MAX_ATTEMPTS + 1):
+        try:
+            if gemini_cache:
+                _, variable_suffix = _split_grounded_user_message(
+                    job, primary_text, companion_texts, valid_companions, images
+                )
+                report["phase2"]["user_msg_len"] = len(variable_suffix)
+                if gen_attempt == 1:
+                    log.info("  Phase 2: Cache-Hit — sende nur variable Suffix (%d Zeichen)",
+                             len(variable_suffix))
+                raw_response = gemini_client.call_gemini(
+                    system_prompt, variable_suffix, model=model, thinking_config=phase2_thinking,
+                    response_mime_type="application/json", cached_content=gemini_cache,
+                )
+            else:
+                if user_msg is None:
+                    user_msg = build_grounded_user_message(
+                        job, primary_text, companion_texts, valid_companions, images
+                    )
+                    report["phase2"]["user_msg_len"] = len(user_msg)
+                raw_response = gemini_client.call_gemini(
+                    system_prompt, user_msg, model=model, thinking_config=phase2_thinking,
+                    response_mime_type="application/json",
+                )
+
+            # JSON-Parse
+            try:
+                article = parse_article_json(raw_response)
+            except (json.JSONDecodeError, ValueError) as parse_err:
+                errors_dir = out_dir / "_errors"
+                errors_dir.mkdir(parents=True, exist_ok=True)
+                (errors_dir / f"{article_id}_raw.txt").write_text(raw_response or "", encoding="utf-8")
+                raise RuntimeError(f"JSON-Parse: {parse_err}") from parse_err
+
+            # Plausibilitätsprüfung: Pflichtfelder, nicht 1-Token-Fragment
+            n_secs  = len(article.get("sections", []))
+            n_sents = sum(len(s.get("sentences", [])) for s in article.get("sections", []))
+            if n_secs == 0 or n_sents < 3:
+                raise RuntimeError(
+                    f"Artikel nicht plausibel: {n_secs} Sections, {n_sents} Sätze"
+                )
+
+            break  # Erfolg
+
+        except Exception as e:
+            if gen_attempt < _GEN_MAX_ATTEMPTS:
+                wait = _GEN_RETRY_WAITS[gen_attempt - 1]
+                log.warning(
+                    "  Phase 2 [%s] Versuch %d/%d: %s — warte %ds",
+                    article_id, gen_attempt, _GEN_MAX_ATTEMPTS, e, wait,
+                )
+                time.sleep(wait)
+                article = None
+            else:
+                log.error(
+                    "  Phase 2 [%s]: alle %d Versuche fehlgeschlagen: %s",
+                    article_id, _GEN_MAX_ATTEMPTS, e,
+                )
+                report["errors"].append(
+                    f"Phase 2 alle {_GEN_MAX_ATTEMPTS} Versuche fehlgeschlagen: {e}"
+                )
+                return None, report
 
     article.setdefault("meta", {})["id"]           = article_id
     article["meta"]["title"]                        = thema
@@ -882,6 +918,10 @@ def generate_one_level(
 
     if word_count < wmin:
         log.warning("  Wortzahl zu kurz: %d Wörter (Ziel %d–%d) — Retry", word_count, wmin, wmax)
+        if user_msg is None:
+            user_msg = build_grounded_user_message(
+                job, primary_text, companion_texts, valid_companions, images
+            )
         retry_hint = (
             f"\n\nRETRY_FEEDBACK: Vorentwurf hatte {word_count} Wörter, Ziel {wmin}–{wmax}. "
             f"Entwickle die deklarierten Quellen voller — konkrete Fakten, Beispiele, "
@@ -1097,38 +1137,34 @@ def main() -> None:
             )
             gemini_cache = try_create_gemini_cache(client, model, system_prompt, stable_prefix)
 
-        # Phase 2: alle Stufen parallel generieren, Artikel sammeln
+        # Phase 2: Stufen SEQUENZIELL generieren (verhindert 503-Burst beim parallelen Feuern)
         topic_articles: list[tuple[dict, dict, dict]] = []  # (job, article, report)
-
-        def _run_level(job: dict) -> tuple[dict, dict | None, dict]:
-            return job, *generate_one_level(
-                client, system_prompt, job,
-                primary_text, companion_texts, valid_companions, images,
-                phase1_report, model, args.skip_images, out_dir,
-                gemini_cache=gemini_cache,
-            )
+        failed_levels: list[str] = []
 
         try:
-            print(f"\n  Phase 2 startet {len(topic_jobs)} Stufe(n) parallel ...")
-            with concurrent.futures.ThreadPoolExecutor(max_workers=len(topic_jobs)) as pool:
-                futures = {pool.submit(_run_level, job): job for job in topic_jobs}
-                for fut in concurrent.futures.as_completed(futures):
-                    job, article, report = fut.result()
-                    article_id = job["article_id"]
-                    print(f"\n  --- Stufe {job['age_level']}: {article_id} ---")
-                    report_path = out_dir / f"{article_id}_report.json"
-                    report_path.write_text(
-                        json.dumps(report, ensure_ascii=False, indent=2),
-                        encoding="utf-8",
-                    )
-                    print(f"  Report: {report_path.relative_to(ROOT)}")
-                    if article:
-                        topic_articles.append((job, article, report))
-                    else:
-                        print(f"  FEHLER: {report.get('errors')}")
+            print(f"\n  Phase 2 startet {len(topic_jobs)} Stufe(n) sequenziell ...")
+            for job in sorted(topic_jobs, key=lambda j: j["age_level"]):
+                article_id = job["article_id"]
+                print(f"\n  --- Stufe {job['age_level']}: {article_id} ---")
 
-            # Reihenfolge nach age_level für konsistente Lektorat-Verarbeitung
-            topic_articles.sort(key=lambda t: t[0]["age_level"])
+                article, report = generate_one_level(
+                    client, system_prompt, job,
+                    primary_text, companion_texts, valid_companions, images,
+                    phase1_report, model, args.skip_images, out_dir,
+                    gemini_cache=gemini_cache,
+                )
+
+                report_path = out_dir / f"{article_id}_report.json"
+                report_path.write_text(
+                    json.dumps(report, ensure_ascii=False, indent=2),
+                    encoding="utf-8",
+                )
+                print(f"  Report: {report_path.relative_to(ROOT)}")
+                if article:
+                    topic_articles.append((job, article, report))
+                else:
+                    failed_levels.append(article_id)
+                    print(f"  FEHLGESCHLAGEN: {report.get('errors')}")
 
             # Lektorat (alle Stufen, Quellblock geteilt; sync=default, batch=--lektorat-batch)
             if not skip_lektorat and topic_articles:
@@ -1192,6 +1228,12 @@ def main() -> None:
                 print(f"  Gespeichert: {out_path.relative_to(ROOT)}")
                 print(f"  meta.title='{meta_title}' | method='{gen_m}'")
                 print(f"  Bilder: {n_imgs} | Saetze: {n_sents} | Woerter: {wc} (Ziel {wtarget}){retry}{review}{lekt_note}")
+
+            if failed_levels:
+                log.warning(
+                    "  FEHLGESCHLAGEN (%d/%d Stufen): %s",
+                    len(failed_levels), len(topic_jobs), ", ".join(failed_levels),
+                )
 
         finally:
             if gemini_cache:

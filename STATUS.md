@@ -1,12 +1,36 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-10T14:19:44Z -->
+<!-- updated: 2026-06-10T14:56:19Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Gemini-Cache-Hygiene + Phase-2-Parallel + Lektorat-Sync (2026-06-10)** ← AKTUELL
+**503-Härtung + Robuste Phase-2-Generierung (2026-06-10)** ← AKTUELL
+
+### 503-Härtung: Phase 2 sequenziell
+- `generate_grounded.py`: Phase-2-Loop von ThreadPoolExecutor auf sequenziell umgestellt.
+  Sequenziell verhindert den 503-Burst (3 gleichzeitige Calls → Free-Tier-Rate-Limit).
+  Verifiziert: 0 × 503 in Phase 2 (war: 1-3 × pro Lauf mit parallelen Calls).
+
+### Robuste Generierung: finish_reason + outer retry
+- `gemini_client.py`: finish_reason-Check nach Response — wenn nicht STOP (MAX_TOKENS/SAFETY),
+  RuntimeError → wird als retryable erkannt. `_retry_wait`: 30/60/120/240s (war 60/120/240/300).
+  `RETRY_ATTEMPTS`: 4 (war 6).
+- `generate_grounded.py` `generate_one_level`: outer retry loop (4 Versuche, 30/60/120/240s).
+  Jeder Versuch: call_gemini → JSON-Parse → Plausibilitätsprüfung (Sections ≥ 1, Sätze ≥ 3).
+  Bei Fehler: Retry. Nach 4 Fehlschlägen: return None, FEHLGESCHLAGEN — NIE partiellen Artikel
+  schreiben. Fehlgeschlagene Stufen loggen + zusammenfassen, Rest-Lauf läuft weiter.
+  user_msg lazy gebaut (auch für Wortzahl-Retry korrekt).
+- Verifiziert: L3 JSON-Parse-Fehler bei Versuch 1 → Retry-Wait 30s → Versuch 2 erfolgreich.
+  Alle 3 Stufen vollständig gespeichert. Cache-Hit L2/L3 ✓. DELETE 200 OK ✓.
+
+### Phase-2-Timing nach Umbau
+- Sequenziell (inkl. 1 × Retry 30s): ~215s — war ~96s parallel (aber 1-2 Truncations/Lauf).
+- Tradeoff: Zuverlässigkeit > Rohgeschwindigkeit auf Free-Tier gemini-3.5-flash.
+
+### Vorgänger: Cache-Hygiene + Phase-2-Parallel (2026-06-10)
+- Cache TTL 15 Min + finally-Delete. Parallelisierung (ThreadPoolExecutor).
 
 ### Gemini-Cache-Hygiene
 - `generate_grounded.py`: Phase-2 + Lektorat + Artikel-Schreiben in `try/finally` eingewickelt.
