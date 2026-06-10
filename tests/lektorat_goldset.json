@@ -1,0 +1,112 @@
+[
+  {
+    "id": "L1",
+    "typ": "artikel_slip",
+    "herkunft": "indianer_3-flash-preview_l2",
+    "claim": "Eine berühmte Vermittlerin zwischen den Völkern war Pocahontas, die Tochter eines Häuptlings.",
+    "deklarierte_quellen": ["Tipi", "Wappenpfahl", "Amerikanischer Bison", "Pocahontas", "Wigwam und Wickiup"],
+    "primaer_artikel": "Indianer",
+    "gold_verdikt": "ÜBERZOGEN",
+    "begruendung": "Die Pocahontas-Vermittlerrolle ist historisch stark mythologisiert. Der Pocahontas-Wikipedia-Artikel beschreibt sie explizit als 'Mittelpunkt eines US-amerikanischen Geschichtsmythos' und nennt die Rettungserzählung (John Smith) als literarisch überliefert und teils erfunden. Sie schlicht als 'berühmte Vermittlerin' zu bezeichnen übernimmt den Mythos ohne Einschränkung.",
+    "match_begriffe": ["Pocahontas"]
+  },
+  {
+    "id": "L2",
+    "typ": "artikel_slip",
+    "herkunft": "indianer_3-1-flash-lite_l3",
+    "claim": "Die Maya entwickelten eine eigene Schrift und tiefes Wissen über die Sterne.",
+    "deklarierte_quellen": ["Indigene Völker", "Tipi", "Wappenpfahl", "Büffel", "Kanu"],
+    "primaer_artikel": "Indianer",
+    "gold_verdikt": "NICHT_BELEGT",
+    "begruendung": "Kein Maya-Begleitartikel deklariert. In keiner der deklarierten Quellen (Indigene Völker, Tipi, Wappenpfahl, Büffel, Kanu, Indianer-Primär) findet sich ein Beleg für Maya-Schrift oder Maya-Astronomie. Das Thema liegt außerhalb des Quellrahmens.",
+    "match_begriffe": ["Maya", "Schrift"]
+  },
+  {
+    "id": "L3",
+    "typ": "claim",
+    "herkunft": "kanonisch",
+    "claim": "Die Pocken töteten neun von zehn Ureinwohnern — das entspricht etwa 90 Prozent der Bevölkerung.",
+    "deklarierte_quellen": ["Indianer"],
+    "primaer_artikel": null,
+    "gold_verdikt": "ÜBERZOGEN",
+    "begruendung": "Der Indianer-Wikipedia-Artikel sagt: 'Man nimmt an, dass ein Viertel bis die Hälfte der indigenen Bevölkerung Amerikas nach Ankunft der Europäer allein den Pocken zum Opfer fiel.' Die Behauptung '9 von 10 = 90 %' liegt weit über der belegten Schätzung (25–50 %) und ist eine massive Überzeichnung.",
+    "match_begriffe": ["neun von zehn", "90"]
+  },
+  {
+    "id": "L4",
+    "typ": "claim",
+    "herkunft": "kanonisch",
+    "claim": "Marterpfähle gab es gar nicht — das ist nur ein Vorurteil aus alten Filmen.",
+    "deklarierte_quellen": ["Marterpfahl"],
+    "primaer_artikel": null,
+    "gold_verdikt": "WIDERSPRUCH",
+    "begruendung": "Der Marterpfahl-Wikipedia-Artikel belegt: 'Tatsächlich belegt ist die Verwendung nur bei wenigen Indigenen, darunter den Irokesen, Kiowa, Lenni Lenape und Comanchen.' Marterpfähle existierten real als rituelles Folterinstrument — die Aussage 'gab es gar nicht' ist ein direkter Widerspruch zur Quelle.",
+    "match_begriffe": ["Marterpfähle"]
+  },
+  {
+    "id": "K1",
+    "typ": "kontrolle",
+    "herkunft": "kanonisch",
+    "claim": "Tipi bedeutet in der Lakota-Sprache 'sie wohnen dort'.",
+    "deklarierte_quellen": ["Tipi"],
+    "primaer_artikel": null,
+    "gold_verdikt": "BELEGT",
+    "begruendung": "Wörtlich im Tipi-Artikel: 'thípi bedeutet also wörtlich übersetzt »sie wohnen (dort)«'.",
+    "match_begriffe": ["Tipi", "Lakota"]
+  },
+  {
+    "id": "K2",
+    "typ": "kontrolle",
+    "herkunft": "kanonisch",
+    "claim": "1885 gab es in Nordamerika nur noch etwa 1.000 Bisons.",
+    "deklarierte_quellen": ["Amerikanischer Bison"],
+    "primaer_artikel": null,
+    "gold_verdikt": "BELEGT",
+    "begruendung": "Wörtlich im Amerikanischer-Bison-Artikel: 'Im Jahr 1885 lag die Gesamtpopulation bei nur noch etwa 1.000 Tieren.'",
+    "match_begriffe": ["1885", "1000"]
+  },
+  {
+    "id": "K3",
+    "typ": "kontrolle",
+    "herkunft": "kanonisch",
+    "claim": "Sitting Bull hieß als Kind Jumping Badger.",
+    "deklarierte_quellen": ["Sitting Bull"],
+    "primaer_artikel": null,
+    "gold_verdikt": "BELEGT",
+    "begruendung": "Im Sitting-Bull-Artikel: 'In seiner Kindheit trug Sitting Bull [den Namen Jumping Badger]' und 'Nach diesem Ereignis erhielt Jumping Badger seinen Namen Tȟatȟáŋka Íyotake (Sitting Bull) von seinem Vater'.",
+    "match_begriffe": ["Jumping Badger"]
+  },
+  {
+    "id": "K4",
+    "typ": "kontrolle",
+    "herkunft": "kanonisch",
+    "claim": "Wappenpfähle werden traditionell aus Riesenlebensbäumen (Thuja plicata, Western Red Cedar) geschnitzt.",
+    "deklarierte_quellen": ["Wappenpfahl"],
+    "primaer_artikel": null,
+    "gold_verdikt": "BELEGT",
+    "begruendung": "Wörtlich im Wappenpfahl-Artikel: 'Wappenpfähle wurden und werden meist aus dem Holz von Riesenlebensbäumen (Thuja plicata, Western Red Cedar) gefertigt.'",
+    "match_begriffe": ["Riesenlebensbäumen", "Western Red Cedar"]
+  },
+  {
+    "id": "K5",
+    "typ": "kontrolle",
+    "herkunft": "kanonisch",
+    "claim": "2024 bat US-Präsident Biden die indigenen Völker Amerikas wegen der Internate offiziell um Verzeihung.",
+    "deklarierte_quellen": ["Indianer"],
+    "primaer_artikel": null,
+    "gold_verdikt": "BELEGT",
+    "begruendung": "Wörtlich im Indianer-Artikel: 'Im Jahr 2024 bat US-Präsident Joe Biden die indigenen Völker Amerikas wegen Misshandlungen an von der US-Regierung betriebenen Internaten im Namen der USA um Verzeihung.'",
+    "match_begriffe": ["Biden", "2024"]
+  },
+  {
+    "id": "K6",
+    "typ": "kontrolle",
+    "herkunft": "kanonisch",
+    "claim": "Die ersten Menschen kamen vor mindestens 16.000 Jahren über die Landbrücke Beringia nach Amerika.",
+    "deklarierte_quellen": ["Indianer"],
+    "primaer_artikel": null,
+    "gold_verdikt": "BELEGT",
+    "begruendung": "Im Indianer-Artikel: 'Die Besiedlung Amerikas erfolgte in mehreren Einwanderungswellen, die mindestens 16.000 Jahre überspannen' und 'über eine Landbrücke, Beringia'.",
+    "match_begriffe": ["16.000", "Beringia"]
+  }
+]

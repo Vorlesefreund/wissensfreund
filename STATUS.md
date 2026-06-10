@@ -1,12 +1,23 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-10T07:24:50Z -->
+<!-- updated: 2026-06-10T08:37:23Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Structured Output + Modell-Vergleich test_modelcompare2 (2026-06-10)** ← AKTUELL
+**Lektorat Catch-Test (2026-06-10)** ← AKTUELL
+Goldset: 4 Slips (L1–L4) × 6 Kontrollen (K1–K6), handverifiziert.
+Verifizierer-Ergebnis (tests/lektorat_catchtest_result.md, lokal):
+- Claude Sonnet 4.6: Catch 4/4 | FP 1/6 (K6 Beringia — Grenzfall Formulierung)
+- Claude Haiku 4.5:  Catch 2/4 | FP 0/6 (verpasst: L1 Pocahontas, L2 Maya)
+- Gemini 2.5 Pro¹:  Catch 3/3 | FP 0/6 (¹L1 503-Abbruch — nicht auswertbar)
+Fazit: Sonnet fängt alle, hat aber höchste FP-Rate. Haiku schärfer auf Kontrollen,
+       blind auf subtile Quellen-Slips (ÜBERZOGEN/NICHT_BELEGT). Gemini teuer+langsam.
+Infrastruktur: tests/lektorat_goldset.json + scripts/run_lektorat_catchtest.py
+Anmerkung: gemini-3.1-pro → 404, Fallback gemini-2.5-pro. Primär-Input ungekürzt (kein Cap).
+
+**Structured Output + Modell-Vergleich test_modelcompare2 (2026-06-10)**
 3 Code-Fixes für fairen Modellvergleich:
 - `gemini_client.py`: 6 Retries + Exponential Backoff (60/120/240/300s), response_mime_type + response_schema Parameter
 - `generate_articles.py parse_article_json()`: Balanced-Brace-Extraktion (Trailing-Content wird ignoriert)
