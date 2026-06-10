@@ -56,16 +56,19 @@ def call_gemini(
     for attempt in range(1, RETRY_ATTEMPTS + 1):
         try:
             cfg = types.GenerateContentConfig(
-                system_instruction=system_prompt,
                 temperature=0.6,
                 thinking_config=effective_thinking,
             )
+            # system_instruction darf nicht gesetzt sein, wenn cached_content verwendet wird
+            # (Cache enthält system_instruction bereits; Gemini 400 sonst)
+            if not cached_content:
+                cfg.system_instruction = system_prompt
+            else:
+                cfg.cached_content = cached_content
             if response_mime_type:
                 cfg.response_mime_type = response_mime_type
             if response_schema is not None:
                 cfg.response_schema = response_schema
-            if cached_content:
-                cfg.cached_content = cached_content
 
             response = client.models.generate_content(
                 model=effective_model,

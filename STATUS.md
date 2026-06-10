@@ -1,47 +1,41 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-10T12:33:46Z -->
+<!-- updated: 2026-06-10T13:44:06Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Prompt-Caching aktiviert — Kosten-Hebel (2026-06-10)** ← AKTUELL
+**Phase-2-Parallelisierung + Lektorat-Sync + Cache-Verifikation (2026-06-10)** ← AKTUELL
 
-### A) Anthropic-Lektorat — Caching
-- `scripts/lektorat_common.py`:
-  - `build_lektorat_parts(article, sources_block) -> (sources_prefix, article_task)`: stabiler
-    Quellblock (System + Primär + Companions) als ERSTER Block mit `cache_control: ephemeral`.
-  - `run_lektorat_batch` auf `parts_by_id: dict[str, tuple[str,str]]` umgestellt.
-    System-Prompt ebenfalls mit `cache_control: ephemeral`.
-    Usage-Logging je Ergebnis: `tokens in=%d create=%d read=%d out=%d`.
-- `scripts/generate_grounded.py`: Lektorat-Aufruf nutzt `build_lektorat_parts` statt `build_lektorat_prompt`.
-- Catch-Test nach Umbau: **4/4** | K1–K4 stabil | K5/K6 borderline-FP (wie erwartet, pre-existing) ✓.
+### Phase 2 parallel (concurrent.futures)
+- `generate_grounded.py`: `ThreadPoolExecutor(max_workers=len(topic_jobs))` — alle Stufen gleichzeitig.
+  Reihenfolge nach age_level sortiert vor Lektorat. Wandzeit L1-L3: ~96s (war ~131s sequenziell).
 
-### B) Gemini-Generierung — Context Cache
-- `scripts/gemini_client.py`: `cached_content: str | None = None` Param in `call_gemini`; usage_metadata-Log.
-- `scripts/generate_grounded.py`:
-  - `_split_grounded_user_message(job, ...) -> (stable_prefix, variable_suffix)`: trennt stabilen
-    Quellblock (Artikeltexte) vom variablen Suffix (AGE_LEVEL + WORTZIEL).
-  - `try_create_gemini_cache(client, model, system_prompt, stable_prefix) -> str | None`:
-    erstellt Gemini Context Cache (TTL 1h), graceful Fallback bei Fehler.
-  - Hauptschleife: `try_create_gemini_cache` einmal je Thema nach Phase 1 aufgerufen.
-    `generate_one_level(gemini_cache=...)` — bei Cache-Hit: nur variable_suffix gesendet,
-    stabiler Prefix aus Cache gelesen (~75 % Token-Einsparung erwartet). Fallback = voller Kontext.
+### Lektorat Sync als Default (--lektorat-batch für Batch-API)
+- `lektorat_common.py`: `run_lektorat_sync` — sequenziell, direkte API-Calls (kein Polling).
+  Sequenziell BEWUSST: L1 schreibt Anthropic-KV-Cache (create=60765), L2+L3 lesen ihn (read=60765).
+- `generate_grounded.py`: Default = `run_lektorat_sync`; `--lektorat-batch` → `run_lektorat_batch`.
+  Lektorat-Wandzeit: ~212s sequenziell (Batch war ~134s, aber dort kein garantierter Cache-Hit).
 
-### C) Vorgänger-Meilensteine (Stufe 2 + Catch-Test-Fix, 2026-06-10)
-- Stufe-2-Prompt: BELEGT-BEDINGUNG, VERBUND-REGEL, Färbungs-Regel.
-- Catch-Test-Fix: box.text-Bug, match_begriffe=["Schrift"], --compare-Flag, VERIFIER_DEFAULT=Sonnet.
-- Smoke-Test Indianer L1–L3: L1 0A/2V/1E | L2 0A/1V/0E | L3 0A/4V/1E.
+### Gemini-Cache Fix: system_instruction-Konflikt
+- `gemini_client.py`: Bei `cached_content` wird `system_instruction` NICHT in GenerateContentConfig
+  gesetzt (API 400 sonst — system_instruction muss im Cache stehen, nicht doppelt im Request).
+
+### Cache-Verifikation (Lauf Indianer L1-L3, --skip-images)
+- Gemini: `prompt=54905, cached=54858` → **99,9 % Cache-Hit** | nur 128 Zeichen Suffix gesendet.
+- Anthropic: L1 `create=60765 read=0` → L2 `create=0 read=60765` → L3 `create=0 read=60765` ✓.
+
+### Vorgänger: Prompt-Caching Grundaufbau + Catch-Test-Fix (2026-06-10)
+- Caching: build_lektorat_parts, run_lektorat_batch mit cache_control, _split_grounded_user_message,
+  try_create_gemini_cache, generate_one_level(gemini_cache=...). Catch-Test: 4/4 ✓.
+- Stufe-2-Prompt: BELEGT-BEDINGUNG, VERBUND-REGEL. Catch-Test-Fix: box.text-Bug, ["Schrift"].
 
 ---
 
 ## 🔴 Nächster Schritt (Hoch)
 
-**Caching-Verifikation** — Lauf mit `--skip-images` isoliert (keine API-Konkurrenz):
-- Bestätigen: Anthropic cache_read_input_tokens > 0 ab 2. Lektorat-Call im Batch.
-- Bestätigen: Gemini cached_content_token_count > 0 in Stufe 2+3 (wenn Cache verfügbar).
-- Baseline-Vergleich: Kosten vor/nach (Timing + Token-Log).
+**Sichtung** test_modelcompare2 — Qualitätsvergleich 3 Modelle
 
 ---
 

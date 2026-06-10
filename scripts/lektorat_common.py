@@ -427,6 +427,60 @@ def annotate_article_lektorat(
         article["meta"]["review_reason"] = (existing + "; " + reason).lstrip("; ")
 
 
+# ── Anthropic Sync-API (Default für Test-/Kleinläufe) ────────────────────────
+
+def run_lektorat_sync(
+    parts_by_id: dict[str, tuple[str, str]],
+    api_key: str,
+) -> dict[str, list[dict]]:
+    """Führt Lektorat-Calls SEQUENZIELL aus (schnell für ≤5 Artikel).
+
+    Gleiche Prompt-Struktur wie run_lektorat_batch (cache_control: ephemeral).
+    Sequenziell statt parallel: Call 1 schreibt den Anthropic-KV-Cache
+    (cache_creation_input_tokens), Calls 2-3 lesen ihn (cache_read_input_tokens).
+    """
+    import anthropic
+
+    client  = anthropic.Anthropic(api_key=api_key)
+    results: dict[str, list[dict]] = {}
+
+    for aid, (sources_prefix, article_task) in parts_by_id.items():
+        log.info("  Lektorat-Sync [%s] …", aid)
+        try:
+            msg = client.messages.create(
+                model=LEKTORAT_MODEL,
+                max_tokens=16000,
+                system=[
+                    {"type": "text", "text": LEKTORAT_SYSTEM,
+                     "cache_control": {"type": "ephemeral"}},
+                ],
+                messages=[{"role": "user", "content": [
+                    {"type": "text", "text": sources_prefix,
+                     "cache_control": {"type": "ephemeral"}},
+                    {"type": "text", "text": article_task},
+                ]}],
+            )
+            raw = msg.content[0].text
+            u   = msg.usage
+            log.info(
+                "  [%s] tokens in=%d create=%d read=%d out=%d",
+                aid, u.input_tokens,
+                getattr(u, "cache_creation_input_tokens", 0),
+                getattr(u, "cache_read_input_tokens", 0),
+                u.output_tokens,
+            )
+            try:
+                results[aid] = parse_lektorat_json(raw)
+            except Exception as exc:
+                log.warning("  Lektorat JSON-Parse [%s]: %s", aid, exc)
+                results[aid] = []
+        except Exception as exc:
+            log.warning("  Lektorat-Sync [%s] fehlgeschlagen: %s", aid, exc)
+            results[aid] = []
+
+    return results
+
+
 # ── Anthropic Batch-API ───────────────────────────────────────────────────────
 
 def run_lektorat_batch(
