@@ -183,16 +183,30 @@ body {
   border-left: 4px solid #9E9E9E; border-radius: 0 4px 4px 0;
   font-size: 0.87rem;
 }
-.lektorat-item.v-BELEGT       { background:#E8F5E9; border-left-color:#43A047; }
-.lektorat-item.v-NICHT_BELEGT { background:#FFEBEE; border-left-color:#E53935; }
-.lektorat-item.v-UEBERZOGEN   { background:#FFF8E1; border-left-color:#FFA000; }
-.lektorat-item.v-WIDERSPRUCH  { background:#FFEBEE; border-left-color:#B71C1C; }
+.lektorat-item.v-BELEGT        { background:#E8F5E9; border-left-color:#43A047; }
+.lektorat-item.v-AUTO          { background:#E8F5E9; border-left-color:#2E7D32; }
+.lektorat-item.v-VORSCHLAG     { background:#FFF3E0; border-left-color:#E65100; }
+.lektorat-item.v-ESKALATION    { background:#FFEBEE; border-left-color:#B71C1C; }
+/* Fallback-Klassen für altes Format */
+.lektorat-item.v-NICHT_BELEGT  { background:#FFEBEE; border-left-color:#E53935; }
+.lektorat-item.v-UEBERZOGEN    { background:#FFF8E1; border-left-color:#FFA000; }
+.lektorat-item.v-WIDERSPRUCH   { background:#FFEBEE; border-left-color:#B71C1C; }
 .lektorat-verdikt {
   font-family: sans-serif; font-size: 0.72rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px;
+  text-transform: uppercase; letter-spacing: .05em; margin-bottom: 6px;
 }
 .lektorat-claim { font-style: italic; color: #333; margin-bottom: 4px; }
 .lektorat-beleg { color: #555; font-size: 0.82rem; }
+.lektorat-row   { display: flex; gap: 12px; margin-top: 6px; }
+.lektorat-col   { flex: 1; }
+.lektorat-col-label {
+  font-family: sans-serif; font-size: 0.68rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .04em; color: #888; margin-bottom: 3px;
+}
+.lektorat-orig  { font-style: italic; color: #777; text-decoration: line-through; }
+.lektorat-neu   { font-style: italic; color: #1B5E20; font-weight: 600; }
+.lektorat-neu-v { font-style: italic; color: #E65100; font-weight: 600; }
+.lektorat-src   { color: #555; font-size: 0.79rem; margin-top: 5px; }
 
 /* Print */
 @media print {
@@ -397,51 +411,88 @@ def render_lektorat(pruefbericht: dict) -> str:
         return ""
     sm = pruefbericht.get("summary", {})
 
-    _CSS_VERD = {
-        "BELEGT":       "v-BELEGT",
-        "NICHT_BELEGT": "v-NICHT_BELEGT",
-        "ÜBERZOGEN":    "v-UEBERZOGEN",
-        "WIDERSPRUCH":  "v-WIDERSPRUCH",
-    }
-    _TIER_LABEL = {
-        "AUTO":      '<span style="background:#FFF8E1;color:#F57F17;border:1px solid #FFE082;'
-                     'padding:1px 6px;border-radius:3px;font-size:.72rem;font-weight:700">AUTO</span>',
-        "VORSCHLAG": '<span style="background:#FFF3E0;color:#E65100;border:1px solid #FFCC80;'
-                     'padding:1px 6px;border-radius:3px;font-size:.72rem;font-weight:700">VORSCHLAG</span>',
-        "ESKALATION":'<span style="background:#FFEBEE;color:#B71C1C;border:1px solid #EF9A9A;'
-                     'padding:1px 6px;border-radius:3px;font-size:.72rem;font-weight:700">ESKALATION ⚠</span>',
-    }
+    # Stufe-2-Format: status-basiert
+    n_auto = sm.get("auto_angewandt", sm.get("AUTO", 0))
+    n_vor  = sm.get("vorschlag_offen", sm.get("VORSCHLAG", 0))
+    n_esk  = sm.get("eskaliert", sm.get("ESKALATION", 0))
+    total  = len(findings)
+    belegt = sum(1 for f in findings
+                 if f.get("status", f.get("verdikt", "")) in ("belegt", "BELEGT"))
 
-    n_v = sm.get("VORSCHLAG", 0)
-    n_e = sm.get("ESKALATION", 0)
-    n_a = sm.get("AUTO", 0)
-    total = len(findings)
-    belegt = sm.get("BELEGT", 0)
-
-    summary_parts = [f"{total} Aussagen — {belegt} BELEGT"]
-    if n_a:
-        summary_parts.append(f"{n_a} AUTO")
-    if n_v:
-        summary_parts.append(f"<strong style='color:#E65100'>{n_v} VORSCHLAG</strong>")
-    if n_e:
-        summary_parts.append(f"<strong style='color:#B71C1C'>{n_e} ESKALATION ⚠</strong>")
+    summary_parts = [f"{total} Aussagen — {belegt} belegt"]
+    if n_auto:
+        summary_parts.append(
+            f"<strong style='color:#2E7D32'>{n_auto} auto-korrigiert ✓</strong>")
+    if n_vor:
+        summary_parts.append(
+            f"<strong style='color:#E65100'>{n_vor} Vorschlag ⚑</strong>")
+    if n_esk:
+        summary_parts.append(
+            f"<strong style='color:#B71C1C'>{n_esk} Eskalation ⚠</strong>")
     summary_html = " · ".join(summary_parts)
 
     items = []
     for f in findings:
-        verd  = f.get("verdikt", "?")
-        tier  = f.get("tier", "")
-        claim = f.get("claim", "")
-        beleg = f.get("beleg_oder_begruendung", "")
-        css   = _CSS_VERD.get(verd, "")
-        tier_html = _TIER_LABEL.get(tier, "") if tier else ""
-        items.append(
-            f'<div class="lektorat-item {e(css)}">'
-            f'<div class="lektorat-verdikt">{e(verd)}{" " + tier_html if tier_html else ""}</div>'
-            f'<div class="lektorat-claim">{e(claim)}</div>'
-            f'<div class="lektorat-beleg">{e(beleg)}</div>'
-            f'</div>'
-        )
+        status     = f.get("status") or f.get("verdikt", "?")
+        claim_orig = f.get("claim_original", f.get("claim", ""))
+        kor_neu    = f.get("korrektur_neu", "")
+        beleg_k    = f.get("beleg_fuer_korrektur", "")
+        beleg      = f.get("beleg_oder_begruendung", "")
+
+        if status in ("belegt", "BELEGT"):
+            continue  # Belegte Aussagen: kein Review nötig, nicht anzeigen
+
+        if status == "auto_angewandt":
+            css   = "v-AUTO"
+            label = "AUTO-KORRIGIERT ✓"
+            items.append(
+                f'<div class="lektorat-item {css}">'
+                f'<div class="lektorat-verdikt">{label}</div>'
+                f'<div class="lektorat-row">'
+                f'  <div class="lektorat-col">'
+                f'    <div class="lektorat-col-label">Original</div>'
+                f'    <div class="lektorat-orig">{e(claim_orig)}</div>'
+                f'  </div>'
+                f'  <div class="lektorat-col">'
+                f'    <div class="lektorat-col-label">Eingebaut</div>'
+                f'    <div class="lektorat-neu">{e(kor_neu)}</div>'
+                f'  </div>'
+                f'</div>'
+                f'<div class="lektorat-src">{e(beleg_k)}</div>'
+                f'</div>'
+            )
+        elif status in ("vorschlag_offen", "NICHT_BELEGT", "ÜBERZOGEN", "WIDERSPRUCH"):
+            css   = "v-VORSCHLAG"
+            label = "VORSCHLAG — bitte prüfen"
+            items.append(
+                f'<div class="lektorat-item {css}">'
+                f'<div class="lektorat-verdikt">{label}</div>'
+                f'<div class="lektorat-row">'
+                f'  <div class="lektorat-col">'
+                f'    <div class="lektorat-col-label">Original</div>'
+                f'    <div class="lektorat-orig">{e(claim_orig)}</div>'
+                f'  </div>'
+                f'  <div class="lektorat-col">'
+                f'    <div class="lektorat-col-label">Vorschlag</div>'
+                f'    <div class="lektorat-neu-v">{e(kor_neu)}</div>'
+                f'  </div>'
+                f'</div>'
+                f'<div class="lektorat-src">{e(beleg_k) or e(beleg)}</div>'
+                f'</div>'
+            )
+        else:  # eskaliert
+            css   = "v-ESKALATION"
+            label = "ESKALATION ⚠"
+            items.append(
+                f'<div class="lektorat-item {css}">'
+                f'<div class="lektorat-verdikt">{label}</div>'
+                f'<div class="lektorat-claim">{e(claim_orig)}</div>'
+                f'<div class="lektorat-beleg">{e(beleg)}</div>'
+                f'</div>'
+            )
+
+    if not items:
+        items = [f'<div style="color:#777;font-size:.85rem">Alle {total} Aussagen belegt — kein Review nötig.</div>']
 
     return f"""
   <div class="lektorat-section">

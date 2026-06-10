@@ -920,12 +920,7 @@ def main() -> None:
             log.error("Unbekannte article_id: %s (verfuegbar: %s)",
                       article_id, list(TEST_JOBS.keys()))
             continue
-        if args.gen_model:
-            parts = article_id.rsplit("_", 1)
-            effective_id = f"{parts[0]}_{model_slug}_{parts[1]}"
-        else:
-            effective_id = article_id
-        resolved_jobs.append({**job, "article_id": effective_id})
+        resolved_jobs.append({**job, "article_id": article_id})
 
     # Nach primaer_wikipedia gruppieren (Reihenfolge des ersten Auftretens bewahren)
     topic_groups: dict[str, list[dict]] = defaultdict(list)
@@ -1050,13 +1045,15 @@ def main() -> None:
                 for job, article, _ in topic_articles:
                     aid = job["article_id"]
                     verdicts = lektorat_results.get(aid, [])
-                    annotate_article_lektorat(article, verdicts)
+                    annotate_article_lektorat(article, verdicts, primary_text)
                     pb = article.get("pruefbericht", {})
                     sm = pb.get("summary", {})
                     log.info(
-                        "  Lektorat [%s]: %d Aussagen — AUTO:%d VORSCHLAG:%d ESKALATION:%d",
+                        "  Lektorat [%s]: %d Aussagen — angewandt:%d vorschlag:%d eskaliert:%d",
                         aid, len(pb.get("findings", [])),
-                        sm.get("AUTO", 0), sm.get("VORSCHLAG", 0), sm.get("ESKALATION", 0),
+                        sm.get("auto_angewandt", 0),
+                        sm.get("vorschlag_offen", 0),
+                        sm.get("eskaliert", 0),
                     )
             except Exception as exc:
                 log.error("  Lektorat-Batch fehlgeschlagen: %s — Artikel ohne Lektorat-Feld", exc)
@@ -1083,7 +1080,8 @@ def main() -> None:
             sm      = pb.get("summary", {})
             n_f     = len(pb.get("findings", []))
             lekt_note = (
-                f" [LEKTORAT {n_f}:{sm.get('AUTO',0)}A/{sm.get('VORSCHLAG',0)}V/{sm.get('ESKALATION',0)}E]"
+                f" [LEKTORAT {n_f}:{sm.get('auto_angewandt',0)}A"
+                f"/{sm.get('vorschlag_offen',0)}V/{sm.get('eskaliert',0)}E]"
                 if n_f else ""
             )
             gen_m   = article["meta"].get("generation_method", "?")

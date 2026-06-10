@@ -1,43 +1,47 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-10T10:22:26Z -->
+<!-- updated: 2026-06-10T12:06:28Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Gegroundetes Lektorat Stufe 1 — Smoke-Test erfolgreich (2026-06-10)** ← AKTUELL
-- `scripts/lektorat_common.py` (NEU): COMPANION_CHAR_CAP=30k, LEKTORAT_SYSTEM-Prompt mit Tier-Logik,
-  build_grounded_sources_block, parse_lektorat_json (3-stufiger Fallback), annotate_article_lektorat,
-  run_lektorat_batch (Anthropic Batch-API, max_tokens=16000).
-- `scripts/generate_grounded.py`: --skip-lektorat, sources_block einmal pro Thema,
-  Batch nach allen Stufen, [LEKTORAT N:A/V/E]-Log, GEMINI_MODEL-Default=gemini-3.5-flash.
-- `scripts/run_lektorat_catchtest.py`: importiert aus lektorat_common (kein Drift).
-- `scripts/render_review_html.py`: Prüfbericht-Panel mit Tier-Badges (AUTO=gelb, VORSCHLAG=orange, ESKALATION=rot).
+**Gegroundetes Lektorat Stufe 2 — Korrektur-Schicht + Catch-Test-Fix (2026-06-10)** ← AKTUELL
 
-Smoke-Test Indianer L1–L3 (gemini-3.5-flash, --skip-images, Batch msgbatch_01VySczot33):
-- L1: 16 Aussagen | BELEGT:14 ÜB:2 | AUTO:2 | review_flag=False
-- L2: 22 Aussagen | BELEGT:20 NB:1 ÜB:1 | AUTO:1 ESKALATION:1 | review_flag=True
-- L3: 24 Aussagen | BELEGT:18 NB:4 ÜB:2 | AUTO:1 VORSCHLAG:4 ESKALATION:1 | review_flag=True
+### Stufe 2 — Korrektur-Schicht
+- `scripts/lektorat_common.py`: Stufe-2-Prompt mit Färbungs-Regel, BELEGT-BEDINGUNG (kein Implizit-Beleg),
+  VERBUND-REGEL (zusammengesetzte Aussagen: ALLE Teile müssen einzeln direkt belegt sein).
+  `build_pruefbericht` + `annotate_article_lektorat` mit Status {auto_angewandt/vorschlag_offen/eskaliert}.
+  `_apply_auto_correction` (Jaccard ≥ 0.4), `_normalize_for_check` (NFKC).
+- `scripts/generate_grounded.py`: `annotate_article_lektorat(article, verdicts, primary_text)`.
+  Log: `angewandt:%d vorschlag:%d eskaliert:%d`. Naming-Fix: `effective_id = article_id` (deterministisch).
+- `scripts/render_review_html.py`: Stufe-2-Prüfbericht-Panel (Original→Neu, status-basiert).
 
-Parser-Fix: Dreistufiger Fallback (JSON-raw → _fix_inner_quotes → Strukturextraktion).
-Root cause: Claude nutzt „Wort" (U+201E + U+0022) als dt. Anführungszeichen innerhalb
-JSON-Strings; U+0022 terminiert den String vorzeitig. Fix: Case 1 „text"" → '" (inner " weg),
-Case 2 „text" Text → replace mit '. Fallback: Strukturextraktion nach Schlüsselposition.
+Stufe-2-Smoke-Test Indianer L1–L3 (gemini-3.5-flash, Batch msgbatch_01YQS7tpyxobGq23gQm9enYb):
+- L1: 27 Aussagen | 0A/2V/1E | review_flag=True
+- L2: 22 Aussagen | 0A/1V/0E | review_flag=True
+- L3: 28 Aussagen | 0A/4V/1E | review_flag=True
 
-Review-HTML: articles/test_grounded/_review.html (lokal)
-
-**artikel_pipeline.yml: schedule entfernt (2026-06-10)**
-- `on: schedule` (cron "0 3 * * 1") entfernt — Pipeline läuft nicht mehr automatisch.
+### Catch-Test-Fix
+- `scripts/run_lektorat_catchtest.py`:
+  - Bug-Fix: `article_to_text` las `box.text` NICHT (nur `box.sentences`) → Slip L2 wurde nie geprüft.
+  - Goldset L2 `match_begriffe`: ["Maya","Schrift"] → ["Schrift"] (vermeidet falschen Match auf "Maya oder Inka").
+  - `--compare`-Flag: Standard-Lauf = nur Sonnet. Haiku/Gemini nur mit `--compare`.
+  - VERIFIER_DEFAULT = [Sonnet] / VERIFIER_COMPARE = [Sonnet, Haiku, Gemini].
+- Catch-Test Sonnet: **4/4** | FP 2/6 (K5 Grenzfall-wording, K6 Beringia-Grenzfall).
+  Nur api.anthropic.com-Calls, null googleapis, kein Haiku im Standard-Lauf ✓.
+- Mock/Stub-Befund bestätigt: Kein Mock/Stub/Offline-Fallback. Nur zwei bedingte Pfade:
+  - Fehlt ANTHROPIC_API_KEY: Lektorat übersprungen (kein Fake-Output), generate_grounded.py:900–902.
+  - Fehlt GEMINI_API_KEY: sys.exit(1), generate_grounded.py:895–897.
 
 ---
 
 ## 🔴 Nächster Schritt (Hoch)
 
-**Sichtung test_modelcompare2**: articles/test_modelcompare2/_review.html
-- Qualitätsvergleich: 3.5-flash vs. 3.1-flash-lite (beide 3/3)
-- 3-flash-preview L3 fehlt — ggf. mit max_output_tokens=16384 nachgenerieren
-- ⛔ KEIN Upload vor Sichtung
+**Laufzeit-Messung generate_grounded.py** (nach Abschluss aller laufenden Jobs, allein):
+- Phase 1 (Companion-Vorschlag, Wikipedia-Fetches), Phase 2 (Generierung L1-L3), Lektorat L1-L3.
+- Wandzeit je Phase, Batch-API vs. synchron, Prompt-Cache-Hits, Thinking-Anteil.
+- User-Anforderung: isoliert laufen lassen (keine API-Konkurrenz).
 
 ---
 
@@ -51,7 +55,6 @@ Review-HTML: articles/test_grounded/_review.html (lokal)
 
 ### Mittel
 - **Flutter-App testen**: WfArticleListScreen mit R2-Artikeln
-- **Lektorat Stufe 2**: Auto-Korrektur-Schicht (Stufe 2 nach Stufe 1 Erkennung)
 - **Related Terms**: prepare_articles.py befüllt sie noch nicht
 
 ### Niedrig

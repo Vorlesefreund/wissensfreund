@@ -36,7 +36,11 @@ from lektorat_common import (            # noqa: E402
 
 PROBLEMATIC = {"NICHT_BELEGT", "ÜBERZOGEN", "WIDERSPRUCH"}
 
-VERIFIER_CANDIDATES = [
+VERIFIER_DEFAULT = [
+    {"id": "claude-sonnet-4-6", "family": "claude", "label": "Claude Sonnet 4.6"},
+]
+
+VERIFIER_COMPARE = [
     {"id": "claude-sonnet-4-6",         "family": "claude", "label": "Claude Sonnet 4.6"},
     {"id": "claude-haiku-4-5-20251001",  "family": "claude", "label": "Claude Haiku 4.5"},
     {"id": "gemini-3.1-pro",             "family": "gemini", "label": "Gemini 3.1 Pro",
@@ -119,6 +123,9 @@ def article_to_text(path: Path) -> str:
             if t:
                 lines.append(t)
         for box in sec.get("boxes", []):
+            t = box.get("text", "").strip()
+            if t:
+                lines.append(f"  BOX: {t}")
             for s in box.get("sentences", []):
                 t = s.get("text", "").strip()
                 if t:
@@ -281,9 +288,10 @@ def call_verifier(model_cfg: dict, user_msg: str) -> str:
 
 # ── Model discovery ───────────────────────────────────────────────────────────
 
-def resolve_verifiers() -> list[dict]:
+def resolve_verifiers(compare: bool = False) -> list[dict]:
+    candidates = VERIFIER_COMPARE if compare else VERIFIER_DEFAULT
     available = []
-    for cfg in VERIFIER_CANDIDATES:
+    for cfg in candidates:
         cfg = dict(cfg)
         if cfg["family"] == "claude":
             if os.environ.get("ANTHROPIC_API_KEY"):
@@ -347,13 +355,15 @@ def run_item(item: dict, v: dict) -> dict:
 
 # ── Main test runner ──────────────────────────────────────────────────────────
 
-def run_catchtest():
+def run_catchtest(compare: bool = False):
     load_dotenv(DOTENV_PATH)
     goldset = json.loads(GOLDSET_PATH.read_text(encoding="utf-8"))
     slips      = [i for i in goldset if i["typ"] in ("artikel_slip", "claim")]
     kontrollen = [i for i in goldset if i["typ"] == "kontrolle"]
 
     log.info("Goldset: %d Slips, %d Kontrollen", len(slips), len(kontrollen))
+    if not compare:
+        log.info("Modus: Sonnet-only (--compare für Mehrmodell-Vergleich)")
 
     session = requests.Session()
     session.headers.update({"User-Agent": "Wissensfreund-Lektorat-Test/1.0"})
@@ -362,7 +372,7 @@ def run_catchtest():
     prefetch_all_sources(goldset, session)
 
     log.info("Verifizierer-Auflösung ...")
-    verifiers = resolve_verifiers()
+    verifiers = resolve_verifiers(compare=compare)
 
     results: dict[str, dict] = {}
 
@@ -480,6 +490,11 @@ def write_report(verifiers, results, slips, kontrollen):
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
-    verifiers, results, slips, kontrollen = run_catchtest()
+    import argparse
+    parser = argparse.ArgumentParser(description="Lektorat Catch-Test")
+    parser.add_argument("--compare", action="store_true",
+                        help="Mehrmodell-Vergleich (Sonnet + Haiku + Gemini)")
+    ap = parser.parse_args()
+    verifiers, results, slips, kontrollen = run_catchtest(compare=ap.compare)
     write_report(verifiers, results, slips, kontrollen)
     print(f"\nErgebnis: {RESULT_PATH}")

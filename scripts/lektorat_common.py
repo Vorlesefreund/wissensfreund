@@ -9,6 +9,7 @@ import json
 import logging
 import re
 import time
+import unicodedata
 
 log = logging.getLogger(__name__)
 
@@ -20,26 +21,62 @@ PROBLEMATIC_VERDICTS = {"NICHT_BELEGT", "ÜBERZOGEN", "WIDERSPRUCH"}
 TIER_VALUES          = {"AUTO", "VORSCHLAG", "ESKALATION"}
 
 LEKTORAT_SYSTEM = (
-    "Du bist Faktenprüfer. Prüfe alle Aussagen im vorgelegten Artikel AUSSCHLIESSLICH gegen die "
-    "beigefügten Quell-Volltexte — niemals aus Vorwissen.\n\n"
-    "Für jede faktische Aussage:\n"
-    "  Verdikt: BELEGT | NICHT_BELEGT | ÜBERZOGEN | WIDERSPRUCH\n"
-    "  Tier (nur bei Nicht-BELEGT):\n"
-    "    AUTO      — ÜBERZOGEN, das durch eine lokale Abschwächung behebbar ist "
-    "(z.B. »alle« → »viele«); eindeutiger lokaler Wert-Tausch.\n"
-    "    VORSCHLAG — NICHT_BELEGT; WIDERSPRUCH mit nötiger Umschreibung; "
-    "invasives ÜBERZOGEN; mittlere Konfidenz.\n"
-    "    ESKALATION— Idealisierung/NPOV-Verstoß; Quelle mehrdeutig; "
-    "geringe Konfidenz; struktureller Umbau nötig.\n"
-    "  Bei BELEGT: tier leer lassen.\n\n"
-    "Wörtliches Beleg-Zitat aus der Quelle bei BELEGT; sonst kurze Begründung. "
-    "Vivide Sprache ist erlaubt, solange sie keine Fakten über die Quelle hinaus hinzufügt.\n\n"
+    "Du bist Faktenprüfer und Korrektor für Kinderlexikon-Artikel. "
+    "Prüfe alle faktischen Aussagen AUSSCHLIESSLICH gegen die beigefügten "
+    "Quell-Volltexte — niemals aus Vorwissen.\n\n"
+
+    "FAERBUNGS-REGEL — diese Formulierungen NICHT flaggen (= BELEGT):\n"
+    "  · Illustrative Vergleiche belegter Zahlen/Größen: «56 m ≈ 18-stöckiges Hochhaus», "
+    "«so groß wie ein Haus», «so hoch wie Bäume» (bei aus Baumstämmen geschnitzten Pfählen)\n"
+    "  · Mildes sprachliches/emotionales Kolorit («stolz», «wunderschön»), "
+    "das den Sachverhalt nicht ändert\n"
+    "  · Register-gerechte Vereinfachungen, die im Kern stimmen "
+    "(z.B. «runde Zelte» für Tipis in Stufe 1)\n"
+    "NUR flaggen bei: (a) neuer, nicht belegter Sachaussage (Detail/Pflanze/Ereignis), "
+    "ODER (b) Zahl/Superlativ/Größenordnung, die Quelle nicht stützt oder widerspricht "
+    "(«der höchste der Welt» wo Quelle «einer der höchsten» sagt). "
+    "Idealisierung/NPOV-Verstoß: ESKALATION.\n"
+    "BELEGT-BEDINGUNG: Der genaue Sachverhalt muss DIREKT in der Quelle stehen — "
+    "nicht nur das Thema. «Ist impliziert» oder «lässt sich schließen» reicht NICHT aus.\n"
+    "VERBUND-REGEL: Enthält ein Satz zwei Sachverhalte (A UND B), müssen BEIDE einzeln "
+    "direkt in den Quellen stehen. Ist B nicht direkt belegt, ist der Gesamtsatz NICHT_BELEGT.\n\n"
+
+    "FÜR JEDE AUSSAGE diese Felder liefern:\n"
+    "  claim: EXAKTER vollständiger Satz aus dem Artikel (wird per Textersatz eingebaut)\n"
+    "  verdikt: BELEGT | NICHT_BELEGT | ÜBERZOGEN | WIDERSPRUCH\n"
+    "  tier (nur bei Nicht-BELEGT):\n"
+    "    AUTO      — eindeutiger, register-sicherer Ersatz-Satz bildbar; "
+    "beleg_fuer_korrektur WÖRTLICH in Quelle auffindbar\n"
+    "    VORSCHLAG — Ersatz möglich aber Umformulierung nötig / mehrere Optionen / "
+    "Beleg-Zitat nicht exakt wörtlich\n"
+    "    ESKALATION— kein gegroundeter Ersatz möglich / Idealisierung/NPOV / "
+    "Quelle mehrdeutig / struktureller Umbau\n"
+    "  beleg_oder_begruendung: wörtliches Quellzitat bei BELEGT; kurze Begründung sonst\n"
+    "  korrektur_neu: bei AUTO/VORSCHLAG der vollständig korrigierte Satz "
+    "(gleiches Register, quellenbasiert; NIE vage abschwächen, z.B. NICHT "
+    "«so hoch wie Bäume» durch «sehr groß» ersetzen); bei BELEGT/ESKALATION leer lassen\n"
+    "  beleg_fuer_korrektur: bei AUTO/VORSCHLAG WÖRTLICHES Quellzitat als Beleg für "
+    "korrektur_neu; bei BELEGT/ESKALATION leer lassen\n\n"
+
+    "KORREKTIONS-PRINZIP:\n"
+    "  · Gleichwertiger Ersatz: Zahl→Quell-Zahl, Superlativ→Quell-Form, "
+    "unbelegtes Detail→belegtes Pendant aus der Quelle\n"
+    "  · KEINE Abschwächung ins Vage, KEINE ersatzlose Streichung\n"
+    "  · Register wahren (Stufe 1: kindgerecht; Stufe 3: sachlich)\n\n"
+
     "Antworte NUR mit JSON-Array:\n"
-    '[{"claim":"...","verdikt":"BELEGT|NICHT_BELEGT|ÜBERZOGEN|WIDERSPRUCH",'
-    '"tier":"AUTO|VORSCHLAG|ESKALATION|","beleg_oder_begruendung":"..."}]\n\n'
-    "WICHTIG JSON-Sicherheit: Innerhalb von Feldwerten keine geraden Anführungszeichen. "
-    "Zitierte Textstellen in «\xa0» oder einfache Apostrophe einschliessen — nie \"Wort\" schreiben."
+    '[{"claim":"exakter Satz aus Artikel","verdikt":"BELEGT|NICHT_BELEGT|ÜBERZOGEN|WIDERSPRUCH",'
+    '"tier":"AUTO|VORSCHLAG|ESKALATION|","beleg_oder_begruendung":"...",'
+    '"korrektur_neu":"...","beleg_fuer_korrektur":"..."}]\n\n'
+    "JSON-Sicherheit: Innerhalb von Feldwerten keine geraden Anführungszeichen. "
+    "Zitierte Textstellen in «\xa0» oder Apostrophe einschliessen."
 )
+
+# Reihenfolge der Felder im JSON (für robust extractor)
+_ALL_FIELD_ORDER = [
+    "claim", "verdikt", "tier", "beleg_oder_begruendung",
+    "korrektur_neu", "beleg_fuer_korrektur",
+]
 
 
 # ── Quellblock (symmetrisch zur Generierung) ──────────────────────────────────
@@ -50,10 +87,7 @@ def build_grounded_sources_block(
     companion_titles: list[str],
     companion_texts: dict[str, str],
 ) -> str:
-    """
-    Primär ungekürzt · Companions[:COMPANION_CHAR_CAP].
-    Identisch zur Phase-2-Generierung in generate_grounded.py.
-    """
+    """Primär ungekürzt · Companions[:COMPANION_CHAR_CAP]."""
     parts = [f"### Quelle: {primary_title}\n{primary_text}"]
     for title in companion_titles:
         text = companion_texts.get(title, "")
@@ -96,25 +130,22 @@ def build_lektorat_prompt(article: dict, sources_block: str) -> str:
         f"PRÜF-ARTIKEL (Stufe {level}, Titel: {title}):\n{article_text}\n\n"
         f"{sources_block}\n\n"
         "Prüfe ALLE faktischen Aussagen im Artikel gegen die deklarierten Quellen. "
-        "Gib für jede Aussage ein separates Verdikt mit Tier im JSON-Array."
+        "Liefere für jede Aussage alle sechs Felder im JSON-Array."
     )
 
 
 # ── JSON-Parser ───────────────────────────────────────────────────────────────
 
 def _fix_inner_quotes(text: str) -> str:
-    """Fix German inner quotes that break JSON: U+201E...U+0022 patterns.
+    """Fix German inner quotes (U+201E + U+0022) that break JSON string parsing.
 
-    Claude uses „word" (U+201E open, U+0022 close) inside JSON string values.
-    The U+0022 terminates the JSON string early. Two cases:
-    - „word"" → inner " immediately before structural " → drop the inner "
-    - „word" … → inner " followed by more text → replace inner " with '
+    Two cases:
+    - inner" immediately before structural " → drop the inner "
+    - inner" followed by more text → replace inner " with '
     """
-    text = text.replace('„', '«')  # „ → « (safe in JSON strings)
-    # Case 1: inner " immediately followed by structural " → remove inner "
-    text = re.sub(r'(?<=[^\s{[\n,"])"(?=")', '', text)
-    # Case 2: inner " followed by non-structural continuation → replace with '
-    text = re.sub(r'(?<=[^\s{[\n,"])"(?!\s*[:{}\],""])', "'", text)
+    text = text.replace("„", "«")  # „ → «
+    text = re.sub(r'(?<=[^\s{[\n,"])"(?=")', "", text)          # Case 1
+    text = re.sub(r'(?<=[^\s{[\n,"])"(?!\s*[:{}\],""])', "'", text)  # Case 2
     return text
 
 
@@ -126,7 +157,7 @@ def parse_lektorat_json(raw: str) -> list[dict]:
 
     has_array = "[" in cleaned
 
-    # Try standard JSON parse — first as-is, then with inner-quote fix
+    # Try standard JSON parse — as-is, then with inner-quote fix
     for attempt in (cleaned, _fix_inner_quotes(cleaned)):
         start = attempt.find("[")
         if start != -1:
@@ -159,10 +190,8 @@ def parse_lektorat_json(raw: str) -> list[dict]:
 def _extract_lektorat_objects_robust(text: str) -> list[dict]:
     """Structural extraction: split on { } depth, extract fields by key position.
 
-    Used when JSON parsing fails. Does NOT track string state, so it works even
-    when string values contain unescaped " characters.
+    Works even when string values contain unescaped " characters.
     """
-    # Split into top-level { ... } blocks
     blocks = []
     depth = 0
     start = -1
@@ -178,22 +207,25 @@ def _extract_lektorat_objects_robust(text: str) -> list[dict]:
 
     results = []
     for block in blocks:
-        # verdikt and tier have short, predictable values — safe regex
         vm = re.search(r'"verdikt"\s*:\s*"([^"]{1,30})"', block)
         tm = re.search(r'"tier"\s*:\s*"([^"]{0,20})"', block)
-        claim = _field_value_between_keys(block, "claim", ["verdikt", "tier", "beleg_oder_begruendung"])
-        beleg = _field_value_before_close(block, "beleg_oder_begruendung")
-        results.append({
-            "claim": claim,
+        obj: dict = {
             "verdikt": vm.group(1) if vm else "UNBEKANNT",
-            "tier": tm.group(1) if tm else "",
-            "beleg_oder_begruendung": beleg,
-        })
+            "tier":    tm.group(1) if tm else "",
+        }
+        for i, field in enumerate(_ALL_FIELD_ORDER):
+            if field in ("verdikt", "tier"):
+                continue
+            next_fields = _ALL_FIELD_ORDER[i + 1:]
+            if next_fields:
+                obj[field] = _field_value_between_keys(block, field, next_fields)
+            else:
+                obj[field] = _field_value_before_close(block, field)
+        results.append(obj)
     return results
 
 
 def _field_value_between_keys(block: str, field: str, next_keys: list[str]) -> str:
-    """Extract value of field by finding the value start and the next key as end marker."""
     m = re.search(r'"' + re.escape(field) + r'"\s*:\s*"', block)
     if not m:
         return ""
@@ -206,12 +238,10 @@ def _field_value_between_keys(block: str, field: str, next_keys: list[str]) -> s
 
 
 def _field_value_before_close(block: str, field: str) -> str:
-    """Extract value of the last field (before the closing })."""
     m = re.search(r'"' + re.escape(field) + r'"\s*:\s*"', block)
     if not m:
         return ""
     rest = block[m.end():]
-    # Last " before \n  }
     end = re.search(r'"\s*\n?\s*}', rest)
     if end:
         return rest[: end.start()]
@@ -244,44 +274,144 @@ def _extract_balanced(text: str, open_ch: str, close_ch: str) -> str:
     raise ValueError(f"Unvollständiges JSON (kein balanciertes '{close_ch}')")
 
 
+# ── Hilfsfunktionen für Beleg-Check + Textersatz ─────────────────────────────
+
+def _normalize_for_check(text: str) -> str:
+    """NFKC-normalisiert + lowercase + whitespace-kollabiert für Substring-Check."""
+    text = unicodedata.normalize("NFKC", text)
+    return " ".join(text.lower().split())
+
+
+def _jaccard(a: str, b: str) -> float:
+    """Jaccard-Ähnlichkeit auf Wort-Ebene für Satz-Matching."""
+    wa = set(re.sub(r"[^\w\s]", "", a.lower()).split())
+    wb = set(re.sub(r"[^\w\s]", "", b.lower()).split())
+    if not wa or not wb:
+        return 0.0
+    return len(wa & wb) / len(wa | wb)
+
+
+def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -> bool:
+    """Ersetzt den Satz in article, der claim_text am besten trifft, mit korrektur_neu.
+
+    Gibt True zurück wenn Jaccard >= 0.4 und Ersatz vorgenommen wurde.
+    """
+    if not claim_text or not korrektur_neu or claim_text == korrektur_neu:
+        return False
+
+    best_score = 0.0
+    best_loc: tuple | None = None  # ("sec", si, sj) or ("box", si, bi, sj)
+
+    for si, sec in enumerate(article.get("sections", [])):
+        for sj, sent in enumerate(sec.get("sentences", [])):
+            score = _jaccard(claim_text, sent.get("text", ""))
+            if score > best_score:
+                best_score = score
+                best_loc = ("sec", si, sj)
+        for bi, box in enumerate(sec.get("boxes", [])):
+            for sj, sent in enumerate(box.get("sentences", [])):
+                score = _jaccard(claim_text, sent.get("text", ""))
+                if score > best_score:
+                    best_score = score
+                    best_loc = ("box", si, bi, sj)
+
+    if best_score < 0.4 or best_loc is None:
+        return False
+
+    if best_loc[0] == "sec":
+        _, si, sj = best_loc
+        article["sections"][si]["sentences"][sj]["text"] = korrektur_neu
+    else:
+        _, si, bi, sj = best_loc
+        article["sections"][si]["boxes"][bi]["sentences"][sj]["text"] = korrektur_neu
+    return True
+
+
 # ── Prüfbericht erstellen + Artikel annotieren ───────────────────────────────
 
-def build_pruefbericht(verdicts: list[dict]) -> dict:
-    """Strukturiert rohe Verdikt-Liste in pruefbericht {findings, summary}."""
-    findings = [
-        {
-            "claim":                  v.get("claim", ""),
-            "verdikt":                v.get("verdikt", "UNBEKANNT"),
-            "tier":                   v.get("tier", ""),
+def build_pruefbericht(verdicts: list[dict], primary_text: str = "") -> dict:
+    """Strukturiert Verdikt-Liste in pruefbericht mit Korrektur-Status (Stufe 2).
+
+    Status je Finding:
+      belegt         — Aussage korrekt, keine Aktion
+      auto_angewandt — AUTO-Tier + beleg_fuer_korrektur wörtlich in primary_text
+      vorschlag_offen— VORSCHLAG, oder AUTO dessen Beleg nicht wörtlich gefunden
+      eskaliert      — ESKALATION (kein gegroundeter Ersatz)
+    """
+    n_primary = _normalize_for_check(primary_text)
+
+    findings = []
+    for v in verdicts:
+        verdikt   = v.get("verdikt", "UNBEKANNT")
+        tier      = v.get("tier", "")
+        kor_neu   = v.get("korrektur_neu", "")
+        beleg_k   = v.get("beleg_fuer_korrektur", "")
+
+        if verdikt == "BELEGT":
+            status = "belegt"
+        elif tier == "ESKALATION":
+            status = "eskaliert"
+        elif tier == "AUTO":
+            # Mechanischer Beleg-Check: wörtliches Zitat im Primärtext?
+            if beleg_k and n_primary and _normalize_for_check(beleg_k) in n_primary:
+                status = "auto_angewandt"
+            else:
+                tier   = "VORSCHLAG"   # Downgrade
+                status = "vorschlag_offen"
+        else:
+            status = "vorschlag_offen"
+
+        findings.append({
+            "claim_original":         v.get("claim", ""),
+            "verdikt":                verdikt,
+            "tier":                   tier,
             "beleg_oder_begruendung": v.get("beleg_oder_begruendung", ""),
-        }
-        for v in verdicts
-    ]
+            "korrektur_neu":          kor_neu if status in ("auto_angewandt", "vorschlag_offen") else "",
+            "beleg_fuer_korrektur":   beleg_k if status in ("auto_angewandt", "vorschlag_offen") else "",
+            "status":                 status,
+        })
+
     summary = {
-        "BELEGT":       sum(1 for f in findings if f["verdikt"] == "BELEGT"),
-        "NICHT_BELEGT": sum(1 for f in findings if f["verdikt"] == "NICHT_BELEGT"),
-        "ÜBERZOGEN":    sum(1 for f in findings if f["verdikt"] == "ÜBERZOGEN"),
-        "WIDERSPRUCH":  sum(1 for f in findings if f["verdikt"] == "WIDERSPRUCH"),
-        "AUTO":         sum(1 for f in findings if f["tier"] == "AUTO"),
-        "VORSCHLAG":    sum(1 for f in findings if f["tier"] == "VORSCHLAG"),
-        "ESKALATION":   sum(1 for f in findings if f["tier"] == "ESKALATION"),
+        "auto_angewandt":  sum(1 for f in findings if f["status"] == "auto_angewandt"),
+        "vorschlag_offen": sum(1 for f in findings if f["status"] == "vorschlag_offen"),
+        "eskaliert":       sum(1 for f in findings if f["status"] == "eskaliert"),
     }
     return {"findings": findings, "summary": summary}
 
 
-def annotate_article_lektorat(article: dict, verdicts: list[dict]) -> None:
+def annotate_article_lektorat(
+    article: dict,
+    verdicts: list[dict],
+    primary_text: str = "",
+) -> None:
+    """Schreibt pruefbericht-Feld ins Artikel-JSON und wendet AUTO-Korrekturen an.
+
+    review_flag = True nur bei vorschlag_offen oder eskaliert.
+    AUTO-Korrekturen werden direkt in article["sections"] eingebaut.
     """
-    Schreibt pruefbericht-Feld ins Artikel-JSON.
-    review_flag = True nur bei VORSCHLAG oder ESKALATION (AUTO-only = kein Flag).
-    """
-    pb = build_pruefbericht(verdicts)
+    pb = build_pruefbericht(verdicts, primary_text)
+
+    # AUTO-Korrekturen einbauen
+    for finding in pb["findings"]:
+        if finding["status"] == "auto_angewandt" and finding["korrektur_neu"]:
+            applied = _apply_auto_correction(
+                article, finding["claim_original"], finding["korrektur_neu"]
+            )
+            if not applied:
+                # Satz nicht im Artikel gefunden — auf VORSCHLAG herabstufen
+                finding["status"] = "vorschlag_offen"
+                finding["tier"]   = "VORSCHLAG"
+                pb["summary"]["auto_angewandt"]  -= 1
+                pb["summary"]["vorschlag_offen"] += 1
+
     article["pruefbericht"] = pb
-    n_v = pb["summary"]["VORSCHLAG"]
-    n_e = pb["summary"]["ESKALATION"]
+
+    n_v = pb["summary"]["vorschlag_offen"]
+    n_e = pb["summary"]["eskaliert"]
     if n_v > 0 or n_e > 0:
         article.setdefault("meta", {})["review_flag"] = True
         existing = article["meta"].get("review_reason", "")
-        reason = f"lektorat: {n_v} VORSCHLAG, {n_e} ESKALATION"
+        reason   = f"lektorat: {n_v} vorschlag, {n_e} eskaliert"
         article["meta"]["review_reason"] = (existing + "; " + reason).lstrip("; ")
 
 
@@ -291,8 +421,7 @@ def run_lektorat_batch(
     prompts_by_id: dict[str, str],
     api_key: str,
 ) -> dict[str, list[dict]]:
-    """
-    Reicht alle Lektorat-Anfragen als Anthropic Message Batch ein (50 % günstiger),
+    """Reicht alle Lektorat-Anfragen als Anthropic Message Batch ein (50 % günstiger),
     pollt bis abgeschlossen, gibt article_id → rohe Verdikt-Liste zurück.
     """
     import anthropic
@@ -303,10 +432,10 @@ def run_lektorat_batch(
         {
             "custom_id": aid,
             "params": {
-                "model": LEKTORAT_MODEL,
+                "model":      LEKTORAT_MODEL,
                 "max_tokens": 16000,
-                "system": LEKTORAT_SYSTEM,
-                "messages": [{"role": "user", "content": prompt}],
+                "system":     LEKTORAT_SYSTEM,
+                "messages":   [{"role": "user", "content": prompt}],
             },
         }
         for aid, prompt in prompts_by_id.items()
