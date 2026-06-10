@@ -59,8 +59,16 @@ from image_vision_filter import (        # noqa: E402
     download_image,
     analyze_with_vision,
 )
+from lektorat_common import (            # noqa: E402
+    COMPANION_CHAR_CAP,
+    PROBLEMATIC_VERDICTS,
+    build_grounded_sources_block,
+    build_lektorat_prompt,
+    annotate_article_lektorat,
+    run_lektorat_batch,
+)
 
-GEMINI_MODEL       = "gemini-2.5-flash"
+GEMINI_MODEL       = "gemini-3.5-flash"
 OUT_DIR            = ROOT / "articles" / "test_grounded"
 SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v3.23_production.md"
 
@@ -71,9 +79,6 @@ MAX_IMG_COMPANION = 6
 
 # Companion-Cap gestaffelt nach Appeal (kein Auffüllen)
 COMPANION_CAP = {"low": 4, "medium": 5, "high": 6}
-
-# Zeichenlimit je Companion-Text im Generierungs-Prompt (positional slice)
-COMPANION_CHAR_CAP = 30_000
 
 # Wortziel-Tabelle: (age_level, appeal) → (min_wörter, max_wörter)
 WORTZIEL_TABLE: dict[tuple[int, str], tuple[int, int]] = {
@@ -875,16 +880,26 @@ def main() -> None:
         "--output-dir", default=None,
         help="Ausgabeverzeichnis (default: articles/test_grounded)",
     )
+    parser.add_argument(
+        "--skip-lektorat", action="store_true",
+        help="Lektorat-Schritt (Claude Sonnet) nach Generierung ueberspringen",
+    )
     args = parser.parse_args()
 
-    model      = args.gen_model or GEMINI_MODEL
-    out_dir    = Path(args.output_dir).resolve() if args.output_dir else OUT_DIR
-    model_slug = model.replace("gemini-", "").replace(".", "-")
+    model         = args.gen_model or GEMINI_MODEL
+    out_dir       = Path(args.output_dir).resolve() if args.output_dir else OUT_DIR
+    model_slug    = model.replace("gemini-", "").replace(".", "-")
+    skip_lektorat = args.skip_lektorat
 
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         log.error("GEMINI_API_KEY nicht gesetzt.")
         sys.exit(1)
+
+    anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
+    if not skip_lektorat and not anthropic_key:
+        log.warning("ANTHROPIC_API_KEY fehlt — Lektorat wird uebersprungen (--skip-lektorat zum Unterdrücken)")
+        skip_lektorat = True
 
     system_prompt = SYSTEM_PROMPT_PATH.read_text(encoding="utf-8")
     log.info("System-Prompt: %d Zeichen", len(system_prompt))
@@ -990,7 +1005,16 @@ def main() -> None:
         print(f"  Validiert + aufgeloest:  {valid_companions}")
         print(f"  [Quellblock wird fuer {len(topic_jobs)} Stufe(n) geteilt + gecacht]")
 
-        # Phase 2: je Stufe
+        # Quellblock einmal pro Thema bauen (geteilt über alle Stufen)
+        sources_block = build_grounded_sources_block(
+            primary_wikipedia, primary_text, valid_companions, companion_texts
+        )
+        log.info("  Quellblock: %d Zeichen (Primaer + %d Companions)",
+                 len(sources_block), len(valid_companions))
+
+        # Phase 2: alle Stufen generieren, Artikel sammeln
+        topic_articles: list[tuple[dict, dict, dict]] = []  # (job, article, report)
+
         for job in topic_jobs:
             article_id = job["article_id"]
             print(f"\n  --- Stufe {job['age_level']}: {article_id} ---")
@@ -1006,31 +1030,66 @@ def main() -> None:
                 json.dumps(report, ensure_ascii=False, indent=2),
                 encoding="utf-8",
             )
+            print(f"  Report: {report_path.relative_to(ROOT)}")
 
             if article:
-                out_path = out_dir / f"{article_id}.json"
-                out_path.write_text(
-                    json.dumps(article, ensure_ascii=False, indent=2),
-                    encoding="utf-8",
-                )
-                meta_title = article.get("meta", {}).get("title", "?")
-                n_imgs  = len(article.get("images", []))
-                n_sents = sum(
-                    len(s.get("sentences", []))
-                    for s in article.get("sections", [])
-                )
-                wc      = report["phase2"].get("word_count", "?")
-                wtarget = report["phase2"].get("word_target", "?")
-                retry   = " [RETRY]" if report["phase2"].get("retry_needed") else ""
-                review  = " [REVIEW]" if article["meta"].get("review_flag") else ""
-                gen_m   = article["meta"].get("generation_method", "?")
-                print(f"  Gespeichert: {out_path.relative_to(ROOT)}")
-                print(f"  meta.title='{meta_title}' | method='{gen_m}'")
-                print(f"  Bilder: {n_imgs} | Saetze: {n_sents} | Woerter: {wc} (Ziel {wtarget}){retry}{review}")
+                topic_articles.append((job, article, report))
             else:
                 print(f"  FEHLER: {report.get('errors')}")
 
-            print(f"  Report: {report_path.relative_to(ROOT)}")
+        # Lektorat-Batch (alle Stufen auf einmal, Quellblock geteilt)
+        if not skip_lektorat and topic_articles:
+            log.info("  Starte Lektorat-Batch fuer %d Artikel (Modell: claude-sonnet-4-6) ...",
+                     len(topic_articles))
+            prompts = {
+                job["article_id"]: build_lektorat_prompt(article, sources_block)
+                for job, article, _ in topic_articles
+            }
+            try:
+                lektorat_results = run_lektorat_batch(prompts, anthropic_key)
+                for job, article, _ in topic_articles:
+                    aid = job["article_id"]
+                    verdicts = lektorat_results.get(aid, [])
+                    annotate_article_lektorat(article, verdicts)
+                    pb = article.get("pruefbericht", {})
+                    sm = pb.get("summary", {})
+                    log.info(
+                        "  Lektorat [%s]: %d Aussagen — AUTO:%d VORSCHLAG:%d ESKALATION:%d",
+                        aid, len(pb.get("findings", [])),
+                        sm.get("AUTO", 0), sm.get("VORSCHLAG", 0), sm.get("ESKALATION", 0),
+                    )
+            except Exception as exc:
+                log.error("  Lektorat-Batch fehlgeschlagen: %s — Artikel ohne Lektorat-Feld", exc)
+
+        # Artikel schreiben (mit ggf. annotiertem lektorat-Feld)
+        for job, article, report in topic_articles:
+            article_id = job["article_id"]
+            out_path = out_dir / f"{article_id}.json"
+            out_path.write_text(
+                json.dumps(article, ensure_ascii=False, indent=2),
+                encoding="utf-8",
+            )
+            meta_title = article.get("meta", {}).get("title", "?")
+            n_imgs  = len(article.get("images", []))
+            n_sents = sum(
+                len(s.get("sentences", []))
+                for s in article.get("sections", [])
+            )
+            wc      = report["phase2"].get("word_count", "?")
+            wtarget = report["phase2"].get("word_target", "?")
+            retry   = " [RETRY]" if report["phase2"].get("retry_needed") else ""
+            review  = " [REVIEW]" if article["meta"].get("review_flag") else ""
+            pb      = article.get("pruefbericht", {})
+            sm      = pb.get("summary", {})
+            n_f     = len(pb.get("findings", []))
+            lekt_note = (
+                f" [LEKTORAT {n_f}:{sm.get('AUTO',0)}A/{sm.get('VORSCHLAG',0)}V/{sm.get('ESKALATION',0)}E]"
+                if n_f else ""
+            )
+            gen_m   = article["meta"].get("generation_method", "?")
+            print(f"  Gespeichert: {out_path.relative_to(ROOT)}")
+            print(f"  meta.title='{meta_title}' | method='{gen_m}'")
+            print(f"  Bilder: {n_imgs} | Saetze: {n_sents} | Woerter: {wc} (Ziel {wtarget}){retry}{review}{lekt_note}")
 
         print(f"\n  Appeal: {appeal} ({appeal_source}) | Companions ({len(valid_companions)}): {valid_companions}")
 

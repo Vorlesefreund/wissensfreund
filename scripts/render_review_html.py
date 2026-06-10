@@ -170,6 +170,30 @@ body {
 .footer-companions { margin-top: 4px; }
 .footer-meta { margin-top: 6px; }
 
+/* Lektorat */
+.lektorat-section {
+  margin-top: 36px; padding-top: 24px; border-top: 2px solid #e0e0e0;
+}
+.lektorat-heading {
+  font-family: sans-serif; font-size: 0.85rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em; color: #555; margin-bottom: 14px;
+}
+.lektorat-item {
+  margin-bottom: 12px; padding: 10px 14px;
+  border-left: 4px solid #9E9E9E; border-radius: 0 4px 4px 0;
+  font-size: 0.87rem;
+}
+.lektorat-item.v-BELEGT       { background:#E8F5E9; border-left-color:#43A047; }
+.lektorat-item.v-NICHT_BELEGT { background:#FFEBEE; border-left-color:#E53935; }
+.lektorat-item.v-UEBERZOGEN   { background:#FFF8E1; border-left-color:#FFA000; }
+.lektorat-item.v-WIDERSPRUCH  { background:#FFEBEE; border-left-color:#B71C1C; }
+.lektorat-verdikt {
+  font-family: sans-serif; font-size: 0.72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px;
+}
+.lektorat-claim { font-style: italic; color: #333; margin-bottom: 4px; }
+.lektorat-beleg { color: #555; font-size: 0.82rem; }
+
 /* Print */
 @media print {
   body { background: white; padding: 0; }
@@ -365,6 +389,67 @@ def render_footer(meta: dict) -> str:
   </div>"""
 
 
+def render_lektorat(pruefbericht: dict) -> str:
+    if not pruefbericht:
+        return ""
+    findings = pruefbericht.get("findings", [])
+    if not findings:
+        return ""
+    sm = pruefbericht.get("summary", {})
+
+    _CSS_VERD = {
+        "BELEGT":       "v-BELEGT",
+        "NICHT_BELEGT": "v-NICHT_BELEGT",
+        "ÜBERZOGEN":    "v-UEBERZOGEN",
+        "WIDERSPRUCH":  "v-WIDERSPRUCH",
+    }
+    _TIER_LABEL = {
+        "AUTO":      '<span style="background:#FFF8E1;color:#F57F17;border:1px solid #FFE082;'
+                     'padding:1px 6px;border-radius:3px;font-size:.72rem;font-weight:700">AUTO</span>',
+        "VORSCHLAG": '<span style="background:#FFF3E0;color:#E65100;border:1px solid #FFCC80;'
+                     'padding:1px 6px;border-radius:3px;font-size:.72rem;font-weight:700">VORSCHLAG</span>',
+        "ESKALATION":'<span style="background:#FFEBEE;color:#B71C1C;border:1px solid #EF9A9A;'
+                     'padding:1px 6px;border-radius:3px;font-size:.72rem;font-weight:700">ESKALATION ⚠</span>',
+    }
+
+    n_v = sm.get("VORSCHLAG", 0)
+    n_e = sm.get("ESKALATION", 0)
+    n_a = sm.get("AUTO", 0)
+    total = len(findings)
+    belegt = sm.get("BELEGT", 0)
+
+    summary_parts = [f"{total} Aussagen — {belegt} BELEGT"]
+    if n_a:
+        summary_parts.append(f"{n_a} AUTO")
+    if n_v:
+        summary_parts.append(f"<strong style='color:#E65100'>{n_v} VORSCHLAG</strong>")
+    if n_e:
+        summary_parts.append(f"<strong style='color:#B71C1C'>{n_e} ESKALATION ⚠</strong>")
+    summary_html = " · ".join(summary_parts)
+
+    items = []
+    for f in findings:
+        verd  = f.get("verdikt", "?")
+        tier  = f.get("tier", "")
+        claim = f.get("claim", "")
+        beleg = f.get("beleg_oder_begruendung", "")
+        css   = _CSS_VERD.get(verd, "")
+        tier_html = _TIER_LABEL.get(tier, "") if tier else ""
+        items.append(
+            f'<div class="lektorat-item {e(css)}">'
+            f'<div class="lektorat-verdikt">{e(verd)}{" " + tier_html if tier_html else ""}</div>'
+            f'<div class="lektorat-claim">{e(claim)}</div>'
+            f'<div class="lektorat-beleg">{e(beleg)}</div>'
+            f'</div>'
+        )
+
+    return f"""
+  <div class="lektorat-section">
+    <div class="lektorat-heading">Prüfbericht — {summary_html}</div>
+    {"".join(items)}
+  </div>"""
+
+
 def render_article(art: dict, index: int) -> str:
     meta     = art.get("meta", {})
     sections = art.get("sections", [])
@@ -400,12 +485,14 @@ def render_article(art: dict, index: int) -> str:
   </div>"""
 
     sections_html = "".join(render_section(sec, images) for sec in sections)
+    lektorat_html = render_lektorat(art.get("pruefbericht", {}))
 
     return f"""
 <div class="article-wrapper" id="article-{index}">
   {header_html}
   {sections_html}
   {render_quiz(quiz)}
+  {lektorat_html}
   {render_images(images)}
   {render_footer(meta)}
 </div>"""

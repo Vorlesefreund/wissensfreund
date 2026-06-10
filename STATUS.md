@@ -1,52 +1,34 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-10T09:12:19Z -->
+<!-- updated: 2026-06-10T10:22:26Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**artikel_pipeline.yml: schedule entfernt (2026-06-10)** ← AKTUELL
+**Gegroundetes Lektorat Stufe 1 — Smoke-Test erfolgreich (2026-06-10)** ← AKTUELL
+- `scripts/lektorat_common.py` (NEU): COMPANION_CHAR_CAP=30k, LEKTORAT_SYSTEM-Prompt mit Tier-Logik,
+  build_grounded_sources_block, parse_lektorat_json (3-stufiger Fallback), annotate_article_lektorat,
+  run_lektorat_batch (Anthropic Batch-API, max_tokens=16000).
+- `scripts/generate_grounded.py`: --skip-lektorat, sources_block einmal pro Thema,
+  Batch nach allen Stufen, [LEKTORAT N:A/V/E]-Log, GEMINI_MODEL-Default=gemini-3.5-flash.
+- `scripts/run_lektorat_catchtest.py`: importiert aus lektorat_common (kein Drift).
+- `scripts/render_review_html.py`: Prüfbericht-Panel mit Tier-Badges (AUTO=gelb, VORSCHLAG=orange, ESKALATION=rot).
+
+Smoke-Test Indianer L1–L3 (gemini-3.5-flash, --skip-images, Batch msgbatch_01VySczot33):
+- L1: 16 Aussagen | BELEGT:14 ÜB:2 | AUTO:2 | review_flag=False
+- L2: 22 Aussagen | BELEGT:20 NB:1 ÜB:1 | AUTO:1 ESKALATION:1 | review_flag=True
+- L3: 24 Aussagen | BELEGT:18 NB:4 ÜB:2 | AUTO:1 VORSCHLAG:4 ESKALATION:1 | review_flag=True
+
+Parser-Fix: Dreistufiger Fallback (JSON-raw → _fix_inner_quotes → Strukturextraktion).
+Root cause: Claude nutzt „Wort" (U+201E + U+0022) als dt. Anführungszeichen innerhalb
+JSON-Strings; U+0022 terminiert den String vorzeitig. Fix: Case 1 „text"" → '" (inner " weg),
+Case 2 „text" Text → replace mit '. Fallback: Strukturextraktion nach Schlüsselposition.
+
+Review-HTML: articles/test_grounded/_review.html (lokal)
+
+**artikel_pipeline.yml: schedule entfernt (2026-06-10)**
 - `on: schedule` (cron "0 3 * * 1") entfernt — Pipeline läuft nicht mehr automatisch.
-- `on: workflow_dispatch` bleibt erhalten — manueller Auslöser weiterhin verfügbar.
-
-**COMPANION_CHAR_CAP=30000 + Harness-Symmetrie (2026-06-10)**
-- generate_grounded.py: `COMPANION_CHAR_CAP = 30_000` als benannte Konstante (Z.76); `text[:COMPANION_CHAR_CAP]` ersetzt Magic Number `[:6000]` (Z.613)
-- run_lektorat_catchtest.py: importiert dieselbe Konstante aus generate_grounded (kein Duplikat).
-  Logik in `_build_sources_block`: Artikel-Checks → Primär ungekürzt / Companions `[:30000]`;
-  Einzelaussagen → alle Quellen ungekürzt (K5 Biden@59k + K6 16.000@25k vollständig abgedeckt).
-  `extract_source_text` + `SOURCE_PREFIX/WINDOW/MAX`-Konstanten entfernt.
-
-**Lektorat Catch-Test (2026-06-10)**
-Goldset: 4 Slips (L1–L4) × 6 Kontrollen (K1–K6), handverifiziert.
-Verifizierer-Ergebnis (tests/lektorat_catchtest_result.md, lokal):
-- Claude Sonnet 4.6: Catch 4/4 | FP 1/6 (K6 Beringia — Grenzfall Formulierung)
-- Claude Haiku 4.5:  Catch 2/4 | FP 0/6 (verpasst: L1 Pocahontas, L2 Maya)
-- Gemini 2.5 Pro¹:  Catch 3/3 | FP 0/6 (¹L1 503-Abbruch — nicht auswertbar)
-Fazit: Sonnet fängt alle, hat aber höchste FP-Rate. Haiku schärfer auf Kontrollen,
-       blind auf subtile Quellen-Slips (ÜBERZOGEN/NICHT_BELEGT). Gemini teuer+langsam.
-Infrastruktur: tests/lektorat_goldset.json + scripts/run_lektorat_catchtest.py
-Anmerkung: gemini-3.1-pro → 404, Fallback gemini-2.5-pro. Primär-Input ungekürzt (kein Cap).
-
-**Structured Output + Modell-Vergleich test_modelcompare2 (2026-06-10)**
-3 Code-Fixes für fairen Modellvergleich:
-- `gemini_client.py`: 6 Retries + Exponential Backoff (60/120/240/300s), response_mime_type + response_schema Parameter
-- `generate_articles.py parse_article_json()`: Balanced-Brace-Extraktion (Trailing-Content wird ignoriert)
-- `generate_grounded.py`: Structured Output Phase 1 (companions_schema) + Phase 2 (response_mime_type JSON)
-
-Befund test_modelcompare2 (Indianer L1/L2/L3, --skip-images, v3.23):
-- gemini-3.5-flash: 3/3 ✅ | 176/352/583W | Companions: Tipi, Wigwam+W., Sitting Bull, Bison, Wappenpfahl
-- gemini-3.1-flash-lite: 3/3 ✅ | 160/301/387W | Companions: Indigene V., Tipi, Wappenpfahl, Büffel, Kanu (vorher 0/3 wegen Markdown-Output!)
-- gemini-3-flash-preview: 2/3 ❌ | 222/374W/FAIL | L3 truncated (8233Z, kein '}') — Thinking frisst max_output_tokens
-
-Alle Wortzahlen im WORTZIEL-Korridor (wo generiert). Review-HTML: articles/test_modelcompare2/_review.html (lokal)
-
-**v3.23 + test_v323 (2026-06-10)**
-- WORTZIEL explizit injiziert, Companion-Cap gestaffelt, Regionen-Ausgewogenheit Nordamerika
-- L1: 200W / L2: 358W / L3: 613W — alle im Korridor | Appeal: high (klexikon-quartil)
-
-**Robustness-Check + test_compass3b (2026-06-09)**
-- FAILED_NO_COMPANIONS-Abbruch wenn Phase 1 keine Companions liefert
 
 ---
 
@@ -55,7 +37,7 @@ Alle Wortzahlen im WORTZIEL-Korridor (wo generiert). Review-HTML: articles/test_
 **Sichtung test_modelcompare2**: articles/test_modelcompare2/_review.html
 - Qualitätsvergleich: 3.5-flash vs. 3.1-flash-lite (beide 3/3)
 - 3-flash-preview L3 fehlt — ggf. mit max_output_tokens=16384 nachgenerieren
-- ⛔ KEIN Lektorat, KEIN Upload vor Sichtung
+- ⛔ KEIN Upload vor Sichtung
 
 ---
 
@@ -64,12 +46,12 @@ Alle Wortzahlen im WORTZIEL-Korridor (wo generiert). Review-HTML: articles/test_
 ### Hoch
 - **Sichtung** test_modelcompare2 — Qualitätsvergleich 3 Modelle
 - **3-flash-preview L3 Fix**: max_output_tokens explizit setzen (Thinking frisst Budget)
-- **Sichtung** test_v323 — WORTZIEL-Erstlauf (Regionen-Ausgewogenheit Nordamerika?)
+- **Sichtung** test_v323 — WORTZIEL-Erstlauf
 - **generate_grounded.py Re-Run** biene_l3 + demokratie_l1
 
 ### Mittel
 - **Flutter-App testen**: WfArticleListScreen mit R2-Artikeln
-- **Lektorat-Pipeline-Integration** (manueller Standalone-Prompt)
+- **Lektorat Stufe 2**: Auto-Korrektur-Schicht (Stufe 2 nach Stufe 1 Erkennung)
 - **Related Terms**: prepare_articles.py befüllt sie noch nicht
 
 ### Niedrig
@@ -85,9 +67,9 @@ Alle Wortzahlen im WORTZIEL-Korridor (wo generiert). Review-HTML: articles/test_
 | `prepare_articles.py` | Batch-Vorbereitung (Job-JSONs) | Produktion |
 | `generate_articles.py` | Artikel-Generierung (Claude/Gemini) | Produktion |
 | `upload_articles.py` | Index + R2-Upload | Produktion |
-| `generate_grounded.py` | Lokaler Test: Kompass-Grounding + v3.23 | Aktiv (Entwicklung) |
+| `generate_grounded.py` | Lokaler Test: Kompass-Grounding + Lektorat | Aktiv (Entwicklung) |
 
-Produktions-Workflow: `.github/workflows/artikel_pipeline.yml` (Montag 03:00 UTC)
+Produktions-Workflow: `.github/workflows/artikel_pipeline.yml` (manuell, kein Schedule)
 
 ---
 

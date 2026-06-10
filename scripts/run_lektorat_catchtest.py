@@ -27,18 +27,11 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)-7s %(message)s")
 log = logging.getLogger(__name__)
 
 sys.path.insert(0, str(Path(__file__).parent))
-from generate_grounded import COMPANION_CHAR_CAP  # noqa: E402 — gleiche Konstante wie Generierung
-
-GEMINI_RETRY = 4
-
-LEKTORAT_SYSTEM = (
-    "Du bist Faktenprüfer. Prüfe die vorgelegte(n) Aussage(n) AUSSCHLIESSLICH gegen die "
-    "beigefügten Volltexte der deklarierten Quellen — niemals aus Vorwissen. "
-    "Verdikt je Aussage: BELEGT / NICHT_BELEGT / ÜBERZOGEN / WIDERSPRUCH. "
-    "Bei BELEGT ein wörtliches Beleg-Zitat aus der Quelle; sonst kurze Begründung. "
-    "Vivide Sprache ist erlaubt, solange sie keine Fakten über die Quelle hinaus hinzufügt.\n"
-    "Antworte NUR mit JSON-Array: "
-    '[{"claim":"...","verdikt":"BELEGT|NICHT_BELEGT|ÜBERZOGEN|WIDERSPRUCH","beleg_oder_begruendung":"..."}]'
+from lektorat_common import (            # noqa: E402
+    COMPANION_CHAR_CAP,
+    LEKTORAT_SYSTEM,
+    build_grounded_sources_block,
+    parse_lektorat_json,
 )
 
 PROBLEMATIC = {"NICHT_BELEGT", "ÜBERZOGEN", "WIDERSPRUCH"}
@@ -164,72 +157,26 @@ def build_claim_prompt(item: dict) -> str:
 def _build_sources_block(sources: list[str], primaer: str | None,
                           is_single_claim: bool) -> str:
     """
-    Symmetrisch zur Generierung:
-    - Artikel-Checks (is_single_claim=False): Primär ungekürzt, Companions[:COMPANION_CHAR_CAP]
-    - Einzelaussagen (is_single_claim=True): alle Quellen ungekürzt (keine Companion-Logik)
+    - Artikel-Checks (is_single_claim=False): build_grounded_sources_block aus lektorat_common
+      → Primär ungekürzt, Companions[:COMPANION_CHAR_CAP] — identisch zur Generierung.
+    - Einzelaussagen (is_single_claim=True): alle Quellen ungekürzt (keine Companion-Logik).
     """
+    if not is_single_claim:
+        primaer_text = _WIKI_CACHE.get((primaer or "").lower(), "") if primaer else ""
+        companion_titles = [s for s in sources if s.lower() != (primaer or "").lower()]
+        companion_texts  = {t: _WIKI_CACHE.get(t.lower(), "") for t in companion_titles}
+        return build_grounded_sources_block(
+            primaer or "", primaer_text, companion_titles, companion_texts
+        )
+    # Einzelaussage: alle Quellen voll
     all_sources = list(sources)
     if primaer and primaer not in all_sources:
         all_sources.append(primaer)
-    parts = []
-    for title in all_sources:
-        full = _WIKI_CACHE.get(title.lower(), "[nicht gecacht]")
-        if is_single_claim:
-            excerpt = full  # Einzelaussage: voller Text, kein Cap
-        elif primaer and title.lower() == primaer.lower():
-            excerpt = full  # Primärartikel im Artikel-Check: ungekürzt
-        else:
-            excerpt = full[:COMPANION_CHAR_CAP]  # Companion: identisch zur Generierung
-        parts.append(f"### Quelle: {title}\n{excerpt}")
+    parts = [
+        f"### Quelle: {title}\n{_WIKI_CACHE.get(title.lower(), '[nicht gecacht]')}"
+        for title in all_sources
+    ]
     return "DEKLARIERTE QUELLEN:\n" + "\n\n".join(parts)
-
-
-# ── JSON parser ───────────────────────────────────────────────────────────────
-
-def parse_lektorat_json(raw: str) -> list[dict]:
-    if not raw:
-        raise ValueError("Leere Antwort")
-    cleaned = re.sub(r"```[a-zA-Z]*\n?", "", raw.strip())
-    cleaned = re.sub(r"```\s*$", "", cleaned).strip()
-    # Versuche Array
-    start = cleaned.find("[")
-    if start != -1:
-        inner = _extract_balanced(cleaned[start:], "[", "]")
-        result = json.loads(inner)
-        if isinstance(result, list):
-            return result
-    # Fallback: einzelnes Objekt
-    start = cleaned.find("{")
-    if start != -1:
-        inner = _extract_balanced(cleaned[start:], "{", "}")
-        obj = json.loads(inner)
-        return [obj]
-    raise ValueError("Kein JSON-Array oder Objekt gefunden")
-
-
-def _extract_balanced(text: str, open_ch: str, close_ch: str) -> str:
-    depth = 0
-    in_str = False
-    esc = False
-    for i, ch in enumerate(text):
-        if esc:
-            esc = False
-            continue
-        if ch == "\\" and in_str:
-            esc = True
-            continue
-        if ch == '"':
-            in_str = not in_str
-            continue
-        if in_str:
-            continue
-        if ch == open_ch:
-            depth += 1
-        elif ch == close_ch:
-            depth -= 1
-            if depth == 0:
-                return text[:i + 1]
-    raise ValueError(f"Unvollständiges JSON (kein balanciertes '{close_ch}')")
 
 
 def find_verdict(verdicts: list[dict], match_begriffe: list[str]) -> tuple[str, str]:
