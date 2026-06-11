@@ -216,6 +216,156 @@ def _clean_wikipedia_text(text: str) -> str:
     return cleaned.strip()
 
 
+# ─────────────────────────────────────────────
+# Lemma-Härtung
+# ─────────────────────────────────────────────
+
+def _wp_get(session: requests.Session, params: dict, max_retries: int = 3) -> requests.Response:
+    """Wikipedia-API-Request mit 429-Retry."""
+    for attempt in range(max_retries):
+        resp = session.get(WIKIPEDIA_API, params=params, timeout=30)
+        if resp.status_code == 429:
+            wait = 15 * (attempt + 1)
+            log.warning("  Wikipedia 429 — warte %ds (Versuch %d/%d) ...", wait, attempt + 1, max_retries)
+            time.sleep(wait)
+            continue
+        resp.raise_for_status()
+        return resp
+    raise RuntimeError("Wikipedia 429 nach allen Retries")
+
+
+_HATNOTE_TEMPLATES = (
+    "{{Dieser Artikel",
+    "{{Dieser Abschnitt",
+    "{{Weiterleitungshinweis",
+    "{{Begriffsklärungshinweis",
+)
+
+
+def resolve_lemma(session: requests.Session, query: str) -> dict:
+    """
+    Löst einen Suchbegriff zu einem stabilen Wikipedia-Lemma auf.
+
+    Schritte:
+    1. Direkt-Lookup + Redirect + Kategorien (ein Request)
+    2. Nicht gefunden oder Vol=0 → Wikipedia-Suche (list=search) + Volumen
+    3. Listen-Check: Titel startet mit "Liste " oder hat Listenkategorie
+    4. Doppelbedeutungs-Check: BKS-Schwesterseite oder Hatnote im Einleitungstext
+
+    Gibt zurück:
+      resolved_title: str | None
+      vol:            int           # Seitengröße in Bytes
+      source:         str           # "direct" | "redirect" | "search" | "none"
+      flags:          list[str]
+        Mögliche Werte:
+          "BITTE PRUEFEN: Listenartikel"
+          "BITTE PRUEFEN: Doppelbedeutung"
+          "NICHT AUFLOESBAR: kein Suchergebnis"
+          "NICHT AUFLOESBAR: Vol=0"
+    """
+    result: dict = {"resolved_title": None, "vol": 0, "source": "none", "flags": []}
+
+    # ── Schritt 1: Direkt-Lookup + Kategorien (ein Request) ───────────────────
+    resp = _wp_get(session, {
+        "action": "query", "format": "json",
+        "titles": query, "redirects": "1",
+        "prop": "info|categories", "cllimit": "10",
+    })
+    qdata = resp.json().get("query", {})
+    via_redirect = bool(qdata.get("redirects", []))
+
+    resolved_title: str | None = None
+    vol = 0
+    direct_cats: list[str] = []
+    for page in qdata.get("pages", {}).values():
+        if "missing" not in page:
+            resolved_title = page.get("title")
+            vol = page.get("length", 0)
+            result["source"] = "redirect" if via_redirect else "direct"
+            direct_cats = [c.get("title", "") for c in page.get("categories", [])]
+            if via_redirect:
+                log.info("  Lemma-Redirect: '%s' → '%s'", query, resolved_title)
+
+    # ── Schritt 2: Suche-Fallback (nicht gefunden oder Vol=0) ─────────────────
+    if resolved_title is None or vol == 0:
+        time.sleep(1.0)
+        resp2 = _wp_get(session, {
+            "action": "query", "format": "json",
+            "list": "search", "srsearch": query,
+            "srnamespace": "0", "srlimit": "3",
+        })
+        hits = resp2.json().get("query", {}).get("search", [])
+        if not hits:
+            result["flags"].append("NICHT AUFLOESBAR: kein Suchergebnis")
+            return result
+        search_title = hits[0]["title"]
+        log.info("  Lemma via Suche: '%s' → '%s'", query, search_title)
+        # Volumen + Kategorien für Suchtreffer
+        time.sleep(1.0)
+        resp3 = _wp_get(session, {
+            "action": "query", "format": "json",
+            "titles": search_title, "redirects": "1",
+            "prop": "info|categories", "cllimit": "10",
+        })
+        for p in resp3.json().get("query", {}).get("pages", {}).values():
+            if "missing" not in p:
+                resolved_title = p.get("title")
+                vol = p.get("length", 0)
+                direct_cats = [c.get("title", "") for c in p.get("categories", [])]
+        result["source"] = "search"
+
+    if resolved_title is None or vol == 0:
+        if resolved_title:
+            result["resolved_title"] = resolved_title
+        result["flags"].append("NICHT AUFLOESBAR: Vol=0")
+        return result
+
+    result["resolved_title"] = resolved_title
+    result["vol"] = vol
+
+    # ── Schritt 3: Listen-Check ────────────────────────────────────────────────
+    if resolved_title.startswith("Liste "):
+        log.warning("  '%s' → Listenartikel: '%s'", query, resolved_title)
+        result["flags"].append("BITTE PRUEFEN: Listenartikel")
+    else:
+        for cat in direct_cats:
+            if "Liste" in cat:
+                log.warning("  '%s' → Listenkategorie '%s'", resolved_title, cat)
+                result["flags"].append("BITTE PRUEFEN: Listenartikel")
+                break
+
+    # ── Schritt 4: Doppelbedeutungs-Check ─────────────────────────────────────
+    # a) BKS-Schwesterseite zum Original-Query
+    time.sleep(1.0)
+    resp_bks = _wp_get(session, {
+        "action": "query", "format": "json",
+        "titles": f"{query} (Begriffsklärung)",
+        "prop": "info",
+    })
+    for p in resp_bks.json().get("query", {}).get("pages", {}).values():
+        if "missing" not in p:
+            log.warning("  '%s' hat BKS-Schwesterseite → Doppelbedeutung", query)
+            result["flags"].append("BITTE PRUEFEN: Doppelbedeutung")
+
+    # b) Hatnote im Einleitungsabschnitt des aufgelösten Artikels
+    if "BITTE PRUEFEN: Doppelbedeutung" not in result["flags"]:
+        time.sleep(1.0)
+        resp_wt = _wp_get(session, {
+            "action": "query", "format": "json",
+            "titles": resolved_title, "redirects": "1",
+            "prop": "revisions", "rvprop": "content", "rvslots": "main",
+        })
+        for p in resp_wt.json().get("query", {}).get("pages", {}).values():
+            slots = p.get("revisions", [{}])[0].get("slots", {})
+            wt = (slots.get("main", {}) or {}).get("*", "") or ""
+            # Hatnotes stehen immer in den ersten 2000 Zeichen
+            if any(pat in wt[:2000] for pat in _HATNOTE_TEMPLATES):
+                log.warning("  '%s' hat Hatnote → Doppelbedeutung", resolved_title)
+                result["flags"].append("BITTE PRUEFEN: Doppelbedeutung")
+
+    return result
+
+
 _IMG_SKIP_PREFIXES = (
     "File:Commons-logo", "File:Wikidata", "File:Question",
     "File:Symbol", "File:OOjs", "File:Portal", "File:Flag_of",
