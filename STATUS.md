@@ -1,104 +1,93 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-11T20:17:52Z -->
+<!-- updated: 2026-06-11T20:19:59Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Wortbudget-Design finalisiert + Lemma-Härtung (2026-06-11)** ← AKTUELL
+**Rang-Re-Run 33 + Lemma-Härtung Flash (2026-06-11)** ← AKTUELL
 
-### TEIL 1 — Wortbudget-Kalibrierung (Ergebnis aus 33 Themen)
-wc=0.20 optimal | fasc_norm=(flash−1)/9 | klex_norm=clamp((klex_w−180)/1180,0,1)
-
-| wc   | MAE₁₃ | MAE₂₀ | MAE₃₃       |
-|------|-------|-------|-------------|
-| 0.00 | 0.662 | 0.920 | 0.818       |
-| 0.20 | 0.692 | 0.875 | **0.803** ← |
-| 0.35 | 0.738 | 0.910 | 0.842       |
-
-### TEIL 2 — Finalisiertes Wortbudget-Design (noch NICHT verdrahtet)
-
-**Formel:**
+### Finalisierte Formel (Wortbudget, noch NICHT verdrahtet)
 ```
-importance_S = 0.80 · fasc_S + 0.20 · cov_S
-  S1-cov  = mini_norm   (Mini-Klexikon-Länge, normiert)
-  S2/S3-cov = klex_norm (Klexikon-Länge, normiert)
-  fehlt cov → nur fasc_S (reweight auf 1.0, kein 0-Fallback)
-```
+fasc_norm_S  = (flash_S − 1) / 9
+cov_norm_S1  = clamp((MiniW − 85)  / 150,  0, 1)   falls MiniW vorhanden
+cov_norm_S23 = clamp((KlexW − 180) / 1180, 0, 1)   falls KlexW vorhanden
+importance_S = 0.8·fasc_S + 0.2·cov_S   (fehlt cov → nur fasc)
 
-**Klexikon-Abwesenheits-Deckel (NUR S2/S3, NUR bei echter Abwesenheit):**
-```
-score_gedeckelt = min(score, 0.5·score + 1.5)
-  → 5→4.0, 4→3.5, 3→3.0 (ab 3 unverändert)
+Klexikon-Abwesenheits-Deckel, NUR S2/S3, NUR wenn KlexW fehlt (—), KEINE Ausnahmen:
+  importance_S = min(importance_S, 0.25 + 0.5·importance_S)
+  → Deckel beißt wenn imp > 0.5: z.B. 1.0→0.75, 0.889→0.694
+  → Kein S1-Deckel (nie)
+
+target_S = Wlo + importance_S · (Whi − Wlo)   KEIN vol_cap
+  S1[50,250] / S2[80,400] / S3[100,650]
+
+Rang = 1 + 4 · mean(imp_S1, imp_S2, imp_S3)
 ```
 
-**S1-Deckel via Mini-Klexikon: NICHT anwenden**
-→ Mini-Klexikon hat nur 1.512 Artikel (Schwellenwert: >4.000) — siehe Diagnose unten
-→ S1 bleibt beim weichen Coverage-Signal (mini_norm, wo vorhanden)
+### Rang-Tabelle 33 Themen (* = Deckel S2/S3 aktiv)
 
-**Wortziel:** `target_S = Wlo + importance_S · (Whi − Wlo)` | **KEIN vol_cap**
-Bänder: S1[50,250] / S2[80,400] / S3[100,650]
+| #  | Thema           | Rang | S1  | S2  | S3  |
+|----|-----------------|------|-----|-----|-----|
+|  1 | Dinosaurier     | 4.76 | 250 | 372 | 601 |
+|  2 | Hund            | 4.68 | 221 | 384 | 623 |
+|  3 | Elefant         | 4.49 | 222 | 361 | 583 |
+|  4 | Eis             | 4.26 | 233 | 339 | 497 |
+|  5 | Feuerwehr       | 4.26 | 220 | 336 | 539 |
+|  6 | Lego            | 4.26 | 250 | 320 | 482 | *
+|  7 | Süßigkeiten     | 4.26 | 250 | 320 | 482 | *
+|  8 | Indianer        | 4.16 | 195 | 343 | 552 |
+|  9 | Seefahrer       | 3.89 | 206 | 302 | 482 | * (→ LISTENARTIKEL, moot)
+| 10 | Fußball         | 3.89 | 194 | 311 | 497 |
+| 11 | Ägypten         | 3.85 | 177 | 320 | 513 |
+| 12 | Schiffe         | 3.66 | 185 | 306 | 439 |
+| 13 | Pangolin        | 3.59 | 183 | 284 | 451 | *
+| 14 | Vulkan          | 3.47 | 165 | 285 | 452 |
+| 15 | Krankenschw.    | 3.37 | 139 | 279 | 491 |
+| 16 | Regenbogen      | 3.29 | 172 | 258 | 406 |
+| 17 | Hades           | 3.22 | 117 | 279 | 491 |
+| 18 | Schule          | 3.17 | 181 | 249 | 342 |
+| 19 | Schmetterling   | 3.15 | 153 | 256 | 402 |
+| 20 | Jahreszeiten    | 3.15 | 166 | 259 | 360 |
+| 21 | Kinderrechte    | 2.45 | 118 | 171 | 355 |
+| 22 | Apfel           | 2.25 | 114 | 179 | 270 |
+| 23 | Viereck         | 2.17 | 125 | 175 | 214 |
+| 24 | Pupille         | 2.13 |  94 | 165 | 296 |
+| 25 | Brennessel      | 1.96 | 117 | 142 | 207 |
+| 26 | Airbag          | 1.94 |  72 | 146 | 312 |
+| 27 | Mozart          | 1.93 |  86 | 163 | 243 |
+| 28 | Beethoven       | 1.88 |  87 | 156 | 230 |
+| 29 | Zigaretten      | 1.78 |  50 | 145 | 309 |
+| 30 | Düsseldorf      | 1.77 |  98 | 120 | 217 |
+| 31 | Fasten          | 1.67 |  77 | 124 | 225 |
+| 32 | Kühlschrank     | 1.63 |  94 | 135 | 145 |
+| 33 | VW              | 1.59 |  72 | 116 | 222 | * (Deckel beißt nicht, imp<0.5)
 
-Material-Realität bei GENERIERUNG: aufs Ziel zuschreiben, kürzer wenn Quellen dünn.
-**PADDING VERBOTEN** (hart im Generator-Prompt). Optional: QA-Flag "Gesamt-Quelle dünn".
+Schnitzer-Check: Lego/Süßigkeiten (#6/7, 4.26) — ohne Deckel wären beide #1 (S2=400, S3=548).
+Deckel schiebt korrekt auf S2=320, S3=482. Keine groben Schnitzer erkennbar.
 
-### TEIL 3 — Lemma-Härtung (2026-06-11, fertig, inkl. Flash-Doppelbedeutung)
-
-`resolve_lemma(session, query)` in `generate_articles.py`. Schritt 4 (Doppelbedeutung):
-BKS-Schwester / Hatnote als billiger Pre-Filter → bei Treffer Flash-Call (gemini-2.5-flash)
-→ verdict a/b/c. Kein Flag mehr allein aus Struktur.
-
-**Probe-Ergebnis** (6 Fälle, `scripts/_lemma_probe.py`, 2026-06-11):
-
-| Thema     | Aufgelöst            | Quelle   | Flash-Verdict | Ergebnis                          |
-|-----------|----------------------|----------|---------------|-----------------------------------|
-| Schiffe   | Schiff               | search   | a             | keine Flags, keine Direktive ✓    |
-| Seefahrer | Liste von Seefahrern | redirect | —             | LISTENARTIKEL (kein Flash) ✓      |
-| Eis       | Eis                  | direct   | **b**         | Direktive: Speiseeis zuerst ✓     |
-| Elefant   | Elefanten            | redirect | a             | keine Flags ✓                     |
-| Vulkan    | Vulkan               | direct   | a             | keine Flags ✓                     |
-| Hund      | Haushund             | redirect | a             | keine Flags ✓                     |
-
-Eis-Direktive (Flash): "Erkläre zuerst Speiseeis als Hauptthema. Gehe dann auf Eis als
-Aggregatzustand von Wasser ein." → child_lemma=Speiseeis (Flash priorisiert Kindsicht korrekt)
-
-`resolve_lemma` gibt jetzt zurück:
-- `flags`: nur noch LISTENARTIKEL, LEMMA_GEWECHSELT, NICHT AUFLOESBAR
-- `doppelbedeutung_directive`: dict | None (verdict b) mit child_topic, child_lemma, directive
-
-### TEIL 4 — Diagnose Klexikon / Mini-Klexikon (2026-06-11, read-only)
-
-**Klexikon (5.696 Artikel):**
-- Süßigkeiten: NICHT vorhanden → nächste: Schokolade ✓, Zucker ✓, Karamell ✓, Kaugummi ✓
-- Seefahrer: NICHT vorhanden → nächste: Seemann ✓, Matrose ✓
-
-**Mini-Klexikon (miniklexikon.zum.de): 1.512 Inhaltsseiten** (vs. Klexikon 5.696)
-- Süßigkeiten: NICHT vorhanden → nächste: Schokolade ✓
-- Seefahrer: NICHT vorhanden → kein Seemann/Matrose im S-Bereich sichtbar
-- Schiff: vorhanden ✓ (Schiffe: nicht vorhanden)
-
-**Entscheidung S1-Deckel:** NICHT anwenden — 1.512 << 4.000 Schwelle.
-
-**Vorher (2026-06-11):** Wortbudget-Kalibrierung + BKS-Guard + 503-Härtung ✓
+### Lemma-Härtung Flash-Doppelbedeutung (2026-06-11)
+`_flash_check_doppelbedeutung()` in `generate_articles.py` (gemini-2.5-flash, thinking_budget=0).
+BKS-Schwester / Hatnote = Pre-Filter; Flash-Urteil a/b/c ersetzt strukturelles Flag.
+Probe: Schiffe→a, Eis→b (Direktive: Speiseeis zuerst, child_lemma=Speiseeis), Elefant/Vulkan/Hund→a.
 
 ---
 
 ## 🔴 Nächster Schritt
 
-**Formel verdrahten**: statische WORTZIEL_TABLE in `generate_grounded.py` (Z.86–96) ersetzen
-durch dynamische imp_S-Berechnung (wc=0.20, fasc_S, klex_norm/mini_norm, Klexikon-Abwesenheitsdeckel).
-Vorher: `resolve_lemma` in Pipeline-Call integrieren (vor `fetch_wikipedia_text`).
+**Formel verdrahten**: WORTZIEL_TABLE in `generate_grounded.py` (Z.86–96) durch
+dynamische imp_S-Berechnung ersetzen + `resolve_lemma` vor `fetch_wikipedia_text` einbauen.
 
 ---
 
 ## 🔴 Offene Punkte (nach Priorität)
 
 ### Hoch
-- **Formel verdrahten** (WORTZIEL_TABLE → dynamische imp_S, wc=0.20, Abwesenheitsdeckel S2/S3)
-- **resolve_lemma in Pipeline**: vor jedem `fetch_wikipedia_text`-Aufruf in `generate_grounded.py` einbauen
+- **Formel verdrahten** (imp_S dynamisch, Abwesenheitsdeckel S2/S3, kein vol_cap)
+- **resolve_lemma in Pipeline**: vor `fetch_wikipedia_text` in `generate_grounded.py`
 - **Sichtung** test_modelcompare2 — Qualitätsvergleich 3 Modelle
-- **3-flash-preview L3 Fix**: max_output_tokens explizit (Thinking frisst Budget)
+- **3-flash-preview L3 Fix**: max_output_tokens explizit
 
 ### Mittel
 - **Flutter-App testen**: WfArticleListScreen mit R2-Artikeln
@@ -106,4 +95,4 @@ Vorher: `resolve_lemma` in Pipeline-Call integrieren (vor `fetch_wikipedia_text`
 
 ### Niedrig
 - Primärkategorie-Konvention, Box-Key, ZIM→JSON Decode-Cap
-- artikel_pipeline.yml Pfad-Bug (python scripts/ statt python root)
+- artikel_pipeline.yml Pfad-Bug
