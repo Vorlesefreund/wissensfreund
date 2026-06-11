@@ -1,0 +1,204 @@
+{
+  "model": "gemini-3.5-flash",
+  "timestamp": "2026-06-11T20:38:59.160146+00:00",
+  "scores": [
+    {
+      "thema": "Indianer",
+      "s1": 7,
+      "s2": 7,
+      "s3": 5
+    },
+    {
+      "thema": "Beethoven",
+      "s1": 1,
+      "s2": 2,
+      "s3": 3
+    },
+    {
+      "thema": "Elefant",
+      "s1": 9,
+      "s2": 6,
+      "s3": 4
+    },
+    {
+      "thema": "Vulkan",
+      "s1": 5,
+      "s2": 9,
+      "s3": 9
+    },
+    {
+      "thema": "Fußball",
+      "s1": 5,
+      "s2": 9,
+      "s3": 10
+    },
+    {
+      "thema": "Hund",
+      "s1": 10,
+      "s2": 9,
+      "s3": 8
+    },
+    {
+      "thema": "Apfel",
+      "s1": 3,
+      "s2": 2,
+      "s3": 1
+    },
+    {
+      "thema": "Feuerwehr",
+      "s1": 10,
+      "s2": 7,
+      "s3": 4
+    },
+    {
+      "thema": "Regenbogen",
+      "s1": 8,
+      "s2": 5,
+      "s3": 3
+    },
+    {
+      "thema": "Schmetterling",
+      "s1": 7,
+      "s2": 4,
+      "s3": 2
+    },
+    {
+      "thema": "Dinosaurier",
+      "s1": 10,
+      "s2": 10,
+      "s3": 7
+    },
+    {
+      "thema": "Ägypten",
+      "s1": 2,
+      "s2": 8,
+      "s3": 9
+    },
+    {
+      "thema": "Mozart",
+      "s1": 1,
+      "s2": 2,
+      "s3": 3
+    },
+    {
+      "thema": "Pangolin",
+      "s1": 2,
+      "s2": 4,
+      "s3": 4
+    },
+    {
+      "thema": "Seefahrer",
+      "s1": 7,
+      "s2": 8,
+      "s3": 7
+    },
+    {
+      "thema": "Lego",
+      "s1": 9,
+      "s2": 10,
+      "s3": 8
+    },
+    {
+      "thema": "Kinderrechte",
+      "s1": 1,
+      "s2": 4,
+      "s3": 7
+    },
+    {
+      "thema": "Süßigkeiten",
+      "s1": 10,
+      "s2": 10,
+      "s3": 10
+    },
+    {
+      "thema": "Jahreszeiten",
+      "s1": 4,
+      "s2": 3,
+      "s3": 2
+    },
+    {
+      "thema": "Schule",
+      "s1": 8,
+      "s2": 4,
+      "s3": 2
+    },
+    {
+      "thema": "Schiffe",
+      "s1": 6,
+      "s2": 5,
+      "s3": 4
+    },
+    {
+      "thema": "Eis",
+      "s1": 10,
+      "s2": 10,
+      "s3": 10
+    },
+    {
+      "thema": "Kühlschrank",
+      "s1": 3,
+      "s2": 2,
+      "s3": 1
+    },
+    {
+      "thema": "Düsseldorf",
+      "s1": 1,
+      "s2": 1,
+      "s3": 1
+    },
+    {
+      "thema": "VW",
+      "s1": 2,
+      "s2": 3,
+      "s3": 4
+    },
+    {
+      "thema": "Brennessel",
+      "s1": 3,
+      "s2": 4,
+      "s3": 3
+    },
+    {
+      "thema": "Krankenschwester",
+      "s1": 5,
+      "s2": 4,
+      "s3": 3
+    },
+    {
+      "thema": "Pupille",
+      "s1": 2,
+      "s2": 4,
+      "s3": 5
+    },
+    {
+      "thema": "Zigaretten",
+      "s1": 1,
+      "s2": 3,
+      "s3": 6
+    },
+    {
+      "thema": "Hades",
+      "s1": 2,
+      "s2": 7,
+      "s3": 9
+    },
+    {
+      "thema": "Fasten",
+      "s1": 1,
+      "s2": 1,
+      "s3": 2
+    },
+    {
+      "thema": "Viereck",
+      "s1": 3,
+      "s2": 1,
+      "s3": 1
+    },
+    {
+      "thema": "Airbag",
+      "s1": 3,
+      "s2": 6,
+      "s3": 7
+    }
+  ]
+}
