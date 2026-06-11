@@ -241,6 +241,87 @@ _HATNOTE_TEMPLATES = (
     "{{Begriffsklärungshinweis",
 )
 
+_FLASH_DOPPELBEDEUTUNG_SYSTEM = """
+Du bewertest, ob ein Wikipedia-Artikel das richtige Konzept für Kinder (4–12 Jahre) trifft.
+
+Verdicts:
+- "a": Hauptbedeutung ist genau das, was Kinder meinen. (Standardfall — meist korrekt)
+- "b": Hauptbedeutung passt, aber ein kindrelevanter Sonderfall existiert und sollte im
+  Artikel behandelt werden. Gib child_topic, child_lemma und directive an.
+  Beispiel directive: "Erkläre zuerst X als Hauptthema. Gehe dann auf Y als verwandtes
+  Kinderthema ein."
+- "c": Hauptbedeutung für Kinder 4–12 eindeutig irrelevant; child_lemma nennt das bessere
+  Wikipedia-Lemma.
+
+Wähle "b" oder "c" NUR wenn wirklich nötig. Standard ist "a".
+""".strip()
+
+
+def _fetch_article_intro(session: requests.Session, title: str) -> str:
+    """Holt die ersten 2 Sätze des Wikipedia-Artikels als Plaintext."""
+    resp = _wp_get(session, {
+        "action": "query", "format": "json",
+        "titles": title, "redirects": "1",
+        "prop": "extracts",
+        "exsentences": "2", "exintro": "1", "explaintext": "1",
+    })
+    for page in resp.json().get("query", {}).get("pages", {}).values():
+        return (page.get("extract", "") or "").strip()
+    return ""
+
+
+def _flash_check_doppelbedeutung(
+    session: requests.Session,
+    query: str,
+    resolved_title: str,
+) -> dict:
+    """
+    Flash-Urteil: Trifft der aufgelöste WP-Artikel die richtige Bedeutung für Kinder?
+
+    Gibt zurück:
+      verdict:     "a" (passt) | "b" (passt + Sonderfall) | "c" (Lemma wechseln)
+      child_topic: str | None   — für b/c: kindrelevanter Begriff
+      child_lemma: str | None   — für b/c: Wikipedia-Lemma des Sonderfalls
+      directive:   str | None   — für b: Generierungsdirektive
+    """
+    _fallback = {"verdict": "a", "child_topic": None, "child_lemma": None, "directive": None}
+    try:
+        import sys as _sys
+        _sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from gemini_client import call_gemini
+        from google.genai import types as gtypes
+    except ImportError:
+        log.warning("  gemini_client nicht verfügbar — Doppelbedeutungscheck übersprungen")
+        return _fallback
+
+    intro = _fetch_article_intro(session, resolved_title)
+    user_msg = (
+        f'Begriff: "{query}"\n'
+        f"Wikipedia-Artikel: {resolved_title}\n"
+        f"Einleitung: {intro or '(kein Text)'}\n\n"
+        f'Wenn ein Kind (4–12 J.) nach "{query}" fragt — '
+        f"meint es die Hauptbedeutung dieses Artikels oder eine andere?\n"
+        f'Antworte als JSON: {{"verdict":"a"|"b"|"c","reasoning":"...","child_topic":null|"...", '
+        f'"child_lemma":null|"...","directive":null|"..."}}'
+    )
+    try:
+        raw = call_gemini(
+            system_prompt=_FLASH_DOPPELBEDEUTUNG_SYSTEM,
+            user_message=user_msg,
+            thinking_config=gtypes.ThinkingConfig(thinking_budget=0),
+            response_mime_type="application/json",
+        )
+        data = json.loads(raw)
+        return {
+            "verdict":     data.get("verdict", "a"),
+            "child_topic": data.get("child_topic"),
+            "child_lemma": data.get("child_lemma"),
+            "directive":   data.get("directive"),
+        }
+    except Exception as exc:
+        log.warning("  Flash-Check fehlgeschlagen (%s) — fallback verdict=a", exc)
+        return _fallback
+
 
 def resolve_lemma(session: requests.Session, query: str) -> dict:
     """
@@ -250,20 +331,28 @@ def resolve_lemma(session: requests.Session, query: str) -> dict:
     1. Direkt-Lookup + Redirect + Kategorien (ein Request)
     2. Nicht gefunden oder Vol=0 → Wikipedia-Suche (list=search) + Volumen
     3. Listen-Check: Titel startet mit "Liste " oder hat Listenkategorie
-    4. Doppelbedeutungs-Check: BKS-Schwesterseite oder Hatnote im Einleitungstext
+    4. Doppelbedeutungs-Check: BKS-Schwester / Hatnote als Pre-Filter → Flash-Urteil
 
     Gibt zurück:
-      resolved_title: str | None
-      vol:            int           # Seitengröße in Bytes
-      source:         str           # "direct" | "redirect" | "search" | "none"
-      flags:          list[str]
+      resolved_title:          str | None
+      vol:                     int           # Seitengröße in Bytes
+      source:                  str           # "direct" | "redirect" | "search" | "none"
+      flags:                   list[str]
         Mögliche Werte:
           "BITTE PRUEFEN: Listenartikel"
-          "BITTE PRUEFEN: Doppelbedeutung"
+          "LEMMA_GEWECHSELT: <alt> → <neu>"   # Flash verdict "c"
           "NICHT AUFLOESBAR: kein Suchergebnis"
           "NICHT AUFLOESBAR: Vol=0"
+      doppelbedeutung_directive: dict | None
+        Gesetzt bei Flash verdict "b":
+          child_topic: str
+          child_lemma: str
+          directive:   str   # Generierungsanweisung
     """
-    result: dict = {"resolved_title": None, "vol": 0, "source": "none", "flags": []}
+    result: dict = {
+        "resolved_title": None, "vol": 0, "source": "none",
+        "flags": [], "doppelbedeutung_directive": None,
+    }
 
     # ── Schritt 1: Direkt-Lookup + Kategorien (ein Request) ───────────────────
     resp = _wp_get(session, {
@@ -334,8 +423,9 @@ def resolve_lemma(session: requests.Session, query: str) -> dict:
                 result["flags"].append("BITTE PRUEFEN: Listenartikel")
                 break
 
-    # ── Schritt 4: Doppelbedeutungs-Check ─────────────────────────────────────
-    # a) BKS-Schwesterseite zum Original-Query
+    # ── Schritt 4: Doppelbedeutungs-Check (Pre-Filter → Flash-Urteil) ───────────
+    # Pre-Filter a: BKS-Schwesterseite für den Original-Query
+    has_bk_candidate = False
     time.sleep(1.0)
     resp_bks = _wp_get(session, {
         "action": "query", "format": "json",
@@ -344,11 +434,10 @@ def resolve_lemma(session: requests.Session, query: str) -> dict:
     })
     for p in resp_bks.json().get("query", {}).get("pages", {}).values():
         if "missing" not in p:
-            log.warning("  '%s' hat BKS-Schwesterseite → Doppelbedeutung", query)
-            result["flags"].append("BITTE PRUEFEN: Doppelbedeutung")
+            has_bk_candidate = True
 
-    # b) Hatnote im Einleitungsabschnitt des aufgelösten Artikels
-    if "BITTE PRUEFEN: Doppelbedeutung" not in result["flags"]:
+    # Pre-Filter b: Hatnote im Artikeltext (nur wenn BKS-Schwester fehlt)
+    if not has_bk_candidate:
         time.sleep(1.0)
         resp_wt = _wp_get(session, {
             "action": "query", "format": "json",
@@ -358,10 +447,37 @@ def resolve_lemma(session: requests.Session, query: str) -> dict:
         for p in resp_wt.json().get("query", {}).get("pages", {}).values():
             slots = p.get("revisions", [{}])[0].get("slots", {})
             wt = (slots.get("main", {}) or {}).get("*", "") or ""
-            # Hatnotes stehen immer in den ersten 2000 Zeichen
             if any(pat in wt[:2000] for pat in _HATNOTE_TEMPLATES):
-                log.warning("  '%s' hat Hatnote → Doppelbedeutung", resolved_title)
-                result["flags"].append("BITTE PRUEFEN: Doppelbedeutung")
+                has_bk_candidate = True
+
+    if has_bk_candidate:
+        # Flash entscheidet: a=OK, b=Sonderfall, c=Lemma-Wechsel
+        vd = _flash_check_doppelbedeutung(session, query, resolved_title)
+        v = vd["verdict"]
+        log.info(
+            "  Flash-Doppelbedeutung '%s': verdict=%s child_lemma=%s",
+            query, v, vd.get("child_lemma"),
+        )
+        if v == "b":
+            result["doppelbedeutung_directive"] = {
+                "child_topic": vd["child_topic"],
+                "child_lemma": vd["child_lemma"],
+                "directive":   vd["directive"],
+            }
+            log.info("  → Direktive: %s", vd["directive"])
+        elif v == "c":
+            new_lemma = vd["child_lemma"]
+            if new_lemma:
+                log.warning(
+                    "  → Lemma-Wechsel: '%s' → '%s'", resolved_title, new_lemma
+                )
+                result["flags"].append(
+                    f"LEMMA_GEWECHSELT: {resolved_title} → {new_lemma}"
+                )
+                result["resolved_title"] = new_lemma
+            else:
+                log.warning("  → Flash verdict 'c' ohne child_lemma — ignoriert")
+        # verdict "a": keine Aktion, kein Flag
 
     return result
 

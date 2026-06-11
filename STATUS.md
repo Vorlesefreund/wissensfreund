@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-11T19:25:52Z -->
+<!-- updated: 2026-06-11T20:17:52Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -43,26 +43,29 @@ Bänder: S1[50,250] / S2[80,400] / S3[100,650]
 Material-Realität bei GENERIERUNG: aufs Ziel zuschreiben, kürzer wenn Quellen dünn.
 **PADDING VERBOTEN** (hart im Generator-Prompt). Optional: QA-Flag "Gesamt-Quelle dünn".
 
-### TEIL 3 — Lemma-Härtung (2026-06-11, fertig)
+### TEIL 3 — Lemma-Härtung (2026-06-11, fertig, inkl. Flash-Doppelbedeutung)
 
-`resolve_lemma(session, query)` in `generate_articles.py` implementiert (nach `_clean_wikipedia_text`).
-Exportiert — direkt von anderen Skripten importierbar.
+`resolve_lemma(session, query)` in `generate_articles.py`. Schritt 4 (Doppelbedeutung):
+BKS-Schwester / Hatnote als billiger Pre-Filter → bei Treffer Flash-Call (gemini-2.5-flash)
+→ verdict a/b/c. Kein Flag mehr allein aus Struktur.
 
-**Probe-Ergebnis** (6 Fälle, `scripts/_lemma_probe.py`):
+**Probe-Ergebnis** (6 Fälle, `scripts/_lemma_probe.py`, 2026-06-11):
 
-| Thema     | Aufgelöst             | Vol      | Quelle   | Flags                       |
-|-----------|-----------------------|----------|----------|-----------------------------|
-| Schiffe   | Schiff                |  19.936  | search   | DOPPELBEDEUTUNG (Hatnote)   |
-| Seefahrer | Liste von Seefahrern  |  11.010  | redirect | LISTENARTIKEL ✓             |
-| Eis       | Eis                   |  66.119  | direct   | DOPPELBEDEUTUNG ✓           |
-| Elefant   | Elefanten             | 218.797  | redirect | DOPPELBEDEUTUNG (BKS-Panel) |
-| Vulkan    | Vulkan                |  29.013  | direct   | DOPPELBEDEUTUNG (BKS exist) |
-| Hund      | Haushund              | 139.249  | redirect | DOPPELBEDEUTUNG (BKS exist) |
+| Thema     | Aufgelöst            | Quelle   | Flash-Verdict | Ergebnis                          |
+|-----------|----------------------|----------|---------------|-----------------------------------|
+| Schiffe   | Schiff               | search   | a             | keine Flags, keine Direktive ✓    |
+| Seefahrer | Liste von Seefahrern | redirect | —             | LISTENARTIKEL (kein Flash) ✓      |
+| Eis       | Eis                  | direct   | **b**         | Direktive: Speiseeis zuerst ✓     |
+| Elefant   | Elefanten            | redirect | a             | keine Flags ✓                     |
+| Vulkan    | Vulkan               | direct   | a             | keine Flags ✓                     |
+| Hund      | Haushund             | redirect | a             | keine Flags ✓                     |
 
-Hinweise:
-- Schiffe: "Schiffe" hat keinen WP-Redirect → Suche findet "Schiff" korrekt
-- Elefant: "Elefant (Begriffsklärung)" existiert (Wehrmacht-Panzer) → technisch korrekt
-- Vulkan/Hund: BKS-Schwesterseiten existieren → korrekt; in Kinderkontext ggf. ignorierbar
+Eis-Direktive (Flash): "Erkläre zuerst Speiseeis als Hauptthema. Gehe dann auf Eis als
+Aggregatzustand von Wasser ein." → child_lemma=Speiseeis (Flash priorisiert Kindsicht korrekt)
+
+`resolve_lemma` gibt jetzt zurück:
+- `flags`: nur noch LISTENARTIKEL, LEMMA_GEWECHSELT, NICHT AUFLOESBAR
+- `doppelbedeutung_directive`: dict | None (verdict b) mit child_topic, child_lemma, directive
 
 ### TEIL 4 — Diagnose Klexikon / Mini-Klexikon (2026-06-11, read-only)
 

@@ -38,19 +38,23 @@ TOPICS = [
 session = requests.Session()
 session.headers.update({"User-Agent": "WissensfreundLemmaProbe/1.0"})
 
-print(f"\n{'Thema':<14} {'Aufgeloest':<32} {'Vol':>8}  {'Quelle':<10} Flags")
-print("-" * 95)
+print(f"\n{'Thema':<14} {'Aufgeloest':<30} {'Vol':>8}  {'Src':<10} {'Flags / Direktive'}")
+print("-" * 100)
 for topic in TOPICS:
     try:
         r = resolve_lemma(session, topic)
         title_str = str(r["resolved_title"]) if r["resolved_title"] else "—"
         flags_str = " | ".join(r["flags"]) if r["flags"] else "—"
+        extra = ""
+        if r.get("doppelbedeutung_directive"):
+            dd = r["doppelbedeutung_directive"]
+            extra = f"\n{'':14}   → Direktive: {dd['directive']} (Lemma: {dd['child_lemma']})"
         print(
-            f"{topic:<14} {title_str:<32} {r['vol']:>8,}  {r['source']:<10} {flags_str}"
+            f"{topic:<14} {title_str:<30} {r['vol']:>8,}  {r['source']:<10} {flags_str}{extra}"
         )
     except Exception as e:
         print(f"{topic:<14} FEHLER: {type(e).__name__}: {e}")
     time.sleep(15.0)
 
-print("-" * 95)
+print("-" * 100)
 print("Fertig.")
