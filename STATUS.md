@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-11T20:19:59Z -->
+<!-- updated: 2026-06-11T20:34:43Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -67,10 +67,11 @@ Rang = 1 + 4 · mean(imp_S1, imp_S2, imp_S3)
 Schnitzer-Check: Lego/Süßigkeiten (#6/7, 4.26) — ohne Deckel wären beide #1 (S2=400, S3=548).
 Deckel schiebt korrekt auf S2=320, S3=482. Keine groben Schnitzer erkennbar.
 
-### Lemma-Härtung Flash-Doppelbedeutung (2026-06-11)
-`_flash_check_doppelbedeutung()` in `generate_articles.py` (gemini-2.5-flash, thinking_budget=0).
-BKS-Schwester / Hatnote = Pre-Filter; Flash-Urteil a/b/c ersetzt strukturelles Flag.
-Probe: Schiffe→a, Eis→b (Direktive: Speiseeis zuerst, child_lemma=Speiseeis), Elefant/Vulkan/Hund→a.
+### Lemma-Härtung Flash-Doppelbedeutung (2026-06-11, Fix 2)
+`_flash_check_doppelbedeutung()` in `generate_articles.py` — gemini-3.5-flash, ThinkingLevel.NONE.
+Flash liefert NUR child_topic/child_lemma/main_hint. Direktive hart codiert (Hauptbedeutung zuerst):
+"Erkläre zuerst {query} ({main_hint}), dann weiter unten {child_topic}."
+Eis-Test: "Erkläre zuerst Eis (gefrorenes Wasser), dann weiter unten Speiseeis." ✓
 
 ---
 

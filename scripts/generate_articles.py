@@ -246,10 +246,11 @@ Du bewertest, ob ein Wikipedia-Artikel das richtige Konzept für Kinder (4–12 
 
 Verdicts:
 - "a": Hauptbedeutung ist genau das, was Kinder meinen. (Standardfall — meist korrekt)
-- "b": Hauptbedeutung passt, aber ein kindrelevanter Sonderfall existiert und sollte im
-  Artikel behandelt werden. Gib child_topic, child_lemma und directive an.
-  Beispiel directive: "Erkläre zuerst X als Hauptthema. Gehe dann auf Y als verwandtes
-  Kinderthema ein."
+- "b": Hauptbedeutung passt, aber ein kindrelevanter Sonderfall existiert.
+  Gib an: child_topic (der Sonderfall), child_lemma (sein WP-Lemma) und main_hint
+  (2–5-Wort-Beschreibung worum es im Hauptartikel geht, z. B. "gefrorenes Wasser").
+  Die Reihenfolge im Artikel ist IMMER: Hauptbedeutung zuerst, Sonderfall ergänzend.
+  Du gibst NUR child_topic/child_lemma/main_hint an — KEINE Reihenfolge/Direktive.
 - "c": Hauptbedeutung für Kinder 4–12 eindeutig irrelevant; child_lemma nennt das bessere
   Wikipedia-Lemma.
 
@@ -270,6 +271,9 @@ def _fetch_article_intro(session: requests.Session, title: str) -> str:
     return ""
 
 
+_FLASH_DOPPELBEDEUTUNG_MODEL = "gemini-3.5-flash"
+
+
 def _flash_check_doppelbedeutung(
     session: requests.Session,
     query: str,
@@ -282,9 +286,9 @@ def _flash_check_doppelbedeutung(
       verdict:     "a" (passt) | "b" (passt + Sonderfall) | "c" (Lemma wechseln)
       child_topic: str | None   — für b/c: kindrelevanter Begriff
       child_lemma: str | None   — für b/c: Wikipedia-Lemma des Sonderfalls
-      directive:   str | None   — für b: Generierungsdirektive
+      main_hint:   str | None   — für b: 2–5-Wort-Beschreibung der Hauptbedeutung
     """
-    _fallback = {"verdict": "a", "child_topic": None, "child_lemma": None, "directive": None}
+    _fallback = {"verdict": "a", "child_topic": None, "child_lemma": None, "main_hint": None}
     try:
         import sys as _sys
         _sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -301,14 +305,22 @@ def _flash_check_doppelbedeutung(
         f"Einleitung: {intro or '(kein Text)'}\n\n"
         f'Wenn ein Kind (4–12 J.) nach "{query}" fragt — '
         f"meint es die Hauptbedeutung dieses Artikels oder eine andere?\n"
-        f'Antworte als JSON: {{"verdict":"a"|"b"|"c","reasoning":"...","child_topic":null|"...", '
-        f'"child_lemma":null|"...","directive":null|"..."}}'
+        f'Antworte als JSON: {{"verdict":"a"|"b"|"c","reasoning":"...",'
+        f'"child_topic":null|"...","child_lemma":null|"...","main_hint":null|"..."}}'
     )
     try:
+        # gemini-3.5-flash verwendet ThinkingLevel, nicht thinking_budget
+        try:
+            thinking_cfg = gtypes.ThinkingConfig(
+                thinking_level=gtypes.ThinkingLevel.NONE
+            )
+        except AttributeError:
+            thinking_cfg = gtypes.ThinkingConfig(thinking_budget=0)
         raw = call_gemini(
             system_prompt=_FLASH_DOPPELBEDEUTUNG_SYSTEM,
             user_message=user_msg,
-            thinking_config=gtypes.ThinkingConfig(thinking_budget=0),
+            model=_FLASH_DOPPELBEDEUTUNG_MODEL,
+            thinking_config=thinking_cfg,
             response_mime_type="application/json",
         )
         data = json.loads(raw)
@@ -316,7 +328,7 @@ def _flash_check_doppelbedeutung(
             "verdict":     data.get("verdict", "a"),
             "child_topic": data.get("child_topic"),
             "child_lemma": data.get("child_lemma"),
-            "directive":   data.get("directive"),
+            "main_hint":   data.get("main_hint"),
         }
     except Exception as exc:
         log.warning("  Flash-Check fehlgeschlagen (%s) — fallback verdict=a", exc)
@@ -459,12 +471,18 @@ def resolve_lemma(session: requests.Session, query: str) -> dict:
             query, v, vd.get("child_lemma"),
         )
         if v == "b":
+            # Direktive: Reihenfolge fest — Hauptbedeutung IMMER zuerst, Sonderfall ergänzend
+            main_hint = vd.get("main_hint") or resolved_title
+            directive = (
+                f"Erkläre zuerst {query} ({main_hint}), "
+                f"dann weiter unten {vd['child_topic']}."
+            )
             result["doppelbedeutung_directive"] = {
                 "child_topic": vd["child_topic"],
                 "child_lemma": vd["child_lemma"],
-                "directive":   vd["directive"],
+                "directive":   directive,
             }
-            log.info("  → Direktive: %s", vd["directive"])
+            log.info("  → Direktive: %s", directive)
         elif v == "c":
             new_lemma = vd["child_lemma"]
             if new_lemma:
