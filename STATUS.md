@@ -1,12 +1,20 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-11T22:08:17Z -->
+<!-- updated: 2026-06-11T22:18:16Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Re-Scoring Inhaltsreichtum (content_richness_v2, 2026-06-12)** ← AKTUELL
+**100er-Robustheitsprobe content_richness_v2 (2026-06-12)** ← AKTUELL
+
+100 Zufalls-Klexikon-Titel (seed=42), 8 Anker, 1 Flash-Call → `scripts/fasc_cache_100.json`.
+Top: Haie/Brachiosaurus/Hai Ø9.7, Chamäleon/Fossilien/Blackbeard Ø8.3 — plausibel.
+Bottom: Arenhusen/Gatte Ø2.0, Bottrop/Vevey Ø2.7, Somatropin Ø2.7 — korrekt dünn.
+Anker-Konsistenz: Brachiosaurus=Dinosaurier-Anker (Ø9.7✓), Erdmännchen=Elefant-Anker (Ø7.7✓).
+Befund: Trennschärfe hält auf ungesehenen Titeln. Kein Defekt. Siehe Trennschärfe-Befund unten.
+
+**Re-Scoring Inhaltsreichtum (content_richness_v2, 2026-06-12)**
 
 Alle 33 Themen neu bewertet mit fixiertem Inhalts-Wortlaut (Peer-Status/Coolness explizit
 ausgeschlossen). gemini-3.5-flash, ThinkingLevel.LOW, 1 Call → `scripts/importance_cache_33.json`.

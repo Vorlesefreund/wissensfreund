@@ -1,0 +1,657 @@
+{
+  "model": "gemini-3.5-flash",
+  "prompt_variant": "content_richness_v2",
+  "anchors": [
+    {
+      "thema": "Dinosaurier",
+      "s1": 10,
+      "s2": 10,
+      "s3": 9
+    },
+    {
+      "thema": "Vulkan",
+      "s1": 7,
+      "s2": 10,
+      "s3": 10
+    },
+    {
+      "thema": "Elefant",
+      "s1": 9,
+      "s2": 8,
+      "s3": 6
+    },
+    {
+      "thema": "Schmetterling",
+      "s1": 8,
+      "s2": 7,
+      "s3": 5
+    },
+    {
+      "thema": "Krankenschwester",
+      "s1": 5,
+      "s2": 5,
+      "s3": 6
+    },
+    {
+      "thema": "Regenbogen",
+      "s1": 7,
+      "s2": 5,
+      "s3": 4
+    },
+    {
+      "thema": "Kühlschrank",
+      "s1": 2,
+      "s2": 4,
+      "s3": 5
+    },
+    {
+      "thema": "Viereck",
+      "s1": 2,
+      "s2": 2,
+      "s3": 2
+    }
+  ],
+  "timestamp": "2026-06-11T22:17:46.521192+00:00",
+  "scores": [
+    {
+      "thema": "Verwandte",
+      "s1": 4,
+      "s2": 4,
+      "s3": 4
+    },
+    {
+      "thema": "Corona-Virus",
+      "s1": 4,
+      "s2": 7,
+      "s3": 8
+    },
+    {
+      "thema": "Anschlag vom 11. September",
+      "s1": 1,
+      "s2": 5,
+      "s3": 8
+    },
+    {
+      "thema": "Imker",
+      "s1": 6,
+      "s2": 8,
+      "s3": 7
+    },
+    {
+      "thema": "Haie",
+      "s1": 9,
+      "s2": 10,
+      "s3": 10
+    },
+    {
+      "thema": "Giftpilz",
+      "s1": 6,
+      "s2": 8,
+      "s3": 8
+    },
+    {
+      "thema": "Dänische Sprache",
+      "s1": 2,
+      "s2": 4,
+      "s3": 5
+    },
+    {
+      "thema": "Chaplin",
+      "s1": 3,
+      "s2": 6,
+      "s3": 8
+    },
+    {
+      "thema": "Wüstenfuchs",
+      "s1": 8,
+      "s2": 8,
+      "s3": 7
+    },
+    {
+      "thema": "Science Center",
+      "s1": 5,
+      "s2": 8,
+      "s3": 9
+    },
+    {
+      "thema": "Bruges",
+      "s1": 2,
+      "s2": 4,
+      "s3": 6
+    },
+    {
+      "thema": "Symptom",
+      "s1": 2,
+      "s2": 4,
+      "s3": 5
+    },
+    {
+      "thema": "Nazis",
+      "s1": 1,
+      "s2": 5,
+      "s3": 9
+    },
+    {
+      "thema": "Arenhusen",
+      "s1": 1,
+      "s2": 2,
+      "s3": 3
+    },
+    {
+      "thema": "Arabien",
+      "s1": 4,
+      "s2": 7,
+      "s3": 8
+    },
+    {
+      "thema": "Bunker",
+      "s1": 3,
+      "s2": 7,
+      "s3": 9
+    },
+    {
+      "thema": "Gesamtschule",
+      "s1": 2,
+      "s2": 4,
+      "s3": 4
+    },
+    {
+      "thema": "Graubünden",
+      "s1": 2,
+      "s2": 5,
+      "s3": 6
+    },
+    {
+      "thema": "Robespierre",
+      "s1": 1,
+      "s2": 3,
+      "s3": 7
+    },
+    {
+      "thema": "Tell",
+      "s1": 5,
+      "s2": 8,
+      "s3": 8
+    },
+    {
+      "thema": "Antisemitismus",
+      "s1": 1,
+      "s2": 4,
+      "s3": 8
+    },
+    {
+      "thema": "Somatropin",
+      "s1": 1,
+      "s2": 2,
+      "s3": 5
+    },
+    {
+      "thema": "Frida Kahlo",
+      "s1": 3,
+      "s2": 6,
+      "s3": 8
+    },
+    {
+      "thema": "Waldbrand",
+      "s1": 6,
+      "s2": 8,
+      "s3": 9
+    },
+    {
+      "thema": "Schädlingsbekämpfer",
+      "s1": 4,
+      "s2": 6,
+      "s3": 6
+    },
+    {
+      "thema": "Nase",
+      "s1": 5,
+      "s2": 6,
+      "s3": 6
+    },
+    {
+      "thema": "Gestein",
+      "s1": 4,
+      "s2": 7,
+      "s3": 8
+    },
+    {
+      "thema": "Ozonloch",
+      "s1": 2,
+      "s2": 6,
+      "s3": 8
+    },
+    {
+      "thema": "Suriname",
+      "s1": 2,
+      "s2": 5,
+      "s3": 7
+    },
+    {
+      "thema": "Ingolstadt",
+      "s1": 2,
+      "s2": 4,
+      "s3": 5
+    },
+    {
+      "thema": "Ader",
+      "s1": 4,
+      "s2": 6,
+      "s3": 7
+    },
+    {
+      "thema": "Erdmännchen",
+      "s1": 9,
+      "s2": 8,
+      "s3": 6
+    },
+    {
+      "thema": "Negerkuss",
+      "s1": 3,
+      "s2": 5,
+      "s3": 6
+    },
+    {
+      "thema": "Kurdische Sprache",
+      "s1": 1,
+      "s2": 3,
+      "s3": 5
+    },
+    {
+      "thema": "Ingenieur",
+      "s1": 3,
+      "s2": 6,
+      "s3": 8
+    },
+    {
+      "thema": "England (Übersicht)",
+      "s1": 4,
+      "s2": 7,
+      "s3": 8
+    },
+    {
+      "thema": "Gemüse",
+      "s1": 5,
+      "s2": 5,
+      "s3": 4
+    },
+    {
+      "thema": "Kristall",
+      "s1": 6,
+      "s2": 9,
+      "s3": 9
+    },
+    {
+      "thema": "Chamäleon",
+      "s1": 8,
+      "s2": 9,
+      "s3": 8
+    },
+    {
+      "thema": "Bundesrepublik Deutschland",
+      "s1": 2,
+      "s2": 5,
+      "s3": 7
+    },
+    {
+      "thema": "Maschine",
+      "s1": 5,
+      "s2": 8,
+      "s3": 9
+    },
+    {
+      "thema": "Bücherei",
+      "s1": 5,
+      "s2": 5,
+      "s3": 5
+    },
+    {
+      "thema": "Linke Politik",
+      "s1": 1,
+      "s2": 3,
+      "s3": 6
+    },
+    {
+      "thema": "Kürbis",
+      "s1": 6,
+      "s2": 6,
+      "s3": 5
+    },
+    {
+      "thema": "Tetanus",
+      "s1": 2,
+      "s2": 5,
+      "s3": 7
+    },
+    {
+      "thema": "Hochofen",
+      "s1": 3,
+      "s2": 7,
+      "s3": 8
+    },
+    {
+      "thema": "Augsburger Puppenkiste",
+      "s1": 6,
+      "s2": 6,
+      "s3": 5
+    },
+    {
+      "thema": "Persischer Golf",
+      "s1": 2,
+      "s2": 5,
+      "s3": 7
+    },
+    {
+      "thema": "Schneekanone",
+      "s1": 4,
+      "s2": 6,
+      "s3": 7
+    },
+    {
+      "thema": "Deutschland (Übersicht)",
+      "s1": 3,
+      "s2": 6,
+      "s3": 8
+    },
+    {
+      "thema": "Markt",
+      "s1": 4,
+      "s2": 4,
+      "s3": 4
+    },
+    {
+      "thema": "Bottrop",
+      "s1": 1,
+      "s2": 3,
+      "s3": 4
+    },
+    {
+      "thema": "Shanghai",
+      "s1": 2,
+      "s2": 6,
+      "s3": 8
+    },
+    {
+      "thema": "Jugendlicher",
+      "s1": 2,
+      "s2": 5,
+      "s3": 7
+    },
+    {
+      "thema": "Unicef",
+      "s1": 2,
+      "s2": 5,
+      "s3": 7
+    },
+    {
+      "thema": "Trojanischer Krieg",
+      "s1": 5,
+      "s2": 9,
+      "s3": 10
+    },
+    {
+      "thema": "Looney Tunes",
+      "s1": 7,
+      "s2": 7,
+      "s3": 6
+    },
+    {
+      "thema": "Stephen Hawking",
+      "s1": 3,
+      "s2": 7,
+      "s3": 9
+    },
+    {
+      "thema": "Fossilien",
+      "s1": 7,
+      "s2": 9,
+      "s3": 9
+    },
+    {
+      "thema": "Billy The Kid",
+      "s1": 4,
+      "s2": 8,
+      "s3": 9
+    },
+    {
+      "thema": "Autoscooter",
+      "s1": 6,
+      "s2": 6,
+      "s3": 6
+    },
+    {
+      "thema": "Wendekreis",
+      "s1": 1,
+      "s2": 4,
+      "s3": 6
+    },
+    {
+      "thema": "Goldschakal",
+      "s1": 6,
+      "s2": 7,
+      "s3": 7
+    },
+    {
+      "thema": "Johann Sebastian Bach",
+      "s1": 3,
+      "s2": 6,
+      "s3": 7
+    },
+    {
+      "thema": "Brachiosaurus",
+      "s1": 10,
+      "s2": 10,
+      "s3": 9
+    },
+    {
+      "thema": "Graz",
+      "s1": 2,
+      "s2": 4,
+      "s3": 5
+    },
+    {
+      "thema": "Casablanca",
+      "s1": 2,
+      "s2": 4,
+      "s3": 6
+    },
+    {
+      "thema": "Masern",
+      "s1": 3,
+      "s2": 5,
+      "s3": 6
+    },
+    {
+      "thema": "Ingo Siegner",
+      "s1": 8,
+      "s2": 7,
+      "s3": 4
+    },
+    {
+      "thema": "Papua-Neuguinea",
+      "s1": 3,
+      "s2": 6,
+      "s3": 8
+    },
+    {
+      "thema": "Verbannung",
+      "s1": 2,
+      "s2": 5,
+      "s3": 7
+    },
+    {
+      "thema": "Lunge",
+      "s1": 4,
+      "s2": 7,
+      "s3": 8
+    },
+    {
+      "thema": "Erotik",
+      "s1": 1,
+      "s2": 3,
+      "s3": 6
+    },
+    {
+      "thema": "Magnetschwebebahn",
+      "s1": 5,
+      "s2": 8,
+      "s3": 9
+    },
+    {
+      "thema": "Lexikon",
+      "s1": 3,
+      "s2": 5,
+      "s3": 5
+    },
+    {
+      "thema": "Gatte",
+      "s1": 1,
+      "s2": 2,
+      "s3": 3
+    },
+    {
+      "thema": "Wirtschaft",
+      "s1": 1,
+      "s2": 4,
+      "s3": 7
+    },
+    {
+      "thema": "Homosexuell",
+      "s1": 2,
+      "s2": 5,
+      "s3": 7
+    },
+    {
+      "thema": "Zentripetalkraft",
+      "s1": 1,
+      "s2": 4,
+      "s3": 7
+    },
+    {
+      "thema": "Wachs",
+      "s1": 4,
+      "s2": 5,
+      "s3": 5
+    },
+    {
+      "thema": "Blackbeard",
+      "s1": 6,
+      "s2": 9,
+      "s3": 10
+    },
+    {
+      "thema": "Tinte",
+      "s1": 4,
+      "s2": 5,
+      "s3": 6
+    },
+    {
+      "thema": "Vene",
+      "s1": 3,
+      "s2": 6,
+      "s3": 7
+    },
+    {
+      "thema": "FDP (Deutschland)",
+      "s1": 1,
+      "s2": 3,
+      "s3": 5
+    },
+    {
+      "thema": "Schmerz",
+      "s1": 3,
+      "s2": 5,
+      "s3": 7
+    },
+    {
+      "thema": "Hai",
+      "s1": 9,
+      "s2": 10,
+      "s3": 10
+    },
+    {
+      "thema": "Erzieher",
+      "s1": 4,
+      "s2": 4,
+      "s3": 4
+    },
+    {
+      "thema": "Pfeil und Bogen",
+      "s1": 7,
+      "s2": 9,
+      "s3": 9
+    },
+    {
+      "thema": "Martin Luther King",
+      "s1": 3,
+      "s2": 7,
+      "s3": 9
+    },
+    {
+      "thema": "Humboldt",
+      "s1": 3,
+      "s2": 7,
+      "s3": 9
+    },
+    {
+      "thema": "Vevey",
+      "s1": 1,
+      "s2": 3,
+      "s3": 4
+    },
+    {
+      "thema": "Zunge",
+      "s1": 4,
+      "s2": 6,
+      "s3": 6
+    },
+    {
+      "thema": "Skateboard",
+      "s1": 5,
+      "s2": 8,
+      "s3": 8
+    },
+    {
+      "thema": "Geschlechtsorgane",
+      "s1": 3,
+      "s2": 6,
+      "s3": 8
+    },
+    {
+      "thema": "Zigarette",
+      "s1": 2,
+      "s2": 5,
+      "s3": 7
+    },
+    {
+      "thema": "Kolosseum",
+      "s1": 4,
+      "s2": 8,
+      "s3": 9
+    },
+    {
+      "thema": "Bauch",
+      "s1": 4,
+      "s2": 5,
+      "s3": 6
+    },
+    {
+      "thema": "Gorillas",
+      "s1": 8,
+      "s2": 8,
+      "s3": 7
+    },
+    {
+      "thema": "Argentinien",
+      "s1": 3,
+      "s2": 6,
+      "s3": 8
+    },
+    {
+      "thema": "Kinderschreck",
+      "s1": 6,
+      "s2": 7,
+      "s3": 7
+    }
+  ]
+}
