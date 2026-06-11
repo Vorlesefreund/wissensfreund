@@ -1,204 +1,238 @@
 {
   "model": "gemini-3.5-flash",
-  "timestamp": "2026-06-11T20:38:59.160146+00:00",
+  "prompt_variant": "content_richness_v2",
+  "timestamp": "2026-06-11T22:07:34.515005+00:00",
   "scores": [
     {
       "thema": "Indianer",
-      "s1": 7,
-      "s2": 7,
-      "s3": 5
+      "s1": 6,
+      "s2": 9,
+      "s3": 8,
+      "begruendung": "Abenteuerliche Lebensweisen und die Vielfalt der Stämme bieten extrem packenden Stoff für spannende Geschichten und historische Entdeckungen."
     },
     {
       "thema": "Beethoven",
-      "s1": 1,
-      "s2": 2,
-      "s3": 3
+      "s1": 2,
+      "s2": 5,
+      "s3": 8,
+      "begruendung": "Seine Ertaubung und die dramatischen Kompositionen bieten älteren Kindern eine tiefgründige und faszinierende Charakterstudie."
     },
     {
       "thema": "Elefant",
       "s1": 9,
-      "s2": 6,
-      "s3": 4
+      "s2": 8,
+      "s3": 6,
+      "begruendung": "Die sanften Riesen faszinieren Jüngere durch ihre Physis und ihr Sozialverhalten, verlierend jedoch an Lesetiefe für Ältere."
     },
     {
       "thema": "Vulkan",
-      "s1": 5,
-      "s2": 9,
-      "s3": 9
+      "s1": 7,
+      "s2": 10,
+      "s3": 10,
+      "begruendung": "Die explosive Mischung aus Urgewalt, Zerstörung und Geologie fesselt Kinder jeden Alters mit spektakulären Bildern und Fakten."
     },
     {
       "thema": "Fußball",
-      "s1": 5,
-      "s2": 9,
-      "s3": 10
+      "s1": 6,
+      "s2": 8,
+      "s3": 8,
+      "begruendung": "Regeln, Taktiken, historische Spiele und Legenden bieten unerschöpflichen, emotional aufgeladenen Lesestoff für Fans."
     },
     {
       "thema": "Hund",
       "s1": 10,
-      "s2": 9,
-      "s3": 8
+      "s2": 8,
+      "s3": 6,
+      "begruendung": "Als bester Freund des Menschen emotional extrem stark für Erstleser, bietet aber wissenschaftlich weniger epische Tiefe für Ältere."
     },
     {
       "thema": "Apfel",
-      "s1": 3,
-      "s2": 2,
-      "s3": 1
+      "s1": 4,
+      "s2": 3,
+      "s3": 2,
+      "begruendung": "Ein allzu alltägliches Thema, das trotz biologischer Details kaum genug erzählerische Spannung für freiwilliges Lesen erzeugt."
     },
     {
       "thema": "Feuerwehr",
       "s1": 10,
-      "s2": 7,
-      "s3": 4
+      "s2": 8,
+      "s3": 5,
+      "begruendung": "Heldenhafter Nervenkitzel und große Fahrzeuge begeistern die Kleinsten, verblassen aber als reines Lesethema in der späten Kindheit."
     },
     {
       "thema": "Regenbogen",
-      "s1": 8,
+      "s1": 7,
       "s2": 5,
-      "s3": 3
+      "s3": 4,
+      "begruendung": "Visuell wunderschön für S1, verliert das Thema nach der einfachen physikalischen Erklärung schnell an Lesestoff-Potenzial."
     },
     {
       "thema": "Schmetterling",
-      "s1": 7,
-      "s2": 4,
-      "s3": 2
+      "s1": 8,
+      "s2": 7,
+      "s3": 5,
+      "begruendung": "Das Wunder der Metamorphose ist extrem bildstark und faszinierend, bietet aber für S3 zu wenig fortlaufenden Lesestoff."
     },
     {
       "thema": "Dinosaurier",
       "s1": 10,
       "s2": 10,
-      "s3": 7
+      "s3": 9,
+      "begruendung": "Gigantische Urzeitmonster vereinen Evolution, Entdeckung und Nervenkitzel zu einem absolut zeitlosen Lesemagneten."
     },
     {
       "thema": "Ägypten",
-      "s1": 2,
-      "s2": 8,
-      "s3": 9
+      "s1": 3,
+      "s2": 9,
+      "s3": 10,
+      "begruendung": "Mumien, Flüche, Hieroglyphen und Pyramiden bieten einen unerschöpflichen Schatz an mysteriösen und historischen Abenteuern."
     },
     {
       "thema": "Mozart",
-      "s1": 1,
-      "s2": 2,
-      "s3": 3
+      "s1": 3,
+      "s2": 6,
+      "s3": 8,
+      "begruendung": "Die Geschichte des exzentrischen Wunderkinds fesselt durch historische Anekdoten und die Tragik seines frühen Todes."
     },
     {
       "thema": "Pangolin",
-      "s1": 2,
-      "s2": 4,
-      "s3": 4
+      "s1": 3,
+      "s2": 6,
+      "s3": 7,
+      "begruendung": "Dieses skurrile, schuppige Tier weckt durch seine Einzigartigkeit und Bedrohung den detektivischen Entdeckergeist neugieriger Leser."
     },
     {
       "thema": "Seefahrer",
-      "s1": 7,
-      "s2": 8,
-      "s3": 7
+      "s1": 4,
+      "s2": 9,
+      "s3": 10,
+      "begruendung": "Entdecker, Stürme, Piraten und ungeheure Gefahren auf den Weltmeeren garantieren epischen und geschichtsträchtigen Lesestoff."
     },
     {
       "thema": "Lego",
-      "s1": 9,
-      "s2": 10,
-      "s3": 8
+      "s1": 8,
+      "s2": 9,
+      "s3": 7,
+      "begruendung": "Die Erfolgsgeschichte des Steins und kreative Bauwelten bieten spannende Einblicke in Design und Erfindungsgeist."
     },
     {
       "thema": "Kinderrechte",
-      "s1": 1,
-      "s2": 4,
-      "s3": 7
+      "s1": 3,
+      "s2": 7,
+      "s3": 9,
+      "begruendung": "Gerechtigkeit und globale Lebensrealitäten von Gleichaltrigen berühren ältere Kinder tief und regen zum intensiven Nachdenken an."
     },
     {
       "thema": "Süßigkeiten",
-      "s1": 10,
-      "s2": 10,
-      "s3": 10
+      "s1": 7,
+      "s2": 6,
+      "s3": 5,
+      "begruendung": "Zwar emotional beliebt, bietet die reine Geschichte und Herstellung von Zuckerwaren jedoch nur mäßig tiefen Lesestoff."
     },
     {
       "thema": "Jahreszeiten",
-      "s1": 4,
-      "s2": 3,
-      "s3": 2
+      "s1": 6,
+      "s2": 4,
+      "s3": 3,
+      "begruendung": "Ein wichtiges Grundkonzept für den Einstieg, das jedoch für ältere Kinder kaum noch spannende Geheimnisse bereithält."
     },
     {
       "thema": "Schule",
-      "s1": 8,
+      "s1": 5,
       "s2": 4,
-      "s3": 2
+      "s3": 4,
+      "begruendung": "Als Alltagsumgebung oft zu nah an der Pflicht, um als freiwilliger, fesselnder Lesestoff außerhalb von Belletristik zu glänzen."
     },
     {
       "thema": "Schiffe",
-      "s1": 6,
-      "s2": 5,
-      "s3": 4
+      "s1": 7,
+      "s2": 8,
+      "s3": 8,
+      "begruendung": "Vom hölzernen Wikingerschiff bis zur Titanic bietet die Schifffahrt reichlich Technik, Tragödien und Abenteuerpotenzial."
     },
     {
       "thema": "Eis",
-      "s1": 10,
-      "s2": 10,
-      "s3": 10
+      "s1": 5,
+      "s2": 4,
+      "s3": 4,
+      "begruendung": "Ob Speiseeis oder Gletscher – das Thema ist erfrischend, aber physikalisch und historisch schnell ausgelesen."
     },
     {
       "thema": "Kühlschrank",
-      "s1": 3,
-      "s2": 2,
-      "s3": 1
+      "s1": 2,
+      "s2": 4,
+      "s3": 5,
+      "begruendung": "Die physikalische Funktionsweise und Erfindungsgeschichte ist zwar clever, aber als freiwilliger Lesestoff eher trocken."
     },
     {
       "thema": "Düsseldorf",
       "s1": 1,
-      "s2": 1,
-      "s3": 1
+      "s2": 2,
+      "s3": 3,
+      "begruendung": "Ein sehr spezifisches, lokales Thema, das ohne persönlichen Bezug kaum allgemeines Lesefieber entfachen kann."
     },
     {
       "thema": "VW",
       "s1": 2,
-      "s2": 3,
-      "s3": 4
+      "s2": 4,
+      "s3": 6,
+      "begruendung": "Die Entwicklung vom Käfer zum Weltkonzern bietet zwar Industrie- und Designgeschichte, bleibt aber für Kinder recht nischig."
     },
     {
       "thema": "Brennessel",
       "s1": 3,
-      "s2": 4,
-      "s3": 3
+      "s2": 5,
+      "s3": 5,
+      "begruendung": "Die wehrhafte Pflanze überrascht mit Überlebensstrategien und Nutzen, trägt aber kein ganzes Buch voller Leselust."
     },
     {
       "thema": "Krankenschwester",
       "s1": 5,
-      "s2": 4,
-      "s3": 3
+      "s2": 5,
+      "s3": 6,
+      "begruendung": "Der medizinische Alltag und die Hilfe für Menschen bieten zwar Empathie, aber mäßigen Nervenkitzel für eine freiwillige Lektüre."
     },
     {
       "thema": "Pupille",
       "s1": 2,
-      "s2": 4,
-      "s3": 5
+      "s2": 5,
+      "s3": 7,
+      "begruendung": "Das Tor zum Gehirn und die Funktionsweise des Sehens bieten faszinierende optische Phänomene und biologische Wunder."
     },
     {
       "thema": "Zigaretten",
       "s1": 1,
       "s2": 3,
-      "s3": 6
+      "s3": 6,
+      "begruendung": "Die Geschichte des Tabaks, Suchtmechanismen und gesundheitliche Aufklärung bieten durchaus brisanten, wenn auch ernsten Lesestoff für S3."
     },
     {
       "thema": "Hades",
       "s1": 2,
-      "s2": 7,
-      "s3": 9
+      "s2": 8,
+      "s3": 10,
+      "begruendung": "Die griechische Unterwelt voller Mythen, Monster und Göttersagen bietet einen unerschöpflichen, düster-faszinierenden Lesestoff."
     },
     {
       "thema": "Fasten",
       "s1": 1,
-      "s2": 1,
-      "s3": 2
+      "s2": 3,
+      "s3": 5,
+      "begruendung": "Kulturelle und biologische Aspekte des Verzichts sind zwar lehrreich, für Kinder freiwillig aber eher schwer verdauliche Kost."
     },
     {
       "thema": "Viereck",
-      "s1": 3,
-      "s2": 1,
-      "s3": 1
+      "s1": 2,
+      "s2": 2,
+      "s3": 2,
+      "begruendung": "Geometrische Formen sind für den Unterricht wichtig, bieten als privates Lesethema jedoch keinerlei erzählerischen Reiz."
     },
     {
       "thema": "Airbag",
-      "s1": 3,
-      "s2": 6,
-      "s3": 7
+      "s1": 2,
+      "s2": 5,
+      "s3": 6,
+      "begruendung": "Lebensrettende Physik in Millisekunden ist extrem spannend zu verstehen, bleibt thematisch aber sehr eng eingegrenzt."
     }
   ]
 }
