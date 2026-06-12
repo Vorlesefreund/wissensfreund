@@ -1,6 +1,6 @@
 # WISSEN: Artikel-Pipeline
 <!-- Thematisches Wissensdokument — wird nicht täglich gelesen, nur bei Artikel-Themen -->
-<!-- Letztes Update: 2026-06-04 -->
+<!-- Letztes Update: 2026-06-12 -->
 
 ## Überblick
 
@@ -460,3 +460,108 @@ Flash bekommt alles als Text — kein URL-Tool nötig. **Empfohlen.**
 in den User-Message (`COMPANION_URL_1: https://...`), aktiviert url_context-Tool.
 Flash fetcht explizit genannte URLs zur Laufzeit. Teurer + langsamer als Weg A,
 aber ohne pre-fetch nötig. url_context_metadata gibt echten Beweis zurück.
+
+---
+
+## Grounded Pipeline (generate_grounded.py) — Stand 2026-06-12
+
+**Produktionsdatei:** `scripts/generate_grounded.py`  
+**Modell:** `gemini-3.5-flash` (ThinkingLevel.MEDIUM in Phase 2)  
+**System-Prompt:** `wissensfreund_generator_prompt_v3.23_production.md`  
+**Output-Dir:** `articles/test_grounded/`
+
+### Zwei-Phasen-Architektur
+
+**Phase 1 — Kompass (einmal pro Thema):**
+1. `fetch_wikipedia_text(session, primary_wikipedia)` → Primärtext (BKS-Guard integriert)
+2. `select_companions_raw(client, thema, primary_text, model)` → Flash wählt 4–6 Begleitartikel frei
+3. `validate_and_resolve_companions(session, raw_companions, primary_wikipedia, cap)` → WP-Existenzprüfung + Redirect-Auflösung
+4. Companion-Volltexte fetchen → `companion_texts: dict[str, str]`
+5. Vision-Bildanalyse (überspringbar via `skip_images=True`)
+
+**Phase 2 — Generierung je Stufe:**
+1. `build_grounded_user_message(job, primary_text, companion_texts, companion_order, images)` → User-Message
+2. Stabiler Prefix + variables WORTZIEL/AGE_LEVEL-Suffix → Gemini Context Cache möglich
+3. `gemini_client.call_gemini(SYSTEM_PROMPT, user_msg, ...)` → JSON-Rohtext
+4. `parse_article_json(raw)` → Article-Dict
+5. `count_article_words(article)` → Wortzahl (Fließtext + Boxen, OHNE Quiz)
+6. Lektorat (optional, `--skip-lektorat` Flag)
+
+**Companion-Cap gestaffelt nach Appeal:** low=4 / medium=5 / high=6  
+**Prompt-Caching:** Stabiler Prefix (Quelltext) = unveränderlich; nur AGE_LEVEL+WORTZIEL wechselt → Gemini Context Cache spart ~80 % der Token-Kosten für Stufen 2+3.
+
+### WORTZIEL-Injektion (aktuell fehlerhaft — BUG)
+
+Aktuell in `build_grounded_user_message()`, Z. ~664:
+```python
+wmin, wmax = WORTZIEL_TABLE.get((level, appeal), (100, 250))
+parts.append(
+    f"WORTZIEL: {wmin}–{wmax} Wörter (bei reichen Quellen Richtung Obergrenze; "
+    f"harte Obergrenze {wmax} Wörter nicht überschreiten)"
+)
+```
+
+`WORTZIEL_TABLE` enthält statische (level, appeal)-Werte — **nicht kalibriert gegen Flash-Scores.**
+
+**Pilot-Befund (2026-06-12, 36 Artikel):** Ceiling-only-Formulierung ("bis zu X")
+veranlasst das Modell, systematisch unter dem Ziel zu bleiben (S2/S3 oft −100–200 Wörter),
+auch wenn der Wikipedia-Stoff reichhaltig genug wäre.
+
+**Korrekte Formulierung:**
+```
+WORTZIEL: {wmin}–{wmax} Wörter.
+Wenn der Stoff für {wmax} reicht, schreib bis dahin.
+Kürzer als {wmin} nur wenn der Wikipedia-Stoff wirklich erschöpft ist — nicht aufblähen.
+```
+
+### Wortbudget-Formel (kalibriert, noch NICHT verdrahtet)
+
+Basis: `scripts/importance_cache_33.json` (content_richness_v2-Scores, 33 Themen)
+
+```python
+# Faszinations-Norm (0..1)
+fasc_norm_S = (flash_score_S - 1) / 9
+
+# wc=0 optimal (MAE-Analyse bestätigt kein Coverage-Signal nötig)
+importance_S = fasc_norm_S
+
+# Klexikon-Abwesenheits-Deckel (NUR S2/S3, NUR 5 Themen ohne KlexW)
+# Themen: Pangolin, Seefahrer, Lego, Süßigkeiten, VW
+if klex_missing and level >= 2:
+    importance_S = min(importance_S, 0.25 + 0.5 * importance_S)
+
+# Wortziel
+wmin = Wlo + importance_S * (Whi - Wlo)  # Untergrenze
+wmax = wmin  # bei wc=0: wmin == wmax (ein Zielwert, keine Spanne)
+# S1: Wlo=50, Whi=250 / S2: Wlo=80, Whi=400 / S3: Wlo=100, Whi=650
+```
+
+**TODO:** `WORTZIEL_TABLE` in `generate_grounded.py` (Z. 86–96) durch diese dynamische
+Berechnung ersetzen. Benötigt: `importance_cache_33.json` einlesen + Cache-Lookup.
+
+### resolve_lemma-Integration (fehlt noch)
+
+`resolve_lemma()` ist in `generate_articles.py` (Z. 338) definiert, aber **nicht** in
+`generate_grounded.py` aufgerufen. Aktuell: `fetch_wikipedia_text()` bekommt den rohen
+Thema-String — BKS-Guard löst auf, aber Doppelbedeutungs-Direktive und LISTENARTIKEL-Flag
+fehlen im Artikel-Job.
+
+**TODO:** Vor `prepare_topic_sources()` aufrufen:
+```python
+lr = resolve_lemma(session, thema)
+primary_wikipedia = lr["resolved_title"] or thema
+flags = lr["flags"]
+dd_directive = lr.get("doppelbedeutung_directive")
+if dd_directive:
+    job["doppelbedeutung_directive"] = dd_directive["directive"]
+```
+
+### Pilot-Lauf-Befunde (temp/_pilot_gen.py, 2026-06-12)
+
+- 36/36 Artikel ohne Fehler, Laufzeit ~16 Min
+- Fußball + Wirtschaft: Doppelbedeutungs-Direktive korrekt erkannt + injiziert
+- Pangolin → Schuppentiere, Schmetterling → Schmetterlinge (BKS korrekt aufgelöst)
+- Hund → Haushund (Redirect korrekt)
+- Kühlschrank ohne Companions (Companion-Validierung schlug wegen 429 fehl → korrekt degradiert)
+- Wortzahl-Pattern: thin-content-Themen (Wirtschaft WP=9 kB) decken korrekt ab;
+  rich-content-Themen (Hund, Dino, Fußball) unterschreiten zu stark → WORTZIEL-Fix nötig
