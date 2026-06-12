@@ -660,8 +660,9 @@ def build_grounded_user_message(
     level   = job.get("age_level", 2)
     wmin, wmax = WORTZIEL_TABLE.get((level, appeal), (100, 250))
     parts.append(
-        f"WORTZIEL: {wmin}–{wmax} Wörter "
-        f"(bei reichen Quellen Richtung Obergrenze; harte Obergrenze {wmax} Wörter nicht überschreiten)"
+        f"WORTZIEL: Zielumfang ungefähr {wmax} Wörter. Das ist die ANGESTREBTE Länge, KEINE Obergrenze. "
+        f"Schöpfe den Wikipedia-Stoff aus und entfalte alle Aspekte vollständig, bis du den Zielumfang erreichst. "
+        f"Kürzer (minimal {wmin} Wörter) nur, wenn der Wikipedia-Artikel den Stoff für {wmax} nicht hergibt — niemals aufblähen."
     )
 
     return "\n".join(parts)
@@ -687,8 +688,9 @@ def _split_grounded_user_message(
     wmin, wmax = WORTZIEL_TABLE.get((level, appeal), (100, 250))
     variable = (
         f"AGE_LEVEL: {job['age_level']}\n"
-        f"WORTZIEL: {wmin}–{wmax} Wörter "
-        f"(bei reichen Quellen Richtung Obergrenze; harte Obergrenze {wmax} Wörter nicht überschreiten)"
+        f"WORTZIEL: Zielumfang ungefähr {wmax} Wörter. Das ist die ANGESTREBTE Länge, KEINE Obergrenze. "
+        f"Schöpfe den Wikipedia-Stoff aus und entfalte alle Aspekte vollständig, bis du den Zielumfang erreichst. "
+        f"Kürzer (minimal {wmin} Wörter) nur, wenn der Wikipedia-Artikel den Stoff für {wmax} nicht hergibt — niemals aufblähen."
     )
     stable = full[: len(full) - len(variable)].rstrip("\n")
     return stable, variable

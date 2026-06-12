@@ -1,0 +1,22 @@
+﻿thema,stufe,lemma,flags,companion_count,quelle_kB,zielumfang_wmax,ist_woerter,delta
+Elefant,1,Elefanten,OK,4,113.2,250,248,-2
+Elefant,2,Elefanten,OK,4,113.2,400,377,-23
+Elefant,3,Elefanten,OK,4,113.2,650,631,-19
+Hund,1,Haushund,OK,4,78.1,250,273,23
+Hund,2,Haushund,OK,4,78.1,400,343,-57
+Hund,3,Haushund,OK,4,78.1,650,535,-115
+Dinosaurier,1,Dinosaurier,OK,5,66.4,250,261,11
+Dinosaurier,2,Dinosaurier,OK,5,66.4,400,380,-20
+Dinosaurier,3,Dinosaurier,OK,5,66.4,650,676,26
+Vulkan,1,Vulkan,OK,4,20.9,217,180,-37
+Vulkan,2,Vulkan,OK,4,20.9,400,492,92
+Vulkan,3,Vulkan,OK,4,20.9,650,848,198
+Fußball,1,Fußball,"DOPPELBEDEUTUNG: Erkläre zuerst Fußball (die Sportart), dann weiter unten Spielball.",3,57.4,183,179,-4
+Fußball,2,Fußball,"DOPPELBEDEUTUNG: Erkläre zuerst Fußball (die Sportart), dann weiter unten Spielball.",3,57.4,400,412,12
+Fußball,3,Fußball,"DOPPELBEDEUTUNG: Erkläre zuerst Fußball (die Sportart), dann weiter unten Spielball.",3,57.4,650,638,-12
+Wirtschaft,1,Wirtschaft,"DOPPELBEDEUTUNG: Erkläre zuerst Wirtschaft (Handel und Geldwesen), dann weiter unten Gaststätte.",4,9.2,117,117,0
+Wirtschaft,2,Wirtschaft,"DOPPELBEDEUTUNG: Erkläre zuerst Wirtschaft (Handel und Geldwesen), dann weiter unten Gaststätte.",4,9.2,347,345,-2
+Wirtschaft,3,Wirtschaft,"DOPPELBEDEUTUNG: Erkläre zuerst Wirtschaft (Handel und Geldwesen), dann weiter unten Gaststätte.",4,9.2,650,559,-91
+Kühlschrank,1,Kühlschrank,OK,4,41.1,83,123,40
+Kühlschrank,2,Kühlschrank,OK,4,41.1,240,276,36
+Kühlschrank,3,Kühlschrank,OK,4,41.1,375,355,-20
