@@ -530,8 +530,8 @@ API-Kosten separat vom Chat-Budget.
 Anker-Artefakt: `wortziele_ergiebigkeit_134_v2.xlsx` (134 Themen mit Ergiebigkeit /
 Wortzielen / Flags) = Ground-Truth fürs Voll-Rating.
 
-Verdrahtet: `WORTZIEL_TABLE` ersetzt durch `wordziel_for(thema, level)` + `appeal_for(thema)` aus
-`ergiebigkeit_scores.json`. Funktionen `_load_ergiebigkeit()` / `wordziel_for()` / `appeal_for()` in
+Verdrahtet: `WORTZIEL_TABLE` ersetzt durch `wortziel_for(thema, level)` + `appeal_for(thema)` aus
+`ergiebigkeit_scores.json`. Funktionen `_load_ergiebigkeit()` / `wortziel_for()` / `appeal_for()` in
 `generate_grounded.py` Z. 101+. Fallback bei fehlendem Score → ERG_FALLBACK_SCORE=6 (sichtbar geloggt).
 
 ### Wortzahl-Guard (implementiert, 2026-06-12)
