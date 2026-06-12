@@ -82,51 +82,65 @@ MAX_IMG_COMPANION = 6
 # Companion-Cap gestaffelt nach Appeal (kein Auffüllen)
 COMPANION_CAP = {"low": 4, "medium": 5, "high": 6}
 
-# Wortziel-Tabelle: (age_level, appeal) → (min_wörter, max_wörter)
-WORTZIEL_TABLE: dict[tuple[int, str], tuple[int, int]] = {
-    (1, "low"):    (50,  100),
-    (1, "medium"): (100, 150),
-    (1, "high"):   (150, 250),
-    (2, "low"):    (80,  150),
-    (2, "medium"): (150, 250),
-    (2, "high"):   (250, 400),
-    (3, "low"):    (100, 200),
-    (3, "medium"): (200, 350),
-    (3, "high"):   (350, 650),
-}
+# Ergiebigkeits-Bänder je Stufe: (Wlo, Whi). Wortziel = Kurve über Ergiebigkeits-Score.
+ERG_BANDS: dict[int, tuple[int, int]] = {1: (50, 250), 2: (80, 400), 3: (100, 650)}
+RETRY_FLOOR_FRAC   = 0.70   # Retry-Untergrenze als Bruchteil des Ziels (nur klares Untertreiben nachfordern)
+ERG_FALLBACK_SCORE = 6      # medium, wenn Thema (noch) nicht gerated — sichtbar geloggt
+APPEAL_TIER_HIGH   = 7.0    # Erg-Mittel ≥ → high   (steuert Companion-/Bildmenge)
+APPEAL_TIER_MED    = 4.0    # Erg-Mittel ≥ → medium, sonst low
 
 AGE_RANGES = {1: "4-6 Jahre", 2: "7-9 Jahre", 3: "10-12 Jahre"}
 
 
-def _load_klexikon_appeal() -> dict[str, str]:
-    """Lädt klexikon_appeal_quartil.json → Titel/Slug → Appeal-Mapping."""
-    path = ROOT / "klexikon_appeal_quartil.json"
+def _load_ergiebigkeit() -> dict[str, dict]:
+    """Lädt ergiebigkeit_scores.json → key (thema.lower) → {S1,S2,S3}."""
+    path = ROOT / "ergiebigkeit_scores.json"
     if not path.exists():
+        log.warning("ergiebigkeit_scores.json fehlt (%s) — Wortziel/Appeal nutzen Fallback", path)
         return {}
     data = json.load(path.open(encoding="utf-8"))
-    mapping: dict[str, str] = {}
-    for entry in data:
-        q = entry.get("quartil", 3)
-        appeal = "high" if q == 1 else ("medium" if q == 2 else "low")
-        for key in (entry.get("slug", ""), entry.get("klexikon_titel", "")):
-            if key:
-                mapping[key.lower()] = appeal
-    return mapping
+    return data.get("scores", data)  # toleriert {_meta,scores}- oder flaches Format
 
-_KLEXIKON_APPEAL: dict[str, str] = _load_klexikon_appeal()
+_ERGIEBIGKEIT: dict[str, dict] = _load_ergiebigkeit()
 
 
-def resolve_appeal(thema: str, job_appeal: str | None) -> tuple[str, str]:
+def wortziel_for(thema: str, level: int) -> tuple[int, int, str]:
+    """(wmin_retry_floor, wmax_target, source) aus Ergiebigkeit + Kurve.
+
+    wmax = round(Wlo + clamp((Erg-2)/6, 0, 1) * (Whi-Wlo))   (Bänder = ERG_BANDS)
+    wmin = round(wmax * RETRY_FLOOR_FRAC)
+    Kein gerateter Score → ERG_FALLBACK_SCORE, sichtbar geloggt (nie still mis-sizen).
     """
-    Löst Interessenstufe auf: Klexikon-Quartil → Job-Wert → Default 'medium'.
-    Gibt (appeal, source) zurück.
+    lo, hi = ERG_BANDS.get(level, (100, 250))
+    rec = _ERGIEBIGKEIT.get(thema.strip().lower())
+    if rec is None:
+        erg, source = ERG_FALLBACK_SCORE, "fallback-medium"
+        log.warning("  Ergiebigkeit fehlt für '%s' (Stufe %d) → Fallback-Score %d",
+                    thema, level, erg)
+    else:
+        erg, source = int(rec.get(f"S{level}", ERG_FALLBACK_SCORE)), "ergiebigkeit"
+    frac = max(0.0, min(1.0, (erg - 2) / 6))
+    wmax = round(lo + frac * (hi - lo))
+    wmin = round(wmax * RETRY_FLOOR_FRAC)
+    return wmin, wmax, source
+
+
+def appeal_for(thema: str, job_appeal: str | None = None) -> tuple[str, str]:
+    """Appeal-Tier (high/medium/low) aus Ergiebigkeit (Mittel der 3 Stufen).
+
+    Steuert NUR Companion-Anzahl + Bildmenge — NICHT das Wortbudget.
+    Gerated → Tier aus Erg-Mittel; sonst Job-Wert; sonst 'medium' (sichtbar geloggt).
     """
-    key = thema.lower()
-    if key in _KLEXIKON_APPEAL:
-        return _KLEXIKON_APPEAL[key], "klexikon-quartil"
+    rec = _ERGIEBIGKEIT.get(thema.strip().lower())
+    if rec is not None:
+        s = [int(rec.get(f"S{i}", ERG_FALLBACK_SCORE)) for i in (1, 2, 3)]
+        mean = sum(s) / 3
+        tier = "high" if mean >= APPEAL_TIER_HIGH else ("medium" if mean >= APPEAL_TIER_MED else "low")
+        return tier, "ergiebigkeit"
     if job_appeal in ("low", "medium", "high"):
         return job_appeal, "job"
-    return "medium", "default"
+    log.warning("  Appeal: kein Ergiebigkeits-Score für '%s' → Fallback 'medium'", thema)
+    return "medium", "fallback-medium"
 
 
 def count_article_words(article: dict) -> int:
@@ -656,9 +670,8 @@ def build_grounded_user_message(
 
     # ── Variabler Suffix: AGE_LEVEL + WORTZIEL je Stufe ──────────────────────
     parts.append(f"AGE_LEVEL: {job['age_level']}")
-    appeal  = job.get("resolved_appeal", job.get("topic_interest", "medium"))
     level   = job.get("age_level", 2)
-    wmin, wmax = WORTZIEL_TABLE.get((level, appeal), (100, 250))
+    wmin, wmax, _wz_src = wortziel_for(thema, level)
     parts.append(
         f"WORTZIEL: Strebe {wmax} Wörter an und schöpfe den Wikipedia-Stoff so weit aus, dass du nah an {wmax} herankommst. "
         f"{wmax} ist zugleich die harte Obergrenze — schreibe nicht darüber hinaus. "
@@ -684,9 +697,9 @@ def _split_grounded_user_message(
     full = build_grounded_user_message(
         job, primary_text, companion_texts, companion_order, images
     )
-    appeal = job.get("resolved_appeal", job.get("topic_interest", "medium"))
     level  = job.get("age_level", 2)
-    wmin, wmax = WORTZIEL_TABLE.get((level, appeal), (100, 250))
+    thema  = job.get("thema", job.get("title", ""))
+    wmin, wmax, _wz_src = wortziel_for(thema, level)
     variable = (
         f"AGE_LEVEL: {job['age_level']}\n"
         f"WORTZIEL: Strebe {wmax} Wörter an und schöpfe den Wikipedia-Stoff so weit aus, dass du nah an {wmax} herankommst. "
@@ -914,8 +927,7 @@ def generate_one_level(
     article["meta"]["generation_method"]             = generation_method
 
     # ── Wortzahl-Check + ggf. Retry ──────────────────────────────────────────
-    appeal_for_wz = job.get("resolved_appeal", job.get("topic_interest", "medium"))
-    wmin, wmax = WORTZIEL_TABLE.get((job["age_level"], appeal_for_wz), (100, 250))
+    wmin, wmax, _wz_src = wortziel_for(thema, job["age_level"])
     word_count = count_article_words(article)
     report["phase2"]["word_count"]  = word_count
     report["phase2"]["word_target"] = f"{wmin}–{wmax}"
@@ -1064,7 +1076,7 @@ def main() -> None:
         levels     = [j["age_level"] for j in topic_jobs]
 
         # Interessenstufe auflösen (Klexikon-Quartil → Job-Wert → Default)
-        appeal, appeal_source = resolve_appeal(thema, topic_jobs[0].get("topic_interest"))
+        appeal, appeal_source = appeal_for(thema, topic_jobs[0].get("topic_interest"))
         for job in topic_jobs:
             job["resolved_appeal"] = appeal
             job["appeal_source"]   = appeal_source

@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-12T12:45:09Z -->
+<!-- updated: 2026-06-12T13:16:21Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Lauf 3 (pilot_output3): WORTZIEL-Wording auskonvergiert — Deckel hält (Vulkan S3 644/650, Kühlschrank punktgenau), Dino-Kontrolle ok. Rest: Vulkan S2 461/400 → gehört in Wortzahl-Guard. Hund nachgeholt nach Connection-Reset.** ← AKTUELL
+**Ergiebigkeit verdrahtet (Part A+A.2): Wortbudget + Appeal-Tier (Companion/Bild) beide aus ergiebigkeit_scores.json; Klexikon-Appeal entfernt. Verifikation Wörter+Appeal gegen xlsx-Ground-Truth PASS. resolve_lemma (Part B) noch offen.** ← AKTUELL
+
+**Lauf 3 (pilot_output3): WORTZIEL-Wording auskonvergiert — Deckel hält (Vulkan S3 644/650, Kühlschrank punktgenau), Dino-Kontrolle ok. Rest: Vulkan S2 461/400 → gehört in Wortzahl-Guard. Hund nachgeholt nach Connection-Reset.**
 
 `temp/_pilot_gen3_hund.py` → `pilot_output3/Hund_S{1,2,3}.md`. Netzwerk-Retry (3 Versuche, 2s/5s/10s) um prepare_topic_sources ergänzt.
 
