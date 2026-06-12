@@ -508,7 +508,7 @@ Deckel + Auswahlregel) → Deckel hält weitgehend selbst (Lauf 3: Vulkan S3 644
 punktgenau), Untergrenze weich. Wording gilt als abgeschlossen — Resthärte am Cap gehört in
 den Wortzahl-Guard, nicht in weiteres Prompt-Tuning.
 
-### Ergiebigkeits-Wortbudget (kalibriert, noch NICHT verdrahtet)
+### Ergiebigkeits-Wortbudget (kalibriert + verdrahtet, 2026-06-12)
 Modellwechsel (2026-06-12): Das frühere Modell (content_richness_v2 / fasc-Norm / wc=0 /
 Klexikon-Abwesenheits-Deckel) ist ÜBERHOLT. Länge wird jetzt von Claude-bewerteter
 Ergiebigkeit gesteuert.
@@ -530,39 +530,29 @@ API-Kosten separat vom Chat-Budget.
 Anker-Artefakt: `wortziele_ergiebigkeit_134_v2.xlsx` (134 Themen mit Ergiebigkeit /
 Wortzielen / Flags) = Ground-Truth fürs Voll-Rating.
 
-TODO (Verdrahtung): `WORTZIEL_TABLE` in `generate_grounded.py` durch dynamische
-`target_S`-Berechnung (Kurve + Boost) ersetzen; Ergiebigkeits-Scores aus dem Rater-Lauf einlesen.
+Verdrahtet: `WORTZIEL_TABLE` ersetzt durch `wordziel_for(thema, level)` + `appeal_for(thema)` aus
+`ergiebigkeit_scores.json`. Funktionen `_load_ergiebigkeit()` / `wordziel_for()` / `appeal_for()` in
+`generate_grounded.py` Z. 101+. Fallback bei fehlendem Score → ERG_FALLBACK_SCORE=6 (sichtbar geloggt).
 
-### Wortzahl-Guard (offen, Vor-Bulk-Muss)
-Prompts halten einen harten Zahlen-Cap nie zu 100 %. Pilot Lauf 3 zeigt zwei Rest-Breaches:
-Vulkan S2 461/400 (+61) und Hund S3 667/650 (+17). Deterministische Absicherung: Post-Gen-
-Wortzahl (autoritativ vom Script) > Obergrenze → Trim-Pass („kürze auf ≤ M, straffe/entferne den
-am wenigsten kindrelevanten Abschnitt, Fakten + Stil bewahren"), bis ≤ Cap. Feuert selten,
-garantiert aber die Stufen-Obergrenze. Vor dem Bulk-Lauf nötig.
+### Wortzahl-Guard (implementiert, 2026-06-12)
+Implementiert in `generate_grounded.py`. Cap = `round(wmax * 1.05)`. Bis zu `TRIM_MAX_ATTEMPTS=2`
+Trim-Pässe via `_trim_article_to_cap()` + `TRIM_SYSTEM_PROMPT` (Lektor-Prompt, JSON-Rückgabe).
+Nach max. Versuchen → `review_flag`. Verifiziert: 238→18W (Netz-Test PASS).
 
-### Box-Regeln (offen, Generator-Systemprompt)
-Pilot Hund S3: fakt + warnung beide im letzten Abschnitt geclustert, keine stimmt_das.
-Andere Artikel (Dino, Vulkan) verteilen sauber → kein Systembruch, aber der Generator erzwingt
-zwei Dinge nicht. Nachzubessern im Generator-Systemprompt:
+### Box-Verteilungs-Guard (implementiert, 2026-06-12)
+`_box_lint()`: erkennt deterministisch Clusterung (≥2 Boxen im letzten Abschnitt) und fehlendes
+Mitteldrittel (bei n≥3 Abschnitten). Bei Verstoß: `_box_repair_pass()` lässt Modell Boxen
+umordnen (nur Platzierung). `_box_signature()` prüft Inhalts-Gleichheit (Box-Multiset + Sätze
+wortgleich) — akzeptiert nur bei `same_content AND lint(repaired) is None`, sonst `review_flag`.
+stimmt_das-Pflicht bewusst NICHT eingebaut (widerspricht Prompt-Philosophie).
 
-- Pflicht: mind. eine `stimmt_das`-Box pro S2/S3-Artikel.
-- Verteilung: max. eine Box pro Abschnitt, keine zwei am Stück am Ende — über den Artikel
-  streuen.
-
-### resolve_lemma-Integration (fehlt noch)
-`resolve_lemma()` ist in `generate_articles.py` (Z. 338) definiert, aber nicht in
-`generate_grounded.py` aufgerufen. Aktuell bekommt `fetch_wikipedia_text()` den rohen
-Thema-String — der BKS-Guard löst auf, aber Doppelbedeutungs-Direktive und LISTENARTIKEL-Flag
-fehlen im Artikel-Job.
-TODO: Vor `prepare_topic_sources()` aufrufen:
-```python
-lr = resolve_lemma(session, thema)
-primary_wikipedia = lr["resolved_title"] or thema
-flags = lr["flags"]
-dd_directive = lr.get("doppelbedeutung_directive")
-if dd_directive:
-    job["doppelbedeutung_directive"] = dd_directive["directive"]
-```
+### resolve_lemma-Integration (implementiert, 2026-06-12)
+Verdrahtet im Hauptloop von `generate_grounded.py` (nach `levels = [...]`, vor Phase 1).
+`resolve_lemma(session, thema)` → `resolved_title` überschreibt `primary_wikipedia`;
+`lemma_flags` mit BITTE_PRUEFEN/LEMMA_GEWECHSELT → `review_flag`; `doppelbedeutung_directive`
+→ `job["doppelbedeutung_directive"]` → in stabilen Prefix injiziert.
+BKS-Fix (2026-06-12): `resolve_lemma` erkennt zusätzlich wenn Lemma selbst eine BKS ist
+(`pageprops.disambiguation`) → `_resolve_bks()` → BITTE PRUEFEN-Flag.
 
 ### Pilot-Lauf-Befunde (2026-06-12, Läufe 1–3)
 
@@ -578,3 +568,28 @@ if dd_directive:
   korrekt (Pangolin → Schuppentiere, Schmetterling → Schmetterlinge, Hund → Haushund).
 - Companion-Auswahl nicht-deterministisch zwischen Läufen (Kühlschrank: „Carl von Linde" statt
   „Gefrierbrand") — unkritisch, gelegentlich qualitativ besser.
+
+### Eignungs-Gate (implementiert, 2026-06-12)
+
+`eignung_for(thema)` liest `eignung_verdicts.json` (ROOT) → `{eignung, age_floor, framing_note, source}`.
+Fallback: `EIGNUNG_STRICT=False` → permissive (include/S1); `True` → exclude (vor Bulk setzen).
+Im Hauptloop (nach Eignungs-Gate, vor Lemma-Auflösung):
+- `eignung == "exclude"` → `continue` (Thema übersprungen)
+- `age_floor > 1` → Stufen unter Floor aus `topic_jobs` gefiltert
+- `framing_note` → `job["framing_note"]` → `FRAMING: …` in stabilen Prefix injiziert
+
+System-Prompt v3.23b: FRAMING-Direktive dokumentiert (Terminologie, keine Wertung/Moralisierung,
+Vorrang vor stilistischer Freiheit). Rubrik 10 Kategorien (explizit Sexuelles → exclude; Sexualität
+→ S3/sachlich; NS/Holocaust → S3/nüchtern; Politik → S2/neutral; …).
+`eignung_verdicts.json` noch nicht befüllt — Fallback läuft bis Excel-Freigabe nach Katalog-Lauf.
+
+### Katalog-Rater-Instruktion (angelegt, 2026-06-12)
+
+System-Prompt: `wissensfreund_rater_kuratierung_v1.md` (Repo-Stamm).
+Modell: Opus. ~5000 Themen, 19 Gebiete. Je Aufruf: Themengebiet + ~20 Kalibrier-Anker aus
+`wortziele_ergiebigkeit_134_v2.xlsx`. Ausgabe: JSON-Array mit `thema / themengebiet / leuchtturm /
+erg_s1..s3 / eignung / age_floor / kategorie_nr / framing_note / sensibel / begruendung_eignung /
+dublette_von / notiz`.
+Nachgelagert (Skript): Cross-Gebiet-Merge + Dedup + Round-Robin-Reihenfolge + erste 500 aus
+`leuchtturm`-Themen → Export Excel-Freigabeliste → `eignung_verdicts.json` + Produktionskatalog.
+Kleinstädte (> 10 000 EW, ohne Bedeutung) vorerst ausgenommen — separater späterer Lauf.
