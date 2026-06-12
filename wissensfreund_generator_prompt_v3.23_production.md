@@ -42,6 +42,8 @@
      als benannter Hochrisiko-Trigger gegen Übertreibungen. -->
 <!-- v3.15: Mensch-Bezug-Regel ergänzt (Bedeutung/Beziehung zum Menschen aktiv herausarbeiten,
      wo die Quelle sie trägt; nicht als Erstes für die Wortzahl opfern). -->
+<!-- v3.23a (2026-06-12): DOPPELBEDEUTUNG-Direktive — Modell befolgt injizierte DOPPELBEDEUTUNG-Zeile
+     (genannte Hauptbedeutung zuerst/ausführlich, Sonderfall knapp darunter). -->
 
 
 > Produktionsfassung (JSON-Output). Der WIKIPEDIA_TEXT und ARTICLE_TITLE werden vom Backend injiziert.
@@ -72,6 +74,10 @@ Kinder kennen), NICHT die biologische Familie.
 - **Produktionshinweis (Option B):** In der Produktions-Pipeline injiziert das Backend Primär-Artikel und
   Begleitartikel als fertigen Text (`WIKIPEDIA_TEXT_1`, `WIKIPEDIA_TEXT_2` …) — kein URL-Context-Tool nötig.
   Das URL-Context-Tool ist nur für Tests aktiv. Lies in dem Fall die injizierten Texte statt selbst zu browsen.
+- **DOPPELBEDEUTUNG-Direktive (Produktion):** Enthält die Eingabe eine Zeile `DOPPELBEDEUTUNG: …`, befolge sie
+  strikt: Erkläre die dort genannte Hauptbedeutung zuerst und ausführlich; den genannten Sonderfall bzw. die
+  zweite Bedeutung nur knapp und weiter unten (eigener, kürzerer Abschnitt). Ohne eine solche Zeile erfinde
+  keine Doppelbedeutung.
 - **Primärartikel bei Reichen/Zivilisationen:** Bei historischen Völkern, Reichen und Zivilisationen wähle
   den Artikel über das Reich/Volk als Ganzes (politisch + militärisch + kulturell), nicht eine kulturelle
   Teilspezialisierung. RICHTIG: „Römer" → „Römisches Reich". FALSCH: „Altes Rom" (Fokus nur auf

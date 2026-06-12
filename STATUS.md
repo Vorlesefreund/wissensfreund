@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-12T15:29:23Z -->
+<!-- updated: 2026-06-12T15:40:58Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**resolve_lemma im Hauptloop verdrahtet (Part B): primaer_wikipedia wird jetzt aufgelöst (Redirect/BKS/Listen/Lemma-Wechsel); Lemma-Flags → review_flag; Doppelbedeutungs-Direktive diagnostisch am Job (nicht injiziert). py_compile + import PASS.** ← AKTUELL
+**Doppelbedeutungs-Direktive wirksam: v3.23-Prompt dokumentiert DOPPELBEDEUTUNG-Feld + build_grounded_user_message injiziert die Zeile in den stabilen Prefix. Plumbing-Test PASS.** ← AKTUELL
+
+**resolve_lemma im Hauptloop verdrahtet (Part B): primaer_wikipedia wird jetzt aufgelöst (Redirect/BKS/Listen/Lemma-Wechsel); Lemma-Flags → review_flag; Doppelbedeutungs-Direktive diagnostisch am Job (nicht injiziert). py_compile + import PASS.**
 
 **Ergiebigkeit verdrahtet (Part A+A.2): Wortbudget + Appeal-Tier (Companion/Bild) beide aus ergiebigkeit_scores.json; Klexikon-Appeal entfernt. Verifikation Wörter+Appeal gegen xlsx-Ground-Truth PASS.**
 

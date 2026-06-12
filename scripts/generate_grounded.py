@@ -640,6 +640,9 @@ def build_grounded_user_message(
         parts.append(f"TOPIC_INTEREST: {job['topic_interest']}")
     if companion_order:
         parts.append(f"VERWENDETE_BEGLEITTEXTE: {', '.join(companion_order)}")
+    dd = job.get("doppelbedeutung_directive", "")
+    if dd:
+        parts.append(f"DOPPELBEDEUTUNG: {dd}")
 
     # Bildpool (stabil — gleiche Images für alle Stufen)
     if images:
