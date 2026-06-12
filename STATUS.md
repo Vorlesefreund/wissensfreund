@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-12T17:14:14Z -->
+<!-- updated: 2026-06-12T18:01:19Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Eignungs-Gate Runtime: exclude-Filter + age_floor-Skip + framing_note-Injektion (FRAMING-Feld im v3.23-Prompt). Schalter EIGNUNG_STRICT (vor Bulk = ungeprüfte Themen blockieren). Daten aus eignung_verdicts.json (Fallback bis Excel-Freigabe). Verifikation PASS.** ← AKTUELL
+**Katalog-Rater-Instruktion wissensfreund_rater_kuratierung_v1.md angelegt (Modell Opus; ~5000 Themen über 19 Gebiete; Ergiebigkeit gegen 134er-Anker; Eignungs-Rubrik integriert; Kleinstädte vorerst ausgenommen). Nächste Phase: Katalog-Lauf (Gebiets-Calls → Merge → Excel-Freigabe).** ← AKTUELL
+
+**Eignungs-Gate Runtime: exclude-Filter + age_floor-Skip + framing_note-Injektion (FRAMING-Feld im v3.23-Prompt). Schalter EIGNUNG_STRICT (vor Bulk = ungeprüfte Themen blockieren). Daten aus eignung_verdicts.json (Fallback bis Excel-Freigabe). Verifikation PASS.**
 
 **Box-Verteilungs-Guard: deterministischer Lint (Clusterung / kein Mittel-Box) → Modell-Reparatur-Pass (nur Platzierung) mit Inhalts-Integritätscheck; akzeptiert nur bei wortgleichem Inhalt + sauberer Verteilung, sonst review_flag. stimmt_das-Pflicht bewusst NICHT eingebaut.**
 
