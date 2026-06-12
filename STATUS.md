@@ -1,42 +1,36 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-12T12:09:19Z -->
+<!-- updated: 2026-06-12T12:19:20Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**WORTZIEL Lauf 3 (pilot_output3): harter Deckel + Auswahlregel — Overshoot bei Kühlschrank gefixt, Vulkan S2 noch leicht drüber (2026-06-12)** ← AKTUELL
+**Lauf 3 (pilot_output3): WORTZIEL-Wording auskonvergiert — Deckel hält (Vulkan S3 644/650, Kühlschrank punktgenau), Dino-Kontrolle ok. Rest: Vulkan S2 461/400 → gehört in Wortzahl-Guard. Hund nachgeholt nach Connection-Reset.** ← AKTUELL
 
-`temp/_pilot_gen3.py` → `pilot_output3/` (9/12 Artikel, Hund ausgefallen wegen Connection-Reset).
+`temp/_pilot_gen3_hund.py` → `pilot_output3/Hund_S{1,2,3}.md`. Netzwerk-Retry (3 Versuche, 2s/5s/10s) um prepare_topic_sources ergänzt.
 
 ```
 Thema           S   Ziel    Ist       Δ     kB  Comp
 -------------------------------------------------------
 Dinosaurier     1    250    209     -41   66.4     5  ✓
 Dinosaurier     2    400    347     -53   66.4     5  ✓
-Dinosaurier     3    650    636     -14   66.4     5  ✓  ← Dino trifft noch ✓
-Hund            1    250      —       —      0     0  ✗  (Connection Reset)
-Hund            2    400      —       —      0     0  ✗
-Hund            3    650      —       —      0     0  ✗
+Dinosaurier     3    650    636     -14   66.4     5  ✓  ← Dino-Kontrolle ok
+Hund            1    250    188     -62   78.1     4  ✓
+Hund            2    400    363     -37   78.1     4  ✓
+Hund            3    650    667     +17   78.1     4  ✓  ← nah an 650, leicht drüber
 Vulkan          1    217    197     -20   20.9     4  ✓
-Vulkan          2    400    461     +61   20.9     4  ⚠  leicht drüber
+Vulkan          2    400    461     +61   20.9     4  ⚠  → Wortzahl-Guard
 Vulkan          3    650    644      -6   20.9     4  ✓
-Kühlschrank     1     83     79      -4   41.1     4  ✓  (war +40 in Lauf 2)
+Kühlschrank     1     83     79      -4   41.1     4  ✓
 Kühlschrank     2    240    234      -6   41.1     4  ✓
 Kühlschrank     3    375    371      -4   41.1     4  ✓
 ```
 
-Fazit: Lauf-3-Wording ("Strebe X Wörter an … X ist zugleich die harte Obergrenze") funktioniert gut.
-Kühlschrank-Overshoot aus Lauf 2 (+40) vollständig gefixt (jetzt -4).
-Vulkan S2 bleibt mit +61 leicht drüber — kleines WP-Primärtext (20.9 kB) + großer Vesuv-Companion (42 kB).
-Hund ausgefallen (Netzwerk-Reset während Phase 1 — kein Inhaltsproblem).
-
 **WORTZIEL-Fix verdrahtet + Verifikations-Re-Run 7×3 → pilot_output2/ (2026-06-12)**
 
 WORTZIEL-Wording in `generate_grounded.py` geändert: Obergrenze → angestrebte Länge.
-`temp/_pilot_gen2.py` → `pilot_output2/` (21 Artikel). Ergebnis: starke Verbesserung bei
-inhaltsreichen Themen; Overshoot bei Vulkan S3 +198 und Kühlschrank S1 +40.
+`temp/_pilot_gen2.py` → `pilot_output2/` (21 Artikel). Overshoot bei Vulkan S3 +198 und Kühlschrank S1 +40.
 
 **Wortbudget-Kalibrierung abgeschlossen (2026-06-11/12)**
 
@@ -58,19 +52,16 @@ target_S = Wlo + importance_S · (Whi−Wlo)
 
 ## 🔴 Nächster Schritt (höchste Priorität)
 
-**Vulkan S2-Overshoot analysieren** (Δ+61 trotz Lauf-3-Deckel) — vermutlich Vesuv-Companion-Übergewicht.
-Ggf. Companion-Char-Cap bei kleinen Zielen reduzieren, oder Vesuv aus Kompass ausschließen wenn Wmax<300.
-Dann: WORTZIEL_TABLE durch dynamische imp_S-Berechnung aus importance_cache_33.json ersetzen.
-Hund mit neuem Lauf nachziehen (3 fehlende Artikel).
+**Vulkan S2 Wortzahl-Guard**: Δ+61 (461/400) trotz Lauf-3-Deckel — Vesuv-Companion 42 kB dominiert bei kleinem WP (20.9 kB). Optionen: (a) Companion-Char-Cap proportional zu wmax, (b) große Companions kürzen wenn wmax<300, (c) post-hoc Wortcount-Check mit Retry.
+Dann: WORTZIEL_TABLE → dynamisch (imp_S aus importance_cache_33.json).
 
 ---
 
 ## 🔴 Offene Punkte (nach Priorität)
 
-1. **Vulkan S2 Overshoot** untersuchen (Companion-Cap oder Kompass-Filter für große Companions)
-2. **Hund-Nachziehen** (3 fehlende Artikel aus Lauf 3 — Netzwerk-Retry genügt)
-3. **WORTZIEL_TABLE → dynamisch** (imp_S aus importance_cache_33.json verdrahten)
-4. **resolve_lemma in generate_grounded.py** einbauen (vor fetch_wikipedia_text, Z. 746)
-5. **Pilotartikel reviewen** → pilot_output3/*.md
-6. **Sichtung** test_modelcompare2 — Qualitätsvergleich 3 Modelle
-7. Flutter-App testen: WfArticleListScreen mit R2-Artikeln
+1. **Vulkan S2 Wortzahl-Guard** (Companion-Cap bei kleinen Zielen)
+2. **WORTZIEL_TABLE → dynamisch** (imp_S aus importance_cache_33.json verdrahten)
+3. **resolve_lemma in generate_grounded.py** einbauen (vor fetch_wikipedia_text, Z. 746)
+4. **Pilotartikel reviewen** → pilot_output3/*.md
+5. **Sichtung** test_modelcompare2 — Qualitätsvergleich 3 Modelle
+6. Flutter-App testen: WfArticleListScreen mit R2-Artikeln
