@@ -370,7 +370,7 @@ def resolve_lemma(session: requests.Session, query: str) -> dict:
     resp = _wp_get(session, {
         "action": "query", "format": "json",
         "titles": query, "redirects": "1",
-        "prop": "info|categories", "cllimit": "10",
+        "prop": "info|categories|pageprops", "cllimit": "10",
     })
     qdata = resp.json().get("query", {})
     via_redirect = bool(qdata.get("redirects", []))
@@ -378,12 +378,14 @@ def resolve_lemma(session: requests.Session, query: str) -> dict:
     resolved_title: str | None = None
     vol = 0
     direct_cats: list[str] = []
+    is_disambig = False
     for page in qdata.get("pages", {}).values():
         if "missing" not in page:
             resolved_title = page.get("title")
             vol = page.get("length", 0)
             result["source"] = "redirect" if via_redirect else "direct"
             direct_cats = [c.get("title", "") for c in page.get("categories", [])]
+            is_disambig = "disambiguation" in (page.get("pageprops", {}) or {})
             if via_redirect:
                 log.info("  Lemma-Redirect: '%s' → '%s'", query, resolved_title)
 
@@ -406,13 +408,14 @@ def resolve_lemma(session: requests.Session, query: str) -> dict:
         resp3 = _wp_get(session, {
             "action": "query", "format": "json",
             "titles": search_title, "redirects": "1",
-            "prop": "info|categories", "cllimit": "10",
+            "prop": "info|categories|pageprops", "cllimit": "10",
         })
         for p in resp3.json().get("query", {}).get("pages", {}).values():
             if "missing" not in p:
                 resolved_title = p.get("title")
                 vol = p.get("length", 0)
                 direct_cats = [c.get("title", "") for c in p.get("categories", [])]
+                is_disambig = "disambiguation" in (p.get("pageprops", {}) or {})
         result["source"] = "search"
 
     if resolved_title is None or vol == 0:
@@ -423,6 +426,30 @@ def resolve_lemma(session: requests.Session, query: str) -> dict:
 
     result["resolved_title"] = resolved_title
     result["vol"] = vol
+
+    # ── Schritt 2.5: Selbst-BKS auflösen (Titel IST Begriffsklärung) ──────────
+    if is_disambig:
+        log.warning("  Lemma '%s' ist Begriffsklärung — löse auf ...", resolved_title)
+        best = _resolve_bks(session, resolved_title)
+        if best is None:
+            result["flags"].append(
+                f"NICHT AUFLOESBAR: BKS '{resolved_title}' ohne substanziellen Link")
+            return result
+        log.warning("  BKS '%s' → '%s' — BITTE PRUEFEN", resolved_title, best)
+        result["flags"].append(f"BITTE PRUEFEN: BKS '{resolved_title}' → '{best}'")
+        time.sleep(1.0)
+        resp_b = _wp_get(session, {
+            "action": "query", "format": "json",
+            "titles": best, "redirects": "1",
+            "prop": "info|categories", "cllimit": "10",
+        })
+        for p in resp_b.json().get("query", {}).get("pages", {}).values():
+            if "missing" not in p:
+                resolved_title = p.get("title")
+                vol = p.get("length", 0)
+                direct_cats = [c.get("title", "") for c in p.get("categories", [])]
+        result["resolved_title"] = resolved_title
+        result["vol"] = vol
 
     # ── Schritt 3: Listen-Check ────────────────────────────────────────────────
     if resolved_title.startswith("Liste "):

@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-12T15:40:58Z -->
+<!-- updated: 2026-06-12T15:53:49Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Doppelbedeutungs-Direktive wirksam: v3.23-Prompt dokumentiert DOPPELBEDEUTUNG-Feld + build_grounded_user_message injiziert die Zeile in den stabilen Prefix. Plumbing-Test PASS.** ← AKTUELL
+**BKS-Fix: resolve_lemma erkennt Selbst-Begriffsklärungen (pageprops.disambiguation) und löst via _resolve_bks auf substanziellsten Link auf, geflaggt BITTE PRUEFEN: BKS … (→ Review-Flag). Verifiziert: Schmetterling → Schmetterlinge, Apfel → Kulturapfel; Hund-Kontrolle ohne BKS-Flag.** ← AKTUELL
+
+**Doppelbedeutungs-Direktive wirksam: v3.23-Prompt dokumentiert DOPPELBEDEUTUNG-Feld + build_grounded_user_message injiziert die Zeile in den stabilen Prefix. Plumbing-Test PASS.**
 
 **resolve_lemma im Hauptloop verdrahtet (Part B): primaer_wikipedia wird jetzt aufgelöst (Redirect/BKS/Listen/Lemma-Wechsel); Lemma-Flags → review_flag; Doppelbedeutungs-Direktive diagnostisch am Job (nicht injiziert). py_compile + import PASS.**
 
