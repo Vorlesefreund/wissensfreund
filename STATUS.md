@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-12T16:19:51Z -->
+<!-- updated: 2026-06-12T17:14:14Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Box-Verteilungs-Guard: deterministischer Lint (Clusterung / kein Mittel-Box) → Modell-Reparatur-Pass (nur Platzierung) mit Inhalts-Integritätscheck; akzeptiert nur bei wortgleichem Inhalt + sauberer Verteilung, sonst review_flag. stimmt_das-Pflicht bewusst NICHT eingebaut.** ← AKTUELL
+**Eignungs-Gate Runtime: exclude-Filter + age_floor-Skip + framing_note-Injektion (FRAMING-Feld im v3.23-Prompt). Schalter EIGNUNG_STRICT (vor Bulk = ungeprüfte Themen blockieren). Daten aus eignung_verdicts.json (Fallback bis Excel-Freigabe). Verifikation PASS.** ← AKTUELL
+
+**Box-Verteilungs-Guard: deterministischer Lint (Clusterung / kein Mittel-Box) → Modell-Reparatur-Pass (nur Platzierung) mit Inhalts-Integritätscheck; akzeptiert nur bei wortgleichem Inhalt + sauberer Verteilung, sonst review_flag. stimmt_das-Pflicht bewusst NICHT eingebaut.**
 
 **Wortzahl-Guard: Post-Gen >Cap (wmax·1.05) → bis zu 2 Trim-Pässe (eigenes Lektor-Prompt), danach review_flag. Sichert harte Stufen-Obergrenze deterministisch. py_compile + import PASS.**
 
@@ -95,6 +97,6 @@ Ergiebigkeits-Formel verdrahten (Kurve+Boost ersetzt WORTZIEL_TABLE) ✅ — res
 Wortzahl-Guard (Post-Gen >Cap → Trim-Pass) ✅
 Box-Regeln: Verteilung via Guard ✅; stimmt_das-Pflicht verworfen (widerspricht Prompt-Philosophie) ✅
 Katalog: Claude kuratiert+bewertet+kategorisiert ~5000 Themen (verankert an die 134), Round-Robin-Reihenfolge
-Eignungs-/Framing-Gate (Nazis, Erotik, Negerkuss→Schaumkuss, Homosexualität/Geschlechtsorgane altersgerecht, politisch neutral) — Vor-Bulk
+Eignungs-/Framing-Gate ✅ (Rubrik+Rater-Instruktion+Runtime; offen: 5000er-Rater-Kuratierung → eignung_verdicts.json/Excel)
 Dedup (Hai=Haie, Deutschland 3×, Zigarette=Zigaretten; bekannte Dino-Arten eigenständig, obskure als Companion) — Vor-Bulk
 3-flash-preview L3 Fix (max_output_tokens explizit); test_modelcompare2 Sichtung; Flutter WfArticleListScreen mit R2-Artikeln

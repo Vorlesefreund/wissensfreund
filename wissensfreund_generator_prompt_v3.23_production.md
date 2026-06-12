@@ -44,6 +44,8 @@
      wo die Quelle sie trägt; nicht als Erstes für die Wortzahl opfern). -->
 <!-- v3.23a (2026-06-12): DOPPELBEDEUTUNG-Direktive — Modell befolgt injizierte DOPPELBEDEUTUNG-Zeile
      (genannte Hauptbedeutung zuerst/ausführlich, Sonderfall knapp darunter). -->
+<!-- v3.23b (2026-06-12): FRAMING-Direktive — Modell befolgt injizierte FRAMING-Zeile (altersgerechte/
+     sachliche/neutrale Behandlung sensibler Themen; Vorrang vor stilistischer Freiheit). -->
 
 
 > Produktionsfassung (JSON-Output). Der WIKIPEDIA_TEXT und ARTICLE_TITLE werden vom Backend injiziert.
@@ -78,6 +80,10 @@ Kinder kennen), NICHT die biologische Familie.
   strikt: Erkläre die dort genannte Hauptbedeutung zuerst und ausführlich; den genannten Sonderfall bzw. die
   zweite Bedeutung nur knapp und weiter unten (eigener, kürzerer Abschnitt). Ohne eine solche Zeile erfinde
   keine Doppelbedeutung.
+- **FRAMING-Direktive (Produktion):** Enthält die Eingabe eine Zeile `FRAMING: …`, befolge sie strikt — sie gibt
+  die altersgerechte, sachliche, neutrale Behandlung eines sensiblen Themas vor (Terminologie, keine Wertung/
+  Moralisierung, keine Anleitung, keine Verharmlosung oder Verherrlichung). Sie hat Vorrang vor stilistischer
+  Freiheit; im Konflikt mit „lebendig schreiben" gewinnt das Framing.
 - **Primärartikel bei Reichen/Zivilisationen:** Bei historischen Völkern, Reichen und Zivilisationen wähle
   den Artikel über das Reich/Volk als Ganzes (politisch + militärisch + kulturell), nicht eine kulturelle
   Teilspezialisierung. RICHTIG: „Römer" → „Römisches Reich". FALSCH: „Altes Rom" (Fokus nur auf

@@ -146,6 +146,39 @@ def appeal_for(thema: str, job_appeal: str | None = None) -> tuple[str, str]:
     return "medium", "fallback-medium"
 
 
+EIGNUNG_STRICT = False  # True VOR dem Bulk: Themen ohne Urteil werden blockiert statt zugelassen
+
+
+def _load_eignung() -> dict[str, dict]:
+    """Lädt eignung_verdicts.json → key (thema.lower) → {eignung,age_floor,framing_note}."""
+    path = ROOT / "eignung_verdicts.json"
+    if not path.exists():
+        log.warning("eignung_verdicts.json fehlt (%s) — Themen laufen über Eignungs-Fallback", path)
+        return {}
+    data = json.load(path.open(encoding="utf-8"))
+    return data.get("verdicts", data)
+
+
+_EIGNUNG: dict[str, dict] = _load_eignung()
+
+
+def eignung_for(thema: str) -> dict:
+    """Eignungs-Urteil: {eignung, age_floor, framing_note, source}. Kein Urteil → Fallback (sichtbar)."""
+    rec = _EIGNUNG.get(thema.strip().lower())
+    if rec is None:
+        if EIGNUNG_STRICT:
+            log.warning("  Eignung: kein Urteil für '%s' → STRICT: blockiert", thema)
+            return {"eignung": "exclude", "age_floor": 1, "framing_note": "", "source": "fallback-strict"}
+        log.warning("  Eignung: kein Urteil für '%s' → Default include/S1 (ungeprüft)", thema)
+        return {"eignung": "include", "age_floor": 1, "framing_note": "", "source": "fallback-permissive"}
+    return {
+        "eignung":      rec.get("eignung", "include"),
+        "age_floor":    int(rec.get("age_floor", 1)),
+        "framing_note": rec.get("framing_note", "") or "",
+        "source":       "verdict",
+    }
+
+
 def count_article_words(article: dict) -> int:
     """Zählt Wörter in Fließtext + Boxen (ohne Quiz, ohne Überschriften)."""
     words = 0
@@ -645,6 +678,9 @@ def build_grounded_user_message(
     dd = job.get("doppelbedeutung_directive", "")
     if dd:
         parts.append(f"DOPPELBEDEUTUNG: {dd}")
+    fr = job.get("framing_note", "")
+    if fr:
+        parts.append(f"FRAMING: {fr}")
 
     # Bildpool (stabil — gleiche Images für alle Stufen)
     if images:
@@ -1217,6 +1253,23 @@ def main() -> None:
         topic_jobs = topic_groups[primary_wikipedia]
         thema      = topic_jobs[0].get("thema", topic_jobs[0]["title"])
         levels     = [j["age_level"] for j in topic_jobs]
+
+        # ── Eignungs-Gate: exclude / age_floor / framing ─────────────────────
+        ev = eignung_for(thema)
+        if ev["eignung"] == "exclude":
+            log.warning("  Eignungs-Gate: '%s' ausgeschlossen (%s) — übersprungen", thema, ev["source"])
+            continue
+        floor = ev["age_floor"]
+        skipped = [j["age_level"] for j in topic_jobs if j["age_level"] < floor]
+        topic_jobs = [j for j in topic_jobs if j["age_level"] >= floor]
+        if skipped:
+            log.info("  Eignungs-Gate: '%s' age_floor=S%d → Stufen %s übersprungen", thema, floor, skipped)
+        if not topic_jobs:
+            log.warning("  Eignungs-Gate: '%s' — alle Stufen unter age_floor S%d, nichts zu tun", thema, floor)
+            continue
+        for job in topic_jobs:
+            job["framing_note"] = ev["framing_note"]
+        levels = [j["age_level"] for j in topic_jobs]
 
         # ── Lemma auflösen (Redirect / BKS / Listen / Doppelbedeutung) ───────
         try:
