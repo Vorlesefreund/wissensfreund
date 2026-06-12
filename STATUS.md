@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-12T12:19:20Z -->
+<!-- updated: 2026-06-12T12:45:09Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -36,32 +36,53 @@ WORTZIEL-Wording in `generate_grounded.py` geändert: Obergrenze → angestrebte
 
 33 Themen re-scored mit content_richness_v2 (wc=0 optimal).
 
-### Finalisierte Formel (wc=0, noch NICHT in generate_grounded.py verdrahtet)
-```
-fasc_norm_S  = (flash_S − 1) / 9
-importance_S = fasc_norm_S              ← wc=0 optimal
+### Ergiebigkeits-Modell (aktuell — Detail in WISSEN_ARTIKEL_PIPELINE.md)
+Länge = Claude-bewertete ERGIEBIGKEIT (spannend+unterhaltsam+wissenswert, Kind-Neugier),
+NICHT Flash, NICHT Wichtigkeit. Claude 0,74 vs Flash 0,53 ggü. Andreas' Noten.
+`target_S = Wlo + frac·(Whi−Wlo),  frac = clamp((score−2)/6, 0, 1)`
+Bänder: S1[50,250]  S2[80,400]  S3[100,650]   (Score 8 = Limit, 9–10 sättigen)
+Boost (nur nach oben): Lebens-Zentralität/Strategie/Heimat → Wirtschaft, Gemüse, Markt,
+  Lexikon, Düsseldorf; Sockel für dt. Orte + Herkunftssprachen.
+Füllbarkeit = Generator-Prompt-Regel (Wortziel ausschöpfen, nie aufblähen), kein Modul.
+Rater = Opus-Klasse-Claude per API, verankert an die 134 (wortziele_ergiebigkeit_134_v2.xlsx).
+WORTZIEL-Wording auskonvergiert (Lauf 1–3): Deckel hält weitgehend selbst; Rest (Vulkan S2 +61,
+Hund S3 +17) → Wortzahl-Guard.
 
-Klexikon-Abwesenheits-Deckel, NUR S2/S3, NUR wenn KlexW fehlt:
-  importance_S = min(importance_S, 0.25 + 0.5·importance_S)
+### Rang-Tabelle 33 (Pilot-Themen fett)
 
-target_S = Wlo + importance_S · (Whi−Wlo)
-  S1[50,250] / S2[80,400] / S3[100,650]
-```
+Hinweis: f-Spalten sind Flash-Importance (alt). Werden beim Voll-Rating durch Ergiebigkeits-Scores ersetzt. W-Spalten (Bänder) bleiben gültig.
+
+| # | Thema | f:S1/S2/S3 | **W1/W2/W3** |
+|---|---|---|---|
+| 1 | Dinosaurier | 10/10/9 | **250/400/650** |
+| 2 | Vulkan | 7/10/10 | **217/400/650** |
+| 3 | Indianer | 6/9/8 | **183/400/650** |
+| 4 | Elefant | 9/8/6 | **250/400/650** |
+| 5 | Hund | 10/8/6 | **250/400/650** |
+| 9 | Fußball | 6/8/8 | **183/400/650** |
+| 11 | Schmetterling | 8/7/5 | **217/347/467** |
+| 18 | Pangolin | 3/6/7 | **117/293/467** |
+| 24 | Düsseldorf | 1/2/3 | **217/400/650** |
+| 28 | Kühlschrank | 2/4/5 | **83/240/375** |
+| 29 | Wirtschaft (test) | — | **117/347/650** |
+| 33 | Viereck | 2/2/2 | **117/187/283** |
 
 ---
 
 ## 🔴 Nächster Schritt (höchste Priorität)
 
-**Vulkan S2 Wortzahl-Guard**: Δ+61 (461/400) trotz Lauf-3-Deckel — Vesuv-Companion 42 kB dominiert bei kleinem WP (20.9 kB). Optionen: (a) Companion-Char-Cap proportional zu wmax, (b) große Companions kürzen wenn wmax<300, (c) post-hoc Wortcount-Check mit Retry.
-Dann: WORTZIEL_TABLE → dynamisch (imp_S aus importance_cache_33.json).
+Ergiebigkeits-Formel verdrahten in generate_grounded.py: WORTZIEL_TABLE durch dynamische
+target_S-Berechnung (Kurve + Boost) ersetzen; Ergiebigkeits-Scores aus Rater-Lauf einlesen.
+Parallel: resolve_lemma vor prepare_topic_sources() einbauen.
 
 ---
 
 ## 🔴 Offene Punkte (nach Priorität)
 
-1. **Vulkan S2 Wortzahl-Guard** (Companion-Cap bei kleinen Zielen)
-2. **WORTZIEL_TABLE → dynamisch** (imp_S aus importance_cache_33.json verdrahten)
-3. **resolve_lemma in generate_grounded.py** einbauen (vor fetch_wikipedia_text, Z. 746)
-4. **Pilotartikel reviewen** → pilot_output3/*.md
-5. **Sichtung** test_modelcompare2 — Qualitätsvergleich 3 Modelle
-6. Flutter-App testen: WfArticleListScreen mit R2-Artikeln
+Ergiebigkeits-Formel verdrahten (Kurve+Boost ersetzt WORTZIEL_TABLE) + resolve_lemma einbauen
+Wortzahl-Guard (Post-Gen >Cap → Trim-Pass) — Vor-Bulk-Muss
+Box-Regeln im Generator-Systemprompt: stimmt_das-Pflicht (S2/S3) + Verteilung (keine End-Clusterung)
+Katalog: Claude kuratiert+bewertet+kategorisiert ~5000 Themen (verankert an die 134), Round-Robin-Reihenfolge
+Eignungs-/Framing-Gate (Nazis, Erotik, Negerkuss→Schaumkuss, Homosexualität/Geschlechtsorgane altersgerecht, politisch neutral) — Vor-Bulk
+Dedup (Hai=Haie, Deutschland 3×, Zigarette=Zigaretten; bekannte Dino-Arten eigenständig, obskure als Companion) — Vor-Bulk
+3-flash-preview L3 Fix (max_output_tokens explizit); test_modelcompare2 Sichtung; Flutter WfArticleListScreen mit R2-Artikeln

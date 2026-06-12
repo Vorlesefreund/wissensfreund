@@ -48,7 +48,7 @@ Quiz: 3 Fragen (Stufe 3: 4 Fragen), Antworten A/B/C (für STT-Erkennung),
 ## Altersstufen + Wortgrenzen
 
 **ZÄHLREGEL: Fließtext + Boxen zusammen, OHNE Quiz.**
-Interest-gestaffelt über TOPIC_INTEREST (Pageviews): low / medium / high.
+Länge je Thema über die Ergiebigkeits-Kurve (s. Abschnitt „Ergiebigkeits-Wortbudget"), nicht mehr über Pageviews-Interest. Die folgenden Spannen sind die Bänder, in denen target_S liegt.
 
 | Stufe | Alter | low-interest | medium-interest | high-interest | Besonderheiten |
 |---|---|---|---|---|---|
@@ -136,7 +136,7 @@ Alters→Filter-Raster:
   NICHT eine Aussage aus dem unmittelbar vorherigen Absatz.
 - Test: Würde ein Kind das glauben, BEVOR es den Artikel liest?
   Ja → gutes Stimmt-da / Nein → weglassen.
-- Max. 1 bei Stufe 2, max. 2 bei Stufe 3, gleichmäßig verteilt.
+- Pflicht: mind. eine stimmt_das-Box pro S2/S3-Artikel. Max. 1 bei Stufe 2, max. 2 bei Stufe 3, gleichmäßig über den Artikel verteilt — keine Box-Clusterung am Ende (s. „Box-Regeln" im Grounded-Abschnitt).
 - Abschnittstitel darf NICHT denselben Namen tragen wie ein Element darin
   (z.B. nicht „Stimmt das?" als Titel wenn drin eine stimmt-Box steht).
 - Brückensatz vor einer Box muss echten Inhalt liefern — kein dünner Übergangssatz
@@ -490,63 +490,71 @@ aber ohne pre-fetch nötig. url_context_metadata gibt echten Beweis zurück.
 **Companion-Cap gestaffelt nach Appeal:** low=4 / medium=5 / high=6  
 **Prompt-Caching:** Stabiler Prefix (Quelltext) = unveränderlich; nur AGE_LEVEL+WORTZIEL wechselt → Gemini Context Cache spart ~80 % der Token-Kosten für Stufen 2+3.
 
-### WORTZIEL-Injektion (aktuell fehlerhaft — BUG)
-
-Aktuell in `build_grounded_user_message()`, Z. ~664:
-```python
-wmin, wmax = WORTZIEL_TABLE.get((level, appeal), (100, 250))
-parts.append(
-    f"WORTZIEL: {wmin}–{wmax} Wörter (bei reichen Quellen Richtung Obergrenze; "
-    f"harte Obergrenze {wmax} Wörter nicht überschreiten)"
-)
+### WORTZIEL-Injektion (auskonvergiert, 2026-06-12)
+In `build_grounded_user_message()` + `_split_grounded_user_message()`. Finale Formulierung
+(nach Pilot-Läufen 1–3, byte-identisch in beiden Funktionen, da `_split` per
+`full[:len(full)-len(variable)]` schneidet):
 ```
-
-`WORTZIEL_TABLE` enthält statische (level, appeal)-Werte — **nicht kalibriert gegen Flash-Scores.**
-
-**Pilot-Befund (2026-06-12, 36 Artikel):** Ceiling-only-Formulierung ("bis zu X")
-veranlasst das Modell, systematisch unter dem Ziel zu bleiben (S2/S3 oft −100–200 Wörter),
-auch wenn der Wikipedia-Stoff reichhaltig genug wäre.
-
-**Korrekte Formulierung:**
+WORTZIEL: Strebe {wmax} Wörter an und schöpfe den Wikipedia-Stoff so weit aus, dass du nah
+an {wmax} herankommst. {wmax} ist zugleich die harte Obergrenze — schreibe nicht darüber
+hinaus. Wenn nach Erreichen von {wmax} noch Stoff übrig ist, wähle die kindgerechtesten
+Aspekte aus, statt alles aufzunehmen. Kürzer als {wmax} nur, wenn der Wikipedia-Stoff die
+Länge nicht hergibt — niemals aufblähen.
 ```
-WORTZIEL: {wmin}–{wmax} Wörter.
-Wenn der Stoff für {wmax} reicht, schreib bis dahin.
-Kürzer als {wmin} nur wenn der Wikipedia-Stoff wirklich erschöpft ist — nicht aufblähen.
-```
+Entwicklung: Ceiling-Wording („bis zu X … nicht überschreiten") → systematisches Untertreiben
+(Lauf 1). „Angestrebte Länge ohne Deckel" → Untertreiben behoben, aber Overshoot bei
+companion-reichen Themen (Lauf 2: Vulkan S3 848/650). Finale Fassung („strebe an" + harter
+Deckel + Auswahlregel) → Deckel hält weitgehend selbst (Lauf 3: Vulkan S3 644, Kühlschrank
+punktgenau), Untergrenze weich. Wording gilt als abgeschlossen — Resthärte am Cap gehört in
+den Wortzahl-Guard, nicht in weiteres Prompt-Tuning.
 
-### Wortbudget-Formel (kalibriert, noch NICHT verdrahtet)
+### Ergiebigkeits-Wortbudget (kalibriert, noch NICHT verdrahtet)
+Modellwechsel (2026-06-12): Das frühere Modell (content_richness_v2 / fasc-Norm / wc=0 /
+Klexikon-Abwesenheits-Deckel) ist ÜBERHOLT. Länge wird jetzt von Claude-bewerteter
+Ergiebigkeit gesteuert.
 
-Basis: `scripts/importance_cache_33.json` (content_richness_v2-Scores, 33 Themen)
+Längen-Signal = ERGIEBIGKEIT (spannend + unterhaltsam + wissenswert, aus Kind-Neugier).
+Nicht Flash, nicht die „Wichtigkeit"-Achse. Claude-Rater korreliert 0,74 mit Andreas' Noten,
+Flash nur 0,53 (Flash versagt bei vielschichtigen Themen, z. B. Indianer).
+Kurve: target_S = Wlo + frac · (Whi − Wlo), frac = clamp((score − 2) / 6, 0, 1).
+Score 2 → Bandboden, Score 8 → Bandlimit, 9–10 sättigen. Bänder: S1 [50, 250], S2 [80, 400],
+S3 [100, 650]. Bewusst großzügig nach oben.
+Boost: Lebens-Zentralität / Strategie / Heimat hebt nach oben, NIE nach unten. Geboostet
+u. a. Wirtschaft, Gemüse, Markt, Lexikon, Düsseldorf (Launch-Heimatstadt). Zugehörigkeits-
+Sockel für deutsche Orte + Herkunftssprachen.
+Füllbarkeit: kein eigenes Modul — reine Generator-Prompt-Regel (s. WORTZIEL oben).
+Wortziel = angestrebte Länge, Stoff ausschöpfen, nur bei erschöpfter Quelle kürzer, nie
+aufblähen.
+Rater: starkes Claude-Modell (Opus-Klasse) per API, verankert an die 134 Anker-Themen.
+API-Kosten separat vom Chat-Budget.
+Anker-Artefakt: `wortziele_ergiebigkeit_134_v2.xlsx` (134 Themen mit Ergiebigkeit /
+Wortzielen / Flags) = Ground-Truth fürs Voll-Rating.
 
-```python
-# Faszinations-Norm (0..1)
-fasc_norm_S = (flash_score_S - 1) / 9
+TODO (Verdrahtung): `WORTZIEL_TABLE` in `generate_grounded.py` durch dynamische
+`target_S`-Berechnung (Kurve + Boost) ersetzen; Ergiebigkeits-Scores aus dem Rater-Lauf einlesen.
 
-# wc=0 optimal (MAE-Analyse bestätigt kein Coverage-Signal nötig)
-importance_S = fasc_norm_S
+### Wortzahl-Guard (offen, Vor-Bulk-Muss)
+Prompts halten einen harten Zahlen-Cap nie zu 100 %. Pilot Lauf 3 zeigt zwei Rest-Breaches:
+Vulkan S2 461/400 (+61) und Hund S3 667/650 (+17). Deterministische Absicherung: Post-Gen-
+Wortzahl (autoritativ vom Script) > Obergrenze → Trim-Pass („kürze auf ≤ M, straffe/entferne den
+am wenigsten kindrelevanten Abschnitt, Fakten + Stil bewahren"), bis ≤ Cap. Feuert selten,
+garantiert aber die Stufen-Obergrenze. Vor dem Bulk-Lauf nötig.
 
-# Klexikon-Abwesenheits-Deckel (NUR S2/S3, NUR 5 Themen ohne KlexW)
-# Themen: Pangolin, Seefahrer, Lego, Süßigkeiten, VW
-if klex_missing and level >= 2:
-    importance_S = min(importance_S, 0.25 + 0.5 * importance_S)
+### Box-Regeln (offen, Generator-Systemprompt)
+Pilot Hund S3: fakt + warnung beide im letzten Abschnitt geclustert, keine stimmt_das.
+Andere Artikel (Dino, Vulkan) verteilen sauber → kein Systembruch, aber der Generator erzwingt
+zwei Dinge nicht. Nachzubessern im Generator-Systemprompt:
 
-# Wortziel
-wmin = Wlo + importance_S * (Whi - Wlo)  # Untergrenze
-wmax = wmin  # bei wc=0: wmin == wmax (ein Zielwert, keine Spanne)
-# S1: Wlo=50, Whi=250 / S2: Wlo=80, Whi=400 / S3: Wlo=100, Whi=650
-```
-
-**TODO:** `WORTZIEL_TABLE` in `generate_grounded.py` (Z. 86–96) durch diese dynamische
-Berechnung ersetzen. Benötigt: `importance_cache_33.json` einlesen + Cache-Lookup.
+- Pflicht: mind. eine `stimmt_das`-Box pro S2/S3-Artikel.
+- Verteilung: max. eine Box pro Abschnitt, keine zwei am Stück am Ende — über den Artikel
+  streuen.
 
 ### resolve_lemma-Integration (fehlt noch)
-
-`resolve_lemma()` ist in `generate_articles.py` (Z. 338) definiert, aber **nicht** in
-`generate_grounded.py` aufgerufen. Aktuell: `fetch_wikipedia_text()` bekommt den rohen
-Thema-String — BKS-Guard löst auf, aber Doppelbedeutungs-Direktive und LISTENARTIKEL-Flag
+`resolve_lemma()` ist in `generate_articles.py` (Z. 338) definiert, aber nicht in
+`generate_grounded.py` aufgerufen. Aktuell bekommt `fetch_wikipedia_text()` den rohen
+Thema-String — der BKS-Guard löst auf, aber Doppelbedeutungs-Direktive und LISTENARTIKEL-Flag
 fehlen im Artikel-Job.
-
-**TODO:** Vor `prepare_topic_sources()` aufrufen:
+TODO: Vor `prepare_topic_sources()` aufrufen:
 ```python
 lr = resolve_lemma(session, thema)
 primary_wikipedia = lr["resolved_title"] or thema
@@ -556,12 +564,17 @@ if dd_directive:
     job["doppelbedeutung_directive"] = dd_directive["directive"]
 ```
 
-### Pilot-Lauf-Befunde (temp/_pilot_gen.py, 2026-06-12)
+### Pilot-Lauf-Befunde (2026-06-12, Läufe 1–3)
 
-- 36/36 Artikel ohne Fehler, Laufzeit ~16 Min
-- Fußball + Wirtschaft: Doppelbedeutungs-Direktive korrekt erkannt + injiziert
-- Pangolin → Schuppentiere, Schmetterling → Schmetterlinge (BKS korrekt aufgelöst)
-- Hund → Haushund (Redirect korrekt)
-- Kühlschrank ohne Companions (Companion-Validierung schlug wegen 429 fehl → korrekt degradiert)
-- Wortzahl-Pattern: thin-content-Themen (Wirtschaft WP=9 kB) decken korrekt ab;
-  rich-content-Themen (Hund, Dino, Fußball) unterschreiten zu stark → WORTZIEL-Fix nötig
+- **Lauf 1** (`temp/_pilot_gen.py`, 36 Artikel, ~16 Min, 0 Fehler): reiche Themen unterschreiten
+  stark (Hund S2 188/400, Dino S2 291/400) → Ceiling-Wording als Ursache identifiziert.
+- **Lauf 2** (7×3, `_pilot_gen2.py`): „angestrebte Länge"-Fix → Undershoot behoben
+  (Elefant/Dino/Fußball/Wirtschaft ±26), aber Deckel-Entfernung → Vulkan S2/S3 über Cap (848/650).
+- **Lauf 3** (4×3 + Hund-Nachzug, `_pilot_gen3.py`): finales Wording → Deckel hält weitgehend
+  selbst, Dino-Regressionskontrolle bestanden (S3 636/650). Rest-Breaches Vulkan S2 (+61),
+  Hund S3 (+17) → Wortzahl-Guard. Hund S3 −115 aus Lauf 2 war zaghaftes Untertreiben, kein
+  erschöpfter Stoff (jetzt 667, randvoll). Kühlschrank S1 79 W akzeptiert (kein Floor-Eingriff).
+- Doppelbedeutungs-Direktive (Fußball, Wirtschaft) korrekt erkannt + injiziert. BKS-Auflösungen
+  korrekt (Pangolin → Schuppentiere, Schmetterling → Schmetterlinge, Hund → Haushund).
+- Companion-Auswahl nicht-deterministisch zwischen Läufen (Kühlschrank: „Carl von Linde" statt
+  „Gefrierbrand") — unkritisch, gelegentlich qualitativ besser.
