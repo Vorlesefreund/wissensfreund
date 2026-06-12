@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-12T16:04:05Z -->
+<!-- updated: 2026-06-12T16:19:51Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Wortzahl-Guard: Post-Gen >Cap (wmax·1.05) → bis zu 2 Trim-Pässe (eigenes Lektor-Prompt), danach review_flag. Sichert harte Stufen-Obergrenze deterministisch. py_compile + import PASS.** ← AKTUELL
+**Box-Verteilungs-Guard: deterministischer Lint (Clusterung / kein Mittel-Box) → Modell-Reparatur-Pass (nur Platzierung) mit Inhalts-Integritätscheck; akzeptiert nur bei wortgleichem Inhalt + sauberer Verteilung, sonst review_flag. stimmt_das-Pflicht bewusst NICHT eingebaut.** ← AKTUELL
+
+**Wortzahl-Guard: Post-Gen >Cap (wmax·1.05) → bis zu 2 Trim-Pässe (eigenes Lektor-Prompt), danach review_flag. Sichert harte Stufen-Obergrenze deterministisch. py_compile + import PASS.**
 
 **BKS-Fix: resolve_lemma erkennt Selbst-Begriffsklärungen (pageprops.disambiguation) und löst via _resolve_bks auf substanziellsten Link auf, geflaggt BITTE PRUEFEN: BKS … (→ Review-Flag). Verifiziert: Schmetterling → Schmetterlinge, Apfel → Kulturapfel; Hund-Kontrolle ohne BKS-Flag.**
 
@@ -91,7 +93,7 @@ Parallel: resolve_lemma vor prepare_topic_sources() einbauen.
 
 Ergiebigkeits-Formel verdrahten (Kurve+Boost ersetzt WORTZIEL_TABLE) ✅ — resolve_lemma einbauen ✅
 Wortzahl-Guard (Post-Gen >Cap → Trim-Pass) ✅
-Box-Regeln im Generator-Systemprompt: stimmt_das-Pflicht (S2/S3) + Verteilung (keine End-Clusterung)
+Box-Regeln: Verteilung via Guard ✅; stimmt_das-Pflicht verworfen (widerspricht Prompt-Philosophie) ✅
 Katalog: Claude kuratiert+bewertet+kategorisiert ~5000 Themen (verankert an die 134), Round-Robin-Reihenfolge
 Eignungs-/Framing-Gate (Nazis, Erotik, Negerkuss→Schaumkuss, Homosexualität/Geschlechtsorgane altersgerecht, politisch neutral) — Vor-Bulk
 Dedup (Hai=Haie, Deutschland 3×, Zigarette=Zigaretten; bekannte Dino-Arten eigenständig, obskure als Companion) — Vor-Bulk

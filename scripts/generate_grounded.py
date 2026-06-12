@@ -843,6 +843,64 @@ def _trim_article_to_cap(article: dict, wmax: int, model: str, thinking_config) 
     return trimmed, count_article_words(trimmed)
 
 
+BOX_REPAIR_SYSTEM_PROMPT = (
+    "Du bist Lektor für ein deutsches Kinderlexikon. Du erhältst einen fertigen Artikel als JSON, "
+    "dessen Callout-Boxen schlecht verteilt sind. Ordne JEDE vorhandene Box dem inhaltlich passenden "
+    "Abschnitt zu, sodass keine zwei Boxen am Stück am Ende stehen und bei zwei oder mehr Boxen "
+    "mindestens eine im mittleren Drittel sitzt. Du änderst AUSSCHLIESSLICH die Box-Platzierung. "
+    "Box-Inhalt (type/text/reveal_text), Abschnittsreihenfolge, Überschriften und ALLE Sätze bleiben "
+    "wortgleich. Nichts hinzufügen, nichts löschen, nichts umformulieren. Gib NUR das JSON nach "
+    "demselben Schema zurück — kein Vortext."
+)
+
+
+def _box_lint(article: dict) -> str | None:
+    """Prüft Box-Verteilung deterministisch. Rückgabe: Verstoßgrund oder None (ok)."""
+    secs = article.get("sections", [])
+    counts = [len(s.get("boxes", []) or []) for s in secs]
+    total, n = sum(counts), len(secs)
+    if total < 2 or n < 2:
+        return None
+    if counts[-1] >= 2:
+        return "Box-Clusterung: >=2 Boxen im letzten Abschnitt"
+    if n >= 3:
+        lo, hi = n // 3, (2 * n + 2) // 3
+        if not any(counts[i] > 0 for i in range(lo, hi)):
+            return "Box-Verteilung: keine Box im mittleren Drittel"
+    return None
+
+
+def _box_signature(article: dict):
+    """Inhalts-Fingerabdruck (positionsunabhängig): Box-Multiset + Abschnittssätze."""
+    boxes = sorted(
+        (b.get("type", ""), (b.get("text", "") or "").strip(), (b.get("reveal_text", "") or "").strip())
+        for s in article.get("sections", []) for b in (s.get("boxes", []) or [])
+    )
+    sentences = [
+        (s.get("heading", ""),
+         tuple((x.get("text", "") or "").strip() for x in (s.get("sentences", []) or [])))
+        for s in article.get("sections", [])
+    ]
+    return boxes, sentences
+
+
+def _box_repair_pass(article: dict, model: str, thinking_config) -> dict:
+    """Modell ordnet vorhandene Boxen den passenden Abschnitten zu (Inhalt unverändert)."""
+    import json as _json
+    msg = (
+        "Die Callout-Boxen sind schlecht verteilt. Ordne sie den passenden Abschnitten zu — "
+        "nur Platzierung, Inhalt/Sätze/Reihenfolge wortgleich.\n\n"
+        f"ARTIKEL_JSON:\n{_json.dumps(article, ensure_ascii=False)}"
+    )
+    raw = gemini_client.call_gemini(
+        BOX_REPAIR_SYSTEM_PROMPT, msg, model=model, thinking_config=thinking_config,
+        response_mime_type="application/json",
+    )
+    repaired = parse_article_json(raw)
+    repaired.setdefault("meta", {}).update(article.get("meta", {}))
+    return repaired
+
+
 # ── Phase-2-Generierung: je Stufe ────────────────────────────────────────────
 
 def generate_one_level(
@@ -1036,6 +1094,31 @@ def generate_one_level(
 
     report["phase2"]["word_count"] = word_count
     article["meta"]["word_count"] = word_count
+
+    # ── Box-Verteilungs-Guard: Clusterung → Auto-Reparatur, sonst review_flag ──
+    box_issue = _box_lint(article)
+    if box_issue:
+        log.warning("  %s — Box-Reparatur-Pass", box_issue)
+        try:
+            repaired = _box_repair_pass(article, model, phase2_thinking)
+            same_content = _box_signature(repaired) == _box_signature(article)
+            if same_content and _box_lint(repaired) is None:
+                article = repaired
+                report["phase2"]["box_repaired"] = True
+                log.info("  Box-Reparatur erfolgreich (Inhalt unverändert).")
+            else:
+                why = "Inhalt verändert" if not same_content else "Verteilung weiter verletzt"
+                log.warning("  Box-Reparatur verworfen (%s) → review_flag", why)
+                report["phase2"]["box_repaired"] = False
+                article["meta"]["review_flag"]   = True
+                article["meta"]["review_reason"] = (
+                    article["meta"].get("review_reason", "") + f"; {box_issue}").lstrip("; ")
+        except Exception as e:
+            log.error("  Box-Reparatur fehlgeschlagen: %s", e)
+            report["errors"].append(f"Box-Reparatur fehlgeschlagen: {e}")
+            article["meta"]["review_flag"]   = True
+            article["meta"]["review_reason"] = (
+                article["meta"].get("review_reason", "") + f"; {box_issue}").lstrip("; ")
 
     val_errors = validate_article(article, job)
     if val_errors:
