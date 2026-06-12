@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-12T13:16:21Z -->
+<!-- updated: 2026-06-12T15:29:23Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Ergiebigkeit verdrahtet (Part A+A.2): Wortbudget + Appeal-Tier (Companion/Bild) beide aus ergiebigkeit_scores.json; Klexikon-Appeal entfernt. Verifikation Wörter+Appeal gegen xlsx-Ground-Truth PASS. resolve_lemma (Part B) noch offen.** ← AKTUELL
+**resolve_lemma im Hauptloop verdrahtet (Part B): primaer_wikipedia wird jetzt aufgelöst (Redirect/BKS/Listen/Lemma-Wechsel); Lemma-Flags → review_flag; Doppelbedeutungs-Direktive diagnostisch am Job (nicht injiziert). py_compile + import PASS.** ← AKTUELL
+
+**Ergiebigkeit verdrahtet (Part A+A.2): Wortbudget + Appeal-Tier (Companion/Bild) beide aus ergiebigkeit_scores.json; Klexikon-Appeal entfernt. Verifikation Wörter+Appeal gegen xlsx-Ground-Truth PASS.**
 
 **Lauf 3 (pilot_output3): WORTZIEL-Wording auskonvergiert — Deckel hält (Vulkan S3 644/650, Kühlschrank punktgenau), Dino-Kontrolle ok. Rest: Vulkan S2 461/400 → gehört in Wortzahl-Guard. Hund nachgeholt nach Connection-Reset.**
 
@@ -81,7 +83,7 @@ Parallel: resolve_lemma vor prepare_topic_sources() einbauen.
 
 ## 🔴 Offene Punkte (nach Priorität)
 
-Ergiebigkeits-Formel verdrahten (Kurve+Boost ersetzt WORTZIEL_TABLE) + resolve_lemma einbauen
+Ergiebigkeits-Formel verdrahten (Kurve+Boost ersetzt WORTZIEL_TABLE) ✅ — resolve_lemma einbauen ✅
 Wortzahl-Guard (Post-Gen >Cap → Trim-Pass) — Vor-Bulk-Muss
 Box-Regeln im Generator-Systemprompt: stimmt_das-Pflicht (S2/S3) + Verteilung (keine End-Clusterung)
 Katalog: Claude kuratiert+bewertet+kategorisiert ~5000 Themen (verankert an die 134), Round-Robin-Reihenfolge

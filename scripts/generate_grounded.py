@@ -47,6 +47,7 @@ log = logging.getLogger(__name__)
 sys.path.insert(0, str(Path(__file__).parent))
 from generate_articles import (          # noqa: E402
     fetch_wikipedia_text,
+    resolve_lemma,
     parse_article_json,
     validate_article,
     WIKIPEDIA_API,
@@ -925,6 +926,11 @@ def generate_one_level(
     article["meta"]["generated_at"]                 = datetime.now(timezone.utc).isoformat()
     article["meta"]["grounding_companions"]          = valid_companions
     article["meta"]["generation_method"]             = generation_method
+    _lemma_flags = job.get("lemma_flags", [])
+    _review = [f for f in _lemma_flags if f.startswith(("BITTE PRUEFEN", "LEMMA_GEWECHSELT"))]
+    if _review:
+        article["meta"]["review_flag"]   = True
+        article["meta"]["review_reason"] = "; ".join(_review)
 
     # ── Wortzahl-Check + ggf. Retry ──────────────────────────────────────────
     wmin, wmax, _wz_src = wortziel_for(thema, job["age_level"])
@@ -1075,7 +1081,34 @@ def main() -> None:
         thema      = topic_jobs[0].get("thema", topic_jobs[0]["title"])
         levels     = [j["age_level"] for j in topic_jobs]
 
-        # Interessenstufe auflösen (Klexikon-Quartil → Job-Wert → Default)
+        # ── Lemma auflösen (Redirect / BKS / Listen / Doppelbedeutung) ───────
+        try:
+            lr = resolve_lemma(session, thema)
+        except Exception as e:
+            log.warning("  resolve_lemma('%s') Fehler: %s — nutze primaer_wikipedia direkt",
+                        thema, e)
+            lr = {"resolved_title": None, "flags": [], "doppelbedeutung_directive": None}
+        resolved_title = lr.get("resolved_title")
+        lemma_flags    = lr.get("flags", [])
+        dd_directive   = lr.get("doppelbedeutung_directive")
+        if resolved_title:
+            if resolved_title != primary_wikipedia:
+                log.info("  Lemma aufgelöst: '%s' → '%s'", primary_wikipedia, resolved_title)
+            primary_wikipedia = resolved_title
+        else:
+            log.warning("  Lemma '%s' nicht auflösbar (%s) — nutze '%s' direkt",
+                        thema, lemma_flags, primary_wikipedia)
+        if lemma_flags:
+            log.info("  Lemma-Flags: %s", lemma_flags)
+        if dd_directive:
+            log.info("  Doppelbedeutung (diagnostisch, nicht injiziert): %s",
+                     dd_directive.get("directive", ""))
+        for job in topic_jobs:
+            job["primaer_wikipedia"]         = primary_wikipedia
+            job["lemma_flags"]               = lemma_flags
+            job["doppelbedeutung_directive"] = (dd_directive or {}).get("directive", "")
+
+        # Appeal-Tier (Companion-/Bildmenge) aus Ergiebigkeit
         appeal, appeal_source = appeal_for(thema, topic_jobs[0].get("topic_interest"))
         for job in topic_jobs:
             job["resolved_appeal"] = appeal
