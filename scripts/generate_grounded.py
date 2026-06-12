@@ -89,6 +89,8 @@ RETRY_FLOOR_FRAC   = 0.70   # Retry-Untergrenze als Bruchteil des Ziels (nur kla
 ERG_FALLBACK_SCORE = 6      # medium, wenn Thema (noch) nicht gerated — sichtbar geloggt
 APPEAL_TIER_HIGH   = 7.0    # Erg-Mittel ≥ → high   (steuert Companion-/Bildmenge)
 APPEAL_TIER_MED    = 4.0    # Erg-Mittel ≥ → medium, sonst low
+CAP_GRACE_FRAC     = 0.05   # Toleranz über wmax, bevor getrimmt wird (0.0 = strikt ≤ Cap)
+TRIM_MAX_ATTEMPTS  = 2      # max. Trim-Pässe, danach review_flag
 
 AGE_RANGES = {1: "4-6 Jahre", 2: "7-9 Jahre", 3: "10-12 Jahre"}
 
@@ -815,6 +817,32 @@ def prepare_topic_sources(
     return primary_text, valid_companions, companion_texts, images, phase1_report
 
 
+TRIM_SYSTEM_PROMPT = (
+    "Du bist Lektor für ein deutsches Kinderlexikon. Du erhältst einen fertigen Artikel als JSON "
+    "und eine Wort-Obergrenze. Kürze den Artikel auf höchstens diese Wortzahl: straffe Sätze, "
+    "entferne den am wenigsten kindrelevanten Abschnitt oder eine entbehrliche Box. Bewahre Struktur "
+    "(sections mit sentences/boxes, quiz), Faktentreue, Tonfall, Stil und die Sprachstufe. Erfinde "
+    "nichts hinzu. Gib AUSSCHLIESSLICH das gekürzte JSON nach demselben Schema zurück — kein Vortext."
+)
+
+
+def _trim_article_to_cap(article: dict, wmax: int, model: str, thinking_config) -> tuple[dict, int]:
+    """Kürzt einen zu langen Artikel per Modell-Lektorat auf ≤ wmax. Rückgabe: (article, word_count)."""
+    import json as _json
+    trim_msg = (
+        f"WORT-OBERGRENZE: {wmax}\n"
+        f"Der folgende Artikel hat zu viele Wörter. Kürze ihn auf höchstens {wmax} Wörter.\n\n"
+        f"ARTIKEL_JSON:\n{_json.dumps(article, ensure_ascii=False)}"
+    )
+    raw = gemini_client.call_gemini(
+        TRIM_SYSTEM_PROMPT, trim_msg, model=model, thinking_config=thinking_config,
+        response_mime_type="application/json",
+    )
+    trimmed = parse_article_json(raw)
+    trimmed.setdefault("meta", {}).update(article.get("meta", {}))
+    return trimmed, count_article_words(trimmed)
+
+
 # ── Phase-2-Generierung: je Stufe ────────────────────────────────────────────
 
 def generate_one_level(
@@ -984,6 +1012,29 @@ def generate_one_level(
     else:
         report["phase2"]["retry_needed"] = False
 
+    # ── Wortzahl-Guard: zu lang → Trim-Pass (harte Obergrenze) ───────────────
+    cap = round(wmax * (1 + CAP_GRACE_FRAC))
+    trims = 0
+    while word_count > cap and trims < TRIM_MAX_ATTEMPTS:
+        trims += 1
+        log.warning("  Wortzahl zu lang: %d > Cap %d (Ziel %d) — Trim-Pass %d/%d",
+                    word_count, cap, wmax, trims, TRIM_MAX_ATTEMPTS)
+        try:
+            article, word_count = _trim_article_to_cap(article, wmax, model, phase2_thinking)
+            log.info("  Trim-Pass %d Ergebnis: %d Wörter", trims, word_count)
+        except Exception as e:
+            log.error("  Trim-Pass fehlgeschlagen: %s", e)
+            report["errors"].append(f"Trim-Pass fehlgeschlagen: {e}")
+            break
+    if trims:
+        report["phase2"]["trim_passes"] = trims
+        if word_count > cap:
+            log.warning("  Nach %d Trim-Pass(es) weiter zu lang: %d > %d → review_flag",
+                        trims, word_count, cap)
+            article["meta"]["review_flag"]   = True
+            article["meta"]["review_reason"] = f"Wortzahl {word_count} > Cap {cap} nach Trim"
+
+    report["phase2"]["word_count"] = word_count
     article["meta"]["word_count"] = word_count
 
     val_errors = validate_article(article, job)

@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-12T15:53:49Z -->
+<!-- updated: 2026-06-12T16:04:05Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**BKS-Fix: resolve_lemma erkennt Selbst-Begriffsklärungen (pageprops.disambiguation) und löst via _resolve_bks auf substanziellsten Link auf, geflaggt BITTE PRUEFEN: BKS … (→ Review-Flag). Verifiziert: Schmetterling → Schmetterlinge, Apfel → Kulturapfel; Hund-Kontrolle ohne BKS-Flag.** ← AKTUELL
+**Wortzahl-Guard: Post-Gen >Cap (wmax·1.05) → bis zu 2 Trim-Pässe (eigenes Lektor-Prompt), danach review_flag. Sichert harte Stufen-Obergrenze deterministisch. py_compile + import PASS.** ← AKTUELL
+
+**BKS-Fix: resolve_lemma erkennt Selbst-Begriffsklärungen (pageprops.disambiguation) und löst via _resolve_bks auf substanziellsten Link auf, geflaggt BITTE PRUEFEN: BKS … (→ Review-Flag). Verifiziert: Schmetterling → Schmetterlinge, Apfel → Kulturapfel; Hund-Kontrolle ohne BKS-Flag.**
 
 **Doppelbedeutungs-Direktive wirksam: v3.23-Prompt dokumentiert DOPPELBEDEUTUNG-Feld + build_grounded_user_message injiziert die Zeile in den stabilen Prefix. Plumbing-Test PASS.**
 
@@ -88,7 +90,7 @@ Parallel: resolve_lemma vor prepare_topic_sources() einbauen.
 ## 🔴 Offene Punkte (nach Priorität)
 
 Ergiebigkeits-Formel verdrahten (Kurve+Boost ersetzt WORTZIEL_TABLE) ✅ — resolve_lemma einbauen ✅
-Wortzahl-Guard (Post-Gen >Cap → Trim-Pass) — Vor-Bulk-Muss
+Wortzahl-Guard (Post-Gen >Cap → Trim-Pass) ✅
 Box-Regeln im Generator-Systemprompt: stimmt_das-Pflicht (S2/S3) + Verteilung (keine End-Clusterung)
 Katalog: Claude kuratiert+bewertet+kategorisiert ~5000 Themen (verankert an die 134), Round-Robin-Reihenfolge
 Eignungs-/Framing-Gate (Nazis, Erotik, Negerkuss→Schaumkuss, Homosexualität/Geschlechtsorgane altersgerecht, politisch neutral) — Vor-Bulk
