@@ -1,0 +1,13 @@
+﻿thema,stufe,lemma,flags,companion_count,quelle_kB,zielumfang_wmax,ist_woerter,delta
+Dinosaurier,1,Dinosaurier,OK,5,66.4,250,209,-41
+Dinosaurier,2,Dinosaurier,OK,5,66.4,400,347,-53
+Dinosaurier,3,Dinosaurier,OK,5,66.4,650,636,-14
+Hund,1,Haushund,OK,0,0,250,0,0
+Hund,2,Haushund,OK,0,0,400,0,0
+Hund,3,Haushund,OK,0,0,650,0,0
+Vulkan,1,Vulkan,OK,4,20.9,217,197,-20
+Vulkan,2,Vulkan,OK,4,20.9,400,461,61
+Vulkan,3,Vulkan,OK,4,20.9,650,644,-6
+Kühlschrank,1,Kühlschrank,OK,4,41.1,83,79,-4
+Kühlschrank,2,Kühlschrank,OK,4,41.1,240,234,-6
+Kühlschrank,3,Kühlschrank,OK,4,41.1,375,371,-4
