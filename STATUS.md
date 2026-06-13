@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-13T16:24:09Z -->
+<!-- updated: 2026-06-13T17:33:38Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Katalog-Batch-Lauf abgeschlossen (2026-06-13): 24/24 Gebiete, 3274 Themen gesamt, 3170 primary / 104 reserve, 447 sensibel, 179 Leuchtturm. 1 Validierungshinweis (Dalai Lama: fehlendes Feld dublette_von).** ← AKTUELL
+**Katalog-Merge v1 (2026-06-13): 2761 eindeutige Themen (513 Dubletten entfernt), 2681 primary / 66 reserve / 25 exclude, 376 sensibel → Freigabe erforderlich, 163 Leuchtturm. catalog_full.json + catalog_reserve.json + catalog_review.xlsx erzeugt.** ← AKTUELL
+
+**Katalog-Batch-Lauf abgeschlossen: 24/24 Gebiete, 3274 Themen roh, 3170 primary / 104 reserve, 447 sensibel, 179 Leuchtturm.**
 
 **Essen & Alltag: 174 Themen (alle primary), 4 sensibel, 5 Leuchtturm. Harness: Extended-Output-Beta (output-128k) für >32k tokens; MAX_TOKENS Default 48k.**
 
@@ -39,10 +41,8 @@ Bänder: S1[50,250] S2[80,400] S3[100,650]. Rater = Opus per API, Anker: 134 The
 
 ## 🔴 Nächster Schritt
 
-**Nächster Schritt:** JSON-Merge → Excel-Freigabe → eignung_verdicts.json
-- Alle 24 JSON-Dateien in catalog_raw/ vorhanden (3274 Themen)
-- Merge-Skript schreiben: alle JSONs → eine Gesamt-Excel (primary-Tab + reserve-Tab)
-- Review auffälliger Gebiete: Berühmte B (82 sensibel), Geschichte (54 sensibel), Religion (64 sensibel)
+**Nächster Schritt:** catalog_review.xlsx öffnen → FREIGABE-Spalte befüllen (sensibel/exclude-Zeilen prüfen) → eignung_verdicts.json generieren.
+Auffällig: Berühmte Personen 115 sensibel, Geschichte 40 sensibel, Religion 58 sensibel, Gesellschaft 30 sensibel.
 
 ---
 
