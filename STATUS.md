@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-13T08:06:21Z -->
+<!-- updated: 2026-06-13T08:22:03Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Märchen, Mythologie & Fabelwesen: 137 Themen, 11 sensibel, 13 Leuchtturm. Harness auf Streaming umgestellt (max_tokens=32000 Default), dotenv-Support eingebaut.** ← AKTUELL
+**Religion, Feste & Bräuche: 102 Themen, 100 primary / 2 reserve, 64 sensibel (⚠ hoch — Gebiet ist naturgemäß sensibel), 5 Leuchtturm.** ← AKTUELL
+
+**Märchen, Mythologie & Fabelwesen: 137 Themen (110 primary / 27 reserve), 11 sensibel, 13 Leuchtturm. Harness: Streaming + 32k + dotenv + primary/reserve-Split.**
 
 **Katalog-Phase gestartet (2026-06-13): wissensfreund_rater_kuratierung_v2.md + catalog_rater_harness.py committed. Dry-Run bestanden: 134 Anker geladen, User-Message korrekt. --list zeigt 24 Calls, Budget-Summe 3980.**
 
@@ -33,9 +35,9 @@ Bänder: S1[50,250] S2[80,400] S3[100,650]. Rater = Opus per API, Anker: 134 The
 
 ## 🔴 Nächster Schritt
 
-**Nächster Gebiet-Call:** Religion, Feste & Bräuche (Budget 100, Slug: `religion_feste_braeuche`):
+**Nächster Gebiet-Call:** Sport & Spiele (Budget 150, Slug: `sport_spiele`):
 ```
-python catalog_rater_harness.py --area religion
+python catalog_rater_harness.py --area sport
 ```
 Danach alle 24 Calls → JSON-Merge → Excel-Freigabe → eignung_verdicts.json + Katalog ≈ 5000 Themen.
 
