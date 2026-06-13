@@ -23,6 +23,10 @@ Nutzung:
 
 import anthropic
 import json
+try:
+    from dotenv import load_dotenv; load_dotenv()
+except ImportError:
+    pass
 import openpyxl
 import pathlib
 import re
@@ -44,7 +48,7 @@ CATALOG_RAW_DIR = REPO_ROOT / "catalog_raw"
 # ── Modell-Konfiguration ──────────────────────────────────────────────────
 
 MODEL        = "claude-opus-4-8"
-MAX_TOKENS   = 16000           # via --max-tokens erhöhbar; 20000 für budget>200
+MAX_TOKENS   = 32000           # Streaming erforderlich ab ~20k; budget>200 braucht ~25k+
 RETRY_DELAYS = [15, 45, 120]   # Sekunden zwischen Retries (Rate-Limit / 5xx)
 INTER_CALL_PAUSE = 5           # Sekunden Pause zwischen erfolgreichen Calls
 
@@ -242,20 +246,23 @@ def validate_items(data: list[dict]) -> list[str]:
 
 
 def call_api(client: anthropic.Anthropic, system: str, user: str, max_tokens: int) -> str:
-    """Ruft Opus auf mit exponentiellem Retry bei Rate-Limit / 5xx."""
+    """Ruft Opus auf mit Streaming + exponentiellem Retry bei Rate-Limit / 5xx."""
     last_exc = None
     for attempt, delay in enumerate([0] + RETRY_DELAYS):
         if delay:
             print(f"    Retry {attempt}/{len(RETRY_DELAYS)} — warte {delay}s …", flush=True)
             time.sleep(delay)
         try:
-            resp = client.messages.create(
+            chunks: list[str] = []
+            with client.messages.stream(
                 model=MODEL,
                 max_tokens=max_tokens,
                 system=system,
                 messages=[{"role": "user", "content": user}],
-            )
-            return resp.content[0].text
+            ) as stream:
+                for text in stream.text_stream:
+                    chunks.append(text)
+            return "".join(chunks)
         except anthropic.RateLimitError as e:
             print(f"    Rate-Limit: {e}")
             last_exc = e

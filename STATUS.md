@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-13T07:47:24Z -->
+<!-- updated: 2026-06-13T08:06:21Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Katalog-Phase gestartet (2026-06-13): wissensfreund_rater_kuratierung_v2.md + catalog_rater_harness.py committed. Dry-Run bestanden: 134 Anker geladen, User-Message korrekt. --list zeigt 24 Calls, Budget-Summe 3980. Windows-Unicode-Fix im Harness eingebaut.** ← AKTUELL
+**Märchen, Mythologie & Fabelwesen: 137 Themen, 11 sensibel, 13 Leuchtturm. Harness auf Streaming umgestellt (max_tokens=32000 Default), dotenv-Support eingebaut.** ← AKTUELL
+
+**Katalog-Phase gestartet (2026-06-13): wissensfreund_rater_kuratierung_v2.md + catalog_rater_harness.py committed. Dry-Run bestanden: 134 Anker geladen, User-Message korrekt. --list zeigt 24 Calls, Budget-Summe 3980.**
 
 **Katalog-Rater-Instruktion wissensfreund_rater_kuratierung_v1.md → v2 (Modell Opus; ~5000 Themen, 24 Calls; Ergiebigkeit gegen 134er-Anker; Eignungs-Rubrik; Kleinstädte vorerst ausgenommen).**
 
@@ -31,12 +33,11 @@ Bänder: S1[50,250] S2[80,400] S3[100,650]. Rater = Opus per API, Anker: 134 The
 
 ## 🔴 Nächster Schritt
 
-**Erster echter Gebiet-Call** (Warmstart mit kleinstem Gebiet):
+**Nächster Gebiet-Call:** Religion, Feste & Bräuche (Budget 100, Slug: `religion_feste_braeuche`):
 ```
-PYTHONIOENCODING=utf-8 python catalog_rater_harness.py --area "m_rchen" --max-tokens 16000
+python catalog_rater_harness.py --area religion
 ```
-Alternativ Slug: `m_rchen_mythologie_fabelwesen` (Budget 110, kleinster Call).
-Danach: alle 24 Calls → JSON-Merge → Excel-Freigabe → eignung_verdicts.json + Katalog ≈ 5000 Themen.
+Danach alle 24 Calls → JSON-Merge → Excel-Freigabe → eignung_verdicts.json + Katalog ≈ 5000 Themen.
 
 ---
 
