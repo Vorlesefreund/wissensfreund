@@ -105,9 +105,12 @@ REQUIRED_FIELDS = {
 # ── Hilfsfunktionen ───────────────────────────────────────────────────────
 
 def area_slug(thema: str, unter: str | None) -> str:
-    """Dateiname-sicherer, eindeutiger Schlüssel."""
+    """Dateiname-sicherer, eindeutiger Schlüssel (Umlaute transliteriert)."""
     raw = thema if not unter else f"{thema} {unter}"
-    return re.sub(r"[^a-z0-9]+", "_", raw.lower()).strip("_")
+    s = raw.lower()
+    for src, dst in [("ä", "ae"), ("ö", "oe"), ("ü", "ue"), ("ß", "ss")]:
+        s = s.replace(src, dst)
+    return re.sub(r"[^a-z0-9]+", "_", s).strip("_")
 
 
 def load_system_prompt() -> str:
