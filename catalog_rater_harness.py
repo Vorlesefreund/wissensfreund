@@ -48,7 +48,7 @@ CATALOG_RAW_DIR = REPO_ROOT / "catalog_raw"
 # ── Modell-Konfiguration ──────────────────────────────────────────────────
 
 MODEL        = "claude-opus-4-8"
-MAX_TOKENS   = 32000           # Streaming erforderlich ab ~20k; budget>200 braucht ~25k+
+MAX_TOKENS   = 48000           # >32k → client.beta (output-128k); budget 250 braucht ~42k
 RETRY_DELAYS = [15, 45, 120]   # Sekunden zwischen Retries (Rate-Limit / 5xx)
 INTER_CALL_PAUSE = 5           # Sekunden Pause zwischen erfolgreichen Calls
 
@@ -278,12 +278,23 @@ def call_api(client: anthropic.Anthropic, system: str, user: str, max_tokens: in
             time.sleep(delay)
         try:
             chunks: list[str] = []
-            with client.messages.stream(
-                model=MODEL,
-                max_tokens=max_tokens,
-                system=system,
-                messages=[{"role": "user", "content": user}],
-            ) as stream:
+            # Extended-output-Beta (client.beta) für >32k tokens (große Gebiete)
+            if max_tokens > 32000:
+                ctx = client.beta.messages.stream(
+                    model=MODEL,
+                    max_tokens=max_tokens,
+                    system=system,
+                    messages=[{"role": "user", "content": user}],
+                    betas=["output-128k-2025-02-19"],
+                )
+            else:
+                ctx = client.messages.stream(
+                    model=MODEL,
+                    max_tokens=max_tokens,
+                    system=system,
+                    messages=[{"role": "user", "content": user}],
+                )
+            with ctx as stream:
                 for text in stream.text_stream:
                     chunks.append(text)
             return "".join(chunks)

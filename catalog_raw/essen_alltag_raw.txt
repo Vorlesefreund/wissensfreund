@@ -1,0 +1,1744 @@
+```json
+[
+  {
+    "thema": "Süßigkeiten",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": true,
+    "erg_s1": 8, "erg_s2": 8, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Kindernahes Alltagsthema, unproblematisch.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Schokolade",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": true,
+    "erg_s1": 7, "erg_s2": 8, "erg_s3": 8,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Beliebt, reicher Herstellungs-/Kakao-Stoff über alle Stufen.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Eis",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 7, "erg_s2": 7, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Speiseeis, Anker-kalibriert.",
+    "dublette_von": null, "notiz": "Speiseeis"
+  },
+  {
+    "thema": "Brot",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": true,
+    "erg_s1": 7, "erg_s2": 8, "erg_s3": 8,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Grundnahrungsmittel mit reicher Kultur-/Herstellungsgeschichte.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Käse",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 7, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Herstellung, Sorten, Reifung — gut belegbar.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Milch",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 7, "erg_s2": 7, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Vertraut, von Kuh bis Verarbeitung reich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Butter",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Alltagsmittel, Herstellung anschaulich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Ei",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 7, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Hühnerei als Lebensmittel, vertraut und ergiebig.",
+    "dublette_von": null, "notiz": "Hühnerei als Lebensmittel"
+  },
+  {
+    "thema": "Honig",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 7, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Bienen-Bezug, beliebt; Imker eigenes Thema.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Zucker",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 7, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Herstellung aus Rübe/Rohr, Alltag; Gesundheit sachlich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Salz",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 7, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Gewinnung, Geschichte, Bedeutung — reich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Mehl",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Getreide-zu-Mehl, Mühle; solider Stoff.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Nudeln",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 7, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Kinderliebling, Formen/Herkunft anschaulich.",
+    "dublette_von": null, "notiz": "Teigwaren"
+  },
+  {
+    "thema": "Pizza",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 7, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Sehr kindernah, Herkunft Italien, Belag-Vielfalt.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Reis",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 7, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Welternährung, Anbau Reisfeld — reich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Kartoffel",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 7, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Geschichte, Anbau, Vielfalt; sehr ergiebig.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Gemüse",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 7, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Anker-Thema, kalibriert.",
+    "dublette_von": null, "notiz": "auch Gebiet Pflanzen & Pilze"
+  },
+  {
+    "thema": "Obst",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 7, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Vertraut, Sorten/Saison reich; auch Pflanzen-nah.",
+    "dublette_von": null, "notiz": "auch Gebiet Pflanzen & Pilze"
+  },
+  {
+    "thema": "Tomate",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Bekannt, Anbau anschaulich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Möhre",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Vertrautes Gemüse, mittlerer Stoff.",
+    "dublette_von": null, "notiz": "Karotte"
+  },
+  {
+    "thema": "Banane",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Tropische Frucht, Handel/Anbau interessant.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Apfel",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Anker-Thema, kalibriert.",
+    "dublette_von": null, "notiz": "auch Gebiet Pflanzen & Pilze"
+  },
+  {
+    "thema": "Erdbeere",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Beliebte Frucht, Saison/Anbau.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Orange",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Zitrusfrucht, solider Mittelstoff.",
+    "dublette_von": null, "notiz": "Orange (Frucht)"
+  },
+  {
+    "thema": "Kürbis",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Anker-Thema, kalibriert.",
+    "dublette_von": null, "notiz": "auch Gebiet Pflanzen & Pilze"
+  },
+  {
+    "thema": "Nuss",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Nüsse als Lebensmittel, mittlerer Stoff.",
+    "dublette_von": null, "notiz": "Nüsse"
+  },
+  {
+    "thema": "Suppe",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Alltagsgericht, Vielfalt; eher mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Wurst",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Deutsche Wurstkultur, vertraut; Fleisch sachlich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Fleisch",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "Herkunft (Tier/Schlachtung) sachlich und schonend, nicht verängstigend.", "sensibel": true,
+    "begruendung_eignung": "Schlachtung/Tierherkunft berührt Tod — schonendes Framing.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Fisch (Lebensmittel)",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Nahrungsmittel, Fischfang knapp erwähnt.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Pommes frites",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Kinderliebling, Herkunft; mittlerer Stoff.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Hamburger",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Bekannt, Herkunft/Fast Food.",
+    "dublette_von": null, "notiz": "Hamburger (Gericht)"
+  },
+  {
+    "thema": "Kuchen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 6, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Backen, Geburtstag — kindernah.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Keks",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Beliebt, eher knapper Stoff.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Marmelade",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Herstellung anschaulich, mittel.",
+    "dublette_von": null, "notiz": "Konfitüre"
+  },
+  {
+    "thema": "Joghurt",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Milchprodukt, Bakterien interessant.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Schokoriegel",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Beliebt; thematisch nahe Schokolade.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Bonbon",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Süßigkeit, Herstellung; nahe Süßigkeiten.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Kaugummi",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Kindernah, Herkunft/Material interessant.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Popcorn",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Platzen des Mais physikalisch nett.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Wasser (Getränk)",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Trinkwasser, Versorgung; alltagsrelevant.",
+    "dublette_von": null, "notiz": "Trinkwasser"
+  },
+  {
+    "thema": "Limonade",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Getränk, Kohlensäure interessant; mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Saft",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Fruchtsaft, Pressen; alltagsnah.",
+    "dublette_von": null, "notiz": "Fruchtsaft"
+  },
+  {
+    "thema": "Kakao",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Vom Baum zur Schokolade, reich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Kaffee",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Anbau/Handel reich; Koffein sachlich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Tee",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Pflanze, Kultur weltweit; ergiebig ab S2.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Brötchen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Frühstück, Bäcker; nahe Brot.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Müsli",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Frühstück, Getreide; mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Gesunde Ernährung",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 7, "erg_s3": 8,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Wichtiges Lebensthema, Ernährungspyramide reich.",
+    "dublette_von": null, "notiz": "auch Gebiet Körper & Gesundheit"
+  },
+  {
+    "thema": "Vitamine",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Ernährungswissen, ab S2 ergiebig.",
+    "dublette_von": null, "notiz": "auch Gebiet Körper & Gesundheit"
+  },
+  {
+    "thema": "Vegetarismus",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "Verschiedene Ernährungsweisen neutral darstellen, nicht werten.", "sensibel": true,
+    "begruendung_eignung": "Lebensstil-Frage, neutral halten.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Restaurant",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Alltagsort, Berufe drumherum; mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Bäckerei",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Vertrauter Ort, Bäcker-Handwerk.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Supermarkt",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Alltäglicher Ort, Warenkette interessant.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Markt",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 7, "erg_s3": 8,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Anker-Thema, kalibriert.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Kochen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "Keine Anleitung mit heißen Herden ohne Aufsicht; Vorsicht erwähnen.", "sensibel": false,
+    "begruendung_eignung": "Alltagskönnen, kindernah.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Backen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Backen mit Kindern beliebt.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Grillen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "Feuer-/Hitzevorsicht erwähnen.", "sensibel": false,
+    "begruendung_eignung": "Sommer-Alltag, vertraut.",
+    "dublette_von": null, "notiz": "Grillen (Garmethode)"
+  },
+  {
+    "thema": "Frühstück",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Alltagsmahlzeit, weltweite Vielfalt.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Gewürze",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 6, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Gewürzhandel/Geschichte reich ab S2.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Schokoladentafel",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": null, "erg_s3": null,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Redundant zu Schokolade.",
+    "dublette_von": "Schokolade", "notiz": "als Companion zu Schokolade"
+  },
+  {
+    "thema": "Spinat",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Gemüse, eher knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Gurke",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Gemüse, mittlerer Stoff.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Zwiebel",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Vertraut, Tränen-Effekt nett.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Paprika",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Gemüse, knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Mais",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Welternährung, Anbau reich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Getreide",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 6, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Grundnahrung weltweit, ergiebig.",
+    "dublette_von": null, "notiz": "auch Gebiet Pflanzen & Pilze"
+  },
+  {
+    "thema": "Weizen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Wichtigstes Getreide; eng an Getreide.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Pilze (Lebensmittel)",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": null, "erg_s3": null,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Redundant zu Pilzen im Gebiet Pflanzen & Pilze.",
+    "dublette_von": "Speisepilz", "notiz": "gehört in Pflanzen & Pilze"
+  },
+  {
+    "thema": "Schinken",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Wurstwaren-nah, knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Sahne",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Milchprodukt, knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Pudding",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Dessert, beliebt aber knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Suppenküche",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 2, "erg_s2": 4, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "Armut/Hunger sachlich und mitfühlend, nicht verängstigend.", "sensibel": true,
+    "begruendung_eignung": "Berührt Armut/soziale Not.",
+    "dublette_von": null, "notiz": "auch Gebiet Gesellschaft"
+  },
+  {
+    "thema": "Hunger (Welt)",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 2, "erg_s2": 4, "erg_s3": 6,
+    "eignung": "include", "age_floor": 2, "kategorie_nr": 8,
+    "framing_note": "Welthunger sachlich, nicht verängstigend, Hilfe/Hoffnung mitnennen.", "sensibel": true,
+    "begruendung_eignung": "Not/Leid-Thema (Kat. 8), age_floor S2.",
+    "dublette_von": null, "notiz": "auch Gebiet Gesellschaft"
+  },
+  {
+    "thema": "Landwirtschaft",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 6, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Woher Essen kommt; reich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Bauernhof",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": true,
+    "erg_s1": 7, "erg_s2": 7, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Sehr kindernah, Tiere und Lebensmittel verbindend.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Kühlschrank",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Anker-Thema, kalibriert.",
+    "dublette_von": null, "notiz": "auch Gebiet Technik"
+  },
+  {
+    "thema": "Herd",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "Hitzevorsicht erwähnen.", "sensibel": false,
+    "begruendung_eignung": "Küchengerät, mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Backofen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Küchengerät, knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Mikrowelle",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Funktionsweise physikalisch interessant.",
+    "dublette_von": null, "notiz": "auch Gebiet Technik"
+  },
+  {
+    "thema": "Geschirrspüler",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 2, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Haushaltsgerät, knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Waschmaschine",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Alltagsgerät, Funktion interessant.",
+    "dublette_von": null, "notiz": "auch Gebiet Technik"
+  },
+  {
+    "thema": "Staubsauger",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Haushaltsgerät, mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Besteck",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Messer/Gabel/Löffel, Geschichte; knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Essstäbchen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Andere Esskultur, spannend für Kinder.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Teller",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 3, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Geschirr, sehr knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Tischmanieren",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Benehmen, kulturell unterschiedlich.",
+    "dublette_von": null, "notiz": "Tischsitten"
+  },
+  {
+    "thema": "Kleidung",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Alltag, Kulturen/Geschichte reich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Schuhe",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Alltag, Herstellung/Vielfalt; mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Mütze",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 3, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Kleidungsstück, knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Jeans",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Geschichte/Herstellung interessant ab S2.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Wolle",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Vom Schaf zum Pullover, anschaulich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Stoff",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Textilien, Weben; mittel.",
+    "dublette_von": null, "notiz": "Textilien"
+  },
+  {
+    "thema": "Baumwolle",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Pflanze zu Kleidung, Welthandel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Schlafanzug",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 3, "erg_s3": 2,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Kleidung, sehr knapp.",
+    "dublette_von": null, "notiz": "Pyjama"
+  },
+  {
+    "thema": "Wohnung",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Wohnen, Räume; alltagsnah.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Haus",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Wohnformen weltweit, Bauen; reich.",
+    "dublette_von": null, "notiz": "auch Gebiet Technik (Hausbau)"
+  },
+  {
+    "thema": "Möbel",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Einrichtung, knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Bett",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Schlafen, vertraut aber knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Toilette",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "Sachlich, Hygiene/Kanalisation; nicht albern-vulgär.", "sensibel": false,
+    "begruendung_eignung": "Hygiene/Geschichte interessant, kindernah.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Badezimmer",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Raum, mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Seife",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Hygiene, Chemie des Reinigens; interessant.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Zahnbürste",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Zahnpflege, kindernah aber knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Zähneputzen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Wichtige Gewohnheit; auch Körper/Gesundheit.",
+    "dublette_von": null, "notiz": "auch Gebiet Körper & Gesundheit"
+  },
+  {
+    "thema": "Haare waschen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": null, "erg_s3": null,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Zu eng, kein eigenes WP-Lemma; als Companion zu Hygiene.",
+    "dublette_von": "Körperpflege", "notiz": ""
+  },
+  {
+    "thema": "Körperpflege",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Hygiene allgemein; auch Körper/Gesundheit.",
+    "dublette_von": null, "notiz": "auch Gebiet Körper & Gesundheit"
+  },
+  {
+    "thema": "Uhr",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": null, "erg_s3": null,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Gehört in Grundbegriffe (Zeit).",
+    "dublette_von": null, "notiz": "gehört in Grundbegriffe"
+  },
+  {
+    "thema": "Geld",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": true,
+    "erg_s1": 5, "erg_s2": 7, "erg_s3": 8,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Zentrales Alltagsthema, Geschichte/Funktion reich.",
+    "dublette_von": null, "notiz": "auch Gebiet Gesellschaft/Wirtschaft"
+  },
+  {
+    "thema": "Münze",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Geschichte/Prägung interessant; nahe Geld.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Euro",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 6, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Eigene Währung, Geldscheine vertraut; reich ab S2.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Taschengeld",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Sehr kindernah, Sparen/Umgang mit Geld.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Sparen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Sparschwein, Bank; kindernah.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Einkaufen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Alltägliche Tätigkeit; mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Spielzeug",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 6, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Sehr kindernah, Geschichte/Vielfalt.",
+    "dublette_von": null, "notiz": "auch Gebiet Sport & Spiele"
+  },
+  {
+    "thema": "Teddybär",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Beliebt, nette Entstehungsgeschichte.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Puppe",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Spielzeug, Geschichte; kindernah.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Schultasche",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Schulranzen, kindernah aber knapp.",
+    "dublette_von": null, "notiz": "Schulranzen"
+  },
+  {
+    "thema": "Bleistift",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Schreibgerät, Herstellung nett; mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Schere",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "Vorsicht (scharf) erwähnen.", "sensibel": false,
+    "begruendung_eignung": "Werkzeug, Hebelprinzip; mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Papier",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Herstellung, Geschichte, Recycling; reich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Brille",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Optik/Linsen, Sehhilfe; vertraut.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Regenschirm",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Alltagsgegenstand, knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Geburtstag",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 6, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Sehr kindernah, Bräuche weltweit.",
+    "dublette_von": null, "notiz": "auch Gebiet Feste & Bräuche"
+  },
+  {
+    "thema": "Familie",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "Verschiedene Familienformen wertfrei darstellen.", "sensibel": false,
+    "begruendung_eignung": "Lebenszentral; auch Gesellschaft.",
+    "dublette_von": null, "notiz": "auch Gebiet Gesellschaft"
+  },
+  {
+    "thema": "Haustier",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 6, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Kindernah, Verantwortung; auch Tiere.",
+    "dublette_von": null, "notiz": "auch Gebiet Tiere"
+  },
+  {
+    "thema": "Garten",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Anbau/Spiel, kindernah.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Spielplatz",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Sehr kindernah, Geräte/Physik.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Kindergarten",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Lebenswelt jüngster Kinder.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Müll",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 6, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Recycling/Umwelt wichtig und ergiebig.",
+    "dublette_von": null, "notiz": "auch Gebiet Gesellschaft"
+  },
+  {
+    "thema": "Recycling",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 6, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Wertstoffe/Umwelt; reich ab S2.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Mülltrennung",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": null, "erg_s3": null,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Redundant zu Müll/Recycling.",
+    "dublette_von": "Recycling", "notiz": ""
+  },
+  {
+    "thema": "Strom (im Haushalt)",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": null, "erg_s3": null,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Gehört in Naturwissenschaft (Elektrizität).",
+    "dublette_von": null, "notiz": "gehört in Naturwissenschaft"
+  },
+  {
+    "thema": "Glühbirne",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Erfindung/Funktion, vertraut.",
+    "dublette_von": null, "notiz": "auch Gebiet Technik"
+  },
+  {
+    "thema": "Wasserhahn",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Wasserversorgung greifbar; knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Heizung",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Wärme im Haus, Funktion interessant.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Schlüssel",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Schloss/Mechanik nett; knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Spiegel",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Reflexion physikalisch interessant.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Kerze",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "Feuervorsicht erwähnen.", "sensibel": false,
+    "begruendung_eignung": "Flamme/Wachs anschaulich.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Besen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 3, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Haushaltsgerät, sehr knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Handtuch",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 2, "erg_s2": 3, "erg_s3": 2,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Alltagstextil, sehr knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Taschentuch",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 3, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Hygiene-Alltag, knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Wecker",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Alltagsgerät, knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Rucksack",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 3, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Alltag, knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Fahrradhelm",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Sicherheit, kindernah aber knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Pflaster",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Wundversorgung, kindernah.",
+    "dublette_von": null, "notiz": "Wundpflaster; auch Körper & Gesundheit"
+  },
+  {
+    "thema": "Schlafen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 6, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Schlaf/Träume reich; auch Körper/Gesundheit.",
+    "dublette_von": null, "notiz": "auch Gebiet Körper & Gesundheit"
+  },
+  {
+    "thema": "Traum",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Faszinierend; auch Körper/Gehirn.",
+    "dublette_von": null, "notiz": "auch Gebiet Körper & Gesundheit"
+  },
+  {
+    "thema": "Geschenk",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Schenken, Bräuche; mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Picknick",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Essen im Freien, kindernah aber knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Eisdiele",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 4, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Kindernah; nahe Eis.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Tafelschokolade",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": null, "erg_s3": null,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Redundant zu Schokolade.",
+    "dublette_von": "Schokolade", "notiz": ""
+  },
+  {
+    "thema": "Lebkuchen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Weihnachtsgebäck, Tradition.",
+    "dublette_von": null, "notiz": "auch Gebiet Feste & Bräuche"
+  },
+  {
+    "thema": "Brezel",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Deutsches Gebäck, Form/Tradition nett.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Pfannkuchen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Beliebt, einfaches Gericht.",
+    "dublette_von": null, "notiz": "Pfannkuchen (Eierkuchen)"
+  },
+  {
+    "thema": "Spaghetti",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": null, "erg_s3": null,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Redundant zu Nudeln.",
+    "dublette_von": "Nudeln", "notiz": ""
+  },
+  {
+    "thema": "Ketchup",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Beliebte Sauce, kindernah aber knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Senf",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Würze, Pflanze/Schärfe nett; knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Schimmel (Lebensmittel)",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "Verdorbenes Essen sachlich; Hygiene erwähnen.", "sensibel": false,
+    "begruendung_eignung": "Warum Essen verdirbt — interessant.",
+    "dublette_von": null, "notiz": "auch Pflanzen & Pilze"
+  },
+  {
+    "thema": "Konservendose",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Haltbarmachen, Erfindung; mittel.",
+    "dublette_von": null, "notiz": "Konservendose/Konservierung"
+  },
+  {
+    "thema": "Tiefkühlkost",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 2, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Haltbarmachen durch Kälte; mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Mahlzeit",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": null, "erg_s3": null,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Zu abstrakt/redundant; als Companion zu Essen.",
+    "dublette_von": "Ernährung", "notiz": ""
+  },
+  {
+    "thema": "Ernährung",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 6, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Übergreifend, reich; auch Körper/Gesundheit.",
+    "dublette_von": null, "notiz": "auch Gebiet Körper & Gesundheit"
+  },
+  {
+    "thema": "Hygiene",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Sauberkeit/Gesundheit; reich ab S2.",
+    "dublette_von": null, "notiz": "auch Gebiet Körper & Gesundheit"
+  },
+  {
+    "thema": "Händewaschen",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 4, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Wichtige Gewohnheit, kindernah aber knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Tasche (Einkaufstasche)",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": null, "erg_s3": null,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Zu dünn, kein eigenständiger Artikel.",
+    "dublette_von": "Einkaufen", "notiz": ""
+  },
+  {
+    "thema": "Salat",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 4,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Gericht/Gemüse, mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Quark",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 3, "erg_s3": 3,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Milchprodukt, knapp.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Currywurst",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Deutsche Spezialität, nette Geschichte.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Döner",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Beliebt, Migration/Kultur interessant.",
+    "dublette_von": null, "notiz": "Döner Kebab"
+  },
+  {
+    "thema": "Sushi",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Japanische Küche, fremd-spannend.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Esskultur",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 7,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Essen weltweit unterschiedlich; reich ab S3.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Mineralwasser",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": null, "erg_s3": null,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Redundant zu Wasser (Getränk).",
+    "dublette_von": "Wasser (Getränk)", "notiz": ""
+  },
+  {
+    "thema": "Cola",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "Zuckergehalt sachlich; kein Konsum-Anreiz.", "sensibel": false,
+    "begruendung_eignung": "Bekanntes Getränk, Geschichte; mittel.",
+    "dublette_von": null, "notiz": ""
+  },
+  {
+    "thema": "Schlafenszeit-Ritual",
+    "themengebiet": "Essen & Alltag",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": null, "erg_s3": null,
+    "eignung": "include", "age_floor": 1, "kategorie_nr": null,
+    "framing_note": "", "sensibel": false,
+    "begruendung_eignung": "Kein eigenständiges WP-Lemma; raus.",
+    "dublette_von": "Schlafen", "notiz": "WP-Lemma unsicher"
+  }
+]
+```

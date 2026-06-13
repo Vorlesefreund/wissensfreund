@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-13T08:29:13Z -->
+<!-- updated: 2026-06-13T09:34:40Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Sport & Spiele: 168 Themen, 150 primary / 18 reserve, 2 sensibel, 4 Leuchtturm.** ← AKTUELL
+**Essen & Alltag: 174 Themen (alle primary, budget=190), 4 sensibel, 5 Leuchtturm. Harness: Extended-Output-Beta (client.beta, output-128k) für >32k tokens; MAX_TOKENS Default 48k.** ← AKTUELL
+
+**Sport & Spiele: 168 Themen, 150 primary / 18 reserve, 2 sensibel, 4 Leuchtturm.**
 
 **Religion, Feste & Bräuche: 102 Themen, 100 primary / 2 reserve, 64 sensibel (Gebiet naturgemäß sensibel), 5 Leuchtturm.**
 
@@ -37,9 +39,9 @@ Bänder: S1[50,250] S2[80,400] S3[100,650]. Rater = Opus per API, Anker: 134 The
 
 ## 🔴 Nächster Schritt
 
-**Nächster Gebiet-Call:** Essen & Alltag (Budget 190, Slug: `essen_alltag`):
+**Nächster Gebiet-Call:** Grundbegriffe (Budget 190, Slug: `grundbegriffe_zahlen_formen_farben_zeit_sprache`):
 ```
-python catalog_rater_harness.py --area essen
+python catalog_rater_harness.py --area grundbegriffe
 ```
 Danach alle 24 Calls → JSON-Merge → Excel-Freigabe → eignung_verdicts.json + Katalog ≈ 5000 Themen.
 
