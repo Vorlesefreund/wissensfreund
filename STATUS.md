@@ -1,14 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-13T09:34:40Z -->
+<!-- updated: 2026-06-13T16:24:09Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Essen & Alltag: 174 Themen (alle primary, budget=190), 4 sensibel, 5 Leuchtturm. Harness: Extended-Output-Beta (client.beta, output-128k) für >32k tokens; MAX_TOKENS Default 48k.** ← AKTUELL
+**Katalog-Batch-Lauf abgeschlossen (2026-06-13): 24/24 Gebiete, 3274 Themen gesamt, 3170 primary / 104 reserve, 447 sensibel, 179 Leuchtturm. 1 Validierungshinweis (Dalai Lama: fehlendes Feld dublette_von).** ← AKTUELL
 
-**Sport & Spiele: 168 Themen, 150 primary / 18 reserve, 2 sensibel, 4 Leuchtturm.**
+**Essen & Alltag: 174 Themen (alle primary), 4 sensibel, 5 Leuchtturm. Harness: Extended-Output-Beta (output-128k) für >32k tokens; MAX_TOKENS Default 48k.**
 
 **Religion, Feste & Bräuche: 102 Themen, 100 primary / 2 reserve, 64 sensibel (Gebiet naturgemäß sensibel), 5 Leuchtturm.**
 
@@ -39,11 +39,10 @@ Bänder: S1[50,250] S2[80,400] S3[100,650]. Rater = Opus per API, Anker: 134 The
 
 ## 🔴 Nächster Schritt
 
-**Nächster Gebiet-Call:** Grundbegriffe (Budget 190, Slug: `grundbegriffe_zahlen_formen_farben_zeit_sprache`):
-```
-python catalog_rater_harness.py --area grundbegriffe
-```
-Danach alle 24 Calls → JSON-Merge → Excel-Freigabe → eignung_verdicts.json + Katalog ≈ 5000 Themen.
+**Nächster Schritt:** JSON-Merge → Excel-Freigabe → eignung_verdicts.json
+- Alle 24 JSON-Dateien in catalog_raw/ vorhanden (3274 Themen)
+- Merge-Skript schreiben: alle JSONs → eine Gesamt-Excel (primary-Tab + reserve-Tab)
+- Review auffälliger Gebiete: Berühmte B (82 sensibel), Geschichte (54 sensibel), Religion (64 sensibel)
 
 ---
 
