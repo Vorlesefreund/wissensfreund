@@ -193,10 +193,15 @@ def load_anchor_table() -> str:
 
 
 def build_user_message(thema: str, unter: str | None, budget: int, anchor_table: str) -> str:
+    leuchtturm_max = max(3, int(budget * 0.05 + 0.5))
     parts = [f"Themengebiet: {thema}"]
     if unter:
         parts.append(f"Unter-Thema: {unter}")
-    parts.append(f"Budget: {budget} Themen (±10 %)")
+    parts.append(
+        f"Themengebiet-Größe: ~{budget} Themen (Orientierung). "
+        f"Vollständigkeit vor Kürze — lieber zu viel als gute Themen weglassen."
+    )
+    parts.append(f"Leuchtturm-Quote: maximal {leuchtturm_max} Themen (Top ~5 % deines Gebiets).")
     parts.append("")
     parts.append("Anker-Tabelle — Ergiebigkeits-Referenz (verbindliche Skala, alle 134 Themen):")
     parts.append(anchor_table)
@@ -243,6 +248,25 @@ def validate_items(data: list[dict]) -> list[str]:
         if item.get("sensibel") and not item.get("begruendung_eignung"):
             issues.append(f"  [{name}] sensibel=true aber begruendung_eignung leer")
     return issues
+
+
+def split_primary_reserve(data: list[dict], budget: int) -> list[dict]:
+    """
+    Sortiert nach Leuchtturm + S2-Ergiebigkeit (desc), markiert top `budget`
+    Themen als tier='primary', den Rest als tier='reserve'. In-place-Mutation.
+    Leuchtturm-Items werden immer primary.
+    """
+    data.sort(
+        key=lambda x: (
+            1 if x.get("leuchtturm") else 0,
+            x.get("erg_s2") or 0,
+            x.get("erg_s1") or 0,
+        ),
+        reverse=True,
+    )
+    for i, item in enumerate(data):
+        item["tier"] = "primary" if i < budget else "reserve"
+    return data
 
 
 def call_api(client: anthropic.Anthropic, system: str, user: str, max_tokens: int) -> str:
@@ -338,13 +362,18 @@ def run_area(
         if len(issues) > 5:
             print(f"    … und {len(issues)-5} weitere (siehe {out_raw.name}).")
 
+    # Primary/Reserve-Split
+    data = split_primary_reserve(data, budget)
+
     # Speichern
     out_json.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    n_primary    = sum(1 for x in data if x.get("tier") == "primary")
+    n_reserve    = sum(1 for x in data if x.get("tier") == "reserve")
     n_sensibel   = sum(1 for x in data if x.get("sensibel"))
     n_leuchtturm = sum(1 for x in data if x.get("leuchtturm"))
     print(
-        f"  ✓ {len(data)} Themen → {out_json.name}"
-        f"  ({n_sensibel} sensibel, {n_leuchtturm} Leuchtturm)"
+        f"  ✓ {len(data)} Themen → {n_primary} primary / {n_reserve} reserve"
+        f"  ({n_sensibel} sensibel, {n_leuchtturm} Leuchtturm) → {out_json.name}"
     )
 
     time.sleep(INTER_CALL_PAUSE)
