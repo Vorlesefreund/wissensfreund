@@ -65,6 +65,11 @@ def load_all() -> list[dict]:
             items.extend(json.loads(f.read_text(encoding="utf-8")))
             file_count += 1
     print(f"  {len(items)} Items aus {file_count} Datei(en) ({', '.join(d.name for d in raw_dirs if d.exists())}).")
+    manual = REPO_ROOT / "catalog_manual.json"
+    if manual.exists():
+        entries = json.loads(manual.read_text(encoding="utf-8"))
+        items.extend(entries)
+        print(f"  +{len(entries)} manuelle Einträge aus catalog_manual.json")
     return items
 
 

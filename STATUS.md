@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-14T14:51:35Z -->
+<!-- updated: 2026-06-14T14:58:17Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Round-2 + Merge (2026-06-14): 11/11 R2-Calls, 3542 eindeutige Themen (760 Dubletten), 3427 primary / 96 reserve / 30 exclude, 431 sensibel, 177 Leuchtturm. Dry-Run Avoid-List korrekt (Tiere: 313). Plural-Fix + 5 neue Geschichte-Einträge.** ← AKTUELL
+**catalog_manual.json eingeführt (2026-06-14): persistente manuelle Einträge, in Merge automatisch geladen. 5 Geschichte-Themen drin. Nach Merge: 3432 primary / 96 reserve / 30 exclude, alle 5 manuellen Einträge gefunden (Rank 182–302).** ← AKTUELL
+
+**Round-2 + Merge: 11/11 R2-Calls, 3427 primary / 96 reserve / 30 exclude, 431 sensibel, 177 Leuchtturm.**
 
 **Katalog-Merge v1 (2026-06-13): 2761 eindeutige Themen, 2681 primary / 66 reserve / 25 exclude, 376 sensibel.**
 
