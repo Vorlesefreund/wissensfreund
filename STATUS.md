@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-13T17:33:38Z -->
+<!-- updated: 2026-06-14T14:51:35Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Katalog-Merge v1 (2026-06-13): 2761 eindeutige Themen (513 Dubletten entfernt), 2681 primary / 66 reserve / 25 exclude, 376 sensibel → Freigabe erforderlich, 163 Leuchtturm. catalog_full.json + catalog_reserve.json + catalog_review.xlsx erzeugt.** ← AKTUELL
+**Round-2 + Merge (2026-06-14): 11/11 R2-Calls, 3542 eindeutige Themen (760 Dubletten), 3427 primary / 96 reserve / 30 exclude, 431 sensibel, 177 Leuchtturm. Dry-Run Avoid-List korrekt (Tiere: 313). Plural-Fix + 5 neue Geschichte-Einträge.** ← AKTUELL
+
+**Katalog-Merge v1 (2026-06-13): 2761 eindeutige Themen, 2681 primary / 66 reserve / 25 exclude, 376 sensibel.**
 
 **Katalog-Batch-Lauf abgeschlossen: 24/24 Gebiete, 3274 Themen roh, 3170 primary / 104 reserve, 447 sensibel, 179 Leuchtturm.**
 
@@ -41,8 +43,8 @@ Bänder: S1[50,250] S2[80,400] S3[100,650]. Rater = Opus per API, Anker: 134 The
 
 ## 🔴 Nächster Schritt
 
-**Nächster Schritt:** catalog_review.xlsx öffnen → FREIGABE-Spalte befüllen (sensibel/exclude-Zeilen prüfen) → eignung_verdicts.json generieren.
-Auffällig: Berühmte Personen 115 sensibel, Geschichte 40 sensibel, Religion 58 sensibel, Gesellschaft 30 sensibel.
+**Nächster Schritt:** catalog_review.xlsx öffnen → FREIGABE-Spalte befüllen (431 sensibel + 30 exclude prüfen) → eignung_verdicts.json generieren.
+Tiere jetzt 628 primary (größtes Gebiet). Geschichte 197, Länder 212, Technik 237, Naturwiss 230.
 
 ---
 
