@@ -205,7 +205,42 @@ def cell_value(item: dict, col: str):
     return v
 
 
+def load_existing_annotations(xlsx_path: pathlib.Path) -> dict[str, dict]:
+    """
+    Liest FREIGABE + editierte Felder aus bestehendem catalog_review.xlsx.
+    Key = thema (stripped). Nur Zeilen mit nicht-leerem FREIGABE werden geladen.
+    """
+    if not xlsx_path.exists():
+        return {}
+    try:
+        wb = openpyxl.load_workbook(xlsx_path, data_only=True, read_only=True)
+        ws = wb["Review"]
+        headers = [c.value for c in next(ws.iter_rows(min_row=1, max_row=1))]
+        col = {h: i for i, h in enumerate(headers) if h}
+        result: dict[str, dict] = {}
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            thema_val = row[col["thema"]] if "thema" in col else None
+            freigabe_val = row[col["FREIGABE"]] if "FREIGABE" in col else None
+            if not thema_val or not freigabe_val:
+                continue
+            result[str(thema_val).strip()] = {
+                "FREIGABE":    freigabe_val,
+                "eignung":     row[col["eignung"]]       if "eignung"       in col else None,
+                "age_floor":   row[col["age_floor"]]     if "age_floor"     in col else None,
+                "framing_note":row[col["framing_note"]]  if "framing_note"  in col else None,
+                "themengebiet":row[col["themengebiet"]]  if "themengebiet"  in col else None,
+                "notiz":       row[col["notiz"]]         if "notiz"         in col else None,
+            }
+        wb.close()
+        print(f"  Bestehende Annotierungen geladen: {len(result)} Zeilen mit FREIGABE.")
+        return result
+    except Exception as e:
+        print(f"  WARNUNG: Konnte bestehende Annotierungen nicht lesen: {e}")
+        return {}
+
+
 def export_xlsx(primary: list[dict], reserve: list[dict], duplicates: list[dict], all_items: list[dict]) -> None:
+    existing = load_existing_annotations(OUT_XLSX)
     wb = openpyxl.Workbook()
 
     # ── Sheet 1: Review ───────────────────────────────────────────────────
@@ -230,8 +265,18 @@ def export_xlsx(primary: list[dict], reserve: list[dict], duplicates: list[dict]
     all_for_review = sorted(all_items, key=sort_key)
 
     for ri, item in enumerate(all_for_review, 2):
-        for ci, col in enumerate(XLSX_COLS, 1):
-            c = ws.cell(row=ri, column=ci, value=cell_value(item, col))
+        thema_key = item.get("thema", "").strip()
+        ann = existing.get(thema_key, {})
+        # Annotation-Overrides auf item anwenden
+        for field in ("eignung", "age_floor", "framing_note", "themengebiet", "notiz"):
+            if field in ann and ann[field] is not None:
+                item[field] = ann[field]
+        for col_idx, col in enumerate(XLSX_COLS, 1):
+            if col == "FREIGABE":
+                ws.cell(row=ri, column=col_idx, value=ann.get("FREIGABE", ""))
+            else:
+                v = item.get(col)
+                ws.cell(row=ri, column=col_idx, value="TRUE" if v is True else ("" if v is False else v))
 
         # Zeilenfarbe
         if item.get("eignung") == "exclude":
