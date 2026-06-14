@@ -1,0 +1,2297 @@
+{
+  "Abholzung": {
+    "age_floor": 2,
+    "framing_note": "sachlich, lösungsorientiert, nicht verängstigend"
+  },
+  "Abraham Lincoln": {
+    "framing_note": "Sklaverei-Ende sachlich; Ermordung behutsam."
+  },
+  "Absolutismus": {
+    "age_floor": 2
+  },
+  "Adolf Hitler": {
+    "age_floor": 3,
+    "framing_note": "nüchtern, nie verherrlichend, Verbrechen sachlich, keine Glorifizierung"
+  },
+  "Advent": {
+    "framing_note": "sachlich; christliche Bedeutung und Brauchtum (Adventskranz, -kalender)"
+  },
+  "Afghanistan": {
+    "framing_note": "Geografie/Kultur sachlich; Kriege/aktuelle Lage neutral, nicht verängstigend."
+  },
+  "Ägyptische Götter": {
+    "exclude": true,
+    "merge_into": "auf ägyptische Mythologie verschmelzen",
+    "framing_note": "sachlich, als historischer Glaube"
+  },
+  "Alan Turing": {
+    "framing_note": "Code-Knacken im 2. Weltkrieg nüchtern; Verfolgung wegen Homosexualität nur sachlich/altersgerecht"
+  },
+  "Alexander der Große": {
+    "framing_note": "Eroberungskriege sachlich einordnen, nicht heroisieren."
+  },
+  "Alexander Gerst": {
+    "framing_note": "nüchtern, keine Moralurteile"
+  },
+  "Alfred Hitchcock": {
+    "age_floor": 3,
+    "framing_note": "Spannung/Grusel sachlich, Filminhalte nicht ausmalen"
+  },
+  "Alfred Nobel": {
+    "framing_note": "Dynamit/Sprengstoff sachlich, keine Anleitung."
+  },
+  "Alkohol": {
+    "age_floor": 2,
+    "framing_note": "Sucht/Gefahren sachlich, kein Konsum-Anreiz, keine Anleitung, Prävention"
+  },
+  "Allergie": {
+    "framing_note": "keine Selbstmedikation, „frag Eltern/Arzt“"
+  },
+  "Allerheiligen": {
+    "framing_note": "sachlich; Gedenktag, Tod behutsam"
+  },
+  "Alpenstrandläufer": {
+    "age_floor": 2
+  },
+  "Altes Königreich Kusch (Nubien)": {
+    "age_floor": 2
+  },
+  "Amelia Earhart": {
+    "framing_note": "Verschwinden sachlich, nicht ängstigend."
+  },
+  "Amerikanische Revolution": {
+    "framing_note": "Krieg sachlich einordnen"
+  },
+  "Amerikanischer Bürgerkrieg": {
+    "framing_note": "Krieg und Sklaverei sachlich, nicht verängstigend, warnung-Box"
+  },
+  "Angela Merkel": {
+    "framing_note": "strikt neutral, Positionen fair, keine Wertung"
+  },
+  "Angst": {
+    "framing_note": "sachlich, nicht verängstigend"
+  },
+  "Anime": {
+    "age_floor": 2
+  },
+  "Anne Frank": {
+    "age_floor": 2,
+    "framing_note": "nüchtern, Holocaust/Tod sachlich, nicht verherrlichend"
+  },
+  "Antibiotikum": {
+    "framing_note": "keine Selbstmedikation, „frag Eltern/Arzt“"
+  },
+  "Antikörper": {
+    "age_floor": 2
+  },
+  "Apartheid": {
+    "age_floor": 2,
+    "framing_note": "Rassentrennung als Unrecht klar benennen, sachlich, Überwindung würdigen"
+  },
+  "Apotheke": {
+    "framing_note": "Medikamente nur sachlich, keine Selbstmedikation, „frag Eltern/Arzt\""
+  },
+  "Apotheker": {
+    "framing_note": "keine Dosierung/Selbstmedikation; Medikamente nur mit Erwachsenen/Arzt"
+  },
+  "Aristoteles": {
+    "age_floor": 2
+  },
+  "Armut": {
+    "age_floor": 2,
+    "framing_note": "sachlich, nicht verängstigend, kein Schuld-Framing"
+  },
+  "Arzt": {
+    "framing_note": "keine Dosierung/Selbstmedikation; bei Krankheit Eltern/Arzt fragen"
+  },
+  "Äskulapnatter": {
+    "age_floor": 2
+  },
+  "Asthma": {
+    "framing_note": "keine Selbstmedikation, „frag Eltern/Arzt“"
+  },
+  "Atheismus": {
+    "framing_note": "sachlich; Nicht-Glauben gleichwertig neben Religionen darstellen"
+  },
+  "Atlantis (Legende)": {
+    "exclude": true,
+    "merge_into": "auf Atlantis verschmelzen",
+    "framing_note": "klar als Sage/Mythos kennzeichnen"
+  },
+  "Aufklärung (Epoche)": {
+    "age_floor": 2
+  },
+  "Ausbildung": {
+    "age_floor": 2
+  },
+  "Außerirdisches Leben": {
+    "framing_note": "klar zwischen wissenschaftlicher Suche und Science-Fiction trennen; nichts als bewiesen darstellen"
+  },
+  "Axel Scheffler": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Azteken": {
+    "framing_note": "Menschenopfer nur sachlich-knapp, nicht ausmalend"
+  },
+  "Banksy": {
+    "framing_note": "Street-Art; Sachbeschädigung neutral einordnen, kein Anreiz"
+  },
+  "Barack Obama": {
+    "framing_note": "strikt neutral, Positionen fair, keine Wertung"
+  },
+  "Bärlauch": {
+    "framing_note": "Verwechslungsgefahr mit Giftpflanzen sachlich erwähnen"
+  },
+  "Bartholomäus Columbus": {
+    "exclude": true
+  },
+  "Bartmeise": {
+    "age_floor": 2
+  },
+  "Basilisk (Gattung)": {
+    "exclude": true,
+    "merge_into": "auf Basilisk verschmelzen"
+  },
+  "Baumläufer": {
+    "age_floor": 2
+  },
+  "Beerdigung": {
+    "framing_note": "sachlich, behutsam; Tod nicht verängstigend, verschiedene Bräuche"
+  },
+  "Beere": {
+    "framing_note": "essbar/giftig unterscheiden, Warnhinweis"
+  },
+  "Behinderung": {
+    "framing_note": "wertfrei, respektvoll, kein Mitleid-Framing; Inklusion betonen"
+  },
+  "Belarus": {
+    "framing_note": "Politische Lage neutral darstellen."
+  },
+  "Beo": {
+    "age_floor": 2
+  },
+  "Berchtesgaden": {
+    "framing_note": "Königssee/Alpen/Salzbergwerk betonen; NS-Bezug (Obersalzberg) nur sachlich."
+  },
+  "Bergfink": {
+    "age_floor": 2
+  },
+  "Berliner Mauer": {
+    "framing_note": "Teilung/Todesopfer sachlich, warnung-Box, nicht verängstigend."
+  },
+  "Beugung (Physik)": {
+    "age_floor": 3
+  },
+  "Beutelmeise": {
+    "age_floor": 2
+  },
+  "Beyoncé": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Bibel": {
+    "framing_note": "sachlich; heiliges Buch des Christentums, kein Missionieren"
+  },
+  "Bill Gates": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Billy the Kid": {
+    "framing_note": "Verbrechen/Gewalt sachlich, nicht verherrlichend."
+  },
+  "Bilsenkraut": {
+    "framing_note": "Giftpflanze sachlich, Hexen-Geschichte historisch einordnen, warnung-Box"
+  },
+  "Biologische Systematik": {
+    "age_floor": 2
+  },
+  "Bioprodukte": {
+    "framing_note": "sachlich, ohne Kaufempfehlung, verschiedene Sichtweisen fair"
+  },
+  "Birgit Prinz": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Birkhuhn": {
+    "age_floor": 2
+  },
+  "Blackbeard": {
+    "framing_note": "Piratengewalt sachlich, nicht verherrlichend."
+  },
+  "Blauracke": {
+    "age_floor": 2
+  },
+  "Blindheit": {
+    "framing_note": "wertfrei, respektvoll"
+  },
+  "Blindwühlen": {
+    "age_floor": 2
+  },
+  "Blutgruppe": {
+    "age_floor": 2
+  },
+  "Blutspende": {
+    "age_floor": 2
+  },
+  "Bob Marley": {
+    "framing_note": "Reggae sachlich; Drogen-Bezug nicht thematisieren"
+  },
+  "Boris Becker": {
+    "framing_note": "nüchtern; spätere Probleme nicht in S1/S2"
+  },
+  "Bosnien und Herzegowina": {
+    "framing_note": "Balkankrieg nur in S3, sachlich, nicht verherrlichend."
+  },
+  "Boxen": {
+    "framing_note": "Verletzungsrisiko sachlich erwähnen, Kampf nicht verherrlichen"
+  },
+  "Brachvogel": {
+    "age_floor": 2
+  },
+  "Brandgans": {
+    "age_floor": 2
+  },
+  "Bruch (Mathematik)": {
+    "age_floor": 2
+  },
+  "Brunnen der Märchen": {
+    "exclude": true
+  },
+  "Buddha": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Buddha (Siddhartha Gautama)": {
+    "exclude": true,
+    "merge_into": "auf Buddha verschmelzen",
+    "framing_note": "Religionsstifter sachlich, kein Missionieren."
+  },
+  "Buddhismus": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Buffalo Bill": {
+    "framing_note": "Klischeebild des Wilden Westens einordnen."
+  },
+  "Bundeskanzler": {
+    "framing_note": "neutral, Amt erklären, keine Personen-/Parteienwertung"
+  },
+  "Bundestag": {
+    "framing_note": "neutral, Institution erklären, keine Parteienwertung"
+  },
+  "Bunte Vögel": {
+    "exclude": true
+  },
+  "Bürgerrechtsbewegung": {
+    "age_floor": 2,
+    "framing_note": "Diskriminierung sachlich, Gleichberechtigung als Wert"
+  },
+  "Chanukka": {
+    "framing_note": "sachlich; jüdisches Lichterfest"
+  },
+  "Che Guevara": {
+    "age_floor": 2,
+    "framing_note": "strikt neutral, Gewalt/Revolution sachlich, keine Verherrlichung"
+  },
+  "Christentum": {
+    "framing_note": "sachlich, kein Missionieren; eine Weltreligion neben anderen"
+  },
+  "Christ-Erlöser-Kathedrale": {
+    "framing_note": "Sachlich. Ggf. Basilius-Kathedrale, WP-Lemma prüfen."
+  },
+  "Christi Himmelfahrt": {
+    "framing_note": "sachlich; christlicher Feiertag"
+  },
+  "Christiansborg (entf.)": {
+    "exclude": true
+  },
+  "Christkind": {
+    "framing_note": "sachlich; Figur und Brauch"
+  },
+  "Christoph Kolumbus": {
+    "framing_note": "Koloniale Folgen und Leid der Ureinwohner sachlich einordnen, nicht heroisieren."
+  },
+  "Christoph Wilhelm Hufeland": {
+    "exclude": true
+  },
+  "Christo-Verhüllter Reichstag (entf.)": {
+    "exclude": true
+  },
+  "Christrose": {
+    "framing_note": "blüht im Winter, leicht giftig kurz erwähnen"
+  },
+  "Christ-Statue Lissabon (entf.)": {
+    "exclude": true
+  },
+  "Chromosom": {
+    "age_floor": 2
+  },
+  "Coco Chanel": {
+    "framing_note": "NS-Bezug nicht in S1/S2; nicht verharmlosen"
+  },
+  "Cola": {
+    "framing_note": "Zuckergehalt sachlich; kein Konsum-Anreiz."
+  },
+  "Cornelia Funke": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Corona-Virus": {
+    "framing_note": "sachlich, nicht verängstigend, „frag Eltern/Arzt“"
+  },
+  "Crazy Horse": {
+    "framing_note": "sachlich, Kriege/Verdrängung nicht verklärend, warnung-Box, nicht verängstigend"
+  },
+  "Cristiano Ronaldo": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Dalai Lama": {
+    "framing_note": "sachlich, kein Missionieren; politisch neutral"
+  },
+  "Dampf": {
+    "framing_note": "Verbrühungsgefahr durch heißen Dampf erwähnen"
+  },
+  "Das Mädchen mit den Schwefelhölzern": {
+    "framing_note": "Tod des Mädchens sachlich, nicht verängstigend einordnen"
+  },
+  "David Attenborough": {
+    "framing_note": "nüchtern"
+  },
+  "David Livingstone": {
+    "framing_note": "Afrika-Expeditionen und kolonialer Kontext einordnen."
+  },
+  "DDR": {
+    "framing_note": "politisch neutral, Diktatur und Alltag fair, keine Verklärung/Verteufelung"
+  },
+  "Demokratie": {
+    "framing_note": "neutral, Funktionsweise erklären, keine Ideologie-Wertung"
+  },
+  "Dezimalsystem": {
+    "age_floor": 2
+  },
+  "Diabetes mellitus": {
+    "age_floor": 2,
+    "framing_note": "keine Selbstmedikation, „frag Eltern/Arzt“"
+  },
+  "Diagramm": {
+    "age_floor": 2
+  },
+  "Dian Fossey": {
+    "framing_note": "Ermordung sachlich/altersgerecht, warnung-Box"
+  },
+  "Diego Maradona": {
+    "framing_note": "Drogenprobleme nicht in S1/S2; in S3 nur knapp sachlich"
+  },
+  "Diffusion": {
+    "age_floor": 2
+  },
+  "Dinosaurier-Aussterben": {
+    "framing_note": "Katastrophe sachlich, nicht verängstigend."
+  },
+  "Dirk Nowitzki": {
+    "framing_note": "nüchtern"
+  },
+  "Diwali": {
+    "framing_note": "sachlich; hinduistisches Lichterfest"
+  },
+  "Donald Trump": {
+    "age_floor": 2,
+    "framing_note": "strikt neutral, Positionen fair, keine Wertung"
+  },
+  "Doping": {
+    "framing_note": "Gefahren und Betrug sachlich, kein Anreiz, Prävention"
+  },
+  "Dreißigjähriger Krieg": {
+    "framing_note": "Krieg/Leid sachlich, nicht ausmalend, Konfessionen neutral"
+  },
+  "Drüse": {
+    "age_floor": 2
+  },
+  "Dschingis Khan": {
+    "framing_note": "Eroberungskriege und Gewalt sachlich, nicht verherrlichend."
+  },
+  "Dürre": {
+    "framing_note": "sachlich, nicht verängstigend"
+  },
+  "Ed Sheeran": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Ehrenamt": {
+    "age_floor": 2
+  },
+  "Eibe": {
+    "framing_note": "Giftigkeit sachlich erwähnen, nicht verängstigend"
+  },
+  "Eiderente": {
+    "age_floor": 2
+  },
+  "Eisenhut": {
+    "framing_note": "giftigste Pflanze Europas sachlich, warnung-Box, nicht anfassen/pflücken"
+  },
+  "Eisente": {
+    "age_floor": 2
+  },
+  "Eissturmvogel": {
+    "age_floor": 2
+  },
+  "Eistaucher": {
+    "age_floor": 2
+  },
+  "Elektrizität": {
+    "framing_note": "Gefahr Strom sachlich erwähnen, keine Experimentier-Anleitung mit Netzstrom"
+  },
+  "Elektromagnetische Welle": {
+    "age_floor": 2
+  },
+  "Elon Musk": {
+    "framing_note": "nüchtern, keine Moralurteile; politische Äußerungen nicht thematisieren"
+  },
+  "Embryo": {
+    "framing_note": "sachlich-biologisch"
+  },
+  "Energieumwandlung": {
+    "age_floor": 2
+  },
+  "Engel": {
+    "framing_note": "sachlich; religiöse Vorstellung"
+  },
+  "Engelstrompete": {
+    "framing_note": "starke Giftigkeit sachlich, warnung-Box, kein Konsum-Bezug"
+  },
+  "Entdeckung Amerikas": {
+    "framing_note": "Folgen für indigene Völker fair benennen, kein einseitiges Heldenbild"
+  },
+  "Enzym": {
+    "age_floor": 3
+  },
+  "Erbrechen": {
+    "framing_note": "sachlich, nicht ekelbetont"
+  },
+  "Erdbeben": {
+    "framing_note": "sachlich, warnung-Box, nicht verängstigend, altersgerecht"
+  },
+  "Erdmännchen-Verwandte: Kusimanse": {
+    "exclude": true
+  },
+  "Erdrutsch": {
+    "framing_note": "sachlich, nicht verängstigend"
+  },
+  "Erfindung der Impfung": {
+    "framing_note": "sachlich, kein Konsumrat, frag Arzt"
+  },
+  "Erfindung des Schießpulvers": {
+    "framing_note": "Waffen-Bezug sachlich, keine Anleitung, Feuerwerk-Aspekt betonen"
+  },
+  "Erika Mann": {
+    "exclude": true
+  },
+  "Erkältung": {
+    "framing_note": "keine Selbstmedikation, „frag Eltern/Arzt“"
+  },
+  "Ernest Hemingway": {
+    "framing_note": "Suizid nicht in S2; in S3 nur knapp/sachlich erwähnen"
+  },
+  "Erno Rubik": {
+    "framing_note": "nüchtern"
+  },
+  "Erntedankfest": {
+    "framing_note": "sachlich; christlicher und kultureller Erntedank"
+  },
+  "Erste Hilfe": {
+    "framing_note": "altersgerecht, Notruf 112 betonen"
+  },
+  "Erster Mai": {
+    "framing_note": "Tag der Arbeit sachlich, neutral"
+  },
+  "Erster Weltkrieg": {
+    "framing_note": "Krieg/Tod nüchtern, warnung-Box, nicht verherrlichend, nicht verängstigend"
+  },
+  "Esa-Astronautin Samantha Cristoforetti": {
+    "framing_note": "nüchtern, keine Moralurteile"
+  },
+  "Europäische Union": {
+    "framing_note": "Strikt neutral, Funktionsweise sachlich, keine politische Wertung."
+  },
+  "Familie": {
+    "framing_note": "verschiedene Familienformen wertfrei nebeneinander"
+  },
+  "Ferdinand Porsche": {
+    "framing_note": "NS-Bezug in S3 sachlich, nicht verharmlosen"
+  },
+  "Fett (Körper)": {
+    "framing_note": "wertfrei, nicht körperbild-/figurfixiert"
+  },
+  "Feuer": {
+    "framing_note": "Brandgefahr sachlich, kein Zündeln-Anreiz, keine Anleitung"
+  },
+  "Feuerqualle": {
+    "framing_note": "Nesselgefahr sachlich erwähnen"
+  },
+  "Feuerwerk": {
+    "framing_note": "Gefahren sachlich; keine Bastelanleitung"
+  },
+  "Fibonacci-Folge": {
+    "age_floor": 2
+  },
+  "Fieber": {
+    "framing_note": "keine Selbstmedikation, „frag Eltern/Arzt“"
+  },
+  "Fingerhut (Pflanze)": {
+    "framing_note": "giftig, Warnhinweis, nicht berühren/essen"
+  },
+  "Fläche": {
+    "age_floor": 2
+  },
+  "Fleisch": {
+    "framing_note": "Herkunft (Tier/Schlachtung) sachlich und schonend, nicht verängstigend."
+  },
+  "Fliegenpilz": {
+    "framing_note": "giftig, Warnung nicht essen, sachlich"
+  },
+  "Flucht und Vertreibung": {
+    "framing_note": "Leid sachlich, einfühlsam, nicht verängstigend, warnung-Box"
+  },
+  "Flüchtlinge": {
+    "framing_note": "neutral, sachlich, keine politische Wertung; Krieg/Flucht behutsam"
+  },
+  "Förderschule": {
+    "age_floor": 2,
+    "framing_note": "wertfrei, respektvoll; Inklusion"
+  },
+  "Fortpflanzung": {
+    "framing_note": "allgemein-biologisch (Tiere/Pflanzen), keine menschliche Sexualität im Detail"
+  },
+  "Frank-Walter Steinmeier": {
+    "age_floor": 2,
+    "framing_note": "strikt neutral, Positionen fair"
+  },
+  "Französische Revolution": {
+    "framing_note": "Gewalt/Hinrichtungen sachlich, politisch neutral, Freiheitsidee fair"
+  },
+  "Freddie Mercury": {
+    "framing_note": "Identität/AIDS-Tod in S3 sachlich, wertfrei"
+  },
+  "Friedhof": {
+    "framing_note": "Tod sachlich, behutsam, nicht verängstigend; warnung-Box"
+  },
+  "Friedrich Ebert": {
+    "age_floor": 2,
+    "framing_note": "strikt neutral, Weimarer Republik sachlich"
+  },
+  "Fronleichnam": {
+    "framing_note": "sachlich; katholischer Feiertag"
+  },
+  "Furz": {
+    "framing_note": "sachlich-biologisch, wertfrei"
+  },
+  "Galápagos-Inseln": {
+    "exclude": true,
+    "merge_into": "verschmelzen auf Galapagosinseln"
+  },
+  "Ganesha": {
+    "framing_note": "sachlich, respektvoll als hinduistische Gottheit einordnen"
+  },
+  "Garri Kasparow": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Gartenrotschwanz": {
+    "age_floor": 2
+  },
+  "Gebet": {
+    "framing_note": "sachlich, kein Missionieren; in verschiedenen Religionen"
+  },
+  "Geburt": {
+    "framing_note": "sachlich, altersgerecht, ohne explizite Details"
+  },
+  "Gefängnis": {
+    "age_floor": 2,
+    "framing_note": "sachlich, nicht verängstigend"
+  },
+  "Genetik": {
+    "age_floor": 2
+  },
+  "Gentechnik": {
+    "age_floor": 3,
+    "framing_note": "neutral, Chancen und Bedenken fair nebeneinander"
+  },
+  "Gerhard Richter": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Gericht": {
+    "framing_note": "sachlich, nicht verängstigend"
+  },
+  "Germanen": {
+    "framing_note": "neutral, kein völkisch-nationalistischer Bezug"
+  },
+  "Geronimo": {
+    "framing_note": "Krieg und Vertreibung respektvoll und sachlich."
+  },
+  "Gesamtschule": {
+    "age_floor": 2
+  },
+  "Geschichte der Medizin": {
+    "framing_note": "keine Selbstmedikation, historisch"
+  },
+  "Geschichte Deutschlands": {
+    "framing_note": "Epochen neutral, NS-Zeit klar als Unrecht"
+  },
+  "Geschlechtsorgane": {
+    "age_floor": 2,
+    "framing_note": "sachlich-biologisch, wertfrei, keine Akt-Darstellung"
+  },
+  "Gespenst": {
+    "framing_note": "nicht verängstigend, spielerisch einordnen"
+  },
+  "Gift (Biologie)": {
+    "framing_note": "sachlich, nicht verängstigend"
+  },
+  "Giftpflanzen": {
+    "framing_note": "Warnung-Box, nicht verängstigend, sachlich, 'nie unbekannte Pflanzen essen'"
+  },
+  "Giftpilz": {
+    "framing_note": "Warnung-Box, nie unbekannte Pilze essen, sachlich"
+  },
+  "Gilgamesch": {
+    "age_floor": 2
+  },
+  "Gladiator": {
+    "framing_note": "Kämpfe/Tod sachlich, nicht verherrlichend, historisch einordnen"
+  },
+  "Gleichberechtigung": {
+    "framing_note": "wertfrei, sachlich"
+  },
+  "Goldene Zwanziger": {
+    "age_floor": 2
+  },
+  "Goldener Pfeilgiftfrosch": {
+    "framing_note": "Giftigkeit sachlich, nicht verängstigend"
+  },
+  "Goldener Tempel (Amritsar)": {
+    "framing_note": "Sachlich, kein Missionieren."
+  },
+  "Goldregen": {
+    "framing_note": "alle Pflanzenteile giftig sachlich, warnung-Box"
+  },
+  "Goldregenpfeifer": {
+    "age_floor": 2
+  },
+  "Gott": {
+    "framing_note": "sachlich; verschiedene Gottesvorstellungen, kein Missionieren"
+  },
+  "Graffiti": {
+    "framing_note": "rechtlichen Aspekt (Sachbeschädigung) sachlich erwähnen, nicht als Anleitung"
+  },
+  "Grammatik": {
+    "age_floor": 2
+  },
+  "Grand Canyon (entf.)": {
+    "exclude": true
+  },
+  "Greta Thunberg": {
+    "framing_note": "strikt neutral, Klima-Aktivismus sachlich darstellen"
+  },
+  "Griechische Götter": {
+    "framing_note": "sachlich, als historische Mythologie"
+  },
+  "Grillen": {
+    "framing_note": "Feuer-/Hitzevorsicht erwähnen."
+  },
+  "Grippe": {
+    "framing_note": "keine Selbstmedikation, „frag Eltern/Arzt“"
+  },
+  "Großes Barriereriff (entf.)": {
+    "exclude": true
+  },
+  "Großes Indien (alte Reiche)": {
+    "age_floor": 2
+  },
+  "Gürtelmaki": {
+    "exclude": true
+  },
+  "Guru Nanak": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Gymnasium": {
+    "age_floor": 2
+  },
+  "Hagia Sophia": {
+    "framing_note": "Wechselnde religiöse Nutzung sachlich, neutral."
+  },
+  "Hammurabi und sein Gesetz": {
+    "framing_note": "harte Strafen sachlich einordnen, nicht verängstigend"
+  },
+  "Hanf": {
+    "framing_note": "Cannabis/Marihuana als illegale Droge sachlich-warnend; Fokus auf Nutzhanf (Faser, Seile, Papier), keine Konsum-Anleitung"
+  },
+  "Hänfling": {
+    "age_floor": 2
+  },
+  "Hannibal": {
+    "framing_note": "Krieg sachlich; Elefanten über Alpen als Aufhänger."
+  },
+  "Hannibal und die Elefanten": {
+    "framing_note": "Krieg sachlich, Schwerpunkt Alpenüberquerung mit Elefanten"
+  },
+  "Harriet Tubman": {
+    "framing_note": "Sklaverei sachlich; Befreiungsaktionen als Heldengeschichte."
+  },
+  "Haubenlerche": {
+    "age_floor": 2
+  },
+  "Haubenmeise": {
+    "age_floor": 2
+  },
+  "Hausrotschwanz": {
+    "age_floor": 2
+  },
+  "Hayao Miyazaki": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Hebamme": {
+    "framing_note": "Geburt sachlich-altersgerecht, keine expliziten Details"
+  },
+  "Heckenbraunelle": {
+    "age_floor": 2
+  },
+  "Heilige (Religion)": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Heilige Drei Könige": {
+    "framing_note": "sachlich; biblische Figuren und Sternsinger-Brauch"
+  },
+  "Heiliges Römisches Reich": {
+    "age_floor": 2
+  },
+  "Heilpflanzen": {
+    "framing_note": "keine Selbstmedikation/Dosierung, sachlich, 'frag Eltern/Arzt'"
+  },
+  "Heinrich VIII.": {
+    "framing_note": "Hinrichtungen von Ehefrauen sehr knapp und sachlich."
+  },
+  "Helene Fischer": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Helmut Kohl": {
+    "framing_note": "strikt neutral, Positionen fair"
+  },
+  "Henri Dunant": {
+    "framing_note": "Gründung Rotes Kreuz sachlich, Kriegskontext nicht verängstigend"
+  },
+  "Henry Ford": {
+    "framing_note": "spätere antisemitische Haltung nicht thematisieren in S1/S2"
+  },
+  "Henry Morton Stanley": {
+    "exclude": true
+  },
+  "Herd": {
+    "framing_note": "Hinweis: heiß, Vorsicht, nur mit Erwachsenen"
+  },
+  "Hermann Hesse": {
+    "age_floor": 2
+  },
+  "Hernán Cortés": {
+    "framing_note": "Eroberung und Gewalt gegen die Azteken sachlich, nicht heroisieren."
+  },
+  "Hexe": {
+    "framing_note": "Märchen-Hexe von historischer Hexenverfolgung trennen, nicht verängstigend"
+  },
+  "Hexenverfolgung": {
+    "framing_note": "Verfolgung/Folter/Tod nüchtern, nicht ausmalend, Unrecht klar benennen"
+  },
+  "Himmel (Religion)": {
+    "framing_note": "sachlich; religiöse Jenseitsvorstellung, kein Missionieren"
+  },
+  "Hinduismus": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Hindu-Mythologie": {
+    "framing_note": "sachlich, kein Missionieren, religiöse Erzählungen respektvoll einordnen"
+  },
+  "Hip-Hop": {
+    "age_floor": 2
+  },
+  "Hippokrates": {
+    "framing_note": "Medizin sachlich; keine Selbstmedikation."
+  },
+  "Hitzewelle": {
+    "framing_note": "sachlich, Gesundheits-Hinweis (trinken, Schatten)"
+  },
+  "Hoatzin": {
+    "age_floor": 2
+  },
+  "Hochzeit": {
+    "framing_note": "verschiedene Eheformen wertfrei erwähnen"
+  },
+  "Holocaust": {
+    "age_floor": 3,
+    "framing_note": "nüchtern, Gedenken, Verbrechen klar als Völkermord, keine Bilder von Grausamkeit, nicht verängstigend"
+  },
+  "Holzschnitzen": {
+    "framing_note": "Werkzeuggebrauch (scharfe Messer) als Erwachsenen-Tätigkeit darstellen, keine Anleitung für Kinder."
+  },
+  "Hongkong": {
+    "framing_note": "politische Lage neutral darstellen"
+  },
+  "Honiganzeiger": {
+    "age_floor": 2
+  },
+  "Honigfresser": {
+    "age_floor": 2
+  },
+  "Hopfen": {
+    "framing_note": "Bezug zu Bier sachlich, kein Konsum-Anreiz"
+  },
+  "Hormon": {
+    "age_floor": 2
+  },
+  "Hornisse": {
+    "framing_note": "Mythos vom tödlichen Stich entzaubern."
+  },
+  "Hundertjähriger Krieg": {
+    "framing_note": "Krieg sachlich, nicht verängstigend"
+  },
+  "Hunger (Welt)": {
+    "framing_note": "Welthunger sachlich, nicht verängstigend, Hilfe/Hoffnung mitnennen."
+  },
+  "Hurrikan": {
+    "framing_note": "sachlich, warnung-Box, nicht verängstigend, altersgerecht"
+  },
+  "Husten": {
+    "framing_note": "keine Selbstmedikation, „frag Eltern/Arzt“"
+  },
+  "Ibis": {
+    "age_floor": 2
+  },
+  "Impfung": {
+    "framing_note": "medizinisch sachlich, kein Selbstmedikations-Rat, 'frag Eltern/Arzt'"
+  },
+  "Ingo Siegner": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Inklusion": {
+    "framing_note": "wertschätzend, sachlich"
+  },
+  "Insektensterben": {
+    "framing_note": "sachlich, nicht angsteinflößend, Handlungsmöglichkeiten zeigen"
+  },
+  "Invasive Art": {
+    "age_floor": 2
+  },
+  "Irak": {
+    "framing_note": "Mesopotamien/frühe Hochkulturen im Vordergrund; Kriege sachlich, nicht verängstigend."
+  },
+  "Iran": {
+    "framing_note": "Geschichte/Kultur (Persien) im Vordergrund; aktuelle Politik strikt neutral."
+  },
+  "Islam": {
+    "framing_note": "sachlich, kein Missionieren, kein Pauschalisieren; eine Weltreligion neben anderen"
+  },
+  "Israel": {
+    "framing_note": "Religiöse Bedeutung (Jerusalem) sachlich; Nahostkonflikt strikt neutral und altersgerecht, keine Parteinahme."
+  },
+  "J. K. Rowling": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "James Cook": {
+    "framing_note": "Begegnung mit Ureinwohnern sachlich einordnen."
+  },
+  "Jan Ullrich": {
+    "framing_note": "nüchtern, Dopingthema sachlich, keine Moralurteile in S1/S2"
+  },
+  "Jeanne d'Arc": {
+    "framing_note": "Krieg und Hinrichtung sachlich, nicht verängstigend."
+  },
+  "Jemen": {
+    "age_floor": 2,
+    "framing_note": "Krieg/Hungersnot sachlich, warnung-Box, nicht verängstigend."
+  },
+  "Jerusalem": {
+    "framing_note": "Heilige Stadt dreier Religionen sachlich darstellen, kein Bevorzugen, politischen Konflikt nur knapp und neutral."
+  },
+  "Jesse Owens": {
+    "framing_note": "Olympia 1936 / NS-Kontext nüchtern einordnen, nicht verherrlichend"
+  },
+  "Jesus von Nazareth": {
+    "framing_note": "sachlich; religiöse Bedeutung und historische Person, kein Missionieren"
+  },
+  "John F. Kennedy": {
+    "framing_note": "strikt neutral; Ermordung sachlich, nicht verängstigend"
+  },
+  "Judentum": {
+    "framing_note": "sachlich, kein Missionieren; eine Weltreligion neben anderen"
+  },
+  "Julius Caesar": {
+    "framing_note": "Kriege und Ermordung sachlich, nicht verängstigend."
+  },
+  "Kalorie": {
+    "framing_note": "Energie sachlich, nicht diät-/figurfixiert"
+  },
+  "Kalter Krieg": {
+    "age_floor": 2,
+    "framing_note": "politisch neutral, beide Blöcke fair, Bedrohung sachlich nicht angstmachend"
+  },
+  "Kamin": {
+    "framing_note": "Hinweis: Feuer ist gefährlich, nur mit Erwachsenen"
+  },
+  "Kammmolch": {
+    "age_floor": 2
+  },
+  "Kampfflugzeug": {
+    "framing_note": "Militärfahrzeug sachlich, Kriegsbezug nüchtern, nicht verherrlichend"
+  },
+  "Kampfsport": {
+    "framing_note": "Sport von echter Gewalt abgrenzen, Regeln/Respekt betonen"
+  },
+  "Kanadagans": {
+    "age_floor": 2
+  },
+  "Kapillarwirkung": {
+    "age_floor": 2
+  },
+  "Karfreitag": {
+    "framing_note": "sachlich; christlicher Gedenktag, Tod Jesu behutsam"
+  },
+  "Karies": {
+    "framing_note": "„frag Eltern/Arzt“"
+  },
+  "Karl Marx": {
+    "framing_note": "Ideen neutral darstellen, keine Wertung, Folgen sachlich."
+  },
+  "Karl May": {
+    "framing_note": "Klischeehaftes Indianerbild als historisch/fiktiv einordnen."
+  },
+  "Katapult": {
+    "framing_note": "Historische Maschine, Belagerungs-/Gewaltkontext sachlich knapp"
+  },
+  "Katapult und Belagerung": {
+    "framing_note": "Kriegstechnik sachlich"
+  },
+  "Katarina Witt": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Käthe Kollwitz": {
+    "framing_note": "Themen Krieg/Trauer sachlich"
+  },
+  "Kernbeißer": {
+    "age_floor": 2
+  },
+  "Kernkraftwerk": {
+    "framing_note": "Risiken/Unfälle sachlich, nicht verängstigend, Strahlung altersgerecht"
+  },
+  "Kerze": {
+    "framing_note": "Feuervorsicht erwähnen."
+  },
+  "Kinderarbeit in der Geschichte": {
+    "framing_note": "Leid sachlich, nicht verängstigend, Bezug zu Kinderrechten"
+  },
+  "Kippa": {
+    "framing_note": "sachlich; jüdische Kopfbedeckung"
+  },
+  "Kirche (Bauwerk)": {
+    "framing_note": "sachlich; Gotteshaus, kein Missionieren"
+  },
+  "Klagemauer": {
+    "framing_note": "Religiöse Bedeutung sachlich, kein Missionieren, Konflikt neutral."
+  },
+  "Klimawandel": {
+    "framing_note": "sachlich, wissenschaftlicher Konsens, nicht angstmachend"
+  },
+  "Klonen": {
+    "age_floor": 2,
+    "framing_note": "sachlich, ethische Fragen neutral andeuten"
+  },
+  "Kloster": {
+    "framing_note": "sachlich"
+  },
+  "Knäkente": {
+    "age_floor": 2
+  },
+  "Knecht Ruprecht": {
+    "framing_note": "nicht als Kinderschreck verängstigend einordnen"
+  },
+  "Knochenbruch": {
+    "framing_note": "„frag Eltern/Arzt“"
+  },
+  "Knollenblätterpilz": {
+    "age_floor": 2,
+    "framing_note": "Tödliche Giftigkeit sachlich, warnung-Box, nicht verängstigend; Verwechslungsgefahr betonen"
+  },
+  "Knutt": {
+    "age_floor": 2
+  },
+  "Kochen": {
+    "framing_note": "Keine Anleitung mit heißen Herden ohne Aufsicht; Vorsicht erwähnen."
+  },
+  "Kohlenhydrat": {
+    "exclude": true,
+    "merge_into": "auf Kohlenhydrate verschmelzen"
+  },
+  "Kohlenstoffkreislauf": {
+    "age_floor": 2
+  },
+  "Kölner Dom": {
+    "framing_note": "Sachlich, kein Missionieren."
+  },
+  "Kolonialismus": {
+    "framing_note": "Unterdrückung und Gewalt sachlich, kritisch einordnen, nicht verharmlosen"
+  },
+  "Kolosseum": {
+    "framing_note": "Gladiatorenkämpfe/Tod sachlich, nicht verherrlichend."
+  },
+  "Kommunion": {
+    "framing_note": "sachlich; katholischer Ritus"
+  },
+  "Konfirmation": {
+    "framing_note": "sachlich; evangelischer Ritus"
+  },
+  "Konfuzianische Lehre": {
+    "age_floor": 3
+  },
+  "Konfuzius": {
+    "age_floor": 2
+  },
+  "König Artus und die Tafelrunde": {
+    "exclude": true,
+    "merge_into": "auf König Artus verschmelzen",
+    "framing_note": "Legende von Geschichte trennen"
+  },
+  "Konrad Adenauer": {
+    "framing_note": "strikt neutral, Positionen fair"
+  },
+  "Kopfschmerz": {
+    "framing_note": "„frag Eltern/Arzt“"
+  },
+  "Kopftuch": {
+    "framing_note": "sachlich, neutral, kein Werten; verschiedene Sichtweisen fair nebeneinander"
+  },
+  "Korallenbleiche": {
+    "age_floor": 2,
+    "framing_note": "sachlich, nicht verängstigend"
+  },
+  "Koran": {
+    "framing_note": "sachlich; heiliges Buch des Islam, kein Missionieren"
+  },
+  "Kosovo": {
+    "age_floor": 2,
+    "framing_note": "Umstrittener Status neutral, beide Sichtweisen fair."
+  },
+  "Kot": {
+    "framing_note": "sachlich-biologisch, wertfrei"
+  },
+  "Krampus": {
+    "framing_note": "nicht verängstigend, als Brauch einordnen"
+  },
+  "Krankenhaus": {
+    "framing_note": "sachlich, nicht verängstigend; keine Selbstbehandlung"
+  },
+  "Krankenversicherung": {
+    "age_floor": 2
+  },
+  "Krankheit": {
+    "framing_note": "keine Selbstmedikation, „frag Eltern/Arzt“"
+  },
+  "Krebs (Krankheit)": {
+    "age_floor": 2,
+    "framing_note": "sachlich, nicht verängstigend, „frag Eltern/Arzt“, warnung-Box"
+  },
+  "Kreisel": {
+    "exclude": true,
+    "merge_into": "auf Kreisel (Spielzeug) verschmelzen"
+  },
+  "Kreml": {
+    "framing_note": "Politische Rolle neutral."
+  },
+  "Kreuz (Christentum)": {
+    "framing_note": "sachlich; christliches Symbol"
+  },
+  "Kreuzschnabel": {
+    "age_floor": 2
+  },
+  "Kreuzzüge": {
+    "framing_note": "Religionskrieg sachlich, beide Seiten, nicht wertend, Gewalt nüchtern"
+  },
+  "Kriegsschiff": {
+    "framing_note": "Militärfahrzeug sachlich, Kriegsbezug nüchtern, nicht verherrlichend"
+  },
+  "Krippe (Weihnachten)": {
+    "framing_note": "sachlich; christlicher Brauch"
+  },
+  "Kugelfisch": {
+    "framing_note": "Giftigkeit sachlich."
+  },
+  "Küstenseeschwalbe": {
+    "age_floor": 2
+  },
+  "Laozi": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Laser": {
+    "framing_note": "Augengefahr bei Laserpointern erwähnen"
+  },
+  "Latein": {
+    "age_floor": 2
+  },
+  "Laus": {
+    "framing_note": "Kopfläuse sachlich, kein Ekel/Stigma."
+  },
+  "Läuse": {
+    "framing_note": "wertfrei, nicht stigmatisierend"
+  },
+  "Lawine": {
+    "framing_note": "sachlich, warnung-Box, nicht verängstigend"
+  },
+  "LeBron James": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Leni Riefenstahl": {
+    "age_floor": 3,
+    "framing_note": "NS-Propaganda nüchtern, nicht verharmlosen/verherrlichen"
+  },
+  "Libanon": {
+    "framing_note": "Konflikte sachlich, nicht verängstigend."
+  },
+  "Libyen": {
+    "framing_note": "Konflikte sachlich, nicht verängstigend."
+  },
+  "Lionel Messi": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Loch Ness": {
+    "framing_note": "Ungeheuer-Legende als Sage klar von Fakten trennen"
+  },
+  "Löffelente": {
+    "age_floor": 2
+  },
+  "Löffler": {
+    "age_floor": 2
+  },
+  "Lori": {
+    "age_floor": 2
+  },
+  "Ludwig Erhard": {
+    "age_floor": 2,
+    "framing_note": "strikt neutral"
+  },
+  "Ludwig II. (Bayern)": {
+    "framing_note": "Geheimnisvoller Tod sachlich, nicht dramatisierend."
+  },
+  "Magnus Carlsen": {
+    "framing_note": "nüchtern"
+  },
+  "Mahatma Gandhi": {
+    "framing_note": "Gewaltfreiheit, Tod durch Attentat sachlich"
+  },
+  "Mahavira": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Maiglöckchen": {
+    "framing_note": "Giftigkeit sachlich erwähnen, Warnung nicht verzehren"
+  },
+  "Malala Yousafzai": {
+    "framing_note": "Attentat/Gewalt sachlich, nicht verängstigend"
+  },
+  "Mamushi": {
+    "age_floor": 2
+  },
+  "Manga": {
+    "age_floor": 2
+  },
+  "Manuel Neuer": {
+    "framing_note": "nüchtern"
+  },
+  "Marabu": {
+    "framing_note": "Aasfresser-Rolle sachlich darstellen"
+  },
+  "Marathon (Schlacht und Lauf)": {
+    "framing_note": "Schlacht sachlich, Schwerpunkt auf Botenlauf-Legende"
+  },
+  "Maria (Mutter Jesu)": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Marie Antoinette": {
+    "framing_note": "Revolution und Hinrichtung sachlich, nicht verängstigend."
+  },
+  "Marilyn Monroe": {
+    "framing_note": "Tod sachlich, glamouröses Image neutral; kein Sex-Symbol-Framing"
+  },
+  "Mark Zuckerberg": {
+    "framing_note": "nüchtern, keine Moralurteile; Datenschutz-Debatten neutral"
+  },
+  "Martin Luther": {
+    "framing_note": "Religiöse Reformation sachlich, nicht missionierend."
+  },
+  "Martin Luther King": {
+    "framing_note": "Rassismus sachlich, Ermordung nicht verängstigend"
+  },
+  "Masern": {
+    "framing_note": "keine Selbstmedikation, „frag Eltern/Arzt“"
+  },
+  "Maßstab (Karte)": {
+    "age_floor": 2
+  },
+  "Mauereidechse": {
+    "age_floor": 2
+  },
+  "Max und Moritz": {
+    "framing_note": "Streiche enden gewaltsam — sachlich, nicht ausschmücken"
+  },
+  "Maya": {
+    "framing_note": "Menschenopfer nur sachlich-knapp, nicht ausmalend"
+  },
+  "Maya-Mythologie": {
+    "age_floor": 2
+  },
+  "Medikament": {
+    "framing_note": "keine Dosierung, keine Selbstmedikation, „frag Eltern/Arzt“"
+  },
+  "Menschenrechte": {
+    "framing_note": "sachlich"
+  },
+  "Menstruation": {
+    "age_floor": 3,
+    "framing_note": "sachlich-biologisch, wertfrei"
+  },
+  "Mesopotamische Götter": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Metamorphose (Zoologie)": {
+    "exclude": true,
+    "merge_into": "Verschmelzung auf Metamorphose"
+  },
+  "Michael Jackson": {
+    "framing_note": "Vorwürfe nicht in S1/S2, in S3 nur sachlich erwähnen"
+  },
+  "Michael Schumacher": {
+    "framing_note": "nüchtern; Skiunfall sachlich, nicht dramatisierend"
+  },
+  "Michelangelo": {
+    "framing_note": "Nackt-Darstellungen (David, Sixtinische Kapelle) als Kunst sachlich einordnen."
+  },
+  "Mobbing": {
+    "age_floor": 2,
+    "framing_note": "sachlich, Hilfe aufzeigen (Eltern/Lehrer), nicht verängstigend"
+  },
+  "Modell (Mode)": {
+    "age_floor": 2,
+    "framing_note": "kein Schönheitsdruck, realistisches Körperbild"
+  },
+  "Mohammed": {
+    "framing_note": "Religionsstifter sachlich, respektvoll, kein Bild des Propheten, kein Missionieren."
+  },
+  "Mohenjo-Daro und Indus-Kultur": {
+    "age_floor": 2
+  },
+  "Mohn": {
+    "framing_note": "Opium-Bezug nur sachlich am Rande, kein Drogen-Detail"
+  },
+  "Mönch": {
+    "framing_note": "sachlich; in verschiedenen Religionen"
+  },
+  "Mönch und Kloster": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Mönchsgrasmücke": {
+    "age_floor": 2
+  },
+  "Mongolisches Reich": {
+    "framing_note": "Eroberungskriege sachlich einordnen"
+  },
+  "Montezuma II.": {
+    "framing_note": "Eroberung und Tod sachlich."
+  },
+  "Moschee": {
+    "framing_note": "sachlich; Gotteshaus des Islam, kein Missionieren"
+  },
+  "Moses": {
+    "framing_note": "Biblische Figur sachlich, als religiöse Überlieferung kennzeichnen."
+  },
+  "Muhammad Ali": {
+    "framing_note": "Boxen als Sport sachlich, kein Gewalt-Anreiz"
+  },
+  "Murgang": {
+    "framing_note": "sachlich, Gefahren altersgerecht"
+  },
+  "Mutation": {
+    "age_floor": 2
+  },
+  "Mutter Teresa": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Myanmar": {
+    "framing_note": "Politische Lage sachlich, nicht verängstigend."
+  },
+  "Mykorrhiza": {
+    "age_floor": 2
+  },
+  "Naher Osten": {
+    "framing_note": "Konflikte strikt neutral und sachlich, keine Wertung."
+  },
+  "Napoleon": {
+    "exclude": true,
+    "merge_into": "auf Napoleon Bonaparte verschmelzen",
+    "framing_note": "Eroberungskriege sachlich, nicht verherrlichend"
+  },
+  "Napoleon Bonaparte": {
+    "framing_note": "Kriege sachlich, nicht heroisieren; Niederlagen und Folgen einordnen."
+  },
+  "Nationalsozialismus": {
+    "framing_note": "nüchtern, nie verherrlichend, Verbrechen klar benennen, keine Täter-Glorifizierung"
+  },
+  "Naturkatastrophe": {
+    "framing_note": "sachlich, warnung-Box, nicht verängstigend"
+  },
+  "Natürliche Auslese": {
+    "age_floor": 2
+  },
+  "Nektarvogel": {
+    "age_floor": 2
+  },
+  "Nelson Mandela": {
+    "framing_note": "Apartheid/Haft sachlich, nicht verängstigend"
+  },
+  "Nero": {
+    "framing_note": "Grausamkeit/Christenverfolgung sachlich, nicht verängstigend."
+  },
+  "Neuntöter": {
+    "framing_note": "Aufspießen von Beute sachlich, nicht reißerisch"
+  },
+  "Neuzeit (Epoche)": {
+    "age_floor": 2
+  },
+  "Nikolaus von Myra": {
+    "framing_note": "sachlich; Heiliger und Brauch nebeneinander"
+  },
+  "Nonnengans": {
+    "age_floor": 2
+  },
+  "Nordkorea": {
+    "framing_note": "Strikt neutral, abgeschottetes politisches System sachlich, keine Wertung; keine verängstigenden Details."
+  },
+  "Notre-Dame de Paris": {
+    "framing_note": "Sachlich; Brand 2019 nüchtern erwähnen."
+  },
+  "Notruf": {
+    "framing_note": "Notruf sachlich erklären, nicht verängstigend"
+  },
+  "Nürnberg": {
+    "framing_note": "Lebkuchen/Burg betonen; NS-Reichsparteitage sachlich, nicht verherrlichend."
+  },
+  "Obdachlosigkeit": {
+    "age_floor": 2,
+    "framing_note": "sachlich, mitfühlend, nicht verängstigend"
+  },
+  "Ohrwurm": {
+    "framing_note": "Mythos vom Ohrkriechen entzaubern."
+  },
+  "Ökologie": {
+    "age_floor": 2
+  },
+  "Oktoberfest": {
+    "framing_note": "Volksfest; Alkohol/Bier sachlich, kein Konsum-Anreiz"
+  },
+  "Olaf Scholz": {
+    "age_floor": 2,
+    "framing_note": "strikt neutral, Positionen fair, keine Wertung"
+  },
+  "Operation": {
+    "age_floor": 2,
+    "framing_note": "sachlich, nicht verängstigend, altersgerecht"
+  },
+  "Opferfest": {
+    "framing_note": "sachlich; islamisches Fest, Schlachtung sachlich und nicht drastisch"
+  },
+  "Orange (Frucht)": {
+    "exclude": true,
+    "merge_into": "Verschmelzung auf Orange"
+  },
+  "Osmose": {
+    "age_floor": 2
+  },
+  "Ostern": {
+    "framing_note": "sachlich, kein Missionieren; christliche Bedeutung und Bräuche nebeneinander"
+  },
+  "Otto Lilienthal": {
+    "framing_note": "Tödlicher Flugunfall knapp und sachlich."
+  },
+  "Otto von Bismarck": {
+    "age_floor": 2
+  },
+  "Ötzi": {
+    "framing_note": "Mumie/Tod sachlich"
+  },
+  "Ozonloch": {
+    "age_floor": 2
+  },
+  "Palästina": {
+    "age_floor": 2,
+    "framing_note": "Nahostkonflikt strikt neutral, beide Seiten fair, keine Wertung."
+  },
+  "Panzer": {
+    "framing_note": "Militärfahrzeug sachlich, Kriegsbezug nüchtern, nicht verherrlichend"
+  },
+  "Papst": {
+    "framing_note": "sachlich; Oberhaupt der katholischen Kirche"
+  },
+  "Papst Franziskus": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Paul Maar": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Periodensystem": {
+    "age_floor": 2
+  },
+  "Pessach": {
+    "framing_note": "sachlich; jüdisches Fest"
+  },
+  "Pest": {
+    "framing_note": "Krankheit/Tod sachlich, nicht verängstigend, historisch"
+  },
+  "Petersdom": {
+    "framing_note": "Sachlich, kein Missionieren."
+  },
+  "Pfarrer": {
+    "framing_note": "sachlich"
+  },
+  "Pfauenauge (Bird)": {
+    "age_floor": 2
+  },
+  "Pfeifente": {
+    "age_floor": 2
+  },
+  "Pfingsten": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Photoeffekt": {
+    "age_floor": 3
+  },
+  "Photorezeptor": {
+    "age_floor": 3
+  },
+  "Pi (Kreiszahl)": {
+    "age_floor": 2
+  },
+  "Pilgerfahrt nach Mekka": {
+    "framing_note": "sachlich; islamische Pilgerfahrt (Hadsch)"
+  },
+  "Pilze (Lebensmittel)": {
+    "framing_note": "Hinweis: nur bekannte Pilze sammeln/essen, Giftpilze gefährlich, mit Erwachsenen"
+  },
+  "Pippi Langstrumpf": {
+    "framing_note": "veraltete/diskriminierende Begriffe im Original nur historisch einordnen"
+  },
+  "Piranha": {
+    "framing_note": "Mythos vom Killerfisch sachlich entzaubern."
+  },
+  "Piraten": {
+    "framing_note": "Gewalt/Raub nicht verherrlichend, historisch einordnen"
+  },
+  "Pocahontas": {
+    "framing_note": "Reale Geschichte von Disney-Mythos unterscheiden; kolonialer Kontext."
+  },
+  "Polarisation (Welle)": {
+    "age_floor": 3
+  },
+  "Pompeji": {
+    "framing_note": "Vulkankatastrophe/Todesopfer sachlich, warnung-Box, nicht verängstigend."
+  },
+  "Population": {
+    "age_floor": 2
+  },
+  "Portugiesische Galeere": {
+    "framing_note": "Giftigkeit sachlich, nicht verängstigend"
+  },
+  "Preußen": {
+    "age_floor": 2
+  },
+  "Primzahl": {
+    "age_floor": 2
+  },
+  "Protein": {
+    "age_floor": 2
+  },
+  "Prozent": {
+    "age_floor": 2
+  },
+  "Psyche": {
+    "framing_note": "sachlich, kein Pathologisieren"
+  },
+  "Pteranodon": {
+    "framing_note": "Kein Dino, sondern Flugsaurier — korrekt einordnen."
+  },
+  "Pubertät": {
+    "age_floor": 3,
+    "framing_note": "sachlich-biologisch, wertfrei, keine Akt-Darstellung"
+  },
+  "Qualle": {
+    "framing_note": "Nesselgift sachlich, kein Verängstigen."
+  },
+  "Quetzal": {
+    "age_floor": 2
+  },
+  "Radioaktivität": {
+    "framing_note": "Strahlungsgefahr sachlich, warnung-Box, nicht verängstigend"
+  },
+  "Ramadan": {
+    "framing_note": "sachlich; islamischer Fastenmonat"
+  },
+  "Ratsel der Häutung": {
+    "exclude": true
+  },
+  "Räuber und Wegelagerer": {
+    "framing_note": "Kriminalität nicht verherrlichend"
+  },
+  "Rauchen": {
+    "age_floor": 2,
+    "framing_note": "Sucht/Gefahren sachlich, kein Konsum-Anreiz, keine Anleitung, Prävention"
+  },
+  "Reformation": {
+    "framing_note": "sachlich; Spaltung der Kirche, neutral"
+  },
+  "Reformation und Martin Luther": {
+    "framing_note": "sachlich, kein Missionieren, Konfessionen neutral"
+  },
+  "Regierung": {
+    "framing_note": "neutral, Funktion erklären, keine Wertung"
+  },
+  "Reich (Biologie)": {
+    "age_floor": 2
+  },
+  "Reich von Benin und Afrika": {
+    "age_floor": 2
+  },
+  "Reichsgründung 1871": {
+    "age_floor": 2
+  },
+  "Reichstagsgebäude": {
+    "framing_note": "Politische Funktion neutral."
+  },
+  "Reinhold Messner": {
+    "framing_note": "nüchtern"
+  },
+  "Religion": {
+    "framing_note": "sachlich, kein Missionieren; verschiedene Religionen und Nicht-Religiöse gleichwertig"
+  },
+  "Renaissance": {
+    "age_floor": 2
+  },
+  "Resonanz": {
+    "age_floor": 2
+  },
+  "Rettungsdienst": {
+    "framing_note": "Notfall sachlich, nicht verängstigend; Notruf 112 erklären"
+  },
+  "Richard Löwenherz": {
+    "framing_note": "Kreuzzüge sachlich einordnen."
+  },
+  "Richard Wagner": {
+    "framing_note": "Antisemitismus Wagners sachlich erwähnen."
+  },
+  "Riesen-Bärenklau": {
+    "framing_note": "verursacht Verbrennungen, Warnhinweis nicht berühren"
+  },
+  "Robespierre": {
+    "framing_note": "Terror der Revolution sachlich, nicht verherrlichend."
+  },
+  "Robin Hood": {
+    "exclude": true,
+    "merge_into": "auf \"Robin Hood (Legende und Zeit)\" verschmelzen",
+    "framing_note": "Als Legende/Sagengestalt kennzeichnen."
+  },
+  "Robin Hood (Legende und Zeit)": {
+    "framing_note": "Legende von historischem Hintergrund unterscheiden"
+  },
+  "Roger Federer": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Rohrdommel": {
+    "age_floor": 2
+  },
+  "Rohrsänger": {
+    "age_floor": 2
+  },
+  "Roller": {
+    "exclude": true,
+    "merge_into": "auf Roller (Spielzeug) verschmelzen"
+  },
+  "Römische Legionäre": {
+    "framing_note": "Kämpfe sachlich, nicht verherrlichend"
+  },
+  "Rosa Parks": {
+    "framing_note": "Rassismus sachlich, nicht verängstigend"
+  },
+  "Ruanda": {
+    "framing_note": "Völkermord 1994 nur in S3, nüchtern, nicht verherrlichend."
+  },
+  "Runen": {
+    "framing_note": "moderne missbräuchliche Verwendung neutral/kritisch einordnen"
+  },
+  "Russische Revolution": {
+    "framing_note": "Gewalt und Umsturz sachlich, politisch neutral"
+  },
+  "Russland": {
+    "framing_note": "Größe/Geografie sachlich; aktuelle politische Konflikte nur neutral und altersgerecht erwähnen."
+  },
+  "Sabbat": {
+    "framing_note": "sachlich; jüdischer Ruhetag"
+  },
+  "Säbelschnäbler": {
+    "age_floor": 2
+  },
+  "Saladin": {
+    "framing_note": "Kreuzzüge sachlich, beide Seiten fair, nicht verklärend, warnung-Box"
+  },
+  "Same (Pflanze)": {
+    "exclude": true,
+    "merge_into": "auf Samen verschmelzen"
+  },
+  "Samurai": {
+    "framing_note": "Kämpfe sachlich, nicht verherrlichend"
+  },
+  "Sankt Martin": {
+    "framing_note": "sachlich; Heiliger und Laternenumzug-Brauch"
+  },
+  "Sankt Martin (Legende)": {
+    "exclude": true,
+    "merge_into": "auf Sankt Martin verschmelzen"
+  },
+  "Saudi-Arabien": {
+    "framing_note": "Mekka/religiöse Bedeutung sachlich, kein Missionieren."
+  },
+  "Säure": {
+    "framing_note": "Gefahr starker Säuren erwähnen, keine Experimente ohne Aufsicht"
+  },
+  "Schellente": {
+    "age_floor": 2
+  },
+  "Schere": {
+    "framing_note": "Vorsicht (scharf) erwähnen."
+  },
+  "Schießsport": {
+    "framing_note": "Sportgeräte von echten Waffen abgrenzen, Sicherheit betonen"
+  },
+  "Schimmel": {
+    "exclude": true,
+    "merge_into": "auf Schimmel (Lebensmittel) verschmelzen"
+  },
+  "Schimmel (Lebensmittel)": {
+    "framing_note": "Verdorbenes Essen sachlich; Hygiene erwähnen."
+  },
+  "Schlafmohn": {
+    "framing_note": "Opium/Heroin als illegale Droge nur sachlich-warnend erwähnen, keine Gewinnung/Anleitung; Fokus auf Botanik und Medizin-Geschichte"
+  },
+  "Schlangengift": {
+    "age_floor": 2,
+    "framing_note": "sachlich, nicht verängstigend, Gefahr und medizinischer Nutzen ausgewogen"
+  },
+  "Schlingnatter": {
+    "age_floor": 2
+  },
+  "Schlupfwespe": {
+    "framing_note": "Parasitismus an Wirtstieren sachlich, nicht drastisch ausmalen"
+  },
+  "Schneeammer": {
+    "age_floor": 2
+  },
+  "Schuhe binden": {
+    "exclude": true
+  },
+  "Schützenfest": {
+    "framing_note": "Volksfest sachlich"
+  },
+  "Schwangerschaft": {
+    "framing_note": "sachlich, altersgerecht, kein Aufklärungsdetail in S1"
+  },
+  "Schwarze Witwe": {
+    "framing_note": "Gefährlichkeit sachlich, kein Verängstigen, Warnung-Box."
+  },
+  "Schwarzstorch": {
+    "age_floor": 2
+  },
+  "Schweißgerät": {
+    "framing_note": "Hitze-/Lichtgefahr sachlich erwähnen"
+  },
+  "Schwert": {
+    "framing_note": "Waffe als historisches Objekt, nicht zum Nachmachen"
+  },
+  "Schwingkreis": {
+    "age_floor": 3
+  },
+  "Sebastian Vettel": {
+    "framing_note": "nüchtern"
+  },
+  "Seidenschwanz": {
+    "age_floor": 2
+  },
+  "Serena Williams": {
+    "framing_note": "nüchtern"
+  },
+  "Sexualität": {
+    "age_floor": 3,
+    "framing_note": "sachlich-biologisch, wertfrei, keine Akt-Darstellung"
+  },
+  "Sigmund Freud": {
+    "age_floor": 2,
+    "framing_note": "Psychologie sachlich und vereinfacht."
+  },
+  "Sir Francis Drake": {
+    "framing_note": "Kaperfahrten/Piraterie sachlich einordnen."
+  },
+  "Sir Walter Raleigh": {
+    "age_floor": 3
+  },
+  "Sissi (Elisabeth von Österreich)": {
+    "framing_note": "Gewaltsamer Tod nur sachlich/knapp."
+  },
+  "Sitting Bull": {
+    "framing_note": "Konflikte und Vertreibung der Ureinwohner sachlich, respektvoll."
+  },
+  "Skink": {
+    "age_floor": 2
+  },
+  "Sklavenhandel über den Atlantik": {
+    "framing_note": "Leid und Unrecht sachlich, kritisch, nicht verharmlosen, warnung-Box"
+  },
+  "Sklaverei": {
+    "framing_note": "Unrecht klar benennen, Leid sachlich, nicht ausmalend, Befreiung würdigen"
+  },
+  "Skorpion": {
+    "framing_note": "Giftstachel sachlich."
+  },
+  "Skua": {
+    "age_floor": 2,
+    "framing_note": "Nahrungsraub anderer Vögel sachlich darstellen"
+  },
+  "Smaragdeidechse": {
+    "age_floor": 2
+  },
+  "Smog": {
+    "framing_note": "sachlich, Umwelt-Bezug"
+  },
+  "Sojourner Truth": {
+    "framing_note": "Sklaverei sachlich; Befreiungsgeschichte als Vorbild."
+  },
+  "Sokrates": {
+    "framing_note": "Tod durch Schierlingsbecher sachlich."
+  },
+  "Soldat": {
+    "framing_note": "sachlich, Krieg/Gewalt nicht verherrlichend; warnung-Box"
+  },
+  "Somalia": {
+    "age_floor": 2,
+    "framing_note": "Bürgerkrieg/Piraterie sachlich, warnung-Box, nicht verängstigend."
+  },
+  "Sommerzeit": {
+    "age_floor": 2
+  },
+  "Sonnenbrand": {
+    "framing_note": "Vorbeugung, „frag Eltern“"
+  },
+  "Sonnenfinsternis": {
+    "framing_note": "Hinweis: niemals ungeschützt in die Sonne schauen"
+  },
+  "Sonnenfleck": {
+    "framing_note": "Hinweis: nicht direkt in die Sonne schauen"
+  },
+  "Sonnenstrahlung": {
+    "framing_note": "Sonnenschutz-Hinweis (UV)"
+  },
+  "Sophie Scholl": {
+    "age_floor": 2,
+    "framing_note": "Widerstand gegen NS, Hinrichtung sachlich, nicht verängstigend"
+  },
+  "Soziale Medien": {
+    "age_floor": 2,
+    "framing_note": "Sicherheit, Datenschutz, Altersgrenzen; nicht als Konsumanreiz"
+  },
+  "Spanische Eroberung Amerikas (Konquistadoren)": {
+    "framing_note": "Gewalt gegen indigene Völker sachlich, kritisch einordnen"
+  },
+  "Spartacus": {
+    "framing_note": "Sklaverei und Gewalt sachlich, altersgerecht."
+  },
+  "Spartaner": {
+    "framing_note": "harte Erziehung/Krieg sachlich, nicht idealisierend"
+  },
+  "Spechtmeise": {
+    "age_floor": 2
+  },
+  "Sperlingskauz": {
+    "age_floor": 2
+  },
+  "Spinnen": {
+    "framing_note": "Netzbau und Biss sachlich, kein Verängstigen."
+  },
+  "Spritze": {
+    "framing_note": "nicht verängstigend"
+  },
+  "Stachelrochen": {
+    "framing_note": "Giftstachel sachlich."
+  },
+  "Stachelschwanzleguan": {
+    "age_floor": 3
+  },
+  "Stammzelle": {
+    "age_floor": 3,
+    "framing_note": "sachlich, ethische Fragen neutral"
+  },
+  "Stechmücke": {
+    "framing_note": "Stich/Krankheiten sachlich."
+  },
+  "Steckdose": {
+    "framing_note": "Stromgefahr sachlich erwähnen, keine Bastelanleitung"
+  },
+  "Steffi Jones": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Steinschmätzer": {
+    "age_floor": 2
+  },
+  "Stelzenläufer": {
+    "age_floor": 2
+  },
+  "Stephansdom": {
+    "framing_note": "Sachlich, kein Missionieren."
+  },
+  "Stephen King": {
+    "age_floor": 3,
+    "framing_note": "Horror-Werke nur nennen, nicht ausmalen; nicht verängstigend"
+  },
+  "Steuern": {
+    "age_floor": 2
+  },
+  "Steve Irwin": {
+    "framing_note": "tödlicher Unfall sachlich/altersgerecht, warnung-Box, nicht verängstigend"
+  },
+  "Steven Spielberg": {
+    "framing_note": "nüchtern"
+  },
+  "Stevie Wonder": {
+    "framing_note": "nüchtern"
+  },
+  "Stickstoffkreislauf": {
+    "age_floor": 3
+  },
+  "Stillen": {
+    "framing_note": "sachlich-biologisch, wertfrei"
+  },
+  "Strahlung": {
+    "framing_note": "Strahlungsgefahren sachlich, nicht verängstigend."
+  },
+  "Strandläufer": {
+    "age_floor": 2
+  },
+  "Stromnetz": {
+    "age_floor": 2
+  },
+  "Strumpfbandnatter": {
+    "age_floor": 2
+  },
+  "Studium": {
+    "age_floor": 2
+  },
+  "Sturm": {
+    "framing_note": "sachlich, nicht verängstigend, altersgerecht"
+  },
+  "Sucht": {
+    "age_floor": 2,
+    "framing_note": "sachlich, Prävention, kein Konsum-Anreiz"
+  },
+  "Sudan": {
+    "framing_note": "Aktuelle Konflikte nur sachlich, nicht verängstigend."
+  },
+  "Sumpfmeise": {
+    "age_floor": 2
+  },
+  "Sumpfschildkröte": {
+    "age_floor": 2
+  },
+  "Sun Tzu": {
+    "age_floor": 3
+  },
+  "Suppenküche": {
+    "framing_note": "Armut/Hunger sachlich und mitfühlend, nicht verängstigend."
+  },
+  "Sven Nordqvist": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Symptom": {
+    "age_floor": 2,
+    "framing_note": "„frag Eltern/Arzt“"
+  },
+  "Synagoge": {
+    "framing_note": "sachlich; Gotteshaus des Judentums"
+  },
+  "Syrien": {
+    "framing_note": "Bürgerkrieg/Flucht sachlich, warnung-Box, nicht verängstigend."
+  },
+  "Tabak": {
+    "age_floor": 2,
+    "framing_note": "Sucht/Gefahren sachlich, kein Konsum-Anreiz, Prävention"
+  },
+  "Taiwan": {
+    "framing_note": "Politischer Status China/Taiwan neutral darstellen."
+  },
+  "Tarantel": {
+    "framing_note": "Gift-Mythos sachlich."
+  },
+  "Taubheit": {
+    "framing_note": "wertfrei, Gehörlosigkeit als Teil des Lebens, kein Mitleids-Ton"
+  },
+  "Taufe": {
+    "framing_note": "sachlich; christlicher Ritus"
+  },
+  "Taylor Swift": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Teichhuhn": {
+    "age_floor": 2
+  },
+  "Teichmolch": {
+    "age_floor": 2
+  },
+  "Tempel": {
+    "framing_note": "sachlich"
+  },
+  "Tempelritter": {
+    "framing_note": "Religionskontext neutral, Kreuzzugsgewalt sachlich"
+  },
+  "Tetanus": {
+    "age_floor": 2,
+    "framing_note": "keine Selbstmedikation, „frag Eltern/Arzt“"
+  },
+  "Thomas Mann": {
+    "age_floor": 2
+  },
+  "Tibet": {
+    "framing_note": "Politischer Status (China) neutral darstellen."
+  },
+  "Tierkreiszeichen": {
+    "framing_note": "Astronomie (Sternbilder) von Astrologie klar trennen; Horoskope nicht als Tatsache darstellen"
+  },
+  "Tim Berners-Lee": {
+    "framing_note": "nüchtern"
+  },
+  "Tim Cook": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Tim und Struppi (Hergé)": {
+    "exclude": true,
+    "merge_into": "auf Tim und Struppi verschmelzen"
+  },
+  "Timbuktu und Mali-Reich": {
+    "age_floor": 2
+  },
+  "Titanic": {
+    "framing_note": "Unglück/Tote sachlich, nicht dramatisierend, warnung-Box"
+  },
+  "Tod": {
+    "framing_note": "behutsam, sachlich, nicht verängstigend; Trauer würdigen; warnung-Box"
+  },
+  "Tod (Biologie)": {
+    "framing_note": "sachlich, nicht verängstigend, altersgerecht"
+  },
+  "Toilette": {
+    "framing_note": "Sachlich, Hygiene/Kanalisation; nicht albern-vulgär."
+  },
+  "Tollkirsche": {
+    "framing_note": "stark giftig, deutlicher Warnhinweis, nie essen"
+  },
+  "Toni Kroos": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Tora": {
+    "framing_note": "sachlich, kein Missionieren"
+  },
+  "Tordalk": {
+    "age_floor": 2
+  },
+  "Tornado": {
+    "framing_note": "sachlich, warnung-Box, nicht verängstigend, altersgerecht"
+  },
+  "Totengräber (Käfer)": {
+    "framing_note": "Aas/Verwesung sachlich, nicht ekelerregend ausgemalt"
+  },
+  "Totenkopfschwärmer": {
+    "framing_note": "Totenkopf-Muster sachlich, nicht gruselig aufgeladen"
+  },
+  "Toter See": {
+    "exclude": true
+  },
+  "Tower of London": {
+    "framing_note": "Hinrichtungen sachlich, nicht gruselig ausgemalt."
+  },
+  "Trauer": {
+    "framing_note": "behutsam, nicht verängstigend"
+  },
+  "Trauerschnäpper": {
+    "age_floor": 2
+  },
+  "Trickfilm-Sport": {
+    "exclude": true
+  },
+  "Trickster": {
+    "age_floor": 2
+  },
+  "Trompetervogel": {
+    "age_floor": 2
+  },
+  "Trottellumme": {
+    "age_floor": 2
+  },
+  "Tsunami": {
+    "framing_note": "sachlich, warnung-Box, nicht verängstigend, altersgerecht"
+  },
+  "Tutanchamuns Fluch (Legende)": {
+    "framing_note": "klar als Legende/Aberglaube kennzeichnen, sachliche Erklärung"
+  },
+  "Übergewicht": {
+    "age_floor": 2,
+    "framing_note": "wertfrei, nicht stigmatisierend, „frag Eltern/Arzt“"
+  },
+  "Überschwemmung": {
+    "framing_note": "sachlich, warnung-Box, nicht verängstigend"
+  },
+  "Uferschwalbe": {
+    "age_floor": 2
+  },
+  "Ukraine": {
+    "framing_note": "Aktueller Krieg nur sachlich, neutral und altersgerecht; nicht verängstigend."
+  },
+  "Universität": {
+    "age_floor": 2
+  },
+  "Untergang des Römischen Reiches": {
+    "age_floor": 2
+  },
+  "Urin": {
+    "framing_note": "sachlich, wertfrei"
+  },
+  "Usain Bolt": {
+    "framing_note": "nüchtern"
+  },
+  "Vampir": {
+    "framing_note": "nicht verängstigend, als Sagengestalt einordnen, kein Horror"
+  },
+  "Vampirfledermaus": {
+    "framing_note": "sachlich, nicht gruselig überzeichnen"
+  },
+  "Vatikanstadt": {
+    "framing_note": "Sachlich, kein Missionieren."
+  },
+  "Vegetarismus": {
+    "framing_note": "Verschiedene Ernährungsweisen neutral darstellen, nicht werten."
+  },
+  "Verbrennung": {
+    "framing_note": "Brandgefahr sachlich, keine Anleitung"
+  },
+  "Vereinte Nationen": {
+    "framing_note": "neutral, keine politische Wertung"
+  },
+  "Verhütung": {
+    "age_floor": 3,
+    "framing_note": "sachlich-biologisch, wertfrei, keine Akt-Darstellung"
+  },
+  "Versicherung": {
+    "age_floor": 2
+  },
+  "Verstauchung": {
+    "framing_note": "sachlich, nicht verängstigend"
+  },
+  "Verstopfung": {
+    "age_floor": 2,
+    "framing_note": "„frag Eltern/Arzt“"
+  },
+  "Vielfalt": {
+    "framing_note": "wertfrei, respektvoll"
+  },
+  "Vincent (Standbild)": {
+    "exclude": true
+  },
+  "Vincent van Gogh": {
+    "framing_note": "Psychische Krankheit und Tod sachlich, nicht dramatisierend."
+  },
+  "Vogelspinne": {
+    "framing_note": "Gift/Biss sachlich entängstigen."
+  },
+  "Völkerwanderung": {
+    "age_floor": 2
+  },
+  "Volumen": {
+    "age_floor": 2
+  },
+  "Wahlen": {
+    "framing_note": "strikt neutral, Funktionsweise erklären, keine Parteienwertung"
+  },
+  "Wahrscheinlichkeit": {
+    "age_floor": 2
+  },
+  "Walpurgisnacht": {
+    "framing_note": "Brauch und Hexen-Sage sachlich, nicht verängstigend"
+  },
+  "Walt Disney Company": {
+    "exclude": true
+  },
+  "Walt Whitman": {
+    "exclude": true
+  },
+  "Walt Whitman Rostow": {
+    "exclude": true
+  },
+  "Walter Moers": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2; Werk auch für Erwachsene"
+  },
+  "Wärmespeicher": {
+    "age_floor": 2
+  },
+  "Wasseramsel": {
+    "age_floor": 2
+  },
+  "Wasserralle": {
+    "age_floor": 2
+  },
+  "Wat Arun / Tempel von Bangkok": {
+    "framing_note": "Sachlich, kein Missionieren."
+  },
+  "Wattvogel": {
+    "exclude": true
+  },
+  "Wechselkröte": {
+    "age_floor": 2
+  },
+  "Weihnachten": {
+    "framing_note": "sachlich, kein Missionieren; christliches Fest und kulturelle Bräuche nebeneinander"
+  },
+  "Weihnachtsmann": {
+    "framing_note": "Figur und Brauchtum, behutsam mit Glauben der Kinder"
+  },
+  "Weimar": {
+    "framing_note": "Goethe/Schiller/Bauhaus betonen; nahes KZ Buchenwald nur historisch-sachlich."
+  },
+  "Weimarer Republik": {
+    "age_floor": 2,
+    "framing_note": "politisch neutral, Übergang zur NS-Zeit sachlich"
+  },
+  "Weintraube": {
+    "framing_note": "Wein/Alkohol nur sachlich am Rande, kein Konsum-Anreiz"
+  },
+  "Weltwirtschaftskrise": {
+    "age_floor": 2
+  },
+  "Wendehals": {
+    "age_floor": 2
+  },
+  "Wernher von Braun": {
+    "age_floor": 2,
+    "framing_note": "NS-Vergangenheit/Zwangsarbeit sachlich, nicht verharmlosen"
+  },
+  "Werwolf": {
+    "age_floor": 2,
+    "framing_note": "nicht verängstigend, als Sagengestalt einordnen, kein Horror"
+  },
+  "Wespe": {
+    "framing_note": "Stich sachlich, kein Verängstigen."
+  },
+  "Westminster Abbey": {
+    "framing_note": "Sachlich."
+  },
+  "Wettlauf ins All": {
+    "framing_note": "Kalter-Krieg-Kontext neutral darstellen"
+  },
+  "Wettlauf zum Südpol": {
+    "framing_note": "Tod der Expedition sachlich, nicht verängstigend"
+  },
+  "Wiesenpieper": {
+    "exclude": true
+  },
+  "Wilder Westen": {
+    "framing_note": "Cowboy/Indianer-Bild differenziert, Gewalt sachlich"
+  },
+  "Wilhelm der Eroberer": {
+    "framing_note": "Eroberung und Schlacht sachlich."
+  },
+  "Wilhelm I. (Deutsches Reich)": {
+    "age_floor": 2
+  },
+  "Wilhelm von Oranien": {
+    "exclude": true
+  },
+  "Willy Brandt": {
+    "framing_note": "strikt neutral, Positionen fair"
+  },
+  "Windpocken": {
+    "framing_note": "keine Selbstmedikation, „frag Eltern/Arzt“"
+  },
+  "Winkel": {
+    "age_floor": 2
+  },
+  "Winston Churchill": {
+    "framing_note": "strikt neutral, Kriegskontext sachlich"
+  },
+  "Wirbelsturm": {
+    "framing_note": "sachlich, Gefahren altersgerecht, nicht verängstigend"
+  },
+  "Wladimir Putin": {
+    "age_floor": 3,
+    "framing_note": "strikt neutral, Krieg sachlich, keine Wertung; nicht verängstigend"
+  },
+  "Wolfgang von Kempelen": {
+    "exclude": true
+  },
+  "Wolodymyr Selenskyj": {
+    "age_floor": 3,
+    "framing_note": "strikt neutral, Krieg sachlich, nicht verängstigend"
+  },
+  "Wunde": {
+    "framing_note": "„frag Eltern/Arzt“, sachlich"
+  },
+  "Wunderbaum": {
+    "framing_note": "Rizin als sehr giftig sachlich erwähnen, warnung-Box, nicht verängstigend"
+  },
+  "Würfelnatter": {
+    "age_floor": 2
+  },
+  "Würfelqualle": {
+    "framing_note": "Gefährlichkeit sachlich, nicht verängstigend"
+  },
+  "Yayoi Kusama": {
+    "framing_note": "nüchtern, keine Moralurteile in S1/S2"
+  },
+  "Yoga": {
+    "framing_note": "als Bewegung/Entspannung, religiöser Ursprung sachlich erwähnt"
+  },
+  "Yoko Ono": {
+    "age_floor": 3
+  },
+  "Zahlenfolge": {
+    "age_floor": 2
+  },
+  "Zahnarzt": {
+    "framing_note": "keine Selbstbehandlung; Zähneputzen/Prävention betonen"
+  },
+  "Zecke": {
+    "framing_note": "Krankheiten (FSME/Borreliose) sachlich, Schutz-Hinweis, kein Verängstigen."
+  },
+  "Zeisig": {
+    "age_floor": 2
+  },
+  "Zeitzone": {
+    "age_floor": 2
+  },
+  "Zellatmung": {
+    "age_floor": 3
+  },
+  "Zellkern": {
+    "age_floor": 2
+  },
+  "Zombie": {
+    "age_floor": 2,
+    "framing_note": "nicht verängstigend, kulturhistorisch einordnen, kein Horror"
+  },
+  "Zuckerfest": {
+    "framing_note": "sachlich; islamisches Fest nach dem Ramadan"
+  },
+  "Zufall": {
+    "age_floor": 2
+  },
+  "Zweiter Weltkrieg": {
+    "framing_note": "nüchtern, NS-Verbrechen klar als Unrecht, keine Verherrlichung, Tod sachlich"
+  },
+  "Zwergtaucher": {
+    "age_floor": 2
+  }
+}
