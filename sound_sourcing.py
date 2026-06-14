@@ -208,11 +208,66 @@ def translate_themen_batch(themen: list[str]) -> dict[str, str]:
     return result
 
 
+def fetch_wikipedia_audio(thema: str, en_query: str) -> list[dict]:
+    """
+    Sucht Audiodateien via DE-Wikipedia-Artikel auf Wikimedia Commons.
+    Fallback auf EN-Wikipedia wenn DE keinen Treffer liefert.
+    """
+    AUDIO_EXTS = {".ogg", ".wav", ".flac", ".mp3", ".oga"}
+    filenames = []
+
+    for lang, title in [("de", thema), ("en", en_query)]:
+        try:
+            r = requests.get(
+                f"https://{lang}.wikipedia.org/w/api.php",
+                params={"action": "query", "titles": title, "prop": "images",
+                        "imlimit": "50", "format": "json", "formatversion": "2"},
+                timeout=10,
+            )
+            pages = r.json().get("query", {}).get("pages", [])
+            for page in pages:
+                for img in page.get("images", []):
+                    t = img.get("title", "")
+                    if pathlib.Path(t).suffix.lower() in AUDIO_EXTS:
+                        filenames.append(t.replace("File:", "").replace("Datei:", ""))
+        except Exception:
+            pass
+        if filenames:
+            break
+
+    if not filenames:
+        return []
+
+    audio_info = []
+    for fname in filenames[:5]:
+        try:
+            r = requests.get(
+                "https://commons.wikimedia.org/w/api.php",
+                params={"action": "query", "titles": f"File:{fname}",
+                        "prop": "imageinfo", "iiprop": "url|mime|size",
+                        "format": "json", "formatversion": "2"},
+                timeout=10,
+            )
+            pages = r.json().get("query", {}).get("pages", [])
+            for page in pages:
+                for info in page.get("imageinfo", []):
+                    if info.get("mime", "").startswith("audio/") or \
+                       pathlib.Path(fname).suffix.lower() in AUDIO_EXTS:
+                        audio_info.append({
+                            "filename": fname,
+                            "url":      info.get("url", ""),
+                            "mime":     info.get("mime", ""),
+                        })
+        except Exception:
+            pass
+
+    return audio_info
+
+
 def phase_catalog_scan(candidates_per_thema: int = 3):
     """
-    Scannt catalog_full.json gegen Freesound:
-    Jedes Thema aus SCAN_THEMENGEBIETE → CC0-Suche (0.5–15s) →
-    Kandidaten cachen → HTML-Review generieren.
+    Scannt catalog_full.json: Wikimedia Commons (primär) → Freesound (Fallback).
+    Jedes Thema aus SCAN_THEMENGEBIETE → Kandidaten cachen → HTML-Review.
     Bereits gecachte Themen werden übersprungen (Resume-fähig).
     """
     if not CATALOG_JSON.exists():
@@ -251,17 +306,42 @@ def phase_catalog_scan(candidates_per_thema: int = 3):
         en_query = translations.get(thema, thema)
         print(f"  [{idx+1}/{len(to_scan)}] {thema} → \"{en_query}\"", end=" ", flush=True)
 
-        results = freesound_search(en_query, api_key, dur_min=0.5, dur_max=15, n=candidates_per_thema)
-        if not results:
-            results = freesound_search(thema, api_key, dur_min=0.5, dur_max=15, n=candidates_per_thema)
+        # ── Wikimedia Commons (primär) ────────────────────────────────
+        wiki_audio = fetch_wikipedia_audio(thema, en_query)
+        sounds = []
+        slug = re.sub(r"[^a-z0-9]", "_", thema.lower())[:28]
 
-        good = [r for r in results if (r.get("avg_rating") or 0) >= 3.0]
+        if wiki_audio:
+            for audio in wiki_audio[:candidates_per_thema]:
+                safe_fname = re.sub(r"[^a-z0-9_.]", "_", audio["filename"].lower())[:40]
+                ext = pathlib.Path(audio["filename"]).suffix or ".ogg"
+                fpath = SCAN_CAND_DIR / f"{slug}_wiki_{safe_fname}"
+                try:
+                    resp = requests.get(audio["url"], timeout=30)
+                    resp.raise_for_status()
+                    fpath.write_bytes(resp.content)
+                    sounds.append({
+                        "id":       f"wiki_{safe_fname}",
+                        "name":     audio["filename"],
+                        "author":   "Wikimedia Commons",
+                        "duration": 0,
+                        "rating":   5.0,
+                        "license":  "CC-BY-SA",
+                        "local":    str(fpath),
+                        "source":   "wikimedia",
+                        "en_query": en_query,
+                    })
+                except Exception as e:
+                    print(f" [WP-DL: {e}]", end="")
 
-        if good:
-            sounds = []
+        # ── Freesound (Fallback wenn Wikimedia leer) ──────────────────
+        if not sounds:
+            results = freesound_search(en_query, api_key, dur_min=0.5, dur_max=15, n=candidates_per_thema)
+            if not results:
+                results = freesound_search(thema, api_key, dur_min=0.5, dur_max=15, n=candidates_per_thema)
+            good = [r for r in results if (r.get("avg_rating") or 0) >= 3.0]
             for r in good[:candidates_per_thema]:
-                slug = re.sub(r"[^a-z0-9]", "_", thema.lower())[:28]
-                fpath = SCAN_CAND_DIR / f"{slug}_{r['id']}.mp3"
+                fpath = SCAN_CAND_DIR / f"{slug}_fs_{r['id']}.mp3"
                 if download_preview(r, fpath):
                     sounds.append({
                         "id":       r["id"],
@@ -271,8 +351,13 @@ def phase_catalog_scan(candidates_per_thema: int = 3):
                         "rating":   round(r.get("avg_rating") or 0, 1),
                         "license":  "CC0",
                         "local":    str(fpath),
+                        "source":   "freesound",
                         "en_query": en_query,
                     })
+
+        # ── Ergebnis speichern ────────────────────────────────────────
+        src_tag = "[WP]" if (sounds and sounds[0].get("source") == "wikimedia") else "[FS]"
+        if sounds:
             entry = {
                 "thema":        thema,
                 "themengebiet": item.get("themengebiet", ""),
@@ -281,7 +366,7 @@ def phase_catalog_scan(candidates_per_thema: int = 3):
             }
             cache[thema] = entry
             found_count += 1
-            print(f"→ {len(sounds)} Treffer ★{max(s['rating'] for s in sounds) if sounds else 0}")
+            print(f"→ {len(sounds)} {src_tag}")
         else:
             cache[thema] = None
             print("→ kein Treffer")
@@ -312,13 +397,20 @@ def build_catalog_review_html(cache: dict):
         for thema, data in items:
             player_html = ""
             for i, s in enumerate(data["sounds"]):
-                rel = pathlib.Path(s["local"]).as_posix()
-                jd  = json.dumps({"id": s["id"], "name": s["name"], "author": s["author"],
-                                   "duration": s["duration"], "rating": s["rating"],
-                                   "license": "CC0", "local": s["local"]})
+                rel   = pathlib.Path(s["local"]).as_posix()
+                src   = s.get("source", "freesound")
+                badge = "WP" if src == "wikimedia" else "FS"
+                badge_color = "#1565C0" if src == "wikimedia" else "#2E7D32"
+                jd    = json.dumps({"id": s["id"], "name": s["name"], "author": s["author"],
+                                    "duration": s["duration"], "rating": s["rating"],
+                                    "license": s.get("license", "CC0"), "local": s["local"],
+                                    "source": src})
                 player_html += (
                     f'<div class="sc" data-cat="{thema}" data-idx="{i}">'
-                    f'<div class="meta">★{s["rating"]} {s["duration"]}s · {s["author"]}</div>'
+                    f'<div class="meta">'
+                    f'<span style="background:{badge_color};color:white;padding:1px 5px;'
+                    f'border-radius:3px;font-size:.7em;font-weight:bold">{badge}</span>'
+                    f' ★{s["rating"]} {s["duration"]}s · {s["author"]}</div>'
                     f'<div class="sname">{s["name"][:55]}</div>'
                     f'<audio controls src="{rel}" preload="none"></audio>'
                     f'<button class="sbtn" onclick=\'sel("{thema}",{i},{jd})\'>✓ Auswählen</button>'
