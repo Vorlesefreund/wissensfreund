@@ -1,0 +1,115 @@
+Ich prüfe das Gebiet auf wirklich neue, ergiebige Themen mit Stärke auf allen drei Stufen. Der Katalog ist bereits sehr dicht — ich suche echte Lücken bei bekannten, kindfaszinierenden Meerestieren, Fischen und Wirbellosen.
+
+```json
+[
+  {
+    "thema": "Tintenfische",
+    "themengebiet": "Tiere",
+    "leuchtturm": false,
+    "erg_s1": 7, "erg_s2": 8, "erg_s3": 8,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Kopffüßer als Gruppe: Tarnung, Farbwechsel, Intelligenz — faszinierend auf allen Stufen.",
+    "dublette_von": null,
+    "notiz": "Gruppe; nicht zu verwechseln mit Einzelart Tintenfisch im Katalog — falls als Dublette gewertet, Gruppen-Lemma bevorzugen"
+  },
+  {
+    "thema": "Oktopus",
+    "themengebiet": "Tiere",
+    "leuchtturm": true,
+    "erg_s1": 7, "erg_s2": 8, "erg_s3": 9,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Acht Arme, drei Herzen, Werkzeuggebrauch, Tarnkünstler — Top-Kinderthema, sehr ergiebig.",
+    "dublette_von": "Krake",
+    "notiz": "Mögliche Dublette zu Krake — beliebteres Lemma 'Oktopus' prüfen, sonst Krake behalten"
+  },
+  {
+    "thema": "Seestern (Verhalten)",
+    "themengebiet": "Tiere",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 7, "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Wahrscheinlich Dublette zu Seestern.",
+    "dublette_von": "Seestern",
+    "notiz": "Bereits im Katalog — streichen"
+  },
+  {
+    "thema": "Doktorfisch",
+    "themengebiet": "Tiere",
+    "leuchtturm": false,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Bereits im Katalog.",
+    "dublette_von": "Doktorfisch",
+    "notiz": "Schon vorhanden — streichen"
+  },
+  {
+    "thema": "Lippfisch",
+    "themengebiet": "Tiere",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sengsibel": false,
+    "sensibel": false,
+    "begruendung_eignung": "Putzer-Lippfische sind interessant (Symbiose), aber niedrige Ergiebigkeit auf S1; Napoleonfisch (Lippfisch-Art) ist schon im Katalog. Grenzwertig.",
+    "dublette_von": null,
+    "notiz": "R3-Fokus: eher schwach, weglassen erwägen"
+  },
+  {
+    "thema": "Anemonenfisch",
+    "themengebiet": "Tiere",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 7, "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Wahrscheinlich Dublette zu Clownfisch.",
+    "dublette_von": "Clownfisch",
+    "notiz": "Clownfisch schon im Katalog — streichen"
+  },
+  {
+    "thema": "Zitronenrochen",
+    "themengebiet": "Tiere",
+    "leuchtturm": false,
+    "erg_s1": 4, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Obskure Art, viele Rochen-Arten schon im Katalog (Adlerrochen, Manta, Stachelrochen, Zitterrochen, Sägerochen). Redundant.",
+    "dublette_von": null,
+    "notiz": "Weglassen — Rochen ausreichend abgedeckt"
+  }
+]
+```
+
+**Ehrliche Einschätzung dieses Unter-Themas:** Der Katalog mit 636 Tier-Themen ist bei Meerestieren, Fischen und Wirbellosen **außergewöhnlich vollständig** — praktisch alle kindfaszinierenden, ergiebigen Arten und Konzepte sind bereits erfasst (von Anglerfisch über Mondfisch, Seedrache-Verwandte, sämtliche Hai-/Rochen-/Quallen-/Krebs-Familien bis zu Konzepten wie Biolumineszenz, Symbiose, Plankton, Gezeitentümpel).
+
+Echte **neue** Themen mit hoher Ergiebigkeit auf **allen drei Stufen** finde ich kaum noch — fast alles, was ich prüfe, ist entweder schon vorhanden oder eine Dublette/zu obskure Variante (→ Companion bei der Generierung).
+
+Die **einzigen ernsthaft tragfähigen Neuvorschläge**:
+- **Oktopus** — falls als eigenständiges, populäreres Lemma neben *Krake* geführt; sonst Dublette. Lohnt menschliche Prüfung.
+- **Tintenfische** (Gruppe) — falls Gruppen-Lemma neben Einzelart sinnvoll ist.
+
+Alles andere oben habe ich bewusst als Dublette/Streichkandidat markiert, damit der Merge-Schritt nicht doppelt zählt. **Empfehlung:** Dieses Unter-Thema gilt als praktisch ausgeschöpft — kein Nachschub nötig.
