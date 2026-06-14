@@ -211,13 +211,15 @@ def cell_value(item: dict, col: str):
 
 def load_existing_annotations(xlsx_path: pathlib.Path) -> dict[str, dict]:
     """
-    Liest FREIGABE + editierte Felder aus bestehendem catalog_review.xlsx.
-    Key = thema (stripped). Nur Zeilen mit nicht-leerem FREIGABE werden geladen.
+    Liest FREIGABE + editierte Felder aus catalog_review_master.xlsx (falls vorhanden),
+    sonst aus xlsx_path. Key = thema (stripped). Nur Zeilen mit FREIGABE werden geladen.
     """
-    if not xlsx_path.exists():
+    MASTER = xlsx_path.parent / "catalog_review_master.xlsx"
+    source = MASTER if MASTER.exists() else xlsx_path
+    if not source.exists():
         return {}
     try:
-        wb = openpyxl.load_workbook(xlsx_path, data_only=True, read_only=True)
+        wb = openpyxl.load_workbook(source, data_only=True, read_only=True)
         ws = wb["Review"]
         headers = [c.value for c in next(ws.iter_rows(min_row=1, max_row=1))]
         col = {h: i for i, h in enumerate(headers) if h}
@@ -236,7 +238,7 @@ def load_existing_annotations(xlsx_path: pathlib.Path) -> dict[str, dict]:
                 "notiz":       row[col["notiz"]]         if "notiz"         in col else None,
             }
         wb.close()
-        print(f"  Bestehende Annotierungen geladen: {len(result)} Zeilen mit FREIGABE.")
+        print(f"  Bestehende Annotierungen geladen: {len(result)} Zeilen mit FREIGABE ({source.name}).")
         return result
     except Exception as e:
         print(f"  WARNUNG: Konnte bestehende Annotierungen nicht lesen: {e}")
@@ -367,6 +369,11 @@ def export_xlsx(primary: list[dict], reserve: list[dict], duplicates: list[dict]
         ws3.cell(row=2, column=1, value="Keine Dubletten gefunden.")
 
     wb.save(OUT_XLSX)
+    import shutil
+    master_path = OUT_XLSX.parent / "catalog_review_master.xlsx"
+    if not master_path.exists():
+        shutil.copy2(OUT_XLSX, master_path)
+        print(f"  → catalog_review_master.xlsx angelegt (Erstanlage).")
     print(f"  catalog_review.xlsx:  {len(all_for_review)} Zeilen"
           f" ({sum(1 for x in all_for_review if x.get('sensibel'))} sensibel,"
           f" {sum(1 for x in all_for_review if x.get('eignung')=='exclude')} exclude)")
