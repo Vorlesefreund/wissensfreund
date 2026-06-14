@@ -97,6 +97,7 @@ AREAS = [
 ]
 
 CATALOG_RAW_R2_DIR = REPO_ROOT / "catalog_raw_r2"
+CATALOG_RAW_R3_DIR = REPO_ROOT / "catalog_raw_r3"
 
 AREAS_R2 = [
     # Tiere — 4 vertiefte Sub-Calls
@@ -113,6 +114,26 @@ AREAS_R2 = [
     ("Erde, Wetter & Naturphänomene",         "R2 — Weitere Phänomene, Gesteine & Prozesse",                  60),
     ("Menschlicher Körper & Gesundheit",      "R2 — Weitere Körper- & Gesundheitsthemen",                     80),
 ]
+
+AREAS_R3 = [
+    ("Tiere",                                  "R3-A — Weitere Säugetiere & Exoten weltweit",                  120),
+    ("Tiere",                                  "R3-B — Weitere Vögel (Singvögel, Zugvögel, Küstenvögel, exotische)", 100),
+    ("Tiere",                                  "R3-C — Weitere Meerestiere, Fische & Wirbellose",              100),
+    ("Geschichte & Epochen",                   "R3 — Weitere Epochen & historische Themen",                    100),
+    ("Länder & Kontinente",                    "R3 — Weitere Länder, Inseln & Regionen",                       100),
+    ("Berühmte Personen",                      "R3 — Weitere bedeutende Persönlichkeiten",                     100),
+    ("Gesellschaft, Berufe & Zusammenleben",   "R3 — Weitere Berufe, Konzepte & Alltagsthemen",                 80),
+    ("Kunst, Musik & Literatur",               "R3 — Weitere Werke, Künstler & Kulturthemen",                   80),
+    ("Sport & Spiele",                         "R3 — Weitere Sportarten, Spiele & Freizeitthemen",              80),
+    ("Essen & Alltag",                         "R3 — Weitere Lebensmittel & Alltagsthemen",                     80),
+    ("Naturwissenschaft & Biologie-Konzepte",  "R3 — Weitere Konzepte & Phänomene",                             80),
+    ("Pflanzen & Pilze",                       "R3 — Weitere Pflanzen, Bäume & Pilze",                          80),
+]
+
+FOCUS_R3 = (
+    "Fokus R3: Bevorzuge Themen mit hoher Ergiebigkeit auf ALLEN drei Stufen (S1+S2+S3). "
+    "Lückenfüller mit niedriger Ergiebigkeit weglassen."
+)
 
 # Pflichtfelder je Themen-Objekt (für Validierung)
 REQUIRED_FIELDS = {
@@ -227,7 +248,7 @@ def load_avoid_topics(themengebiet: str) -> list[str]:
     return sorted(topics)
 
 
-def build_user_message(thema: str, unter: str | None, budget: int, anchor_table: str, avoid_topics: list[str] | None = None) -> str:
+def build_user_message(thema: str, unter: str | None, budget: int, anchor_table: str, avoid_topics: list[str] | None = None, focus_note: str | None = None) -> str:
     leuchtturm_max = max(3, int(budget * 0.05 + 0.5))
     parts = [f"Themengebiet: {thema}"]
     if unter:
@@ -237,6 +258,8 @@ def build_user_message(thema: str, unter: str | None, budget: int, anchor_table:
         f"Vollständigkeit vor Kürze — lieber zu viel als gute Themen weglassen."
     )
     parts.append(f"Leuchtturm-Quote: maximal {leuchtturm_max} Themen (Top ~5 % deines Gebiets).")
+    if focus_note:
+        parts.append(f"\n{focus_note}")
     if avoid_topics:
         parts.append(
             f"\nBereits im Katalog ({len(avoid_topics)} Themen) — "
@@ -363,6 +386,7 @@ def run_area(
     max_tokens: int,
     dry_run: bool,
     avoid_topics: list[str] | None = None,
+    focus_note: str | None = None,
 ) -> bool:
     slug  = area_slug(thema, unter)
     label = thema + (f" / {unter}" if unter else "")
@@ -379,7 +403,7 @@ def run_area(
         print(f"  ✓ Übersprungen — {len(existing)} Themen bereits vorhanden.")
         return True
 
-    user_msg = build_user_message(thema, unter, budget, anchor_table, avoid_topics)
+    user_msg = build_user_message(thema, unter, budget, anchor_table, avoid_topics, focus_note)
 
     if dry_run:
         print("\n[DRY-RUN] User-Message (erste 800 Zeichen):")
@@ -464,9 +488,18 @@ def main() -> None:
         "--round2", action="store_true",
         help="Runde 2: AREAS_R2 verwenden + Avoid-List aus catalog_full.json injizieren.",
     )
+    parser.add_argument(
+        "--round3", action="store_true",
+        help="Runde 3: AREAS_R3 verwenden + Avoid-List + Ergiebigkeits-Fokus.",
+    )
     args = parser.parse_args()
 
-    area_list = AREAS_R2 if args.round2 else AREAS
+    if args.round3:
+        area_list = AREAS_R3
+    elif args.round2:
+        area_list = AREAS_R2
+    else:
+        area_list = AREAS
 
     # ── --list ────────────────────────────────────────────────────────────
     if args.list:
@@ -481,10 +514,14 @@ def main() -> None:
         return
 
     # ── Initialisierung ───────────────────────────────────────────────────
-    if args.round2 and args.output_dir == str(CATALOG_RAW_DIR):
+    if args.output_dir != str(CATALOG_RAW_DIR):
+        out_dir = pathlib.Path(args.output_dir)
+    elif args.round3:
+        out_dir = CATALOG_RAW_R3_DIR
+    elif args.round2:
         out_dir = CATALOG_RAW_R2_DIR
     else:
-        out_dir = pathlib.Path(args.output_dir)
+        out_dir = CATALOG_RAW_DIR
     out_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"System-Prompt : {SYSTEM_PROMPT}")
@@ -514,24 +551,27 @@ def main() -> None:
 
     client = None if args.dry_run else anthropic.Anthropic()
 
-    # ── Avoid-Topics laden (Round 2) ──────────────────────────────────────
+    # ── Avoid-Topics laden (Round 2 + 3) ─────────────────────────────────
     avoid_map: dict[str, list[str]] = {}
-    if args.round2:
+    if args.round2 or args.round3:
         unique_gebiete = {a[0] for a in areas}
         for g in unique_gebiete:
             avoid_map[g] = load_avoid_topics(g)
             print(f"  Avoid-List {g}: {len(avoid_map[g])} Themen")
 
+    focus = FOCUS_R3 if args.round3 else None
+
     # ── Haupt-Loop ────────────────────────────────────────────────────────
     print(f"\nStarte {len(areas)} Call(s) …")
     ok_list, fail_list = [], []
     for thema, unter, budget in areas:
-        avoid = avoid_map.get(thema, []) if args.round2 else None
+        avoid = avoid_map.get(thema, []) if (args.round2 or args.round3) else None
         ok = run_area(
             client, system, anchor_table,
             thema, unter, budget,
             out_dir, args.max_tokens, args.dry_run,
             avoid_topics=avoid,
+            focus_note=focus,
         )
         slug = area_slug(thema, unter)
         (ok_list if ok else fail_list).append(slug)
