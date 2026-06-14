@@ -96,6 +96,24 @@ AREAS = [
     ("Märchen, Mythologie & Fabelwesen",              None, 110),
 ]
 
+CATALOG_RAW_R2_DIR = REPO_ROOT / "catalog_raw_r2"
+
+AREAS_R2 = [
+    # Tiere — 4 vertiefte Sub-Calls
+    ("Tiere", "D — Vögel vertieft (heimische Arten, Zugvögel, Greifvögel, Wasservögel)",            120),
+    ("Tiere", "E — Reptilien & Amphibien vertieft (Schlangen, Eidechsen, Frösche, Kröten)",          100),
+    ("Tiere", "F — Meerestiere & Fische vertieft (Tiefseebewohner, Haie, Rochen, Muscheln)",         120),
+    ("Tiere", "G — Insekten & Gliedertiere vertieft (Libellen, Käfer, Spinnenarten, Tausendfüßler)", 100),
+    # Weitere Gebiete — je ein zweiter Pass
+    ("Geschichte & Epochen",                  "R2 — Weitere Epochen, Ereignisse & Zivilisationen",           120),
+    ("Länder & Kontinente",                   "R2 — Weitere Länder, Regionen & geographische Einheiten",     100),
+    ("Naturwissenschaft & Biologie-Konzepte", "C — Weitere Physik-, Chemie- & Biologie-Konzepte",            100),
+    ("Pflanzen & Pilze",                      "R2 — Weitere Pflanzen, Bäume, Pilzarten",                      70),
+    ("Technik, Maschinen & Fahrzeuge",        "R2 — Weitere Technik, Geräte & Fahrzeuge",                     80),
+    ("Erde, Wetter & Naturphänomene",         "R2 — Weitere Phänomene, Gesteine & Prozesse",                  60),
+    ("Menschlicher Körper & Gesundheit",      "R2 — Weitere Körper- & Gesundheitsthemen",                     80),
+]
+
 # Pflichtfelder je Themen-Objekt (für Validierung)
 REQUIRED_FIELDS = {
     "thema", "themengebiet", "leuchtturm",
@@ -192,7 +210,24 @@ def load_anchor_table() -> str:
     return "\n".join(lines)
 
 
-def build_user_message(thema: str, unter: str | None, budget: int, anchor_table: str) -> str:
+def load_avoid_topics(themengebiet: str) -> list[str]:
+    """
+    Liest alle thema-Werte für ein Themengebiet aus catalog_full.json
+    und catalog_reserve.json — damit Round-2-Calls keine Dubletten erzeugen.
+    """
+    topics: set[str] = set()
+    for f in [REPO_ROOT / "catalog_full.json", REPO_ROOT / "catalog_reserve.json"]:
+        if not f.exists():
+            continue
+        for item in json.loads(f.read_text(encoding="utf-8")):
+            if item.get("themengebiet", "") == themengebiet:
+                t = item.get("thema", "").strip()
+                if t:
+                    topics.add(t)
+    return sorted(topics)
+
+
+def build_user_message(thema: str, unter: str | None, budget: int, anchor_table: str, avoid_topics: list[str] | None = None) -> str:
     leuchtturm_max = max(3, int(budget * 0.05 + 0.5))
     parts = [f"Themengebiet: {thema}"]
     if unter:
@@ -202,6 +237,12 @@ def build_user_message(thema: str, unter: str | None, budget: int, anchor_table:
         f"Vollständigkeit vor Kürze — lieber zu viel als gute Themen weglassen."
     )
     parts.append(f"Leuchtturm-Quote: maximal {leuchtturm_max} Themen (Top ~5 % deines Gebiets).")
+    if avoid_topics:
+        parts.append(
+            f"\nBereits im Katalog ({len(avoid_topics)} Themen) — "
+            f"diese NICHT wiederholen, nur wirklich neue vorschlagen:"
+        )
+        parts.append(", ".join(avoid_topics))
     parts.append("")
     parts.append("Anker-Tabelle — Ergiebigkeits-Referenz (verbindliche Skala, alle 134 Themen):")
     parts.append(anchor_table)
@@ -321,6 +362,7 @@ def run_area(
     out_dir: pathlib.Path,
     max_tokens: int,
     dry_run: bool,
+    avoid_topics: list[str] | None = None,
 ) -> bool:
     slug  = area_slug(thema, unter)
     label = thema + (f" / {unter}" if unter else "")
@@ -337,7 +379,7 @@ def run_area(
         print(f"  ✓ Übersprungen — {len(existing)} Themen bereits vorhanden.")
         return True
 
-    user_msg = build_user_message(thema, unter, budget, anchor_table)
+    user_msg = build_user_message(thema, unter, budget, anchor_table, avoid_topics)
 
     if dry_run:
         print("\n[DRY-RUN] User-Message (erste 800 Zeichen):")
@@ -418,22 +460,31 @@ def main() -> None:
         "--output-dir", default=str(CATALOG_RAW_DIR),
         help=f"Ausgabe-Verzeichnis (default: {CATALOG_RAW_DIR}).",
     )
+    parser.add_argument(
+        "--round2", action="store_true",
+        help="Runde 2: AREAS_R2 verwenden + Avoid-List aus catalog_full.json injizieren.",
+    )
     args = parser.parse_args()
+
+    area_list = AREAS_R2 if args.round2 else AREAS
 
     # ── --list ────────────────────────────────────────────────────────────
     if args.list:
         print(f"{'#':>3}  {'Slug':<52} {'Budget':>7}")
         print("─" * 66)
         total = 0
-        for i, (t, u, b) in enumerate(AREAS, 1):
+        for i, (t, u, b) in enumerate(area_list, 1):
             print(f"{i:>3}  {area_slug(t, u):<52} {b:>7}")
             total += b
         print("─" * 66)
-        print(f"     {'GESAMT':<52} {total:>7}  ({len(AREAS)} Calls)")
+        print(f"     {'GESAMT':<52} {total:>7}  ({len(area_list)} Calls)")
         return
 
     # ── Initialisierung ───────────────────────────────────────────────────
-    out_dir = pathlib.Path(args.output_dir)
+    if args.round2 and args.output_dir == str(CATALOG_RAW_DIR):
+        out_dir = CATALOG_RAW_R2_DIR
+    else:
+        out_dir = pathlib.Path(args.output_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"System-Prompt : {SYSTEM_PROMPT}")
@@ -449,11 +500,11 @@ def main() -> None:
     anchor_table = load_anchor_table()
 
     # ── Gebiets-Filter ────────────────────────────────────────────────────
-    areas = AREAS
+    areas = area_list
     if args.area:
         f = args.area.lower()
         areas = [
-            a for a in AREAS
+            a for a in area_list
             if f in a[0].lower()
             or (a[1] and f in a[1].lower())
             or f in area_slug(a[0], a[1])
@@ -463,14 +514,24 @@ def main() -> None:
 
     client = None if args.dry_run else anthropic.Anthropic()
 
+    # ── Avoid-Topics laden (Round 2) ──────────────────────────────────────
+    avoid_map: dict[str, list[str]] = {}
+    if args.round2:
+        unique_gebiete = {a[0] for a in areas}
+        for g in unique_gebiete:
+            avoid_map[g] = load_avoid_topics(g)
+            print(f"  Avoid-List {g}: {len(avoid_map[g])} Themen")
+
     # ── Haupt-Loop ────────────────────────────────────────────────────────
     print(f"\nStarte {len(areas)} Call(s) …")
     ok_list, fail_list = [], []
     for thema, unter, budget in areas:
+        avoid = avoid_map.get(thema, []) if args.round2 else None
         ok = run_area(
             client, system, anchor_table,
             thema, unter, budget,
             out_dir, args.max_tokens, args.dry_run,
+            avoid_topics=avoid,
         )
         slug = area_slug(thema, unter)
         (ok_list if ok else fail_list).append(slug)
