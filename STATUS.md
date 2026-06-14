@@ -1,12 +1,20 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-14T19:35:28Z -->
+<!-- updated: 2026-06-14T20:45:06Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**generate_grounded.py: eignung_verdicts.json vollständig verdrahtet (2026-06-14).** ← AKTUELL
+**sound_sourcing.py v1 angelegt (2026-06-14).** ← AKTUELL
+- 40 Ambient-Kategorien (Natur/Gesellschaft/Geschichte/Technik/Besonderes)
+- 30 Spot-Kategorien (Tiere, Fahrzeuge, Effekte)
+- Workflow: `--phase search` → HTML-Review → `sound_approvals_*.json` → `--phase finalize`
+- Freesound API, nur CC0-Lizenzen, Preview-MP3-Downloads
+- Abhängigkeit: `requests` (bereits installiert 2.32.5)
+- Nächster Schritt: FREESOUND_API_KEY in `.env` eintragen, dann `python sound_sourcing.py --phase search --type ambient`
+
+**generate_grounded.py: eignung_verdicts.json vollständig verdrahtet (2026-06-14).**
 - Bug 1 gefixt: `_load_eignung()` normiert Keys auf `.lower()` → Lookup trifft jetzt
 - Bug 2 gefixt: `eignung_for()` liest neues Schema (`exclude:true` statt `eignung:"exclude"`)
 - Dry-Run bestanden: exclude/age_floor=3/framing_note alle korrekt
