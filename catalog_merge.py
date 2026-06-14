@@ -25,6 +25,14 @@ if hasattr(sys.stdout, "reconfigure"):
 import openpyxl
 from openpyxl.styles import PatternFill, Font, Alignment
 
+PLURAL_PAIRS = {
+    # lower(Plural) → lower(Singular) — von Andreas identifizierte Paare
+    "wale": "wal", "delfine": "delfin", "pinguine": "pinguin",
+    "schildkröten": "schildkröte", "robben": "robbe",
+    "mondphasen": "mondphase", "vitamine": "vitamin",
+    "fossilien": "fossil", "samen": "same", "dünen": "düne",
+}
+
 # ── Pfade ─────────────────────────────────────────────────────────────────
 
 REPO_ROOT       = pathlib.Path(__file__).parent
@@ -47,18 +55,24 @@ XLSX_COLS = [
 
 def load_all() -> list[dict]:
     items = []
-    files = sorted(f for f in CATALOG_RAW_DIR.glob("*.json") if "_raw" not in f.name)
-    for f in files:
-        data = json.loads(f.read_text(encoding="utf-8"))
-        items.extend(data)
-    print(f"  {len(items)} Items aus {len(files)} Datei(en) geladen.")
+    raw_dirs = [CATALOG_RAW_DIR, CATALOG_RAW_DIR.parent / "catalog_raw_r2"]
+    file_count = 0
+    for raw_dir in raw_dirs:
+        if not raw_dir.exists():
+            continue
+        files = sorted(f for f in raw_dir.glob("*.json") if "_raw" not in f.name)
+        for f in files:
+            items.extend(json.loads(f.read_text(encoding="utf-8")))
+            file_count += 1
+    print(f"  {len(items)} Items aus {file_count} Datei(en) ({', '.join(d.name for d in raw_dirs if d.exists())}).")
     return items
 
 
 # ── 2. Dedup ───────────────────────────────────────────────────────────────
 
 def normalize(s: str) -> str:
-    return s.strip().lower()
+    lower = s.strip().lower()
+    return PLURAL_PAIRS.get(lower, lower)
 
 
 def priority(item: dict) -> tuple:
