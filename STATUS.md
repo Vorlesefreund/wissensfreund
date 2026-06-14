@@ -1,12 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-14T14:58:17Z -->
+<!-- updated: 2026-06-14T15:08:49Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**catalog_manual.json eingeführt (2026-06-14): persistente manuelle Einträge, in Merge automatisch geladen. 5 Geschichte-Themen drin. Nach Merge: 3432 primary / 96 reserve / 30 exclude, alle 5 manuellen Einträge gefunden (Rank 182–302).** ← AKTUELL
+**catalog_delta_r2.py + Annotation-Fix (2026-06-14): Delta-Excel mit 916 R2-Einträgen (79 sensibel, 5 manuell/grün). Merge erhält FREIGABE + editierte Felder aus bestehendem catalog_review.xlsx.** ← AKTUELL
+
+**catalog_manual.json: 5 Geschichte-Themen (Rank 182–302). Merge: 3432 primary / 96 reserve / 30 exclude.**
 
 **Round-2 + Merge: 11/11 R2-Calls, 3427 primary / 96 reserve / 30 exclude, 431 sensibel, 177 Leuchtturm.**
 
