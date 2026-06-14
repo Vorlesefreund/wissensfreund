@@ -13,8 +13,9 @@ Voraussetzung:
   FREESOUND_API_KEY=<dein-key>  (in .env oder Umgebungsvariable)
 """
 
-import os, sys, json, time, shutil, argparse, pathlib
+import os, sys, json, re, time, shutil, argparse, pathlib
 import requests
+import anthropic
 from string import Template
 
 API_BASE     = "https://freesound.org/apiv2"
@@ -22,6 +23,27 @@ CAND_DIR     = pathlib.Path("sound_candidates")
 LIB_DIR      = pathlib.Path("sound_library")
 REVIEW_HTML  = pathlib.Path("sound_review.html")
 LIB_JSON     = pathlib.Path("sound_library.json")
+
+CATALOG_JSON  = pathlib.Path("catalog_full.json")
+SCAN_CACHE    = pathlib.Path("sound_scan_cache.json")
+SCAN_CAND_DIR = CAND_DIR / "catalog_scan"
+
+SCAN_THEMENGEBIETE = {
+    "Tiere",
+    "Pflanzen & Pilze",
+    "Menschlicher Körper & Gesundheit",
+    "Erde, Wetter & Naturphänomene",
+    "Naturräume & Landschaften",
+    "Weltall & Astronomie",
+    "Naturwissenschaft & Biologie-Konzepte",
+    "Technik, Maschinen & Fahrzeuge",
+    "Kunst, Musik & Literatur",
+    "Sport & Spiele",
+    "Essen & Alltag",
+    "Religion, Feste & Bräuche",
+    "Märchen, Mythologie & Fabelwesen",
+    "Grundbegriffe (Zahlen, Formen, Farben, Zeit, Sprache)",
+}
 
 # ── Kategorien: Ambient ──────────────────────────────────────────────────────
 
@@ -150,6 +172,219 @@ def download_preview(sound, out_path):
     except Exception as e:
         print(f"    Download fehlgeschlagen: {e}")
         return False
+
+# ── Catalog-Scan ─────────────────────────────────────────────────────────────
+
+def translate_themen_batch(themen: list[str]) -> dict[str, str]:
+    """Übersetzt deutsche Themen-Namen ins Englische via Haiku (günstig)."""
+    client = anthropic.Anthropic()
+    result = {}
+    batch_size = 80
+
+    for i in range(0, len(themen), batch_size):
+        batch = themen[i : i + batch_size]
+        numbered = "\n".join(f"{j+1}. {t}" for j, t in enumerate(batch))
+        prompt = (
+            "Translate these German encyclopedia topic names to concise English "
+            "search terms for Freesound.org (sound effects library). "
+            "Return ONLY a JSON object mapping each German name to its English "
+            "search term. No explanations, no markdown.\n\n" + numbered
+        )
+        try:
+            resp = client.messages.create(
+                model="claude-haiku-4-5-20251001",
+                max_tokens=2000,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            text = resp.content[0].text.strip()
+            text = re.sub(r"^```[a-z]*\n?", "", text).rstrip("`").strip()
+            result.update(json.loads(text))
+        except Exception as e:
+            print(f"  Übersetzungsfehler (Batch {i//batch_size+1}): {e} — nutze Deutsch")
+            for t in batch:
+                result[t] = t
+        time.sleep(1)
+
+    return result
+
+
+def phase_catalog_scan(candidates_per_thema: int = 3):
+    """
+    Scannt catalog_full.json gegen Freesound:
+    Jedes Thema aus SCAN_THEMENGEBIETE → CC0-Suche (0.5–15s) →
+    Kandidaten cachen → HTML-Review generieren.
+    Bereits gecachte Themen werden übersprungen (Resume-fähig).
+    """
+    if not CATALOG_JSON.exists():
+        sys.exit(f"FEHLER: {CATALOG_JSON} nicht gefunden.")
+
+    api_key = get_api_key()
+    SCAN_CAND_DIR.mkdir(parents=True, exist_ok=True)
+
+    catalog = json.loads(CATALOG_JSON.read_text(encoding="utf-8"))
+    to_scan = [
+        item for item in catalog
+        if item.get("themengebiet") in SCAN_THEMENGEBIETE
+        and item.get("eignung") != "exclude"
+        and item.get("tier") == "primary"
+    ]
+    print(f"Themen im Scan-Scope: {len(to_scan)}")
+
+    cache: dict = json.loads(SCAN_CACHE.read_text(encoding="utf-8")) \
+        if SCAN_CACHE.exists() else {}
+    already_done = sum(1 for t in to_scan if t["thema"] in cache)
+    print(f"Bereits gecacht: {already_done} — neu zu suchen: {len(to_scan)-already_done}")
+
+    need_trans = [t["thema"] for t in to_scan if t["thema"] not in cache]
+    translations: dict[str, str] = {}
+    if need_trans:
+        print(f"Übersetze {len(need_trans)} Themen (Haiku-Batch) …")
+        translations = translate_themen_batch(need_trans)
+        print(f"  {len(translations)} Übersetzungen erhalten.")
+
+    found_count = sum(1 for t in to_scan if cache.get(t["thema"]))
+    for idx, item in enumerate(to_scan):
+        thema = item["thema"]
+        if thema in cache:
+            continue
+
+        en_query = translations.get(thema, thema)
+        print(f"  [{idx+1}/{len(to_scan)}] {thema} → \"{en_query}\"", end=" ", flush=True)
+
+        results = freesound_search(en_query, api_key, dur_min=0.5, dur_max=15, n=candidates_per_thema)
+        if not results:
+            results = freesound_search(thema, api_key, dur_min=0.5, dur_max=15, n=candidates_per_thema)
+
+        good = [r for r in results if (r.get("avg_rating") or 0) >= 3.0]
+
+        if good:
+            sounds = []
+            for r in good[:candidates_per_thema]:
+                slug = re.sub(r"[^a-z0-9]", "_", thema.lower())[:28]
+                fpath = SCAN_CAND_DIR / f"{slug}_{r['id']}.mp3"
+                if download_preview(r, fpath):
+                    sounds.append({
+                        "id":       r["id"],
+                        "name":     r["name"][:80],
+                        "author":   r["username"],
+                        "duration": round(r["duration"], 1),
+                        "rating":   round(r.get("avg_rating") or 0, 1),
+                        "license":  "CC0",
+                        "local":    str(fpath),
+                        "en_query": en_query,
+                    })
+            entry = {
+                "thema":        thema,
+                "themengebiet": item.get("themengebiet", ""),
+                "en_query":     en_query,
+                "sounds":       sounds,
+            }
+            cache[thema] = entry
+            found_count += 1
+            print(f"→ {len(sounds)} Treffer ★{max(s['rating'] for s in sounds) if sounds else 0}")
+        else:
+            cache[thema] = None
+            print("→ kein Treffer")
+
+        if idx % 25 == 0:
+            SCAN_CACHE.write_text(
+                json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8"
+            )
+        time.sleep(0.35)
+
+    SCAN_CACHE.write_text(json.dumps(cache, ensure_ascii=False, indent=2), encoding="utf-8")
+    print(f"\n{found_count} Themen mit Freesound-Treffern (von {len(to_scan)} gescannt)")
+    build_catalog_review_html(cache)
+
+
+def build_catalog_review_html(cache: dict):
+    """Generiert sound_review_catalog.html — gruppiert nach Themengebiet."""
+    found = {k: v for k, v in cache.items() if v and v.get("sounds")}
+
+    by_gebiet: dict[str, list] = {}
+    for thema, data in sorted(found.items()):
+        g = data.get("themengebiet", "Sonstiges")
+        by_gebiet.setdefault(g, []).append((thema, data))
+
+    cats_html = ""
+    for gebiet, items in sorted(by_gebiet.items()):
+        cards_html = ""
+        for thema, data in items:
+            player_html = ""
+            for i, s in enumerate(data["sounds"]):
+                rel = pathlib.Path(s["local"]).as_posix()
+                jd  = json.dumps({"id": s["id"], "name": s["name"], "author": s["author"],
+                                   "duration": s["duration"], "rating": s["rating"],
+                                   "license": "CC0", "local": s["local"]})
+                player_html += (
+                    f'<div class="sc" data-cat="{thema}" data-idx="{i}">'
+                    f'<div class="meta">★{s["rating"]} {s["duration"]}s · {s["author"]}</div>'
+                    f'<div class="sname">{s["name"][:55]}</div>'
+                    f'<audio controls src="{rel}" preload="none"></audio>'
+                    f'<button class="sbtn" onclick=\'sel("{thema}",{i},{jd})\'>✓ Auswählen</button>'
+                    f'</div>'
+                )
+            cards_html += (
+                f'<div class="topic" data-cat="{thema}">'
+                f'<div class="tname">{thema}</div>'
+                f'<div class="players">{player_html}</div>'
+                f'</div>'
+            )
+        cats_html += (
+            f'<details open><summary class="ghead">{gebiet} ({len(items)})</summary>'
+            f'<div class="grid">{cards_html}</div></details>'
+        )
+
+    html = f"""<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">
+<title>Wissensfreund — Catalog Sound Review</title>
+<style>
+body{{font-family:Arial,sans-serif;max-width:1200px;margin:0 auto;padding:16px;background:#f5f5f5}}
+h1{{color:#1F4E79}}details{{background:white;border-radius:8px;margin-bottom:16px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}}
+summary.ghead{{font-weight:bold;font-size:1.05em;color:#1F4E79;cursor:pointer;padding:4px 0}}
+.grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-top:10px}}
+.topic{{border:1px solid #ddd;border-radius:6px;padding:8px;background:#fafafa}}
+.tname{{font-weight:bold;font-size:.9em;margin-bottom:6px;color:#333}}
+.players{{display:flex;flex-direction:column;gap:6px}}
+.sc{{border:2px solid #eee;border-radius:4px;padding:6px;background:white}}
+.sc.selected{{border-color:#2E7D32;background:#E8F5E9}}
+.meta{{font-size:.72em;color:#888}}
+.sname{{font-size:.78em;font-weight:bold;margin:2px 0}}
+audio{{width:100%;height:28px}}
+.sbtn{{width:100%;padding:4px;border:none;border-radius:3px;background:#1F4E79;color:white;
+       font-size:.78em;cursor:pointer;margin-top:3px}}
+.sbtn.selected{{background:#2E7D32}}
+#expbtn{{padding:10px 24px;background:#1F4E79;color:white;border:none;border-radius:6px;
+         font-size:1em;cursor:pointer;margin-top:20px}}
+#expout{{width:100%;height:250px;font-family:monospace;font-size:.8em;margin-top:10px}}
+.prog{{color:#666;font-size:.85em;margin:8px 0}}
+</style></head><body>
+<h1>Catalog Sound Review — {len(found)} Themen mit Freesound-Treffern</h1>
+<p class="prog" id="prog">0 von {len(found)} ausgewählt</p>
+{cats_html}
+<button id="expbtn" onclick="exportSel()">Export JSON</button>
+<textarea id="expout" placeholder="JSON erscheint nach Klick..."></textarea>
+<script>
+const sel_={{}}; const total={len(found)};
+function sel(cat,idx,data){{
+  document.querySelectorAll(`[data-cat="${{cat}}"] .sc`).forEach(e=>e.classList.remove('selected'));
+  document.querySelectorAll(`[data-cat="${{cat}}"] .sbtn`).forEach(e=>{{e.classList.remove('selected');e.textContent='✓ Auswählen';}});
+  const card=document.querySelector(`[data-cat="${{cat}}"] [data-idx="${{idx}}"]`);
+  card.classList.add('selected');
+  card.querySelector('.sbtn').classList.add('selected');
+  card.querySelector('.sbtn').textContent='✓ Ausgewählt';
+  sel_[cat]=data;
+  document.getElementById('prog').textContent=Object.keys(sel_).length+' von '+total+' ausgewählt';
+}}
+function exportSel(){{document.getElementById('expout').value=JSON.stringify(sel_,null,2);}}
+</script></body></html>"""
+
+    out = pathlib.Path("sound_review_catalog.html")
+    out.write_text(html, encoding="utf-8")
+    print(f"Review-Seite: {out.resolve()}")
+    print(f"→ Im Browser öffnen, pro Thema besten Sound wählen, Export klicken")
+    print(f"→ JSON als sound_approvals_catalog.json speichern")
+    print(f"→ Danach: python sound_sourcing.py --phase finalize --approvals sound_approvals_catalog.json --type spot")
+
 
 # ── Phase 1: Search ──────────────────────────────────────────────────────────
 
@@ -342,9 +577,11 @@ def phase_finalize(approvals_file, sound_type):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--phase", choices=["search", "finalize"], required=True)
+    ap.add_argument("--phase", choices=["search", "finalize", "catalog-scan"], required=True)
     ap.add_argument("--type",  choices=["ambient", "spot"], default="ambient")
     ap.add_argument("--approvals", help="JSON-Datei mit genehmigten Sounds (phase=finalize)")
+    ap.add_argument("--candidates", type=int, default=3,
+                    help="Max. Freesound-Kandidaten je Thema beim catalog-scan (default 3)")
     args = ap.parse_args()
 
     if args.phase == "search":
@@ -354,6 +591,8 @@ def main():
         if not args.approvals:
             sys.exit("--approvals erforderlich fuer phase=finalize")
         phase_finalize(args.approvals, args.type)
+    elif args.phase == "catalog-scan":
+        phase_catalog_scan(candidates_per_thema=args.candidates)
 
 if __name__ == "__main__":
     main()

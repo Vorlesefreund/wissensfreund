@@ -1,18 +1,23 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-14T20:45:06Z -->
+<!-- updated: 2026-06-14T21:10:00Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**sound_sourcing.py v1 angelegt (2026-06-14).** ← AKTUELL
-- 40 Ambient-Kategorien (Natur/Gesellschaft/Geschichte/Technik/Besonderes)
-- 30 Spot-Kategorien (Tiere, Fahrzeuge, Effekte)
-- Workflow: `--phase search` → HTML-Review → `sound_approvals_*.json` → `--phase finalize`
-- Freesound API, nur CC0-Lizenzen, Preview-MP3-Downloads
-- Abhängigkeit: `requests` (bereits installiert 2.32.5)
-- Nächster Schritt: FREESOUND_API_KEY in `.env` eintragen, dann `python sound_sourcing.py --phase search --type ambient`
+**sound_sourcing.py: --phase catalog-scan ergänzt (2026-06-14).** ← AKTUELL
+- 2730 Themen im Scan-Scope (14 Themengebiete, primary, non-exclude)
+- Haiku-Batch-Übersetzung (80er-Batches), Resume-fähiger Cache (sound_scan_cache.json)
+- Freesound-Suche CC0, 0.5–15s, ★≥3.0 Filter, EN-Fallback auf DE
+- HTML-Review: sound_review_catalog.html (gruppiert nach Themengebiet, <details>-Akkordeon)
+- --candidates N (default 3) konfigurierbar
+- Laufzeit ~15–20 Min für alle 2730 Themen
+- Nächster Schritt: FREESOUND_API_KEY + ANTHROPIC_API_KEY setzen, dann `python sound_sourcing.py --phase catalog-scan`
+
+**sound_sourcing.py v1 angelegt (2026-06-14).**
+- 40 Ambient + 30 Spot Kategorien, HTML-Review-Workflow
+- Nächster Schritt nach catalog-scan: sound_review_catalog.html im Browser öffnen, auswählen, finalize
 
 **generate_grounded.py: eignung_verdicts.json vollständig verdrahtet (2026-06-14).**
 - Bug 1 gefixt: `_load_eignung()` normiert Keys auf `.lower()` → Lookup trifft jetzt
