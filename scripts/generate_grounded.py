@@ -155,8 +155,10 @@ def _load_eignung() -> dict[str, dict]:
     if not path.exists():
         log.warning("eignung_verdicts.json fehlt (%s) — Themen laufen über Eignungs-Fallback", path)
         return {}
-    data = json.load(path.open(encoding="utf-8"))
-    return data.get("verdicts", data)
+    raw = json.load(path.open(encoding="utf-8"))
+    data = raw.get("verdicts", raw)
+    # Keys auf lowercase normieren — eignung_for() sucht mit .lower()
+    return {k.strip().lower(): v for k, v in data.items()}
 
 
 _EIGNUNG: dict[str, dict] = _load_eignung()
@@ -171,8 +173,10 @@ def eignung_for(thema: str) -> dict:
             return {"eignung": "exclude", "age_floor": 1, "framing_note": "", "source": "fallback-strict"}
         log.warning("  Eignung: kein Urteil für '%s' → Default include/S1 (ungeprüft)", thema)
         return {"eignung": "include", "age_floor": 1, "framing_note": "", "source": "fallback-permissive"}
+    # Neues Schema: exclude:true statt eignung:"exclude"; age_floor direkt als int
+    eignung_val = "exclude" if rec.get("exclude") else rec.get("eignung", "include")
     return {
-        "eignung":      rec.get("eignung", "include"),
+        "eignung":      eignung_val,
         "age_floor":    int(rec.get("age_floor", 1)),
         "framing_note": rec.get("framing_note", "") or "",
         "source":       "verdict",
