@@ -55,7 +55,11 @@ XLSX_COLS = [
 
 def load_all() -> list[dict]:
     items = []
-    raw_dirs = [CATALOG_RAW_DIR, CATALOG_RAW_DIR.parent / "catalog_raw_r2"]
+    raw_dirs = [
+        CATALOG_RAW_DIR,
+        CATALOG_RAW_DIR.parent / "catalog_raw_r2",
+        CATALOG_RAW_DIR.parent / "catalog_raw_r3",
+    ]
     file_count = 0
     for raw_dir in raw_dirs:
         if not raw_dir.exists():
