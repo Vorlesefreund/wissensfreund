@@ -1,12 +1,22 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-15T06:46:07Z -->
+<!-- updated: 2026-06-15T09:58:37Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**sound_compare.py v2 angelegt (2026-06-15).** ← AKTUELL
+**TTS-Tagging Vergleichs-Harness angelegt (2026-06-15).** ← AKTUELL
+- wissensfreund_tts_tagging_v1.md: System-Prompt "Professor-Stimme", Inline-Tags, sound_mood
+- tts_tagging_compare.py: 3 Modelle parallel (Gemini 2.5-flash, Haiku 4.5, Sonnet 4.6), HTML-Report
+- Fixes: max_tokens 4000→8192, JSON-Fallback-Extraktion (Anführungszeichen-Problem S3), Gemini-Retry bei 503
+- Ergebnis 3-Pilot (Vulkan, Dinosaurier, Kühlschrank × S1–S3):
+  Haiku 4.5: 9/9 OK | Sonnet 4.6: 9/9 OK | Gemini Flash: 7/9 OK (2× 503 transient)
+- HTML-Vergleich: tts_tagging_compare_out/tts_tagging_compare.html
+- Aufruf: `python tts_tagging_compare.py --articles Thema1 Thema2 [--dir Verzeichnis]`
+- Gemini-Modell: gemini-2.5-flash (preview, gelegentlich 503)
+
+**sound_compare.py v2 angelegt (2026-06-15).**
 - Vergleicht Freesound vs. Openverse auf 100 kuratierten Themen (slug, EN-Query, DE-Label)
 - Phase 1: Parallel-Suche (ThreadPool, workers=4), Dauer-Filter 1–15s
 - Phase 2: Preview-Download + 4s-Clip via ffmpeg subprocess (Stille am Anfang überspringen, fade-in/out)
