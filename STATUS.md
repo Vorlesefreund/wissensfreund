@@ -1,12 +1,26 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-15T19:31:30Z -->
+<!-- updated: 2026-06-15T19:59:05Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Coverage-Audit + Excel abgeschlossen (2026-06-15).** ← AKTUELL
+**TTS JSON-Pipeline: tts_compose.py + tts_audio_compare.py v2 (2026-06-15).** ← AKTUELL
+- tts_compose.py: compose() + strip_emoji() — Canonical-JSON → sauberer Vorlesetext
+  - Emojis gestrippt, Boxen mit ProfessorPhrasen (wow/fakt/warnung/stimmt_das je S1-S3)
+  - stimmt_das: Frage → Absatzpause (\n\n) → Antwort mit Einleitung
+  - Überschriften als Sätze (Satzzeichen-Check), Quiz ausgelassen
+- tts_audio_compare.py v2: --dir <verzeichnis> nimmt *.json Artikel (report.json gefiltert)
+  - from tts_compose import compose — stufe aus meta.age_level abgeleitet
+  - SCENE ersetzt (ruhige Professor-Instructions, englisch), VOICE_NAME=Iapetus
+  - Legacy --articles .md Betrieb erhalten
+- Testlauf --dir articles/test_compare: 12 Artikel × 2 Varianten = 24 TTS-Generierungen
+  - 19/24 WAVs OK (5 TAGGING-FEHLER = 503×3 auf gemini-3.5-flash, transient)
+  - TTS-Retry-Fallback funktioniert (NoneType → OK auf Retry 1)
+  - Vergleich: tts_audio_compare_out/tts_audio_compare.html
+
+**Coverage-Audit + Excel abgeschlossen (2026-06-15).**
 - coverage_audit.py: 3-stufiger Audit (Klexikon-Abgleich, Pflichtliste, LLM-Audit pro Gebiet)
 - 560 neue Kandidaten: 325 Klexikon, 10 Pflichtliste, 225 LLM (Haiku pro Gebiet)
 - Fuzzy-Match: 36 mutmaßliche Dubletten (ratio ≥ 0.85)

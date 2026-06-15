@@ -19,27 +19,28 @@ Voraussetzung:
 """
 
 import os, sys, json, re, pathlib, argparse, time, struct, wave
+from tts_compose import compose
 
 PROMPT_FIXED = pathlib.Path("wissensfreund_tts_tagging_v1.md")
 PROMPT_FREE  = pathlib.Path("wissensfreund_tts_tagging_FREE_v1.md")
 OUT_DIR      = pathlib.Path("tts_audio_compare_out")
-PILOT_DIR    = pathlib.Path("pilot_output3")
 
 TAGGING_MODEL = "gemini-3.5-flash"
 TTS_MODEL     = "gemini-3.1-flash-tts-preview"
 STUFE_LABEL   = {"1": "S1", "2": "S2", "3": "S3"}
 
-# Scene-Direction des Professors je Stufe (an die TTS-Stufe übergeben)
 SCENE = {
-    "S1": ("A warm, gentle elderly professor reading a bedtime-style science "
-           "story to a 5-year-old. Playful, soft, full of wonder, slow pace."),
-    "S2": ("A warm, curious elderly professor telling an exciting fact-story to "
-           "a 8-year-old. Lively, engaged, natural storytelling pace."),
-    "S3": ("A warm but composed elderly professor explaining a topic to a "
-           "12-year-old. Calm, respectful, intelligent, almost natural delivery."),
+    "S1": ("Read aloud as a good-natured professor sharing something with a young child, "
+           "as if sitting together quietly. Calm, warm, a little slower than normal. "
+           "Friendly but understated — let the wonder come from the words, not loud emphasis."),
+    "S2": ("Read aloud as a relaxed, good-natured professor sharing a story with a child. "
+           "Conversational and unhurried, as if chatting at the kitchen table. "
+           "Understated, warm, natural — no dramatic emphasis."),
+    "S3": ("Read aloud as a calm, knowledgeable professor explaining something to an older child. "
+           "Conversational and even, quietly engaged. "
+           "Natural pace, minimal emphasis — clear and grounded, never dramatic."),
 }
-# Stimme — kindgerecht warm. Gemini-Stimmen-Name ggf. anpassen.
-VOICE_NAME = "Sulafat"   # falls ungültig → Script meldet verfügbare Stimmen
+VOICE_NAME = "Iapetus"
 
 
 def load_env():
@@ -88,6 +89,8 @@ def tag_text(client, system: str, text: str, stufe: str) -> dict:
                 config=types.GenerateContentConfig(
                     system_instruction=system, max_output_tokens=8192, temperature=0.7),
             )
+            if resp.text is None:
+                raise ValueError("model returned text=None (token budget?)")
             data = extract_json(resp.text)
             if data and data.get("tts_text"):
                 return data
@@ -157,9 +160,13 @@ th{{background:#1F4E79;color:white}} td.meta{{width:90px;background:#fafafa}}
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--articles", nargs="+", required=True)
+    ap.add_argument("--dir", help="Verzeichnis mit *.json Artikeln (aus dem Generator)")
+    ap.add_argument("--articles", nargs="+", help="Themennamen für legacy .md Betrieb")
     ap.add_argument("--stufen", nargs="+", default=["1", "2", "3"])
     args = ap.parse_args()
+
+    if not args.dir and not args.articles:
+        sys.exit("FEHLER: --dir <verzeichnis> oder --articles <themen...> angeben.")
 
     load_env()
     if "GEMINI_API_KEY" not in os.environ:
@@ -172,14 +179,29 @@ def main():
     sys_free  = PROMPT_FREE.read_text(encoding="utf-8")
 
     # Artikel sammeln
-    tasks = []
-    for thema in args.articles:
-        for s in args.stufen:
-            f = PILOT_DIR / f"{thema}_S{s}.md"
-            if f.exists():
-                tasks.append((thema, STUFE_LABEL[s], f.read_text(encoding="utf-8")))
+    tasks = []  # [(thema_slug, stufe_label, composed_text), ...]
+    if args.dir:
+        for jf in sorted(f for f in pathlib.Path(args.dir).glob("*.json")
+                         if not f.name.endswith("_report.json")):
+            article = json.loads(jf.read_text(encoding="utf-8"))
+            level = article.get("meta", {}).get("age_level", 2)
+            stufe = f"S{max(1, min(3, int(level)))}"
+            thema = jf.stem  # filename stem as unique label (avoids collisions in --dir)
+            text  = compose(article, stufe)
+            if text.strip():
+                tasks.append((thema, stufe, text))
             else:
-                print(f"  übersprungen (nicht gefunden): {f.name}")
+                print(f"  übersprungen (kein Text): {jf.name}")
+    else:
+        # Legacy: .md-Dateien aus pilot_output3
+        pilot_dir = pathlib.Path("pilot_output3")
+        for thema in args.articles:
+            for s in args.stufen:
+                f = pilot_dir / f"{thema}_S{s}.md"
+                if f.exists():
+                    tasks.append((thema, STUFE_LABEL[s], f.read_text(encoding="utf-8")))
+                else:
+                    print(f"  übersprungen (nicht gefunden): {f.name}")
 
     print(f"\n{len(tasks)} Artikel-Stufen × 2 Varianten = {len(tasks)*2} TTS-Generierungen\n")
 
