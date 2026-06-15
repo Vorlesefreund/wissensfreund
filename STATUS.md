@@ -1,12 +1,22 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-15T12:53:51Z -->
+<!-- updated: 2026-06-15T19:31:30Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Tagging-Modell auf gemini-3.5-flash aktualisiert (2026-06-15).** ← AKTUELL
+**Coverage-Audit + Excel abgeschlossen (2026-06-15).** ← AKTUELL
+- coverage_audit.py: 3-stufiger Audit (Klexikon-Abgleich, Pflichtliste, LLM-Audit pro Gebiet)
+- 560 neue Kandidaten: 325 Klexikon, 10 Pflichtliste, 225 LLM (Haiku pro Gebiet)
+- Fuzzy-Match: 36 mutmaßliche Dubletten (ratio ≥ 0.85)
+- catalog_review_audit.xlsx: Basis=Review-Sheet + NEU-Zeilen alphabetisch eingemischt
+  Grün=neue Kandidaten | Orange=mutmaßl. Dublette | Spalten: STATUS_NEU, QUELLE_AUDIT, MUTMASSLICHE_DUBLETTE, AEHNLICH_VORHANDEN
+- Top-Lücken-Gebiete: Grundbegriffe 71, Gesellschaft 57, Geschichte 54, Tiere 41, Religion 35
+- Gebiet-Klassifikation per Haiku-Batch (211 Klexikon-Items ohne Keyword-Match)
+- Diagnose "Indianer": war nie in Rater-Runden → muss manuell in catalog_manual.json
+
+**Tagging-Modell auf gemini-3.5-flash aktualisiert (2026-06-15).**
 - gemini-3.1-flash (Text): per 404 verifiziert nicht existent
 - gemini-3.5-flash: bestes verfügbares Text-Flash, TAGGING_MODEL in beiden Scripts
 - Stabilitätstest 3.5-flash: 3/5 OK bei Kurz-Calls (Thinking-Modell, braucht ≥8192 Token)
