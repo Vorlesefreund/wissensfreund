@@ -1,12 +1,21 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-15T09:58:37Z -->
+<!-- updated: 2026-06-15T11:46:58Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**TTS-Tagging Vergleichs-Harness angelegt (2026-06-15).** ← AKTUELL
+**TTS-Audio A/B-Vergleich abgeschlossen (2026-06-15).** ← AKTUELL
+- tts_audio_compare.py: feste Tag-Palette vs. freie Tag-Wahl, beide mit Gemini Flash
+- TTS: gemini-3.1-flash-tts-preview, Stimme: Sulafat (warme Kinderstimme, validiert)
+- Tagging: gemini-2.5-flash-lite (stabil, keine 503-Fehler; 2.5-flash zu überlastet)
+- Ergebnis 3-Pilot × S1–S3 × 2 Varianten = 18 TTS-Calls, **18/18 OK**
+- Audio: tts_audio_compare_out/*.wav (18 Dateien)
+- HTML-Vergleich: tts_audio_compare_out/tts_audio_compare.html
+- Umlaut-Problem in PowerShell → Wrapper temp/_run_all3.py (sys.argv direkt setzen)
+
+**TTS-Tagging Vergleichs-Harness angelegt (2026-06-15).**
 - wissensfreund_tts_tagging_v1.md: System-Prompt "Professor-Stimme", Inline-Tags, sound_mood
 - tts_tagging_compare.py: 3 Modelle parallel (Gemini 2.5-flash, Haiku 4.5, Sonnet 4.6), HTML-Report
 - Fixes: max_tokens 4000→8192, JSON-Fallback-Extraktion (Anführungszeichen-Problem S3), Gemini-Retry bei 503
