@@ -1,0 +1,19 @@
+[
+  {
+    "thema": "Inflation",
+    "themengebiet": "Gesellschaft, Berufe & Zusammenleben",
+    "leuchtturm": false,
+    "erg_s1": null,
+    "erg_s2": 4,
+    "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": "S2",
+    "kategorie_nr": 5,
+    "framing_note": "sachlich-neutral erklären, keine wirtschaftspolitische Wertung",
+    "sensibel": true,
+    "begruendung_eignung": "Wirtschaftsthema mit politischer Dimension; abstrakt, für jüngere Kinder schwer greifbar. Mit Alltagsbeispielen (Preise steigen) ab S2 erklärbar, voll ergiebig erst S3. Neutralität geboten, daher sensibel.",
+    "dublette_von": null,
+    "notiz": "Verwandt mit Anker 'Wirtschaft' (4/7/9) und 'Markt' (6/7/8); Inflation enger/abstrakter, daher niedriger und mit age_floor S2.",
+    "tier": "primary"
+  }
+]

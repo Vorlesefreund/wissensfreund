@@ -1,0 +1,46 @@
+```json
+[
+  {
+    "thema": "Dinkel",
+    "themengebiet": "Pflanzen & Pilze",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 5, "erg_s3": 5,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Getreideart, unproblematisches Pflanzenthema.",
+    "dublette_von": null,
+    "notiz": ""
+  },
+  {
+    "thema": "Kokosnuss",
+    "themengebiet": "Pflanzen & Pilze",
+    "leuchtturm": true,
+    "erg_s1": 5, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Bekannte tropische Frucht, vertraut und anschaulich, gut für Kinder.",
+    "dublette_von": null,
+    "notiz": ""
+  },
+  {
+    "thema": "Stengel",
+    "themengebiet": "Pflanzen & Pilze",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 5,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Pflanzenteil/Botanik-Grundbegriff, unproblematisch.",
+    "dublette_von": null,
+    "notiz": "WP-Lemma heute meist 'Stängel' (Sprossachse); kanonische Schreibweise prüfen."
+  }
+]
+```

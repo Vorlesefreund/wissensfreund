@@ -1,0 +1,72 @@
+[
+  {
+    "thema": "Fortnite",
+    "themengebiet": "Sport & Spiele",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": 6, "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": 2,
+    "kategorie_nr": 8,
+    "framing_note": "Spielinhalt (Schießen/Ausscheiden) sachlich und nicht verharmlosend; Hinweis auf Altersfreigabe (USK 12), Spielzeit/Sucht-Risiko und In-Game-Käufe ohne Konsum-Anreiz",
+    "sensibel": true,
+    "begruendung_eignung": "Sehr populäres Videospiel mit Kampf-/Schussmechanik; USK 12, daher kein S1. Comichafte Gewalt, aber Schießspiel — Gewalt/Suchtaspekt rechtfertigt age_floor S2 und warnung-Framing.",
+    "dublette_von": null,
+    "notiz": "Videospiel — Grenzfall zwischen Sport & Spiele und Technik; hier korrekt als Spiel geführt"
+  },
+  {
+    "thema": "Golfstrom",
+    "themengebiet": "Erde, Wetter & Naturphänomene",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": 5, "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": 2,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Meeresströmung, unproblematisches naturkundliches Thema. Abstrakt, daher kein S1.",
+    "dublette_von": null,
+    "notiz": "Falsch einsortiert: gehört nicht zu Sport & Spiele, sondern zu Erde, Wetter & Naturphänomene (Meeresströmung/Klima)"
+  },
+  {
+    "thema": "Kickboxen",
+    "themengebiet": "Sport & Spiele",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 2,
+    "kategorie_nr": 8,
+    "framing_note": "Kampfsport sachlich als Sport mit Regeln und Schutzausrüstung darstellen; Schläge/Tritte nicht als Gewalt verherrlichen",
+    "sensibel": true,
+    "begruendung_eignung": "Vollkontakt-Kampfsport. Gewaltaspekt (Schlagen/Treten) rechtfertigt age_floor S2 und sachliches Framing.",
+    "dublette_von": null,
+    "notiz": ""
+  },
+  {
+    "thema": "Orientierungslauf",
+    "themengebiet": "Sport & Spiele",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": 5, "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Laufsport mit Karte und Kompass, unproblematisch. Eher nischiges Thema, mäßige Ergiebigkeit.",
+    "dublette_von": null,
+    "notiz": "age_floor 1, aber erg_s1 null gesetzt — abstraktes Karten-/Kompass-Konzept für S1 kaum greifbar"
+  },
+  {
+    "thema": "Trampolinspringen",
+    "themengebiet": "Sport & Spiele",
+    "leuchtturm": false,
+    "erg_s1": 6, "erg_s2": 6, "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Bei Kindern vertrautes, körperlich-konkretes Sportthema mit Staunfaktor (Springen, Höhe); für alle Stufen zugänglich.",
+    "dublette_von": null,
+    "notiz": ""
+  }
+]

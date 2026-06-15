@@ -1,12 +1,20 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-15T19:59:05Z -->
+<!-- updated: 2026-06-15T20:51:59Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**TTS JSON-Pipeline: tts_compose.py + tts_audio_compare.py v2 (2026-06-15).** ← AKTUELL
+**Audit-Nachbewertung: 393 neue Themen via Opus-Rater (2026-06-15).** ← AKTUELL
+- catalog_rater_audit.py: Opus-Calls pro Themengebiet, Input = audit_include_topics.json
+- 393 Themen bewertet: 20 Leuchtturm, 113 sensibel, 0 exclude (alle bleiben include)
+- 21 JSON-Dateien in catalog_raw_audit/ (je Gebiet)
+- Gebiet-Korrekturen durch Rater: z.B. Eidgenossenschaft/Gorbatschow/Wissenschaft aus Tiere heraus
+- essen_alltag.json: manuell gerettet (typografisches „ + gerader " brach JSON-Parse)
+- NOCH NICHT in catalog_manual.json gemergt — nächster Schritt: gemeinsame Prüfung
+
+**TTS JSON-Pipeline: tts_compose.py + tts_audio_compare.py v2 (2026-06-15).**
 - tts_compose.py: compose() + strip_emoji() — Canonical-JSON → sauberer Vorlesetext
   - Emojis gestrippt, Boxen mit ProfessorPhrasen (wow/fakt/warnung/stimmt_das je S1-S3)
   - stimmt_das: Frage → Absatzpause (\n\n) → Antwort mit Einleitung

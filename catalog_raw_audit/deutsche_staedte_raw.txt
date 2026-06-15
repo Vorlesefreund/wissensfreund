@@ -1,0 +1,72 @@
+[
+  {
+    "thema": "Aschaffenburg",
+    "themengebiet": "Deutsche Städte",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 5,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Mittelgroße deutsche Stadt mit Schloss, unproblematisch. Ergiebigkeit vergleichbar mit Bottrop/Ingolstadt (3/4/5).",
+    "dublette_von": null,
+    "notiz": ""
+  },
+  {
+    "thema": "Bernkastel-Kues",
+    "themengebiet": "Deutsche Städte",
+    "leuchtturm": false,
+    "erg_s1": 2, "erg_s2": 3, "erg_s3": 4,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Kleine Moselstadt, eher dünn für Kinder. Ergiebigkeit am unteren Rand der Städte (vgl. Vevey 2/3/4). Eher Grenzfall fürs Budget, da Kleinstadt.",
+    "dublette_von": null,
+    "notiz": "Kleinstadt ohne besondere überregionale Bedeutung — grenzwertig fürs Städte-Budget."
+  },
+  {
+    "thema": "Bonnie und Clyde",
+    "themengebiet": "Berühmte Personen",
+    "leuchtturm": false,
+    "erg_s1": null, "erg_s2": null, "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": "S3",
+    "kategorie_nr": 8,
+    "framing_note": "Gewalt/Verbrechen sachlich darstellen, nicht verherrlichend, kein Glorifizieren der Täter, warnung-Box",
+    "sensibel": true,
+    "begruendung_eignung": "Kriminelles Verbrecherpaar mit Gewalt/Tod — falsches Gebiet (gehört zu Berühmte Personen, nicht Deutsche Städte). Kategorie 8 (Gewalt/Verbrechen), age_floor S3. Vergleichbar Billy The Kid/Blackbeard, aber heikler Kontext.",
+    "dublette_von": null,
+    "notiz": "FALSCHES GEBIET: gehört in 'Berühmte Personen', nicht 'Deutsche Städte'."
+  },
+  {
+    "thema": "Reichstag",
+    "themengebiet": "Deutsche Städte",
+    "leuchtturm": true,
+    "erg_s1": 4, "erg_s2": 6, "erg_s3": 8,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": 5,
+    "framing_note": "strikt neutral bezüglich Parteien/Politik, demokratische Institutionen sachlich erklären",
+    "sensibel": true,
+    "begruendung_eignung": "Wahrzeichen Berlins und Sitz des Bundestags — markantes, ergiebiges Thema (Architektur, Glaskuppel, Demokratie, Geschichte). Politik-Bezug (Kat. 5) erfordert neutrale Einordnung. Reichstagsbrand 1933 (NS-Kontext) ggf. sachlich. Leuchtturm-Kandidat des Gebiets.",
+    "dublette_von": null,
+    "notiz": "Eher Wahrzeichen/Bauwerk als Stadt; passt thematisch auch zu 'Weltstädte & Wahrzeichen'."
+  },
+  {
+    "thema": "Siegessäule",
+    "themengebiet": "Deutsche Städte",
+    "leuchtturm": false,
+    "erg_s1": 3, "erg_s2": 4, "erg_s3": 5,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Berliner Wahrzeichen (Goldelse), Architektur und Aussichtsplattform — kindgerecht. Kriegerdenkmal-Hintergrund sachlich einordbar, aber nicht gewaltzentriert. Ergiebigkeit moderat (vgl. Casablanca/Graz 3/4/5).",
+    "dublette_von": null,
+    "notiz": "Wahrzeichen/Bauwerk; passt thematisch auch zu 'Weltstädte & Wahrzeichen'."
+  }
+]
