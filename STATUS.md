@@ -1,12 +1,24 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-14T21:10:00Z -->
+<!-- updated: 2026-06-15T06:46:07Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**sound_sourcing.py: --phase catalog-scan ergänzt (2026-06-14).** ← AKTUELL
+**sound_compare.py v2 angelegt (2026-06-15).** ← AKTUELL
+- Vergleicht Freesound vs. Openverse auf 100 kuratierten Themen (slug, EN-Query, DE-Label)
+- Phase 1: Parallel-Suche (ThreadPool, workers=4), Dauer-Filter 1–15s
+- Phase 2: Preview-Download + 4s-Clip via ffmpeg subprocess (Stille am Anfang überspringen, fade-in/out)
+- Phase 3: HTML-Report mit eingebettetem `<audio>`-Player (Clips) oder Extern-Link (Fallback)
+- pydub NICHT benötigt (Python 3.14-inkompatibel) → ffmpeg direkt per subprocess
+- Zapsplat: kein öffentlicher API-Endpunkt → nur notiert, nicht implementiert
+- Freesound aktuell rate-limited (429, 2000/day erschöpft)
+- Openverse: funktioniert (kein Key, CC0+by, duration manuell in ms gefiltert)
+- Aufruf: `python sound_compare.py` (alle 100) | `--limit N` | `--no-freesound` | `--no-clips`
+- Voraussetzung ffmpeg: `winget install ffmpeg` (dann Clips aktiv)
+
+**sound_sourcing.py: --phase catalog-scan ergänzt (2026-06-14).**
 - 2730 Themen im Scan-Scope (14 Themengebiete, primary, non-exclude)
 - Haiku-Batch-Übersetzung (80er-Batches), Resume-fähiger Cache (sound_scan_cache.json)
 - Freesound-Suche CC0, 0.5–15s, ★≥3.0 Filter, EN-Fallback auf DE
