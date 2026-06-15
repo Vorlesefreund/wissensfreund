@@ -23,7 +23,7 @@ OUT_DIR        = pathlib.Path("tts_tagging_compare_out")
 
 # Modelle: (Anzeigename, Provider, Modell-ID)
 MODELS = [
-    ("Gemini Flash", "gemini",    "gemini-2.5-flash"),
+    ("Gemini Flash", "gemini",    "gemini-3.5-flash"),
     ("Haiku 4.5",    "anthropic", "claude-haiku-4-5-20251001"),
     ("Sonnet 4.6",   "anthropic", "claude-sonnet-4-6"),
 ]

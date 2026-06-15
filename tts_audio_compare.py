@@ -25,7 +25,7 @@ PROMPT_FREE  = pathlib.Path("wissensfreund_tts_tagging_FREE_v1.md")
 OUT_DIR      = pathlib.Path("tts_audio_compare_out")
 PILOT_DIR    = pathlib.Path("pilot_output3")
 
-TAGGING_MODEL = "gemini-2.5-flash-lite"
+TAGGING_MODEL = "gemini-3.5-flash"
 TTS_MODEL     = "gemini-3.1-flash-tts-preview"
 STUFE_LABEL   = {"1": "S1", "2": "S2", "3": "S3"}
 

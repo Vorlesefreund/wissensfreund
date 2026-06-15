@@ -1,16 +1,23 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-15T11:46:58Z -->
+<!-- updated: 2026-06-15T12:53:51Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**TTS-Audio A/B-Vergleich abgeschlossen (2026-06-15).** ← AKTUELL
+**Tagging-Modell auf gemini-3.5-flash aktualisiert (2026-06-15).** ← AKTUELL
+- gemini-3.1-flash (Text): per 404 verifiziert nicht existent
+- gemini-3.5-flash: bestes verfügbares Text-Flash, TAGGING_MODEL in beiden Scripts
+- Stabilitätstest 3.5-flash: 3/5 OK bei Kurz-Calls (Thinking-Modell, braucht ≥8192 Token)
+- 18-Call-Lauf 3.5-flash: 16/18 OK (2 TAGGING-FEHLER nach je 3 Retries 503)
+- Vergleich 2.5-flash-lite: 18/18 OK, schneller (kein Thinking) → stabiler für Prod-Pipeline
+- TTS-Modell: gemini-3.1-flash-tts-preview ✅ | Stimme: Sulafat ✅
+
+**TTS-Audio A/B-Vergleich abgeschlossen (2026-06-15).**
 - tts_audio_compare.py: feste Tag-Palette vs. freie Tag-Wahl, beide mit Gemini Flash
 - TTS: gemini-3.1-flash-tts-preview, Stimme: Sulafat (warme Kinderstimme, validiert)
-- Tagging: gemini-2.5-flash-lite (stabil, keine 503-Fehler; 2.5-flash zu überlastet)
-- Ergebnis 3-Pilot × S1–S3 × 2 Varianten = 18 TTS-Calls, **18/18 OK**
+- Ergebnis 3-Pilot × S1–S3 × 2 Varianten = 18 TTS-Calls
 - Audio: tts_audio_compare_out/*.wav (18 Dateien)
 - HTML-Vergleich: tts_audio_compare_out/tts_audio_compare.html
 - Umlaut-Problem in PowerShell → Wrapper temp/_run_all3.py (sys.argv direkt setzen)
