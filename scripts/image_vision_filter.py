@@ -84,10 +84,27 @@ VISION_PROMPT_TEMPLATE = """Analysiere dieses Bild für den Wissensfreund-Artike
 Wissensfreund ist eine Kinder-Wissens-App mit drei Altersstufen:
   Stufe 1 = 4–6 Jahre | Stufe 2 = 7–9 Jahre | Stufe 3 = 10–12 Jahre
 
-Vergib eine ALTERSFREIGABE (ab_stufe):
+SCHRITT 1 — GRENZFALL-PRÜFUNG (VOR der Alterseinstufung beantworten):
+
+grenzfall (true | false): Zeigt das Bild eines oder mehrere dieser Merkmale?
+  - sichtbares Leid, Schmerz, Krankheit oder Verletzung an Menschen oder Tieren
+  - Krankheitssymptome am Körper (Ausschlag, Lähmung, Wunden, Schwellungen, Deformationen)
+  - medizinische Eingriffe (Spritzen, Operationen, Verbände, Behandlungen an Personen/Tieren)
+  - Tod, Sterben, Trauer oder traumatisierende Situationen
+  - historisch ernste Darstellungen (Krieg, Gewalt, Unterdrückung, Gefangenschaft)
+  - nackte oder teils nackte Körper (unabhängig vom Kontext)
+  - potenziell beängstigende, erschreckende oder belastende Szenen für Kinder unter 12 Jahren
+  → true, wenn mindestens ein Merkmal zutrifft — auch wenn das Bild lehrreich gemeint ist
+  → false nur, wenn das Bild eindeutig harmlos und nicht verstörend ist
+
+grenzfall_grund (string): Falls grenzfall=true — welches Merkmal trifft zu? (1 Satz, konkret)
+  Falls grenzfall=false: leerer String "".
+
+SCHRITT 2 — ALTERSFREIGABE (unter Berücksichtigung des grenzfall-Ergebnisses):
 
   ab_stufe=1  → für ALLE geeignet (auch 4–6 J.): freundliche Tierfotos, Landschaften,
-                Alltagsobjekte, lebendige Tiere, fröhliche Szenen
+                Alltagsobjekte, lebendige Tiere, fröhliche Szenen.
+                ACHTUNG: grenzfall=true Bilder dürfen NIEMALS ab_stufe=1 bekommen.
   ab_stufe=2  → ab 7 J.: Skelette oder Fossilien mit Lehrcharakter, leichte historische
                 Darstellungen, mäßig komplexe Diagramme mit klarem Bezug zum Thema
   ab_stufe=3  → ab 10 J.: detaillierte Anatomie (Organe, Muskeln), komplexe
@@ -95,23 +112,16 @@ Vergib eine ALTERSFREIGABE (ab_stufe):
   ab_stufe=0  → GESPERRT (keine Stufe geeignet): Blut, offene Verletzungen, tote Tiere,
                 Nacktheit, Kriegsfotos, grafische Gewalt, beängstigende Inhalte
 
-WICHTIG — Strenge für ab_stufe=1 (4–6 Jahre):
-NUR freundliche, klare, nicht verstörende Bilder. Skelette, Fossilien, anatomische
-Darstellungen, ernste historische Motive → mindestens ab_stufe=2 oder 3.
 Im Zweifel IMMER die höhere Stufe wählen.
-
 Abstrakte Diagramme ohne erkennbares Motiv, reine Texttafeln, leere Karten → ab_stufe=0.
 
-Beantworte außerdem:
+SCHRITT 3 — WEITERE FELDER:
 
   relevanz (0–10): Wie gut passt das Bild zum Thema "{thema}"?
     10=perfekt, 7–9=sehr gut, 5–6=passabel, 0–4=kaum relevant
 
   confidence ("hoch" | "mittel" | "niedrig"): Wie sicher bist du in der ab_stufe-Einschätzung?
-    "hoch"    = klarer Fall, kein Zweifel
-    "mittel"  = Grenzfall, Einschätzung aber vertretbar
-    "niedrig" = echte Unsicherheit ob das Bild für die gewählte Stufe geeignet ist
-    Im Zweifel auf "niedrig" setzen — das System stuft dann konservativ hoch.
+    "hoch" = klarer Fall | "mittel" = Grenzfall aber vertretbar | "niedrig" = echte Unsicherheit
 
   beschreibung (string): Was ist auf dem Bild zu sehen? (1–2 Sätze, sachlich)
     Bei ab_stufe=0: kurze Begründung für die Sperrung.
@@ -121,6 +131,8 @@ Beantworte außerdem:
 
 Antworte NUR mit diesem JSON (kein Markdown, kein Text davor/danach):
 {{
+  "grenzfall": false,
+  "grenzfall_grund": "",
   "ab_stufe": 1,
   "kindgerecht": true,
   "confidence": "hoch",
@@ -653,22 +665,31 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
             rejected.append({**img, "reason": "Vision-Fehler", "ablehnungsgrund": "Vision-API-Fehler"})
             print("    [X] Vision-Fehler")
         else:
-            ab_stufe = result.get("ab_stufe", 0)
-            confidence = result.get("confidence", "hoch")
-            relevanz = result.get("relevanz", 0)
-            beschreibung = result.get("beschreibung", "")
-            hero = result.get("hero_candidate", False)
+            ab_stufe      = result.get("ab_stufe", 0)
+            grenzfall     = result.get("grenzfall", False)
+            grenzfall_grund = result.get("grenzfall_grund", "")
+            confidence    = result.get("confidence", "hoch")
+            relevanz      = result.get("relevanz", 0)
+            beschreibung  = result.get("beschreibung", "")
+            hero          = result.get("hero_candidate", False)
+
+            # grenzfall=true verhindert ab_stufe=1
+            if grenzfall and ab_stufe == 1:
+                ab_stufe = 2
+
             if ab_stufe == 0:
                 rejected.append({**img, "reason": f"gesperrt: {beschreibung}",
                                  "ablehnungsgrund": beschreibung})
                 print(f"    [0] GESPERRT: {beschreibung[:80]}")
             else:
-                accepted.append({**img, "ab_stufe": ab_stufe, "confidence": confidence,
-                                 "relevanz": relevanz, "hero_candidate": hero,
-                                 "beschreibung": beschreibung})
+                accepted.append({**img, "ab_stufe": ab_stufe,
+                                 "grenzfall": grenzfall, "grenzfall_grund": grenzfall_grund,
+                                 "confidence": confidence, "relevanz": relevanz,
+                                 "hero_candidate": hero, "beschreibung": beschreibung})
+                gz_marker   = " [GZ]" if grenzfall else ""
                 conf_marker = f" conf={confidence}" if confidence != "hoch" else ""
                 hero_marker = " [HERO]" if hero else ""
-                print(f"    [S{ab_stufe}]{conf_marker} [{relevanz}] {beschreibung[:70]}{hero_marker}")
+                print(f"    [S{ab_stufe}]{gz_marker}{conf_marker} [{relevanz}] {beschreibung[:70]}{hero_marker}")
 
     # 4. Sortieren + Hero bestimmen
     accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))
@@ -727,16 +748,18 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
         } if hero_img else None,
         "accepted": [
             {
-                "rank":           a["rank"],
-                "filename":       a["filename"],
-                "ab_stufe":       a["ab_stufe"],
-                "relevanz":       a["relevanz"],
-                "hero_candidate": a.get("hero_candidate", False),
-                "beschreibung":   a["beschreibung"],
-                "license":        a["license"],
-                "license_author": a["license_author"],
-                "thumb_url":      a["thumb_url"],
-                "wikimedia_id":   a["wikimedia_id"],
+                "rank":            a["rank"],
+                "filename":        a["filename"],
+                "ab_stufe":        a["ab_stufe"],
+                "grenzfall":       a.get("grenzfall", False),
+                "grenzfall_grund": a.get("grenzfall_grund", ""),
+                "relevanz":        a["relevanz"],
+                "hero_candidate":  a.get("hero_candidate", False),
+                "beschreibung":    a["beschreibung"],
+                "license":         a["license"],
+                "license_author":  a["license_author"],
+                "thumb_url":       a["thumb_url"],
+                "wikimedia_id":    a["wikimedia_id"],
             }
             for a in accepted
         ],

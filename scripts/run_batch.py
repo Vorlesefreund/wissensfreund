@@ -331,7 +331,7 @@ def stage1_sourcing(
         print(f"Kompass-Batch: {len(wp_data)} InlinedRequests")
         n_sens = sum(1 for d in wp_data.values() if d["sensibel"])
         print(f"Vision-Batch: ~{len(wp_data) * MAX_VISION_CHECKS} Requests (max {MAX_VISION_CHECKS}/Thema)")
-        print(f"Opus-Recheck: nur confidence=niedrig Bilder bei {n_sens} sensiblen Themen")
+        print(f"Opus-Recheck: {n_sens} sensible Themen → alle Bilder; sonst → grenzfall=true")
         return {}
 
     # ── Step 2: Kompass-Batch (Gemini) ────────────────────────────────────────
@@ -540,17 +540,19 @@ def stage1_sourcing(
                 n_rejected += 1
                 continue
 
-            ab_stufe    = result.get("ab_stufe", 0)
-            confidence  = result.get("confidence", "hoch")
-            beschreibung = result.get("beschreibung", "")
-            relevanz    = result.get("relevanz", 0)
-            hero        = result.get("hero_candidate", False)
+            ab_stufe       = result.get("ab_stufe", 0)
+            grenzfall      = result.get("grenzfall", False)
+            grenzfall_grund = result.get("grenzfall_grund", "")
+            confidence     = result.get("confidence", "hoch")
+            beschreibung   = result.get("beschreibung", "")
+            relevanz       = result.get("relevanz", 0)
+            hero           = result.get("hero_candidate", False)
 
-            # Conservative Upgrade
-            if confidence == "niedrig" and ab_stufe == 1:
+            # Conservative Upgrade: grenzfall=true verhindert ab_stufe=1
+            if grenzfall and ab_stufe == 1:
                 ab_stufe = 2
-                log.info("    confidence=niedrig: '%s' → ab_stufe 1→2",
-                         img_meta.get("filename", "")[:40])
+                log.info("    grenzfall=true: '%s' → ab_stufe 1→2 (%s)",
+                         img_meta.get("filename", "")[:40], grenzfall_grund[:60])
 
             if ab_stufe == 0 or relevanz < 4:
                 n_rejected += 1
@@ -558,15 +560,18 @@ def stage1_sourcing(
 
             entry = {
                 **img_meta,
-                "ab_stufe":       ab_stufe,
-                "confidence":     confidence,
-                "relevanz":       relevanz,
-                "hero_candidate": hero,
-                "beschreibung":   beschreibung,
+                "ab_stufe":        ab_stufe,
+                "grenzfall":       grenzfall,
+                "grenzfall_grund": grenzfall_grund,
+                "confidence":      confidence,
+                "relevanz":        relevanz,
+                "hero_candidate":  hero,
+                "beschreibung":    beschreibung,
             }
             accepted.append(entry)
 
-            if data["sensibel"] and confidence == "niedrig" and anthropic_key:
+            # Opus-Recheck: sensibel=True → alle Bilder; sonst → nur grenzfall=true
+            if anthropic_key and (data["sensibel"] or grenzfall):
                 opus_kandidaten.append({"thema": thema, "key": key, "img": entry})
 
         accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))

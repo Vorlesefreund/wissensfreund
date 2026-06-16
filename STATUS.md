@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T12:47:07Z -->
+<!-- updated: 2026-06-16T13:11:07Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -72,11 +72,42 @@ Offene Punkte Vollkatalog-Bilder:
 
 ---
 
+## Zuletzt abgeschlossen (neu)
+
+**KRITISCHER FIX: confidence-Signal → grenzfall-Feld (2026-06-16)** ← AKTUELL
+
+Befund: confidence=niedrig NIE ausgelöst (181 Bilder, 0 niedrig) — beide
+Sicherheitsschichten (Conservative Upgrade + Opus-Recheck) versagten still.
+Ursache: Modell committed ab_stufe zuerst, bestätigte sich dann selbst.
+
+Fix umgesetzt in `image_vision_filter.py` + `run_batch.py`:
+
+1. **VISION_PROMPT_TEMPLATE** umstrukturiert: Schritt 1 = grenzfall-Prüfung mit
+   konkreter Checkliste (Leid, Krankheitssymptome, Eingriffe, Tod, Nacktheit...),
+   Schritt 2 = ab_stufe informiert durch grenzfall-Ergebnis.
+   grenzfall=true → NIEMALS ab_stufe=1 (im Prompt vorgegeben).
+
+2. **Conservative Upgrade**: `grenzfall=true AND ab_stufe=1 → 2` (war: confidence=niedrig)
+
+3. **Opus-Recheck-Trigger**:
+   - `sensibel=True` → ALLE akzeptierten Bilder → Opus (war: nur confidence=niedrig)
+   - `sensibel=False` → grenzfall=true Bilder → Opus (NEU)
+
+Verifikation Impfung (14 Bilder):
+- `Polio_sequelle.jpg`: [S2 hoch] → **GESPERRT** ✅
+- `RougeoleDP.jpg`: [S3 hoch] → **GESPERRT** ✅
+- `Immunization_retusche.jpg`: [S1 hoch] → **[S3 GZ]** ✅
+- `Mai_Simu_Vasina_COVID-19.jpg`: [S1 hoch] → **[S2 GZ]** ✅
+- Opus-Quote: Impfung sensibel=True → alle 9 akzeptierten → Opus (vorher 0)
+- Spartacus sensibel=True → alle 15 → Opus (vorher 0)
+
+Kostenschätzung Opus-Recheck Vollkatalog: ~$40 (563 sensibel × ~10-15 Bilder +
+grenzfall=true bei nicht-sensiblen), Batch-Preis. Bewusst akzeptiert (Kinderschutz).
+
 ## Gerade in Arbeit
 
-**Stage 1 Mini-Lauf (6 Themen) ABGESCHLOSSEN ✅ (2026-06-16)**
-Wikimedia-Fixes bestätigt: keine Drosselung, Vision-Batch 181 Requests in ~59 Min.
-→ Nächster Schritt: Stage 2 (Generierung) implementieren.
+**Stage 2 (Generierung) implementieren**
+→ Nächster Schritt: Stage 2 TODO-Gerüst in run_batch.py ausfüllen.
 
 ---
 

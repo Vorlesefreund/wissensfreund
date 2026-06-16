@@ -88,6 +88,60 @@ am echten Eindruck bewertet:
 
 ---
 
+## grenzfall-Signal (2026-06-16)
+
+### Problem (behoben)
+
+Das alte `confidence`-Feld war strukturell kaputt: Das Modell entschied zuerst `ab_stufe`,
+bewertetedann retrospektiv seine eigene Entscheidung → fast immer "hoch". Befund Mini-Lauf:
+181 Bilder, hoch=146, mittel=1, **niedrig=0** — auch `Polio_sequelle.jpg` (Kind mit
+Lähmungsfolgen) und `RougeoleDP.jpg` (Kind mit Masernausschlag am ganzen Körper) bekamen
+`confidence="hoch"`. Beide Sicherheitsschichten (Conservative Upgrade + Opus-Recheck)
+wurden damit nie ausgelöst.
+
+### Lösung: grenzfall-Feld VOR ab_stufe
+
+Der Vision-Prompt wurde umstrukturiert. Das Modell beantwortet jetzt in dieser Reihenfolge:
+
+1. **SCHRITT 1 — grenzfall-Prüfung** (vor der Alterseinstufung):
+   Explizite Checkliste heikler Merkmale:
+   - sichtbares Leid, Schmerz, Krankheit oder Verletzung an Menschen/Tieren
+   - Krankheitssymptome am Körper (Ausschlag, Lähmung, Wunden, Deformationen)
+   - medizinische Eingriffe (Spritzen, Operationen, Verbände)
+   - Tod, Sterben, Trauer, Trauma
+   - historisch ernste Darstellungen (Krieg, Gewalt, Unterdrückung)
+   - Nacktheit (unabhängig vom Kontext)
+   - beängstigende/belastende Szenen für Kinder unter 12
+
+2. **SCHRITT 2 — ab_stufe** (informiert durch grenzfall):
+   - `grenzfall=true` → NIEMALS ab_stufe=1
+   - Progressive Einstufung 2/3, GESPERRT (0) nur bei explizit nicht zumutbaren Inhalten
+
+### Verifikation (Impfung, 14 Bilder):
+
+| Bild | Vorher | Nachher |
+|---|---|---|
+| `Polio_sequelle.jpg` | [S2] hoch ❌ | **GESPERRT** ✅ |
+| `RougeoleDP.jpg` | [S3] hoch ❌ | **GESPERRT** ✅ |
+| `Immunization_retusche.jpg` | [S1] hoch ❌ | **[S3] grenzfall=true** ✅ |
+| `Mai_Simu_Vasina_COVID-19.jpg` | [S1] hoch ❌ | **[S2] grenzfall=true** ✅ |
+| `Vaccination-polio-india.jpg` | [S1] hoch ❌ | **[S2] grenzfall=true** ✅ |
+
+### Neue Sicherheitslogik
+
+**Conservative Upgrade (lokal, sofort):**
+- `grenzfall=true AND ab_stufe=1` → automatisch `ab_stufe=2`
+- (ersetzt: `confidence=niedrig AND ab_stufe=1`)
+
+**Opus-Recheck-Trigger:**
+- `sensibel=True` → ALLE akzeptierten Bilder des Themas → Opus
+- `sensibel=False` → nur `grenzfall=true` Bilder → Opus
+- (ersetzt: `sensibel AND confidence=niedrig`)
+
+**`confidence`-Feld:** Bleibt im JSON (informativ), keine Logik hängt mehr daran.
+
+---
+
 ## Batch-Orchestrator: run_batch.py
 
 ### Stage-Reihenfolge (KORREKT — Vision VOR Generierung)
@@ -98,9 +152,11 @@ Stage 1 — SOURCING
   → Kompass-Batch (Gemini, gemini-3.5-flash)
   → Companion-Fetch + Validierung (sync)
   → Image-Download (sync, 0.5s-Sleep, kein 10s-Wait)
-  → Vision-Batch (Gemini, gemini-2.5-flash, ab_stufe 0/1/2/3)
-  → Conservative Upgrade (confidence=niedrig + ab_stufe=1 → 2, lokal)
-  → Opus-Recheck (Anthropic Batch, claude-opus-4-8, nur sensibel + confidence=niedrig)
+  → Vision-Batch (Gemini, gemini-2.5-flash, ab_stufe 0/1/2/3 + grenzfall)
+  → Conservative Upgrade (grenzfall=true + ab_stufe=1 → 2, lokal)
+  → Opus-Recheck (Anthropic Batch, claude-opus-4-8):
+       sensibel=True  → ALLE akzeptierten Bilder
+       sensibel=False → nur grenzfall=true Bilder
   Ergebnis: topics_data[thema] = {primary_text, companions, companion_texts, images}
 
 Stage 2 — GENERIERUNG (TODO)
@@ -155,7 +211,7 @@ Beim Start: Checkpoint vorhanden + status=done → Stage überspringen.
 |---|---|---|---|
 | Kompass | gemini-3.5-flash | Batch | ~$10 |
 | Vision | gemini-2.5-flash | Batch | ~$15 |
-| Opus-Recheck | claude-opus-4-8 | Batch | ~$25 |
+| Opus-Recheck | claude-opus-4-8 | Batch | ~$40 |
 | Artikel | gemini-3.5-flash | Batch + Cache | ~$40 |
 | Lektorat | claude-sonnet-4-6 | Batch + Cache | ~$30 |
 | TTS | gemini-tts | Online | ~$1173 |
