@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T19:16:14Z -->
+<!-- updated: 2026-06-16T19:38:00Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -100,11 +100,16 @@ Fix: `re.sub(r"[^a-zA-Z0-9_-]", "_", filename)[:41]`, Key max 63 Zeichen.
 Aktuell: 503 UNAVAILABLE (serverseitige Überlastung, neues GA-Modell, recherchiert bestätigt —
 nicht unser Code, betrifft alle Nutzer).
 
-- **Synchroner Diagnose-Einzeltest Elefant S2** (temp/_sync_test_s2.py, bereit):
-  Rohe Response zeigen: finish_reason, candidates leer/gefüllt, usage_metadata
-  (prompt_tokens / candidates_tokens / thoughts_tokens).
-  Ziel: "leere Batch-Antwort"-Problem isolieren — generiert das Modell selbst leer
-  (dann Prompt/Schema/Logik-Bug) oder liegt der Fehler nur in der Batch-Schicht?
+- **Synchroner Diagnose-Einzeltest + A/B** (temp/_sync_test_s2.py, bereit):
+  - `python temp/_sync_test_s2.py` → Variante A (MEDIUM), rohe Response
+  - `python temp/_sync_test_s2.py --ab` → A (MEDIUM) + B (kein Thinking) Vergleich
+  - Zeigt: finish_reason, candidates, usage_metadata (prompt/candidates/thoughts_tokens),
+    Dauer, ~Wortanzahl. Artikel gespeichert unter articles/test_thinking_ab/ für Qualitätsbewertung.
+  - Ziel 1 (Diagnose): "leere Batch-Antwort" isolieren — Generierungslogik ok oder Batch-Bug?
+  - Ziel 2 (A/B): Thinking MEDIUM vs. kein Thinking — Qualität, Wortzahl, Dauer, Token
+- **Recherche-Befund Thinking-Vergleich:** Kein bewerteter A/B existiert. Alle bisherigen
+  3.5-flash-Artikel liefen mit MEDIUM (generation_method "gemini-3.5-flash/medium/v3.23").
+  Versehentlicher Batch ohne Thinking → leere Antworten (nicht auswertbar).
 - **Bestes Zeitfenster:** 2–7 Uhr Pazifik = ca. 11–16 Uhr MESZ (503-Rate dann <5%)
 
 ### BEKANNTE STAGE-2-BEFUNDE (bereits gefixt)
