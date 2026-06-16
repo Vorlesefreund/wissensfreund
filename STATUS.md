@@ -1,19 +1,24 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T08:12:46Z -->
+<!-- updated: 2026-06-16T08:19:06Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**cost_tracker.py: zentrales Token+Kosten-Tracking (2026-06-16).** ← AKTUELL
+**cost_tracker.py v2: echter TTS-Preis verdrahtet (2026-06-16).** ← AKTUELL
+- TTS-Preis verifiziert: $1.00/1M Input-Tok, $20.00/1M Audio-Tok, 25 Tok/Sek
+  Quelle: ai.google.dev/gemini-api/docs/pricing, Juni 2026
+- TTS bevorzugt `tts_audio_sec` (echte Laenge); Fallback: `tts_chars` → ~14 Zeichen/Sek Schätzung + Warnung
+- Selbsttest 180s Audio: $0.0906 ✅ (600 Input-Tok + 4500 Audio-Tok)
+- Report: Log-Projektion + statische Kontrollrechnung (4346×3×180s = $1173 TTS-Output)
+- Platzhalter-Kommentar entfernt, Quelle + Stand dokumentiert
+
+**cost_tracker.py v1: zentrales Token+Kosten-Tracking (2026-06-16).**
 - `from cost_tracker import track(run_id, thema, stufe, schritt, modell, input_tok, output_tok, ...)`
 - Preis-Tabelle: gemini-2.5-flash / -lite / gemini-3.5-flash / claude-haiku/sonnet/opus
-- TTS-Preis (gemini-3.1-flash-tts-preview): **PLATZHALTER** 5.00 USD/1M Zeichen — verifizieren!
 - CLI: `--report [--run id]` | `--reset`
-- Hochrechnung: Avg/Thema × 4346 Themen, aufgeteilt in Text / Vision / TTS
-- Selbsttest OK: 10 Dummy-Einträge, Report + Reset verifiziert
-- cost_log.json in .gitignore (wird nicht committed)
+- cost_log.json in .gitignore
 
 **Finaler Merge nach vollständigem manuellem Review (2026-06-16).**
 - 18 Korrekturen aus catalog_review_master.xlsx (Andreas' Review abgeschlossen)
