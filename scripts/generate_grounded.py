@@ -62,6 +62,8 @@ from image_vision_filter import (        # noqa: E402
     fetch_image_candidates,
     download_image,
     analyze_with_vision,
+    load_cached_image_bytes,
+    opus_recheck,
 )
 from lektorat_common import (            # noqa: E402
     COMPANION_CHAR_CAP,
@@ -221,6 +223,7 @@ TEST_JOBS: dict[str, dict] = {
         "title":             "Indianer",
         "age_level":         1,
         "topic_interest":    "high",
+        "sensibel":          True,
         "pattern":           "history_person",
         "category_top":      "laender_und_kulturen",
         "category_sub":      "voelker_und_kulturen",
@@ -232,6 +235,7 @@ TEST_JOBS: dict[str, dict] = {
         "title":             "Indianer",
         "age_level":         2,
         "topic_interest":    "high",
+        "sensibel":          True,
         "pattern":           "history_person",
         "category_top":      "laender_und_kulturen",
         "category_sub":      "voelker_und_kulturen",
@@ -243,6 +247,7 @@ TEST_JOBS: dict[str, dict] = {
         "title":             "Indianer",
         "age_level":         3,
         "topic_interest":    "high",
+        "sensibel":          True,
         "pattern":           "history_person",
         "category_top":      "laender_und_kulturen",
         "category_sub":      "voelker_und_kulturen",
@@ -254,6 +259,7 @@ TEST_JOBS: dict[str, dict] = {
         "title":             "Biene",
         "age_level":         1,
         "topic_interest":    "high",
+        "sensibel":          False,
         "pattern":           "living_being",
         "category_top":      "tiere",
         "category_sub":      "insekten",
@@ -265,6 +271,7 @@ TEST_JOBS: dict[str, dict] = {
         "title":             "Biene",
         "age_level":         2,
         "topic_interest":    "high",
+        "sensibel":          False,
         "pattern":           "living_being",
         "category_top":      "tiere",
         "category_sub":      "insekten",
@@ -276,6 +283,7 @@ TEST_JOBS: dict[str, dict] = {
         "title":             "Biene",
         "age_level":         3,
         "topic_interest":    "high",
+        "sensibel":          False,
         "pattern":           "living_being",
         "category_top":      "tiere",
         "category_sub":      "insekten",
@@ -287,6 +295,7 @@ TEST_JOBS: dict[str, dict] = {
         "title":             "Demokratie",
         "age_level":         1,
         "topic_interest":    "medium",
+        "sensibel":          True,
         "pattern":           "tech_science",
         "category_top":      "gesellschaft",
         "category_sub":      "staat_und_recht",
@@ -563,6 +572,8 @@ def build_image_pool(
     primary_wikipedia: str,
     companion_titles: list[str],
     appeal: str,
+    sensibel: bool = False,
+    anthropic_api_key: str | None = None,
 ) -> tuple[list[dict], dict]:
     all_candidates: list[dict] = []
     sources: dict[str, int] = {}
@@ -635,7 +646,15 @@ def build_image_pool(
             continue
 
         ab_stufe = result.get("ab_stufe", 0)
+        confidence = result.get("confidence", "hoch")
         beschreibung = result.get("beschreibung", "")
+
+        # Konservatives Hochstufen: unsicheres S1-Urteil → S2
+        if confidence == "niedrig" and ab_stufe == 1:
+            ab_stufe = 2
+            log.info("    confidence=niedrig: %s → ab_stufe 1→2 (konservativ hochgestuft)",
+                     img["filename"][:50])
+
         if ab_stufe == 0:
             rejected_vision.append({**img, "reason": f"gesperrt: {beschreibung}"})
         elif result.get("relevanz", 0) < 4:
@@ -644,6 +663,7 @@ def build_image_pool(
             accepted.append({
                 **img,
                 "ab_stufe":       ab_stufe,
+                "confidence":     confidence,
                 "relevanz":       result.get("relevanz", 5),
                 "hero_candidate": result.get("hero_candidate", False),
                 "beschreibung":   beschreibung,
@@ -653,14 +673,55 @@ def build_image_pool(
 
     accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))
 
+    # ── Opus-Recheck: nur bei sensiblen Themen ───────────────────────────────
+    opus_overrides = 0
+    opus_blocked   = 0
+    if sensibel and anthropic_api_key and accepted:
+        log.info("    Sensibles Thema '%s': Opus-Recheck fuer %d Bilder ...", thema, len(accepted))
+        rechked: list[dict] = []
+        for img in accepted:
+            img_bytes = load_cached_image_bytes(img["thumb_url"])
+            if img_bytes is None:
+                log.warning("    Opus-Recheck: Cache fehlt fuer %s -- Gemini-Urteil behalten",
+                            img["filename"][:45])
+                rechked.append(img)
+                continue
+            new_ab, new_desc, usage = opus_recheck(anthropic_api_key, img_bytes, thema)
+            if usage:
+                cost_tracker.track(
+                    run_id=_RUN_ID, thema=thema, stufe="S0",
+                    schritt="vision_recheck", modell="claude-opus-4-8",
+                    input_tok=usage.get("input_tok", 0),
+                    output_tok=usage.get("output_tok", 0),
+                )
+            if new_ab is None:
+                log.warning("    Opus-Recheck fehlgeschlagen: %s -- Gemini-Urteil behalten",
+                            img["filename"][:45])
+                rechked.append(img)
+            elif new_ab == 0:
+                opus_blocked += 1
+                log.info("    Opus SPERRT: %s (%s)", img["filename"][:45], new_desc[:60])
+            else:
+                if new_ab != img.get("ab_stufe", 1):
+                    opus_overrides += 1
+                    log.info("    Opus ueberschreibt: %s ab_stufe %d→%d",
+                             img["filename"][:45], img.get("ab_stufe", 1), new_ab)
+                rechked.append({**img, "ab_stufe": new_ab, "beschreibung": new_desc})
+        accepted = rechked
+        log.info("    Opus-Recheck abgeschlossen: %d Bilder, %d überschrieben, %d gesperrt",
+                 len(accepted), opus_overrides, opus_blocked)
+
     report = {
-        "sources":          sources,
-        "candidates_total": len(unique),
-        "vision_checked":   len(accepted) + len(rejected_vision),
-        "accepted":         len(accepted),
-        "rejected":         len(rejected_vision),
-        "target":           target,
-        "hero":             next(
+        "sources":           sources,
+        "candidates_total":  len(unique),
+        "vision_checked":    len(accepted) + len(rejected_vision),
+        "accepted":          len(accepted),
+        "rejected":          len(rejected_vision),
+        "target":            target,
+        "sensibel":          sensibel,
+        "opus_overrides":    opus_overrides,
+        "opus_blocked":      opus_blocked,
+        "hero":              next(
             (a["filename"] for a in accepted if a.get("hero_candidate", False)),
             accepted[0]["filename"] if accepted else None,
         ),
@@ -833,6 +894,8 @@ def prepare_topic_sources(
     appeal: str,
     model: str,
     skip_images: bool,
+    sensibel: bool = False,
+    anthropic_api_key: str | None = None,
 ) -> tuple[str, list[str], dict[str, str], list[dict], dict]:
     """
     Phase 1 + Quellen-Fetch, einmalig pro Thema.
@@ -886,7 +949,8 @@ def prepare_topic_sources(
         fetched_companions = [c for c in valid_companions if c in companion_texts]
         log.info("  Baue Bildpool (Primaer + %d Companions) ...", len(fetched_companions))
         images, img_report = build_image_pool(
-            session, client, thema, primary_wikipedia, fetched_companions, appeal
+            session, client, thema, primary_wikipedia, fetched_companions, appeal,
+            sensibel=sensibel, anthropic_api_key=anthropic_api_key,
         )
         log.info("  Bildpool: %d akzeptiert, Hero=%s",
                  img_report["accepted"], img_report["hero"])
@@ -1281,6 +1345,7 @@ def _build_catalog_jobs(themen: list[str], stufen: list[int]) -> list[dict]:
                 "title":             canonical,
                 "age_level":         level,
                 "topic_interest":    "medium",
+                "sensibel":          bool(entry.get("sensibel", False)),
                 "pattern":           entry.get("themengebiet", ""),
                 "category_top":      "",
                 "category_sub":      "",
@@ -1416,7 +1481,8 @@ def main() -> None:
         for job in resolved_jobs:
             ev = eignung_for(job.get("thema", job["title"]))
             gate = f"exclude={ev['eignung']=='exclude'} age_floor={ev['age_floor']}"
-            print(f"  {job['article_id']:30s}  {gate}")
+            sens = "sensibel=True " if job.get("sensibel") else ""
+            print(f"  {job['article_id']:30s}  {gate}  {sens}")
         print("Kein einziger API-Call — dry-run beendet.")
         return
 
@@ -1485,9 +1551,11 @@ def main() -> None:
             job["resolved_appeal"] = appeal
             job["appeal_source"]   = appeal_source
 
+        sensibel = bool(topic_jobs[0].get("sensibel", False))
+
         print(f"\n{'='*60}")
         print(f"THEMA: {thema} | Primaer: {primary_wikipedia} | Modell: {model}")
-        print(f"Stufen: {levels} | Appeal: {appeal} (Herkunft: {appeal_source})")
+        print(f"Stufen: {levels} | Appeal: {appeal} (Herkunft: {appeal_source}) | sensibel: {sensibel}")
         print(f"Phase 1 laeuft EINMAL fuer alle Stufen")
         print(f"{'='*60}")
 
@@ -1495,7 +1563,8 @@ def main() -> None:
             primary_text, valid_companions, companion_texts, images, phase1_report = (
                 prepare_topic_sources(
                     session, client, primary_wikipedia, thema, appeal,
-                    model, args.skip_images
+                    model, args.skip_images,
+                    sensibel=sensibel, anthropic_api_key=anthropic_key,
                 )
             )
         except Exception as e:

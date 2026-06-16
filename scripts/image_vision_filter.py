@@ -12,6 +12,7 @@ Output:
 """
 
 import argparse
+import base64
 import hashlib
 import io
 import json
@@ -98,6 +99,12 @@ Beantworte außerdem:
   relevanz (0–10): Wie gut passt das Bild zum Thema "{thema}"?
     10=perfekt, 7–9=sehr gut, 5–6=passabel, 0–4=kaum relevant
 
+  confidence ("hoch" | "mittel" | "niedrig"): Wie sicher bist du in der ab_stufe-Einschätzung?
+    "hoch"    = klarer Fall, kein Zweifel
+    "mittel"  = Grenzfall, Einschätzung aber vertretbar
+    "niedrig" = echte Unsicherheit ob das Bild für die gewählte Stufe geeignet ist
+    Im Zweifel auf "niedrig" setzen — das System stuft dann konservativ hoch.
+
   beschreibung (string): Was ist auf dem Bild zu sehen? (1–2 Sätze, sachlich)
     Bei ab_stufe=0: kurze Begründung für die Sperrung.
 
@@ -108,6 +115,7 @@ Antworte NUR mit diesem JSON (kein Markdown, kein Text davor/danach):
 {{
   "ab_stufe": 1,
   "kindgerecht": true,
+  "confidence": "hoch",
   "relevanz": 7,
   "beschreibung": "...",
   "hero_candidate": false
@@ -484,6 +492,85 @@ def analyze_with_vision(
     return None, {}
 
 
+OPUS_RECHECK_SYSTEM = (
+    "Du bist ein strenger Bildprüfer für eine Kinder-Wissens-App (4–12 Jahre). "
+    "Antworte ausschließlich mit gültigem JSON ohne Markdown-Blöcke."
+)
+
+OPUS_RECHECK_PROMPT = """Prüfe dieses Bild für Wissensfreund (Thema: "{thema}") nach der Altersfreigabe-Skala:
+
+  ab_stufe=1  → eindeutig für ALLE (auch 4–6 J.): freundliche Tierfotos, Landschaften, Objekte
+  ab_stufe=2  → ab 7 J.: Skelette/Fossilien lehrreich, leichte historische Darstellungen
+  ab_stufe=3  → ab 10 J.: Organe, detaillierte Anatomie, wissenschaftlich/historisch ernst
+  ab_stufe=0  → GESPERRT: Blut, Gewalt, Nacktheit, Kriegsfotos, verstörende Inhalte
+
+Sei STRENGER als ein durchschnittlicher Prüfer. Im Zweifel höhere Stufe vergeben.
+
+Antworte NUR mit JSON:
+{{"ab_stufe": 1, "beschreibung": "..."}}"""
+
+
+def load_cached_image_bytes(url: str) -> bytes | None:
+    """Laedt 800px-Version aus dem lokalen Download-Cache (kein Netz-Request)."""
+    cache_key = hashlib.md5(url.encode()).hexdigest()
+    cache_800 = _DL_CACHE_DIR / f"{cache_key}_800.jpg"
+    return cache_800.read_bytes() if cache_800.exists() else None
+
+
+def opus_recheck(
+    api_key: str,
+    image_bytes: bytes,
+    thema: str,
+) -> tuple[int | None, str, dict]:
+    """Zweitprüfung mit claude-opus-4-8 (strenger Vision-Prompt).
+
+    Gibt (ab_stufe, beschreibung, usage_dict) zurück.
+    ab_stufe=None bei Fehler (Gemini-Urteil beibehalten).
+    """
+    try:
+        import anthropic
+    except ImportError:
+        log.warning("opus_recheck: 'anthropic'-Paket fehlt — Recheck uebersprungen")
+        return None, "", {}
+
+    try:
+        client = anthropic.Anthropic(api_key=api_key)
+        prompt = OPUS_RECHECK_PROMPT.format(thema=thema)
+        response = client.messages.create(
+            model="claude-opus-4-8",
+            max_tokens=256,
+            system=OPUS_RECHECK_SYSTEM,
+            messages=[
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image",
+                            "source": {
+                                "type": "base64",
+                                "media_type": "image/jpeg",
+                                "data": base64.standard_b64encode(image_bytes).decode("utf-8"),
+                            },
+                        },
+                        {"type": "text", "text": prompt},
+                    ],
+                }
+            ],
+        )
+        usage = {
+            "input_tok":  response.usage.input_tokens,
+            "output_tok": response.usage.output_tokens,
+        }
+        text = response.content[0].text.strip()
+        text = re.sub(r"^```[a-zA-Z]*\n?", "", text)
+        text = re.sub(r"\n?```$", "", text)
+        result = json.loads(text)
+        return int(result.get("ab_stufe", 0)), result.get("beschreibung", ""), usage
+    except Exception as e:
+        log.warning("opus_recheck Fehler: %s", e)
+        return None, "", {}
+
+
 # ── Haupt-Lauf ───────────────────────────────────────────────────────────────
 
 def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
@@ -548,6 +635,7 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
             print("    [X] Vision-Fehler")
         else:
             ab_stufe = result.get("ab_stufe", 0)
+            confidence = result.get("confidence", "hoch")
             relevanz = result.get("relevanz", 0)
             beschreibung = result.get("beschreibung", "")
             hero = result.get("hero_candidate", False)
@@ -556,10 +644,12 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
                                  "ablehnungsgrund": beschreibung})
                 print(f"    [0] GESPERRT: {beschreibung[:80]}")
             else:
-                accepted.append({**img, "ab_stufe": ab_stufe, "relevanz": relevanz,
-                                 "hero_candidate": hero, "beschreibung": beschreibung})
+                accepted.append({**img, "ab_stufe": ab_stufe, "confidence": confidence,
+                                 "relevanz": relevanz, "hero_candidate": hero,
+                                 "beschreibung": beschreibung})
+                conf_marker = f" conf={confidence}" if confidence != "hoch" else ""
                 hero_marker = " [HERO]" if hero else ""
-                print(f"    [S{ab_stufe}] [{relevanz}] {beschreibung[:75]}{hero_marker}")
+                print(f"    [S{ab_stufe}]{conf_marker} [{relevanz}] {beschreibung[:70]}{hero_marker}")
 
     # 4. Sortieren + Hero bestimmen
     accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))

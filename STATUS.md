@@ -1,12 +1,32 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T10:04:12Z -->
+<!-- updated: 2026-06-16T10:13:36Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Sicherheits-Upgrade Bildfilter: gestufte Altersfreigabe (ab_stufe), stufengenaue Auswahl, Bildanzahl-Konsistenz (2026-06-16)** ← AKTUELL
+**Bildfilter: confidence + konservatives Sperren + Opus-Recheck für sensible Themen (2026-06-16)** ← AKTUELL
+
+### Was gebaut wurde
+
+**image_vision_filter.py** — Zwei neue Sicherheits-Schichten:
+- `confidence` im Vision-Prompt ("hoch"/"mittel"/"niedrig") — Modell meldet Unsicherheit
+- `OPUS_RECHECK_PROMPT` + `opus_recheck(api_key, image_bytes, thema)` → claude-opus-4-8 Vision, strenger Prompt, gibt (ab_stufe, beschreibung, usage_dict) zurück
+- `load_cached_image_bytes(url)` — liest 800px-Cache ohne Netz-Request
+
+**generate_grounded.py** — Konservatives Hochstufen + Opus-Gate:
+- Nach Gemini-Urteil: `confidence=="niedrig" AND ab_stufe==1` → `ab_stufe=2` (Log-Eintrag)
+- Opus-Recheck NUR wenn `sensibel=True` (563 von 4346 Themen, ~13%): alle akzeptierten Bilder durch claude-opus-4-8, Opus-Urteil überschreibt Gemini
+- `cost_tracker.track(schritt="vision_recheck", modell="claude-opus-4-8", ...)` je Bild
+- `sensibel` in `_build_catalog_jobs` + `TEST_JOBS` (Indianer/Demokratie=True, Biene=False)
+- `prepare_topic_sources` + `build_image_pool` haben `sensibel` + `anthropic_api_key` Parameter
+- Report enthält `sensibel`, `opus_overrides`, `opus_blocked`
+- Dry-Run zeigt `sensibel=True` je Job
+
+---
+
+**Bildfilter Baustein 1: ab_stufe + stufengenaue Auswahl + Bildanzahl (2026-06-16)**
 
 ### Was gebaut wurde
 
