@@ -1,12 +1,20 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T05:23:45Z -->
+<!-- updated: 2026-06-16T05:46:46Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Finaler Katalog-Merge abgeschlossen (2026-06-16).** ← AKTUELL
+**FIX: Annotation-Transfer catalog_merge.py (2026-06-16).** ← AKTUELL
+- Bug: load_existing_annotations() las nur Zeilen mit gesetztem FREIGABE → 29 Andreas-Edits verloren
+- Fix: Zeile gilt als annotiert wenn FREIGABE gesetzt ODER eignung in ('include','exclude')
+- 4146 Zeilen aus Master geladen (vorher: nur FREIGABE-Zeilen)
+- Verifikation 9 Testthemen: ALLE OK (Charlie Brown/Yoko Ono/Napoleon/Robin Hood etc.)
+- catalog_review.xlsx neu generiert: 4557 Zeilen, 42 exclude, 597 sensibel
+- Commit: 3be5be5
+
+**Finaler Katalog-Merge abgeschlossen (2026-06-16).**
 - catalog_manual.json: 424 Einträge (6 alt + 418 neu aus audit+anker)
 - catalog_full.json: 4379 primary | 214 Leuchtturm | 565 sensibel | 162 reserve
 - Keine exakten Duplikate
