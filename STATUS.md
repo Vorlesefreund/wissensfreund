@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T12:03:36Z -->
+<!-- updated: 2026-06-16T12:31:21Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -76,6 +76,39 @@ Offene Punkte Vollkatalog-Bilder:
 
 **Stage 1 Mini-Lauf (6 Themen) läuft** — nach Wikimedia-Fix (UA+Email, iiurlwidth=1600, 3s-Rate).
 Ergebnis ausstehend: Companions, Bildpool/ab_stufe, Opus-Recheck, Speicher-Tabelle.
+
+---
+
+## Batch-Härtung VOR Großlauf (Pflicht, nicht Mini-Lauf)
+
+Diese 4 Punkte sind **verbindliche Voraussetzung** für jeden Lauf über die 6 Mini-Themen hinaus.
+Für den Mini-Lauf selbst nicht nötig (stabiles WLAN, 48h-Timeout, Downloads gecacht).
+Befund aus Poll-Audit: run_batch.py hat keinen Netzwerk-Retry, keine Batch-ID-Persistenz,
+keinen Resume-Punkt innerhalb Stage 1.
+
+### 1. Batch-ID persistieren (`pending_batches.json`)
+Nach JEDEM `client.batches.create()` (Gemini + Anthropic) sofort in `out_dir/pending_batches.json`
+schreiben: `{batch_name, stage, run_id, timestamp, status}`.
+**Grund**: Bei Prozess-Absturz ist der laufende (bereits bezahlte!) Batch verloren — kein Pointer
+zum Abholen der Ergebnisse. Bei Vollkatalog-Mengen (~4k Themen) teuer und nicht wiederholbar.
+
+### 2. Entkoppeltes Submit → Poll → Collect (`--resume`-Flag)
+`run_batch.py --resume` liest `pending_batches.json`, prüft Status aller offenen Batches,
+sammelt fertige Ergebnisse ein und setzt die Pipeline fort — ohne neu einzureichen.
+Damit kann man einen Batch einreichen, den Prozess beenden, und SPÄTER die Ergebnisse abholen.
+
+### 3. Netzwerk-Retry beim Poll
+`try/except` um `client.batches.get()` und Anthropic-Poll-Call.
+3 Retries mit Backoff (5s / 15s / 60s), dann erst Abbruch.
+**Grund**: Eine transiente Netzwerk-Exception killt heute den gesamten Lauf — auch wenn der
+Batch-Job auf Gemini-/Anthropic-Seite korrekt läuft.
+
+### 4. Zwischen-Checkpoint in Stage 1
+Nach WP-Fetch + Kompass-Batch + Companion-Fetch + Image-Download (VOR Vision-Submit)
+einen `stage1_mid_checkpoint.json` schreiben.
+Bei Neustart: Kompass + Downloads überspringen, direkt zum Vision-Submit.
+**Grund**: Aktuell muss bei Absturz während Vision-Batch der gesamte Stage-1-Vorlauf
+(~15 Min WP-Fetch + Kompass) wiederholt werden, obwohl die Image-Caches erhalten bleiben.
 
 ---
 
