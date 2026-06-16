@@ -62,3 +62,5 @@ dry_run_out/
 scrape_image_results.json
 dumpstate-*.zip
 articles/**/_review.html
+cost_log.json
+cost_log.json.bak
