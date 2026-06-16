@@ -673,13 +673,16 @@ def build_image_pool(
 
     accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))
 
-    # ── Opus-Recheck: nur bei sensiblen Themen ───────────────────────────────
+    # ── Opus-Recheck: sensible Themen, NUR unsichere Bilder (confidence=niedrig) ─
     opus_overrides = 0
     opus_blocked   = 0
     if sensibel and anthropic_api_key and accepted:
-        log.info("    Sensibles Thema '%s': Opus-Recheck fuer %d Bilder ...", thema, len(accepted))
-        rechked: list[dict] = []
-        for img in accepted:
+        opus_kandidaten = [img for img in accepted if img.get("confidence") == "niedrig"]
+        stable          = [img for img in accepted if img.get("confidence") != "niedrig"]
+        log.info("    Sensibles Thema '%s': Opus-Recheck fuer %d unsichere Bilder (von %d akzeptierten)",
+                 thema, len(opus_kandidaten), len(accepted))
+        rechked: list[dict] = list(stable)
+        for img in opus_kandidaten:
             img_bytes = load_cached_image_bytes(img["thumb_url"])
             if img_bytes is None:
                 log.warning("    Opus-Recheck: Cache fehlt fuer %s -- Gemini-Urteil behalten",
@@ -708,7 +711,7 @@ def build_image_pool(
                              img["filename"][:45], img.get("ab_stufe", 1), new_ab)
                 rechked.append({**img, "ab_stufe": new_ab, "beschreibung": new_desc})
         accepted = rechked
-        log.info("    Opus-Recheck abgeschlossen: %d Bilder, %d überschrieben, %d gesperrt",
+        log.info("    Opus-Recheck abgeschlossen: %d Bilder im Pool, %d ueberschrieben, %d gesperrt",
                  len(accepted), opus_overrides, opus_blocked)
 
     report = {

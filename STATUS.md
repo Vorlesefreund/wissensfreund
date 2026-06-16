@@ -1,12 +1,20 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T10:13:36Z -->
+<!-- updated: 2026-06-16T10:20:04Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Bildfilter: confidence + konservatives Sperren + Opus-Recheck für sensible Themen (2026-06-16)** ← AKTUELL
+**Opus-Recheck nur für unsichere Bilder sensibler Themen (~$50 statt ~$200, 2026-06-16)** ← AKTUELL
+
+Opus prüft jetzt NUR `confidence=="niedrig"`-Bilder sensibler Themen (nicht alle).
+Stabile Bilder (confidence hoch/mittel) behalten Gemini-Urteil ohne Extra-Call.
+Log: "Sensibles Thema X: Opus-Recheck fuer N unsichere Bilder (von M akzeptierten)"
+
+---
+
+**Bildfilter: confidence + konservatives Sperren + Opus-Recheck für sensible Themen (2026-06-16)**
 
 ### Was gebaut wurde
 
