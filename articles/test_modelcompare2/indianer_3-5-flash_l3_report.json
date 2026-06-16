@@ -1,0 +1,40 @@
+{
+  "article_id": "indianer_3-5-flash_l3",
+  "thema": "Indianer",
+  "primaer_wikipedia": "Indianer",
+  "phase1": {
+    "raw_companions": [
+      "Tipi",
+      "Wigwam",
+      "Sitting Bull",
+      "Amerikanischer Bison",
+      "Totempfahl"
+    ],
+    "valid_companions": [
+      "Tipi",
+      "Wigwam und Wickiup",
+      "Sitting Bull",
+      "Amerikanischer Bison",
+      "Wappenpfahl"
+    ],
+    "rejected": []
+  },
+  "phase2": {
+    "images": {
+      "skipped": true
+    },
+    "user_msg_len": 137430,
+    "word_count": 583,
+    "word_target": "350–650",
+    "retry_needed": false,
+    "validation_errors": [],
+    "companions_fetched": [
+      "Tipi",
+      "Wigwam und Wickiup",
+      "Sitting Bull",
+      "Amerikanischer Bison",
+      "Wappenpfahl"
+    ]
+  },
+  "errors": []
+}

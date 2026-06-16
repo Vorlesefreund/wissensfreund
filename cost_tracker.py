@@ -59,6 +59,11 @@ PRICE_TABLE: dict[str, dict] = {
     "claude-haiku-4-5-20251001":    {"in": 1.00,  "out": 5.00},
     "claude-sonnet-4-6":            {"in": 3.00,  "out": 15.00},
     "claude-opus-4-8":              {"in": 15.00, "out": 75.00},
+    # Mistral — Quelle: mistral.ai/technology/#pricing, Juni 2026
+    "mistral-large-3":              {"in": 2.00,  "out": 6.00},
+    "mistral-large-latest":         {"in": 2.00,  "out": 6.00},
+    "mistral-medium-3.5":           {"in": 0.40,  "out": 2.00},
+    "mistral-medium-latest":        {"in": 0.40,  "out": 2.00},
 }
 
 TOTAL_CATALOG_TOPICS = 4346   # Stand 2026-06-16, catalog_full.json primary

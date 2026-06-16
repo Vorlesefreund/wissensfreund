@@ -1,0 +1,281 @@
+{
+  "meta": {
+    "id": "indianer_3-flash-preview_l2",
+    "title": "Indianer",
+    "subtitle": "Die ersten Völker Amerikas",
+    "emoji": "🏹",
+    "age_level": 2,
+    "pattern": "history_person",
+    "theme_color": "#A0522D",
+    "word_count": 374,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Indianer",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "völker",
+    "generated_at": "2026-06-10T07:10:42.881751+00:00",
+    "grounding_companions": [
+      "Tipi",
+      "Wappenpfahl",
+      "Amerikanischer Bison",
+      "Pocahontas",
+      "Wigwam und Wickiup"
+    ],
+    "generation_method": "gemini-3-flash-preview/medium/v3.23"
+  },
+  "images": [],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Was ist ein Indianer?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Viele denken bei Indianern sofort an Federschmuck und Tipis, doch das ist nur ein kleiner Teil der Wahrheit.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Indianer ist ein Sammelname für die Menschen, die schon lange vor den Europäern in Amerika lebten.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Der Name entstand durch einen Irrtum: Als Christoph Kolumbus vor über 500 Jahren in Amerika landete, dachte er, er wäre in Indien.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Deshalb nannte er die Bewohner einfach Indianer.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Riesige Reiche und wilde Jäger",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s005",
+          "text": "Es gab hunderte verschiedene Völker mit eigenen Sprachen und Bräuchen.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Im Süden bauten Völker wie die Maya oder Inka riesige Städte mit Pyramiden aus Stein.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "In den weiten Ebenen des Nordens zogen andere Gruppen als Jäger umher.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Sie folgten den riesigen Bisonherden, die ihnen Fleisch zum Essen und Fell für Kleidung gaben.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Eine berühmte Vermittlerin zwischen den Völkern war Pocahontas, die Tochter eines Häuptlings.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Haben Indianer wirklich rote Haut?",
+          "reveal_text": "Nein, ihre Haut ist bräunlich. Der Name „Rothaut“ entstand wahrscheinlich, weil sich manche Krieger mit roter Farbe bemalten. Später dachten viele Menschen in Europa fälschlicherweise, das sei ihre echte Hautfarbe.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Zelte, Hütten und hohe Pfähle",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s010",
+          "text": "Je nachdem, wo sie lebten, bauten die Menschen unterschiedliche Häuser.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Das bekannte Tipi war ein praktisches Zelt aus Stangen und Bisonleder.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Das Wort Tipi bedeutet in der Sprache der Lakota-Indianer einfach „sie wohnen“.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Im Waldland bauten die Menschen eher feste Hütten aus Ästen und Rinde, die man Wigwam nennt.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "An der Küste im Westen schnitzten Familien hohe Wappenpfähle aus Holz.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Diese zeigen Tiere wie Adler oder Bären und erzählen die Geschichte der Familie.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Eine schwere Zeit",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s016",
+          "text": "Als immer mehr Siedler aus Europa kamen, wurde das Leben für die Indianer sehr schwer.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Die Fremden brachten Krankheiten wie die Pocken mit, gegen die die Ureinwohner keine Abwehrkräfte hatten.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Viele Menschen starben daran.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Außerdem nahmen die Siedler den Indianern ihr Land weg und töteten fast alle Bisons.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Später mussten viele Kinder in spezielle Schulen gehen, die Internate genannt wurden.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Dort durften sie ihre eigene Sprache nicht mehr sprechen und wurden von ihren Familien getrennt.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Indianer heute",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s022",
+          "text": "Heute leben viele Indianer in Städten oder in besonderen Schutzgebieten, den Reservaten.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Sie kämpfen für ihre Rechte und versuchen, ihre alten Sprachen und Bräuche zu bewahren.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "In Ländern wie Bolivien gab es sogar schon einen indianischen Präsidenten.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "In Kanada steht einer der höchsten Wappenpfähle der Welt. Er ist über 56 Meter hoch – das ist so hoch wie ein Haus mit etwa 18 Stockwerken!"
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Warum nannte Kolumbus die Bewohner Amerikas „Indianer“?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Er dachte, er sei in Indien gelandet."
+          },
+          {
+            "key": "B",
+            "text": "Es war ein Name aus ihrer eigenen Sprache."
+          },
+          {
+            "key": "C",
+            "text": "Er fand, dass sie wie Inder aussahen."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Was bedeutet das Wort „Tipi“ übersetzt?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Großes Zelt"
+          },
+          {
+            "key": "B",
+            "text": "Sie wohnen"
+          },
+          {
+            "key": "C",
+            "text": "Spitzer Berg"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Wozu dienten die geschnitzten Wappenpfähle?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie waren heilige Götterfiguren."
+          },
+          {
+            "key": "B",
+            "text": "Sie dienten als Stützen für die Häuser."
+          },
+          {
+            "key": "C",
+            "text": "Sie erzählten Familiengeschichten."
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Indigene Völker",
+      "Amerika",
+      "Reservat",
+      "Bison"
+    ],
+    "discover": [
+      "Maya",
+      "Inka",
+      "Pocahontas",
+      "Tipi"
+    ]
+  }
+}

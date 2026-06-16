@@ -1,0 +1,243 @@
+{
+  "meta": {
+    "id": "indianer_3-1-flash-lite_l2",
+    "title": "Indianer",
+    "subtitle": "Mehr als nur ein Bild aus Filmen",
+    "emoji": "🏹",
+    "age_level": 2,
+    "pattern": "history_person",
+    "theme_color": "#D35400",
+    "word_count": 301,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Indianer",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "völker",
+    "generated_at": "2026-06-10T07:04:49.258180+00:00",
+    "grounding_companions": [
+      "Indigene Völker",
+      "Tipi",
+      "Wappenpfahl",
+      "Büffel",
+      "Kanu"
+    ],
+    "generation_method": "gemini-3.1-flash-lite/medium/v3.23"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Tipi_Lager.jpg",
+      "alt": "Traditionelles Tipi-Lager in der Prärie",
+      "caption": "Das Tipi war für viele Völker der Prärie ein praktisches und schnell aufbaubares Zuhause.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Wikipedia-Nutzer",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Tipi.jpg",
+      "wikimedia_id": "File:Tipi.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/12/Tipi.jpg/320px-Tipi.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Wer sind die Indianer eigentlich?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Viele Menschen denken bei dem Wort „Indianer“ sofort an Federschmuck und Tipis.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Doch das ist nur ein kleiner Teil der echten Geschichte.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Eigentlich ist „Indianer“ eine Sammelbezeichnung für die vielen verschiedenen Völker, die schon lange vor den Europäern in Amerika lebten.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Der Name entstand durch einen Irrtum: Christoph Kolumbus glaubte 1492, er sei in Indien gelandet, als er Amerika erreichte.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Sind alle Indianer gleich?",
+          "reveal_text": "Nein! Es gab hunderte verschiedene Völker mit eigenen Sprachen, Kulturen und Lebensweisen – von den Fischern an der Küste bis zu den Bauern in den Bergen.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Leben im Einklang mit der Natur",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s005",
+          "text": "Die Ureinwohner Amerikas passten sich ihrer Umgebung perfekt an.",
+          "img_index": 0
+        },
+        {
+          "id": "s006",
+          "text": "In den weiten Prärien jagten sie Büffel, die ihnen Nahrung, Kleidung und Material für ihre Tipis lieferten.",
+          "img_index": 0
+        },
+        {
+          "id": "s007",
+          "text": "In waldreichen Gebieten oder an Flüssen nutzen sie Kanus, um sich schnell fortzubewegen.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Viele Gruppen lebten als Jäger und Sammler, während andere in großen Städten Ackerbau betrieben und Pflanzen wie Mais oder Kartoffeln züchteten.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Die Büffel waren für viele Stämme so wichtig, dass sie ihr ganzes Leben danach ausrichteten. Das Tipi aus Bisonhaut war dabei ideal: Es ließ sich in nur einer Stunde aufbauen und war sehr stabil.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Eine schwere Zeit",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s009",
+          "text": "Mit der Ankunft der Europäer änderte sich für die Ureinwohner alles.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Krankheiten, gegen die sie keine Abwehrkräfte hatten, und gewaltsame Eroberungen führten zu einer großen Katastrophe.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Viele Völker wurden aus ihrem Land vertrieben und in Reservate gezwungen.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Ihre Kulturen sollten oft unterdrückt werden, etwa durch das Verbot ihrer Sprachen in Schulen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Durch die Kolonialisierung verloren Millionen Menschen ihre Heimat und ihr Leben. Erst in den letzten Jahren haben einige Regierungen offiziell um Verzeihung für dieses Leid gebeten.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Stolz auf die Herkunft",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s013",
+          "text": "Heute setzen sich viele indigene Völker für ihre Rechte ein.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Sie kämpfen für den Schutz ihres Landes und die Pflege ihrer Traditionen.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Viele junge Leute sind stolz auf ihre Wurzeln und wollen ihre Sprachen und Geschichten für die Zukunft bewahren.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Warum nennt man die Ureinwohner Amerikas „Indianer“?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Weil sie sich selbst so nannten."
+          },
+          {
+            "key": "B",
+            "text": "Weil Kolumbus glaubte, er sei in Indien gelandet."
+          },
+          {
+            "key": "C",
+            "text": "Weil sie aus Indien eingewandert sind."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Was war ein Tipi?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein kegelförmiges Zelt der Prärie-Völker."
+          },
+          {
+            "key": "B",
+            "text": "Ein großes Holzschiff für den Ozean."
+          },
+          {
+            "key": "C",
+            "text": "Ein ritueller Tanzplatz aus Stein."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Wie lebten die Ureinwohner früher?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Alle lebten in der gleichen Art von Haus."
+          },
+          {
+            "key": "B",
+            "text": "Sie lebten auf sehr unterschiedliche Weise."
+          },
+          {
+            "key": "C",
+            "text": "Sie lebten nur in Städten aus Stein."
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Indigene Völker",
+      "Büffel",
+      "Tipi"
+    ],
+    "discover": [
+      "Kanu",
+      "Wappenpfahl"
+    ]
+  }
+}

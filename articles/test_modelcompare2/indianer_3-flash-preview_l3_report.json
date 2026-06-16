@@ -1,0 +1,31 @@
+{
+  "article_id": "indianer_3-flash-preview_l3",
+  "thema": "Indianer",
+  "primaer_wikipedia": "Indianer",
+  "phase1": {
+    "raw_companions": [
+      "Tipi",
+      "Totempfahl",
+      "Amerikanischer Bison",
+      "Pocahontas",
+      "Wigwam"
+    ],
+    "valid_companions": [
+      "Tipi",
+      "Wappenpfahl",
+      "Amerikanischer Bison",
+      "Pocahontas",
+      "Wigwam und Wickiup"
+    ],
+    "rejected": []
+  },
+  "phase2": {
+    "images": {
+      "skipped": true
+    },
+    "user_msg_len": 137426
+  },
+  "errors": [
+    "JSON-Parse: Unvollständiges JSON-Objekt (kein balanciertes '}')"
+  ]
+}

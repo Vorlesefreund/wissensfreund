@@ -1,0 +1,297 @@
+{
+  "meta": {
+    "id": "indianer_3-5-flash_l2",
+    "title": "Indianer",
+    "subtitle": "Die ersten Völker Amerikas",
+    "emoji": "🏹",
+    "age_level": 2,
+    "pattern": "place_geography",
+    "theme_color": "#8B4513",
+    "word_count": 352,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Indianer",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "völker",
+    "generated_at": "2026-06-10T07:03:41.005124+00:00",
+    "grounding_companions": [
+      "Tipi",
+      "Wigwam und Wickiup",
+      "Sitting Bull",
+      "Amerikanischer Bison",
+      "Wappenpfahl"
+    ],
+    "generation_method": "gemini-3.5-flash/medium/v3.23"
+  },
+  "images": [],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Wer sind die ersten Amerikaner?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Viele denken bei „Indianern“ sofort an reitende Jäger mit Federschmuck.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Doch das ist nur ein kleiner Teil einer riesigen, bunten Welt von vielen verschiedenen Völkern.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "„Indianer“ ist ein Sammelname für die Menschen, die schon lange vor den Europäern in Amerika lebten.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Der Name entstand durch einen Irrtum: Christoph Kolumbus glaubte 1492, er sei in Indien gelandet.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Wo und wie wohnten sie?",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s005",
+          "text": "Nicht alle Völker wohnten in Zelten.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Die Jäger in den großen Steppen nutzten das Tipi.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Das ist ein stabiles Zelt aus Stangen und Bisonhäuten, das man schnell abbauen kann.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Zwei Frauen brauchten für den Aufbau nur etwa eine Stunde.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Andere Völker bauten feste Hütten aus Ästen und Rinde, die man Wigwam nennt.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Im Süden Amerikas gab es sogar riesige Steinhäuser und große Städte.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Wusstest du, dass viele unserer heutigen Lebensmittel von den ersten Amerikanern gezüchtet wurden?",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Ohne sie gäbe es bei uns keine Kartoffeln, Tomaten oder Mais!",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Hatten Indianer wirklich rote Haut?",
+          "reveal_text": "Nein, ihre Haut ist braun. Der Name „Rothaut“ entstand vermutlich, weil sich manche Völker mit roter Farbe bemalt hatten.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Die Jagd auf den riesigen Bison",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s013",
+          "text": "Für viele Völker war der Amerikanische Bison lebenswichtig.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Dieser riesige Wildochse ist das größte Landsäugetier in Nordamerika.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Er lieferte den Menschen Fleisch, Leder für Kleidung und Knochen für Werkzeuge.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Später halfen Pferde den Jägern bei der Jagd.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Die Spanier brachten die Pferde nach Amerika, wo sie sich rasant vermehrten.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Eine schwere Zeit der Verdrängung",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s018",
+          "text": "Als immer mehr Europäer nach Amerika kamen, änderte sich das Leben der Ureinwohner völlig.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Die Einwanderer nahmen ihnen ihr Land weg und brachten gefährliche Krankheiten mit.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Berühmte Anführer wie der Medizinmann Sitting Bull wehrten sich tapfer gegen die Landnahme.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Doch am Ende verloren die Völker ihren Kampf.",
+          "img_index": -1
+        },
+        {
+          "id": "s022",
+          "text": "Die US-Regierung zwang sie, in bestimmten Gebieten zu leben, den sogenannten Reservaten.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Die Einwanderer jagten die Bisons fast bis zur Ausrottung, um den Ureinwohnern ihre Nahrung zu nehmen. Am Ende gab es nur noch etwa 1000 Tiere."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Stolz und neue Wege heute",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s023",
+          "text": "Heute leben viele Millionen Ureinwohner in ganz Amerika.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Viele zeigen wieder stolz ihre Kultur bei großen Festen mit traditioneller Musik.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "Sie erwecken auch alte Bräuche zum Leben, wie das Schnitzen von riesigen Wappenpfählen.",
+          "img_index": -1
+        },
+        {
+          "id": "s026",
+          "text": "Auf diesen Holzstämmen schnitzen sie kunstvolle Tierfiguren wie Adler oder Bären.",
+          "img_index": -1
+        },
+        {
+          "id": "s027",
+          "text": "Diese Pfähle erzählen die stolze Geschichte einer Familie.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Warum nannte Kolumbus die Ureinwohner „Indianer“?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Weil er dachte, er sei in Indien gelandet."
+          },
+          {
+            "key": "B",
+            "text": "Weil sie rote Kleidung trugen."
+          },
+          {
+            "key": "C",
+            "text": "Weil das ihr eigenes Wort für Mensch war."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Welches Tier war für die Völker der Steppe überlebenswichtig?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Das Känguru"
+          },
+          {
+            "key": "B",
+            "text": "Der Amerikanische Bison"
+          },
+          {
+            "key": "C",
+            "text": "Der Eisbär"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Was ist ein Tipi?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein festes Haus aus Lehmziegeln."
+          },
+          {
+            "key": "B",
+            "text": "Ein Boot aus Birkenrinde."
+          },
+          {
+            "key": "C",
+            "text": "Ein stabiles Zelt aus Stangen und Bisonhäuten."
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Tipi",
+      "Wigwam",
+      "Sitting Bull",
+      "Amerikanischer Bison",
+      "Wappenpfahl"
+    ],
+    "discover": [
+      "Nordamerika",
+      "Südamerika",
+      "Christoph Kolumbus",
+      "Ureinwohner"
+    ]
+  }
+}

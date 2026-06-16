@@ -1,0 +1,231 @@
+{
+  "meta": {
+    "id": "indianer_3-5-flash_l1",
+    "title": "Indianer",
+    "subtitle": "Wer sie sind und wie sie lebten",
+    "emoji": "⛺",
+    "age_level": 1,
+    "pattern": "place_geography",
+    "theme_color": "#FF5722",
+    "word_count": 176,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Indianer",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "völker",
+    "generated_at": "2026-06-10T07:02:51.381728+00:00",
+    "grounding_companions": [
+      "Tipi",
+      "Wigwam und Wickiup",
+      "Sitting Bull",
+      "Amerikanischer Bison",
+      "Wappenpfahl"
+    ],
+    "generation_method": "gemini-3.5-flash/medium/v3.23"
+  },
+  "images": [],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Wer sind die ersten Amerikaner?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Denkst du bei Indianern sofort an wilde Reiter?",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Das ist nur ein kleiner Teil ihrer Geschichte.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Sie sind die allerersten Menschen in Amerika.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Ein berühmter Seefahrer machte damals einen großen Fehler.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Er landete in Amerika, suchte aber eigentlich Indien.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Deshalb nannte er die Menschen dort einfach Indianer.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Heute wissen wir: Es sind viele verschiedene Völker.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Gemüse, Zelte und bunte Pfähle",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s008",
+          "text": "Die Völker lebten ganz unterschiedlich auf dem Kontinent.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Sie bauten schon früh eigenes Gemüse an.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Dazu gehören Kartoffeln, Mais und saftige Kürbisse.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Isst du auch gerne Pommes oder Popcorn?",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Manche Familien bauten feste Hütten aus Ästen und Rinde.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Diese runden Hütten heißen Wigwams.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Andere reisten viel und wohnten in spitzen Tipis.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Dazu nutzten sie die Haut von riesigen Bisons.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Diese zotteligen Wildrinder gaben ihnen auch warmes Fell.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "An den Küsten schnitzten Familien riesige Pfähle aus Holz.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Darauf malten sie bunte Adler, Bären oder Biber.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Später kamen viele neue Menschen aus Europa nach Amerika.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Sie nahmen den Ureinwohnern viel von ihrem Land weg.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Heute kämpfen die ersten Amerikaner stolz für ihre Rechte.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Das zottelige Bison ist das größte Land-Tier in ganz Nordamerika!"
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Warum heißen die ersten Amerikaner \"Indianer\"?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Weil ein Seefahrer dachte, er wäre in Indien gelandet."
+          },
+          {
+            "key": "B",
+            "text": "Weil ihre Vorfahren früher aus Indien kamen."
+          },
+          {
+            "key": "C",
+            "text": "Weil das erste Schiff den Namen Indien trug."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Wie heißen die runden Hütten aus Ästen und Rinde?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Tipis"
+          },
+          {
+            "key": "B",
+            "text": "Wigwams"
+          },
+          {
+            "key": "C",
+            "text": "Bisons"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Welches Gemüse bauten die Ureinwohner schon früh an?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Karotten und Erbsen"
+          },
+          {
+            "key": "B",
+            "text": "Äpfel und Erdbeeren"
+          },
+          {
+            "key": "C",
+            "text": "Kartoffeln und Mais"
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Amerika",
+      "Ureinwohner",
+      "Tipi",
+      "Wigwam"
+    ],
+    "discover": [
+      "Bison",
+      "Wappenpfahl",
+      "Kolumbus"
+    ]
+  }
+}

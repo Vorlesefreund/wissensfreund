@@ -1,0 +1,291 @@
+{
+  "meta": {
+    "id": "indianer_3-1-flash-lite_l3",
+    "title": "Indianer",
+    "subtitle": "Eine Welt voller Vielfalt, Geschichte und Überlebenskraft",
+    "emoji": "🏹",
+    "age_level": 3,
+    "pattern": "history_person",
+    "theme_color": "#8B4513",
+    "word_count": 387,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Indianer",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "völker",
+    "generated_at": "2026-06-10T07:05:00.671310+00:00",
+    "grounding_companions": [
+      "Indigene Völker",
+      "Tipi",
+      "Wappenpfahl",
+      "Büffel",
+      "Kanu"
+    ],
+    "generation_method": "gemini-3.1-flash-lite/medium/v3.23",
+    "review_reason": "18 Sätze außerhalb [25,100] für Stufe 3"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Tipi_lager.jpg",
+      "alt": "Ein traditionelles Tipi in einer weiten Landschaft",
+      "caption": "Das Tipi war ein praktisches und mobiles Zuhause für viele Völker der Prärie.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Wikipedia-Nutzer",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Tipi.jpg",
+      "wikimedia_id": "File:Tipi.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Tipi.jpg/640px-Tipi.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Eine Welt voller Vielfalt",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Viele Menschen denken bei dem Wort „Indianer“ sofort an Federhauben, wilde Reiter und Tipis.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Doch das ist nur ein winziger Ausschnitt einer riesigen, jahrtausendealten Geschichte.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Eigentlich bezeichnen wir damit die Ureinwohner Amerikas, die schon lange vor der Ankunft der Europäer dort lebten.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Es handelt sich nicht um ein einzelnes Volk, sondern um hunderte verschiedene Kulturen mit eigenen Sprachen, Traditionen und Lebensweisen.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Die indigenen Völker Amerikas züchteten Pflanzen, die heute weltweit auf unseren Tellern landen – darunter Kartoffeln, Mais, Tomaten und sogar Ananas!"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Wie alles begann",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s005",
+          "text": "Die Vorfahren der heutigen indigenen Völker kamen vor über 15.000 Jahren von Asien aus über eine Landbrücke nach Amerika.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Sie passten sich an die unterschiedlichsten Umgebungen an: von den eisigen arktischen Regionen bis hin zu den tropischen Regenwäldern.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "In Mittel- und Südamerika bauten sie riesige Städte und komplexe Reiche auf, wie die der Maya oder Inka, mit beeindruckenden Pyramiden und ausgeklügelten Bewässerungssystemen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "fakt",
+          "text": "Die Maya entwickelten eine eigene Schrift und ein tiefes Wissen über die Sterne, lange bevor Europäer den Kontinent erreichten."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Leben im Einklang mit der Natur",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s008",
+          "text": "Das Leben war eng mit der Natur verbunden.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "In den Prärien Nordamerikas war der Bison das Herzstück der Kultur: Er lieferte Nahrung, Kleidung und Material für die Tipis.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Ein Tipi war ein geniales Zelt, das in einer Stunde aufgebaut werden konnte – perfekt für ein nomadisches Leben.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "An den Küsten hingegen waren Kanus aus Baumstämmen oder Rinde das wichtigste Fortbewegungsmittel für den Fischfang und Handel.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Stammen die Ureinwohner Amerikas aus Indien?",
+          "reveal_text": "Nein! Christoph Kolumbus glaubte 1492, er sei in Indien gelandet, als er Amerika erreichte. Deshalb nannte er die Bewohner irrtümlich „Indios“. Der Name blieb haften, obwohl er falsch ist.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Eine schmerzhafte Geschichte",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s012",
+          "text": "Mit der Ankunft der Europäer änderte sich alles.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Krankheiten, die die Europäer mitbrachten, gegen die die Ureinwohner keine Abwehrkräfte hatten, dezimierten die Bevölkerung dramatisch.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Viele Völker wurden gewaltsam von ihrem Land vertrieben, ihre Lebensgrundlagen zerstört und ihre Kinder in Internate gezwungen, um sie ihrer Kultur zu entfremden.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Die Kolonialisierung führte zu einer der größten Katastrophen der Menschheitsgeschichte. Millionen Menschen starben durch Kriege, Zwangsarbeit und eingeschleppte Seuchen."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Heute und in der Zukunft",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s015",
+          "text": "Heute kämpfen viele indigene Völker dafür, ihre Rechte, Sprachen und Traditionen zu bewahren.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Viele leben in Reservaten, aber auch in Städten.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Sie setzen sich politisch für den Schutz ihrer Umwelt und ihre Mitsprache ein.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Das Bewusstsein für ihr Erbe wächst weltweit, und viele junge Menschen beleben ihre alte Kultur neu, etwa durch Kunst oder den Schutz ihrer Sprachen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Warum nannten die Europäer die Ureinwohner Amerikas „Indianer“?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Weil sie aus Indien stammten."
+          },
+          {
+            "key": "B",
+            "text": "Weil Kolumbus glaubte, in Indien gelandet zu sein."
+          },
+          {
+            "key": "C",
+            "text": "Weil es ihre eigene Bezeichnung für sich selbst war."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Was war ein Tipi?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein stabiles, kegelförmiges Zelt der Prärie-Völker."
+          },
+          {
+            "key": "B",
+            "text": "Ein aus Stein gebautes Haus in Südamerika."
+          },
+          {
+            "key": "C",
+            "text": "Ein Boot, das für den Fischfang genutzt wurde."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Was war eine der Hauptursachen für das Sterben vieler Ureinwohner nach 1492?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Vulkanausbrüche auf dem ganzen Kontinent."
+          },
+          {
+            "key": "B",
+            "text": "Eingeschleppte Krankheiten der Europäer."
+          },
+          {
+            "key": "C",
+            "text": "Ein Mangel an Nahrung durch Dürre."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q4",
+        "text": "Was ist ein Wappenpfahl (oft Totempfahl genannt)?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein religiöses Götzenbild, das angebetet wurde."
+          },
+          {
+            "key": "B",
+            "text": "Eine Skulptur, die soziale Geschichten und Familienwappen erzählt."
+          },
+          {
+            "key": "C",
+            "text": "Ein Werkzeug, um Bisons auf der Jagd zu fangen."
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Indigene Völker",
+      "Prärie",
+      "Kolonialismus"
+    ],
+    "discover": [
+      "Maya",
+      "Inka",
+      "Powwow"
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "article_id": "indianer_3-1-flash-lite_l3",
+  "thema": "Indianer",
+  "primaer_wikipedia": "Indianer",
+  "phase1": {
+    "raw_companions": [
+      "Indigene Völker Amerikas",
+      "Tipi",
+      "Totempfahl",
+      "Büffel",
+      "Kanu"
+    ],
+    "valid_companions": [
+      "Indigene Völker",
+      "Tipi",
+      "Wappenpfahl",
+      "Büffel",
+      "Kanu"
+    ],
+    "rejected": []
+  },
+  "phase2": {
+    "images": {
+      "skipped": true
+    },
+    "user_msg_len": 133766,
+    "word_count": 387,
+    "word_target": "350–650",
+    "retry_needed": false,
+    "validation_errors": [
+      "18 Sätze außerhalb [25,100] für Stufe 3"
+    ],
+    "companions_fetched": [
+      "Indigene Völker",
+      "Tipi",
+      "Wappenpfahl",
+      "Büffel",
+      "Kanu"
+    ]
+  },
+  "errors": []
+}

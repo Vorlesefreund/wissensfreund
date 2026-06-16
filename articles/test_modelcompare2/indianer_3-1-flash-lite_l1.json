@@ -1,0 +1,218 @@
+{
+  "planung": {
+    "MUSTER": "history_person",
+    "QUELLEN": "https://de.wikipedia.org/wiki/Indianer, https://de.wikipedia.org/wiki/Indigene_Völker, https://de.wikipedia.org/wiki/Tipi, https://de.wikipedia.org/wiki/Wappenpfahl, https://de.wikipedia.org/wiki/Büffel, https://de.wikipedia.org/wiki/Kanu",
+    "BEREICHERUNGS_LINKS": "Tipi (Alltagsleben), Kanu (Natur/Fortbewegung), Wappenpfahl (Kunst/Identität)",
+    "APPEAL": "S1 hoch · S2 hoch · S3 hoch",
+    "CONTENT_DEPTH": "1",
+    "FAKTEN_S1": "Sammelbegriff für viele Völker in Amerika, lebten schon lange vor Ankunft der Europäer dort, vielfältige Kulturen (Nomaden und Ackerbauern), enge Verbindung zur Natur (Büffel, Kanus), unterschiedliche Wohnformen wie das Tipi.",
+    "KINDERWELT_ANKER": "Das Tipi als Zelt und das Kanu als Boot.",
+    "HAKEN": "Viele kennen Indianer aus Geschichten oder Filmen. Doch das sind oft nur Bilder. In Wahrheit waren sie keine einheitliche Gruppe, sondern hunderte verschiedene Völker mit ganz eigenen Sprachen, Häusern und Bräuchen.",
+    "BOX_PLAN_S1": "wow · Mitte · Es gibt nicht nur eine Art von Indianern, sondern hunderte ganz verschiedene Völker. warnung · Ende · Früher wurden viele Völker von Einwanderern schlecht behandelt und mussten ihr Land verlassen.",
+    "BOX_PLAN_S2": "fakt · Mitte · Das Wort Tipi bedeutet in der Sprache der Lakota eigentlich nur 'sie wohnen dort'."
+  },
+  "meta": {
+    "id": "indianer_3-1-flash-lite_l1",
+    "title": "Indianer",
+    "subtitle": "Viele verschiedene Völker und Kulturen",
+    "emoji": "🏹",
+    "age_level": 1,
+    "pattern": "history_person",
+    "theme_color": "#d9534f",
+    "word_count": 160,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Indianer",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "ureinwohner",
+    "generated_at": "2026-06-10T07:04:40.095095+00:00",
+    "grounding_companions": [
+      "Indigene Völker",
+      "Tipi",
+      "Wappenpfahl",
+      "Büffel",
+      "Kanu"
+    ],
+    "generation_method": "gemini-3.1-flash-lite/medium/v3.23"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Tipi_Lager.jpg",
+      "alt": "Ein traditionelles Tipi in einer weiten Landschaft.",
+      "caption": "Ein Tipi war ein praktisches Zelt für Nomaden.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Wikipedia",
+      "source_url": "https://de.wikipedia.org/wiki/Tipi",
+      "wikimedia_id": "File:Tipi.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Tipi.jpg/300px-Tipi.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Wer waren die Indianer?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Indianer ist ein Sammelbegriff für die vielen verschiedenen Völker, die schon vor langer Zeit in Amerika lebten.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Sie waren die ersten Bewohner des riesigen Doppelkontinents.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Es gibt nicht „den einen“ Indianer.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Stattdessen waren es hunderte Völker mit eigenen Sprachen, Bräuchen und einer besonderen Art, mit der Natur zu leben.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Es gibt nicht nur eine Art von Indianern, sondern hunderte ganz verschiedene Völker mit eigenen Sprachen und Kulturen."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Leben mit der Natur",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s005",
+          "text": "Viele Völker lebten sehr eng mit der Natur zusammen.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "In den weiten Ebenen jagten sie zum Beispiel Büffel.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Auf den Flüssen waren sie mit Kanus aus Rinde unterwegs, um sich fortzubewegen.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Das Tipi war ein bekanntes Zelt, das man schnell auf- und abbauen konnte.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Eine schwere Zeit",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s009",
+          "text": "Als Menschen aus Europa nach Amerika kamen, änderte sich für die Ureinwohner vieles.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Sie wurden oft schlecht behandelt und mussten ihr Land verlassen.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Heute kämpfen viele Völker stolz dafür, ihre Traditionen und ihre Kultur zu bewahren.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Früher wurden viele Völker von Einwanderern schlecht behandelt und mussten ihr Land verlassen."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was ist ein Tipi?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein großes Boot aus Rinde"
+          },
+          {
+            "key": "B",
+            "text": "Ein kegelförmiges Zelt"
+          },
+          {
+            "key": "C",
+            "text": "Ein festes Haus aus Stein"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Wie lebten die Indianer früher?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Es waren hunderte verschiedene Völker"
+          },
+          {
+            "key": "B",
+            "text": "Alle lebten genau gleich"
+          },
+          {
+            "key": "C",
+            "text": "Sie lebten nur in großen Städten"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Was nutzten sie auf dem Wasser?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Große Dampfschiffe"
+          },
+          {
+            "key": "B",
+            "text": "Kanus aus Rinde"
+          },
+          {
+            "key": "C",
+            "text": "Surfbretter aus Holz"
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Amerika",
+      "Natur",
+      "Kultur"
+    ],
+    "discover": [
+      "Büffel",
+      "Kanu",
+      "Tipi"
+    ]
+  }
+}

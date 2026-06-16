@@ -1,0 +1,290 @@
+{
+  "meta": {
+    "id": "indianer_3-flash-preview_l1",
+    "title": "Indianer",
+    "subtitle": "Das spannende Leben der Indianer",
+    "emoji": "🏹",
+    "age_level": 1,
+    "pattern": "history_person",
+    "theme_color": "#A0522D",
+    "word_count": 222,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Indianer",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "völker",
+    "generated_at": "2026-06-10T07:07:32.483706+00:00",
+    "grounding_companions": [
+      "Tipi",
+      "Wappenpfahl",
+      "Amerikanischer Bison",
+      "Pocahontas",
+      "Wigwam und Wickiup"
+    ],
+    "generation_method": "gemini-3-flash-preview/medium/v3.23"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "tipi_tent.jpg",
+      "alt": "Ein spitzes Indianerzelt auf einer Wiese",
+      "caption": "Ein Tipi ist ein praktisches Zelt zum Mitnehmen.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Unbekannt",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Teepee.jpg",
+      "wikimedia_id": "File:Teepee.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Teepee.jpg/200px-Teepee.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Wer sind die Indianer?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Viele denken bei Indianern sofort an Federn im Haar.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Aber sie waren vor allem die ersten Entdecker Amerikas.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Indianer ist ein Name für viele Gruppen von Menschen.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Sie lebten schon sehr lange in diesem riesigen Land.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Der Name kommt von einem alten Irrtum.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Ein Seefahrer dachte nämlich, er sei in Indien gelandet.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Ein Land voller Vielfalt",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s007",
+          "text": "In Amerika gab es hunderte verschiedene Völker.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Jede Gruppe hatte ihre eigene Sprache und Bräuche.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Manche bauten sogar riesige Städte mit Pyramiden aus Stein.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Zelte und hohe Pfähle",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s010",
+          "text": "Hast du schon mal in einem kleinen Zelt gespielt?",
+          "img_index": 0
+        },
+        {
+          "id": "s011",
+          "text": "Einige Indianer wohnten in spitzen Zelten aus Leder.",
+          "img_index": 0
+        },
+        {
+          "id": "s012",
+          "text": "Man nennt diese Zelte Tipis.",
+          "img_index": 0
+        },
+        {
+          "id": "s013",
+          "text": "Andere bauten Hütten aus Ästen und Baumrinde.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "An der Küste schnitzten sie hohe Pfähle aus Holz.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Darauf waren Gesichter von Tieren wie Bären oder Adlern.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Zwei Frauen konnten ein Tipi in nur einer Stunde aufbauen."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Leben mit der Natur",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s016",
+          "text": "Die Indianer kannten sich super im Wald aus.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Sie wussten genau, welche Beeren man essen kann.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Ein wichtiges Tier war der riesige, zottelige Bison.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Pocahontas war ein mutiges Mädchen von damals.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Sie half den neuen Leuten, im Land zu überleben.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Was passierte später?",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s021",
+          "text": "Später kamen immer mehr Menschen aus anderen Ländern.",
+          "img_index": -1
+        },
+        {
+          "id": "s022",
+          "text": "Sie nahmen den Indianern leider viel von ihrem Land weg.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Heute feiern viele Indianer Feste mit Tanz und Musik.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "So zeigen sie allen, wie toll ihre Kultur ist.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Früher gab es Millionen Bisons, aber später wurden fast alle getötet."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wie nennt man die spitzen Zelte der Indianer?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Burgen"
+          },
+          {
+            "key": "B",
+            "text": "Tipis"
+          },
+          {
+            "key": "C",
+            "text": "Iglus"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Welches große Tier war für viele Indianer wichtig?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Elefant"
+          },
+          {
+            "key": "B",
+            "text": "Löwe"
+          },
+          {
+            "key": "C",
+            "text": "Bison"
+          }
+        ],
+        "correct_key": "C"
+      },
+      {
+        "id": "q3",
+        "text": "Wer war Pocahontas?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein mutiges Mädchen"
+          },
+          {
+            "key": "B",
+            "text": "Eine Erfinderin"
+          },
+          {
+            "key": "C",
+            "text": "Eine Zauberin"
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Amerika",
+      "Tipi",
+      "Bison",
+      "Pocahontas"
+    ],
+    "discover": [
+      "Wigwam",
+      "Wappenpfahl",
+      "Natur"
+    ]
+  }
+}

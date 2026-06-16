@@ -1,12 +1,43 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T17:32:46Z -->
+<!-- updated: 2026-06-16T19:16:14Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**gemini_client.py: Robustes Retry (2026-06-16)** ← AKTUELL
+**Mistral-Modellvergleich Elefant S2 (2026-06-16)** ← AKTUELL
+
+`temp/mistral_test_elefant_s2.py` — synchroner Vergleichstest vs. Gemini-Produktionspfad.
+Gleicher System-Prompt v3.23b, gleiche Quelltexte (Stage-1-Checkpoint), gleicher User-Message-Aufbau.
+
+### mistral-large-latest (mistral-large-3, $2/$6 pro 1M)
+- finish_reason: stop ✅, Dauer 145s, Input=70.098 / Output=7.296 Tokens, Kosten $0.184
+- Wortzahl: **574 / Ziel 280–400** (43% über Deckel) — Prompt-Tuning fehlt für Mistral
+- Schema-Abweichungen (3, alle fixbar per Post-Processing):
+  - `box.type` statt `box.box_type` (App-Parser bricht)
+  - `quiz` als `{"questions":[...]}` statt flaches Array
+  - Box-Key `warnung` statt `warn`
+- Inhalt: sehr gut — Kindwelt-Brücken (Kühlschrank, Wasserflaschen, Ventilator), gute stimmt_das-Box (Mäuse-Mythos), 25 source_passages mit echten WP-Zitaten, S2-Register flüssig
+- Artikel gespeichert: `articles/test_modelcompare2/mistral-large-3_elefant_s2.json`
+
+### mistral-medium-latest (mistral-medium-3.5, $0.40/$2 pro 1M)
+- **429 Rate-Limit** — persistiert 40+ Min nach dem Large-Call (Token-Budget der Stunde erschöpft)
+- Key hat enges stündliches Token-Kontingent; nach Large (70K Tokens) reicht kein Budget für Medium
+- Test noch ausstehend (separate Session wenn Rate-Limit zurückgesetzt)
+
+### gemini-3.5-flash
+- Weiterhin 503 UNAVAILABLE — Situation unverändert
+
+### Erkenntnisse Mistral-Integration
+- `mistralai` SDK v2.4.11 installiert (from mistralai.client.sdk import Mistral)
+- JSON-Mode: `ResponseFormat(type="json_object")` — kein strukturiertes Schema wie Gemini
+- timeout_ms=360.000 nötig (Default 60s reicht nicht für 70K Input-Token)
+- Schema-Keys weichen vom WF-Standard ab → Post-Processing-Schicht nötig bei Produktion
+- Wortzahl-Overshoot deutet auf Prompt-Tuning-Bedarf hin (Gemini-optimierter Prompt)
+- cost_tracker um Mistral-Preise erweitert (mistral-large-3, mistral-medium-3.5)
+
+**gemini_client.py: Robustes Retry (2026-06-16)**
 
 Exponentielles Backoff + Jitter für alle synchronen Gemini-Calls:
 - 503 UNAVAILABLE / 429 RESOURCE_EXHAUSTED → 5 Versuche, Wartezeiten 10/20/40/80/160s + Jitter 0-5s
@@ -83,9 +114,10 @@ nicht unser Code, betrifft alle Nutzer).
 - Context-Cache (cached_content) funktioniert NICHT in Gemini-Batch-InlinedRequests →
   im Batch deaktiviert (Mehrkosten ~$70 Vollkatalog; Batch-Rabatt -50% bleibt Haupthebel)
 
-### PARALLEL LÄUFT
-Mistral-Alternativtest (Large 3 + Medium 3.5) in separatem Chat — Ergebnis fließt in
-die Modellentscheidung ein.
+### Mistral-Test-Ergebnis
+Large 3: qualitativ stark, aber Schema-Abweichungen + 43% Wortzahl-Overshoot.
+Medium 3.5: Rate-Limit nach Large-Call — noch nicht testbar.
+→ Für Produktion: Prompt-Tuning nötig, Post-Processing-Schicht für Schema-Keys.
 
 ---
 

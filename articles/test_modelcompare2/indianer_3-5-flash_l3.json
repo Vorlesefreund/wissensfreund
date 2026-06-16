@@ -1,0 +1,336 @@
+{
+  "meta": {
+    "id": "indianer_3-5-flash_l3",
+    "title": "Indianer",
+    "subtitle": "Wer die „Indianer“ wirklich sind und wie sie lebten",
+    "emoji": "🏹",
+    "age_level": 3,
+    "pattern": "history_person",
+    "theme_color": "#D2691E",
+    "word_count": 583,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Indianer",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "kulturen",
+    "generated_at": "2026-06-10T07:04:15.486277+00:00",
+    "grounding_companions": [
+      "Tipi",
+      "Wigwam und Wickiup",
+      "Sitting Bull",
+      "Amerikanischer Bison",
+      "Wappenpfahl"
+    ],
+    "generation_method": "gemini-3.5-flash/medium/v3.23"
+  },
+  "images": [],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Ein Name, der auf einem Irrtum beruht",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Viele denken bei dem Wort „Indianer“ sofort an Federschmuck, Tipis und die Jagd auf wilde Büffel.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Doch dieses vertraute Bild aus Filmen zeigt nur einen winzigen Ausschnitt einer riesigen, farbenprächtigen Welt.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Tatsächlich ist „Indianer“ eine Sammelbezeichnung für die unzähligen verschiedenen Völker, die schon lange vor den Europäern in Amerika lebten.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Der Name geht auf einen berühmten Irrtum von Christoph Kolumbus zurück.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Als er im Jahr 1492 den Kontinent erreichte, glaubte er fälschlicherweise, in Indien gelandet zu sein, und nannte die Einwohner kurzerhand „Indios“.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Eine riesige Vielfalt an Kulturen",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s006",
+          "text": "Die Vorfahren dieser Völker wanderten vor mindestens 16.000 Jahren über eine eisige Landbrücke von Asien nach Amerika ein.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Über die Jahrhunderte entwickelten sich Hunderte von eigenen Sprachen und völlig unterschiedliche Lebensweisen.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Einige Völker im Süden bauten riesige, dauerhafte Städte aus Stein und betrieben fortschrittlichen Ackerbau.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Ihnen verdanken wir heute wichtige Nutzpflanzen wie Mais, Kartoffeln, Tomaten, Kürbisse und Avocados.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Andere Gruppen lebten als Nomaden und zogen im Rhythmus der Jahreszeiten durch das Land, um zu jagen und Wildpflanzen zu sammeln.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Tipis, Wigwams und Wappenpfähle",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s011",
+          "text": "Die Behausungen der Menschen waren perfekt an ihre jeweilige Umwelt angepasst.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Die Bisonjäger in den weiten Grassteppen Nordamerikas wohnten in Tipis.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Diese kegelförmigen Zelte bestanden aus einem Holzgerüst, das mit schweren Bisonhäuten bespannt war.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Sie ließen sich von den Frauen des Stammes in nur einer Stunde aufbauen und schnell wieder transportieren.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "In den waldreichen Regionen im Osten bauten die Menschen dagegen Wigwams.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Das waren feste, kuppelförmige Hütten aus gebogenen Ästen, die mit schützender Baumrinde oder Grasmatten gedeckt wurden.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "An der waldreichen Pazifikküste wiederum schnitzten die Völker riesige Wappenpfähle aus dicken Baumstämmen.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Diese reich verzierten Kunstwerke erzählten die Geschichte einer Familie und zeigten ihren Rang in der Gemeinschaft.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Hatten die Ureinwohner Amerikas wirklich rote Haut?",
+          "reveal_text": "Nein, das ist ein weit verbreitetes Vorurteil. Die frühen europäischen Siedler wussten genau, dass die Ureinwohner eine braune Hautfarbe haben. Der Begriff „Rothaut“ entstand vermutlich, weil sich einige Völker bei Feierlichkeiten oder für den Kampf mit roter Erdfarbe bemalten. Später verbreitete sich in Europa fälschlicherweise der Glaube, die Haut selbst sei rot.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Verdrängung und Zerstörung",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s019",
+          "text": "Mit der Ankunft der europäischen Siedler begann für die Ureinwohner eine Zeit des großen Leids.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Die Fremden brachten Krankheiten wie Pocken und Masern mit, gegen die die Ureinwohner keine Abwehrkräfte hatten.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Millionen Menschen starben qualvoll an diesen Seuchen.",
+          "img_index": -1
+        },
+        {
+          "id": "s022",
+          "text": "Zudem wurden die Ureinwohner durch Kriege und Gewalt immer weiter von ihrem fruchtbaren Land vertrieben.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "In Nordamerika rotteten die Siedler gezielt die riesigen Bisonherden aus, um den ansässigen Völkern die Lebensgrundlage zu entziehen.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Berühmte Anführer wie der Medizinmann Sitting Bull leisteten erbitterten Widerstand, konnten die militärische Übermacht aber letztlich nicht stoppen.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "Am Ende wurden die Überlebenden gezwungen, in oft kargen Schutzgebieten, den sogenannten Reservaten, zu leben.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Um die Kultur der Ureinwohner ganz auszulöschen, trennten die Regierungen in Nordamerika Kinder gewaltsam von ihren Familien. Sie wurden in strenge Internate gesteckt. Dort wurde ihnen verboten, ihre Muttersprache zu sprechen, ihre traditionelle Kleidung zu tragen oder ihre Bräuche auszuüben."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Der Kampf um Rechte heute",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s026",
+          "text": "Heute leben viele Millionen Nachfahren der ersten Amerikaner auf dem gesamten Doppelkontinent.",
+          "img_index": -1
+        },
+        {
+          "id": "s027",
+          "text": "Besonders in Ländern wie Bolivien stellen sie sogar die Mehrheit der Bevölkerung.",
+          "img_index": -1
+        },
+        {
+          "id": "s028",
+          "text": "Viele Gemeinschaften kämpfen heute erfolgreich vor Gerichten um ihr geraubtes Land und die Anerkennung ihrer alten Verträge.",
+          "img_index": -1
+        },
+        {
+          "id": "s029",
+          "text": "Sie beleben ihre alten Sprachen wieder und pflegen stolz ihre Traditionen.",
+          "img_index": -1
+        },
+        {
+          "id": "s030",
+          "text": "Im Jahr 2024 bat US-Präsident Joe Biden die indigenen Völker im Namen der USA offiziell um Verzeihung für die grausamen Misshandlungen in den früheren Internaten.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Wappenpfähle können gigantisch werden! Einer der höchsten Wappenpfähle der Welt steht in Alert Bay in Kanada. Er ist stolze 56,4 Meter hoch – das ist so hoch wie ein Hochhaus mit etwa 18 Stockwerken!"
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Warum nannte Christoph Kolumbus die Ureinwohner Amerikas „Indianer“?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Weil er dachte, er sei in Indien gelandet."
+          },
+          {
+            "key": "B",
+            "text": "Weil das Wort in seiner Sprache „Freunde“ bedeutete."
+          },
+          {
+            "key": "C",
+            "text": "Weil sie aus dem asiatischen Land Indien eingewandert waren."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Aus welchem Material bestand die schützende Außenhülle eines Tipis?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Aus dicken Rindenstücken von Birken und Ulmen."
+          },
+          {
+            "key": "B",
+            "text": "Aus gegerbten Tierhäuten, meistens vom Bison."
+          },
+          {
+            "key": "C",
+            "text": "Aus geflochtenem Stroh und Lehm."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Was war ein „Wigwam“ im Vergleich zu einem Tipi?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein hölzerner Wappenpfahl an der Pazifikküste."
+          },
+          {
+            "key": "B",
+            "text": "Ein großes Segelschiff der europäischen Entdecker."
+          },
+          {
+            "key": "C",
+            "text": "Eine feste, kuppelförmige Hütte aus gebogenen Ästen und Rinde."
+          }
+        ],
+        "correct_key": "C"
+      },
+      {
+        "id": "q4",
+        "text": "Welche traurige Methode nutzten Regierungen früher, um die indigene Kultur zu zerstören?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie schickten die Kinder in strenge Internate und verboten ihre Sprache."
+          },
+          {
+            "key": "B",
+            "text": "Sie verboten den Ureinwohnern, Gemüse anzubauen."
+          },
+          {
+            "key": "C",
+            "text": "Sie zwangen alle Menschen, dauerhaft in Booten zu leben."
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Tipi",
+      "Wigwam",
+      "Sitting Bull",
+      "Amerikanischer Bison",
+      "Wappenpfahl"
+    ],
+    "discover": [
+      "Maya",
+      "Azteken",
+      "Christoph Kolumbus",
+      "Beringia"
+    ]
+  }
+}

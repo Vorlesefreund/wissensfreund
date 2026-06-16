@@ -1,0 +1,122 @@
+<planung>
+MUSTER: history_person
+QUELLEN: https://de.wikipedia.org/wiki/Indianer + [gefolgter Link 1: https://de.wikipedia.org/wiki/Tipi — Details zu Wohnformen] + [gefolgter Link 2: https://de.wikipedia.org/wiki/Wappenpfahl — Klärung Totempfahl-Mythos] + [gefolgter Link 3: https://de.wikipedia.org/wiki/Amerikanischer_Bison — Bedeutung als Lebensgrundlage] + [gefolgter Link 4: https://de.wikipedia.org/wiki/Pocahontas — Beispiel für Vermittlung] + [gefolgter Link 5: https://de.wikipedia.org/wiki/Wigwam_und_Wickiup — Unterscheidung Behausungen]
+BEREICHERUNGS_LINKS: [Amerikanischer_Bison: Die dramatische Beinahe-Ausrottung des Nationaltiers verdeutlicht den kulturellen Überlebenskampf.] [Wappenpfahl: Die Korrektur des Begriffs "Marterpfahl" und die soziale Bedeutung der Schnitzkunst bieten starken Korrektur-Mehrwert.]
+APPEAL: S1 niedrig · S2 mittel · S3 hoch
+CONTENT_DEPTH: 3
+FAKTEN_S1: [Nicht relevant für S3]
+FAKTEN_S2: [Nicht relevant für S3]
+FAKTEN_S3: [Einwanderung über Beringia vor 16.000 Jahren. Hochkulturen wie Maya, Azteken und Inka. Columbus-Irrtum 1492. Katastrophe durch Krankheiten (90% Rückgang). Boarding Schools und Kulturverlust. Heutiger Kampf um Rechte und Souveränität.]
+KINDERWELT_ANKER: [Essen: Mais, Kartoffeln und Tomaten — Dinge, die Kinder täglich essen, stammen von indianischen Züchtungen.]
+HAKEN: [Viele denken bei Indianern sofort an Winnetou, Federhauben oder wilde Kämpfe in Hollywood-Filmen – doch das ist nur ein winziger und oft falscher Teil einer riesigen Geschichte über einen ganzen Kontinent.]
+BOX_PLAN_S1: [Nicht relevant für S3]
+BOX_PLAN_S2: [Nicht relevant für S3]
+BOX_PLAN_S3: [stimmt_das · Mitte · Rothaut-Mythos] [wow · Ende · Bison-Zahlen (30 Mio auf 1000)] [warnung · Mitte · Internate/Residential Schools]
+</planung>
+{
+  "meta": {
+    "id": "indianer_l3",
+    "title": "Indianer",
+    "subtitle": "Die ersten Völker Amerikas",
+    "emoji": "🏹",
+    "age_level": 3,
+    "pattern": "history_person",
+    "theme_color": "#A0522D",
+    "word_count": 585,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Indianer",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "völker"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "tipi_plains.jpg",
+      "alt": "Ein traditionelles Tipi der Plains-Indianer",
+      "caption": "Das Tipi war das ideale Haus für Jäger, die den Bisonherden folgten.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Wikipedia User",
+      "source_url": "https://de.wikipedia.org/wiki/Tipi",
+      "wikimedia_id": "File:Tipi.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d3/Tipi.jpg/400px-Tipi.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Ein ganzer Kontinent voller Vielfalt",
+      "section_role": "intro",
+      "sentences": [
+        {"id": "s001", "text": "Wenn du an Indianer denkst, hast du vielleicht sofort Federhauben, Tipis oder wilde Reiter im Kopf.", "img_index": -1},
+        {"id": "s002", "text": "Doch das ist nur ein winziger Teil der Wahrheit: Als „Indianer“ bezeichnet man die riesige Gruppe von Menschen, die schon lange vor den Europäern in Amerika lebten.", "img_index": -1},
+        {"id": "s003", "text": "Es gab tausende verschiedene Völker mit ganz eigenen Sprachen und Lebensweisen.", "img_index": -1},
+        {"id": "s004", "text": "Der Name selbst geht auf einen berühmten Irrtum zurück: Als Christoph Kolumbus 1492 in Amerika landete, dachte er, er sei in Indien angekommen.", "img_index": -1},
+        {"id": "s005", "text": "Deshalb nannte er die Bewohner „Indios“, woraus im Deutschen das Wort Indianer wurde.", "img_index": -1}
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Die ersten Amerikaner",
+      "section_role": "historical_context",
+      "sentences": [
+        {"id": "s006", "text": "Die Geschichte der indianischen Völker begann schon vor mindestens 16.000 Jahren.", "img_index": -1},
+        {"id": "s007", "text": "Damals wanderten Menschen aus Asien über eine Landbrücke namens „Beringia“ nach Amerika ein.", "img_index": -1},
+        {"id": "s008", "text": "Über die Jahrtausende breiteten sie sich über den gesamten Doppelkontinent aus und passten sich ihrer Umgebung an.", "img_index": -1},
+        {"id": "s009", "text": "Einige blieben Jäger und Sammler, während andere riesige Städte und Reiche gründeten.", "img_index": -1},
+        {"id": "s010", "text": "Vielleicht hast du schon von den Maya, Azteken oder Inka gehört – sie bauten gewaltige Pyramiden und besaßen unglaubliche Mengen an Gold.", "img_index": -1},
+        {"id": "s011", "text": "Auch viele Lebensmittel, die du heute isst, wie Mais, Kartoffeln, Tomaten und Kakao, wurden von indianischen Bauern gezüchtet.", "img_index": -1}
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Hatten Indianer wirklich eine rote Haut?",
+          "reveal_text": "Nein, das ist ein Missverständnis. Ihre Haut ist eigentlich bräunlich. Der Begriff „Rothaut“ entstand wahrscheinlich, weil sich einige Krieger der Cherokee im 18. Jahrhundert rot bemalten, um sich von den weißen Europäern abzugrenzen. Später glaubten viele Menschen fälschlicherweise, das sei die echte Hautfarbe.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Wohnen und Schnitzen",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {"id": "s012", "text": "Je nachdem, wo sie lebten, bauten die Völker ganz unterschiedliche Häuser.", "img_index": 0},
+        {"id": "s013", "text": "Die Jäger in den weiten Grassteppen nutzten das Tipi, ein kegelförmiges Zelt aus Bisonhäuten, das man schnell abbauen konnte.", "img_index": 0},
+        {"id": "s014", "text": "Im Waldland lebten Menschen oft in Wigwams – das sind feste Hütten aus gebogenen Ästen, die mit Baumrinde oder Matten bedeckt waren.", "img_index": -1},
+        {"id": "s015", "text": "An der Westküste schnitzten Völker wie die Haida riesige Wappenpfähle aus Baumstämmen.", "img_index": -1},
+        {"id": "s016", "text": "Diese Pfähle, die oft fälschlicherweise Totempfähle genannt werden, waren keine Götterbilder, sondern erzählten die Geschichte und den Rang einer Familie.", "img_index": -1},
+        {"id": "s017", "text": "Man liest sie übrigens von unten nach oben.", "img_index": -1}
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Die große Katastrophe",
+      "section_role": "process_how",
+      "sentences": [
+        {"id": "s018", "text": "Als immer mehr Europäer nach Amerika kamen, änderte sich alles.", "img_index": -1},
+        {"id": "s019", "text": "Die Ankömmlinge brachten Krankheiten wie Pocken und Grippe mit, gegen die die Ureinwohner keine Abwehrkräfte hatten.", "img_index": -1},
+        {"id": "s020", "text": "Man schätzt, dass dadurch bis zu 90 Prozent der indianischen Bevölkerung starben – das war eine der größten Katastrophen der Menschheitsgeschichte.", "img_index": -1},
+        {"id": "s021", "text": "Zusätzlich wurden die Völker durch Kriege und Gewalt von ihrem Land vertrieben.", "img_index": -1},
+        {"id": "s022", "text": "Um sie endgültig zu besiegen, töteten Siedler im 19. Jahrhundert fast alle Bisons, die für viele Stämme die wichtigste Lebensgrundlage waren.", "img_index": -1}
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Ein dunkles Kapitel: Um die indianische Kultur zu vernichten, wurden Kinder über Jahrzehnte gezwungen, in Internate (Boarding Schools) zu gehen. Dort durften sie ihre Muttersprache nicht sprechen und ihre Traditionen nicht ausüben. Erst 2024 entschuldigte sich der US-Präsident Joe Biden offiziell für dieses Unrecht."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Indianer heute",
+      "section_role": "today_legacy",
+      "sentences": [
+        {"id": "s023", "text": "Heute leben in Nord- und Südamerika noch Millionen von Nachfahren der Ureinwohner.", "img_index": -1},
+        {"id": "s024", "text": "In den USA und Kanada wohnen viele in eigenen Gebieten
