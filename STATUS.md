@@ -1,12 +1,24 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T05:18:07Z -->
+<!-- updated: 2026-06-16T05:23:45Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Anker-Nachträge: 27 Grundstock-Themen bewertet (2026-06-16).** ← AKTUELL
+**Finaler Katalog-Merge abgeschlossen (2026-06-16).** ← AKTUELL
+- catalog_manual.json: 424 Einträge (6 alt + 418 neu aus audit+anker)
+- catalog_full.json: 4379 primary | 214 Leuchtturm | 565 sensibel | 162 reserve
+- Keine exakten Duplikate
+- 12 Fuzzy-Paare (>=0.9) wo BEIDE Varianten im Katalog — brauchen manuelle Entscheidung:
+  KLAR DOPPELT: Galápagos-Inseln/Galapagosinseln, Galápagos-Riesenschildkröte/Galapagos-R.,
+    Samen/Same (Pflanze), Ungeheuer/Seeungeheuer von Loch Ness
+  WAHRSCH. DOPPELT: Tintenfisch/Tintenfische, Zwilling/Zwillinge,
+    Kohlenhydrat/Kohlenhydrate, Gefühl/Gefühle, Feder/Federn
+  VERSCHIEDENE THEMEN (behalten): Erfindung des Radios ≠ Erfindung des Rades,
+    Grille ≠ Grillen (Insekt vs. BBQ), Ruder ≠ Rudern (Gegenstand vs. Sport)
+
+**Anker-Nachträge: 27 Grundstock-Themen bewertet (2026-06-16).**
 - catalog_rater_anker.py: 1 Opus-Call, alle 27 mit gesperrten Anker-erg-Werten
 - 27/27 bewertet | 3 Leuchtturm (Elefant, Indianer, Lego) | 7 sensibel
 - erg aus xlsx übernommen: alle 27 hatten Anker-Werte, 0 neu bewertet
