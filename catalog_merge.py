@@ -33,6 +33,19 @@ PLURAL_PAIRS = {
     "fossilien": "fossil", "samen": "same", "dünen": "düne",
 }
 
+# Variante → kanonische Schreibweise (geprüfte Bedeutungsgleichheit)
+# Bewusst NICHT enthalten: Zwilling/Zwillinge (echte Bedeutungstrennung)
+VARIANT_MAP = {
+    "galápagos-inseln":           "galapagosinseln",
+    "galápagos-riesenschildkröte":"galapagos-riesenschildkröte",
+    "same (pflanze)":             "samen (pflanze)",
+    "seeungeheuer von loch ness": "ungeheuer von loch ness",
+    "tintenfische":               "tintenfisch",
+    "kohlenhydrate":              "kohlenhydrat",
+    "gefühle":                    "gefühl",
+    "federn":                     "feder",
+}
+
 # ── Pfade ─────────────────────────────────────────────────────────────────
 
 REPO_ROOT       = pathlib.Path(__file__).parent
@@ -81,7 +94,8 @@ def load_all() -> list[dict]:
 
 def normalize(s: str) -> str:
     lower = s.strip().lower()
-    return PLURAL_PAIRS.get(lower, lower)
+    lower = PLURAL_PAIRS.get(lower, lower)
+    return VARIANT_MAP.get(lower, lower)
 
 
 def priority(item: dict) -> tuple:

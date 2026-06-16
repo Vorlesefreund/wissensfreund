@@ -1,12 +1,19 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T05:46:46Z -->
+<!-- updated: 2026-06-16T05:52:47Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**FIX: Annotation-Transfer catalog_merge.py (2026-06-16).** ← AKTUELL
+**Dubletten-Bereinigung: 8 Varianten via VARIANT_MAP (2026-06-16).** ← AKTUELL
+- VARIANT_MAP in catalog_merge.py: 8 Schreibvarianten → Kanon (dedup)
+- Ergebnis: 4371 primary (−8 vs. 4379), keine exakten Doppel
+- Zwilling/Zwillinge BEWUSST beide behalten (echte Bedeutungstrennung, WP-geprüft)
+- Behalten (keine Dedup): Erfindung des Radios+Rades, Grille+Grillen, Ruder+Rudern
+- Paarweise Verifikation: alle 8 Paare OK (jeweils genau eine Form im Katalog)
+
+**FIX: Annotation-Transfer catalog_merge.py (2026-06-16).**
 - Bug: load_existing_annotations() las nur Zeilen mit gesetztem FREIGABE → 29 Andreas-Edits verloren
 - Fix: Zeile gilt als annotiert wenn FREIGABE gesetzt ODER eignung in ('include','exclude')
 - 4146 Zeilen aus Master geladen (vorher: nur FREIGABE-Zeilen)
@@ -160,7 +167,7 @@ Bänder: S1[50,250] S2[80,400] S3[100,650]. Rater = Opus per API, Anker: 134 The
 
 ## 🔴 Nächster Schritt
 
-**Pilot-Bulk-Lauf** (z.B. 50–100 Themen aus catalog_full.json) mit der vollständigen Pipeline:
+**Pilot-Bulk-Lauf** (50–100 Themen aus catalog_full.json) mit der vollständigen Pipeline:
 generate_grounded.py aus catalog_full.json → exclude-Filter, age_floor, framing_note aktiv.
 
 ---
