@@ -1,120 +1,89 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T10:20:04Z -->
+<!-- updated: 2026-06-16T10:52:00Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Opus-Recheck nur für unsichere Bilder sensibler Themen (~$50 statt ~$200, 2026-06-16)** ← AKTUELL
-
-Opus prüft jetzt NUR `confidence=="niedrig"`-Bilder sensibler Themen (nicht alle).
-Stabile Bilder (confidence hoch/mittel) behalten Gemini-Urteil ohne Extra-Call.
-Log: "Sensibles Thema X: Opus-Recheck fuer N unsichere Bilder (von M akzeptierten)"
-
----
-
-**Bildfilter: confidence + konservatives Sperren + Opus-Recheck für sensible Themen (2026-06-16)**
+**run_batch.py: Batch-Orchestrator, Stage 1 vollständig (2026-06-16)** ← AKTUELL
 
 ### Was gebaut wurde
 
-**image_vision_filter.py** — Zwei neue Sicherheits-Schichten:
-- `confidence` im Vision-Prompt ("hoch"/"mittel"/"niedrig") — Modell meldet Unsicherheit
-- `OPUS_RECHECK_PROMPT` + `opus_recheck(api_key, image_bytes, thema)` → claude-opus-4-8 Vision, strenger Prompt, gibt (ab_stufe, beschreibung, usage_dict) zurück
-- `load_cached_image_bytes(url)` — liest 800px-Cache ohne Netz-Request
+**scripts/run_batch.py** — neuer Batch-Orchestrator (KEIN synchroner Mini-Lauf):
 
-**generate_grounded.py** — Konservatives Hochstufen + Opus-Gate:
-- Nach Gemini-Urteil: `confidence=="niedrig" AND ab_stufe==1` → `ab_stufe=2` (Log-Eintrag)
-- Opus-Recheck NUR wenn `sensibel=True` (563 von 4346 Themen, ~13%): alle akzeptierten Bilder durch claude-opus-4-8, Opus-Urteil überschreibt Gemini
-- `cost_tracker.track(schritt="vision_recheck", modell="claude-opus-4-8", ...)` je Bild
-- `sensibel` in `_build_catalog_jobs` + `TEST_JOBS` (Indianer/Demokratie=True, Biene=False)
-- `prepare_topic_sources` + `build_image_pool` haben `sensibel` + `anthropic_api_key` Parameter
-- Report enthält `sensibel`, `opus_overrides`, `opus_blocked`
-- Dry-Run zeigt `sensibel=True` je Job
+Stage-Reihenfolge (Vision VOR Generierung):
 
----
+**Stage 1 SOURCING — vollständig implementiert:**
+- WP-Fetch + Lemma (sync) pro Thema
+- Kompass-Batch (Gemini, gemini-3.5-flash, InlinedRequest)
+- Companion-Fetch + Validierung (sync)
+- Image-Download (sync, 0.5s-Sleep statt 10s, kein Gemini-Echtzeit-Call)
+- Vision-Batch (Gemini, gemini-2.5-flash, Base64 inline, Chunking 500/Batch)
+- Conservative Upgrade (confidence=niedrig + ab_stufe=1 → 2, lokal)
+- Opus-Recheck (Anthropic Batch, claude-opus-4-8, nur sensibel + confidence=niedrig)
+- Checkpoint-Save (stage1_checkpoint.json), Resume-fähig
 
-**Bildfilter Baustein 1: ab_stufe + stufengenaue Auswahl + Bildanzahl (2026-06-16)**
+**Stage 2 GENERIERUNG — Gerüst mit TODOs:**
+- Gemini Batch + Context Cache (stable prefix)
+- select_images_for_stufe + variable suffix je Stufe
+- Post-Processing: Wortzahl-Guard + Box-Guard (synchron)
 
-### Was gebaut wurde
+**Stage 3 LEKTORAT — Gerüst mit TODOs:**
+- Anthropic Message Batches, 2 Pässe (source_passages + Nachschlag)
+- cache_control: ephemeral auf System-Prompt
 
-**image_vision_filter.py** — Vision-Prompt neu:
-- `ab_stufe` (0/1/2/3) statt `kindgerecht` bool: 0=gesperrt, 1=ab 4J, 2=ab 7J, 3=ab 10J
-- Klare Stufenkriterien im Prompt: Skelette/Fossilien → ab_stufe≥2; Organe/Anatomie → ab_stufe=3
-- `hero_candidate` (war: `hero_tauglich`), `beschreibung` als kombiniertes Feld
-- Hard-Block ab_stufe=0, Abwärtskompatibilität: kindgerecht = ab_stufe>0
+**Stage 4 TTS — Stub:** wartet auf tts_produce.py
 
-**generate_grounded.py** — Drei Änderungen:
-- `select_images_for_stufe(pool, stufe, appeal)`: filtert Pool auf ab_stufe≤stufe, cap nach APPEAL_TARGET
-- `generate_one_level()`: ruft `select_images_for_stufe()` am Anfang auf → S1 sieht nur S1-Bilder im Prompt
-- `_variable_suffix(job, wmax)`: neuer Helper mit AGE_LEVEL + BILD-STUFEN-FILTER + WORTZIEL (ersetzt inlinierte Strings in build/split)
-- Bildanzahl-Bänder im Prompt: high=10–15, medium=5–10, low=3–6 (war: "8-12"/"4-8")
-- frühe Terminierung in build_image_pool: stoppt wenn S1-Bilder=target (statt accepted=target)
+**scripts/WISSEN_PIPELINE_PRODUKTION.md** — neu erstellt (Batch-Architektur-Doku)
 
-**batch_run.py** — Feldnamen auf neues Schema aktualisiert (hero_candidate, ab_stufe)
+### Dry-Run bestätigt
 
----
+```
+python scripts/run_batch.py --themen "Elefant" "Hund" "Dinosaurier" "Vulkan" "Tabak" --dry-run
+→ Tabak nicht in catalog → 4 Themen
+→ Stage 1: 4 Kompass-Requests, ~160 Vision-Requests, 0 sensibel (kein Opus)
+→ Stage 2: 12 Requests (4 × 3), Context Cache geplant
+→ Exit 0 ✅
+```
 
-**Baustein 2: catalog-Connector + cost_tracker vollständig verdrahtet (2026-06-16)**
-
-### Was gebaut wurde
-
-**generate_grounded.py** — Neue Flags + Catalog-Connector:
-- `--catalog Vulkan Biene ...` → Themen aus catalog_full.json (dynamisch)
-- `--catalog-rank N` → Top-N nach production_rank
-- `--stufen 1 2 3` → welche Stufen generieren (default: alle)
-- `--run-id minitest` → cost_tracker run-id (default: Zeitstempel)
-- `--dry-run` → zeigt Jobs + Eignungs-Gate, kein API-Call
-- `_build_catalog_jobs()` + `_load_catalog_rank_jobs()` aus catalog_full.json
-- Dry-Run getestet: `Vulkan` → 3 Jobs, `Beschneidung` → nur S3 (age_floor korrekt)
-
-**cost_tracker.py** — Komplett verdrahtet an allen 6 KI-Stellen:
-- `kompass`: select_companions_raw() usage_metadata
-- `article_gen`: generate_one_level() nach call_gemini() (Erst + Retry)
-- `trim`: _trim_article_to_cap() → gemini_client._last_usage
-- `box_repair`: _box_repair_pass() → gemini_client._last_usage
-- `vision`: analyze_with_vision() → usage_metadata je Bild
-- `lektorat`: run_lektorat_sync() → usage_by_id je Artikel-ID
-
-**gemini_client.py**: `global _last_usage` korrekt deklariert (SyntaxError behoben)
-
-**image_vision_filter.py**: `analyze_with_vision()` gibt `(dict|None, usage_dict)` zurück
-
-**lektorat_common.py**: `run_lektorat_sync()` gibt `(results, usage_by_id)` zurück
+Hinweis: Tabak nicht in catalog_full.json → wird übersprungen (nicht exclude, einfach fehlend).
+Für echten Opus-Recheck-Test: sensibel=True Thema wie "Indianer" oder "Demokratie" nutzen.
 
 ---
 
-**Baustein 1: cost_tracker.py v2 (TTS-Preis, 2026-06-16)**
-- TTS: $1.00/1M Input, $20.00/1M Audio-Tok, 25 Tok/Sek (ai.google.dev, Jun 2026)
-- Selbsttest 180s: $0.0906 ✅
-- Statische Projektion: 4346×3×180s = $1173 TTS-Output
+**Opus-Recheck nur für unsichere Bilder sensibler Themen (~$50 statt ~$200, 2026-06-16)**
 
 ---
 
 ## Gerade in Arbeit
 
-Nichts aktiv.
+Nichts aktiv. Nächster Schritt: Stage 2 (Generierung) implementieren ODER Stage 1 echt für 5 Themen testen.
 
 ---
 
 ## Offen nach Priorität
 
+### run_batch.py Stage 2 — GENERIERUNG (TODO)
+Gemini Batch + Context Cache, select_images_for_stufe, Wortzahl/Box-Guard.
+Importiert aus generate_grounded.py: try_create_gemini_cache, _split_grounded_user_message,
+_trim_article_to_cap, _box_repair_pass.
+
+### run_batch.py Stage 3 — LEKTORAT (TODO)
+Anthropic Message Batches, 2 Pässe (source_passages + volle Companion-Texte).
+
 ### Baustein 3 — tts_produce.py (Produktions-TTS)
 compose → tagging (gemini-2.5-flash-lite) → gemini-3.1-flash-tts-preview → WAV/MP3 → R2
 
 ### Baustein 4 — Quiz-Vertonung
-5–6 TTS-Schnipsel je Frage (Frage / A/B/C / Feedback richtig / Feedback falsch+Lösung / Erfolgsmeldung)
-
-### Baustein 5 — Mini-Orchestrator (run_mini.py)
-5 Themen × 3 Stufen end-to-end: Artikel + Lektorat + Bilder + TTS + R2
 
 ### Offene Audio-Entscheidungen (Andreas)
 1. Iapetus-Qualität im Audio-Review bestätigen (tts_audio_compare.html)
-2. Feste Tag-Palette vs. freie Tags — was klingt besser?
-3. Tagging-Modell: gemini-3.5-flash (503-anfällig) vs. gemini-2.5-flash-lite (stabil)
+2. Feste Tag-Palette vs. freie Tags
+3. Tagging-Modell: gemini-3.5-flash vs. gemini-2.5-flash-lite
 
 ### Sonstiges
-- categories_backlog.json → categories-Array je Artikel (spätere Phase)
+- categories_backlog.json → categories-Array je Artikel
 - Flutter WfArticleListScreen + 3-flash-preview L3 Fix
 
 ---
@@ -123,15 +92,17 @@ compose → tagging (gemini-2.5-flash-lite) → gemini-3.1-flash-tts-preview →
 
 | Baustein | Datei | Status |
 |---|---|---|
-| Artikel-Generierung | generate_grounded.py | ✅ lauffähig, gemini-3.5-flash |
-| Bild-Vision | image_vision_filter.py | ✅ lauffähig, gemini-2.5-flash |
+| Artikel-Generierung | generate_grounded.py | ✅ lauffähig, synchron |
+| Batch-Orchestrator Stage 1 | run_batch.py | ✅ Stage 1 komplett |
+| Batch-Orchestrator Stage 2-4 | run_batch.py | ⏳ Gerüst (TODOs) |
+| Bild-Vision | image_vision_filter.py | ✅ lauffähig |
 | TTS-Vorlesetext | tts_compose.py | ✅ lauffähig |
 | TTS-Generierung | tts_produce.py | ❌ fehlt |
 | R2-Upload | upload_articles.py | ✅ lauffähig |
-| Cost-Tracking | cost_tracker.py | ✅ verdrahtet (Baustein 1+2) |
-| Orchestrator | run_mini.py | ❌ fehlt |
+| Cost-Tracking | cost_tracker.py | ✅ verdrahtet |
+| Orchestrator Sync | (run_mini.py) | ❌ fehlt, durch run_batch.py ersetzt |
 
 ### Catalog (final)
 catalog_full.json: **4346 primary**, 213 Leuchtturm, 563 sensibel, 56 exclude
-eignung_verdicts.json: 738 Verdicts (exclude/age_floor/framing_note) ✅
-Ergiebigkeit: ergiebigkeit_scores.json, 134 Anker, Wortziel-Kurve kalibriert ✅
+eignung_verdicts.json: 738 Verdicts ✅
+Ergiebigkeit: ergiebigkeit_scores.json, 134 Anker ✅
