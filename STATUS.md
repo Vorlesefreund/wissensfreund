@@ -104,6 +104,13 @@ Verifikation Impfung (14 Bilder):
 Kostenschätzung Opus-Recheck Vollkatalog: ~$40 (563 sensibel × ~10-15 Bilder +
 grenzfall=true bei nicht-sensiblen), Batch-Preis. Bewusst akzeptiert (Kinderschutz).
 
+BEOBACHTUNGSPUNKT (Stage 2 + Audit): grenzfall-Signal sperrt aggressiv
+(z.B. Spartacus-Bronzestatuen wg. Ketten/Nacktheit als grenzfall). Sicherheitlich
+gewollt, aber sensible Themen könnten bildarm werden. Beim Mini-Lauf + manuellem
+Audit prüfen, ob sensible Themen genug brauchbare Bilder behalten. Im Zweifel
+Vorsicht > Bildfülle. Falls zu aggressiv: grenzfall-Kriterien für historische
+Kunstwerke/Statuen nachschärfen (Statue ≠ Foto).
+
 ## Gerade in Arbeit
 
 **Stage 2 (Generierung) implementieren**
