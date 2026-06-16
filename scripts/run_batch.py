@@ -127,6 +127,9 @@ DONE_STATES    = {
 }
 SUCCESS_STATES = {"JOB_STATE_SUCCEEDED", "JOB_STATE_PARTIALLY_SUCCEEDED"}
 
+# Opus-Recheck: max Bilder pro Thema (sensibel: top-18 nach Relevanz → Stage 2 zieht NUR daraus)
+OPUS_CAP = max(APPEAL_TARGET.values()) + 3  # 18 (high-Ziel 15 + 3 Puffer)
+
 _RUN_ID: str = ""
 
 
@@ -331,7 +334,7 @@ def stage1_sourcing(
         print(f"Kompass-Batch: {len(wp_data)} InlinedRequests")
         n_sens = sum(1 for d in wp_data.values() if d["sensibel"])
         print(f"Vision-Batch: ~{len(wp_data) * MAX_VISION_CHECKS} Requests (max {MAX_VISION_CHECKS}/Thema)")
-        print(f"Opus-Recheck: {n_sens} sensible Themen → alle Bilder; sonst → grenzfall=true")
+        print(f"Opus-Recheck: {n_sens} sensible Themen → top-{OPUS_CAP} Bilder (relevanz-sortiert); sonst → grenzfall=true (max {OPUS_CAP})")
         return {}
 
     # ── Step 2: Kompass-Batch (Gemini) ────────────────────────────────────────
@@ -453,10 +456,10 @@ def stage1_sourcing(
                 continue
 
             prompt  = VISION_PROMPT_TEMPLATE.format(thema=thema)
-            # Schlüssel: thema + filename (sanitiert)
-            safe_t  = re.sub(r"[^\w]", "_", thema)[:30]
-            safe_fn = re.sub(r"[^\w.-]", "_", img["filename"])[:50]
-            key     = f"{safe_t}___{safe_fn}"
+            # Schlüssel: nur [a-zA-Z0-9_-], max 64 Zeichen (Anthropic-Batch-Pflicht)
+            safe_t  = re.sub(r"[^a-zA-Z0-9_-]", "_", thema)[:20]
+            safe_fn = re.sub(r"[^a-zA-Z0-9_-]", "_", img["filename"])[:41]
+            key     = f"{safe_t}__{safe_fn}"
 
             vision_reqs.append(types.InlinedRequest(
                 contents=types.Content(
@@ -532,6 +535,8 @@ def stage1_sourcing(
     for thema, data in wp_data.items():
         accepted: list[dict] = []
         n_rejected = 0
+        # Lookup: filename → Batch-Key (für Opus custom_id)
+        filename_to_key: dict[str, str] = {}
 
         for key in topic_img_keys.get(thema, []):
             img_meta = img_meta_by_key.get(key, {})
@@ -540,13 +545,13 @@ def stage1_sourcing(
                 n_rejected += 1
                 continue
 
-            ab_stufe       = result.get("ab_stufe", 0)
-            grenzfall      = result.get("grenzfall", False)
+            ab_stufe        = result.get("ab_stufe", 0)
+            grenzfall       = result.get("grenzfall", False)
             grenzfall_grund = result.get("grenzfall_grund", "")
-            confidence     = result.get("confidence", "hoch")
-            beschreibung   = result.get("beschreibung", "")
-            relevanz       = result.get("relevanz", 0)
-            hero           = result.get("hero_candidate", False)
+            confidence      = result.get("confidence", "hoch")
+            beschreibung    = result.get("beschreibung", "")
+            relevanz        = result.get("relevanz", 0)
+            hero            = result.get("hero_candidate", False)
 
             # Conservative Upgrade: grenzfall=true verhindert ab_stufe=1
             if grenzfall and ab_stufe == 1:
@@ -569,14 +574,37 @@ def stage1_sourcing(
                 "beschreibung":    beschreibung,
             }
             accepted.append(entry)
-
-            # Opus-Recheck: sensibel=True → alle Bilder; sonst → nur grenzfall=true
-            if anthropic_key and (data["sensibel"] or grenzfall):
-                opus_kandidaten.append({"thema": thema, "key": key, "img": entry})
+            filename_to_key[img_meta.get("filename", "")] = key
 
         accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))
-        data["images"] = accepted
-        log.info("  '%s': %d akzeptiert, %d verworfen", thema, len(accepted), n_rejected)
+
+        if data["sensibel"]:
+            # Sensible Themen: nur top-OPUS_CAP Bilder prüfen lassen;
+            # Stage 2 zieht ausschließlich aus diesem geprüften Pool.
+            opus_pool = accepted[:OPUS_CAP]
+            data["images"] = opus_pool
+            if anthropic_key:
+                for e in opus_pool:
+                    opus_kandidaten.append({
+                        "thema": thema,
+                        "key":   filename_to_key.get(e.get("filename", ""), ""),
+                        "img":   e,
+                    })
+        else:
+            data["images"] = accepted
+            # Nicht-sensibel: nur grenzfall=true-Bilder → Opus, auch gecappt
+            if anthropic_key:
+                gz_pool = [e for e in accepted if e.get("grenzfall", False)][:OPUS_CAP]
+                for e in gz_pool:
+                    opus_kandidaten.append({
+                        "thema": thema,
+                        "key":   filename_to_key.get(e.get("filename", ""), ""),
+                        "img":   e,
+                    })
+
+        n_sensibel_opus = len([c for c in opus_kandidaten if c["thema"] == thema])
+        log.info("  '%s': %d akzeptiert, %d verworfen → Opus: %d",
+                 thema, len(accepted), n_rejected, n_sensibel_opus)
 
     # ── Step 7: Opus-Recheck (Anthropic Batch) ────────────────────────────────
     if opus_kandidaten and anthropic_key:
@@ -709,7 +737,89 @@ def stage1_sourcing(
     return topics_data
 
 
-# ── Stage 2: GENERIERUNG (Gerüst) ─────────────────────────────────────────────
+# ── Stage 2 Helpers ───────────────────────────────────────────────────────────
+
+def _stage2_job(thema: str, data: dict, slug: str, stufe: int) -> dict:
+    """Job-Dict für Stage 2 aus topics_data."""
+    return {
+        "article_id":        f"{slug}_l{stufe}",
+        "thema":             thema,
+        "primaer_wikipedia": data.get("resolved_title", thema),
+        "title":             thema,
+        "age_level":         stufe,
+        "topic_interest":    "medium",
+        "sensibel":          data.get("sensibel", False),
+        "pattern":           "",
+        "category_top":      "",
+        "category_sub":      "",
+        "framing_note":      data.get("framing_note", ""),
+        "resolved_appeal":   data.get("appeal", "medium"),
+        "lemma_flags":       data.get("lemma_flags", []),
+    }
+
+
+def _gen2_variable_suffix(job: dict, wmax: int) -> str:
+    """Variable Suffix für Stage-2-Batch: AGE_LEVEL + WORTZIEL + source_passages-Wrapper."""
+    base = _variable_suffix(job, wmax)
+    return (
+        base
+        + "\n\nAUSGABE-FORMAT (Stage 2 Batch): Antwort als Wrapper-JSON:\n"
+        '{"article": <Artikel nach Schema v1.0>, "source_passages": ['
+        '{"claim": "exakter Satz aus Artikel", "source": "Wikipedia-Artikeltitel", '
+        '"passage": "woertliches Quellzitat"}]}\n'
+        "source_passages: Je Fakten-Satz 1 Eintrag mit woertlichem Zitat aus den "
+        "eingebetteten Wikipedia-Texten. Einleitungs-/Verbindungssaetze auslassen. Max. 30 Eintraege."
+    )
+
+
+def _parse_gen2_response(raw: str) -> tuple[dict, list]:
+    """Parse Stage-2-Batch-Antwort: Wrapper-JSON {article, source_passages} oder plain Article.
+    Gibt (article_dict, source_passages_list) zurück."""
+    cleaned = re.sub(r"<planung>.*?</planung>", "", raw or "", flags=re.DOTALL)
+    cleaned = _strip_md(cleaned).strip()
+    try:
+        outer = json.loads(cleaned)
+        if isinstance(outer, dict) and "article" in outer:
+            art = outer["article"]
+            for sec in art.get("sections", []):
+                for s in sec.get("sentences", []):
+                    if s.get("img_index") is None:
+                        s["img_index"] = -1
+            return art, outer.get("source_passages", [])
+    except (json.JSONDecodeError, ValueError):
+        pass
+    return parse_article_json(raw), []
+
+
+def _set_is_hero(article: dict, images_stufe: list[dict], thema: str) -> None:
+    """Setzt is_hero=True auf dem besten Hero-Kandidaten, tiers-Pfade auf allen Bildern.
+
+    Hero-Regel: hero_candidate=True mit höchster Relevanz (select_images_for_stufe sortiert so);
+    Fallback: erstes Bild im Pool. Nur Bilder, die die Pipeline akzeptiert hat (in images_stufe).
+    """
+    thema_slug = thema.lower().replace(" ", "_").replace("/", "_")
+    pool = {img["filename"]: img for img in images_stufe}
+    hero_fname = next(
+        (img["filename"] for img in images_stufe if img.get("hero_candidate", False)),
+        images_stufe[0]["filename"] if images_stufe else None,
+    )
+    for art_img in article.get("images", []):
+        fname    = art_img.get("filename", "")
+        pool_img = pool.get(fname, {})
+        art_img["is_hero"]   = (fname == hero_fname)
+        art_img["ab_stufe"]  = pool_img.get("ab_stufe", 1)
+        art_img["grenzfall"] = pool_img.get("grenzfall", False)
+        if not art_img.get("thumb_url") and pool_img.get("thumb_url"):
+            art_img["thumb_url"] = pool_img["thumb_url"]
+        stem = fname.rsplit(".", 1)[0].replace(" ", "_")
+        art_img["tiers"] = {
+            "300":  f"bilder/{thema_slug}/{stem}_300.jpg",
+            "800":  f"bilder/{thema_slug}/{stem}_800.jpg",
+            "1600": f"bilder/{thema_slug}/{stem}_1600.jpg",
+        }
+
+
+# ── Stage 2: GENERIERUNG ──────────────────────────────────────────────────────
 
 def stage2_generierung(
     themen: list[str],
@@ -723,48 +833,268 @@ def stage2_generierung(
     """
     Stage 2: Gemini Batch — Artikel-Generierung (Themen × Stufen).
 
-    TODO: Implementierung ausstehend.
-
-    Schritte:
-    1. system_prompt = SYSTEM_PROMPT_PATH.read_text()
-    2. Für jedes Thema:
-       a. stable_prefix, _ = _split_grounded_user_message(
-              job_s1, primary_text, companion_texts, valid_companions,
-              images)  # Bild-Liste noch NICHT stufen-gefiltert
-       b. cache_name = try_create_gemini_cache(client, GEN_MODEL,
-              system_prompt, stable_prefix)
-    3. Für jedes Thema × Stufe:
-       a. images_stufe = select_images_for_stufe(images, stufe, appeal)
-       b. job = {thema, age_level=stufe, resolved_appeal=appeal, ...}
-       c. variable = _variable_suffix(job, wortziel_for(thema, stufe)[1])
-       d. InlinedRequest(contents=variable, config=...(cached_content=cache_name),
-              metadata={"key": article_id})
-       e. Fallback ohne Cache: contents = build_grounded_user_message(...)
-    4. client.batches.create(model=GEN_MODEL, src=requests)
-    5. poll_gemini_batch()
-    6. Für jede Batch-Antwort (synchron, lokal):
-       a. parse_article_json(raw)
-       b. validate_article()
-       c. Wortzahl-Check → _trim_article_to_cap() falls > cap
-       d. _box_lint() → _box_repair_pass() falls Clusterung
-       e. Metadaten setzen, Artikel speichern als {article_id}.json
-    7. _save_cp(out_dir, 2, {"status": "done", "articles": {aid: path}})
+    1. Je Thema: Gemini Context Cache (stable Wikipedia-Prefix)
+    2. Je Thema × Stufe: InlinedRequest mit variablem Suffix + source_passages-Wrapper
+    3. Gemini Batch einreichen + pollen
+    4. Post-Processing (synchron): JSON-Parse, Wortzahl-Guard, Box-Guard, is_hero
     """
     cp = _load_cp(out_dir, 2)
     if cp:
         return cp.get("articles", {})
 
+    if not SYSTEM_PROMPT_PATH.exists():
+        log.error("System-Prompt fehlt: %s", SYSTEM_PROMPT_PATH)
+        return {}
+    system_prompt = SYSTEM_PROMPT_PATH.read_text(encoding="utf-8")
+    thinking_cfg = _make_thinking_config(GEN_MODEL, budget_for_2_5=8192)
+    articles_dir = out_dir / "articles"
+    articles_dir.mkdir(exist_ok=True)
+
     if dry_run:
-        total = sum(len(stufen) for _ in themen)
+        n = sum(1 for t in themen if t in topics_data)
+        total = n * len(stufen)
         print(f"\n=== DRY-RUN Stage 2 ===")
-        print(f"Artikel-Batch: {total} Requests ({len(themen)} Themen × {len(stufen)} Stufen)")
-        print(f"  Gemini Context Cache: 1 Cache je Thema (stable prefix)")
-        print(f"  Variable Suffix: AGE_LEVEL + BILD-STUFEN-FILTER + WORTZIEL")
+        print(f"Artikel-Batch: {total} Requests ({n} Themen × {len(stufen)} Stufen)")
+        print(f"  Gemini Context Cache: 1 Cache je Thema (stable Wikipedia-Prefix)")
+        print(f"  Variable Suffix: AGE_LEVEL + BILD-STUFEN-FILTER + WORTZIEL + source_passages-Wrapper")
         print(f"  Post-Processing: Wortzahl-Guard + Box-Guard (synchron)")
         return {}
 
-    log.warning("Stage 2 (Generierung): TODO — noch nicht implementiert")
-    return {}
+    # ── Step 1: Context-Caches je Thema ─────────────────────────────────────
+    log.info("\n=== Stage 2 / Step 1: Context-Caches (%d Themen) ===", len(themen))
+    caches: dict[str, str | None] = {}
+
+    for thema in themen:
+        data = topics_data.get(thema)
+        if not data:
+            log.warning("  '%s' fehlt in topics_data — kein Cache", thema)
+            caches[thema] = None
+            continue
+        slug = thema.lower().replace(" ", "_").replace("/", "_")
+        dummy_job = _stage2_job(thema, data, slug, stufe=1)
+        stable, _ = _split_grounded_user_message(
+            dummy_job,
+            data["primary_text"],
+            data.get("companion_texts", {}),
+            data.get("valid_companions", []),
+            data.get("images", []),
+        )
+        caches[thema] = try_create_gemini_cache(client, GEN_MODEL, system_prompt, stable)
+
+    # ── Step 2: InlinedRequests aufbauen ────────────────────────────────────
+    log.info("\n=== Stage 2 / Step 2: Requests aufbauen ===")
+    gen_reqs:  list[types.InlinedRequest] = []
+    req_meta:  dict[str, dict]            = {}  # article_id → Metadaten für Post-Processing
+
+    for thema in themen:
+        data = topics_data.get(thema)
+        if not data:
+            continue
+        slug       = thema.lower().replace(" ", "_").replace("/", "_")
+        images_all = data.get("images", [])
+        appeal     = data.get("appeal", "medium")
+        cache_name = caches.get(thema)
+
+        for stufe in stufen:
+            article_id    = f"{slug}_l{stufe}"
+            wmin, wmax, _ = wortziel_for(thema, stufe)
+            images_stufe  = select_images_for_stufe(images_all, stufe, appeal)
+            job           = _stage2_job(thema, data, slug, stufe)
+
+            if cache_name:
+                variable = _gen2_variable_suffix(job, wmax)
+                contents = types.Content(
+                    role="user",
+                    parts=[types.Part.from_text(text=variable)],
+                )
+                cfg = types.GenerateContentConfig(
+                    cached_content=cache_name,
+                    max_output_tokens=32768,
+                )
+            else:
+                stable, _ = _split_grounded_user_message(
+                    job, data["primary_text"],
+                    data.get("companion_texts", {}),
+                    data.get("valid_companions", []),
+                    images_all,
+                )
+                full_msg = stable + "\n" + _gen2_variable_suffix(job, wmax)
+                contents = types.Content(
+                    role="user",
+                    parts=[types.Part.from_text(text=full_msg)],
+                )
+                cfg = types.GenerateContentConfig(
+                    system_instruction=system_prompt,
+                    max_output_tokens=32768,
+                )
+
+            req_meta[article_id] = {
+                "thema":        thema,
+                "stufe":        stufe,
+                "job":          job,
+                "images_stufe": images_stufe,
+                "wmin":         wmin,
+                "wmax":         wmax,
+            }
+            gen_reqs.append(types.InlinedRequest(
+                contents=contents,
+                config=cfg,
+                metadata={"key": article_id},
+            ))
+            log.info("  %s: S%d | %d Bilder | Wmax=%d | Cache=%s",
+                     article_id, stufe, len(images_stufe), wmax,
+                     "JA" if cache_name else "NEIN (fallback)")
+
+    if not gen_reqs:
+        log.error("Stage 2: keine Requests — abgebrochen")
+        return {}
+
+    # ── Step 3: Batch einreichen + pollen ───────────────────────────────────
+    log.info("\n=== Stage 2 / Step 3: Generierungs-Batch (%d Requests) ===", len(gen_reqs))
+    gen_batch = client.batches.create(model=GEN_MODEL, src=gen_reqs)
+    log.info("Batch eingereicht: %s", gen_batch.name)
+    gen_batch = poll_gemini_batch(client, gen_batch.name)
+    state = _state_str(gen_batch)
+    if state not in SUCCESS_STATES:
+        log.error("Generierungs-Batch fehlgeschlagen: %s — Artikel fehlen", state)
+        return {}
+
+    # ── Step 4: Post-Processing (synchron, lokal) ────────────────────────────
+    log.info("\n=== Stage 2 / Step 4: Post-Processing ===")
+    articles: dict[str, str] = {}  # article_id → Dateipfad
+
+    for resp in _get_inlined_responses(gen_batch):
+        meta_resp  = getattr(resp, "metadata", {}) or {}
+        article_id = meta_resp.get("key", "")
+        if not article_id or article_id not in req_meta:
+            log.warning("  Unbekannte Response-Key: '%s'", article_id)
+            continue
+
+        m         = req_meta[article_id]
+        thema     = m["thema"]
+        stufe     = m["stufe"]
+        job       = m["job"]
+        imgs_s    = m["images_stufe"]
+        wmin      = m["wmin"]
+        wmax      = m["wmax"]
+        data      = topics_data[thema]
+
+        raw   = _extract_text(getattr(resp, "response", None))
+        usage = _extract_usage(getattr(resp, "response", None))
+        if usage:
+            cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe=f"S{stufe}",
+                               schritt="article_gen", modell=GEN_MODEL, **usage)
+
+        if not raw:
+            log.error("  [%s] Leere Batch-Antwort", article_id)
+            continue
+
+        # JSON-Parse (Wrapper oder plain)
+        try:
+            article, source_passages = _parse_gen2_response(raw)
+        except Exception as e:
+            log.error("  [%s] JSON-Parse: %s", article_id, e)
+            err_dir = out_dir / "_errors"
+            err_dir.mkdir(exist_ok=True)
+            (err_dir / f"{article_id}_raw.txt").write_text(raw or "", encoding="utf-8")
+            continue
+
+        # Metadaten
+        article.setdefault("meta", {})
+        article["meta"]["id"]                   = article_id
+        article["meta"]["title"]                = thema
+        article["meta"]["generated_at"]         = datetime.now(timezone.utc).isoformat()
+        article["meta"]["grounding_companions"] = data.get("valid_companions", [])
+        article["meta"]["generation_method"]    = f"{GEN_MODEL}/batch/v3.23b"
+
+        # Wortzahl-Guard
+        word_count = count_article_words(article)
+        cap        = round(wmax * 1.05)
+        log.info("  [%s] Wortzahl: %d (Ziel %d–%d, Cap %d)", article_id, word_count, wmin, wmax, cap)
+
+        trims = 0
+        while word_count > cap and trims < 2:
+            trims += 1
+            log.warning("  [%s] Zu lang (%d > %d) — Trim %d/2", article_id, word_count, cap, trims)
+            try:
+                article, word_count = _trim_article_to_cap(article, wmax, GEN_MODEL, thinking_cfg)
+                u = getattr(gemini_client, "_last_usage", {})
+                if u:
+                    cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe=f"S{stufe}",
+                                       schritt="trim", modell=GEN_MODEL, **u)
+                log.info("  [%s] Nach Trim %d: %d Wörter", article_id, trims, word_count)
+            except Exception as e:
+                log.error("  [%s] Trim fehlgeschlagen: %s", article_id, e)
+                break
+        if trims:
+            article["meta"]["trim_passes"] = trims
+
+        if word_count < wmin:
+            log.warning("  [%s] Zu kurz: %d < %d → review_flag", article_id, word_count, wmin)
+            article["meta"]["review_flag"]   = True
+            article["meta"]["review_reason"] = f"Wortzahl {word_count} < {wmin}"
+        article["meta"]["word_count"] = word_count
+
+        # Box-Guard
+        box_issue = _box_lint(article)
+        if box_issue:
+            log.warning("  [%s] %s — Box-Repair", article_id, box_issue)
+            try:
+                repaired = _box_repair_pass(article, GEN_MODEL, thinking_cfg)
+                u = getattr(gemini_client, "_last_usage", {})
+                if u:
+                    cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe=f"S{stufe}",
+                                       schritt="box_repair", modell=GEN_MODEL, **u)
+                if _box_lint(repaired) is None:
+                    article = repaired
+                    article["meta"]["box_repaired"] = True
+                    log.info("  [%s] Box-Repair OK", article_id)
+                else:
+                    log.warning("  [%s] Box-Repair ohne Verbesserung → review_flag", article_id)
+                    article["meta"]["review_flag"]   = True
+                    article["meta"]["review_reason"] = (
+                        article["meta"].get("review_reason", "") + f"; {box_issue}").lstrip("; ")
+            except Exception as e:
+                log.error("  [%s] Box-Repair fehlgeschlagen: %s", article_id, e)
+                article["meta"]["review_flag"] = True
+
+        # Validierung
+        val_errors = validate_article(article, job)
+        if val_errors:
+            log.warning("  [%s] Validierung: %s", article_id, "; ".join(val_errors[:3]))
+            article["meta"].setdefault("review_flag", True)
+            article["meta"]["review_reason"] = (
+                article["meta"].get("review_reason", "") + "; " + "; ".join(val_errors[:3])
+            ).lstrip("; ")
+
+        # is_hero + tiers setzen
+        _set_is_hero(article, imgs_s, thema)
+
+        # source_passages einbetten
+        if source_passages:
+            article["source_passages"] = source_passages
+            log.info("  [%s] source_passages: %d Einträge", article_id, len(source_passages))
+
+        # Artikel speichern
+        out_path = articles_dir / f"{article_id}.json"
+        out_path.write_text(
+            json.dumps(article, ensure_ascii=False, indent=2, default=str),
+            encoding="utf-8",
+        )
+        articles[article_id] = str(out_path)
+        n_sects = len(article.get("sections", []))
+        n_sents = sum(len(s.get("sentences", [])) for s in article.get("sections", []))
+        n_boxes = sum(len(s.get("boxes", [])) for s in article.get("sections", []))
+        n_quiz  = len(article.get("quiz", []))
+        log.info(
+            "  [%s] OK: %d Wörter | %d Sects %d Sätze %d Boxen %d Quiz | "
+            "%d Bilder | sp=%s",
+            article_id, word_count, n_sects, n_sents, n_boxes, n_quiz,
+            len(article.get("images", [])), bool(source_passages),
+        )
+
+    _save_cp(out_dir, 2, {"status": "done", "articles": articles})
+    return articles
 
 
 # ── Stage 3: LEKTORAT (Gerüst) ────────────────────────────────────────────────

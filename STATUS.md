@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T13:11:07Z -->
+<!-- updated: 2026-06-16T13:46:45Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -72,49 +72,51 @@ Offene Punkte Vollkatalog-Bilder:
 
 ---
 
-## Zuletzt abgeschlossen (neu)
+## Zuletzt abgeschlossen
 
-**KRITISCHER FIX: confidence-Signal → grenzfall-Feld (2026-06-16)** ← AKTUELL
+**Stage 2 Generierung + Opus-Cap-Fix + custom_id-Bug (2026-06-16)** ← AKTUELL
 
-Befund: confidence=niedrig NIE ausgelöst (181 Bilder, 0 niedrig) — beide
-Sicherheitsschichten (Conservative Upgrade + Opus-Recheck) versagten still.
-Ursache: Modell committed ab_stufe zuerst, bestätigte sich dann selbst.
+### Stage 2 implementiert (run_batch.py)
+- Gemini Context Cache je Thema (stable prefix via _split_grounded_user_message)
+- 3 InlinedRequests je Thema (Stufe 1/2/3), cache=JA auf alle wenn Cache erstellt
+- Variable Suffix (_gen2_variable_suffix): AGE_LEVEL + BILD-STUFEN-FILTER + WORTZIEL +
+  source_passages-Wrapper (Ausgabe als {article, source_passages})
+- Post-Processing: JSON-Parse (Wrapper-first, Fallback plain), Wortzahl-Guard (2 Trim-Pässe),
+  Box-Guard, validate_article, _set_is_hero, source_passages eingebettet, cost_tracker
+- Elefant-Durchstich: Stage 1 ✅ (28 Bilder S1=18 S2=9 S3=1), Stage 2 läuft/abgeschlossen
 
-Fix umgesetzt in `image_vision_filter.py` + `run_batch.py`:
+### Opus-Recheck: OPUS_CAP=18 + Sicherheitsgarantie (run_batch.py)
+Problem: Opus prüfte alle akzeptierten Bilder (bis 40), Stage 2 cappt aber auf
+APPEAL_TARGET (15/10/6). Bis zu 25 Opus-Calls umsonst.
 
-1. **VISION_PROMPT_TEMPLATE** umstrukturiert: Schritt 1 = grenzfall-Prüfung mit
-   konkreter Checkliste (Leid, Krankheitssymptome, Eingriffe, Tod, Nacktheit...),
-   Schritt 2 = ab_stufe informiert durch grenzfall-Ergebnis.
-   grenzfall=true → NIEMALS ab_stufe=1 (im Prompt vorgegeben).
+Lösung mit Sicherheitsgarantie:
+- `OPUS_CAP = max(APPEAL_TARGET.values()) + 3 = 18`
+- Sensible Themen: `data["images"] = accepted[:OPUS_CAP]` — Stage 2 zieht AUSSCHLIESSLICH
+  aus diesen ≤18 Opus-geprüften Bildern. Keine ungeprüften Bilder in Artikeln.
+- Nicht-sensibel: alle akzeptierten in data["images"], nur grenzfall=true-Bilder (max 18)
+  → Opus.
+- Opus läuft auf top-18 nach Relevanz (bereits nach relevanz-Sort).
 
-2. **Conservative Upgrade**: `grenzfall=true AND ab_stufe=1 → 2` (war: confidence=niedrig)
+Verifikation Spartacus (sensibel, appeal=medium):
+- 10 Bilder → Opus (alle, da 10 < 18-Cap) ✅ custom_id-Bug gefixt → 200 OK
+- 1 gesperrt: Spartacus_statue_by_Denis_Foyatier.jpg ✅ (Beobachtungspunkt bestätigt)
+- 7× S3→S2, 1× S3→S1 → Pool: 9 Bilder (S1=2, S2=7) — genug für alle 3 Stufen ✅
+- Kostenschätzung Opus Vollkatalog: ~$30 (statt vorher ~$100)
 
-3. **Opus-Recheck-Trigger**:
-   - `sensibel=True` → ALLE akzeptierten Bilder → Opus (war: nur confidence=niedrig)
-   - `sensibel=False` → grenzfall=true Bilder → Opus (NEU)
+### custom_id-Bug gefixt (run_batch.py)
+Anthropic-Batch erlaubt nur `^[a-zA-Z0-9_-]{1,64}$`.
+Punkte in Dateinamen (z.B. `Elefant.jpg`) brachen custom_id.
+Fix: `re.sub(r"[^a-zA-Z0-9_-]", "_", filename)[:41]`, Key max 63 Zeichen.
 
-Verifikation Impfung (14 Bilder):
-- `Polio_sequelle.jpg`: [S2 hoch] → **GESPERRT** ✅
-- `RougeoleDP.jpg`: [S3 hoch] → **GESPERRT** ✅
-- `Immunization_retusche.jpg`: [S1 hoch] → **[S3 GZ]** ✅
-- `Mai_Simu_Vasina_COVID-19.jpg`: [S1 hoch] → **[S2 GZ]** ✅
-- Opus-Quote: Impfung sensibel=True → alle 9 akzeptierten → Opus (vorher 0)
-- Spartacus sensibel=True → alle 15 → Opus (vorher 0)
-
-Kostenschätzung Opus-Recheck Vollkatalog: ~$40 (563 sensibel × ~10-15 Bilder +
-grenzfall=true bei nicht-sensiblen), Batch-Preis. Bewusst akzeptiert (Kinderschutz).
-
-BEOBACHTUNGSPUNKT (Stage 2 + Audit): grenzfall-Signal sperrt aggressiv
-(z.B. Spartacus-Bronzestatuen wg. Ketten/Nacktheit als grenzfall). Sicherheitlich
-gewollt, aber sensible Themen könnten bildarm werden. Beim Mini-Lauf + manuellem
-Audit prüfen, ob sensible Themen genug brauchbare Bilder behalten. Im Zweifel
-Vorsicht > Bildfülle. Falls zu aggressiv: grenzfall-Kriterien für historische
-Kunstwerke/Statuen nachschärfen (Statue ≠ Foto).
+### KRITISCHER FIX (zuvor): confidence-Signal → grenzfall-Feld
+- grenzfall-Prüfung VOR ab_stufe (7-Punkt-Checkliste im Vision-Prompt)
+- Conservative Upgrade: grenzfall=true + ab_stufe=1 → 2
+- Verifikation Impfung: Polio_sequelle.jpg + RougeoleDP.jpg → GESPERRT ✅
 
 ## Gerade in Arbeit
 
-**Stage 2 (Generierung) implementieren**
-→ Nächster Schritt: Stage 2 TODO-Gerüst in run_batch.py ausfüllen.
+**Elefant Stage 2 Batch läuft** (Gemini-Batch ~15-20 Min)
+→ Ergebnis: Wortzahl vs. Ziel, sections/quiz/boxes, source_passages, is_hero
 
 ---
 
@@ -153,10 +155,8 @@ Bei Neustart: Kompass + Downloads überspringen, direkt zum Vision-Submit.
 
 ## Offen nach Priorität
 
-### run_batch.py Stage 2 — GENERIERUNG (TODO)
-Gemini Batch + Context Cache, select_images_for_stufe, Wortzahl/Box-Guard.
-Importiert aus generate_grounded.py: try_create_gemini_cache, _split_grounded_user_message,
-_trim_article_to_cap, _box_repair_pass.
+### run_batch.py Stage 3 — LEKTORAT (nächstes Ziel)
+Anthropic Message Batches, 2 Pässe (source_passages + volle Companion-Texte).
 
 ### run_batch.py Stage 3 — LEKTORAT (TODO)
 Anthropic Message Batches, 2 Pässe (source_passages + volle Companion-Texte).
