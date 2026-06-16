@@ -226,19 +226,26 @@ def load_existing_annotations(xlsx_path: pathlib.Path) -> dict[str, dict]:
         result: dict[str, dict] = {}
         for row in ws.iter_rows(min_row=2, values_only=True):
             thema_val = row[col["thema"]] if "thema" in col else None
-            freigabe_val = row[col["FREIGABE"]] if "FREIGABE" in col else None
-            if not thema_val or not freigabe_val:
+            if not thema_val:
+                continue
+            freigabe_val  = row[col["FREIGABE"]]  if "FREIGABE"  in col else None
+            eignung_val   = row[col["eignung"]]   if "eignung"   in col else None
+            # Zeile gilt als annotiert wenn FREIGABE gesetzt ODER eignung explizit gesetzt.
+            # Andreas editiert eignung direkt ohne FREIGABE zu setzen — beides abfangen.
+            has_freigabe = bool(freigabe_val and str(freigabe_val).strip())
+            has_eignung  = eignung_val in ("include", "exclude")
+            if not has_freigabe and not has_eignung:
                 continue
             result[str(thema_val).strip()] = {
                 "FREIGABE":    freigabe_val,
-                "eignung":     row[col["eignung"]]       if "eignung"       in col else None,
+                "eignung":     eignung_val,
                 "age_floor":   row[col["age_floor"]]     if "age_floor"     in col else None,
                 "framing_note":row[col["framing_note"]]  if "framing_note"  in col else None,
                 "themengebiet":row[col["themengebiet"]]  if "themengebiet"  in col else None,
                 "notiz":       row[col["notiz"]]         if "notiz"         in col else None,
             }
         wb.close()
-        print(f"  Bestehende Annotierungen geladen: {len(result)} Zeilen mit FREIGABE ({source.name}).")
+        print(f"  Bestehende Annotierungen geladen: {len(result)} Zeilen annotiert ({source.name}).")
         return result
     except Exception as e:
         print(f"  WARNUNG: Konnte bestehende Annotierungen nicht lesen: {e}")
