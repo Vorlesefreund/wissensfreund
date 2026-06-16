@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T07:42:28Z -->
+<!-- updated: 2026-06-16T07:54:10Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -193,6 +193,55 @@ System-Prompt: v3.23b-production | Modell: gemini-3.5-flash
 ### Ergiebigkeits-Modell (Detail → WISSEN_ARTIKEL_PIPELINE.md)
 `target_S = Wlo + frac·(Whi−Wlo), frac = clamp((score−2)/6, 0, 1)`
 Bänder: S1[50,250] S2[80,400] S3[100,650]. Rater = Opus per API, Anker: 134 Themen.
+
+---
+
+---
+
+## TTS-Pipeline Stand (2026-06-16)
+
+### ERLEDIGT
+
+**tts_compose.py** (commit af78549, Repo-Stamm): JSON-native Komposition.
+`strip_emoji()` + `compose(article, stufe)`. Überschriften als Sätze,
+Fließtext aus `sentences[]`, Boxen mit altersgerechten ProfessorPhrasen
+(`_PHRASES` dict, deterministisch), `stimmt_das` mit intro+reveal,
+`fakt`/`wow`/`warnung` mit intro. Quiz bewusst ausgelassen.
+CLI: `python tts_compose.py <artikel.json> [S1|S2|S3]`
+
+**tts_audio_compare.py**: importiert compose, `VOICE_NAME="Iapetus"`,
+`SCENE` = ruhige Professor-Instructions S1/S2/S3 (Andreas' Wahl: S1=A, S2=C, S3=A).
+`--dir <verzeichnis>` lädt alle `*.json` (filtert `*_report.json`), Stufe aus `meta.age_level`.
+Legacy `--articles`/`--stufen` (.md) erhalten.
+
+**Testlauf**: `python tts_audio_compare.py --dir articles/test_compare`
+→ 12 Artikel × 2 Varianten, 19/24 OK, Rest 503-Ausfälle (transient).
+Ausgabe: `tts_audio_compare_out/tts_audio_compare.html`
+
+Dateien dieser Session (alle committed): `tts_compose.py`, `tts_audio_compare.py`,
+`wissensfreund_tts_tagging_v1.md`, `wissensfreund_tts_tagging_FREE_v1.md`
+
+### FESTGELEGT (Andreas)
+
+- Stimme: **Iapetus**
+- Scene-Instructions: ruhige Variante (S1=A weich, S2=C gelassen erzählend, S3=A sachlich)
+- TTS-Modell: `gemini-3.1-flash-tts-preview`
+
+### OFFEN — ENTSCHEIDUNGEN VON ANDREAS (vor Prod-TTS)
+
+1. Audio-Review: `tts_audio_compare.html` anhören — Iapetus-Qualität ok?
+2. Feste Tag-Palette (`wissensfreund_tts_tagging_v1.md`) vs. freie Tags
+   (`wissensfreund_tts_tagging_FREE_v1.md`) — welches klingt besser?
+3. Tagging-Modell: `gemini-3.5-flash` ist 503-anfällig (~20% Ausfall).
+   Alternative `gemini-2.5-flash-lite` (18/18 OK, kein Thinking) für Prod empfohlen.
+
+### OFFEN — NOCH ZU BAUEN (im neuen Pipeline-Chat)
+
+- Quiz-Vertonung: interaktive TTS-Schnipsel je Frage (Frage, Antwortoptionen A/B/C,
+  Feedback richtig, Feedback falsch+Lösung, Erfolgsmeldung). Konzept besprochen,
+  noch nicht implementiert.
+- Orchestrator: pro Artikel alle Audios erzeugen + benennen + nach R2.
+- Integration `tts_compose` ← `generate_grounded.py` Output.
 
 ---
 
