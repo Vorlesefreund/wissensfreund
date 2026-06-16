@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T19:38:00Z -->
+<!-- updated: 2026-06-16T21:46:20Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -21,10 +21,15 @@ Gleicher System-Prompt v3.23b, gleiche Quelltexte (Stage-1-Checkpoint), gleicher
 - Inhalt: sehr gut — Kindwelt-Brücken (Kühlschrank, Wasserflaschen, Ventilator), gute stimmt_das-Box (Mäuse-Mythos), 25 source_passages mit echten WP-Zitaten, S2-Register flüssig
 - Artikel gespeichert: `articles/test_modelcompare2/mistral-large-3_elefant_s2.json`
 
-### mistral-medium-latest (mistral-medium-3.5, $0.40/$2 pro 1M)
-- **429 Rate-Limit** — persistiert 40+ Min nach dem Large-Call (Token-Budget der Stunde erschöpft)
-- Key hat enges stündliches Token-Kontingent; nach Large (70K Tokens) reicht kein Budget für Medium
-- Test noch ausstehend (separate Session wenn Rate-Limit zurückgesetzt)
+### mistral-medium-latest (mistral-medium-3.5, $0.40/$2 pro 1M) — 3-Topic-Test (2026-06-16)
+- Script: `temp/mistral_medium_3topics_s2.py` — Elefant, Vulkan, Indianer jeweils S2
+- **ALLE 3 TOPICS: 429 Rate-Limit** — 5 Retries × 15 Min je Topic, alle erschöpft
+- Rate-Limit persistiert 2h15min+ nach Large-Call (21:31–23:41+) → KEIN Stunden-Limit
+- **Diagnose: Tages- oder Monats-Kontingent des API-Keys erschöpft** (Large-Call 77K Token)
+- Timings: Elefant V1–V5 (21:31–22:31), Vulkan V1–V5 (22:36–23:36), Indianer V1+ (23:41+)
+- Indianer-Wortziel-Quelle: ergiebigkeit (280–400), primary_text 107K Zeichen, 0 Bilder, 0 Companions
+- **Schlussfolgerung:** Medium-Test erfordert frisches Tages-/Monatsbudget — Large+Medium in einer Session nicht möglich mit diesem Key
+- **Nächster Schritt:** Morgen (neues Tageskontingent) medium-only starten, OHNE vorherigen Large-Call
 
 ### gemini-3.5-flash
 - Weiterhin 503 UNAVAILABLE — Situation unverändert
@@ -120,13 +125,17 @@ nicht unser Code, betrifft alle Nutzer).
   im Batch deaktiviert (Mehrkosten ~$70 Vollkatalog; Batch-Rabatt -50% bleibt Haupthebel)
 
 ### Mistral-Test-Ergebnis
-Large 3: qualitativ stark, aber Schema-Abweichungen + 43% Wortzahl-Overshoot.
-Medium 3.5: Rate-Limit nach Large-Call — noch nicht testbar.
+Large 3 (Elefant S2): qualitativ stark, Schema-Abweichungen, 43% Wortzahl-Overshoot.
+Medium 3.5 (3 Topics): alle 429 — Key-Tagesbudget nach Large-Call erschöpft.
+→ Medium-Test: morgen (frisches Budget), medium-only (kein Large vorher).
 → Für Produktion: Prompt-Tuning nötig, Post-Processing-Schicht für Schema-Keys.
 
 ---
 
 ## Gerade in Arbeit
+
+**Mistral-Medium-Test** läuft noch im Hintergrund (Indianer-Retries bis ~00:45).
+Ergebnis klar: alle 429, kein Artikel generiert. STATUS.md bereits aktualisiert.
 
 **Stage-2-Diagnose ausstehend** — gemini-3.5-flash 503-Situation abwarten.
 Sync-Test (temp/_sync_test_s2.py) bereit, sobald Modell erreichbar.
