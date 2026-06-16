@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T12:31:21Z -->
+<!-- updated: 2026-06-16T12:47:07Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -74,8 +74,9 @@ Offene Punkte Vollkatalog-Bilder:
 
 ## Gerade in Arbeit
 
-**Stage 1 Mini-Lauf (6 Themen) läuft** — nach Wikimedia-Fix (UA+Email, iiurlwidth=1600, 3s-Rate).
-Ergebnis ausstehend: Companions, Bildpool/ab_stufe, Opus-Recheck, Speicher-Tabelle.
+**Stage 1 Mini-Lauf (6 Themen) ABGESCHLOSSEN ✅ (2026-06-16)**
+Wikimedia-Fixes bestätigt: keine Drosselung, Vision-Batch 181 Requests in ~59 Min.
+→ Nächster Schritt: Stage 2 (Generierung) implementieren.
 
 ---
 

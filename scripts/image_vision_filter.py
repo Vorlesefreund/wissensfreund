@@ -39,9 +39,17 @@ _CACHE_DIR = ROOT / ".cache"
 _META_CACHE_PATH = _CACHE_DIR / "image_meta_cache.json"
 _DL_CACHE_DIR = _CACHE_DIR / "downloads"
 
-_MAX_ORIG_BYTES = 15 * 1024 * 1024  # 15 MB: über dieser Grenze → 1280px-Fallback
-_DL_PAUSE = 0.4                      # Pause zwischen sequentiellen Downloads (s)
-_DL_RETRY_WAITS = [15, 30]           # 429-Wartezeiten; Originale selten gedrosselt
+_DL_PAUSE = 3.0                      # Pause zwischen Downloads (Wikimedia-konform: ~20/Min)
+_DL_RETRY_WAITS = [15, 30]           # 429-Wartezeiten (Fallback wenn kein Retry-After-Header)
+
+# Speichermessung: frische Downloads protokollieren (für Tier-Entscheidung 600 vs 800)
+_download_size_samples: list[dict] = []
+
+def get_download_sizes() -> list[dict]:
+    return list(_download_size_samples)
+
+def clear_download_sizes() -> None:
+    _download_size_samples.clear()
 
 logging.basicConfig(
     level=logging.INFO,
@@ -246,8 +254,8 @@ def fetch_image_candidates(
         "generator": "images",
         "gimlimit": str(max_candidates),
         "prop": "imageinfo",
-        "iiprop": "url|extmetadata",
-        # KEIN iiurlwidth: Original-URL verwenden, kein serverseitiger Thumbnail-Generator
+        "iiprop": "url|thumburl|extmetadata",
+        "iiurlwidth": "1600",      # CDN-Thumbnail (JPEG, max 1600px) statt Original
         "iiextmetadatafilter": "Artist|LicenseShortName|License",
         "maxlag": 5,
     }
@@ -300,14 +308,14 @@ def fetch_image_candidates(
 
         filename = _filename_from_title(title)
 
-        # Cache-Treffer: nur neue url_orig-Eintraege verwenden (url_800-Eintraege neu laden)
         if filename in cache and "url_orig" in cache[filename]:
             cached = cache[filename]
             images.append({
-                "wikimedia_id": title,
-                "filename":     filename,
-                "thumb_url":    cached["url_orig"],
-                "license":      cached["license"],
+                "wikimedia_id":  title,
+                "filename":      filename,
+                "thumb_url":     cached.get("url_1600") or cached["url_orig"],
+                "original_url":  cached["url_orig"],
+                "license":       cached["license"],
                 "license_author": cached["artist"],
             })
             continue
@@ -316,8 +324,9 @@ def fetch_image_candidates(
         if not ii_list:
             continue
         ii = ii_list[0]
-        orig_url = ii.get("url", "")
-        if not orig_url:
+        orig_url  = ii.get("url", "")
+        thumb_url = ii.get("thumburl", "") or orig_url   # 1600px CDN; Fallback: Original
+        if not orig_url and not thumb_url:
             continue
 
         meta = ii.get("extmetadata", {})
@@ -334,14 +343,20 @@ def fetch_image_candidates(
         )
         clean_author = re.sub(r"<[^>]+>", "", raw_author).strip()[:80]
 
-        cache[filename] = {"url_orig": orig_url, "artist": clean_author, "license": license_str}
+        cache[filename] = {
+            "url_orig":  orig_url,
+            "url_1600":  thumb_url,
+            "artist":    clean_author,
+            "license":   license_str,
+        }
         _meta_cache_dirty = True
 
         images.append({
-            "wikimedia_id": title,
-            "filename":     filename,
-            "thumb_url":    orig_url,
-            "license":      license_str,
+            "wikimedia_id":  title,
+            "filename":      filename,
+            "thumb_url":     thumb_url,     # 1600px CDN-URL (Download-Quelle)
+            "original_url":  orig_url,
+            "license":       license_str,
             "license_author": clean_author,
         })
 
@@ -381,41 +396,45 @@ def _do_download(session: requests.Session, url: str) -> bytes | None:
 
 
 def download_image(session: requests.Session, url: str) -> bytes | None:
-    """Laedt Original-Bild, skaliert lokal auf 800px + 300px (LANCZOS).
-    Gibt 800px-JPEG-Bytes zurueck (fuer Vision-Analyse).
-    Cache: .cache/downloads/{md5(url)}_800.jpg + _300.jpg."""
+    """Laedt 1600px-CDN-Thumbnail (via iiurlwidth=1600 aus fetch_image_candidates).
+    Skaliert lokal: 800px (Vision, Rueckgabe), 300px (Standard-Tier), 1600px (Max-Tier, raw).
+    Misst 600px fuer Speicher-Entscheidung (nicht gecacht).
+    Cache: .cache/downloads/{md5(url)}_800.jpg + _300.jpg + _1600.jpg."""
     cache_key = hashlib.md5(url.encode()).hexdigest()
     cache_800 = _DL_CACHE_DIR / f"{cache_key}_800.jpg"
 
     if cache_800.exists():
         return cache_800.read_bytes()
 
-    # TIF/SVG: kein Riesen-Original — 1280px-Thumb via konstruierter URL
-    url_path = urllib.parse.urlparse(url).path
-    filename_part = Path(url_path).name
-    ext_lower = Path(url_path).suffix.lower()
-
-    use_fallback = ext_lower in (".tif", ".tiff", ".svg")
-    download_url = _wikimedia_thumb_url(filename_part, 1280) if use_fallback else url
-
-    raw = _do_download(session, download_url)
+    raw = _do_download(session, url)
     if raw is None:
         return None
-
-    # Groessen-Schutz: Original >15 MB → 1280px-Fallback
-    if len(raw) > _MAX_ORIG_BYTES and not use_fallback:
-        log.warning("  Original %.1f MB > Limit → 1280px-Fallback: %s",
-                    len(raw) / (1024 * 1024), filename_part)
-        raw = _do_download(session, _wikimedia_thumb_url(filename_part, 1280))
-        if raw is None:
-            return None
 
     try:
         _DL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
         scaled_800 = _scale_image(raw, 800)
         scaled_300 = _scale_image(raw, 300)
+
         cache_800.write_bytes(scaled_800)
         (_DL_CACHE_DIR / f"{cache_key}_300.jpg").write_bytes(scaled_300)
+        (_DL_CACHE_DIR / f"{cache_key}_1600.jpg").write_bytes(raw)   # Max-Tier
+
+        # Speichermessung: 600px messen, nicht cachen (fuer 600-vs-800-Entscheidung)
+        scaled_600 = _scale_image(raw, 600)
+        url_path = urllib.parse.urlparse(url).path
+        fname = Path(url_path).name[:40]
+        _download_size_samples.append({
+            "filename": fname,
+            "sz_300":   len(scaled_300),
+            "sz_600":   len(scaled_600),
+            "sz_800":   len(scaled_800),
+            "sz_1600":  len(raw),
+        })
+        log.debug("  Tier-KB [%s]: 300=%d 600=%d 800=%d 1600=%d KB",
+                  fname[:25],
+                  len(scaled_300) // 1024, len(scaled_600) // 1024,
+                  len(scaled_800) // 1024, len(raw) // 1024)
+
         return scaled_800
     except Exception as e:
         log.warning("  Skalierung fehlgeschlagen: %s", e)

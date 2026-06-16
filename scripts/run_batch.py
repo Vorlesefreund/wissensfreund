@@ -94,6 +94,8 @@ from image_vision_filter import (  # noqa: E402
     fetch_image_candidates,
     download_image,
     load_cached_image_bytes,
+    get_download_sizes,
+    clear_download_sizes,
     VISION_SYSTEM_PROMPT,
     VISION_PROMPT_TEMPLATE,
     OPUS_RECHECK_SYSTEM,
@@ -441,14 +443,14 @@ def stage1_sourcing(
         log.info("  '%s': %d Kandidaten, Vision-Check max %d",
                  thema, len(unique), len(to_check))
 
-        # Herunterladen + Vision-Request aufbauen
-        for img in to_check:
+        # Herunterladen + Vision-Request aufbauen (3s pre-download, Wikimedia-konform)
+        for i, img in enumerate(to_check):
+            if i > 0:
+                time.sleep(3.0)
             img_bytes = download_image(session, img["thumb_url"])
             if img_bytes is None:
                 log.debug("    Download fehlgeschlagen: %s", img["filename"][:40])
-                time.sleep(2.0)
                 continue
-            time.sleep(0.5)  # kleiner Sleep, kein 10s-Wait für Gemini-Call mehr
 
             prompt  = VISION_PROMPT_TEMPLATE.format(thema=thema)
             # Schlüssel: thema + filename (sanitiert)
@@ -681,6 +683,23 @@ def stage1_sourcing(
         s3 = sum(1 for i in imgs if i.get("ab_stufe", 0) == 3)
         log.info("  '%s': Pool %d Bilder (S1=%d S2=%d S3=%d)", thema, len(imgs), s1, s2, s3)
 
+    # Speicher-Tabelle: frische Downloads (nicht aus Cache)
+    dl_sizes = get_download_sizes()
+    if dl_sizes:
+        n = len(dl_sizes)
+        avg = {k: sum(s[k] for s in dl_sizes) // n // 1024
+               for k in ("sz_300", "sz_600", "sz_800", "sz_1600")}
+        log.info("")
+        log.info("=== SPEICHER-TABELLE (%d frische Downloads) ===", n)
+        log.info("  Tier   | Ø KB/Bild | 10 Bilder | 15 Bilder")
+        log.info("  -------+-----------+-----------+----------")
+        for tier, key in [("300px", "sz_300"), ("600px", "sz_600"),
+                          ("800px", "sz_800"), ("1600px", "sz_1600")]:
+            a = avg[key]
+            log.info("  %-6s | %9d | %9d | %9d KB", tier, a, a * 10, a * 15)
+        log.info("  (600+800: nur Messung — noch nicht gecacht)")
+    clear_download_sizes()
+
     _save_cp(out_dir, 1, {"status": "done", "topics": topics_data})
     return topics_data
 
@@ -887,7 +906,9 @@ def main() -> None:
 
     client  = genai.Client(api_key=api_key)
     session = requests.Session()
-    session.headers["User-Agent"] = USER_AGENT
+    session.headers["User-Agent"] = (
+        "WissensfreundPipeline/1.0 (az@expansionssupport.de; Kinderwissens-App)"
+    )
 
     topics_data: dict = {}
     articles:    dict = {}
