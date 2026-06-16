@@ -220,30 +220,33 @@ def build_image_pool_cached(
             # Nicht gecacht → ohne Vision in Pool aufnehmen (basis Metadaten)
             accepted.append({
                 **img,
+                "ab_stufe":       1,
                 "relevanz":      5,
-                "hero_tauglich": False,
+                "hero_candidate": False,
                 "beschreibung":  "",
             })
             continue
 
         img_bytes = cache_800.read_bytes()
-        result = analyze_with_vision(client, img_bytes, "image/jpeg", thema)
+        result, _usage = analyze_with_vision(client, img_bytes, "image/jpeg", thema)
         if result is None:
             continue
 
-        if not result.get("kindgerecht", False):
+        ab_stufe = result.get("ab_stufe", 0)
+        if ab_stufe == 0:
             continue
         if result.get("relevanz", 0) < 4:
             continue
 
         accepted.append({
             **img,
-            "relevanz":      result.get("relevanz", 5),
-            "hero_tauglich": result.get("hero_tauglich", False),
-            "beschreibung":  result.get("beschreibung", ""),
+            "ab_stufe":       ab_stufe,
+            "relevanz":       result.get("relevanz", 5),
+            "hero_candidate": result.get("hero_candidate", False),
+            "beschreibung":   result.get("beschreibung", ""),
         })
 
-    accepted.sort(key=lambda x: (-x["relevanz"], -int(x["hero_tauglich"])))
+    accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))
     log.info("    Bildpool akzeptiert: %d (target=%d)", len(accepted), target)
     return accepted[:target]
 

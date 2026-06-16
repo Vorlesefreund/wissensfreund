@@ -605,8 +605,9 @@ def build_image_pool(
     _consecutive_dl_failures = 0
 
     for img in to_check:
-        if len(accepted) >= target:
-            log.info("    Target %d erreicht -- Vision-Check gestoppt", target)
+        # Stopp sobald genug ab_stufe=1-Bilder für die restriktivste Stufe gesammelt
+        if sum(1 for a in accepted if a.get("ab_stufe", 1) == 1) >= target:
+            log.info("    Target %d S1-Bilder erreicht -- Vision-Check gestoppt", target)
             break
 
         img_bytes = download_image(session, img["thumb_url"])
@@ -626,29 +627,31 @@ def build_image_pool(
 
         result, vision_usage = analyze_with_vision(client, img_bytes, mime, thema)
         if vision_usage:
-            cost_tracker.track(_RUN_ID, thema, 0, "vision", "gemini-2.5-flash", **vision_usage)
+            cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe="S0",
+                                schritt="vision", modell="gemini-2.5-flash", **vision_usage)
         if result is None:
             rejected_vision.append({**img, "reason": "Vision-Fehler"})
             time.sleep(2.0)
             continue
 
-        if not result.get("kindgerecht", False):
-            grund = result.get("ablehnungsgrund", "")
-            rejected_vision.append({**img, "reason": f"kindgerecht=false: {grund}"})
+        ab_stufe = result.get("ab_stufe", 0)
+        beschreibung = result.get("beschreibung", "")
+        if ab_stufe == 0:
+            rejected_vision.append({**img, "reason": f"gesperrt: {beschreibung}"})
         elif result.get("relevanz", 0) < 4:
             rejected_vision.append({**img, "reason": f"relevanz={result['relevanz']} < 4"})
         else:
             accepted.append({
                 **img,
-                "relevanz":      result.get("relevanz", 5),
-                "hero_tauglich": result.get("hero_tauglich", False),
-                "beschreibung":  result.get("beschreibung", ""),
+                "ab_stufe":       ab_stufe,
+                "relevanz":       result.get("relevanz", 5),
+                "hero_candidate": result.get("hero_candidate", False),
+                "beschreibung":   beschreibung,
             })
 
         time.sleep(10.0)
 
-    accepted.sort(key=lambda x: (-x["relevanz"], -int(x["hero_tauglich"])))
-    accepted = accepted[:target]
+    accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))
 
     report = {
         "sources":          sources,
@@ -658,11 +661,36 @@ def build_image_pool(
         "rejected":         len(rejected_vision),
         "target":           target,
         "hero":             next(
-            (a["filename"] for a in accepted if a["hero_tauglich"]),
+            (a["filename"] for a in accepted if a.get("hero_candidate", False)),
             accepted[0]["filename"] if accepted else None,
         ),
     }
     return accepted, report
+
+
+def select_images_for_stufe(pool: list[dict], stufe: int, appeal: str) -> list[dict]:
+    """Filtert Bildpool auf Altersfreigabe (ab_stufe <= stufe), cap nach APPEAL_TARGET."""
+    filtered = [img for img in pool if img.get("ab_stufe", 1) <= stufe]
+    filtered.sort(key=lambda x: (-x.get("relevanz", 0), -int(x.get("hero_candidate", False))))
+    cap = APPEAL_TARGET.get(appeal, 10)
+    return filtered[:cap]
+
+
+def _variable_suffix(job: dict, wmax: int) -> str:
+    """Variabler Suffix je Stufe: AGE_LEVEL + Bild-Stufen-Filter + WORTZIEL.
+    Muss identisch in build_grounded_user_message und _split_grounded_user_message sein."""
+    stufe = job.get("age_level", 2)
+    return (
+        f"AGE_LEVEL: {stufe}\n"
+        f"BILD-STUFEN-FILTER: Fuer AGE_LEVEL={stufe} ausschliesslich Bilder mit "
+        f"ab_stufe<={stufe} verwenden. Bilder mit ab_stufe>{stufe} ignorieren.\n"
+        f"WORTZIEL: Strebe {wmax} Woerter an und schoepfe den Wikipedia-Stoff so weit aus, "
+        f"dass du nah an {wmax} herankommst. "
+        f"{wmax} ist zugleich die harte Obergrenze — schreibe nicht darueber hinaus. "
+        f"Wenn nach Erreichen von {wmax} noch Stoff uebrig ist, waehle die kindgerechtesten Aspekte aus, "
+        f"statt alles aufzunehmen. "
+        f"Kuerzer als {wmax} nur, wenn der Wikipedia-Stoff die Laenge nicht hergibt — niemals aufblaehen."
+    )
 
 
 # ── Phase-2-User-Message ──────────────────────────────────────────────────────
@@ -711,14 +739,17 @@ def build_grounded_user_message(
         for idx, img in enumerate(images):
             author = img.get("license_author", "")[:40]
             desc = img.get("beschreibung", "")
-            hero_flag = " [HERO-KANDIDAT]" if img.get("hero_tauglich") else ""
+            hero_flag = " [HERO-KANDIDAT]" if img.get("hero_candidate") else ""
             line = (
-                f"[{idx}] {img['filename']} | {img['thumb_url']} | "
+                f"[{idx}] {img['filename']} | ab_stufe={img.get('ab_stufe', 1)} | {img['thumb_url']} | "
                 f"{img['license']} | {author}"
             )
             if desc:
                 line += f"\n    Beschreibung: {desc}{hero_flag} Relevanz: {img['relevanz']}/10"
             parts.append(line)
+        _appeal_band = {"high": "10–15", "medium": "5–10", "low": "3–6"}.get(
+            job.get("resolved_appeal", "medium"), "5–10"
+        )
         parts += [
             "",
             "Bildauswahl-Regeln:",
@@ -726,20 +757,14 @@ def build_grounded_user_message(
             "- thumb_url in images[] = URL aus AVAILABLE_IMAGES (exakt uebernehmen)",
             "- img_index in sentences = 0-basierter Index in DEINEM images[]-Array",
             "- Kein Bild doppelt verwenden",
-            f"- {'8-12 Bilder gesamt' if job.get('topic_interest') == 'high' else '4-8 Bilder gesamt'}",
+            f"- {_appeal_band} Bilder gesamt (nur wenn gute vorhanden; nie erzwingen)",
             "- Fuer jedes Bild: filename, alt, caption, license, license_author, source_url, thumb_url befuellen",
         ]
 
-    # ── Variabler Suffix: AGE_LEVEL + WORTZIEL je Stufe ──────────────────────
-    parts.append(f"AGE_LEVEL: {job['age_level']}")
+    # ── Variabler Suffix: AGE_LEVEL + BILD-STUFEN-FILTER + WORTZIEL je Stufe ─
     level   = job.get("age_level", 2)
     wmin, wmax, _wz_src = wortziel_for(thema, level)
-    parts.append(
-        f"WORTZIEL: Strebe {wmax} Wörter an und schöpfe den Wikipedia-Stoff so weit aus, dass du nah an {wmax} herankommst. "
-        f"{wmax} ist zugleich die harte Obergrenze — schreibe nicht darüber hinaus. "
-        f"Wenn nach Erreichen von {wmax} noch Stoff übrig ist, wähle die kindgerechtesten Aspekte aus, statt alles aufzunehmen. "
-        f"Kürzer als {wmax} nur, wenn der Wikipedia-Stoff die Länge nicht hergibt — niemals aufblähen."
-    )
+    parts.append(_variable_suffix(job, wmax))
 
     return "\n".join(parts)
 
@@ -754,7 +779,7 @@ def _split_grounded_user_message(
     """Teilt die User-Message in (stabiler_prefix, variabler_suffix).
 
     stabiler_prefix: Wikipedia-Texte + Metadaten + Bilder (gleich für alle Stufen)
-    variabler_suffix: AGE_LEVEL + WORTZIEL (je Stufe verschieden)
+    variabler_suffix: AGE_LEVEL + BILD-STUFEN-FILTER + WORTZIEL (je Stufe verschieden)
     """
     full = build_grounded_user_message(
         job, primary_text, companion_texts, companion_order, images
@@ -762,13 +787,7 @@ def _split_grounded_user_message(
     level  = job.get("age_level", 2)
     thema  = job.get("thema", job.get("title", ""))
     wmin, wmax, _wz_src = wortziel_for(thema, level)
-    variable = (
-        f"AGE_LEVEL: {job['age_level']}\n"
-        f"WORTZIEL: Strebe {wmax} Wörter an und schöpfe den Wikipedia-Stoff so weit aus, dass du nah an {wmax} herankommst. "
-        f"{wmax} ist zugleich die harte Obergrenze — schreibe nicht darüber hinaus. "
-        f"Wenn nach Erreichen von {wmax} noch Stoff übrig ist, wähle die kindgerechtesten Aspekte aus, statt alles aufzunehmen. "
-        f"Kürzer als {wmax} nur, wenn der Wikipedia-Stoff die Länge nicht hergibt — niemals aufblähen."
-    )
+    variable = _variable_suffix(job, wmax)
     stable = full[: len(full) - len(variable)].rstrip("\n")
     return stable, variable
 
@@ -831,7 +850,8 @@ def prepare_topic_sources(
     # Kompass-Auswahl
     raw_companions, kompass_usage = select_companions_raw(client, thema, primary_text, model)
     if kompass_usage:
-        cost_tracker.track(_RUN_ID, thema, 0, "kompass", model, **kompass_usage)
+        cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe="S0",
+                            schritt="kompass", modell=model, **kompass_usage)
     log.info("  Kompass-Vorschlag: %s", raw_companions)
 
     # Validierung + Weiterleitungsauflösung (cap gestaffelt nach Appeal)
@@ -986,6 +1006,12 @@ def generate_one_level(
     prompt_version   = SYSTEM_PROMPT_PATH.stem.split("_v")[-1].split("_")[0]
     generation_method = f"{model}/medium/v{prompt_version}"
 
+    # Stufengerechte Bildauswahl: nur Bilder mit ab_stufe <= age_level
+    _appeal = job.get("resolved_appeal", "medium")
+    images = select_images_for_stufe(images, job["age_level"], _appeal)
+    log.info("  Bildpool fuer S%d: %d Bilder (ab_stufe<=%d, appeal=%s)",
+             job["age_level"], len(images), job["age_level"], _appeal)
+
     report: dict = {
         "article_id":        article_id,
         "thema":             thema,
@@ -1049,10 +1075,22 @@ def generate_one_level(
 
             _u = gemini_client._last_usage.copy()
             if _u:
-                cost_tracker.track(_RUN_ID, thema, job["age_level"], "article_gen", model, **_u)
+                cost_tracker.track(run_id=_RUN_ID, thema=thema,
+                                    stufe=f"S{job['age_level']}", schritt="article_gen",
+                                    modell=model, **_u)
             break  # Erfolg
 
         except Exception as e:
+            err_str = str(e)
+            # Cache abgelaufen (TTL überschritten durch 503-Sturm) → Full-Context, kein Warten
+            if gemini_cache and "CachedContent not found" in err_str:
+                log.warning(
+                    "  Phase 2 [%s]: Gemini-Cache abgelaufen/ungueltig — wechsle auf Full-Context",
+                    article_id,
+                )
+                gemini_cache = None
+                article = None
+                continue
             if gen_attempt < _GEN_MAX_ATTEMPTS:
                 wait = _GEN_RETRY_WAITS[gen_attempt - 1]
                 log.warning(
@@ -1109,7 +1147,9 @@ def generate_one_level(
             article_retry = parse_article_json(raw_retry)
             _u = gemini_client._last_usage.copy()
             if _u:
-                cost_tracker.track(_RUN_ID, thema, job["age_level"], "article_gen", model, **_u)
+                cost_tracker.track(run_id=_RUN_ID, thema=thema,
+                                    stufe=f"S{job['age_level']}", schritt="article_gen",
+                                    modell=model, **_u)
             wc_retry = count_article_words(article_retry)
             report["phase2"]["retry_needed"]     = True
             report["phase2"]["retry_word_count"] = wc_retry
@@ -1145,7 +1185,9 @@ def generate_one_level(
             article, word_count = _trim_article_to_cap(article, wmax, model, phase2_thinking)
             _u = gemini_client._last_usage.copy()
             if _u:
-                cost_tracker.track(_RUN_ID, thema, job["age_level"], "trim", model, **_u)
+                cost_tracker.track(run_id=_RUN_ID, thema=thema,
+                                    stufe=f"S{job['age_level']}", schritt="trim",
+                                    modell=model, **_u)
             log.info("  Trim-Pass %d Ergebnis: %d Wörter", trims, word_count)
         except Exception as e:
             log.error("  Trim-Pass fehlgeschlagen: %s", e)
@@ -1170,7 +1212,9 @@ def generate_one_level(
             repaired = _box_repair_pass(article, model, phase2_thinking)
             _u = gemini_client._last_usage.copy()
             if _u:
-                cost_tracker.track(_RUN_ID, thema, job["age_level"], "box_repair", model, **_u)
+                cost_tracker.track(run_id=_RUN_ID, thema=thema,
+                                    stufe=f"S{job['age_level']}", schritt="box_repair",
+                                    modell=model, **_u)
             same_content = _box_signature(repaired) == _box_signature(article)
             if same_content and _box_lint(repaired) is None:
                 article = repaired
@@ -1573,7 +1617,9 @@ def main() -> None:
                     if u:
                         _thema_l, _level_l = aid_to_meta.get(aid, (thema, 0))
                         cost_tracker.track(
-                            _RUN_ID, _thema_l, _level_l, "lektorat", "claude-sonnet-4-6",
+                            run_id=_RUN_ID, thema=_thema_l,
+                            stufe=f"S{_level_l}", schritt="lektorat",
+                            modell="claude-sonnet-4-6",
                             input_tok=u.get("input_tok", 0),
                             output_tok=u.get("output_tok", 0),
                             cached_tok=u.get("cache_read_tok", 0),

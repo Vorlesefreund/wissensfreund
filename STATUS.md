@@ -1,12 +1,33 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T08:39:10Z -->
+<!-- updated: 2026-06-16T10:04:12Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Baustein 2: catalog-Connector + cost_tracker vollständig verdrahtet (2026-06-16)** ← AKTUELL
+**Sicherheits-Upgrade Bildfilter: gestufte Altersfreigabe (ab_stufe), stufengenaue Auswahl, Bildanzahl-Konsistenz (2026-06-16)** ← AKTUELL
+
+### Was gebaut wurde
+
+**image_vision_filter.py** — Vision-Prompt neu:
+- `ab_stufe` (0/1/2/3) statt `kindgerecht` bool: 0=gesperrt, 1=ab 4J, 2=ab 7J, 3=ab 10J
+- Klare Stufenkriterien im Prompt: Skelette/Fossilien → ab_stufe≥2; Organe/Anatomie → ab_stufe=3
+- `hero_candidate` (war: `hero_tauglich`), `beschreibung` als kombiniertes Feld
+- Hard-Block ab_stufe=0, Abwärtskompatibilität: kindgerecht = ab_stufe>0
+
+**generate_grounded.py** — Drei Änderungen:
+- `select_images_for_stufe(pool, stufe, appeal)`: filtert Pool auf ab_stufe≤stufe, cap nach APPEAL_TARGET
+- `generate_one_level()`: ruft `select_images_for_stufe()` am Anfang auf → S1 sieht nur S1-Bilder im Prompt
+- `_variable_suffix(job, wmax)`: neuer Helper mit AGE_LEVEL + BILD-STUFEN-FILTER + WORTZIEL (ersetzt inlinierte Strings in build/split)
+- Bildanzahl-Bänder im Prompt: high=10–15, medium=5–10, low=3–6 (war: "8-12"/"4-8")
+- frühe Terminierung in build_image_pool: stoppt wenn S1-Bilder=target (statt accepted=target)
+
+**batch_run.py** — Feldnamen auf neues Schema aktualisiert (hero_candidate, ab_stufe)
+
+---
+
+**Baustein 2: catalog-Connector + cost_tracker vollständig verdrahtet (2026-06-16)**
 
 ### Was gebaut wurde
 

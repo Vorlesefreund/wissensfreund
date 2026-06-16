@@ -72,33 +72,45 @@ Antworte ausschließlich mit gültigem JSON ohne Markdown-Code-Blöcke oder Erkl
 
 VISION_PROMPT_TEMPLATE = """Analysiere dieses Bild für den Wissensfreund-Artikel zum Thema "{thema}".
 
-Beantworte folgende Punkte:
+Wissensfreund ist eine Kinder-Wissens-App mit drei Altersstufen:
+  Stufe 1 = 4–6 Jahre | Stufe 2 = 7–9 Jahre | Stufe 3 = 10–12 Jahre
 
-1. kindgerecht (bool): Ist das Bild für Kinder (4–12 Jahre) geeignet?
-   NICHT kindgerecht: Blut, Gewalt, tote Tiere, Nacktheit, detaillierte Anatomie (Organe, Skelette),
-   Kriegsfotos, grafische Verletzungen, beängstigende Inhalte.
-   Abstrakte Diagramme, reine Texttafeln, leere Karten → ebenfalls NICHT geeignet.
+Vergib eine ALTERSFREIGABE (ab_stufe):
 
-2. ablehnungsgrund (string): Wenn kindgerecht=false, kurze Begründung (1 Satz). Sonst leer "".
+  ab_stufe=1  → für ALLE geeignet (auch 4–6 J.): freundliche Tierfotos, Landschaften,
+                Alltagsobjekte, lebendige Tiere, fröhliche Szenen
+  ab_stufe=2  → ab 7 J.: Skelette oder Fossilien mit Lehrcharakter, leichte historische
+                Darstellungen, mäßig komplexe Diagramme mit klarem Bezug zum Thema
+  ab_stufe=3  → ab 10 J.: detaillierte Anatomie (Organe, Muskeln), komplexe
+                wissenschaftliche Darstellungen, historisch ernste Motive
+  ab_stufe=0  → GESPERRT (keine Stufe geeignet): Blut, offene Verletzungen, tote Tiere,
+                Nacktheit, Kriegsfotos, grafische Gewalt, beängstigende Inhalte
 
-3. beschreibung (string): Was ist auf dem Bild zu sehen? (1–2 Sätze, sachlich, für Redakteure)
+WICHTIG — Strenge für ab_stufe=1 (4–6 Jahre):
+NUR freundliche, klare, nicht verstörende Bilder. Skelette, Fossilien, anatomische
+Darstellungen, ernste historische Motive → mindestens ab_stufe=2 oder 3.
+Im Zweifel IMMER die höhere Stufe wählen.
 
-4. relevanz (int 0–10): Wie gut passt das Bild zum Thema "{thema}" in einer Kinder-Wissens-App?
-   10 = perfekt (zeigt Thema klar, schön, begeisternd für Kinder)
-   7–9 = sehr gut geeignet
-   5–6 = passabel
-   0–4 = kaum relevant
+Abstrakte Diagramme ohne erkennbares Motiv, reine Texttafeln, leere Karten → ab_stufe=0.
 
-5. hero_tauglich (bool): Wäre das Bild als erstes Bild (Hero) geeignet?
-   Kriterien: klar erkennbares Motiv, attraktiv, repräsentativ für das Thema, gute Bildqualität.
+Beantworte außerdem:
+
+  relevanz (0–10): Wie gut passt das Bild zum Thema "{thema}"?
+    10=perfekt, 7–9=sehr gut, 5–6=passabel, 0–4=kaum relevant
+
+  beschreibung (string): Was ist auf dem Bild zu sehen? (1–2 Sätze, sachlich)
+    Bei ab_stufe=0: kurze Begründung für die Sperrung.
+
+  hero_candidate (bool): Wäre das Bild als erstes Bild (Hero) geeignet?
+    Kriterien: klar erkennbares Motiv, attraktiv, repräsentativ für das Thema, gute Bildqualität.
 
 Antworte NUR mit diesem JSON (kein Markdown, kein Text davor/danach):
 {{
+  "ab_stufe": 1,
   "kindgerecht": true,
-  "ablehnungsgrund": "",
-  "beschreibung": "...",
   "relevanz": 7,
-  "hero_tauglich": false
+  "beschreibung": "...",
+  "hero_candidate": false
 }}"""
 
 # ── Request-Zaehler (Modul-Global, fuer Tests) ──────────────────────────────
@@ -534,25 +546,27 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
         if result is None:
             rejected.append({**img, "reason": "Vision-Fehler", "ablehnungsgrund": "Vision-API-Fehler"})
             print("    [X] Vision-Fehler")
-        elif not result.get("kindgerecht", False):
-            grund = result.get("ablehnungsgrund", "")
-            rejected.append({**img, "reason": f"kindgerecht=false: {grund}", "ablehnungsgrund": grund})
-            print(f"    [X] ABGELEHNT: {grund}")
         else:
+            ab_stufe = result.get("ab_stufe", 0)
             relevanz = result.get("relevanz", 0)
-            hero = result.get("hero_tauglich", False)
             beschreibung = result.get("beschreibung", "")
-            accepted.append({**img, "relevanz": relevanz, "hero_tauglich": hero,
-                             "beschreibung": beschreibung})
-            hero_marker = " [HERO]" if hero else ""
-            print(f"    [OK] [{relevanz}] {beschreibung[:80]}{hero_marker}")
+            hero = result.get("hero_candidate", False)
+            if ab_stufe == 0:
+                rejected.append({**img, "reason": f"gesperrt: {beschreibung}",
+                                 "ablehnungsgrund": beschreibung})
+                print(f"    [0] GESPERRT: {beschreibung[:80]}")
+            else:
+                accepted.append({**img, "ab_stufe": ab_stufe, "relevanz": relevanz,
+                                 "hero_candidate": hero, "beschreibung": beschreibung})
+                hero_marker = " [HERO]" if hero else ""
+                print(f"    [S{ab_stufe}] [{relevanz}] {beschreibung[:75]}{hero_marker}")
 
     # 4. Sortieren + Hero bestimmen
-    accepted.sort(key=lambda x: (-x["relevanz"], -int(x["hero_tauglich"])))
+    accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))
     for rank, a in enumerate(accepted, 1):
         a["rank"] = rank
 
-    hero_img = next((a for a in accepted if a["hero_tauglich"]), accepted[0] if accepted else None)
+    hero_img = next((a for a in accepted if a.get("hero_candidate", False)), accepted[0] if accepted else None)
 
     # 5. Zusammenfassung
     total_req = get_request_count() - req_before
@@ -569,8 +583,8 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
     if accepted:
         print("Relevanz-Ranking:")
         for a in accepted:
-            hero_marker = " [H]" if a["hero_tauglich"] else ""
-            print(f"  {a['rank']:2}. [{a['relevanz']}]{hero_marker} {a['filename'][:50]}")
+            hero_marker = " [H]" if a.get("hero_candidate", False) else ""
+            print(f"  {a['rank']:2}. [S{a['ab_stufe']}][{a['relevanz']}]{hero_marker} {a['filename'][:50]}")
             print(f"      {a['beschreibung'][:90]}")
 
     if rejected:
@@ -606,8 +620,9 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
             {
                 "rank":           a["rank"],
                 "filename":       a["filename"],
+                "ab_stufe":       a["ab_stufe"],
                 "relevanz":       a["relevanz"],
-                "hero_tauglich":  a["hero_tauglich"],
+                "hero_candidate": a.get("hero_candidate", False),
                 "beschreibung":   a["beschreibung"],
                 "license":        a["license"],
                 "license_author": a["license_author"],
