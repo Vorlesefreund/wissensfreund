@@ -1,12 +1,22 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T05:52:47Z -->
+<!-- updated: 2026-06-16T06:19:21Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Dubletten-Bereinigung: 8 Varianten via VARIANT_MAP (2026-06-16).** ← AKTUELL
+**Master konsolidiert: eine kanonische catalog_review_master.xlsx (2026-06-16).** ← AKTUELL
+- scripts/build_master.py: erzeugt Master frisch aus aktuellem Katalogstand
+- 4549 Zeilen (4359 primary + 159 reserve + 41 exclude), sortiert themengebiet+thema alpha
+- 233 Themen orange markiert (erg_s1 oder erg_s2 fehlt → Wortziel rechnet mit 0)
+- Neue Spalte: Kommentar | Freeze C2 | AutoFilter A1:R4550
+- Farben: exclude rot | sensibel hellrot | leuchtturm gelb | erg-Lücke orange thema-Zelle
+- Alt-Datei: catalog_review_master_r3.xlsx → _alt/ archiviert + aus Repo entfernt
+- Aufgedecktes Datenproblem (29→233 erg-Lücken): Items aus alter Rater-Runde mit nur erg_s3
+  → brauchen Nachbewertung (Rater-Run oder manuelle Schätzung erg_s1/s2)
+
+**Dubletten-Bereinigung: 8 Varianten via VARIANT_MAP (2026-06-16).**
 - VARIANT_MAP in catalog_merge.py: 8 Schreibvarianten → Kanon (dedup)
 - Ergebnis: 4371 primary (−8 vs. 4379), keine exakten Doppel
 - Zwilling/Zwillinge BEWUSST beide behalten (echte Bedeutungstrennung, WP-geprüft)
@@ -167,14 +177,15 @@ Bänder: S1[50,250] S2[80,400] S3[100,650]. Rater = Opus per API, Anker: 134 The
 
 ## 🔴 Nächster Schritt
 
-**Pilot-Bulk-Lauf** (50–100 Themen aus catalog_full.json) mit der vollständigen Pipeline:
-generate_grounded.py aus catalog_full.json → exclude-Filter, age_floor, framing_note aktiv.
+**Andreas-Review** der catalog_review_master.xlsx (4549 Zeilen, alle Themengebiete).
 
 ---
 
 ## 🔴 Offene Punkte (nach Priorität)
 
-Pilot-Bulk-Lauf (50–100 Themen, vollständige Pipeline) — nächster Chat
+Andreas-Review catalog_review_master.xlsx (4549 Zeilen)
+  → 233 orange Zellen = erg-Lücken prüfen/nachbewerten
+  → Nach Review: catalog_full.json neu generieren (python -X utf8 scripts/build_master.py + catalog_merge.py)
+Pilot-Bulk-Lauf (50–100 Themen, vollständige Pipeline) — nach Review
 categories_backlog.json → categories-Array je Artikel (spätere Phase)
-Dedup (Hai=Haie, Deutschland 3×; eigenständige Dino-Arten) — Vor-Bulk
 3-flash-preview L3 Fix (max_output_tokens explizit); Flutter WfArticleListScreen
