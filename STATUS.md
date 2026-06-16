@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T10:52:00Z -->
+<!-- updated: 2026-06-16T11:50:57Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -48,7 +48,20 @@ python scripts/run_batch.py --themen "Elefant" "Hund" "Dinosaurier" "Vulkan" "Ta
 ```
 
 Hinweis: Tabak nicht in catalog_full.json → wird übersprungen (nicht exclude, einfach fehlend).
-Für echten Opus-Recheck-Test: sensibel=True Thema wie "Indianer" oder "Demokratie" nutzen.
+Mini-Lauf final: Elefant, Hund, Dinosaurier, Vulkan, Spartacus, Zweiter Weltkrieg (6 Themen).
+
+---
+
+**Bild-Tier-Architektur final festgelegt (2026-06-16)**
+
+Server (R2): 300px / 800px / 1600px pro Bild.
+Standard: Hero 800px + Rest 300px offline | Plus/Prem: alle 800px offline + 1600px on-demand WLAN.
+Hero-Regel: hero_candidate=true + höchste relevanz, NACH ab_stufe-Filter (ab_stufe <= stufe).
+JSON-Schema + R2-Pfade in WISSEN_PIPELINE_PRODUKTION.md → Abschnitt "Bild-Tier-Architektur".
+
+Offene Punkte Vollkatalog-Bilder:
+- ~174k Bilder @ 3s = ~145h einmaliger Download (laut Andreas: akzeptabel)
+- R2-Upload-Integration: kommt mit Baustein-Upload-Schritt (upload_articles.py erweitern)
 
 ---
 
@@ -58,7 +71,8 @@ Für echten Opus-Recheck-Test: sensibel=True Thema wie "Indianer" oder "Demokrat
 
 ## Gerade in Arbeit
 
-Nichts aktiv. Nächster Schritt: Stage 2 (Generierung) implementieren ODER Stage 1 echt für 5 Themen testen.
+**Stage 1 Mini-Lauf (6 Themen) läuft** — nach Wikimedia-Fix (UA+Email, iiurlwidth=1600, 3s-Rate).
+Ergebnis ausstehend: Companions, Bildpool/ab_stufe, Opus-Recheck, Speicher-Tabelle.
 
 ---
 

@@ -1,6 +1,78 @@
 # WISSEN_PIPELINE_PRODUKTION.md
 <!-- erstellt: 2026-06-16 -->
 
+## Bild-Tier-Architektur (final, 2026-06-16)
+
+### Auflösungen auf R2 (3 Tiers pro Bild)
+
+| Tier | Auflösung | Quelle |
+|------|-----------|--------|
+| Standard | 300px JPEG | lokal skaliert aus 1600px-Download |
+| Plus/Prem | 800px JPEG | lokal skaliert aus 1600px-Download |
+| Max | 1600px JPEG | CDN-Thumbnail-Download (iiurlwidth=1600) |
+
+R2-Pfad-Schema: `bilder/{thema_slug}/{filename_slug}_{width}.jpg`
+Beispiel: `bilder/elefant/Afrikanischer_Elefant_800.jpg`
+
+### App-Auslieferung nach Nutzer-Tier
+
+| Nutzer-Tier | Hero-Bild | Weitere Bilder | 1600px |
+|-------------|-----------|----------------|--------|
+| Standard (gratis) | 800px offline | 300px offline | — |
+| Plus / Premium | 800px offline | 800px offline | on-demand, nur WLAN, temporär |
+
+### Speicher-Schätzung
+
+| Szenario | KB/Artikel | 100 Artikel |
+|----------|-----------|-------------|
+| Standard (Hero 800 + Rest 300) | ~520 KB | ~52 MB |
+| Plus/Prem offline (alle 800) | ~1.760 KB | ~176 MB |
+| Server gesamt (300+800+1600 × 15k Bilder) | — | ~9 GB |
+
+### Hero-Bild-Regel
+
+1. Primär: `hero_candidate=true` aus Vision-Filter
+2. Falls mehrere: höchste `relevanz`-Punktzahl
+3. Falls keines: erstes akzeptiertes Bild in img_index-Reihenfolge
+4. **Stufenregel**: Hero-Auswahl NACH ab_stufe-Filter — `ab_stufe <= stufe` muss gelten.
+   Kein ab_stufe=2-Bild als Hero in einem S1-Artikel.
+
+### JSON-Schema: Bilder im Artikel-JSON
+
+```json
+{
+  "images": [
+    {
+      "img_index": 0,
+      "filename": "Afrikanischer_Elefant.jpg",
+      "wikimedia_id": "File:Afrikanischer Elefant.jpg",
+      "original_url": "https://upload.wikimedia.org/wikipedia/commons/…/Afrikanischer_Elefant.jpg",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Max Mustermann",
+      "ab_stufe": 1,
+      "relevanz": 9,
+      "hero_candidate": true,
+      "confidence": "hoch",
+      "beschreibung": "Afrikanischer Elefant in der Savanne.",
+      "is_hero": true,
+      "tiers": {
+        "300":  "bilder/elefant/Afrikanischer_Elefant_300.jpg",
+        "800":  "bilder/elefant/Afrikanischer_Elefant_800.jpg",
+        "1600": "bilder/elefant/Afrikanischer_Elefant_1600.jpg"
+      }
+    }
+  ]
+}
+```
+
+**Felder:**
+- `img_index`: Reihenfolge im Artikel (0-basiert, nach Stufenfilter)
+- `is_hero`: genau ein Bild pro Artikel+Stufe hat `true` (das 800px-Hauptbild bei Standard)
+- `tiers.300/800/1600`: R2-Pfade (relativ zur R2-Basis-URL), alle drei immer vorhanden
+- `original_url`: Wikimedia-Quell-URL (für Lizenz-Attribution)
+
+---
+
 ## Batch-Orchestrator: run_batch.py
 
 ### Stage-Reihenfolge (KORREKT — Vision VOR Generierung)
