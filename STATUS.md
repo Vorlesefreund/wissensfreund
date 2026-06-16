@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T07:54:10Z -->
+<!-- updated: 2026-06-16T07:56:57Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -245,9 +245,47 @@ Dateien dieser Session (alle committed): `tts_compose.py`, `tts_audio_compare.py
 
 ---
 
+## Übergang zu Pipeline-Chat (2026-06-16)
+
+### KATALOG: FINAL & PRODUKTIONSBEREIT
+- catalog_full.json: **4346 primary**, 213 Leuchtturm, 563 sensibel, 56 exclude
+- Keine Duplikate, alle Andreas-Reviews eingearbeitet, **0 Ergiebigkeits-Lücken**
+- eignung_verdicts.json: exclude/age_floor/framing_note aktiv (738 Verdicts)
+- Ergiebigkeit verdrahtet, Wortziel-Kurve kalibriert (134 Anker)
+
+### NÄCHSTES ZIEL: Mini-Produktionslauf
+- 5 Themen × 3 Stufen, KOMPLETT: Artikeltext + Quiz + TTS-Audio
+  (inkl. Quiz-Vertonung) + Bilder, alles nach R2
+- Dient auch der Kostenkontrolle (Token-Tracking aller Modelle + TTS)
+- Gleiche Methodik wie späterer Groß-Lauf (hunderte Themen)
+
+### PIPELINE-BESTANDSAUFNAHME (erster Schritt im neuen Chat)
+Bestandsaufnahme bereits durchgeführt. Ergebnis:
+- **Artikel-Generierung** (`generate_grounded.py`): ✅ lauffähig, gemini-3.5-flash
+- **Bild-Vision-Filter** (`image_vision_filter.py`): ✅ lauffähig, gemini-2.5-flash (echter Vision-Call)
+  - `patch_article_images_v1.py`: ✅ existiert, ⚠️ noch nie in Produktion gelaufen
+  - Stufe-2 Kategorie-Blacklist: ❌ fehlt
+- **TTS Vorlesetext** (`tts_compose.py`): ✅ lauffähig
+- **TTS-Generierung** (compose → API → MP3 → R2): ❌ kein Produktionsskript
+- **R2 Artikel-Upload** (`upload_articles.py`): ✅ lauffähig
+- **Orchestrator** (pro Thema: Artikel→Bilder→Audio→R2): ❌ fehlt komplett
+- **cost_tracker.py**: ❌ fehlt
+
+### NOCH ZU BAUEN (bekannt)
+- Quiz-Vertonung (interaktive TTS-Schnipsel je Frage)
+- Orchestrator (pro Thema: Artikel→Bilder→Audio→R2 als ein Lauf)
+- cost_tracker.py (Token + TTS-Kosten, Hochrechnung auf Vollkatalog)
+
+### OFFENE AUDIO-ENTSCHEIDUNGEN VON ANDREAS (siehe TTS-Block)
+1. Iapetus-Stimme im Audio-Review bestätigen
+2. Feste vs. freie Tag-Palette
+3. Tagging-Modell: gemini-3.5-flash (503-anfällig) vs. gemini-2.5-flash-lite (stabil)
+
+---
+
 ## 🔴 Nächster Schritt
 
-**Andreas-Review** der catalog_review_master.xlsx (4549 Zeilen, alle Themengebiete).
+**Mini-Produktionslauf** (5 Themen × 3 Stufen) — Pipeline-Chat übernimmt.
 
 ---
 
