@@ -257,6 +257,9 @@ def load_existing_annotations(xlsx_path: pathlib.Path) -> dict[str, dict]:
                 "framing_note":row[col["framing_note"]]  if "framing_note"  in col else None,
                 "themengebiet":row[col["themengebiet"]]  if "themengebiet"  in col else None,
                 "notiz":       row[col["notiz"]]         if "notiz"         in col else None,
+                "erg_s1":      row[col["erg_s1"]]        if "erg_s1"        in col else None,
+                "erg_s2":      row[col["erg_s2"]]        if "erg_s2"        in col else None,
+                "erg_s3":      row[col["erg_s3"]]        if "erg_s3"        in col else None,
             }
         wb.close()
         print(f"  Bestehende Annotierungen geladen: {len(result)} Zeilen annotiert ({source.name}).")
@@ -266,8 +269,9 @@ def load_existing_annotations(xlsx_path: pathlib.Path) -> dict[str, dict]:
         return {}
 
 
-def export_xlsx(primary: list[dict], reserve: list[dict], duplicates: list[dict], all_items: list[dict]) -> None:
-    existing = load_existing_annotations(OUT_XLSX)
+def export_xlsx(primary: list[dict], reserve: list[dict], duplicates: list[dict], all_items: list[dict], existing: dict | None = None) -> None:
+    if existing is None:
+        existing = load_existing_annotations(OUT_XLSX)
     wb = openpyxl.Workbook()
 
     # ── Sheet 1: Review ───────────────────────────────────────────────────
@@ -402,6 +406,41 @@ def export_xlsx(primary: list[dict], reserve: list[dict], duplicates: list[dict]
 
 # ── Main ───────────────────────────────────────────────────────────────────
 
+def apply_master_annotations(items: list[dict], annotations: dict[str, dict]) -> int:
+    """
+    Überträgt eignung/age_floor/framing_note/themengebiet/notiz/erg aus Master auf items.
+    Muss VOR assign_ranks() aufgerufen werden, damit eignung-Überstimmungen
+    (Andreas: exclude→include oder include→exclude) korrekt in catalog_full.json landen.
+    Sonderfall: tier=reserve + Master-include → tier auf primary hochgestuft,
+    damit das Thema nicht im reserve-Topf versinkt.
+    Gibt Anzahl überschriebener Items zurück.
+    """
+    count = 0
+    for item in items:
+        ann = annotations.get(item.get("thema", "").strip(), {})
+        if not ann:
+            continue
+        changed = False
+        original_eignung = item.get("eignung")
+        for field in ("eignung", "age_floor", "framing_note", "themengebiet", "notiz"):
+            if field in ann and ann[field] is not None:
+                item[field] = ann[field]
+                changed = True
+        # erg-Werte aus Master nur übertragen wenn Item noch kein erg hat
+        for field in ("erg_s1", "erg_s2", "erg_s3"):
+            if ann.get(field) is not None and not item.get(field):
+                item[field] = ann[field]
+                changed = True
+        # tier-Upgrade: nur wenn Rater exclude gesetzt hatte UND Master auf include überstimmt.
+        # Normale reserve-Items (Rater: reserve+include) bleiben reserve.
+        if original_eignung == "exclude" and item.get("eignung") == "include" and item.get("tier") == "reserve":
+            item["tier"] = "primary"
+            changed = True
+        if changed:
+            count += 1
+    return count
+
+
 def main() -> None:
     print("1. Lade …")
     all_items = load_all()
@@ -409,6 +448,11 @@ def main() -> None:
     print("2. Dedup …")
     canonical, duplicates = dedup(all_items)
     print(f"  {len(duplicates)} Dubletten → {len(canonical)} eindeutige Themen")
+
+    print("2b. Master-Annotierungen anwenden …")
+    master_ann = load_existing_annotations(OUT_XLSX)
+    n_ann = apply_master_annotations(canonical, master_ann)
+    print(f"  {n_ann} Themen mit Master-Override (eignung/age_floor/framing_note)")
 
     print("3. Produktions-Reihenfolge …")
     primary, reserve = assign_ranks(canonical)
@@ -422,7 +466,7 @@ def main() -> None:
 
     print("4. Exportiere …")
     export_json(primary, reserve)
-    export_xlsx(primary, reserve, duplicates, canonical)
+    export_xlsx(primary, reserve, duplicates, canonical, master_ann)
 
     print("\n✓ Fertig.")
     print(f"  Nächster Schritt: catalog_review.xlsx öffnen, sensibel/exclude-Zeilen prüfen,")
