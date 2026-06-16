@@ -418,7 +418,10 @@ def prefetch_images(
 
 # ── Vision-Analyse ───────────────────────────────────────────────────────────
 
-def analyze_with_vision(client: genai.Client, image_bytes: bytes, mime_type: str, thema: str) -> dict | None:
+def analyze_with_vision(
+    client: genai.Client, image_bytes: bytes, mime_type: str, thema: str
+) -> tuple[dict | None, dict]:
+    """Gibt (result, usage_dict) zurueck. usage_dict kann {} sein."""
     prompt = VISION_PROMPT_TEMPLATE.format(thema=thema)
     for attempt in range(1, 3):
         try:
@@ -434,6 +437,15 @@ def analyze_with_vision(client: genai.Client, image_bytes: bytes, mime_type: str
                     thinking_config=types.ThinkingConfig(thinking_budget=0),
                 ),
             )
+            um = getattr(response, "usage_metadata", None)
+            usage: dict = {}
+            if um:
+                usage = {
+                    "input_tok":  int(getattr(um, "prompt_token_count", 0) or 0),
+                    "output_tok": int(getattr(um, "candidates_token_count", 0) or 0),
+                    "cached_tok": int(getattr(um, "cached_content_token_count", 0) or 0),
+                    "thoughts_tok": 0,
+                }
             text = response.text
             if text is None:
                 parts = []
@@ -445,10 +457,10 @@ def analyze_with_vision(client: genai.Client, image_bytes: bytes, mime_type: str
             text = text.strip()
             text = re.sub(r"^```[a-zA-Z]*\n?", "", text)
             text = re.sub(r"\n?```$", "", text)
-            return json.loads(text)
+            return json.loads(text), usage
         except json.JSONDecodeError as e:
             log.warning("  JSON-Parse-Fehler: %s", e)
-            return None
+            return None, {}
         except Exception as e:
             err = str(e)
             if attempt < 2 and ("503" in err or "unavailable" in err.lower()):
@@ -456,8 +468,8 @@ def analyze_with_vision(client: genai.Client, image_bytes: bytes, mime_type: str
                 time.sleep(30)
                 continue
             log.warning("  Vision-Fehler: %s", e)
-            return None
-    return None
+            return None, {}
+    return None, {}
 
 
 # ── Haupt-Lauf ───────────────────────────────────────────────────────────────
@@ -517,7 +529,7 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
             print("    [X] Download fehlgeschlagen")
             continue
 
-        result = analyze_with_vision(client, image_bytes, "image/jpeg", thema)
+        result, _vision_usage = analyze_with_vision(client, image_bytes, "image/jpeg", thema)
 
         if result is None:
             rejected.append({**img, "reason": "Vision-Fehler", "ablehnungsgrund": "Vision-API-Fehler"})

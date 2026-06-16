@@ -15,6 +15,10 @@ from google.genai import types
 
 log = logging.getLogger(__name__)
 
+# Letzter Token-Verbrauch — wird nach jedem erfolgreichen call_gemini() befüllt.
+# Caller können _last_usage direkt nach dem Call lesen (vor dem nächsten Call).
+_last_usage: dict = {}
+
 GEMINI_MODEL        = "gemini-2.5-flash"
 RETRY_ATTEMPTS      = 4
 _DOTENV_PATH        = Path(__file__).parent.parent / ".env"
@@ -34,6 +38,7 @@ def call_gemini(
     response_schema: Any = None,
     cached_content: str | None = None,
 ) -> str:
+    global _last_usage
     """Ruft Gemini auf und gibt den Antworttext zurück.
 
     Optionale Parameter:
@@ -75,17 +80,25 @@ def call_gemini(
                 contents=user_message,
                 config=cfg,
             )
-            # usage_metadata auswerten
+            # usage_metadata auswerten + in _last_usage sichern
             um = getattr(response, "usage_metadata", None)
             if um:
-                prompt_tok    = getattr(um, "prompt_token_count", "?")
-                cand_tok      = getattr(um, "candidates_token_count", "?")
+                prompt_tok    = getattr(um, "prompt_token_count", 0) or 0
+                cand_tok      = getattr(um, "candidates_token_count", 0) or 0
                 cached_tok    = getattr(um, "cached_content_token_count", 0) or 0
                 thoughts_tok  = getattr(um, "thoughts_token_count", 0) or 0
                 log.info(
                     "  usage: prompt=%s cached=%d thoughts=%d output=%s",
                     prompt_tok, cached_tok, thoughts_tok, cand_tok,
                 )
+                _last_usage = {
+                    "input_tok":    int(prompt_tok),
+                    "output_tok":   int(cand_tok),
+                    "cached_tok":   int(cached_tok),
+                    "thoughts_tok": int(thoughts_tok),
+                }
+            else:
+                _last_usage = {}
 
             # Thinking-Mode kann response.text=None liefern → Parts direkt auslesen
             candidates = getattr(response, "candidates", [])

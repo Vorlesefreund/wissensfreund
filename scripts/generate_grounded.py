@@ -45,6 +45,8 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
+import cost_tracker                      # noqa: E402
 from generate_articles import (          # noqa: E402
     fetch_wikipedia_text,
     resolve_lemma,
@@ -73,6 +75,9 @@ from lektorat_common import (            # noqa: E402
 
 GEMINI_MODEL       = "gemini-3.5-flash"
 OUT_DIR            = ROOT / "articles" / "test_grounded"
+CATALOG_PATH       = ROOT / "catalog_full.json"
+
+_RUN_ID: str = ""   # wird in main() gesetzt (--run-id)
 SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v3.23_production.md"
 
 APPEAL_TARGET     = {"high": 15, "medium": 10, "low": 6}
@@ -409,8 +414,8 @@ def select_companions_raw(
     thema: str,
     primary_text: str,
     model: str = GEMINI_MODEL,
-) -> list[str]:
-    """Kompass: Gemini schlägt Begleitartikel frei vor (kein Link-Pool)."""
+) -> tuple[list[str], dict]:
+    """Kompass: Gemini schlägt Begleitartikel frei vor. Gibt (companions, usage_dict) zurück."""
     lead = primary_text[:1500]
     prompt = COMPANION_PROMPT_TMPL.format(thema=thema, lead=lead)
     thinking = _make_thinking_config(model, budget_for_2_5=1024)
@@ -441,12 +446,21 @@ def select_companions_raw(
                     response_schema=companions_schema,
                 ),
             )
+            um = getattr(response, "usage_metadata", None)
+            usage: dict = {}
+            if um:
+                usage = {
+                    "input_tok":    int(getattr(um, "prompt_token_count", 0) or 0),
+                    "output_tok":   int(getattr(um, "candidates_token_count", 0) or 0),
+                    "cached_tok":   int(getattr(um, "cached_content_token_count", 0) or 0),
+                    "thoughts_tok": int(getattr(um, "thoughts_token_count", 0) or 0),
+                }
             text = (response.text or "").strip()
             data = json.loads(text)
-            return [str(c) for c in data.get("companions", [])][:10]
+            return [str(c) for c in data.get("companions", [])][:10], usage
         except json.JSONDecodeError as e:
             log.warning("  Phase 1 JSON-Fehler (V%d): %s | raw=%r", attempt, e, (response.text or "")[:120])
-            return []
+            return [], {}
         except Exception as e:
             err = str(e)
             if attempt < max_attempts and ("503" in err or "unavailable" in err.lower()):
@@ -455,8 +469,8 @@ def select_companions_raw(
                 time.sleep(wait)
             else:
                 log.error("  Phase 1 Fehler: %s", e)
-                return []
-    return []
+                return [], {}
+    return [], {}
 
 
 def validate_and_resolve_companions(
@@ -610,7 +624,9 @@ def build_image_pool(
         _consecutive_dl_failures = 0
         mime = "image/jpeg"
 
-        result = analyze_with_vision(client, img_bytes, mime, thema)
+        result, vision_usage = analyze_with_vision(client, img_bytes, mime, thema)
+        if vision_usage:
+            cost_tracker.track(_RUN_ID, thema, 0, "vision", "gemini-2.5-flash", **vision_usage)
         if result is None:
             rejected_vision.append({**img, "reason": "Vision-Fehler"})
             time.sleep(2.0)
@@ -813,7 +829,9 @@ def prepare_topic_sources(
         raise ValueError(f"Primaertext zu kurz: {len(primary_text)} Zeichen")
 
     # Kompass-Auswahl
-    raw_companions = select_companions_raw(client, thema, primary_text, model)
+    raw_companions, kompass_usage = select_companions_raw(client, thema, primary_text, model)
+    if kompass_usage:
+        cost_tracker.track(_RUN_ID, thema, 0, "kompass", model, **kompass_usage)
     log.info("  Kompass-Vorschlag: %s", raw_companions)
 
     # Validierung + Weiterleitungsauflösung (cap gestaffelt nach Appeal)
@@ -1029,6 +1047,9 @@ def generate_one_level(
                     f"Artikel nicht plausibel: {n_secs} Sections, {n_sents} Sätze"
                 )
 
+            _u = gemini_client._last_usage.copy()
+            if _u:
+                cost_tracker.track(_RUN_ID, thema, job["age_level"], "article_gen", model, **_u)
             break  # Erfolg
 
         except Exception as e:
@@ -1086,6 +1107,9 @@ def generate_one_level(
                 response_mime_type="application/json",
             )
             article_retry = parse_article_json(raw_retry)
+            _u = gemini_client._last_usage.copy()
+            if _u:
+                cost_tracker.track(_RUN_ID, thema, job["age_level"], "article_gen", model, **_u)
             wc_retry = count_article_words(article_retry)
             report["phase2"]["retry_needed"]     = True
             report["phase2"]["retry_word_count"] = wc_retry
@@ -1119,6 +1143,9 @@ def generate_one_level(
                     word_count, cap, wmax, trims, TRIM_MAX_ATTEMPTS)
         try:
             article, word_count = _trim_article_to_cap(article, wmax, model, phase2_thinking)
+            _u = gemini_client._last_usage.copy()
+            if _u:
+                cost_tracker.track(_RUN_ID, thema, job["age_level"], "trim", model, **_u)
             log.info("  Trim-Pass %d Ergebnis: %d Wörter", trims, word_count)
         except Exception as e:
             log.error("  Trim-Pass fehlgeschlagen: %s", e)
@@ -1141,6 +1168,9 @@ def generate_one_level(
         log.warning("  %s — Box-Reparatur-Pass", box_issue)
         try:
             repaired = _box_repair_pass(article, model, phase2_thinking)
+            _u = gemini_client._last_usage.copy()
+            if _u:
+                cost_tracker.track(_RUN_ID, thema, job["age_level"], "box_repair", model, **_u)
             same_content = _box_signature(repaired) == _box_signature(article)
             if same_content and _box_lint(repaired) is None:
                 article = repaired
@@ -1175,14 +1205,88 @@ def generate_one_level(
     return article, report
 
 
+# ── Catalog-Connector ─────────────────────────────────────────────────────────
+
+def _build_catalog_jobs(themen: list[str], stufen: list[int]) -> list[dict]:
+    """Baut Job-Dicts aus catalog_full.json für die gegebenen Themen + Stufen."""
+    if not CATALOG_PATH.exists():
+        raise FileNotFoundError(f"catalog_full.json nicht gefunden: {CATALOG_PATH}")
+    catalog: list[dict] = json.load(CATALOG_PATH.open(encoding="utf-8"))
+    by_thema = {e["thema"].strip().lower(): e for e in catalog}
+
+    jobs: list[dict] = []
+    for thema in themen:
+        entry = by_thema.get(thema.strip().lower())
+        if entry is None:
+            log.warning("  Catalog: Thema '%s' nicht gefunden — uebersprungen", thema)
+            continue
+        if entry.get("eignung") == "exclude":
+            log.info("  Catalog: '%s' ist exclude — uebersprungen", thema)
+            continue
+        age_floor = int(entry.get("age_floor") or 1)
+        canonical = entry["thema"]
+        for level in stufen:
+            if level < age_floor:
+                log.info("  Catalog: '%s' S%d unter age_floor S%d — uebersprungen", canonical, level, age_floor)
+                continue
+            slug = canonical.lower().replace(" ", "_").replace("/", "_")
+            jobs.append({
+                "article_id":        f"{slug}_l{level}",
+                "thema":             canonical,
+                "primaer_wikipedia": canonical,
+                "title":             canonical,
+                "age_level":         level,
+                "topic_interest":    "medium",
+                "pattern":           entry.get("themengebiet", ""),
+                "category_top":      "",
+                "category_sub":      "",
+                "_catalog_rank":     entry.get("production_rank", 9999),
+            })
+    return jobs
+
+
+def _load_catalog_rank_jobs(top_n: int, stufen: list[int]) -> list[dict]:
+    """Lädt Top-N Themen nach production_rank aus catalog_full.json."""
+    if not CATALOG_PATH.exists():
+        raise FileNotFoundError(f"catalog_full.json nicht gefunden: {CATALOG_PATH}")
+    catalog: list[dict] = json.load(CATALOG_PATH.open(encoding="utf-8"))
+    eligible = [
+        e for e in catalog
+        if e.get("eignung") != "exclude" and e.get("production_rank") is not None
+    ]
+    eligible.sort(key=lambda e: int(e.get("production_rank") or 9999))
+    top_themen = [e["thema"] for e in eligible[:top_n]]
+    return _build_catalog_jobs(top_themen, stufen)
+
+
 # ── CLI ───────────────────────────────────────────────────────────────────────
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Kompass-Grounding Artikel-Generator")
     parser.add_argument(
         "--articles", nargs="+",
-        default=list(TEST_JOBS.keys()),
-        help="Artikel-IDs zum Generieren (default: alle Test-Jobs)",
+        default=None,
+        help="Artikel-IDs aus TEST_JOBS (default: alle Test-Jobs, wenn kein --catalog)",
+    )
+    parser.add_argument(
+        "--catalog", nargs="+", metavar="THEMA",
+        help="Themen aus catalog_full.json (z.B. --catalog Vulkan Biene)",
+    )
+    parser.add_argument(
+        "--catalog-rank", type=int, default=None, metavar="N",
+        help="Top-N Themen nach production_rank aus catalog_full.json",
+    )
+    parser.add_argument(
+        "--stufen", nargs="+", type=int, choices=[1, 2, 3], default=[1, 2, 3],
+        help="Zu generierende Stufen (default: 1 2 3)",
+    )
+    parser.add_argument(
+        "--run-id", default=None,
+        help="Run-ID fuer cost_tracker (default: Zeitstempel)",
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true",
+        help="Zeigt Jobs + Eignungs-Gate, generiert nichts",
     )
     parser.add_argument(
         "--gen-model", default=None,
@@ -1206,6 +1310,9 @@ def main() -> None:
     )
     args = parser.parse_args()
 
+    global _RUN_ID
+    _RUN_ID = args.run_id or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
     model         = args.gen_model or GEMINI_MODEL
     out_dir       = Path(args.output_dir).resolve() if args.output_dir else OUT_DIR
     model_slug    = model.replace("gemini-", "").replace(".", "-")
@@ -1224,7 +1331,8 @@ def main() -> None:
 
     system_prompt = SYSTEM_PROMPT_PATH.read_text(encoding="utf-8")
     log.info("System-Prompt: %d Zeichen", len(system_prompt))
-    log.info("Modell: %s | skip_images: %s | out_dir: %s", model, args.skip_images, out_dir)
+    log.info("Modell: %s | skip_images: %s | out_dir: %s | run_id: %s",
+             model, args.skip_images, out_dir, _RUN_ID)
 
     client = genai.Client(api_key=api_key)
     session = requests.Session()
@@ -1233,15 +1341,40 @@ def main() -> None:
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "_errors").mkdir(exist_ok=True)
 
-    # Jobs sammeln + Modell-Slug in article_id einbauen
+    # Jobs sammeln
     resolved_jobs: list[dict] = []
-    for article_id in args.articles:
-        job = TEST_JOBS.get(article_id)
-        if not job:
-            log.error("Unbekannte article_id: %s (verfuegbar: %s)",
-                      article_id, list(TEST_JOBS.keys()))
-            continue
-        resolved_jobs.append({**job, "article_id": article_id})
+    if args.catalog_rank:
+        try:
+            resolved_jobs = _load_catalog_rank_jobs(args.catalog_rank, args.stufen)
+            log.info("Catalog-Rank: Top-%d Themen, %d Jobs", args.catalog_rank, len(resolved_jobs))
+        except Exception as e:
+            log.error("Catalog-Rank Fehler: %s", e)
+            sys.exit(1)
+    elif args.catalog:
+        try:
+            resolved_jobs = _build_catalog_jobs(args.catalog, args.stufen)
+            log.info("Catalog: %d Themen, %d Jobs", len(args.catalog), len(resolved_jobs))
+        except Exception as e:
+            log.error("Catalog Fehler: %s", e)
+            sys.exit(1)
+    else:
+        article_ids = args.articles if args.articles else list(TEST_JOBS.keys())
+        for article_id in article_ids:
+            job = TEST_JOBS.get(article_id)
+            if not job:
+                log.error("Unbekannte article_id: %s (verfuegbar: %s)",
+                          article_id, list(TEST_JOBS.keys()))
+                continue
+            resolved_jobs.append({**job, "article_id": article_id})
+
+    if args.dry_run:
+        print(f"\n=== DRY-RUN: {len(resolved_jobs)} Jobs ===")
+        for job in resolved_jobs:
+            ev = eignung_for(job.get("thema", job["title"]))
+            gate = f"exclude={ev['eignung']=='exclude'} age_floor={ev['age_floor']}"
+            print(f"  {job['article_id']:30s}  {gate}")
+        print("Kein einziger API-Call — dry-run beendet.")
+        return
 
     # Nach primaer_wikipedia gruppieren (Reihenfolge des ersten Auftretens bewahren)
     topic_groups: dict[str, list[dict]] = defaultdict(list)
@@ -1411,35 +1544,53 @@ def main() -> None:
 
             # Lektorat (alle Stufen, Quellblock geteilt; sync=default, batch=--lektorat-batch)
             if not skip_lektorat and topic_articles:
-                parts = {
-                    job["article_id"]: build_lektorat_parts(article, sources_block)
-                    for job, article, _ in topic_articles
-                }
+                parts = {}
+                aid_to_meta: dict[str, tuple[str, int]] = {}
+                for job, article, _ in topic_articles:
+                    aid = job["article_id"]
+                    parts[aid] = build_lektorat_parts(article, sources_block)
+                    aid_to_meta[aid] = (job.get("thema", job["title"]), job["age_level"])
                 if use_batch_lektorat:
                     log.info("  Starte Lektorat-Batch fuer %d Artikel (Modell: claude-sonnet-4-6) ...",
                              len(topic_articles))
-                    run_fn = run_lektorat_batch
+                    try:
+                        lektorat_results = run_lektorat_batch(parts, anthropic_key)
+                        lektorat_usage: dict[str, dict] = {}
+                    except Exception as exc:
+                        log.error("  Lektorat-Batch fehlgeschlagen: %s — Artikel ohne Lektorat-Feld", exc)
+                        lektorat_results = {}
+                        lektorat_usage = {}
                 else:
                     log.info("  Starte Lektorat-Sync fuer %d Artikel (Modell: claude-sonnet-4-6) ...",
                              len(topic_articles))
-                    run_fn = run_lektorat_sync
-                try:
-                    lektorat_results = run_fn(parts, anthropic_key)
-                    for job, article, _ in topic_articles:
-                        aid = job["article_id"]
-                        verdicts = lektorat_results.get(aid, [])
-                        annotate_article_lektorat(article, verdicts, primary_text)
-                        pb = article.get("pruefbericht", {})
-                        sm = pb.get("summary", {})
-                        log.info(
-                            "  Lektorat [%s]: %d Aussagen — angewandt:%d vorschlag:%d eskaliert:%d",
-                            aid, len(pb.get("findings", [])),
-                            sm.get("auto_angewandt", 0),
-                            sm.get("vorschlag_offen", 0),
-                            sm.get("eskaliert", 0),
+                    try:
+                        lektorat_results, lektorat_usage = run_lektorat_sync(parts, anthropic_key)
+                    except Exception as exc:
+                        log.error("  Lektorat-Sync fehlgeschlagen: %s — Artikel ohne Lektorat-Feld", exc)
+                        lektorat_results = {}
+                        lektorat_usage = {}
+                for aid, u in lektorat_usage.items():
+                    if u:
+                        _thema_l, _level_l = aid_to_meta.get(aid, (thema, 0))
+                        cost_tracker.track(
+                            _RUN_ID, _thema_l, _level_l, "lektorat", "claude-sonnet-4-6",
+                            input_tok=u.get("input_tok", 0),
+                            output_tok=u.get("output_tok", 0),
+                            cached_tok=u.get("cache_read_tok", 0),
                         )
-                except Exception as exc:
-                    log.error("  Lektorat fehlgeschlagen: %s — Artikel ohne Lektorat-Feld", exc)
+                for job, article, _ in topic_articles:
+                    aid = job["article_id"]
+                    verdicts = lektorat_results.get(aid, [])
+                    annotate_article_lektorat(article, verdicts, primary_text)
+                    pb = article.get("pruefbericht", {})
+                    sm = pb.get("summary", {})
+                    log.info(
+                        "  Lektorat [%s]: %d Aussagen — angewandt:%d vorschlag:%d eskaliert:%d",
+                        aid, len(pb.get("findings", [])),
+                        sm.get("auto_angewandt", 0),
+                        sm.get("vorschlag_offen", 0),
+                        sm.get("eskaliert", 0),
+                    )
 
             # Artikel schreiben (mit ggf. annotiertem lektorat-Feld)
             for job, article, report in topic_articles:

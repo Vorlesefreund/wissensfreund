@@ -432,8 +432,11 @@ def annotate_article_lektorat(
 def run_lektorat_sync(
     parts_by_id: dict[str, tuple[str, str]],
     api_key: str,
-) -> dict[str, list[dict]]:
+) -> tuple[dict[str, list[dict]], dict[str, dict]]:
     """Führt Lektorat-Calls SEQUENZIELL aus (schnell für ≤5 Artikel).
+
+    Gibt (results, usage_by_id) zurück.
+    usage_by_id keys: input_tok, output_tok, cache_create_tok, cache_read_tok.
 
     Gleiche Prompt-Struktur wie run_lektorat_batch (cache_control: ephemeral).
     Sequenziell statt parallel: Call 1 schreibt den Anthropic-KV-Cache
@@ -441,8 +444,9 @@ def run_lektorat_sync(
     """
     import anthropic
 
-    client  = anthropic.Anthropic(api_key=api_key)
-    results: dict[str, list[dict]] = {}
+    client    = anthropic.Anthropic(api_key=api_key)
+    results:    dict[str, list[dict]] = {}
+    usage_by_id: dict[str, dict]     = {}
 
     for aid, (sources_prefix, article_task) in parts_by_id.items():
         log.info("  Lektorat-Sync [%s] …", aid)
@@ -469,6 +473,12 @@ def run_lektorat_sync(
                 getattr(u, "cache_read_input_tokens", 0),
                 u.output_tokens,
             )
+            usage_by_id[aid] = {
+                "input_tok":       u.input_tokens,
+                "output_tok":      u.output_tokens,
+                "cache_create_tok": getattr(u, "cache_creation_input_tokens", 0),
+                "cache_read_tok":   getattr(u, "cache_read_input_tokens", 0),
+            }
             try:
                 results[aid] = parse_lektorat_json(raw)
             except Exception as exc:
@@ -477,8 +487,9 @@ def run_lektorat_sync(
         except Exception as exc:
             log.warning("  Lektorat-Sync [%s] fehlgeschlagen: %s", aid, exc)
             results[aid] = []
+            usage_by_id[aid] = {}
 
-    return results
+    return results, usage_by_id
 
 
 # ── Anthropic Batch-API ───────────────────────────────────────────────────────
