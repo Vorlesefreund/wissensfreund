@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T13:46:45Z -->
+<!-- updated: 2026-06-16T14:28:09Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -83,7 +83,16 @@ Offene Punkte Vollkatalog-Bilder:
   source_passages-Wrapper (Ausgabe als {article, source_passages})
 - Post-Processing: JSON-Parse (Wrapper-first, Fallback plain), Wortzahl-Guard (2 Trim-Pässe),
   Box-Guard, validate_article, _set_is_hero, source_passages eingebettet, cost_tracker
-- Elefant-Durchstich: Stage 1 ✅ (28 Bilder S1=18 S2=9 S3=1), Stage 2 läuft/abgeschlossen
+
+**PRODUKTIONSKONFIGURATION Stage 2 (fix, nicht verhandelbar):**
+Modell: gemini-3.5-flash + ThinkingLevel.MEDIUM + max_output_tokens=32768.
+Thinking ist Pflicht für Artikelqualität — darf nicht zur Bug-Umgehung abgeschaltet werden.
+Truncation bei 8192 war ein Budget-Problem (Thinking-Tokens zählen ins Output-Budget);
+gelöst durch 32768. NICHT durch Thinking-Abschaltung.
+
+- Elefant Durchstich: Stage 1 ✅ (28 Bilder S1=18 S2=9 S3=1)
+- Stage 2 Testlauf (ohne Thinking, Baseline): läuft (bihr1of8o)
+- Stage 2 echter Lauf (mit Thinking MEDIUM + 32768): geplant direkt danach
 
 ### Opus-Recheck: OPUS_CAP=18 + Sicherheitsgarantie (run_batch.py)
 Problem: Opus prüfte alle akzeptierten Bilder (bis 40), Stage 2 cappt aber auf
@@ -150,6 +159,21 @@ einen `stage1_mid_checkpoint.json` schreiben.
 Bei Neustart: Kompass + Downloads überspringen, direkt zum Vision-Submit.
 **Grund**: Aktuell muss bei Absturz während Vision-Batch der gesamte Stage-1-Vorlauf
 (~15 Min WP-Fetch + Kompass) wiederholt werden, obwohl die Image-Caches erhalten bleiben.
+
+### 5. CACHE-TTL vs. BATCH-LATENZ (Großlauf-kritisch)
+Context-Cache-TTL muss länger sein als die maximale Batch-Verarbeitungslatenz, sonst
+läuft der Cache ab bevor Gemini die Requests verarbeitet → leere Antworten (still,
+erst nach Stunden sichtbar). Mini-Lauf nutzt 3600s (1h). Beim Großlauf kann ein Batch
+in Googles Queue mehrere Stunden warten → 3600s reicht evtl. nicht.
+Vor Großlauf entscheiden:
+- (a) Cache-TTL auf Gemini-Maximum setzen (TTL-Obergrenze für gemini-3.5-flash
+  recherchieren), ODER
+- (b) im Batch ganz auf Context-Cache verzichten (Batch-Rabatt −50% ist der
+  Haupthebel; Cache −90% auf gecachten Teil ist Bonus, nicht zwingend) —
+  vermeidet die Ablauf-Falle komplett, ODER
+- (c) Implicit/automatisches Caching prüfen falls verfügbar.
+Beim Mini-Lauf beobachten: kam bei Elefant nach dem 3600s-Fix eine vollständige
+Antwort, oder weiter leer? Falls weiter leer → Cache-Strategie grundsätzlich überdenken.
 
 ---
 

@@ -879,7 +879,8 @@ def stage2_generierung(
             data.get("valid_companions", []),
             data.get("images", []),
         )
-        caches[thema] = try_create_gemini_cache(client, GEN_MODEL, system_prompt, stable)
+        caches[thema] = try_create_gemini_cache(client, GEN_MODEL, system_prompt, stable,
+                                                   ttl="3600s")
 
     # ── Step 2: InlinedRequests aufbauen ────────────────────────────────────
     log.info("\n=== Stage 2 / Step 2: Requests aufbauen ===")
@@ -909,6 +910,7 @@ def stage2_generierung(
                 )
                 cfg = types.GenerateContentConfig(
                     cached_content=cache_name,
+                    thinking_config=thinking_cfg,
                     max_output_tokens=32768,
                 )
             else:
@@ -925,6 +927,7 @@ def stage2_generierung(
                 )
                 cfg = types.GenerateContentConfig(
                     system_instruction=system_prompt,
+                    thinking_config=thinking_cfg,
                     max_output_tokens=32768,
                 )
 

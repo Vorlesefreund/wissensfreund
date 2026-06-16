@@ -863,12 +863,16 @@ def try_create_gemini_cache(
     model: str,
     system_prompt: str,
     stable_prefix: str,
+    ttl: str = "900s",
 ) -> str | None:
     """Versucht, einen Gemini Context Cache für den stabilen Quellblock zu erstellen.
 
     Gibt den Cache-Namen zurück (z.B. 'cachedContents/abc123') oder None bei Fehler.
     Mindestens ~4 000 Tokens Inhalt nötig (je Modell); bei nicht unterstütztem Modell
     oder Fehler: graceful fallback (None → volle Message senden).
+
+    ttl: Cache-Lebensdauer. Für synchrone Nutzung: "900s" (Standard).
+    Für Batch-Modus: "3600s" wählen (Batch-Latenz kann >15 min sein).
     """
     try:
         cache = client.caches.create(
@@ -876,7 +880,7 @@ def try_create_gemini_cache(
             config=types.CreateCachedContentConfig(
                 system_instruction=system_prompt,
                 contents=[{"role": "user", "parts": [{"text": stable_prefix}]}],
-                ttl="900s",
+                ttl=ttl,
             ),
         )
         log.info("  Gemini-Cache erstellt: %s (~%d Zeichen stable_prefix)",

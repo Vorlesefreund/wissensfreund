@@ -225,14 +225,19 @@ Beim Start: Checkpoint vorhanden + status=done → Stage überspringen.
 
 ### Modell-Zuordnung
 
-| Schritt | Modell | Thinking |
-|---|---|---|
-| Kompass | gemini-3.5-flash | ThinkingLevel.MEDIUM |
-| Vision | gemini-2.5-flash | thinking_budget=0 |
-| Artikel-Gen | gemini-3.5-flash | ThinkingLevel.MEDIUM |
-| Trim/Box-Repair | gemini-3.5-flash | ThinkingLevel.MEDIUM |
-| Opus-Recheck | claude-opus-4-8 | - |
-| Lektorat | claude-sonnet-4-6 | - |
+| Schritt | Modell | Thinking | max_output_tokens |
+|---|---|---|---|
+| Kompass | gemini-3.5-flash | ThinkingLevel.MEDIUM | default |
+| Vision | gemini-2.5-flash | thinking_budget=0 | default |
+| Artikel-Gen (Batch) | gemini-3.5-flash | **ThinkingLevel.MEDIUM** (Pflicht!) | **32768** |
+| Trim/Box-Repair (sync) | gemini-3.5-flash | ThinkingLevel.MEDIUM | default |
+| Opus-Recheck | claude-opus-4-8 | - | 256 |
+| Lektorat | claude-sonnet-4-6 | - | default |
+
+**WICHTIG — Artikel-Generierung:** ThinkingLevel.MEDIUM ist Produktionskonfiguration und
+darf NICHT zur Bug-Umgehung abgeschaltet werden. Truncation bei 8192 Token war ein
+Budget-Problem (Thinking-Tokens zählen ins max_output_tokens-Budget). Gelöst durch 32768.
+Bei 32768 ist genug Raum für Thinking-Tokens + vollständigen Artikel + source_passages.
 
 ### Wichtige Funktionen (importiert aus generate_grounded.py)
 
