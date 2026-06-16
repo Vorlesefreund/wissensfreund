@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T11:50:57Z -->
+<!-- updated: 2026-06-16T12:03:36Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -54,14 +54,17 @@ Mini-Lauf final: Elefant, Hund, Dinosaurier, Vulkan, Spartacus, Zweiter Weltkrie
 
 **Bild-Tier-Architektur final festgelegt (2026-06-16)**
 
-Server (R2): 300px / 800px / 1600px pro Bild.
-Standard: Hero 800px + Rest 300px offline | Plus/Prem: alle 800px offline + 1600px on-demand WLAN.
+Server (R2): 300px / 800px / 1600px — immer alle drei produziert, unabhängig von Auslieferung.
+Auslieferung = App-Konfig (nicht Produktion) → kein Pipeline-Neulauf bei Config-Änderung.
+Standard: Hero via STANDARD_HERO_RES (Config, Default 300px, offen bis App-Test), Rest 300px.
+Plus/Prem: alle 800px offline + 1600px on-demand WLAN (temporär).
 Hero-Regel: hero_candidate=true + höchste relevanz, NACH ab_stufe-Filter (ab_stufe <= stufe).
-JSON-Schema + R2-Pfade in WISSEN_PIPELINE_PRODUKTION.md → Abschnitt "Bild-Tier-Architektur".
+JSON-Schema + R2-Pfade + STANDARD_HERO_RES-Erklärung in WISSEN_PIPELINE_PRODUKTION.md.
 
 Offene Punkte Vollkatalog-Bilder:
-- ~174k Bilder @ 3s = ~145h einmaliger Download (laut Andreas: akzeptabel)
+- ~174k Bilder @ 3s = ~145h einmaliger Download (akzeptabel, einmalig)
 - R2-Upload-Integration: kommt mit Baustein-Upload-Schritt (upload_articles.py erweitern)
+- STANDARD_HERO_RES: offen bis Andreas die fertige App am echten Eindruck bewertet (300 vs 800)
 
 ---
 
