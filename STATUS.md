@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T17:18:44Z -->
+<!-- updated: 2026-06-16T17:32:46Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -56,6 +56,36 @@ Thinking ist Pflicht für Artikelqualität — darf nicht zur Bug-Umgehung abges
 ### custom_id-Bug gefixt
 Anthropic-Batch erfordert `^[a-zA-Z0-9_-]{1,64}$`.
 Fix: `re.sub(r"[^a-zA-Z0-9_-]", "_", filename)[:41]`, Key max 63 Zeichen.
+
+---
+
+## Gemini Stage-2 — offener Diagnoseschritt
+
+### ERLEDIGT
+- **Robustes Retry (gemini_client.py):** 5 Versuche, Backoff 10/20/40/80/160s + Jitter 0-5s,
+  400/404 ohne Retry, klare Fehlermeldung mit Modell + Versuchsanzahl. 14 Tests grün.
+
+### OFFEN — wartet auf erreichbares gemini-3.5-flash
+Aktuell: 503 UNAVAILABLE (serverseitige Überlastung, neues GA-Modell, recherchiert bestätigt —
+nicht unser Code, betrifft alle Nutzer).
+
+- **Synchroner Diagnose-Einzeltest Elefant S2** (temp/_sync_test_s2.py, bereit):
+  Rohe Response zeigen: finish_reason, candidates leer/gefüllt, usage_metadata
+  (prompt_tokens / candidates_tokens / thoughts_tokens).
+  Ziel: "leere Batch-Antwort"-Problem isolieren — generiert das Modell selbst leer
+  (dann Prompt/Schema/Logik-Bug) oder liegt der Fehler nur in der Batch-Schicht?
+- **Bestes Zeitfenster:** 2–7 Uhr Pazifik = ca. 11–16 Uhr MESZ (503-Rate dann <5%)
+
+### BEKANNTE STAGE-2-BEFUNDE (bereits gefixt)
+- Truncation bei max_output_tokens=8192 → auf 32768 erhöht (Thinking-Tokens zählen ins Budget)
+- ThinkingLevel.MEDIUM ist Pflicht (Qualität), darf nicht zur Bug-Umgehung abgeschaltet werden —
+  nach irrtümlicher Deaktivierung wieder aktiviert
+- Context-Cache (cached_content) funktioniert NICHT in Gemini-Batch-InlinedRequests →
+  im Batch deaktiviert (Mehrkosten ~$70 Vollkatalog; Batch-Rabatt -50% bleibt Haupthebel)
+
+### PARALLEL LÄUFT
+Mistral-Alternativtest (Large 3 + Medium 3.5) in separatem Chat — Ergebnis fließt in
+die Modellentscheidung ein.
 
 ---
 
