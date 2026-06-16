@@ -1,0 +1,19 @@
+[
+  {
+    "thema": "Graubünden",
+    "themengebiet": "Länder & Kontinente",
+    "leuchtturm": false,
+    "erg_s1": 2,
+    "erg_s2": 4,
+    "erg_s3": 5,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Schweizer Kanton/Region, unproblematisch.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  }
+]

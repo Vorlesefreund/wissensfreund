@@ -1,12 +1,21 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T05:10:46Z -->
+<!-- updated: 2026-06-16T05:18:07Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Anker-134-Abgleich (2026-06-16).** ← AKTUELL
+**Anker-Nachträge: 27 Grundstock-Themen bewertet (2026-06-16).** ← AKTUELL
+- catalog_rater_anker.py: 1 Opus-Call, alle 27 mit gesperrten Anker-erg-Werten
+- 27/27 bewertet | 3 Leuchtturm (Elefant, Indianer, Lego) | 7 sensibel
+- erg aus xlsx übernommen: alle 27 hatten Anker-Werte, 0 neu bewertet
+- Lemma-Korrekturen: Tell→Wilhelm Tell, Humboldt→Alexander von Humboldt,
+  VW→Volkswagen, Chaplin→Charlie Chaplin, Mozart→Wolfgang Amadeus Mozart
+- Output: catalog_raw_anker/ (12 Gebiet-JSONs + alle_nachtraege.json)
+- NOCH NICHT gemergt — nächster Schritt nach Prüfung
+
+**Anker-134-Abgleich (2026-06-16).**
 - 43 von 134 Anker-Themen komplett im Katalog fehlend (anker_gaps.json)
 - 5 nur unter anderer Schreibweise vorhanden (Hai~Haie, Schmetterling~Schmetterlinge etc.)
 - Achtung: "Verbannung ~ Verbrennung" ist FALSE MATCH — sind verschiedene Themen

@@ -1,0 +1,53 @@
+[
+  {
+    "thema": "Wolfgang Amadeus Mozart",
+    "themengebiet": "Kunst, Musik & Literatur",
+    "leuchtturm": false,
+    "erg_s1": 4,
+    "erg_s2": 6,
+    "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": 10,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Historische Person (Komponist), unproblematisch.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  },
+  {
+    "thema": "Lego",
+    "themengebiet": "Kunst, Musik & Literatur",
+    "leuchtturm": true,
+    "erg_s1": 8,
+    "erg_s2": 8,
+    "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Markenname mit Klexikon-Artikel; kindrelevant und unproblematisch.",
+    "dublette_von": null,
+    "notiz": "ggf. besser Gebiet Sport & Spiele oder Technik; Vorschlag belassen",
+    "tier": "primary"
+  },
+  {
+    "thema": "Looney Tunes",
+    "themengebiet": "Kunst, Musik & Literatur",
+    "leuchtturm": false,
+    "erg_s1": 7,
+    "erg_s2": 7,
+    "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Zeichentrick-Markenname mit Klexikon-Artikel; kindrelevant und unproblematisch.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  }
+]

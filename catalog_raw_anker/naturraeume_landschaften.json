@@ -1,0 +1,19 @@
+[
+  {
+    "thema": "Persischer Golf",
+    "themengebiet": "Naturräume & Landschaften",
+    "leuchtturm": false,
+    "erg_s1": 2,
+    "erg_s2": 5,
+    "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Geografisches Gewässer, unproblematisch.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  }
+]

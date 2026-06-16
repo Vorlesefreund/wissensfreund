@@ -1,0 +1,36 @@
+[
+  {
+    "thema": "Waldbrand",
+    "themengebiet": "Erde, Wetter & Naturphänomene",
+    "leuchtturm": false,
+    "erg_s1": 6,
+    "erg_s2": 8,
+    "erg_s3": 8,
+    "eignung": "include",
+    "age_floor": 2,
+    "kategorie_nr": 8,
+    "framing_note": "sachlich, warnung-Box, nicht verängstigend, altersgerecht",
+    "sensibel": true,
+    "begruendung_eignung": "Naturkatastrophe mit Gefahren-/Schadensaspekt; sachlich darstellen, nicht verängstigend.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  },
+  {
+    "thema": "Wendekreis",
+    "themengebiet": "Erde, Wetter & Naturphänomene",
+    "leuchtturm": false,
+    "erg_s1": 2,
+    "erg_s2": 4,
+    "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Geografisch-astronomisches Konzept, unproblematisch.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  }
+]

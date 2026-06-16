@@ -1,0 +1,36 @@
+[
+  {
+    "thema": "Alexander von Humboldt",
+    "themengebiet": "Berühmte Personen",
+    "leuchtturm": false,
+    "erg_s1": 3,
+    "erg_s2": 5,
+    "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": 10,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Historische Person (Forscher), unproblematisch.",
+    "dublette_von": null,
+    "notiz": "Anker führt das Thema als 'Humboldt'",
+    "tier": "primary"
+  },
+  {
+    "thema": "Charlie Chaplin",
+    "themengebiet": "Berühmte Personen",
+    "leuchtturm": false,
+    "erg_s1": 3,
+    "erg_s2": 5,
+    "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": 10,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Historische Person (Filmschauspieler), unproblematisch.",
+    "dublette_von": null,
+    "notiz": "Anker führt das Thema als 'Chaplin'",
+    "tier": "primary"
+  }
+]

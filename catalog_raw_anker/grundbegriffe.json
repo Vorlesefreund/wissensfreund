@@ -1,0 +1,53 @@
+[
+  {
+    "thema": "Tinte",
+    "themengebiet": "Grundbegriffe",
+    "leuchtturm": false,
+    "erg_s1": 4,
+    "erg_s2": 5,
+    "erg_s3": 5,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Alltags-/Schreibthema, unproblematisch.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  },
+  {
+    "thema": "Wachs",
+    "themengebiet": "Grundbegriffe",
+    "leuchtturm": false,
+    "erg_s1": 3,
+    "erg_s2": 5,
+    "erg_s3": 5,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Materialkundliches Alltagsthema, unproblematisch.",
+    "dublette_von": null,
+    "notiz": "inhaltlich eher Naturwissenschaft/Material; Gebiet laut Vorschlag belassen",
+    "tier": "primary"
+  },
+  {
+    "thema": "Dänische Sprache",
+    "themengebiet": "Grundbegriffe",
+    "leuchtturm": false,
+    "erg_s1": 2,
+    "erg_s2": 4,
+    "erg_s3": 5,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Sprachthema, unproblematisch.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  }
+]

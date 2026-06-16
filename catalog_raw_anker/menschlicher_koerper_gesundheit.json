@@ -1,0 +1,19 @@
+[
+  {
+    "thema": "Vene",
+    "themengebiet": "Menschlicher Körper & Gesundheit",
+    "leuchtturm": false,
+    "erg_s1": 3,
+    "erg_s2": 5,
+    "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Anatomie-Grundwissen, unproblematisch.",
+    "dublette_von": null,
+    "notiz": "verwandt mit Anker 'Ader'",
+    "tier": "primary"
+  }
+]

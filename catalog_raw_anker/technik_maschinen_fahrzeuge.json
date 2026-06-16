@@ -1,0 +1,19 @@
+[
+  {
+    "thema": "Volkswagen",
+    "themengebiet": "Technik, Maschinen & Fahrzeuge",
+    "leuchtturm": false,
+    "erg_s1": 4,
+    "erg_s2": 5,
+    "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Automarke/Technikthema, unproblematisch.",
+    "dublette_von": null,
+    "notiz": "Anker führt das Thema als 'VW'",
+    "tier": "primary"
+  }
+]

@@ -1,0 +1,19 @@
+[
+  {
+    "thema": "Elefant",
+    "themengebiet": "Tiere",
+    "leuchtturm": true,
+    "erg_s1": 9,
+    "erg_s2": 9,
+    "erg_s3": 8,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Allgemeines Tierthema, unproblematisch.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  }
+]

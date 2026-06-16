@@ -1,0 +1,53 @@
+[
+  {
+    "thema": "Fossilien",
+    "themengebiet": "Naturwissenschaft & Biologie-Konzepte",
+    "leuchtturm": true,
+    "erg_s1": 6,
+    "erg_s2": 8,
+    "erg_s3": 8,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Naturwissenschaftliches Thema, unproblematisch und kindbegeisternd.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  },
+  {
+    "thema": "Zentripetalkraft",
+    "themengebiet": "Naturwissenschaft & Biologie-Konzepte",
+    "leuchtturm": false,
+    "erg_s1": 2,
+    "erg_s2": 4,
+    "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Physikkonzept, unproblematisch.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  },
+  {
+    "thema": "Science Center",
+    "themengebiet": "Naturwissenschaft & Biologie-Konzepte",
+    "leuchtturm": false,
+    "erg_s1": 5,
+    "erg_s2": 8,
+    "erg_s3": 8,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Bildungsinstitution (Experimentierhäuser), unproblematisch.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  }
+]

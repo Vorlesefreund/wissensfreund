@@ -1,0 +1,672 @@
+{
+ "Dinosaurier": {
+  "erg_s1": 8,
+  "erg_s2": 9,
+  "erg_s3": 9
+ },
+ "Hund": {
+  "erg_s1": 9,
+  "erg_s2": 9,
+  "erg_s3": 8
+ },
+ "Elefant": {
+  "erg_s1": 9,
+  "erg_s2": 9,
+  "erg_s3": 8
+ },
+ "Feuerwehr": {
+  "erg_s1": 9,
+  "erg_s2": 8,
+  "erg_s3": 8
+ },
+ "Haie": {
+  "erg_s1": 7,
+  "erg_s2": 9,
+  "erg_s3": 9
+ },
+ "Hai": {
+  "erg_s1": 7,
+  "erg_s2": 9,
+  "erg_s3": 9
+ },
+ "Vulkan": {
+  "erg_s1": 7,
+  "erg_s2": 9,
+  "erg_s3": 9
+ },
+ "Lego": {
+  "erg_s1": 8,
+  "erg_s2": 8,
+  "erg_s3": 7
+ },
+ "Brachiosaurus": {
+  "erg_s1": 7,
+  "erg_s2": 8,
+  "erg_s3": 8
+ },
+ "Deutschland": {
+  "erg_s1": 6,
+  "erg_s2": 8,
+  "erg_s3": 9
+ },
+ "Deutschland (Übersicht)": {
+  "erg_s1": 6,
+  "erg_s2": 8,
+  "erg_s3": 9
+ },
+ "Gorillas": {
+  "erg_s1": 7,
+  "erg_s2": 8,
+  "erg_s3": 8
+ },
+ "Süßigkeiten": {
+  "erg_s1": 8,
+  "erg_s2": 8,
+  "erg_s3": 7
+ },
+ "Chamäleon": {
+  "erg_s1": 7,
+  "erg_s2": 8,
+  "erg_s3": 8
+ },
+ "Bundesrepublik Deutschland": {
+  "erg_s1": 6,
+  "erg_s2": 8,
+  "erg_s3": 9
+ },
+ "Schiffe": {
+  "erg_s1": 7,
+  "erg_s2": 8,
+  "erg_s3": 8
+ },
+ "Indianer": {
+  "erg_s1": 6,
+  "erg_s2": 8,
+  "erg_s3": 9
+ },
+ "Blackbeard": {
+  "erg_s1": 6,
+  "erg_s2": 8,
+  "erg_s3": 9
+ },
+ "Düsseldorf": {
+  "erg_s1": 7,
+  "erg_s2": 8,
+  "erg_s3": 8
+ },
+ "Fußball": {
+  "erg_s1": 6,
+  "erg_s2": 8,
+  "erg_s3": 8
+ },
+ "Waldbrand": {
+  "erg_s1": 6,
+  "erg_s2": 8,
+  "erg_s3": 8
+ },
+ "Fossilien": {
+  "erg_s1": 6,
+  "erg_s2": 8,
+  "erg_s3": 8
+ },
+ "Pfeil und Bogen": {
+  "erg_s1": 6,
+  "erg_s2": 8,
+  "erg_s3": 8
+ },
+ "Ägypten": {
+  "erg_s1": 5,
+  "erg_s2": 8,
+  "erg_s3": 9
+ },
+ "Science Center": {
+  "erg_s1": 5,
+  "erg_s2": 8,
+  "erg_s3": 8
+ },
+ "Skateboard": {
+  "erg_s1": 6,
+  "erg_s2": 8,
+  "erg_s3": 7
+ },
+ "Kolosseum": {
+  "erg_s1": 5,
+  "erg_s2": 8,
+  "erg_s3": 8
+ },
+ "Jahreszeiten": {
+  "erg_s1": 7,
+  "erg_s2": 7,
+  "erg_s3": 7
+ },
+ "Markt": {
+  "erg_s1": 6,
+  "erg_s2": 7,
+  "erg_s3": 8
+ },
+ "Erdmännchen": {
+  "erg_s1": 7,
+  "erg_s2": 7,
+  "erg_s3": 6
+ },
+ "Seefahrer": {
+  "erg_s1": 5,
+  "erg_s2": 7,
+  "erg_s3": 8
+ },
+ "Trojanischer Krieg": {
+  "erg_s1": 4,
+  "erg_s2": 7,
+  "erg_s3": 9
+ },
+ "Eis": {
+  "erg_s1": 7,
+  "erg_s2": 7,
+  "erg_s3": 6
+ },
+ "Schmetterling": {
+  "erg_s1": 7,
+  "erg_s2": 7,
+  "erg_s3": 6
+ },
+ "Looney Tunes": {
+  "erg_s1": 7,
+  "erg_s2": 7,
+  "erg_s3": 6
+ },
+ "Billy The Kid": {
+  "erg_s1": 5,
+  "erg_s2": 7,
+  "erg_s3": 8
+ },
+ "Gemüse": {
+  "erg_s1": 6,
+  "erg_s2": 7,
+  "erg_s3": 7
+ },
+ "Wirtschaft": {
+  "erg_s1": 4,
+  "erg_s2": 7,
+  "erg_s3": 9
+ },
+ "Schule": {
+  "erg_s1": 6,
+  "erg_s2": 6,
+  "erg_s3": 7
+ },
+ "Giftpilz": {
+  "erg_s1": 5,
+  "erg_s2": 7,
+  "erg_s3": 7
+ },
+ "Imker": {
+  "erg_s1": 5,
+  "erg_s2": 7,
+  "erg_s3": 7
+ },
+ "Magnetschwebebahn": {
+  "erg_s1": 4,
+  "erg_s2": 7,
+  "erg_s3": 8
+ },
+ "Kristall": {
+  "erg_s1": 5,
+  "erg_s2": 7,
+  "erg_s3": 7
+ },
+ "Wüstenfuchs": {
+  "erg_s1": 6,
+  "erg_s2": 7,
+  "erg_s3": 6
+ },
+ "Tell": {
+  "erg_s1": 5,
+  "erg_s2": 7,
+  "erg_s3": 7
+ },
+ "Maschine": {
+  "erg_s1": 4,
+  "erg_s2": 7,
+  "erg_s3": 7
+ },
+ "Bunker": {
+  "erg_s1": 3,
+  "erg_s2": 7,
+  "erg_s3": 8
+ },
+ "Corona-Virus": {
+  "erg_s1": 4,
+  "erg_s2": 7,
+  "erg_s3": 7
+ },
+ "Regenbogen": {
+  "erg_s1": 6,
+  "erg_s2": 6,
+  "erg_s3": 6
+ },
+ "Hades": {
+  "erg_s1": 3,
+  "erg_s2": 7,
+  "erg_s3": 8
+ },
+ "Ingo Siegner": {
+  "erg_s1": 7,
+  "erg_s2": 6,
+  "erg_s3": 5
+ },
+ "Lexikon": {
+  "erg_s1": 5,
+  "erg_s2": 6,
+  "erg_s3": 7
+ },
+ "Autoscooter": {
+  "erg_s1": 6,
+  "erg_s2": 6,
+  "erg_s3": 5
+ },
+ "Lunge": {
+  "erg_s1": 4,
+  "erg_s2": 6,
+  "erg_s3": 7
+ },
+ "Kinderrechte": {
+  "erg_s1": 4,
+  "erg_s2": 6,
+  "erg_s3": 7
+ },
+ "Krankenschwester": {
+  "erg_s1": 5,
+  "erg_s2": 6,
+  "erg_s3": 6
+ },
+ "Zunge": {
+  "erg_s1": 5,
+  "erg_s2": 6,
+  "erg_s3": 6
+ },
+ "Martin Luther King": {
+  "erg_s1": 3,
+  "erg_s2": 6,
+  "erg_s3": 8
+ },
+ "Gestein": {
+  "erg_s1": 4,
+  "erg_s2": 6,
+  "erg_s3": 7
+ },
+ "Nase": {
+  "erg_s1": 5,
+  "erg_s2": 6,
+  "erg_s3": 6
+ },
+ "Stephen Hawking": {
+  "erg_s1": 3,
+  "erg_s2": 6,
+  "erg_s3": 8
+ },
+ "England (Übersicht)": {
+  "erg_s1": 4,
+  "erg_s2": 6,
+  "erg_s3": 7
+ },
+ "Arabien": {
+  "erg_s1": 4,
+  "erg_s2": 6,
+  "erg_s3": 7
+ },
+ "Beethoven": {
+  "erg_s1": 4,
+  "erg_s2": 6,
+  "erg_s3": 7
+ },
+ "Mozart": {
+  "erg_s1": 4,
+  "erg_s2": 6,
+  "erg_s3": 7
+ },
+ "Airbag": {
+  "erg_s1": 3,
+  "erg_s2": 6,
+  "erg_s3": 7
+ },
+ "Hochofen": {
+  "erg_s1": 3,
+  "erg_s2": 6,
+  "erg_s3": 7
+ },
+ "Schmerz": {
+  "erg_s1": 4,
+  "erg_s2": 6,
+  "erg_s3": 6
+ },
+ "Pupille": {
+  "erg_s1": 4,
+  "erg_s2": 6,
+  "erg_s3": 6
+ },
+ "Schneekanone": {
+  "erg_s1": 4,
+  "erg_s2": 6,
+  "erg_s3": 6
+ },
+ "Goldschakal": {
+  "erg_s1": 4,
+  "erg_s2": 6,
+  "erg_s3": 6
+ },
+ "Brennessel": {
+  "erg_s1": 5,
+  "erg_s2": 6,
+  "erg_s3": 5
+ },
+ "Bauch": {
+  "erg_s1": 5,
+  "erg_s2": 6,
+  "erg_s3": 5
+ },
+ "Kürbis": {
+  "erg_s1": 5,
+  "erg_s2": 6,
+  "erg_s3": 5
+ },
+ "Augsburger Puppenkiste": {
+  "erg_s1": 5,
+  "erg_s2": 6,
+  "erg_s3": 5
+ },
+ "Pangolin": {
+  "erg_s1": 4,
+  "erg_s2": 6,
+  "erg_s3": 6
+ },
+ "Humboldt": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 7
+ },
+ "VW": {
+  "erg_s1": 4,
+  "erg_s2": 5,
+  "erg_s3": 6
+ },
+ "Frida Kahlo": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 7
+ },
+ "Zigaretten": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 7
+ },
+ "Chaplin": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 7
+ },
+ "Zigarette": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 7
+ },
+ "Apfel": {
+  "erg_s1": 5,
+  "erg_s2": 5,
+  "erg_s3": 5
+ },
+ "Johann Sebastian Bach": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 7
+ },
+ "Jugendlicher": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 6
+ },
+ "Geschlechtsorgane": {
+  "erg_s1": 2,
+  "erg_s2": 5,
+  "erg_s3": 7
+ },
+ "Ingenieur": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 6
+ },
+ "Bücherei": {
+  "erg_s1": 4,
+  "erg_s2": 5,
+  "erg_s3": 5
+ },
+ "Ader": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 6
+ },
+ "Verwandte": {
+  "erg_s1": 4,
+  "erg_s2": 5,
+  "erg_s3": 5
+ },
+ "Argentinien": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 6
+ },
+ "Unicef": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 6
+ },
+ "Vene": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 6
+ },
+ "Masern": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 6
+ },
+ "Homosexuell": {
+  "erg_s1": 2,
+  "erg_s2": 5,
+  "erg_s3": 7
+ },
+ "Ozonloch": {
+  "erg_s1": 2,
+  "erg_s2": 5,
+  "erg_s3": 7
+ },
+ "Tinte": {
+  "erg_s1": 4,
+  "erg_s2": 5,
+  "erg_s3": 5
+ },
+ "Erzieher": {
+  "erg_s1": 4,
+  "erg_s2": 5,
+  "erg_s3": 5
+ },
+ "Shanghai": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 6
+ },
+ "Nazis": {
+  "erg_s1": 1,
+  "erg_s2": 4,
+  "erg_s3": 8
+ },
+ "Schädlingsbekämpfer": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 5
+ },
+ "Kühlschrank": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 5
+ },
+ "Kinderschreck": {
+  "erg_s1": 4,
+  "erg_s2": 5,
+  "erg_s3": 4
+ },
+ "Zentripetalkraft": {
+  "erg_s1": 2,
+  "erg_s2": 4,
+  "erg_s3": 7
+ },
+ "Wachs": {
+  "erg_s1": 3,
+  "erg_s2": 5,
+  "erg_s3": 5
+ },
+ "Persischer Golf": {
+  "erg_s1": 2,
+  "erg_s2": 5,
+  "erg_s3": 6
+ },
+ "Anschlag vom 11. September": {
+  "erg_s1": 1,
+  "erg_s2": 4,
+  "erg_s3": 7
+ },
+ "Tetanus": {
+  "erg_s1": 2,
+  "erg_s2": 4,
+  "erg_s3": 6
+ },
+ "Viereck": {
+  "erg_s1": 4,
+  "erg_s2": 4,
+  "erg_s3": 4
+ },
+ "Fasten": {
+  "erg_s1": 3,
+  "erg_s2": 4,
+  "erg_s3": 5
+ },
+ "Bottrop": {
+  "erg_s1": 3,
+  "erg_s2": 4,
+  "erg_s3": 5
+ },
+ "Ingolstadt": {
+  "erg_s1": 3,
+  "erg_s2": 4,
+  "erg_s3": 5
+ },
+ "Wendekreis": {
+  "erg_s1": 2,
+  "erg_s2": 4,
+  "erg_s3": 6
+ },
+ "Casablanca": {
+  "erg_s1": 3,
+  "erg_s2": 4,
+  "erg_s3": 5
+ },
+ "Graz": {
+  "erg_s1": 3,
+  "erg_s2": 4,
+  "erg_s3": 5
+ },
+ "Antisemitismus": {
+  "erg_s1": 1,
+  "erg_s2": 3,
+  "erg_s3": 7
+ },
+ "Verbannung": {
+  "erg_s1": 2,
+  "erg_s2": 4,
+  "erg_s3": 5
+ },
+ "Symptom": {
+  "erg_s1": 2,
+  "erg_s2": 4,
+  "erg_s3": 5
+ },
+ "Kurdische Sprache": {
+  "erg_s1": 2,
+  "erg_s2": 4,
+  "erg_s3": 5
+ },
+ "Dänische Sprache": {
+  "erg_s1": 2,
+  "erg_s2": 4,
+  "erg_s3": 5
+ },
+ "Papua-Neuguinea": {
+  "erg_s1": 2,
+  "erg_s2": 4,
+  "erg_s3": 5
+ },
+ "Graubünden": {
+  "erg_s1": 2,
+  "erg_s2": 4,
+  "erg_s3": 5
+ },
+ "Suriname": {
+  "erg_s1": 2,
+  "erg_s2": 4,
+  "erg_s3": 5
+ },
+ "Bruges": {
+  "erg_s1": 2,
+  "erg_s2": 4,
+  "erg_s3": 5
+ },
+ "Gesamtschule": {
+  "erg_s1": 2,
+  "erg_s2": 4,
+  "erg_s3": 4
+ },
+ "Robespierre": {
+  "erg_s1": 1,
+  "erg_s2": 3,
+  "erg_s3": 6
+ },
+ "Negerkuss": {
+  "erg_s1": 2,
+  "erg_s2": 3,
+  "erg_s3": 4
+ },
+ "FDP (Deutschland)": {
+  "erg_s1": 1,
+  "erg_s2": 3,
+  "erg_s3": 5
+ },
+ "Linke Politik": {
+  "erg_s1": 1,
+  "erg_s2": 3,
+  "erg_s3": 5
+ },
+ "Vevey": {
+  "erg_s1": 2,
+  "erg_s2": 3,
+  "erg_s3": 4
+ },
+ "Somatropin": {
+  "erg_s1": 1,
+  "erg_s2": 2,
+  "erg_s3": 5
+ },
+ "Erotik": {
+  "erg_s1": 1,
+  "erg_s2": 2,
+  "erg_s3": 4
+ },
+ "Gatte": {
+  "erg_s1": 1,
+  "erg_s2": 2,
+  "erg_s3": 3
+ },
+ "Arenhusen": {
+  "erg_s1": 1,
+  "erg_s2": 2,
+  "erg_s3": 3
+ }
+}
