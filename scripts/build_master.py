@@ -65,8 +65,17 @@ COL_WIDTHS = {
 
 
 def erg_incomplete(item: dict) -> bool:
-    """True wenn erg_s1 oder erg_s2 fehlt (Wortziel-Formel rechnet dann mit 0)."""
-    return not item.get("erg_s1") or not item.get("erg_s2")
+    """True wenn ein ab age_floor benötigtes erg-Feld fehlt."""
+    if item.get("eignung") == "exclude" or item.get("tier") == "reserve":
+        return False
+    try:
+        af = int(item.get("age_floor") or 1)
+    except Exception:
+        af = 1
+    for i, s in enumerate(["erg_s1", "erg_s2", "erg_s3"], start=1):
+        if i >= af and item.get(s) in (None, "", 0):
+            return True
+    return False
 
 
 def main() -> None:

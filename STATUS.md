@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T06:19:21Z -->
+<!-- updated: 2026-06-16T06:22:31Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -13,8 +13,10 @@
 - Neue Spalte: Kommentar | Freeze C2 | AutoFilter A1:R4550
 - Farben: exclude rot | sensibel hellrot | leuchtturm gelb | erg-Lücke orange thema-Zelle
 - Alt-Datei: catalog_review_master_r3.xlsx → _alt/ archiviert + aus Repo entfernt
-- Aufgedecktes Datenproblem (29→233 erg-Lücken): Items aus alter Rater-Runde mit nur erg_s3
-  → brauchen Nachbewertung (Rater-Run oder manuelle Schätzung erg_s1/s2)
+- Echte erg-Lücken: NUR 9 (af=1, alle primary) — 233 war Zählfehler (age_floor ignoriert)
+  9 Themen: Märtyrer, Beschneidung, Holocaust-Mahnmal, Orientierungslauf, Inflation,
+  Strom (im Haushalt), Bonnie und Clyde, Vieh, Tintenfischschnecke
+  build_master.py erg_incomplete() korrigiert: berücksichtigt jetzt age_floor + skip reserve/exclude
 
 **Dubletten-Bereinigung: 8 Varianten via VARIANT_MAP (2026-06-16).**
 - VARIANT_MAP in catalog_merge.py: 8 Schreibvarianten → Kanon (dedup)
@@ -184,8 +186,8 @@ Bänder: S1[50,250] S2[80,400] S3[100,650]. Rater = Opus per API, Anker: 134 The
 ## 🔴 Offene Punkte (nach Priorität)
 
 Andreas-Review catalog_review_master.xlsx (4549 Zeilen)
-  → 233 orange Zellen = erg-Lücken prüfen/nachbewerten
-  → Nach Review: catalog_full.json neu generieren (python -X utf8 scripts/build_master.py + catalog_merge.py)
+  → 9 orange Zellen = echte erg-Lücken (af=1, erg_s1 fehlt)
+  → Nach Review: python -X utf8 catalog_merge.py neu ausführen
 Pilot-Bulk-Lauf (50–100 Themen, vollständige Pipeline) — nach Review
 categories_backlog.json → categories-Array je Artikel (spätere Phase)
 3-flash-preview L3 Fix (max_output_tokens explizit); Flutter WfArticleListScreen
