@@ -1,12 +1,25 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-15T20:51:59Z -->
+<!-- updated: 2026-06-16T05:10:46Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Audit-Nachbewertung: 393 neue Themen via Opus-Rater (2026-06-15).** ← AKTUELL
+**Anker-134-Abgleich (2026-06-16).** ← AKTUELL
+- 43 von 134 Anker-Themen komplett im Katalog fehlend (anker_gaps.json)
+- 5 nur unter anderer Schreibweise vorhanden (Hai~Haie, Schmetterling~Schmetterlinge etc.)
+- Achtung: "Verbannung ~ Verbrennung" ist FALSE MATCH — sind verschiedene Themen
+- Genuine Lücken (Anker-Grundstock): Mozart, Fossilien, Waldbrand, Trojanischer Krieg,
+  Tell, Humboldt, Seefahrer, Pfeil und Bogen, Tinte, Wachs, Vene, Zentripetalkraft,
+  Wendekreis, Persischer Golf, Graubünden, Graz, Vevey, Dänische Sprache,
+  Bundesrepublik Deutschland, Bundesrepublik Deutschland
+- Intentionell/sensibel (erwartbar nicht im Katalog): Erotik, Negerkuss, Nazis,
+  Antisemitismus, Zigarette(n), FDP, Linke Politik, Anschlag vom 11. September
+- Markennamen/Nische: Lego, VW, Looney Tunes, Science Center, Bunker
+- Nebenbefund Abgleich-Pool: 4524 Einträge (full+reserve+audit)
+
+**Audit-Nachbewertung: 393 neue Themen via Opus-Rater (2026-06-15).**
 - catalog_rater_audit.py: Opus-Calls pro Themengebiet, Input = audit_include_topics.json
 - 393 Themen bewertet: 20 Leuchtturm, 113 sensibel, 0 exclude (alle bleiben include)
 - 21 JSON-Dateien in catalog_raw_audit/ (je Gebiet)
