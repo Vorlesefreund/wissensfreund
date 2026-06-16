@@ -1,0 +1,19 @@
+[
+  {
+    "thema": "Inflation",
+    "themengebiet": "Gesellschaft, Berufe & Zusammenleben",
+    "leuchtturm": false,
+    "erg_s1": null,
+    "erg_s2": 4,
+    "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": 2,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": true,
+    "begruendung_eignung": "Wirtschaftskonzept (vgl. Anker Wirtschaft 4/7/9, Markt 6/7/8). Für S1 zu abstrakt — Preisniveau/Geldwert nicht greifbar; age_floor=S2 angemessen, S1=null. Flag wegen age_floor>1.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  }
+]

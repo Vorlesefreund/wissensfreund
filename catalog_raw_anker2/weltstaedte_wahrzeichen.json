@@ -1,0 +1,19 @@
+[
+  {
+    "thema": "Holocaust-Mahnmal",
+    "themengebiet": "Weltstädte & Wahrzeichen",
+    "leuchtturm": false,
+    "erg_s1": null,
+    "erg_s2": null,
+    "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": 3,
+    "kategorie_nr": 4,
+    "framing_note": "nüchtern, nie verherrlichend, Gewalt/Tod sachlich, keine Täter-Glorifizierung; Mahnmal als Form des Erinnerns einordnen",
+    "sensibel": true,
+    "begruendung_eignung": "NS/Holocaust-Kontext → Kat 4, age_floor=S3 korrekt (vgl. Anker Nazis 1/4/8, Antisemitismus 1/3/7). S1/S2 = null.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  }
+]

@@ -1,12 +1,21 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T06:22:31Z -->
+<!-- updated: 2026-06-16T06:30:43Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**Master konsolidiert: eine kanonische catalog_review_master.xlsx (2026-06-16).** ← AKTUELL
+**9 Ergiebigkeits-Lücken geschlossen (2026-06-16).** ← AKTUELL
+- 3 excludiert: Strom (im Haushalt), Vieh, Tintenfischschnecke (in source-JSONs + master)
+- 6 nachbewertet via catalog_rater_anker2.py (Opus, 1 Call):
+  Märtyrer af=1 2/4/6 | Orientierungslauf af=1 3/5/6 | Inflation af=2 —/4/7
+  Beschneidung af=3 —/—/5 | Holocaust-Mahnmal af=3 —/—/7 | Bonnie und Clyde af=3 —/—/7
+- Kat-4 (NS) + Kat-8 (Gewalt) korrekt auf af=3 gesetzt
+- Verifikation: 0 echte Lücken | primary: 4356 | exclude: 44
+- catalog_review_master.xlsx neu: 0 orange Zellen
+
+**Master konsolidiert: eine kanonische catalog_review_master.xlsx (2026-06-16).**
 - scripts/build_master.py: erzeugt Master frisch aus aktuellem Katalogstand
 - 4549 Zeilen (4359 primary + 159 reserve + 41 exclude), sortiert themengebiet+thema alpha
 - 233 Themen orange markiert (erg_s1 oder erg_s2 fehlt → Wortziel rechnet mit 0)
@@ -185,9 +194,7 @@ Bänder: S1[50,250] S2[80,400] S3[100,650]. Rater = Opus per API, Anker: 134 The
 
 ## 🔴 Offene Punkte (nach Priorität)
 
-Andreas-Review catalog_review_master.xlsx (4549 Zeilen)
-  → 9 orange Zellen = echte erg-Lücken (af=1, erg_s1 fehlt)
-  → Nach Review: python -X utf8 catalog_merge.py neu ausführen
+Andreas-Review catalog_review_master.xlsx (4549 Zeilen, 0 orange, 44 exclude)
 Pilot-Bulk-Lauf (50–100 Themen, vollständige Pipeline) — nach Review
 categories_backlog.json → categories-Array je Artikel (spätere Phase)
 3-flash-preview L3 Fix (max_output_tokens explizit); Flutter WfArticleListScreen

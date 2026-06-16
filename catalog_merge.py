@@ -72,6 +72,7 @@ def load_all() -> list[dict]:
         CATALOG_RAW_DIR,
         CATALOG_RAW_DIR.parent / "catalog_raw_r2",
         CATALOG_RAW_DIR.parent / "catalog_raw_r3",
+        CATALOG_RAW_DIR.parent / "catalog_raw_anker2",   # erg-Lücken-Nachbewertung
     ]
     file_count = 0
     for raw_dir in raw_dirs:

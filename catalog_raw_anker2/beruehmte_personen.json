@@ -1,0 +1,19 @@
+[
+  {
+    "thema": "Bonnie und Clyde",
+    "themengebiet": "Berühmte Personen",
+    "leuchtturm": false,
+    "erg_s1": null,
+    "erg_s2": null,
+    "erg_s3": 7,
+    "eignung": "include",
+    "age_floor": 3,
+    "kategorie_nr": 8,
+    "framing_note": "sachlich, warnung-Box, Gewalt/Tod nicht verherrlichend, keine Glorifizierung von Verbrechen",
+    "sensibel": true,
+    "begruendung_eignung": "Gewaltkriminalität, Raubmorde, gewaltsamer Tod → Kat 8. Anders als Billy The Kid (5/7/8) ist hier die Gewalt zentral und romantisierungs-anfällig; daher strenger als der Kat-8-Default S2 → age_floor=S3 empfohlen. Menschliche Freigabe entscheidet S2 vs. S3.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  }
+]

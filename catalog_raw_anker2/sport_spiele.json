@@ -1,0 +1,19 @@
+[
+  {
+    "thema": "Orientierungslauf",
+    "themengebiet": "Sport & Spiele",
+    "leuchtturm": false,
+    "erg_s1": 3,
+    "erg_s2": 5,
+    "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": null,
+    "framing_note": "",
+    "sensibel": false,
+    "begruendung_eignung": "Sportart, unproblematisch. S1 niedriger, da Karte/Kompass-Konzept für 4–6 Jahre noch abstrakt; konkret-spielerisch aber zugänglich.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  }
+]

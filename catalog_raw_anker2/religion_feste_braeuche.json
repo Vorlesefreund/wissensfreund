@@ -1,0 +1,36 @@
+[
+  {
+    "thema": "Märtyrer",
+    "themengebiet": "Religion, Feste & Bräuche",
+    "leuchtturm": false,
+    "erg_s1": 2,
+    "erg_s2": 4,
+    "erg_s3": 6,
+    "eignung": "include",
+    "age_floor": 1,
+    "kategorie_nr": 6,
+    "framing_note": "sachlich, kein Missionieren; Tod/Gewalt nüchtern und altersgerecht, nicht verherrlichend",
+    "sensibel": true,
+    "begruendung_eignung": "Religiöses Thema (Kat 6, af=1 sachlich ok). Da Märtyrertod Gewalt/Tod berührt (Kat 8), für S1 sehr abstrakt und schwer fassbar — niedrige S1-Ergiebigkeit, vorsichtiges Framing. Flag wegen Religions- und Todes-Kontext.",
+    "dublette_von": null,
+    "notiz": "",
+    "tier": "primary"
+  },
+  {
+    "thema": "Beschneidung",
+    "themengebiet": "Religion, Feste & Bräuche",
+    "leuchtturm": false,
+    "erg_s1": null,
+    "erg_s2": null,
+    "erg_s3": 5,
+    "eignung": "include",
+    "age_floor": 3,
+    "kategorie_nr": 2,
+    "framing_note": "sachlich-biologisch und religiös-kulturell einordnend, wertfrei, keine Akt-Darstellung; Ritual neutral erklären",
+    "sensibel": true,
+    "begruendung_eignung": "Körperliches Ritual mit Bezug zu Geschlechtsorganen → Kat 2 (af=S3) greift und schlägt Kat 6 (Religion). Strengste gewinnt → age_floor=S3, S1/S2 = null.",
+    "dublette_von": null,
+    "notiz": "auch Gebiet Menschlicher Körper & Gesundheit",
+    "tier": "primary"
+  }
+]
