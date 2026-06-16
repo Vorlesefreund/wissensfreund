@@ -1,10 +1,15 @@
 """
 gemini_client.py
 Schlankes Modul für Gemini API-Aufrufe in der Wissensfreund-Pipeline.
+
+Retry-Strategie (synchrone Calls):
+  503 UNAVAILABLE / 429 RESOURCE_EXHAUSTED → exponentielles Backoff + Jitter
+  400 / 404 (echte API-Fehler) → sofort raise, kein Retry
 """
 
 import logging
 import os
+import random
 import time
 from pathlib import Path
 from typing import Any
@@ -16,17 +21,39 @@ from google.genai import types
 log = logging.getLogger(__name__)
 
 # Letzter Token-Verbrauch — wird nach jedem erfolgreichen call_gemini() befüllt.
-# Caller können _last_usage direkt nach dem Call lesen (vor dem nächsten Call).
 _last_usage: dict = {}
 
-GEMINI_MODEL        = "gemini-2.5-flash"
-RETRY_ATTEMPTS      = 4
-_DOTENV_PATH        = Path(__file__).parent.parent / ".env"
+GEMINI_MODEL   = "gemini-2.5-flash"
+RETRY_ATTEMPTS = 5
+_RETRY_WAITS   = [10, 20, 40, 80, 160]   # Sekunden; je + random Jitter 0–5s
+
+_DOTENV_PATH   = Path(__file__).parent.parent / ".env"
 
 
-def _retry_wait(attempt: int) -> int:
-    """Exponentieller Backoff: 30 / 60 / 120 / 240 s."""
-    return min(30 * (2 ** (attempt - 1)), 240)
+def _is_retriable_error(err_str: str) -> bool:
+    """True für transiente Fehler (503, 429) → Retry.
+    False für echte API-Fehler (400 Bad Request, 404 Not Found) → sofort raise.
+    """
+    s = err_str.lower()
+    # Sofort-Fehler: nie retrien
+    if (
+        "400 " in err_str
+        or "invalid_argument" in s
+        or "404 " in err_str
+        or "not_found" in s
+        or ("not found" in s and "model" in s)
+    ):
+        return False
+    return (
+        "503" in err_str
+        or "429" in err_str
+        or "quota" in s
+        or "resource exhausted" in s
+        or "unavailable" in s
+        or "rate" in s
+        or "finish_reason" in err_str     # unvollständige Antwort → Retry
+        or "unvollst" in s                # eigene RuntimeError-Meldung
+    )
 
 
 def call_gemini(
@@ -37,14 +64,13 @@ def call_gemini(
     response_mime_type: str | None = None,
     response_schema: Any = None,
     cached_content: str | None = None,
+    call_name: str = "",
 ) -> str:
     global _last_usage
-    """Ruft Gemini auf und gibt den Antworttext zurück.
+    """Ruft Gemini synchron auf und gibt den Antworttext zurück.
 
-    Optionale Parameter:
-      - response_mime_type: z.B. 'application/json' für Structured Output
-      - response_schema:    Schema-Objekt (genai types.Schema oder dict)
-      - cached_content:     Cache-Name aus client.caches.create (Gemini Context Cache)
+    Bei 503/429: exponentielles Backoff mit Jitter (5 Versuche, 10→160s).
+    Bei 400/404: sofort raise (kein Retry).
     """
     load_dotenv(_DOTENV_PATH)
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -56,7 +82,10 @@ def call_gemini(
 
     effective_model    = model or GEMINI_MODEL
     effective_thinking = thinking_config or types.ThinkingConfig(thinking_budget=8192)
-    client = genai.Client(api_key=api_key)
+    label              = f"[{call_name}] " if call_name else ""
+    client             = genai.Client(api_key=api_key)
+
+    last_exc: Exception | None = None
 
     for attempt in range(1, RETRY_ATTEMPTS + 1):
         try:
@@ -64,8 +93,6 @@ def call_gemini(
                 temperature=0.6,
                 thinking_config=effective_thinking,
             )
-            # system_instruction darf nicht gesetzt sein, wenn cached_content verwendet wird
-            # (Cache enthält system_instruction bereits; Gemini 400 sonst)
             if not cached_content:
                 cfg.system_instruction = system_prompt
             else:
@@ -80,16 +107,16 @@ def call_gemini(
                 contents=user_message,
                 config=cfg,
             )
-            # usage_metadata auswerten + in _last_usage sichern
+
             um = getattr(response, "usage_metadata", None)
             if um:
-                prompt_tok    = getattr(um, "prompt_token_count", 0) or 0
-                cand_tok      = getattr(um, "candidates_token_count", 0) or 0
-                cached_tok    = getattr(um, "cached_content_token_count", 0) or 0
-                thoughts_tok  = getattr(um, "thoughts_token_count", 0) or 0
+                prompt_tok   = getattr(um, "prompt_token_count", 0) or 0
+                cand_tok     = getattr(um, "candidates_token_count", 0) or 0
+                cached_tok   = getattr(um, "cached_content_token_count", 0) or 0
+                thoughts_tok = getattr(um, "thoughts_token_count", 0) or 0
                 log.info(
-                    "  usage: prompt=%s cached=%d thoughts=%d output=%s",
-                    prompt_tok, cached_tok, thoughts_tok, cand_tok,
+                    "  %susage: prompt=%s cached=%d thoughts=%d output=%s",
+                    label, prompt_tok, cached_tok, thoughts_tok, cand_tok,
                 )
                 _last_usage = {
                     "input_tok":    int(prompt_tok),
@@ -100,7 +127,6 @@ def call_gemini(
             else:
                 _last_usage = {}
 
-            # Thinking-Mode kann response.text=None liefern → Parts direkt auslesen
             candidates = getattr(response, "candidates", [])
             text = response.text
             if text is None:
@@ -111,12 +137,11 @@ def call_gemini(
                             parts.append(part.text)
                 text = "".join(parts) or None
 
-            # finish_reason prüfen — MAX_TOKENS/SAFETY/leer → Antwort unvollständig
             if candidates:
                 fr = str(getattr(candidates[0], "finish_reason", "") or "")
                 if fr and "STOP" not in fr:
                     raise RuntimeError(
-                        f"Antwort unvollständig (finish_reason={fr})"
+                        f"Antwort unvollstaendig (finish_reason={fr})"
                     )
 
             if not text:
@@ -125,29 +150,35 @@ def call_gemini(
                     if candidates else "NO_CANDIDATES"
                 )
                 raise RuntimeError(
-                    f"Gemini gab keinen Text zurück (finish_reason: {fr_str})"
+                    f"Gemini gab keinen Text zurueck (finish_reason: {fr_str})"
                 )
             return text
+
         except Exception as e:
             err_str = str(e)
-            is_rate_limit = (
-                "429" in err_str
-                or "503" in err_str
-                or "quota" in err_str.lower()
-                or "resource exhausted" in err_str.lower()
-                or "rate" in err_str.lower()
-                or "unavailable" in err_str.lower()
-                or "finish_reason" in err_str          # unvollständige Antwort
-                or "unvollständig" in err_str          # eigene RuntimeError-Meldung
-            )
-            if is_rate_limit and attempt < RETRY_ATTEMPTS:
-                wait = _retry_wait(attempt)
+
+            if not _is_retriable_error(err_str):
+                raise RuntimeError(
+                    f"Gemini API-Fehler {label}(Modell={effective_model}): {e}"
+                ) from e
+
+            last_exc = e
+            if attempt < RETRY_ATTEMPTS:
+                base_wait = _RETRY_WAITS[attempt - 1]
+                jitter    = random.uniform(0, 5)
+                wait      = base_wait + jitter
                 log.warning(
-                    "Gemini Rate-Limit (Versuch %d/%d) — warte %ds ...",
-                    attempt, RETRY_ATTEMPTS, wait,
+                    "503/429 bei %s%s, Versuch %d/%d, warte %.0fs ...",
+                    label, effective_model, attempt, RETRY_ATTEMPTS, wait,
                 )
                 time.sleep(wait)
-                continue
-            raise RuntimeError(f"Gemini API-Fehler ({effective_model}): {e}") from e
+            else:
+                log.error(
+                    "503/429 bei %s%s, Versuch %d/%d — alle Versuche ausgeschoepft.",
+                    label, effective_model, attempt, RETRY_ATTEMPTS,
+                )
 
-    raise RuntimeError(f"Gemini API: alle {RETRY_ATTEMPTS} Versuche ausgeschöpft")
+    raise RuntimeError(
+        f"Gemini {label}(Modell={effective_model}): alle {RETRY_ATTEMPTS} Versuche "
+        f"fehlgeschlagen. Letzter Fehler: {last_exc}"
+    )
