@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T21:46:20Z -->
+<!-- updated: 2026-06-16T22:41:25Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -28,8 +28,10 @@ Gleicher System-Prompt v3.23b, gleiche Quelltexte (Stage-1-Checkpoint), gleicher
 - **Diagnose: Tages- oder Monats-Kontingent des API-Keys erschöpft** (Large-Call 77K Token)
 - Timings: Elefant V1–V5 (21:31–22:31), Vulkan V1–V5 (22:36–23:36), Indianer V1+ (23:41+)
 - Indianer-Wortziel-Quelle: ergiebigkeit (280–400), primary_text 107K Zeichen, 0 Bilder, 0 Companions
+- Script-Ende: 00:41 MESZ (17.06.) — 3h10min nach letztem Retry-Versuch, Rate-Limit nie erholt
+- Fehlercode `1300` (Mistral) = Token-Rate-Limit, kein Stunden-Reset in 3h40min → Tages-Limit
 - **Schlussfolgerung:** Medium-Test erfordert frisches Tages-/Monatsbudget — Large+Medium in einer Session nicht möglich mit diesem Key
-- **Nächster Schritt:** Morgen (neues Tageskontingent) medium-only starten, OHNE vorherigen Large-Call
+- **Nächster Schritt:** Heute Morgen (neues Tageskontingent) medium-only starten, OHNE vorherigen Large-Call
 
 ### gemini-3.5-flash
 - Weiterhin 503 UNAVAILABLE — Situation unverändert
@@ -133,9 +135,6 @@ Medium 3.5 (3 Topics): alle 429 — Key-Tagesbudget nach Large-Call erschöpft.
 ---
 
 ## Gerade in Arbeit
-
-**Mistral-Medium-Test** läuft noch im Hintergrund (Indianer-Retries bis ~00:45).
-Ergebnis klar: alle 429, kein Artikel generiert. STATUS.md bereits aktualisiert.
 
 **Stage-2-Diagnose ausstehend** — gemini-3.5-flash 503-Situation abwarten.
 Sync-Test (temp/_sync_test_s2.py) bereit, sobald Modell erreichbar.
