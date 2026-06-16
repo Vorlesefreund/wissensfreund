@@ -1,12 +1,22 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T06:30:43Z -->
+<!-- updated: 2026-06-16T07:42:28Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## ✅ Zuletzt abgeschlossen
 
-**9 Ergiebigkeits-Lücken geschlossen (2026-06-16).** ← AKTUELL
+**Finaler Merge nach vollständigem manuellem Review (2026-06-16).** ← AKTUELL
+- 18 Korrekturen aus catalog_review_master.xlsx (Andreas' Review abgeschlossen)
+- 16 Dubletten-Excludes: Atome und Moleküle, Cäsar, Elisabeth II., Federvieh-Spiel,
+  Griechische Götter, Größenvergleich, Ludwig der Vierzehnte, Magellan, Mondlandung 1969,
+  Napoleon, Neuschwanstein (Schloss), Photosynthese-Prozess (detailliert),
+  Spinne (Verhalten), Stachelschweinverwandte: Kängururatte, The Beatles, Vegetarismus
+- 2 Includes: Galápagos-Inseln, Terroranschläge vom 11. September
+- Verifikation: ALLE 21 CHECKS OK (16 raus + 5 drin)
+- Finale Zahlen: primary 4346 | Leuchtturm 213 | sensibel 563 | exclude 56 | KEINE Doppel
+
+**9 Ergiebigkeits-Lücken geschlossen (2026-06-16).**
 - 3 excludiert: Strom (im Haushalt), Vieh, Tintenfischschnecke (in source-JSONs + master)
 - 6 nachbewertet via catalog_rater_anker2.py (Opus, 1 Call):
   Märtyrer af=1 2/4/6 | Orientierungslauf af=1 3/5/6 | Inflation af=2 —/4/7
@@ -194,7 +204,7 @@ Bänder: S1[50,250] S2[80,400] S3[100,650]. Rater = Opus per API, Anker: 134 The
 
 ## 🔴 Offene Punkte (nach Priorität)
 
-Andreas-Review catalog_review_master.xlsx (4549 Zeilen, 0 orange, 44 exclude)
+**Pilot-Bulk-Lauf** (50–100 Themen, vollständige Pipeline) — nächster Schritt
 Pilot-Bulk-Lauf (50–100 Themen, vollständige Pipeline) — nach Review
 categories_backlog.json → categories-Array je Artikel (spätere Phase)
 3-flash-preview L3 Fix (max_output_tokens explizit); Flutter WfArticleListScreen
