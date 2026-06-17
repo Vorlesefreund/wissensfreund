@@ -1023,21 +1023,43 @@ def stage2_generierung(
         log.info("  [%s] Wortzahl: %d (Ziel %d–%d, Cap %d)", article_id, word_count, wmin, wmax, cap)
 
         trims = 0
+        orig_box_count = sum(len(s.get("boxes", [])) for s in article.get("sections", []))
         while word_count > cap and trims < 2:
             trims += 1
             log.warning("  [%s] Zu lang (%d > %d) — Trim %d/2", article_id, word_count, cap, trims)
             try:
-                article, word_count = _trim_article_to_cap(article, wmax, GEN_MODEL, thinking_cfg)
+                trimmed, trimmed_wc = _trim_article_to_cap(article, wmax, GEN_MODEL, thinking_cfg)
                 u = getattr(gemini_client, "_last_usage", {})
                 if u:
                     cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe=f"S{stufe}",
                                        schritt="trim", modell=GEN_MODEL, **u)
-                log.info("  [%s] Nach Trim %d: %d Wörter", article_id, trims, word_count)
+                trimmed_boxes = sum(len(s.get("boxes", [])) for s in trimmed.get("sections", []))
+                if trimmed_boxes == 0 and orig_box_count > 0:
+                    log.error("  [%s] Trim %d hat ALLE Boxen entfernt — Trim-Ergebnis verworfen,"
+                              " review_flag", article_id, trims)
+                    article["meta"]["review_flag"] = True
+                    article["meta"]["review_reason"] = (
+                        (article["meta"].get("review_reason", "") + "; Trim entfernte alle Boxen")
+                        .lstrip("; ")
+                    )
+                    break
+                article, word_count = trimmed, trimmed_wc
+                log.info("  [%s] Nach Trim %d: %d Wörter (%d Boxen)", article_id, trims,
+                         word_count, trimmed_boxes)
             except Exception as e:
                 log.error("  [%s] Trim fehlgeschlagen: %s", article_id, e)
                 break
         if trims:
             article["meta"]["trim_passes"] = trims
+        # Fix 2: review_flag wenn Artikel nach Trim immer noch über Cap liegt
+        if word_count > cap:
+            log.warning("  [%s] Über Cap (%d > %d) nach Trim — review_flag", article_id,
+                        word_count, cap)
+            article["meta"]["review_flag"] = True
+            article["meta"]["review_reason"] = (
+                (article["meta"].get("review_reason", "") + f"; Wortzahl {word_count} > Cap {cap}")
+                .lstrip("; ")
+            )
 
         if word_count < wmin:
             log.warning("  [%s] Zu kurz: %d < %d → review_flag", article_id, word_count, wmin)

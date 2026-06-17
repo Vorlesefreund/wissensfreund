@@ -968,10 +968,12 @@ def prepare_topic_sources(
 
 TRIM_SYSTEM_PROMPT = (
     "Du bist Lektor für ein deutsches Kinderlexikon. Du erhältst einen fertigen Artikel als JSON "
-    "und eine Wort-Obergrenze. Kürze den Artikel auf höchstens diese Wortzahl: straffe Sätze, "
-    "entferne den am wenigsten kindrelevanten Abschnitt oder eine entbehrliche Box. Bewahre Struktur "
-    "(sections mit sentences/boxes, quiz), Faktentreue, Tonfall, Stil und die Sprachstufe. Erfinde "
-    "nichts hinzu. Gib AUSSCHLIESSLICH das gekürzte JSON nach demselben Schema zurück — kein Vortext."
+    "und eine Wort-Obergrenze. Kürze den Artikel auf höchstens diese Wortzahl. "
+    "ERLAUBT: Sätze in sections[].sentences straffen oder einzelne Sätze entfernen; "
+    "maximal EINEN ganzen Abschnitt entfernen (sections[]-Element), wenn unvermeidbar. "
+    "VERBOTEN: Boxen (sections[].boxes) entfernen — alle Boxen bleiben vollständig erhalten. "
+    "Bewahre Faktentreue, Tonfall, Stil, Sprachstufe und Quiz. Erfinde nichts hinzu. "
+    "Gib AUSSCHLIESSLICH das gekürzte JSON nach demselben Schema zurück — kein Vortext."
 )
 
 
