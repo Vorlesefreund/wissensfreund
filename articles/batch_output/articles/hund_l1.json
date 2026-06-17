@@ -2,18 +2,18 @@
   "meta": {
     "id": "hund_l1",
     "title": "Hund",
-    "subtitle": "Der treueste Freund des Menschen",
+    "subtitle": "Unser treuester Freund auf vier Pfoten",
     "emoji": "🐶",
     "age_level": 1,
     "pattern": "living_being",
     "theme_color": "#4CAF50",
-    "word_count": 256,
+    "word_count": 226,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Haushund",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "tiere",
     "category_sub": "saeugetiere",
-    "generated_at": "2026-06-17T09:02:37.859827+00:00",
+    "generated_at": "2026-06-17T11:51:53.611701+00:00",
     "grounding_companions": [
       "Wolf",
       "Hunderasse",
@@ -21,15 +21,14 @@
       "Rettungshund",
       "Dingo"
     ],
-    "generation_method": "gemini-3.5-flash/batch/v3.23b",
-    "review_reason": "33 Sätze außerhalb [8,30] für Stufe 1"
+    "generation_method": "gemini-3.5-flash/batch/v3.23b"
   },
   "images": [
     {
       "index": 0,
       "filename": "Akita_inu.jpeg",
-      "alt": "Ein beigefarbener Akita-Hund liegt entspannt auf einer Holzterrasse.",
-      "caption": "Hunde sind beliebte Haustiere und treue Freunde.",
+      "alt": "Ein beiger Hund liegt entspannt auf einer Holzterrasse",
+      "caption": "Hunde leben als Haustiere ganz nah bei uns Menschen.",
       "license": "CC BY-SA 3.0",
       "license_author": "B@rt",
       "source_url": "https://commons.wikimedia.org/wiki/File:Akita_inu.jpeg",
@@ -46,28 +45,9 @@
     },
     {
       "index": 1,
-      "filename": "Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
-      "alt": "Ein flauschiger, kleiner Welpe mit blauen Augen schaut in die Kamera.",
-      "caption": "Ein kleiner Hundewelpe sieht besonders niedlich aus.",
-      "license": "CC BY-SA 2.5",
-      "license_author": "Richard Bartz, Munich aka Makro Freak",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
-      "wikimedia_id": "File:Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Keeshond_Siberian_Husky_crossbreed_puppy.jpg/1920px-Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
-      "is_hero": false,
-      "ab_stufe": 1,
-      "grenzfall": false,
-      "tiers": {
-        "300": "bilder/hund/Keeshond_Siberian_Husky_crossbreed_puppy_300.jpg",
-        "800": "bilder/hund/Keeshond_Siberian_Husky_crossbreed_puppy_800.jpg",
-        "1600": "bilder/hund/Keeshond_Siberian_Husky_crossbreed_puppy_1600.jpg"
-      }
-    },
-    {
-      "index": 2,
       "filename": "Canis_lupus.jpg",
-      "alt": "Ein graubrauner Wolf liegt entspannt im weißen Schnee.",
-      "caption": "Der Wolf ist der wilde Urvater aller Haushunde.",
+      "alt": "Ein Wolf liegt entspannt im Schnee",
+      "caption": "Der wilde Wolf ist der Ur-Ahn unserer Haushunde.",
       "license": "CC BY-SA 3.0",
       "license_author": "Bernard Landgraf",
       "source_url": "https://commons.wikimedia.org/wiki/File:Canis_lupus.jpg",
@@ -83,67 +63,10 @@
       }
     },
     {
-      "index": 3,
-      "filename": "Big_and_little_dog_1.jpg",
-      "alt": "Eine riesige Deutsche Dogge steht neben einem winzigen, schwarzen Hund im Gras.",
-      "caption": "Es gibt ganz riesige und sehr kleine Hunde.",
-      "license": "CC BY-SA 3.0",
-      "license_author": "Ellen Levy Finch / en:User:Elf",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Big_and_little_dog_1.jpg",
-      "wikimedia_id": "File:Big_and_little_dog_1.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Big_and_little_dog_1.jpg",
-      "is_hero": false,
-      "ab_stufe": 1,
-      "grenzfall": false,
-      "tiers": {
-        "300": "bilder/hund/Big_and_little_dog_1_300.jpg",
-        "800": "bilder/hund/Big_and_little_dog_1_800.jpg",
-        "1600": "bilder/hund/Big_and_little_dog_1_1600.jpg"
-      }
-    },
-    {
-      "index": 4,
-      "filename": "Close-up_of_dog_looking_at_photographer.jpg",
-      "alt": "Nahaufnahme eines Hundegesichts mit feuchter Nase im Vordergrund.",
-      "caption": "Mit ihrer feuchten Nase können Hunde fantastisch riechen.",
-      "license": "CC BY-SA 4.0",
-      "license_author": "Pittigrilli",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Close-up_of_dog_looking_at_photographer.jpg",
-      "wikimedia_id": "File:Close-up_of_dog_looking_at_photographer.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Close-up_of_dog_looking_at_photographer.jpg/1920px-Close-up_of_dog_looking_at_photographer.jpg",
-      "is_hero": false,
-      "ab_stufe": 1,
-      "grenzfall": false,
-      "tiers": {
-        "300": "bilder/hund/Close-up_of_dog_looking_at_photographer_300.jpg",
-        "800": "bilder/hund/Close-up_of_dog_looking_at_photographer_800.jpg",
-        "1600": "bilder/hund/Close-up_of_dog_looking_at_photographer_1600.jpg"
-      }
-    },
-    {
-      "index": 5,
-      "filename": "Dog_face_with_vibrissae.jpg",
-      "alt": "Profil eines Hundegesichts mit deutlich sichtbaren Tashaaren am Maul.",
-      "caption": "Die steifen Fühlhaare im Gesicht schützen den Hund vor Verletzungen.",
-      "license": "CC BY-SA 3.0",
-      "license_author": "Kreuzschnabel",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Dog_face_with_vibrissae.jpg",
-      "wikimedia_id": "File:Dog_face_with_vibrissae.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Dog_face_with_vibrissae.jpg/1920px-Dog_face_with_vibrissae.jpg",
-      "is_hero": false,
-      "ab_stufe": 1,
-      "grenzfall": false,
-      "tiers": {
-        "300": "bilder/hund/Dog_face_with_vibrissae_300.jpg",
-        "800": "bilder/hund/Dog_face_with_vibrissae_800.jpg",
-        "1600": "bilder/hund/Dog_face_with_vibrissae_1600.jpg"
-      }
-    },
-    {
-      "index": 6,
+      "index": 2,
       "filename": "Ears_Dog.jpg",
-      "alt": "Die spitzen Ohren eines Hundes von hinten fotografiert.",
-      "caption": "Hunde können ihre beweglichen Ohren in alle Richtungen drehen.",
+      "alt": "Die aufmerksamen Ohren eines Hundes von hinten",
+      "caption": "Hunde können ihre Ohren in alle Richtungen drehen.",
       "license": "CC BY-SA 3.0",
       "license_author": "Steffen Heinz (Caronna)",
       "source_url": "https://commons.wikimedia.org/wiki/File:Ears_Dog.jpg",
@@ -159,10 +82,48 @@
       }
     },
     {
-      "index": 7,
+      "index": 3,
+      "filename": "Close-up_of_dog_looking_at_photographer.jpg",
+      "alt": "Nahaufnahme einer feuchten Hundenase",
+      "caption": "Mit ihrer feuchten Nase riechen Hunde unheimlich gut.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Pittigrilli",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Close-up_of_dog_looking_at_photographer.jpg",
+      "wikimedia_id": "File:Close-up_of_dog_looking_at_photographer.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Close-up_of_dog_looking_at_photographer.jpg/1920px-Close-up_of_dog_looking_at_photographer.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Close-up_of_dog_looking_at_photographer_300.jpg",
+        "800": "bilder/hund/Close-up_of_dog_looking_at_photographer_800.jpg",
+        "1600": "bilder/hund/Close-up_of_dog_looking_at_photographer_1600.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
+      "alt": "Ein kleiner, flauschiger Welpe sitzt auf hellem Grund",
+      "caption": "Kleine Welpen kommen blind und zahnlos zur Welt.",
+      "license": "CC BY-SA 2.5",
+      "license_author": "Richard Bartz",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
+      "wikimedia_id": "File:Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Keeshond_Siberian_Husky_crossbreed_puppy.jpg/1920px-Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Keeshond_Siberian_Husky_crossbreed_puppy_300.jpg",
+        "800": "bilder/hund/Keeshond_Siberian_Husky_crossbreed_puppy_800.jpg",
+        "1600": "bilder/hund/Keeshond_Siberian_Husky_crossbreed_puppy_1600.jpg"
+      }
+    },
+    {
+      "index": 5,
       "filename": "Nova_Scotia_duck_tolling_retriever.jpg",
-      "alt": "Eine Hündin liegt auf dem Boden und säugt ihre kleinen Welpen.",
-      "caption": "Die kleinen Welpen trinken nach der Geburt warme Milch bei ihrer Mama.",
+      "alt": "Eine Hündin säugt ihre kleinen Welpen",
+      "caption": "Die Hundemutter füttert ihre Babys mit Milch.",
       "license": "Public domain",
       "license_author": "Richardpaas",
       "source_url": "https://commons.wikimedia.org/wiki/File:Nova_Scotia_duck_tolling_retriever.jpg",
@@ -178,10 +139,48 @@
       }
     },
     {
+      "index": 6,
+      "filename": "Big_and_little_dog_1.jpg",
+      "alt": "Eine riesige Dogge steht neben einem winzigen Hund",
+      "caption": "Es gibt sehr große und sehr kleine Hunderassen.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Ellen Levy Finch",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Big_and_little_dog_1.jpg",
+      "wikimedia_id": "File:Big_and_little_dog_1.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/e/e9/Big_and_little_dog_1.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Big_and_little_dog_1_300.jpg",
+        "800": "bilder/hund/Big_and_little_dog_1_800.jpg",
+        "1600": "bilder/hund/Big_and_little_dog_1_1600.jpg"
+      }
+    },
+    {
+      "index": 7,
+      "filename": "Canis_lupus_dingo.jpg",
+      "alt": "Ein rotbrauner Dingo steht am Strand",
+      "caption": "Der Dingo ist ein wilder Hund in Australien.",
+      "license": "CC BY 2.0",
+      "license_author": "Sam Fraser-Smith",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Canis_lupus_dingo.jpg",
+      "wikimedia_id": "File:Canis_lupus_dingo.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Canis_lupus_dingo.jpg/1920px-Canis_lupus_dingo.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Canis_lupus_dingo_300.jpg",
+        "800": "bilder/hund/Canis_lupus_dingo_800.jpg",
+        "1600": "bilder/hund/Canis_lupus_dingo_1600.jpg"
+      }
+    },
+    {
       "index": 8,
       "filename": "Ausbildung_Rettungshundeteam.jpg",
-      "alt": "Ein Rettungshelfer trainiert im tiefen Schnee zusammen mit einem Suchhund.",
-      "caption": "Rettungshunde helfen den Menschen bei der Suche nach Vermissten.",
+      "alt": "Ein Kind geht mit einem Hund durch den Schnee",
+      "caption": "Manche Hunde lernen, wie sie Menschen im Schnee retten.",
       "license": "CC BY-SA 3.0",
       "license_author": "Mirko Zimmermann-vom Wege / SARDOG.de",
       "source_url": "https://commons.wikimedia.org/wiki/File:Ausbildung_Rettungshundeteam.jpg",
@@ -199,38 +198,38 @@
   ],
   "sections": [
     {
-      "id": "intro",
-      "heading": "Der beste Freund des Menschen",
+      "id": "sec1",
+      "heading": "Wer ist der Hund?",
       "section_role": "intro",
       "sentences": [
         {
           "id": "s001",
-          "text": "Viele Kinder wünschen sich einen treuen Spielkameraden.",
+          "text": "Ein wildes Wedeln an der Tür begrüßt dich.",
           "img_index": 0
         },
         {
           "id": "s002",
-          "text": "Der Hund ist der beste Freund des Menschen.",
+          "text": "Der Haushund ist der beste Freund des Menschen.",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Er ist ein sehr beliebtes Haustier.",
+          "text": "Er lebt als Haustier ganz nah bei uns.",
           "img_index": -1
         },
         {
           "id": "s004",
-          "text": "Hunde gehören zur großen Familie der Wölfe.",
-          "img_index": 2
+          "text": "Sein wilder Ur-Opa ist der Wolf.",
+          "img_index": 1
         },
         {
           "id": "s005",
-          "text": "Wölfe sind die wilden Vorfahren unserer Hunde.",
+          "text": "Hunde stammen nämlich direkt von Wölfen ab.",
           "img_index": -1
         },
         {
           "id": "s006",
-          "text": "Hunde und Wölfe können sogar gemeinsame Babys bekommen.",
+          "text": "Deshalb sind sie sehr eng miteinander verwandt.",
           "img_index": -1
         }
       ],
@@ -238,117 +237,92 @@
       "table": null
     },
     {
-      "id": "appearance_equipment",
-      "heading": "Wie sieht ein Hund aus?",
+      "id": "sec2",
+      "heading": "Die Super-Sinne der Hunde",
       "section_role": "appearance_equipment",
       "sentences": [
         {
           "id": "s007",
-          "text": "Es gibt winzige Hunde und riesige Hunde.",
-          "img_index": 3
-        },
-        {
-          "id": "s008",
-          "text": "Manche Hunde haben Schlappohren, andere haben Stehohren.",
+          "text": "Hunde können manche Dinge viel besser als wir.",
           "img_index": -1
         },
         {
+          "id": "s008",
+          "text": "Ihre beweglichen Ohren hören extrem leise Geräusche.",
+          "img_index": 2
+        },
+        {
           "id": "s009",
-          "text": "Ihre Schwänze können gerade oder lustig eingerollt sein.",
+          "text": "Sie drehen die Ohren in alle Richtungen.",
           "img_index": -1
         },
         {
           "id": "s010",
-          "text": "Hunde haben sehr feine Sinne.",
+          "text": "Auch die feine Hundenase ist ein echtes Wunder.",
           "img_index": -1
         },
         {
           "id": "s011",
-          "text": "Sie riechen viel besser als wir Menschen.",
-          "img_index": 4
+          "text": "Ein Hund riecht viel besser als ein Mensch.",
+          "img_index": 3
         },
         {
           "id": "s012",
-          "text": "Ihre Nase ist immer kühl und feucht.",
+          "text": "Er riecht sogar den Angstschweiß von Menschen.",
           "img_index": -1
         },
         {
           "id": "s013",
-          "text": "Sie spüren damit sogar weit entfernte Wärme.",
+          "text": "Außerdem spüren Hunde das Magnetfeld unserer Erde.",
           "img_index": -1
-        },
-        {
-          "id": "s014",
-          "text": "Mit ihren Fühlhaaren im Gesicht weichen sie Hindernissen aus.",
-          "img_index": 5
-        },
-        {
-          "id": "s015",
-          "text": "Hunde hören auch ganz leise Geräusche sehr gut.",
-          "img_index": 6
         }
       ],
       "boxes": [
         {
           "type": "wow",
-          "text": "🌟 Hunde können mit ihrer kalten Nase die Wärme von anderen Tieren spüren! Das kann sonst fast kein anderes Säugetier auf der Welt."
+          "text": "Hunde können mit ihrer feinen Nase sogar rechts und links unterscheiden. Sie riechen also in 3D!"
         }
       ],
       "table": null
     },
     {
-      "id": "behavior_life",
-      "heading": "Das Leben der Hunde",
-      "section_role": "behavior_life",
+      "id": "sec3",
+      "heading": "Kuschelige Hundebabys",
+      "section_role": "reproduction",
       "sentences": [
         {
-          "id": "s016",
-          "text": "Hundebabys heißen Welpen.",
-          "img_index": 1
+          "id": "s014",
+          "text": "Junge Hunde heißen Welpen.",
+          "img_index": 4
         },
         {
-          "id": "s017",
-          "text": "Nach der Geburt trinken sie Milch bei ihrer Mama.",
-          "img_index": 7
-        },
-        {
-          "id": "s018",
-          "text": "Ihre Augen öffnen sich erst nach zwei Wochen.",
+          "id": "s015",
+          "text": "Sie kommen blind und ohne Zähne zur Welt.",
           "img_index": -1
         },
         {
+          "id": "s016",
+          "text": "Die ersten Milchzähne wachsen nach drei Wochen.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Am Anfang trinken die Babys nur Muttermilch.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Sie kuscheln sich ganz eng an ihre Mutter.",
+          "img_index": 5
+        },
+        {
           "id": "s019",
-          "text": "Hunde sprechen mit ihrem ganzen Körper.",
+          "text": "Das sanfte Streicheln beruhigt die kleinen Welpen sehr.",
           "img_index": -1
         },
         {
           "id": "s020",
-          "text": "Wenn sie sich freuen, wedeln sie mit dem Schwanz.",
-          "img_index": -1
-        },
-        {
-          "id": "s021",
-          "text": "Hunde bellen, um uns zu warnen.",
-          "img_index": -1
-        },
-        {
-          "id": "s022",
-          "text": "Manche Hunde heulen auch wie Wölfe.",
-          "img_index": -1
-        },
-        {
-          "id": "s023",
-          "text": "So rufen sie ihre Freunde herbei.",
-          "img_index": -1
-        },
-        {
-          "id": "s024",
-          "text": "Hunde lieben es, im Gras zu tollen.",
-          "img_index": -1
-        },
-        {
-          "id": "s025",
-          "text": "Sie spielen gerne mit weichen Bällen und Spielzeug.",
+          "text": "Ihr Herz schlägt dann viel langsamer und ruhiger.",
           "img_index": -1
         }
       ],
@@ -356,52 +330,52 @@
       "table": null
     },
     {
-      "id": "human_animal",
-      "heading": "Hunde helfen den Menschen",
+      "id": "sec4",
+      "heading": "Große Helfer und Freunde",
       "section_role": "human_animal",
       "sentences": [
         {
+          "id": "s021",
+          "text": "Es gibt riesige Doggen und winzige Chihuahuas.",
+          "img_index": 6
+        },
+        {
+          "id": "s022",
+          "text": "Diese verschiedenen Sorten nennen wir Hunderassen.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "In Australien leben sogar wilde Hunde, die Dingos.",
+          "img_index": 7
+        },
+        {
+          "id": "s024",
+          "text": "Viele Hunde haben richtige Berufe bei uns Menschen.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "Sie retten zum Beispiel Menschen aus tiefem Schnee.",
+          "img_index": 8
+        },
+        {
           "id": "s026",
-          "text": "Hunde arbeiten oft richtig mit uns zusammen.",
+          "text": "Doch vor allem schenken Hunde uns viel Freude.",
           "img_index": -1
         },
         {
           "id": "s027",
-          "text": "Es gibt schlaue Rettungshunde bei der Feuerwehr.",
-          "img_index": 8
-        },
-        {
-          "id": "s028",
-          "text": "Sie suchen vermisste Menschen im dichten Wald.",
-          "img_index": -1
-        },
-        {
-          "id": "s029",
-          "text": "Andere Hunde führen blinde Menschen sicher durch die Stadt.",
-          "img_index": -1
-        },
-        {
-          "id": "s030",
-          "text": "Am liebsten kuscheln Hunde mit ihrer Familie.",
-          "img_index": -1
-        },
-        {
-          "id": "s031",
-          "text": "Wir müssen gut für unsere Hunde sorgen.",
-          "img_index": -1
-        },
-        {
-          "id": "s032",
-          "text": "Sie brauchen gesundes Futter und frisches Wasser.",
-          "img_index": -1
-        },
-        {
-          "id": "s033",
-          "text": "Dann bleiben sie fit und glücklich.",
+          "text": "Sie begleiten uns treu an jedem einzelnen Tag.",
           "img_index": -1
         }
       ],
-      "boxes": [],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Schokolade ist für Hunde sehr giftig. Sie dürfen davon niemals naschen!"
+        }
+      ],
       "table": null
     }
   ],
@@ -409,57 +383,57 @@
     "questions": [
       {
         "id": "q1",
-        "text": "Wer ist der wilde Urvater unserer Haushunde?",
+        "text": "Von welchem wilden Tier stammt der Haushund ab?",
         "options": [
           {
             "key": "A",
-            "text": "Die Hauskatze"
+            "text": "Vom Löwen"
           },
           {
             "key": "B",
-            "text": "Der Wolf"
+            "text": "Vom Wolf"
           },
           {
             "key": "C",
-            "text": "Der Bär"
+            "text": "Vom Bären"
           }
         ],
         "correct_key": "B"
       },
       {
         "id": "q2",
-        "text": "Wie nennt man neugeborene Hundebabys?",
+        "text": "Wie kommen Hundewelpen auf die Welt?",
         "options": [
           {
             "key": "A",
-            "text": "Welpen"
+            "text": "Blind und ohne Zähne"
           },
           {
             "key": "B",
-            "text": "Küken"
+            "text": "Mit dichtem Winterfell"
           },
           {
             "key": "C",
-            "text": "Fohlen"
+            "text": "Bereits fertig ausgebildet zum Jagen"
           }
         ],
         "correct_key": "A"
       },
       {
         "id": "q3",
-        "text": "Was machen die meisten Hunde, wenn sie sich sehr freuen?",
+        "text": "Was dürfen Hunde niemals essen, weil es giftig für sie ist?",
         "options": [
           {
             "key": "A",
-            "text": "Sie fauchen ganz laut"
+            "text": "Hundekekse"
           },
           {
             "key": "B",
-            "text": "Sie verstecken sich im Gebüsch"
+            "text": "Grünes Gras"
           },
           {
             "key": "C",
-            "text": "Sie wedeln mit ihrem Schwanz"
+            "text": "Schokolade"
           }
         ],
         "correct_key": "C"
@@ -470,31 +444,73 @@
     "core": [
       "Wolf",
       "Welpe",
-      "Rettungshund",
-      "Hunderasse",
-      "Dingo"
+      "Hunderasse"
     ],
     "discover": [
-      "Haustier",
-      "Säugetier",
-      "Geruchssinn"
+      "Rettungshund",
+      "Dingo"
     ]
   },
   "source_passages": [
     {
-      "claim": "Wölfe sind die wilden Vorfahren unserer Hunde.",
+      "claim": "Der Haushund ist der beste Freund des Menschen. Er lebt als Haustier ganz nah bei uns.",
+      "source": "Haushund",
+      "passage": "Der Haushund (Canis lupus familiaris) ist ein Haustier und wird als Heim- und Nutztier gehalten."
+    },
+    {
+      "claim": "Sein wilder Ur-Opa ist der Wolf.",
       "source": "Haushund",
       "passage": "Seine wilde Stammform ist der Wolf, dem er als Unterart zugeordnet wird."
     },
     {
-      "claim": "Sie spüren damit sogar weit entfernte Wärme.",
+      "claim": "Ihre beweglichen Ohren hören extrem leise Geräusche.",
       "source": "Haushund",
-      "passage": "Eine in Scientific Reports veröffentlichte Studie deutet darauf hin, dass dies Hunde befähigt, schwache bzw. weit entfernte Wärmestrahlung wahrzunehmen und zu lokalisieren."
+      "passage": "Das Ohr des Hundes ist hoch entwickelt; es kann höhere Frequenzen wahrnehmen als das des Menschen..."
     },
     {
-      "claim": "Hundebabys heißen Welpen.",
+      "claim": "Ein Hund riecht viel besser als ein Mensch. Er riecht sogar den Angstschweiß von Menschen.",
+      "source": "Haushund",
+      "passage": "Hunde können auch Angstschweiß von Menschen riechen."
+    },
+    {
+      "claim": "Hunde riechen eine Million Mal besser als Menschen.",
+      "source": "Haushund",
+      "passage": "Messungen haben ein im Vergleich zum Menschen etwa eine Million Mal besseres Riechvermögen ergeben."
+    },
+    {
+      "claim": "Außerdem spüren Hunde das Magnetfeld unserer Erde.",
+      "source": "Haushund",
+      "passage": "Haushunde verfügen über die Fähigkeit, das Magnetfeld der Erde wahrzunehmen."
+    },
+    {
+      "claim": "Junge Hunde heißen Welpen.",
       "source": "Welpe",
-      "passage": "Als Welpe bezeichnet man einen juvenilen Haushund, aber auch Wolf oder Fuchs, der noch gesäugt wird bzw. höchstens zwei bis drei Monate alt ist."
+      "passage": "Als Welpe bezeichnet man einen juvenilen Haushund..."
+    },
+    {
+      "claim": "Sie kommen blind und ohne Zähne zur Welt.",
+      "source": "Haushund",
+      "passage": "Hunde werden zahnlos geboren."
+    },
+    {
+      "claim": "Das sanfte Streicheln beruhigt die kleinen Welpen sehr. Ihr Herz schlägt dann viel langsamer und ruhiger.",
+      "source": "Haushund",
+      "passage": "Durch Berührungen können Hunde messbar beruhigt werden – der Puls wird langsamer und die Atmung regelmäßiger."
+    },
+    {
+      "claim": "In Australien leben sogar wilde Hunde, die Dingos.",
+      "source": "Dingo",
+      "passage": "Der Dingo (Canis lupus dingo) ist ein Haushund, der vor mehreren tausend Jahren verwilderte und heute in vielen Teilen seines Verbreitungsgebietes in Südostasien und vor allem Australien vom Menschen völlig unabhängig lebt."
+    },
+    {
+      "claim": "Sie retten zum Beispiel Menschen aus tiefem Schnee.",
+      "source": "Rettungshund",
+      "passage": "Nach dem Abgang von Lawinen verschüttete Personen können durch Lawinensuchhundeteams unter dem Schnee gesucht werden."
+    },
+    {
+      "claim": "Schokolade ist für Hunde sehr giftig.",
+      "source": "Haushund",
+      "passage": "Viele menschliche Nahrungs- und Genussmittel sind für Hunde mehr oder weniger giftig, so zum Beispiel Schokolade..."
     }
   ]
 }

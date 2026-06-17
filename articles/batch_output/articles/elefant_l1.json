@@ -2,18 +2,18 @@
   "meta": {
     "id": "elefant_l1",
     "title": "Elefant",
-    "subtitle": "Die sanften Riesen der Erde",
+    "subtitle": "Der sanfte Riese mit der Super-Nase",
     "emoji": "🐘",
     "age_level": 1,
     "pattern": "living_being",
-    "theme_color": "#4CAF50",
-    "word_count": 228,
+    "theme_color": "#808080",
+    "word_count": 215,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Elefanten",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "tiere",
-    "category_sub": "säugetiere",
-    "generated_at": "2026-06-17T09:02:37.852842+00:00",
+    "category_sub": "saeugetiere",
+    "generated_at": "2026-06-17T11:51:53.604054+00:00",
     "grounding_companions": [
       "Rüssel",
       "Stoßzahn",
@@ -26,9 +26,66 @@
   "images": [
     {
       "index": 0,
+      "filename": "Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33).jpg",
+      "alt": "Zwei junge Elefanten spielen auf einer Wiese.",
+      "caption": "Junge Elefanten spielen sehr gerne miteinander.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Z thomas",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Elefantenfamilie_kaudulla_nationalpark_2017-10-17_%2833%29.jpg",
+      "wikimedia_id": "File:Elefantenfamilie_kaudulla_nationalpark_2017-10-17_%2833%29.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/79/Elefantenfamilie_kaudulla_nationalpark_2017-10-17_%2833%29.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/elefant/Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33)_300.jpg",
+        "800": "bilder/elefant/Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33)_800.jpg",
+        "1600": "bilder/elefant/Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33)_1600.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Lightmatter_elephanttrunk.jpg",
+      "alt": "Nahaufnahme von einem Elefantenrüssel.",
+      "caption": "Der Rüssel ist das wichtigste Werkzeug des Elefanten.",
+      "license": "CC BY 1.0",
+      "license_author": "Aaron Logan",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Lightmatter_elephanttrunk.jpg",
+      "wikimedia_id": "File:Lightmatter_elephanttrunk.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/a/ae/Lightmatter_elephanttrunk.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/elefant/Lightmatter_elephanttrunk_300.jpg",
+        "800": "bilder/elefant/Lightmatter_elephanttrunk_800.jpg",
+        "1600": "bilder/elefant/Lightmatter_elephanttrunk_1600.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Elephant_snorkeling.jpg",
+      "alt": "Ein Elefant schwimmt im Wasser, nur der Rüssel schaut heraus.",
+      "caption": "Beim Schwimmen atmet der Elefant durch den Rüssel.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Profberger Lee R. Berger",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Elephant_snorkeling.jpg",
+      "wikimedia_id": "File:Elephant_snorkeling.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Elephant_snorkeling.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/elefant/Elephant_snorkeling_300.jpg",
+        "800": "bilder/elefant/Elephant_snorkeling_800.jpg",
+        "1600": "bilder/elefant/Elephant_snorkeling_1600.jpg"
+      }
+    },
+    {
+      "index": 3,
       "filename": "A_family_group_of_elephants_in_Mudumalai_TR_AJTJohnsingh.jpg",
-      "alt": "Drei Elefanten in einem grünen Wald, darunter ein Elefantenbaby, das bei seiner Mutter trinkt.",
-      "caption": "Ein Elefantenbaby trinkt Milch bei seiner Mutter im dichten Wald.",
+      "alt": "Eine Elefantenfamilie mit einem Baby im Wald.",
+      "caption": "Elefantenkinder wachsen behütet in der Familie auf.",
       "license": "CC BY-SA 4.0",
       "license_author": "A. J. T. Johnsingh, WWF-India and NCF",
       "source_url": "https://commons.wikimedia.org/wiki/File:A_family_group_of_elephants_in_Mudumalai_TR_AJTJohnsingh.jpg",
@@ -44,29 +101,29 @@
       }
     },
     {
-      "index": 1,
-      "filename": "Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33).jpg",
-      "alt": "Zwei junge Elefanten spielen mit ihren Rüsseln auf einer grünen Wiese.",
-      "caption": "Junge Elefanten spielen gerne zusammen auf der Wiese.",
-      "license": "CC BY-SA 4.0",
-      "license_author": "Z thomas",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Elefantenfamilie_kaudulla_nationalpark_2017-10-17_%2833%29.jpg",
-      "wikimedia_id": "File:Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33).jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/79/Elefantenfamilie_kaudulla_nationalpark_2017-10-17_%2833%29.jpg",
+      "index": 4,
+      "filename": "African_Elephants_(Loxodonta_africana)_drinking_(8291607694).jpg",
+      "alt": "Elefanten baden im Schlamm.",
+      "caption": "Ein Schlammbad macht den Riesen großen Spaß.",
+      "license": "CC BY-SA 2.0",
+      "license_author": "Bernard DUPONT from FRANCE",
+      "source_url": "https://commons.wikimedia.org/wiki/File:African_Elephants_%28Loxodonta_africana%29_drinking_%288291607694%29.jpg",
+      "wikimedia_id": "File:African_Elephants_%28Loxodonta_africana%29_drinking_%288291607694%29.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/7b/African_Elephants_%28Loxodonta_africana%29_drinking_%288291607694%29.jpg",
       "is_hero": false,
       "ab_stufe": 1,
       "grenzfall": false,
       "tiers": {
-        "300": "bilder/elefant/Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33)_300.jpg",
-        "800": "bilder/elefant/Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33)_800.jpg",
-        "1600": "bilder/elefant/Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33)_1600.jpg"
+        "300": "bilder/elefant/African_Elephants_(Loxodonta_africana)_drinking_(8291607694)_300.jpg",
+        "800": "bilder/elefant/African_Elephants_(Loxodonta_africana)_drinking_(8291607694)_800.jpg",
+        "1600": "bilder/elefant/African_Elephants_(Loxodonta_africana)_drinking_(8291607694)_1600.jpg"
       }
     },
     {
-      "index": 2,
+      "index": 5,
       "filename": "Elephant_dust_bath_park_w_niger.jpg",
-      "alt": "Ein Elefant steht in einer trockenen Landschaft und wirft mit seinem Rüssel Staub über seinen Rücken.",
-      "caption": "Mit Staub schützt der Elefant seine Haut vor der Sonne.",
+      "alt": "Ein Elefant pustet sich Staub über den Rücken.",
+      "caption": "Puder aus Staub schützt die Haut.",
       "license": "CC BY-SA 2.0",
       "license_author": "Roland Hunziker",
       "source_url": "https://commons.wikimedia.org/wiki/File:Elephant_dust_bath_park_w_niger.jpg",
@@ -80,382 +137,279 @@
         "800": "bilder/elefant/Elephant_dust_bath_park_w_niger_800.jpg",
         "1600": "bilder/elefant/Elephant_dust_bath_park_w_niger_1600.jpg"
       }
-    },
-    {
-      "index": 3,
-      "filename": "African_Bush_Elephants.jpg",
-      "alt": "Ein erwachsener Elefant und ein Elefantenkalb stehen in einer grünen Graslandschaft mit kleinen Blumen.",
-      "caption": "Ein großer Elefant wandert mit seinem kleinen Kalb durch das Gras.",
-      "license": "Public domain",
-      "license_author": "Gorgo",
-      "source_url": "https://commons.wikimedia.org/wiki/File:African_Bush_Elephants.jpg",
-      "wikimedia_id": "File:African_Bush_Elephants.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/a/a9/African_Bush_Elephants.jpg",
-      "is_hero": false,
-      "ab_stufe": 1,
-      "grenzfall": false,
-      "tiers": {
-        "300": "bilder/elefant/African_Bush_Elephants_300.jpg",
-        "800": "bilder/elefant/African_Bush_Elephants_800.jpg",
-        "1600": "bilder/elefant/African_Bush_Elephants_1600.jpg"
-      }
-    },
-    {
-      "index": 4,
-      "filename": "African_Elephants_(Loxodonta_africana)_drinking_(8291607694).jpg",
-      "alt": "Eine Gruppe Elefanten, darunter mehrere Jungtiere, badet in einem schlammigen Wasserloch.",
-      "caption": "Ein Bad im Schlamm macht den grauen Riesen großen Spaß.",
-      "license": "CC BY-SA 2.0",
-      "license_author": "Bernard DUPONT from FRANCE",
-      "source_url": "https://commons.wikimedia.org/wiki/File:African_Elephants_%28Loxodonta_africana%29_drinking_%288291607694%29.jpg",
-      "wikimedia_id": "File:African_Elephants_(Loxodonta_africana)_drinking_(8291607694).jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/7b/African_Elephants_%28Loxodonta_africana%29_drinking_%288291607694%29.jpg",
-      "is_hero": false,
-      "ab_stufe": 1,
-      "grenzfall": false,
-      "tiers": {
-        "300": "bilder/elefant/African_Elephants_(Loxodonta_africana)_drinking_(8291607694)_300.jpg",
-        "800": "bilder/elefant/African_Elephants_(Loxodonta_africana)_drinking_(8291607694)_800.jpg",
-        "1600": "bilder/elefant/African_Elephants_(Loxodonta_africana)_drinking_(8291607694)_1600.jpg"
-      }
-    },
-    {
-      "index": 5,
-      "filename": "Elefants_de_la_sabana.JPG",
-      "alt": "Zwei Elefanten stehen sich gegenüber und berühren sich sanft mit ihren Rüsseln.",
-      "caption": "Elefanten begrüßen sich freundlich, indem sie ihre Rüssel umschlingen.",
-      "license": "CC BY-SA 3.0",
-      "license_author": "Sebastià Beinn",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Elefants_de_la_sabana.JPG",
-      "wikimedia_id": "File:Elefants_de_la_sabana.JPG",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/0/0f/Elefants_de_la_sabana.JPG",
-      "is_hero": false,
-      "ab_stufe": 1,
-      "grenzfall": false,
-      "tiers": {
-        "300": "bilder/elefant/Elefants_de_la_sabana_300.jpg",
-        "800": "bilder/elefant/Elefants_de_la_sabana_800.jpg",
-        "1600": "bilder/elefant/Elefants_de_la_sabana_1600.jpg"
-      }
-    },
-    {
-      "index": 6,
-      "filename": "Elephant_snorkeling.jpg",
-      "alt": "Ein Elefant schwimmt in einem Gewässer, wobei nur sein Kopf und ein Teil seines Rückens sowie sein Rüssel aus dem Wasser ragen.",
-      "caption": "Beim Schwimmen atmet der Elefant einfach durch seinen Rüssel.",
-      "license": "CC BY-SA 3.0",
-      "license_author": "Profberger Lee R. Berger",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Elephant_snorkeling.jpg",
-      "wikimedia_id": "File:Elephant_snorkeling.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Elephant_snorkeling.jpg",
-      "is_hero": false,
-      "ab_stufe": 1,
-      "grenzfall": false,
-      "tiers": {
-        "300": "bilder/elefant/Elephant_snorkeling_300.jpg",
-        "800": "bilder/elefant/Elephant_snorkeling_800.jpg",
-        "1600": "bilder/elefant/Elephant_snorkeling_1600.jpg"
-      }
     }
   ],
   "sections": [
     {
       "id": "sec1",
-      "heading": "Die gemütlichen Riesen",
+      "heading": "Ein Riese auf dem Land",
       "section_role": "intro",
       "sentences": [
         {
           "id": "s001",
-          "text": "Viele Menschen denken bei Elefanten an graue Riesen.",
+          "text": "Stell dir ein Tier so groß wie ein Haus vor!",
           "img_index": 0
         },
         {
           "id": "s002",
-          "text": "Sie sind tatsächlich die allergrößten Landtiere der Erde.",
-          "img_index": 3
+          "text": "Es hat riesige Schlappohren und eine graue Haut.",
+          "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Fachleute nennen sie auch Rüsseltiere.",
+          "text": "Dieses wunderschöne Riesentier ist der Elefant.",
           "img_index": -1
         },
         {
           "id": "s004",
-          "text": "Das liegt an ihrer ganz besonderen, langen Nase.",
+          "text": "Er ist das größte Landtier auf unserer Erde.",
           "img_index": -1
         },
         {
           "id": "s005",
-          "text": "Sie haben auch zwei helle Stoßzähne im Gesicht.",
+          "text": "Heute leben noch drei verschiedene Arten von Elefanten.",
           "img_index": -1
         }
       ],
-      "boxes": [],
-      "table": null
+      "boxes": []
     },
     {
       "id": "sec2",
-      "heading": "Eine Nase, die alles kann",
+      "heading": "Eine Nase, die greifen kann",
       "section_role": "appearance_equipment",
       "sentences": [
         {
           "id": "s006",
-          "text": "Der Rüssel ist die Nase und die Oberlippe zusammen.",
+          "text": "Seine Beine sind so dicke wie starke Säulen.",
           "img_index": -1
         },
         {
           "id": "s007",
-          "text": "Er ist so beweglich wie ein starker Arm.",
+          "text": "Zwei lange Stoßzähne wachsen aus seinem Mund.",
           "img_index": -1
         },
         {
           "id": "s008",
-          "text": "Damit greift der Elefant nach Blättern hoch oben.",
-          "img_index": -1
-        },
-        {
-          "id": "s009",
-          "text": "Oder er saugt Wasser zum Trinken auf.",
-          "img_index": 4
-        },
-        {
-          "id": "s010",
-          "text": "Die riesigen Ohren helfen dem Riesen beim Abkühlen.",
-          "img_index": -1
-        },
-        {
-          "id": "s011",
-          "text": "Er wedelt damit, wenn es sehr heiß ist.",
-          "img_index": -1
-        }
-      ],
-      "boxes": [],
-      "table": null
-    },
-    {
-      "id": "sec3",
-      "heading": "Leben in der großen Familie",
-      "section_role": "behavior_life",
-      "sentences": [
-        {
-          "id": "s012",
-          "text": "Elefantenkühe leben mit ihren Kindern in einer Gruppe.",
-          "img_index": -1
-        },
-        {
-          "id": "s013",
-          "text": "Eine weise, alte Elefanten-Oma führt diese Herde an.",
-          "img_index": -1
-        },
-        {
-          "id": "s014",
-          "text": "Die Babys trinken Milch bei ihrer Mutter.",
-          "img_index": -1
-        },
-        {
-          "id": "s015",
-          "text": "Genau wie Kinder spielen Elefantenbabys gern im Matsch.",
+          "text": "Das beste Werkzeug ist aber sein langer Rüssel.",
           "img_index": 1
         },
         {
-          "id": "s016",
-          "text": "Der Schlamm schützt ihre empfindliche Haut vor Sonne.",
+          "id": "s009",
+          "text": "Der Rüssel ist seine Nase und seine Hand.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Damit kann der Riese riechen, trinken und Futter greifen.",
           "img_index": 2
         },
         {
-          "id": "s017",
-          "text": "Die Tiere begrüßen sich liebevoll mit ihren Rüsseln.",
-          "img_index": 5
-        },
-        {
-          "id": "s018",
-          "text": "Sie umschlingen sich und halten so fest zusammen.",
+          "id": "s011",
+          "text": "Er holt sich damit sogar Blätter hoch aus Bäumen.",
           "img_index": -1
-        }
-      ],
-      "boxes": [],
-      "table": null
-    },
-    {
-      "id": "sec4",
-      "heading": "Großer Hunger und tolle Schwimmer",
-      "section_role": "behavior_life",
-      "sentences": [
-        {
-          "id": "s019",
-          "text": "Ein Elefant frisst fast den ganzen Tag lang.",
-          "img_index": -1
-        },
-        {
-          "id": "s020",
-          "text": "Er mampft Gräser, Blätter und saftige Rinde.",
-          "img_index": -1
-        },
-        {
-          "id": "s021",
-          "text": "Beim Gehen setzt er seine Beine ganz leise auf.",
-          "img_index": -1
-        },
-        {
-          "id": "s022",
-          "text": "Wusstest du, dass Elefanten auch fantastisch schwimmen können?",
-          "img_index": -1
-        },
-        {
-          "id": "s023",
-          "text": "Sie paddeln im tiefen Wasser wie kleine Boote.",
-          "img_index": -1
-        },
-        {
-          "id": "s024",
-          "text": "Ihr Rüssel ragt dann wie ein Schnorchel heraus.",
-          "img_index": 6
         }
       ],
       "boxes": [
         {
           "type": "wow",
-          "text": "Elefanten können tief im Wasser schwimmen und dabei durch ihren Rüssel wie mit einem Schnorchel atmen!"
+          "text": "🌟 Elefanten können super schwimmen. Wenn sie tief im Wasser sind, halten sie einfach ihren Rüssel nach oben. So atmen sie wie mit einem Schnorchel!"
         }
-      ],
-      "table": null
+      ]
     },
     {
-      "id": "sec5",
-      "heading": "Freunde der Menschen",
+      "id": "sec3",
+      "heading": "Leben in der Familie",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s012",
+          "text": "Elefanten-Mütter leben mit ihren Kindern in einer Gruppe.",
+          "img_index": 3
+        },
+        {
+          "id": "s013",
+          "text": "Eine erfahrene Elefanten-Oma zeigt allen den Weg.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Die Väter ziehen meistens lieber alleine umher.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Zusammen sucht die Herde nach Gras und Wasser.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Beim Baden spritzen sie sich gerne mit Schlamm voll.",
+          "img_index": 4
+        },
+        {
+          "id": "s017",
+          "text": "Der Schlamm schützt ihre Haut vor der heißen Sonne.",
+          "img_index": 5
+        }
+      ],
+      "boxes": []
+    },
+    {
+      "id": "sec4",
+      "heading": "Die Riesen beschützen",
       "section_role": "human_animal",
       "sentences": [
         {
-          "id": "s025",
-          "text": "Manche asiatischen Elefanten arbeiten eng mit Menschen zusammen.",
+          "id": "s018",
+          "text": "Schon seit Urzeiten malen Menschen Bilder von Elefanten.",
           "img_index": -1
         },
         {
-          "id": "s026",
-          "text": "Sie tragen schwere Äste aus dem dichten Wald.",
+          "id": "s019",
+          "text": "Früher gab es sogar riesige Mammuts mit dichtem Fell.",
           "img_index": -1
         },
         {
-          "id": "s027",
-          "text": "Menschen beschützen die Riesen heute in großen Naturparks.",
+          "id": "s020",
+          "text": "Doch heute haben die wilden Riesen oft zu wenig Platz.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Wir Menschen müssen die Heimat der Elefanten gut schützen.",
           "img_index": -1
         }
       ],
-      "boxes": [],
-      "table": null
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Manche Menschen jagen Elefanten verboten wegen ihrer Stoßzähne. Das ist gefährlich, damit die Tiere nicht aussterben."
+        }
+      ]
     }
   ],
   "quiz": {
     "questions": [
       {
         "id": "q1",
-        "text": "Was hilft den Elefanten an heißen Tagen beim Abkühlen?",
+        "text": "Was ist der Rüssel des Elefanten noch, außer einer Nase?",
         "options": [
           {
             "key": "A",
-            "text": "Ihr besonders dichtes Fell"
+            "text": "Seine Hand zum Greifen"
           },
           {
             "key": "B",
-            "text": "Ihre langen, spitzen Stoßzähne"
+            "text": "Ein großer Stoßzahn"
           },
           {
             "key": "C",
-            "text": "Das Wedeln mit den großen Ohren"
+            "text": "Ein weicher Schwanz"
           }
         ],
-        "correct_key": "C"
+        "correct_key": "A"
       },
       {
         "id": "q2",
-        "text": "Warum baden Elefanten so gerne im schlammigen Matsch?",
+        "text": "Warum spritzen sich Elefanten gerne mit Schlamm voll?",
         "options": [
           {
             "key": "A",
-            "text": "Damit sie im Dunkeln hell leuchten"
+            "text": "Um schneller rennen zu können"
           },
           {
             "key": "B",
-            "text": "Um ihre Haut vor der heißen Sonne zu schützen"
+            "text": "Zum Schutz vor der heißen Sonne"
           },
           {
             "key": "C",
-            "text": "Damit sie viel besser auf Bäume klettern können"
+            "text": "Um andere Tiere zu erschrecken"
           }
         ],
         "correct_key": "B"
       },
       {
         "id": "q3",
-        "text": "Wer bestimmt in einer Elefantenfamilie, wo es langgeht?",
+        "text": "Wer führt eine Elefanten-Familie auf ihren Wegen an?",
         "options": [
           {
             "key": "A",
-            "text": "Die älteste und weise Elefanten-Oma"
+            "text": "Ein kleiner Vogel"
           },
           {
             "key": "B",
-            "text": "Das allerkleinste Elefantenbaby"
+            "text": "Ein wilder Löwe"
           },
           {
             "key": "C",
-            "text": "Ein junger Elefantenbursche"
+            "text": "Eine kluge Elefanten-Oma"
           }
         ],
-        "correct_key": "A"
+        "correct_key": "C"
       }
     ]
   },
   "related_terms": {
     "core": [
-      "Rüsseltiere",
-      "Leitkuh",
-      "Elfenbein",
-      "Afrikanischer Elefant",
-      "Asiatischer Elefant"
+      "Rüssel",
+      "Stoßzahn",
+      "Mammute"
     ],
     "discover": [
-      "Mammut",
-      "Savanne",
-      "Regenwald",
-      "Nationalpark"
+      "Afrikanischer Elefant",
+      "Asiatischer Elefant"
     ]
   },
   "source_passages": [
     {
-      "claim": "Sie sind tatsächlich die allergrößten Landtiere der Erde.",
+      "claim": "Er ist das größte Landtier auf unserer Erde.",
       "source": "Elefanten",
       "passage": "Die Familie stellt die größten gegenwärtig lebenden Landtiere und schließt außerdem die einzigen heute noch lebenden Vertreter der Ordnungsgruppe ein."
     },
     {
-      "claim": "Fachleute nennen sie auch Rüsseltiere.",
+      "claim": "Heute leben noch drei verschiedene Arten von Elefanten.",
       "source": "Elefanten",
-      "passage": "Die Elefanten (Elephantidae) sind eine familie aus der Ordnung der Rüsseltiere."
+      "passage": "Es werden drei rezente Arten unterschieden: der Afrikanische Elefant... der ebenfalls in Afrika heimische... Waldelefant und der... Asiatische Elefant"
     },
     {
-      "claim": "Der Rüssel ist die Nase und die Oberlippe zusammen.",
+      "claim": "Seine Beine sind so dicke wie starke Säulen.",
+      "source": "Elefanten",
+      "passage": "Weitere auffällige Merkmale finden sich in dem massiven Körperbau mit säulenförmigen Beinen"
+    },
+    {
+      "claim": "Zwei lange Stoßzähne wachsen aus seinem Mund.",
+      "source": "Elefanten",
+      "passage": "und durch ihre aus den oberen Schneidezähnen gebildeten Stoßzähne gekennzeichnet."
+    },
+    {
+      "claim": "Der Rüssel ist seine Nase und seine Hand.",
       "source": "Elefanten",
       "passage": "Alle Elefanten sind durch ihren Rüssel, ein muskulöses Organ, das aus der Verwachsung der Nase mit der Oberlippe hervorgegangen ist... gekennzeichnet."
     },
     {
-      "claim": "Die riesigen Ohren helfen dem Riesen beim Abkühlen.",
-      "source": "Afrikanischer Elefant",
-      "passage": "Zur Kontrolle des Wärmehaushaltes setzen die Tiere unter anderem die Ohren ein, welche durch Wedeln sowohl kühlende als auch wärmende Effekte erzeugen..."
-    },
-    {
-      "claim": "Eine weise, alte Elefanten-Oma führt diese Herde an.",
+      "claim": "Eine erfahrene Elefanten-Oma zeigt allen den Weg.",
       "source": "Elefanten",
       "passage": "Die Familiengruppen oder Herden werden von einer Leitkuh angeführt, bei der es sich meist um ein älteres und erfahreneres Individuum handelt."
     },
     {
-      "claim": "Ihr Rüssel ragt dann wie ein Schnorchel heraus.",
-      "source": "Rüssel",
-      "passage": "Allerdings dient er wie bei den Elefanten zur sozialen Kommunikation... oder als Schnorchel."
+      "claim": "Die Väter ziehen meistens lieber alleine umher.",
+      "source": "Elefanten",
+      "passage": "Männliche Tiere leben dagegen entweder einzelgängerisch oder formieren sich in Junggesellengruppen."
     },
     {
-      "claim": "Manche asiatischen Elefanten arbeiten eng mit Menschen zusammen.",
+      "claim": "Der Schlamm schützt ihre Haut vor der heißen Sonne.",
       "source": "Elefanten",
-      "passage": "Einzig der Asiatische Elefant trat als gezähmtes Tier dauerhaft in den Dienst des Menschen. Er fungierte dabei zunächst als Last- und Arbeitstier..."
+      "passage": "Mit dem Rüssel werden Staub und Schmutz auf der Haut verteilt, was zum Schutz vor der starken Sonneneinstrahlung und vor Insekten geschieht."
+    },
+    {
+      "claim": "Früher gab es sogar riesige Mammuts mit dichtem Fell.",
+      "source": "Elefanten",
+      "passage": "in deren Folge verschiedene kälteangepasste Elefantenarten entstanden, darunter das bekannte Wollhaarmammut."
+    },
+    {
+      "claim": "Manche Menschen jagen Elefanten verboten wegen ihrer Stoßzähne.",
+      "source": "Elefanten",
+      "passage": "Ursachen hierfür sind hauptsächlich die Jagd nach Elfenbein und Lebensraumverlust durch die zunehmend wachsende menschliche Bevölkerung."
     }
   ]
 }

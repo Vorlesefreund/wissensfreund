@@ -783,18 +783,37 @@ def _parse_gen2_response(raw: str) -> tuple[dict, list]:
     return parse_article_json(raw), []
 
 
-def _set_is_hero(article: dict, images_stufe: list[dict], thema: str) -> None:
+def _set_is_hero(article: dict, images_stufe: list[dict], thema: str,
+                 primary_wikipedia: str | None = None) -> None:
     """Setzt is_hero=True auf dem besten Hero-Kandidaten, tiers-Pfade auf allen Bildern.
 
-    Hero-Regel: hero_candidate=True mit höchster Relevanz (select_images_for_stufe sortiert so);
-    Fallback: erstes Bild im Pool. Nur Bilder, die die Pipeline akzeptiert hat (in images_stufe).
+    Hero-Priorität:
+    1. Bilder aus dem Primärartikel (_source == primary_wikipedia) mit hero_candidate=True
+    2. Fallback: beliebiges Bild mit hero_candidate=True (höchste Relevanz zuerst)
+    3. Letzter Fallback: erstes Bild im Pool
+    Nur Bilder aus images_stufe (von der Pipeline akzeptiert und altersgerecht).
     """
     thema_slug = thema.lower().replace(" ", "_").replace("/", "_")
     pool = {img["filename"]: img for img in images_stufe}
-    hero_fname = next(
-        (img["filename"] for img in images_stufe if img.get("hero_candidate", False)),
-        images_stufe[0]["filename"] if images_stufe else None,
-    )
+
+    # Bevorzuge Hero-Kandidaten aus dem Primärartikel
+    if primary_wikipedia:
+        primary_heroes = [
+            img for img in images_stufe
+            if img.get("hero_candidate") and img.get("_source") == primary_wikipedia
+        ]
+        if primary_heroes:
+            hero_fname = primary_heroes[0]["filename"]  # bereits nach relevanz sortiert
+        else:
+            hero_fname = next(
+                (img["filename"] for img in images_stufe if img.get("hero_candidate")),
+                images_stufe[0]["filename"] if images_stufe else None,
+            )
+    else:
+        hero_fname = next(
+            (img["filename"] for img in images_stufe if img.get("hero_candidate")),
+            images_stufe[0]["filename"] if images_stufe else None,
+        )
     for art_img in article.get("images", []):
         fname    = art_img.get("filename", "")
         pool_img = pool.get(fname, {})
@@ -1103,8 +1122,8 @@ def stage2_generierung(
                 article["meta"].get("review_reason", "") + "; " + "; ".join(val_errors[:3])
             ).lstrip("; ")
 
-        # is_hero + tiers setzen
-        _set_is_hero(article, imgs_s, thema)
+        # is_hero + tiers setzen (Primary-Artikel-Hero bevorzugt)
+        _set_is_hero(article, imgs_s, thema, data.get("resolved_title", thema))
 
         # source_passages einbetten
         if source_passages:

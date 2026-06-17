@@ -1,12 +1,59 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T11:15:03Z -->
+<!-- updated: 2026-06-17T11:54:30Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Trim-Fixes verifiziert (2026-06-17)** ← AKTUELL
+**Prompt+Code-Fixes + Stage-1-Dino-Redo + Stage-2-Re-Run (2026-06-17)** ← AKTUELL
+
+### Fixes (alle 4 Gruppen implementiert):
+
+**Gruppe 1 — Bildmenge + -zuordnung:**
+- Fix 1a (Prompt v3.23c): `img_index` Semantik: semantische Zuordnung, alle Sections belegen,
+  alle verfügbaren Bilder nutzen (max 2×), Range `(0–5)` → `(0 bis len(images)-1)`
+- Fix 1b (`_set_is_hero`): Primary-Artikel-Images als Hero bevorzugt (`_source == resolved_title`);
+  Fallback: bester hero_candidate aus allen. ZWK: kein Primary-hero-candidate im Vision-Pool → Anne Frank bleibt (Vision-seitig korrekt)
+
+**Gruppe 2 — Prompt-Qualität:**
+- Fix 2a (Prompt v3.23c, Fehler #40): Einleitung mit „Viele…" verboten
+- Fix 2b (Prompt v3.23c, Fehler #41): Box-Doppelung explizit verboten (kein Echo des Fließtexts)
+- Fix 2c (Prompt v3.23c, Fehler #42): Wunschdenken-Schlüsse bei schweren Themen verboten
+
+**Gruppe 3 — Vision-Filter Skelette:**
+- `image_vision_filter.py`: Museumspräparate + Fossilien prähistorischer Tiere → ab_stufe=1
+  (Dino-Skelette, Ammoniten, Mammuts = Lernexponate); beide Prompts (VISION + OPUS_RECHECK) gefixt
+
+**Gruppe 4 — Stage-1-Redo Dinosaurier + Stage-2-Re-Run:**
+- Dinosaurier Stage 1 neu: S1=28 (vorher 6), S2=0 (vorher 23) — alle Skelette jetzt ab_stufe=1
+- Stage 2 Re-Run (mini_s2_v2): 18/18 Artikel ✅
+
+### Stage-2-v2 Ergebnisse:
+| Artikel | Bilder | Wörter | Status |
+|---|---|---|---|
+| elefant_l1 | 6 | 215 | ✓ |
+| elefant_l2 | 6 | 360 | ✓ |
+| elefant_l3 | 7 | 592 | ✓ |
+| hund_l1 | 9 | 226 | ✓ |
+| hund_l2 | 12 | 395 | ✓ (war 9) |
+| hund_l3 | 12 | 552 | ✓ (war 9) |
+| dinosaurier_l1 | 10 | 204 | ✓ (war 4) |
+| dinosaurier_l2 | 10 | 332 | ✓ (war 4) |
+| dinosaurier_l3 | 9 | 494 | ✓ (war 12 Skelette) |
+| vulkan_l1 | 4 | 174 | ✓ |
+| vulkan_l2 | 5 | 398 | ✓ |
+| vulkan_l3 | 6 | 520 | ⚠ Trim (741→520), review_flag (Satz-ID gap) |
+| spartacus_l1 | 0 | 175 | ✓ (keine S1-Bilder im Pool) |
+| spartacus_l2 | 4 | 270 | ✓ |
+| spartacus_l3 | 5 | 440 | ✓ |
+| zweiter_weltkrieg_l1 | 0 | 172 | ✓ (keine S1-Bilder im Pool) |
+| zweiter_weltkrieg_l2 | 1 | 288 | ✓ |
+| zweiter_weltkrieg_l3 | 5 | 423 | ✓ |
+
+Erste Sätze: Alle ohne „Viele…" ✅ (Szene/Frage/Faktum-Einstiege)
+
+**Trim-Fixes verifiziert (2026-06-17)**
 
 hund_l3: 687W → Trim → 621W, **3 Boxen erhalten** ✅ (Prompt-Fix greift)
 zweiter_weltkrieg_l2: 257W, 1 Box, kein Trim nötig ✅

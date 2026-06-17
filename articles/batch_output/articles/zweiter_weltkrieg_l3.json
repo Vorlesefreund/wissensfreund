@@ -2,18 +2,18 @@
   "meta": {
     "id": "zweiter_weltkrieg_l3",
     "title": "Zweiter Weltkrieg",
-    "subtitle": "Der schwerste Konflikt der Menschheitsgeschichte",
+    "subtitle": "Die schwerste Katastrophe der Menschheitsgeschichte",
     "emoji": "🌍",
     "age_level": 3,
     "pattern": "place_geography",
-    "theme_color": "#8B0000",
-    "word_count": 408,
+    "theme_color": "#5D6D7E",
+    "word_count": 423,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Zweiter_Weltkrieg",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "geschichte",
     "category_sub": "weltkriege",
-    "generated_at": "2026-06-17T09:22:24.796249+00:00",
+    "generated_at": "2026-06-17T11:52:36.124960+00:00",
     "grounding_companions": [
       "Anne Frank",
       "Weiße Rose",
@@ -26,8 +26,8 @@
     {
       "index": 0,
       "filename": "1945-05-01GerWW2BattlefrontAtlas.jpg",
-      "alt": "Historische Karte von Europa im Zweiten Weltkrieg",
-      "caption": "Eine historische Karte zeigt die Fronten in Europa gegen Ende des Krieges.",
+      "alt": "Historische Karte der europäischen Frontlinien 1945",
+      "caption": "Eine historische Karte zeigt die verschobenen Fronten kurz vor dem Ende des Krieges in Europa.",
       "license": "Public domain",
       "license_author": "Army Map Service",
       "source_url": "https://commons.wikimedia.org/wiki/File:1945-05-01GerWW2BattlefrontAtlas.jpg",
@@ -44,9 +44,28 @@
     },
     {
       "index": 1,
+      "filename": "YOU_CAN'T_WIN_THIS_WAR_WITHOUT_SACRIFICE_ON_THE_HOME_FRONT_TOO_-_NARA_-_516217.jpg",
+      "alt": "Historisches Propagandaposter aus dem Zweiten Weltkrieg",
+      "caption": "Dieses Poster aus der Kriegszeit rief die Menschen auf, auch zu Hause Opfer für den Sieg zu bringen.",
+      "license": "Public domain",
+      "license_author": "Unknown author",
+      "source_url": "https://commons.wikimedia.org/wiki/File:%22YOU_CAN%27T_WIN_THIS_WAR_WITHOUT_SACRIFICE_ON_THE_HOME_FRONT_TOO%22_-_NARA_-_516217.jpg",
+      "wikimedia_id": "File:%22YOU_CAN%27T_WIN_THIS_WAR_WITHOUT_SACRIFICE_ON_THE_HOME_FRONT_TOO%22_-_NARA_-_516217.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/77/%22YOU_CAN%27T_WIN_THIS_WAR_WITHOUT_SACRIFICE_ON_THE_HOME_FRONT_TOO%22_-_NARA_-_516217.jpg/1920px-%22YOU_CAN%27T_WIN_THIS_WAR_WITHOUT_SACRIFICE_ON_THE_HOME_FRONT_TOO%22_-_NARA_-_516217.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/zweiter_weltkrieg/YOU_CAN'T_WIN_THIS_WAR_WITHOUT_SACRIFICE_ON_THE_HOME_FRONT_TOO_-_NARA_-_516217_300.jpg",
+        "800": "bilder/zweiter_weltkrieg/YOU_CAN'T_WIN_THIS_WAR_WITHOUT_SACRIFICE_ON_THE_HOME_FRONT_TOO_-_NARA_-_516217_800.jpg",
+        "1600": "bilder/zweiter_weltkrieg/YOU_CAN'T_WIN_THIS_WAR_WITHOUT_SACRIFICE_ON_THE_HOME_FRONT_TOO_-_NARA_-_516217_1600.jpg"
+      }
+    },
+    {
+      "index": 2,
       "filename": "AnneFrank_dHont.jpg",
-      "alt": "Statue von Anne Frank",
-      "caption": "Eine Bronzestatue erinnert an das Schicksal von Anne Frank.",
+      "alt": "Eine Bronzestatue von Anne Frank auf einem Sockel",
+      "caption": "Eine Statue in Gedenken an Anne Frank, die den Holocaust nicht überlebte.",
       "license": "CC BY-SA 3.0",
       "license_author": "brbbl",
       "source_url": "https://commons.wikimedia.org/wiki/File:AnneFrank_dHont.jpg",
@@ -62,10 +81,29 @@
       }
     },
     {
-      "index": 2,
+      "index": 3,
+      "filename": "Alan_Turing_az_1930-as_években.jpg",
+      "alt": "Alan Turing auf einem Gartenstuhl",
+      "caption": "Der geniale Mathematiker Alan Turing knackte den geheimen Code der Enigma-Maschine.",
+      "license": "Public domain",
+      "license_author": "Unknown author",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Alan_Turing_az_1930-as_%C3%A9vekben.jpg",
+      "wikimedia_id": "File:Alan_Turing_az_1930-as_%C3%A9vekben.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/79/Alan_Turing_az_1930-as_%C3%A9vekben.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/zweiter_weltkrieg/Alan_Turing_az_1930-as_években_300.jpg",
+        "800": "bilder/zweiter_weltkrieg/Alan_Turing_az_1930-as_években_800.jpg",
+        "1600": "bilder/zweiter_weltkrieg/Alan_Turing_az_1930-as_években_1600.jpg"
+      }
+    },
+    {
+      "index": 4,
       "filename": "Berlin_Kunstbunker.JPG",
-      "alt": "Grauer Betonbunker aus dem Zweiten Weltkrieg",
-      "caption": "Ein massiver Hochbunker aus Beton bot Schutz vor Luftangriffen.",
+      "alt": "Ein grauer Betonbunker an einer Straßenecke",
+      "caption": "Dieser massive Betonbunker in Berlin trotzte im Krieg den Bombenangriffen.",
       "license": "CC BY-SA 3.0",
       "license_author": "Times",
       "source_url": "https://commons.wikimedia.org/wiki/File:Berlin_Kunstbunker.JPG",
@@ -79,237 +117,203 @@
         "800": "bilder/zweiter_weltkrieg/Berlin_Kunstbunker_800.jpg",
         "1600": "bilder/zweiter_weltkrieg/Berlin_Kunstbunker_1600.jpg"
       }
-    },
-    {
-      "index": 3,
-      "filename": "Bletchley_Park_Mansion.jpg",
-      "alt": "Historisches Gebäude von Bletchley Park",
-      "caption": "In Bletchley Park arbeiteten die Codeknacker der Alliierten.",
-      "license": "CC BY-SA 4.0",
-      "license_author": "DeFacto",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Bletchley_Park_Mansion.jpg",
-      "wikimedia_id": "File:Bletchley_Park_Mansion.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Bletchley_Park_Mansion.jpg/1920px-Bletchley_Park_Mansion.jpg",
-      "is_hero": false,
-      "ab_stufe": 1,
-      "grenzfall": false,
-      "tiers": {
-        "300": "bilder/zweiter_weltkrieg/Bletchley_Park_Mansion_300.jpg",
-        "800": "bilder/zweiter_weltkrieg/Bletchley_Park_Mansion_800.jpg",
-        "1600": "bilder/zweiter_weltkrieg/Bletchley_Park_Mansion_1600.jpg"
-      }
-    },
-    {
-      "index": 4,
-      "filename": "Front_view_Gestapo_photo_of_Christoph_Probst_taken_after_his_capture_on_February_20,_1943_(cropped).jpg",
-      "alt": "Christoph Probst",
-      "caption": "Christoph Probst war ein Mitglied der Widerstandsgruppe „Weiße Rose“.",
-      "license": "Public domain",
-      "license_author": "Unknown German police officer",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Front_view_Gestapo_photo_of_Christoph_Probst_taken_after_his_capture_on_February_20,_1943_(cropped).jpg",
-      "wikimedia_id": "File:Front_view_Gestapo_photo_of_Christoph_Probst_taken_after_his_capture_on_February_20,_1943_(cropped).jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/4b/Front_view_Gestapo_photo_of_Christoph_Probst_taken_after_his_capture_on_February_20%2C_1943_%28cropped%29.jpg",
-      "is_hero": false,
-      "ab_stufe": 3,
-      "grenzfall": false,
-      "tiers": {
-        "300": "bilder/zweiter_weltkrieg/Front_view_Gestapo_photo_of_Christoph_Probst_taken_after_his_capture_on_February_20,_1943_(cropped)_300.jpg",
-        "800": "bilder/zweiter_weltkrieg/Front_view_Gestapo_photo_of_Christoph_Probst_taken_after_his_capture_on_February_20,_1943_(cropped)_800.jpg",
-        "1600": "bilder/zweiter_weltkrieg/Front_view_Gestapo_photo_of_Christoph_Probst_taken_after_his_capture_on_February_20,_1943_(cropped)_1600.jpg"
-      }
     }
   ],
   "sections": [
     {
       "id": "sec1",
-      "heading": "Die Urkatastrophe des Jahrhunderts",
+      "heading": "Als die Welt in Flammen stand",
       "section_role": "intro",
       "sentences": [
         {
           "id": "s001",
-          "text": "Viele Menschen denken bei diesem Krieg an schnelle, scheinbar einfache Siege der Wehrmacht.",
-          "img_index": -1
+          "text": "Es begann am 1. September 1939 mit dem deutschen Überfall auf Polen.",
+          "img_index": 0
         },
         {
           "id": "s002",
-          "text": "Doch das ist ein Irrtum, der die schreckliche Wahrheit verharmlost.",
+          "text": "Der Zweite Weltkrieg war der schwerste globale Konflikt der Menschheit.",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Als Zweiter Weltkrieg wird der gewaltsame, globale Konflikt aller großen Weltmächte zwischen 1939 und 1945 bezeichnet.",
+          "text": "Insgesamt waren über 60 Staaten direkt oder indirekt an diesem verheerenden Kampf beteiligt.",
           "img_index": 0
         },
         {
           "id": "s004",
-          "text": "Der Krieg begann in Europa am 1. September 1939 mit dem deutschen Überfall auf Polen.",
-          "img_index": 0
+          "text": "Mehr als 110 Millionen Menschen trugen Waffen, und Millionen verloren ihr Leben.",
+          "img_index": 1
         },
         {
           "id": "s005",
-          "text": "Über 60 Staaten waren am Ende beteiligt und mehr als 110 Millionen Menschen trugen Waffen.",
-          "img_index": -1
-        },
-        {
-          "id": "s006",
-          "text": "Schätzungen zufolge wurden im gesamten Verlauf über 65 Millionen Menschen getötet.",
-          "img_index": -1
-        },
-        {
-          "id": "s007",
-          "text": "Er war die verlustreichste Katastrophe der Menschheitsgeschichte.",
+          "text": "Die Welt spaltete sich in zwei große Lager, die unerbittlich gegeneinander kämpften.",
           "img_index": -1
         }
       ],
-      "boxes": [],
-      "table": null
+      "boxes": []
     },
     {
       "id": "sec2",
-      "heading": "Technik und Schutz im Krieg",
-      "section_role": "appearance_equipment",
+      "heading": "Wie spaltete sich die Erde?",
+      "section_role": "historical_context",
       "sentences": [
         {
+          "id": "s006",
+          "text": "Auf der einen Seite standen die Achsenmächte, angeführt vom nationalsozialistischen Deutschland unter Diktator Adolf Hitler, Italien und Japan.",
+          "img_index": 0
+        },
+        {
+          "id": "s007",
+          "text": "Ihnen gegenüber kämpften die Alliierten, vor allem Großbritannien, die Sowjetunion und später die USA.",
+          "img_index": -1
+        },
+        {
           "id": "s008",
-          "text": "Auf den Schlachtfeldern spielten neue Technologien eine entscheidende Rolle.",
+          "text": "Die deutschen Truppen eroberten anfangs im \"Blitzkrieg\" weite Teile Europas.",
           "img_index": -1
         },
         {
           "id": "s009",
-          "text": "Um geheime Nachrichten zu senden, nutzte die deutsche Wehrmacht die Chiffriermaschine Enigma.",
-          "img_index": 3
+          "text": "Doch ab 1942 wendete sich das Blatt, als die Wehrmacht schwere Niederlagen erlitt, wie in der Schlacht von Stalingrad.",
+          "img_index": 0
         },
         {
           "id": "s010",
-          "text": "Die Generäle hielten die Verschlüsselung für absolut sicher.",
+          "text": "Auch im Pazifik und in Afrika wurde verbissen gekämpft.",
           "img_index": -1
-        },
+        }
+      ],
+      "boxes": []
+    },
+    {
+      "id": "sec3",
+      "heading": "Alltag in Angst und Verstecken",
+      "section_role": "behavior_life",
+      "sentences": [
         {
           "id": "s011",
-          "text": "In Bletchley Park in England gelang es Experten jedoch, die Funksprüche heimlich zu entziffern.",
-          "img_index": 3
+          "text": "Der Krieg traf vor allem die Zivilbevölkerung hart.",
+          "img_index": 4
         },
         {
           "id": "s012",
-          "text": "Diese wertvollen Informationen halfen den Alliierten, die Angreifer gezielt zu bekämpfen.",
-          "img_index": -1
+          "text": "Bei Luftangriffen suchten die Menschen Schutz in massiven Luftschutzbunkern aus dickem Beton.",
+          "img_index": 4
         },
         {
           "id": "s013",
-          "text": "Gleichzeitig mussten sich Millionen Zivilisten vor schweren Bombenangriffen aus der Luft schützen.",
-          "img_index": 2
+          "text": "Besonders grausam war der rassistische Vernichtungskrieg des NS-Regimes.",
+          "img_index": -1
         },
         {
           "id": "s014",
-          "text": "Dazu bauten die Städte massive Luftschutzbunker aus dickem Beton.",
-          "img_index": 2
+          "text": "Jüdinnen und Juden wurden brutal verfolgt und in Konzentrationslagern ermordet.",
+          "img_index": -1
         },
         {
           "id": "s015",
-          "text": "Sie retteten unzähligen Familien bei Fliegeralarm das Überleben.",
+          "text": "Stell dir vor, du müsstest dich jahrelang lautlos verstecken, nur um zu überleben.",
+          "img_index": 2
+        },
+        {
+          "id": "s016",
+          "text": "Ein bekanntes Symbol für dieses Unrecht ist die junge Jüdin Anne Frank.",
+          "img_index": 2
+        },
+        {
+          "id": "s017",
+          "text": "Sie versteckte sich über zwei Jahre lang in einem Amsterdamer Hinterhaus und hielt ihre Ängste im weltberühmten Tagebuch fest, bevor sie kurz vor Kriegsende im Lager starb.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Millionen von unschuldigen Menschen, darunter über sechs Millionen Jüdinnen und Juden, wurden im Holocaust von den Nationalsozialisten ermordet. Dieser Völkermord war das schlimmste Verbrechen der Menschheitsgeschichte."
+        }
+      ]
+    },
+    {
+      "id": "sec4",
+      "heading": "Der geheime Krieg der Codeknacker",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s018",
+          "text": "Hinter den Fronten tobte ein unsichtbarer Krieg der Wissenschaftler.",
+          "img_index": 3
+        },
+        {
+          "id": "s019",
+          "text": "Die Wehrmacht verschlüsselte ihre Funksprüche mit einer komplizierten Maschine namens Enigma.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Sie nutzte drehbare Walzen und Stecker, um Buchstaben unlesbar zu machen.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Doch im geheimen britischen Bletchley Park gelang es genialen Köpfen wie Alan Turing, diesen Code zu knacken.",
+          "img_index": 3
+        },
+        {
+          "id": "s022",
+          "text": "Mit riesigen Rechenmaschinen lasen die Alliierten die deutschen Pläne mit, was den Krieg entscheidend verkürzte.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
           "type": "wow",
-          "text": "Die Enigma-Maschine war extrem kompliziert. Sie hatte so viele verschiedene Einstellungsmöglichkeiten, dass man dafür eine Zahl mit 23 Nullen bräuchte! Trotzdem schafften es die Codeknacker, das Rätsel zu lösen."
+          "text": "🌟 Die Enigma-Maschine konnte eine unvorstellbare Anzahl an verschiedenen Codes erzeugen. Es gab über 150 Trillionen Möglichkeiten, die Steckverbindungen und Walzen einzustellen!"
         }
-      ],
-      "table": null
+      ]
     },
     {
-      "id": "sec3",
-      "heading": "Alltag im Versteck und im Widerstand",
-      "section_role": "behavior_life",
+      "id": "sec5",
+      "heading": "Widerstand und die Hoffnung auf Frieden",
+      "section_role": "today_legacy",
       "sentences": [
-        {
-          "id": "s016",
-          "text": "Der brutale Alltag veränderte das Leben der Menschen völlig.",
-          "img_index": -1
-        },
-        {
-          "id": "s017",
-          "text": "Besonders jüdische Familien wurden von den Nationalsozialisten grausam verfolgt.",
-          "img_index": -1
-        },
-        {
-          "id": "s018",
-          "text": "Stell dir vor, du müsstest dich jahrelang in einem winzigen Hinterhaus ohne laute Geräusche verstecken.",
-          "img_index": -1
-        },
-        {
-          "id": "s019",
-          "text": "Genau das erlebte das jüdische Mädchen Anne Frank im besetzten Amsterdam.",
-          "img_index": 1
-        },
-        {
-          "id": "s020",
-          "text": "In ihrem berühmten Tagebuch beschrieb sie ihre Ängste, bevor sie entdeckt und verschleppt wurde.",
-          "img_index": 1
-        },
-        {
-          "id": "s021",
-          "text": "Gegen das Unrecht bildete sich jedoch auch mutiger Widerstand.",
-          "img_index": -1
-        },
-        {
-          "id": "s022",
-          "text": "Die Münchener Studentengruppe „Weiße Rose“ verteilte heimlich Flugblätter gegen Adolf Hitlers Diktatur.",
-          "img_index": 4
-        },
         {
           "id": "s023",
-          "text": "Ihre Mitglieder, wie Sophie und Hans Scholl, bezahlten diesen Mut mit ihrem Leben.",
-          "img_index": 4
-        }
-      ],
-      "boxes": [
-        {
-          "type": "warnung",
-          "text": "Die Nationalsozialisten führten einen grausamen Vernichtungskrieg. Sie ermordeten systematisch über sechs Millionen Jüdinnen und Juden im Holocaust. Auch Hunderttausende Sinti und Roma sowie andere verfolgte Gruppen wurden Opfer dieser Verbrechen."
-        }
-      ],
-      "table": null
-    },
-    {
-      "id": "sec4",
-      "heading": "Das Ende der Zerstörung",
-      "section_role": "historical_context",
-      "sentences": [
+          "text": "Trotz der Gefahr gab es auch in Deutschland mutigen Widerstand.",
+          "img_index": -1
+        },
         {
           "id": "s024",
-          "text": "Im Kriegsverlauf wendete sich das Blatt, als Deutschland die Sowjetunion angriff und die USA beitraten.",
-          "img_index": -1
+          "text": "Die studentische Gruppe \"Weiße Rose\" rief mit geheimen Flugblättern zum Aufstand gegen Hitlers Diktatur auf.",
+          "img_index": 1
         },
         {
           "id": "s025",
-          "text": "Nach verlustreichen Schlachten im Osten und der Landung der Westalliierten in Frankreich brach die Wehrmacht zusammen.",
+          "text": "Die Geschwister Scholl bezahlten diesen Mut mit ihrem Leben.",
           "img_index": -1
         },
         {
           "id": "s026",
-          "text": "Adolf Hitler tötete sich selbst im Bunker, woraufhin Deutschland im Mai 1945 bedingungslos kapitulierte.",
+          "text": "Im Mai 1945 kapitulierte Deutschland bedingungslos, im September endete der Krieg auch in Asien.",
           "img_index": -1
         },
         {
           "id": "s027",
-          "text": "In Ostasien kapitulierte Japan erst im September 1945, nachdem die USA zwei Atombomben abgeworfen hatten.",
+          "text": "Um solche Katastrophen für immer zu verhindern, gründeten die Siegerstaaten die Vereinten Nationen.",
           "img_index": -1
         },
         {
           "id": "s028",
-          "text": "Die europäischen Kolonialmächte verloren danach viele ihrer Übersee-Besitzungen, die unabhängig wurden.",
-          "img_index": -1
-        },
-        {
-          "id": "s029",
-          "text": "Um solche Kriege künftig zu verhindern, gründeten die Siegerstaaten im Oktober 1945 die Vereinten Nationen (UNO).",
+          "text": "Sie sollten fortan den Weltfrieden sichern.",
           "img_index": -1
         }
       ],
-      "boxes": [],
-      "table": null
+      "boxes": [
+        {
+          "type": "fakt",
+          "text": "💡 Am 24. Oktober 1945 wurde die Organisation der Vereinten Nationen (UNO) gegründet. Ihr Sicherheitsrat mit den Hauptsiegermächten soll den Frieden auf der Erde bewahren."
+        }
+      ]
     }
   ],
   "quiz": {
@@ -324,7 +328,7 @@
           },
           {
             "key": "B",
-            "text": "Am 22. Juni 1941"
+            "text": "Am 8. Mai 1945"
           },
           {
             "key": "C",
@@ -335,7 +339,26 @@
       },
       {
         "id": "q2",
-        "text": "Welche geheime Maschine knackten die Alliierten in Bletchley Park?",
+        "text": "Wer war die junge Jüdin, die im Versteck ein weltberühmtes Tagebuch schrieb?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sophie Scholl"
+          },
+          {
+            "key": "B",
+            "text": "Anne Frank"
+          },
+          {
+            "key": "C",
+            "text": "Hannah Goslar"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Wie hieß die deutsche Maschine, mit der Funksprüche verschlüsselt wurden?",
         "options": [
           {
             "key": "A",
@@ -343,49 +366,30 @@
           },
           {
             "key": "B",
-            "text": "Bismarck"
+            "text": "Bletchley"
           },
           {
             "key": "C",
-            "text": "T-34"
+            "text": "Turing"
           }
         ],
         "correct_key": "A"
       },
       {
-        "id": "q3",
-        "text": "Wie hieß die studentische Widerstandsgruppe in München?",
-        "options": [
-          {
-            "key": "A",
-            "text": "Edelweißpiraten"
-          },
-          {
-            "key": "B",
-            "text": "Weiße Rose"
-          },
-          {
-            "key": "C",
-            "text": "Rote Kapelle"
-          }
-        ],
-        "correct_key": "B"
-      },
-      {
         "id": "q4",
-        "text": "Welche weltberühmten Aufzeichnungen entstanden im Versteck in Amsterdam?",
+        "text": "Welche studentische Gruppe leistete in München Widerstand mit Flugblättern?",
         "options": [
           {
             "key": "A",
-            "text": "Die Flugblätter der Weißen Rose"
+            "text": "Der Kreisauer Kreis"
           },
           {
             "key": "B",
-            "text": "Das Tagebuch der Anne Frank"
+            "text": "Die Weiße Rose"
           },
           {
             "key": "C",
-            "text": "Die Charta der Vereinten Nationen"
+            "text": "Die Roten Rebellen"
           }
         ],
         "correct_key": "B"
@@ -394,53 +398,93 @@
   },
   "related_terms": {
     "core": [
-      "Nationalsozialismus",
       "Holocaust",
-      "Wehrmacht",
-      "Alliierte"
+      "Adolf Hitler",
+      "Nationalsozialismus",
+      "Sowjetunion"
     ],
     "discover": [
-      "Adolf Hitler",
       "Bletchley Park",
-      "Vereinte Nationen",
-      "Widerstand"
+      "Alan Turing",
+      "München",
+      "Amsterdam"
     ]
   },
   "source_passages": [
     {
-      "claim": "Als Zweiter Weltkrieg wird der zweite global geführte Krieg sämtlicher Großmächte im 20. Jahrhundert bezeichnet.",
-      "source": "Zweiter Weltkrieg",
-      "passage": "Als Zweiter Weltkrieg (1. September 1939 – 2. September 1945) wird der zweite global geführte Krieg sämtlicher Großmächte im 20. Jahrhundert bezeichnet."
-    },
-    {
-      "claim": "Über 60 Staaten waren beteiligt, mehr als 110 Millionen trugen Waffen und über 65 Millionen wurden getötet.",
-      "source": "Zweiter Weltkrieg",
-      "passage": "Über 60 Staaten waren direkt oder indirekt beteiligt, mehr als 110 Millionen Menschen trugen Waffen. Schätzungen zufolge wurden über 65 Millionen Menschen getötet."
-    },
-    {
-      "claim": "Der Krieg begann am 1. September 1939 mit dem Überfall auf Polen.",
+      "claim": "Es begann am 1. September 1939 mit dem deutschen Überfall auf Polen.",
       "source": "Zweiter Weltkrieg",
       "passage": "In Europa begann der Zweite Weltkrieg am 1. September 1939 mit dem von Adolf Hitler befohlenen Überfall auf Polen."
     },
     {
-      "claim": "Die Alliierten entschlüsselten den ENIGMA-Code in Bletchley Park.",
+      "claim": "Insgesamt waren über 60 Staaten direkt oder indirekt an diesem verheerenden Kampf beteiligt.",
       "source": "Zweiter Weltkrieg",
-      "passage": "Den Alliierten gelang es, die damit verschlüsselten Funksprüche nahezu kontinuierlich zu entziffern..."
+      "passage": "Über 60 Staaten waren direkt oder indirekt beteiligt..."
     },
     {
-      "claim": "Anne Frank versteckte sich im Hinterhaus in Amsterdam und schrieb ihr Tagebuch.",
+      "claim": "Mehr als 110 Millionen Menschen trugen Waffen, und Millionen verloren ihr Leben.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "...mehr als 110 Millionen Menschen trugen Waffen. Schätzungen zufolge wurden über 65 Millionen Menschen getötet."
+    },
+    {
+      "claim": "Auf der einen Seite standen die Achsenmächte, angeführt vom nationalsozialistischen Deutschland unter Diktator Adolf Hitler, Italien und Japan.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Im Kriegsverlauf bildeten sich zwei militärische Allianzen, die als Achsenmächte und Alliierte (Anti-Hitler-Koalition) bezeichnet werden. Hauptgegner des nationalsozialistischen Deutschen Reiches waren..."
+    },
+    {
+      "claim": "Ihnen gegenüber kämpften die Alliierten, vor allem Großbritannien, die Sowjetunion und später die USA.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "...das Vereinigte Königreich... die unter der Diktatur Josef Stalins stehende Sowjetunion sowie ab Dezember 1941 die USA..."
+    },
+    {
+      "claim": "Die deutschen Truppen eroberten anfangs im \"Blitzkrieg\" weite Teile Europas.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Der Zweite Weltkrieg bestand in Europa aus Blitzkriegen, Eroberungsfeldzügen gegen die deutschen Nachbarländer..."
+    },
+    {
+      "claim": "Doch ab 1942 wendete sich das Blatt, als die Wehrmacht schwere Niederlagen erlitt, wie in der Schlacht von Stalingrad.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "...und in der Schlacht von Stalingrad 1942/43."
+    },
+    {
+      "claim": "Bei Luftangriffen suchten die Menschen Schutz in massiven Luftschutzbunkern aus dickem Beton.",
+      "source": "Luftschutzbunker",
+      "passage": "Ab 1940 erfolgte das dann unter der Leitung Hermann Görings als Oberbefehlshaber der Luftwaffe in größerer Zahl in allen großen deutschen Städten... Die Bunker sollten dem Schutz der Zivilbevölkerung dienen."
+    },
+    {
+      "claim": "Jüdinnen und Juden wurden brutal verfolgt und in Konzentrationslagern ermordet.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Schätzungen, die Opfer von Holocaust (Shoa)... einbeziehen, reichen bis zu 80 Millionen."
+    },
+    {
+      "claim": "Sie versteckte sich über zwei Jahre lang in einem Amsterdamer Hinterhaus und hielt ihre Ängste im weltberühmten Tagebuch fest, bevor sie kurz vor Kriegsende im Lager starb.",
       "source": "Anne Frank",
       "passage": "Von Juli 1942 bis August 1944 lebte sie mit ihrer Familie versteckt in einem Hinterhaus in Amsterdam. Dort hielt sie ihre Erlebnisse und Gedanken in einem Tagebuch fest..."
     },
     {
-      "claim": "Die Weiße Rose war eine studentische Widerstandsgruppe gegen die Diktatur.",
-      "source": "Weiße Rose",
-      "passage": "Weiße Rose nannte sich eine hauptsächlich von Studenten getragene, von München aus agierende deutsche Widerstandsgruppe gegen die nationalsozialistische Diktatur..."
+      "claim": "Die Wehrmacht verschlüsselte ihre Funksprüche mit einer komplizierten Maschine namens Enigma.",
+      "source": "Enigma (Maschine)",
+      "passage": "Im Zweiten Weltkrieg (1939–1945) wurden Enigma-Maschinen von den Achsenmächten eingesetzt, hauptsächlich von Wehrmacht."
     },
     {
-      "claim": "Die Vereinten Nationen wurden nach dem Krieg gegründet.",
+      "claim": "Doch im geheimen britischen Bletchley Park gelang es genialen Köpfen wie Alan Turing, diesen Code zu knacken.",
+      "source": "Enigma (Maschine)",
+      "passage": "Den Alliierten gelang es, die damit verschlüsselten Funksprüche nahezu kontinuierlich zu entziffern..."
+    },
+    {
+      "claim": "Die studentische Gruppe \"Weiße Rose\" rief mit geheimen Flugblättern zum Aufstand gegen Hitlers Diktatur auf.",
+      "source": "Weiße Rose",
+      "passage": "Weiße Rose nannte sich eine hauptsächlich von Studenten getragene, von München aus agierende deutsche Widerstandsgruppe gegen die nationalsozialistische Diktatur... In diesen Veröffentlichungen thematisierten sie Verbrechen des Regimes und riefen zum Widerstand gegen den Nationalsozialismus auf."
+    },
+    {
+      "claim": "Die Geschwister Scholl bezahlten diesen Mut mit ihrem Leben.",
+      "source": "Weiße Rose",
+      "passage": "Die Geschwister Scholl und Christoph Probst wurden am 22. Februar 1943 zum Tode verurteilt. Das Urteil wurde am selben Tag... vollstreckt."
+    },
+    {
+      "claim": "Um solche Katastrophen für immer zu verhindern, gründeten die Siegerstaaten die Vereinten Nationen.",
       "source": "Zweiter Weltkrieg",
-      "passage": "Die Organisation der Vereinten Nationen (UNO) wurde gegründet, deren ständige Mitglieder im Sicherheitsrat die Hauptsiegermächte des Zweiten Weltkriegs wurden..."
+      "passage": "Die Organisation der Vereinten Nationen (UNO) wurde gegründet..."
     }
   ]
 }

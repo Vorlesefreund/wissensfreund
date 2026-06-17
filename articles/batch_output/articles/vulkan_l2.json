@@ -2,18 +2,18 @@
   "meta": {
     "id": "vulkan_l2",
     "title": "Vulkan",
-    "subtitle": "Die feurigen Riesen unserer Erde",
+    "subtitle": "Wie Vulkane und heiße Quellen unsere Erde formen",
     "emoji": "🌋",
     "age_level": 2,
-    "pattern": "tech_science",
-    "theme_color": "#E64A19",
-    "word_count": 366,
+    "pattern": "place_geography",
+    "theme_color": "#D32F2F",
+    "word_count": 398,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Vulkan",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "natur",
-    "category_sub": "geologie",
-    "generated_at": "2026-06-17T09:08:48.881851+00:00",
+    "category_sub": "geografie",
+    "generated_at": "2026-06-17T11:51:53.630654+00:00",
     "grounding_companions": [
       "Lava",
       "Magma",
@@ -26,8 +26,8 @@
     {
       "index": 0,
       "filename": "Pahoeoe_fountain_edit2.jpg",
-      "alt": "Glühend rote Lava sprudelt aus einem Vulkan.",
-      "caption": "Wenn flüssiges Gestein aus der Erde fließt, nennen wir es Lava.",
+      "alt": "Flüssige, glühende rote Lava spritzt aus einem Vulkan",
+      "caption": "Glühende rote Lava bahnt sich ihren Weg.",
       "license": "Public domain",
       "license_author": "J.D. Griggs",
       "source_url": "https://commons.wikimedia.org/wiki/File:Pahoeoe_fountain_edit2.jpg",
@@ -44,47 +44,47 @@
     },
     {
       "index": 1,
-      "filename": "Dauner_Maar.jpg",
-      "alt": "Ein blauer, runder See in einem ehemaligen Vulkankrater.",
-      "caption": "Ein Maar in der Eifel: Hier hat sich ein alter Vulkankrater mit Wasser gefüllt.",
+      "filename": "Lava_Lake_Nyiragongo_2.jpg",
+      "alt": "Ein brodelnder See aus glühender Lava in einem tiefen Krater",
+      "caption": "Ein seltener Blick in einen kochenden Lavasee.",
       "license": "CC BY-SA 3.0",
-      "license_author": "wa",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Dauner_Maar.jpg",
-      "wikimedia_id": "File:Dauner_Maar.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Dauner_Maar.jpg",
+      "license_author": "Cai Tjeenk Willink (Caitjeenk)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Lava_Lake_Nyiragongo_2.jpg",
+      "wikimedia_id": "File:Lava_Lake_Nyiragongo_2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/76/Lava_Lake_Nyiragongo_2.jpg",
       "is_hero": false,
-      "ab_stufe": 1,
+      "ab_stufe": 2,
       "grenzfall": false,
       "tiers": {
-        "300": "bilder/vulkan/Dauner_Maar_300.jpg",
-        "800": "bilder/vulkan/Dauner_Maar_800.jpg",
-        "1600": "bilder/vulkan/Dauner_Maar_1600.jpg"
+        "300": "bilder/vulkan/Lava_Lake_Nyiragongo_2_300.jpg",
+        "800": "bilder/vulkan/Lava_Lake_Nyiragongo_2_800.jpg",
+        "1600": "bilder/vulkan/Lava_Lake_Nyiragongo_2_1600.jpg"
       }
     },
     {
       "index": 2,
-      "filename": "Columnar_basalt_Sudurarhraun.jpg",
-      "alt": "Regelmäßige, eckige Felssäulen an einer Wand.",
-      "caption": "Diese eckigen Basaltsäulen entstehen, wenn heiße Lava langsam abkühlt.",
-      "license": "CC BY 2.5",
-      "license_author": "Laurent Deschodt",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Columnar_basalt_Sudurarhraun.jpg",
-      "wikimedia_id": "File:Columnar_basalt_Sudurarhraun.jpg",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/2/24/Columnar_basalt_Sudurarhraun.jpg",
+      "filename": "Teide_Volcano_Tenerife_20060429.jpg",
+      "alt": "Ein steiler, kegelförmiger Vulkan mit schneebedeckter Spitze",
+      "caption": "Viele Vulkane haben die Form eines spitzen Kegels.",
+      "license": "CC BY 2.0",
+      "license_author": "ph_micchei",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Teide_Volcano_Tenerife_20060429.jpg",
+      "wikimedia_id": "File:Teide_Volcano_Tenerife_20060429.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/5/59/Teide_Volcano_Tenerife_20060429.jpg",
       "is_hero": false,
       "ab_stufe": 1,
       "grenzfall": false,
       "tiers": {
-        "300": "bilder/vulkan/Columnar_basalt_Sudurarhraun_300.jpg",
-        "800": "bilder/vulkan/Columnar_basalt_Sudurarhraun_800.jpg",
-        "1600": "bilder/vulkan/Columnar_basalt_Sudurarhraun_1600.jpg"
+        "300": "bilder/vulkan/Teide_Volcano_Tenerife_20060429_300.jpg",
+        "800": "bilder/vulkan/Teide_Volcano_Tenerife_20060429_800.jpg",
+        "1600": "bilder/vulkan/Teide_Volcano_Tenerife_20060429_1600.jpg"
       }
     },
     {
       "index": 3,
       "filename": "Beehive_geyser.jpg",
-      "alt": "Ein Geysir stößt eine hohe weiße Wasserdampfsäule in den Himmel.",
-      "caption": "Ein Geysir schleudert kochend heißes Wasser wie eine Fontäne nach oben.",
+      "alt": "Ein Geysir schleudert eine riesige Säule aus Wasser und Dampf in die Luft",
+      "caption": "Ein Geysir schießt heißes Wasser hoch in den Himmel.",
       "license": "Public domain",
       "license_author": "R Robinson",
       "source_url": "https://commons.wikimedia.org/wiki/File:Beehive_geyser.jpg",
@@ -98,42 +98,61 @@
         "800": "bilder/vulkan/Beehive_geyser_800.jpg",
         "1600": "bilder/vulkan/Beehive_geyser_1600.jpg"
       }
+    },
+    {
+      "index": 4,
+      "filename": "Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "alt": "Eine riesige dunkle Aschewolke steigt aus einem Vulkan auf",
+      "caption": "Bei Ausbrüchen entstehen gewaltige Staub- und Aschewolken.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Michael W. Ishak (www.myreefsdiary.com)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "wikimedia_id": "File:Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Mount_Agung%2C_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03_300.jpg",
+        "800": "bilder/vulkan/Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03_800.jpg",
+        "1600": "bilder/vulkan/Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03_1600.jpg"
+      }
     }
   ],
   "sections": [
     {
       "id": "sec1",
-      "heading": "Der schlafende Riese",
+      "heading": "Wenn die Erde Feuer speit",
       "section_role": "intro",
       "sentences": [
         {
           "id": "s001",
-          "text": "Viele Menschen denken bei einem Vulkan sofort an einen steilen Berg, der glühendes Feuer spuckt.",
-          "img_index": -1
+          "text": "Wenn die Erde hustet, spuckt sie Feuer!",
+          "img_index": 0
         },
         {
           "id": "s002",
-          "text": "Doch das ist nur ein kleiner Teil der Wahrheit.",
+          "text": "Ein Vulkan ist ein Berg mit einer ganz besonderen Eigenschaft.",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Ein Vulkan ist eine Stelle auf der Erde, an der geschmolzenes Gestein aus der Tiefe aufsteigt.",
+          "text": "Aus seinem Inneren steigt glühend heißes, geschmolzenes Gestein nach oben und bricht an die Oberfläche.",
           "img_index": -1
         },
         {
           "id": "s004",
-          "text": "Dieses heiße, flüssige Gestein nennen Fachleute Magma.",
+          "text": "Diesen aufregenden Vorgang nennen Forscher Vulkanismus.",
           "img_index": -1
         },
         {
           "id": "s005",
-          "text": "Erst wenn es den Erdboden berührt und herausfließt, heißt es Lava.",
-          "img_index": 0
+          "text": "Dabei fließt nicht nur heißer Brei den Hang hinab.",
+          "img_index": -1
         },
         {
           "id": "s006",
-          "text": "Ein Vulkan kann spitz wie ein Kegel sein, aber auch flach oder unter dem Meer liegen.",
+          "text": "Es fliegen auch riesige Staubwolken und Steine durch die Luft.",
           "img_index": -1
         }
       ],
@@ -142,131 +161,192 @@
     },
     {
       "id": "sec2",
-      "heading": "Wie entsteht ein Ausbruch?",
-      "section_role": "process_how",
+      "heading": "Vom heißen Erdmantel zur kalten Lava",
+      "section_role": "appearance_equipment",
       "sentences": [
         {
           "id": "s007",
-          "text": "Tief unter unseren Füßen ist es so heiß, dass festes Gestein schmilzt.",
+          "text": "Tief unter der Erde ist es extrem heiß.",
           "img_index": -1
         },
         {
           "id": "s008",
-          "text": "Dieses flüssige Magma sammelt sich in riesigen Kammern unter der Erde.",
-          "img_index": -1
+          "text": "Dort schmelzen feste Steine zu einer dicken Suppe.",
+          "img_index": 1
         },
         {
           "id": "s009",
-          "text": "Da Magma leichter ist als das Gestein drumherum, steigt es nach oben.",
+          "text": "Diese flüssige Masse tief im Boden heißt Magma.",
           "img_index": -1
         },
         {
           "id": "s010",
-          "text": "Wenn der Druck in der Kammer zu groß wird, bricht der Vulkan aus.",
+          "text": "Weil sie leichter als das umgebende Gestein ist, steigt sie langsam auf.",
           "img_index": -1
         },
         {
           "id": "s011",
-          "text": "Das funktioniert ähnlich wie bei einer geschüttelten Limonadenflasche, die man plötzlich öffnet.",
+          "text": "Sie sammelt sich in großen Kammern unter dem Vulkan.",
           "img_index": -1
         },
         {
           "id": "s012",
-          "text": "Der Vulkan schleudert dann heiße Lava, Gase und dicke Aschewolken in den Himmel.",
+          "text": "Wächst der Druck in dieser Kammer zu stark an, bricht das Magma nach oben aus.",
           "img_index": -1
         },
         {
           "id": "s013",
-          "text": "Manchmal fließt die rote Lava auch ganz ruhig wie ein glühender Fluss herab.",
+          "text": "Sobald das flüssige Gestein den Erdboden berührt, nennen wir es Lava.",
           "img_index": 0
+        },
+        {
+          "id": "s014",
+          "text": "Sie ist beim Austritt zwischen 800 und 1200 Grad heiß!",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Wenn die Lava abkühlt, wird sie wieder zu festem Gestein.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Je nach Art der Lava sieht ein Vulkan anders aus.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Manche sind flach wie Schilde, andere steil wie Kegel.",
+          "img_index": 2
         }
       ],
       "boxes": [
         {
           "type": "wow",
-          "text": "🌟 Der größte bekannte Vulkan der Erde liegt versteckt im Meer östlich von Japan! Er heißt Tamu-Massiv, ist riesige 650 Kilometer lang und 450 Kilometer breit. Damit ist er fast so groß wie ganz Deutschland!"
+          "text": "Der größte Vulkan unseres Planeten liegt im tiefen Meer! Er heißt Tamu-Massiv und ist so riesig wie ein ganzes Land."
         }
       ],
       "table": null
     },
     {
       "id": "sec3",
-      "heading": "Der berühmte Riese Vesuv",
-      "section_role": "historical_context",
+      "heading": "Wasserfontänen aus der Tiefe",
+      "section_role": "behavior_life",
       "sentences": [
         {
-          "id": "s014",
-          "text": "Vulkane können jahrhundertelang schlafen, bevor sie plötzlich aufwachen.",
-          "img_index": -1
-        },
-        {
-          "id": "s015",
-          "text": "Das passierte im Jahr 79 nach Christus beim Vulkan Vesuv in Italien.",
-          "img_index": -1
-        },
-        {
-          "id": "s016",
-          "text": "Die Menschen in der nahen Stadt Pompeji wurden völlig überrascht.",
-          "img_index": -1
-        },
-        {
-          "id": "s017",
-          "text": "Der Vulkan stieß eine kilometerhohe Wolke aus Asche und Steinbrocken aus.",
-          "img_index": -1
-        },
-        {
           "id": "s018",
-          "text": "Gefährliche Glutlawinen rasten den Berg hinab und verschütteten die ganze Stadt.",
+          "text": "In vulkanischen Gebieten gibt es oft ein weiteres Naturschauspiel.",
           "img_index": -1
         },
         {
           "id": "s019",
-          "text": "Unter der dicken Ascheschicht blieben Häuser und Werkzeuge der Römer über die Jahrhunderte erhalten.",
+          "text": "Heiße Quellen, die Geysire genannt werden, schießen regelmäßig Wasserfontänen in die Luft.",
+          "img_index": 3
+        },
+        {
+          "id": "s020",
+          "text": "Das funktioniert wie ein kochender Wassertopf mit schwerem Deckel.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Die Hitze des Vulkans wärmt das Grundwasser in engen Röhren auf.",
+          "img_index": -1
+        },
+        {
+          "id": "s022",
+          "text": "Weil das obere Wasser schwer nach unten drückt, kann es erst nicht kochen.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Wird es unten zu heiß, steigen Dampfblasen auf.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Sie drücken das obere Wasser hoch.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "Dadurch fällt der Druck ab und das Wasser schießt schlagartig empor!",
           "img_index": -1
         }
       ],
       "boxes": [
         {
-          "type": "warnung",
-          "text": "⚠️ Vulkanausbrüche sind sehr gefährlich. Heiße Glutlawinen, giftige Gase oder plötzliche Schlammströme können das Leben von Menschen bedrohen. Deshalb beobachten Forscher aktive Vulkane heute rund um die Uhr mit empfindlichen Messgeräten."
+          "type": "stimmt_das",
+          "text": "Gibt es Vulkane nur an Land?",
+          "reveal_text": "Nein! Die allermeisten Vulkane auf der Erde liegen tief auf dem Meeresgrund unter Wasser. Wenn sie dort ausbrechen, merkt man das an der Oberfläche oft gar nicht.",
+          "reveal_mode": "auto"
         }
       ],
       "table": null
     },
     {
       "id": "sec4",
-      "heading": "Spuren in der Natur",
+      "heading": "Das Geheimnis unter der Asche",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s026",
+          "text": "Vulkane können jahrhundertelang schlafen, bevor sie plötzlich ausbrechen.",
+          "img_index": -1
+        },
+        {
+          "id": "s027",
+          "text": "Ein berühmter Schichtvulkan ist der Vesuv in Italien.",
+          "img_index": -1
+        },
+        {
+          "id": "s028",
+          "text": "Vor fast zweitausend Jahren wachte er mit einem gewaltigen Knall auf.",
+          "img_index": -1
+        },
+        {
+          "id": "s029",
+          "text": "Er schleuderte eine riesige Wolke aus Asche und heißen Gasen kilometerhoch empor.",
+          "img_index": 4
+        },
+        {
+          "id": "s030",
+          "text": "Die römische Stadt Pompeji wurde völlig unter einer dicken Schicht Staub begraben.",
+          "img_index": -1
+        },
+        {
+          "id": "s031",
+          "text": "Der herabfallende Staub hüllte die Häuser ein und bewahrte sie wie in einer Zeitkapsel.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Vulkane genau belauschen",
       "section_role": "today_legacy",
       "sentences": [
         {
-          "id": "s020",
-          "text": "Auch in Deutschland gibt es Spuren von erloschenen Vulkanen, zum Beispiel in der Eifel.",
+          "id": "s032",
+          "text": "Forscher versuchen heute, Vulkanausbrüche vorherzusagen.",
           "img_index": -1
         },
         {
-          "id": "s021",
-          "text": "Dort füllten sich alte Krater mit Wasser und wurden zu runden Seen, den Maaren.",
-          "img_index": 1
-        },
-        {
-          "id": "s022",
-          "text": "Wenn heiße Lava abkühlt, zieht sie sich zusammen und zerspringt.",
+          "id": "s033",
+          "text": "Dafür nutzen sie empfindliche Messgeräte am Berg.",
           "img_index": -1
         },
         {
-          "id": "s023",
-          "text": "Dadurch entstehen oft wunderschöne, meist sechseckige Säulen aus schwarzem Basaltgestein.",
-          "img_index": 2
-        },
-        {
-          "id": "s024",
-          "text": "In manchen aktiven Vulkangebieten gibt es zudem heiße Quellen, die man Geysire nennt.",
+          "id": "s034",
+          "text": "Sie lauschen auf winzige Erdbeben oder prüfen, ob sich der Vulkan aufbläht.",
           "img_index": -1
         },
         {
-          "id": "s025",
-          "text": "Sie schleudern in regelmäßigen Abständen kochendes Wasser als riesige Fontäne in die Luft.",
-          "img_index": 3
+          "id": "s035",
+          "text": "Auch Tiere helfen: Sie spüren Gefahren oft früher und fliehen.",
+          "img_index": -1
         }
       ],
       "boxes": [],
@@ -277,57 +357,57 @@
     "questions": [
       {
         "id": "q1",
-        "text": "Was ist der Unterschied zwischen Magma und Lava?",
+        "text": "Wie nennen Forscher das geschmolzene Gestein, wenn es noch tief unter der Erde liegt?",
         "options": [
           {
             "key": "A",
-            "text": "Magma ist festes Gestein, während Lava immer gasförmig ist."
+            "text": "Lava"
           },
           {
             "key": "B",
-            "text": "Magma befindet sich unter der Erde, Lava fließt an der Oberfläche."
+            "text": "Magma"
           },
           {
             "key": "C",
-            "text": "Magma ist kalt und grau, Lava glüht rot und ist heiß."
+            "text": "Basalt"
           }
         ],
         "correct_key": "B"
       },
       {
         "id": "q2",
-        "text": "Welcher Vulkan verschüttete im Jahr 79 nach Christus die römische Stadt Pompeji?",
+        "text": "Von welchem römischen Gott leitet sich der Name 'Vulkan' ab?",
         "options": [
           {
             "key": "A",
-            "text": "Der Ätna"
+            "text": "Vom Gott des Feuers, Vulcanus"
           },
           {
             "key": "B",
-            "text": "Der Mount St. Helens"
+            "text": "Vom Gott des Meeres, Neptun"
           },
           {
             "key": "C",
-            "text": "Der Vesuv"
+            "text": "Vom Gott des Windes, Äolus"
           }
         ],
-        "correct_key": "C"
+        "correct_key": "A"
       },
       {
         "id": "q3",
-        "text": "Wie nennt man die mit Wasser gefüllten alten Kraterseen in der Eifel?",
+        "text": "Warum bricht ein Geysir plötzlich aus?",
         "options": [
           {
             "key": "A",
-            "text": "Geysire"
+            "text": "Weil starker Wind das Wasser in Höhlen hineinpresst"
           },
           {
             "key": "B",
-            "text": "Maare"
+            "text": "Weil heißer Wasserdampf tief unter der Erde das Wasser nach oben drückt"
           },
           {
             "key": "C",
-            "text": "Lavadome"
+            "text": "Weil herabstürzendes Eis das Wasser verdrängt"
           }
         ],
         "correct_key": "B"
@@ -336,63 +416,159 @@
   },
   "related_terms": {
     "core": [
-      "Lava",
-      "Magma",
+      "Erdmantel",
       "Erdbeben",
-      "Geologie"
+      "Pompeji",
+      "Vesuv",
+      "Ausbruch"
     ],
     "discover": [
-      "Plattentektonik",
-      "Eifel",
-      "Gestein",
-      "Asche"
+      "Tamu-Massiv",
+      "Schichtvulkan",
+      "Sinter",
+      "Seismometer"
     ]
   },
   "source_passages": [
     {
-      "claim": "Ein Vulkan ist eine Stelle auf der Erde, an der geschmolzenes Gestein aus der Tiefe aufsteigt.",
+      "claim": "Ein Vulkan ist ein Berg, aus dessen Innerem geschmolzenes Gestein nach oben steigt und an die Oberfläche bricht.",
       "source": "Vulkan",
       "passage": "Ein Vulkan ist eine geologische Struktur, die entsteht, wenn Magma (Gesteinsschmelze) bis an die Oberfläche eines Planeten (z. B. der Erde) aufsteigt."
     },
     {
-      "claim": "Dieses heiße, flüssige Gestein nennen Fachleute Magma.",
+      "claim": "Diesen Vorgang nennen Forscher Vulkanismus.",
+      "source": "Vulkan",
+      "passage": "Alle Begleiterscheinungen, die mit dem Aufstieg und Austritt der glutflüssigen Gesteinsschmelze verbunden sind, bezeichnet man als Vulkanismus."
+    },
+    {
+      "claim": "Dabei fließt nicht nur heißer Brei den Hang hinab. Es fliegen auch riesige Staubwolken und Steine durch die Luft.",
+      "source": "Vulkan",
+      "passage": "Bei einem Vulkanausbruch werden nicht nur glutflüssige, sondern auch feste und gasförmige Stoffe freigesetzt."
+    },
+    {
+      "claim": "Tief unter der Erde ist es extrem heiß. Dort schmelzen feste Steine.",
+      "source": "Vulkan",
+      "passage": "Im Fall der Erde schmelzen Gesteine ab 100 km Tiefe bei Temperaturen zwischen 1000 und 1300 °C."
+    },
+    {
+      "claim": "Diese flüssige Masse tief im Boden heißt Magma.",
       "source": "Magma",
       "passage": "Als Magma (sächlich; von altgriechisch μάγμα mágma, deutsch ‚geknetete Masse‘) wird im Untergrund befindliche Gesteinsschmelze bezeichnet."
     },
     {
-      "claim": "Erst wenn es den Erdboden berührt und herausfließt, heißt es Lava.",
-      "source": "Vulkan",
-      "passage": "Magma, das an die Erdoberfläche gelangt, wird als Lava bezeichnet."
+      "claim": "Weil sie leichter als das umgebende Gestein ist, steigt sie langsam auf.",
+      "source": "Magma",
+      "passage": "Auch die geringere Dichte der Magmen trägt zu ihrem Aufstieg bei."
     },
     {
-      "claim": "Dieses flüssige Magma sammelt sich in riesigen Kammern unter der Erde.",
+      "claim": "Sie sammelt sich in großen Kammern unter dem Vulkan.",
       "source": "Vulkan",
       "passage": "Das flüssige Magma sammelt sich in großen Magmaherden in 2 bis 50 km Tiefe."
     },
     {
-      "claim": "Tamu-Massiv, ist riesige 650 Kilometer lang und 450 Kilometer breit.",
+      "claim": "Wächst der Druck in dieser Kammer zu stark an, bricht das Magma nach oben aus.",
       "source": "Vulkan",
-      "passage": "Es handle sich wahrscheinlich um einen Einzelvulkan von 650 Kilometern Länge und 450 Kilometern Breite."
+      "passage": "Wenn der Druck zu groß wird, steigt das Magma über Spalten und Klüfte der Lithosphäre auf."
     },
     {
-      "claim": "Das passierte im Jahr 79 nach Christus beim Vulkan Vesuv in Italien.",
+      "claim": "Sobald das flüssige Gestein den Erdboden berührt, nennen wir es Lava.",
+      "source": "Vulkan",
+      "passage": "Magma, das an die Erdoberfläche gelangt, wird als Lava bezeichnet."
+    },
+    {
+      "claim": "Sie ist beim Austritt zwischen 800 und 1200 Grad heiß!",
+      "source": "Lava",
+      "passage": "Die Temperatur von Lava beträgt beim Austritt zwischen 800 °C (rhyolithische Lava) und 1200 °C (basaltische Lava)."
+    },
+    {
+      "claim": "Wenn die Lava abkühlt, wird sie wieder zu festem Gestein.",
+      "source": "Lava",
+      "passage": "Ersterstarrte Lava bildet vulkanisches Gestein."
+    },
+    {
+      "claim": "Je nach Art der Lava sieht ein Vulkan anders aus. Manche sind flach wie Schilde, andere steil wie Kegel.",
+      "source": "Vulkan",
+      "passage": "Die meisten Vulkane haben annähernd die Form eines Kegels, dessen Hangneigung von der Viskosität der Lava abhängt."
+    },
+    {
+      "claim": "Heiße Quellen, die Geysire genannt werden, schießen regelmäßig Wasserfontänen in die Luft.",
+      "source": "Geysir",
+      "passage": "Ein Geysir [ˈgaɪ̯ziːɐ̯], auch Geiser [ˈɡaɪ̯.zɐ] genannt, ist eine heiße Quelle, die ihr Wasser in regelmäßigen oder unregelmäßigen Abständen als Fontäne ausstößt."
+    },
+    {
+      "claim": "Die Hitze des Vulkans wärmt das Grundwasser in engen Röhren auf.",
+      "source": "Geysir",
+      "passage": "Die Wärme einer Magmakammer erhitzt das Grundwasser auf über 100 °C."
+    },
+    {
+      "claim": "Weil das obere Wasser schwer nach unten drückt, kann es erst nicht kochen.",
+      "source": "Geysir",
+      "passage": "Durch den Druck der darüber stehenden Wassersäule siedet das Wasser zunächst nicht (Siedepunktserhöhung)."
+    },
+    {
+      "claim": "Wird es unten zu heiß, steigen Dampfblasen auf. Sie drücken das obere Wasser hoch.",
+      "source": "Geysir",
+      "passage": "steigen einzelne Dampfblasen durch die Engstelle im Kanal aufwärts und pressen einen Teil der Wassersäule nach oben."
+    },
+    {
+      "claim": "Dadurch fällt der Druck ab und das Wasser schießt schlagartig empor!",
+      "source": "Geysir",
+      "passage": "Dadurch sinkt unten der Druck rapide ab und das überhitzte Wasser geht schlagartig in Dampf über."
+    },
+    {
+      "claim": "Vulkane können jahrhundertelang schlafen, bevor sie plötzlich ausbrechen.",
+      "source": "Vesuv",
+      "passage": "Der anschließende Ruhezustand kann mehrere hundert Jahre andauern und endet mit einem erneuten großen Ausbruch."
+    },
+    {
+      "claim": "Ein berühmter Schichtvulkan ist der Vesuv in Italien.",
+      "source": "Vesuv",
+      "passage": "Der Vesuv (italienisch Vesuvio, lateinisch Vesuvius) ist ein aktiver Vulkan. Er liegt am Golf von Neapel in der italienischen Region Kampanien..."
+    },
+    {
+      "claim": "Vor fast zweitausend Jahren wachte er mit einem gewaltigen Knall auf.",
       "source": "Vesuv",
       "passage": "Der letzte plinianische Ausbruch des Vesuv, bei dem die Orte Pompeji, Herculaneum, Oplontis und das rund zwölf Kilometer entfernte Stabiae unter Staub- und Aschemassen vollständig begraben wurden, ereignete sich laut Plinius im Jahr 79 n. Chr."
     },
     {
-      "claim": "Dort füllten sich alte Krater mit Wasser und wurden zu runden Seen, den Maaren.",
+      "claim": "Er schleuderte eine riesige Wolke aus Asche und heißen Gasen kilometerhoch empor.",
+      "source": "Vesuv",
+      "passage": "Während der folgenden Stunden stieg eine Eruptionssäule aus heißem Wasserdampf, Kohlendioxid und vulkanischem Auswurf auf."
+    },
+    {
+      "claim": "Die römische Stadt Pompeji wurde völlig unter einer dicken Schicht Staub begraben.",
+      "source": "Vesuv",
+      "passage": "bei dem die Orte Pompeji, Herculaneum, Oplontis und das rund zwölf Kilometer entfernte Stabiae unter Staub- und Aschemassen vollständig begraben wurden..."
+    },
+    {
+      "claim": "Der herabfallende Staub hüllte die Häuser ein und bewahrte sie wie in einer Zeitkapsel.",
+      "source": "Vesuv",
+      "passage": "von dicken Asche- und Lavaschichten verschüttet und damit konserviert wurde, ist es in einem – für bronzezeitliche Siedlungen dieser Gegend – einmaligen Erhaltungszustand."
+    },
+    {
+      "claim": "Forscher versuchen heute, Vulkanausbrüche vorherzusagen.",
       "source": "Vulkan",
-      "passage": "Unterteilung nach der äußeren Form: Schichtvulkane... Maar"
+      "passage": "Daher ist es das vorrangige Forschungsziel, Vulkanausbrüche möglichst präzise vorhersagen zu können."
     },
     {
-      "claim": "Dadurch entstehen oft wunderschöne, meist sechseckige Säulen aus schwarzem Basaltgestein.",
-      "source": "Lava",
-      "passage": "Die meisten dieser Basaltsäulen sind sechseckig, es finden sich aber auch fünfeckige..."
+      "claim": "Dafür nutzen sie empfindliche Messgeräte am Berg. Sie lauschen auf winzige Erdbeben oder prüfen, ob sich der Vulkan aufbläht.",
+      "source": "Vulkan",
+      "passage": "die Aufzeichnung seismischer Aktivität, die geodätische Überwachung der Topographie... Deformationen der Erdoberfläche in Form von Aufbeulungen"
     },
     {
-      "claim": "In manchen aktiven Vulkangebieten gibt es zudem heiße Quellen, die man Geysire nennt.",
-      "source": "Geysir",
-      "passage": "Ein Geysir, auch Geiser genannt, ist eine heiße Quelle, die ihr Wasser in regelmäßigen oder unregelmäßigen Abständen als Fontäne ausstößt."
+      "claim": "Auch Tiere helfen: Sie spüren Gefahren oft früher und fliehen.",
+      "source": "Vulkan",
+      "passage": "Oft reagieren Tiere sensibler und verlassen ein gefährdetes Gebiet weit vor einem Vulkanausbruch."
+    },
+    {
+      "claim": "Der größte Vulkan unseres Planeten liegt im tiefen Meer! Er heißt Tamu-Massiv und ist so riesig wie ein ganzes Land.",
+      "source": "Vulkan",
+      "passage": "halten. ... das unterseeische Tamu-Massiv östlich von Japan für den größten Vulkan der Erde halten. ... Einzelvulkan von 650 Kilometern Länge und 450 Kilometern Breite."
+    },
+    {
+      "claim": "Die allermeisten Vulkane auf der Erde liegen tief auf dem Meeresgrund unter Wasser.",
+      "source": "Vulkan",
+      "passage": "allerdings kennt man noch nicht die Anzahl der submarinen Vulkane, von denen es vermutlich vielfach mehr gibt."
     }
   ]
 }

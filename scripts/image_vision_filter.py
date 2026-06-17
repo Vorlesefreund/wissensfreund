@@ -104,9 +104,14 @@ SCHRITT 2 — ALTERSFREIGABE (unter Berücksichtigung des grenzfall-Ergebnisses)
 
   ab_stufe=1  → für ALLE geeignet (auch 4–6 J.): freundliche Tierfotos, Landschaften,
                 Alltagsobjekte, lebendige Tiere, fröhliche Szenen.
+                Ebenfalls ab_stufe=1: Museumspräparate und Fossilien prähistorischer Tiere
+                (Dinosaurierskelette, Ammoniten, Mammuts u. Ä.) — das sind Lern-/
+                Ausstellungsobjekte in einem Museum- oder Wissenschaftskontext, keine
+                verstörenden Inhalte.
                 ACHTUNG: grenzfall=true Bilder dürfen NIEMALS ab_stufe=1 bekommen.
-  ab_stufe=2  → ab 7 J.: Skelette oder Fossilien mit Lehrcharakter, leichte historische
-                Darstellungen, mäßig komplexe Diagramme mit klarem Bezug zum Thema
+  ab_stufe=2  → ab 7 J.: Tierskelette oder Knochen OHNE Museumskontext (z.B. Tierknochen in
+                der Natur, Verwesungsszenen), leichte historische Darstellungen,
+                mäßig komplexe Diagramme mit klarem Bezug zum Thema
   ab_stufe=3  → ab 10 J.: detaillierte Anatomie (Organe, Muskeln), komplexe
                 wissenschaftliche Darstellungen, historisch ernste Motive
   ab_stufe=0  → GESPERRT (keine Stufe geeignet): Blut, offene Verletzungen, tote Tiere,
@@ -530,8 +535,10 @@ OPUS_RECHECK_SYSTEM = (
 
 OPUS_RECHECK_PROMPT = """Prüfe dieses Bild für Wissensfreund (Thema: "{thema}") nach der Altersfreigabe-Skala:
 
-  ab_stufe=1  → eindeutig für ALLE (auch 4–6 J.): freundliche Tierfotos, Landschaften, Objekte
-  ab_stufe=2  → ab 7 J.: Skelette/Fossilien lehrreich, leichte historische Darstellungen
+  ab_stufe=1  → eindeutig für ALLE (auch 4–6 J.): freundliche Tierfotos, Landschaften, Objekte;
+                auch Museumspräparate/Fossilien prähistorischer Tiere (Dino-Skelette, Ammoniten,
+                Mammuts) → Lern-/Ausstellungsobjekte → ab_stufe=1 (sofern kein grenzfall=true)
+  ab_stufe=2  → ab 7 J.: Knochen/Skelette OHNE Museumskontext, leichte historische Darstellungen
   ab_stufe=3  → ab 10 J.: Organe, detaillierte Anatomie, wissenschaftlich/historisch ernst
   ab_stufe=0  → GESPERRT: Blut, Gewalt, Nacktheit, Kriegsfotos, verstörende Inhalte
 

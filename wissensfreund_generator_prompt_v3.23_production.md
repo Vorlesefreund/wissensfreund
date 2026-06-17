@@ -46,6 +46,12 @@
      (genannte Hauptbedeutung zuerst/ausführlich, Sonderfall knapp darunter). -->
 <!-- v3.23b (2026-06-12): FRAMING-Direktive — Modell befolgt injizierte FRAMING-Zeile (altersgerechte/
      sachliche/neutrale Behandlung sensibler Themen; Vorrang vor stilistischer Freiheit). -->
+<!-- v3.23c (2026-06-17): Bild-Zuweisungsregeln + Qualitätsregeln:
+     (1) img_index-Semantik: Bilder über alle Sections verteilen, semantisch zuordnen (Bild zeigt
+         was der Satz beschreibt), alle verfügbaren Bilder nutzen (max. 2× dasselbe).
+     (2) Einleitungsverbot „Viele …": kein Artikel beginnt mit „Viele Menschen/Kinder/denken …"
+     (3) Box-Doppelung explizit verboten: kein Satz aus dem Fließtext darf in einer Box erscheinen.
+     (4) Wunschdenken-Schlüsse bei schweren Themen verboten: Faktenbasiert bleiben. -->
 
 
 > Produktionsfassung (JSON-Output). Der WIKIPEDIA_TEXT und ARTICLE_TITLE werden vom Backend injiziert.
@@ -419,6 +425,9 @@ kein lebendiges Detail, fesselnde Story (z. B. interessante Hintergründe) wegge
 37. **Link-Drift: Der Artikel verliert das Thema aus dem Fokus (zu viel aus einem gefolgten Link).**
 38. **Quellenliste fehlt oder ist unvollständig (gefolgte Links nicht deklariert).**
 39. **Haken trifft ein Kuriosum statt das Wesen (z. B. „auf einer Zehe" als Einstieg statt: was ein Pferd IST).**
+40. **Einleitung mit „Viele …" — VERBOTEN als erster Satz: „Viele Menschen …", „Viele Kinder …", „Viele denken …" oder jede Variation mit „Viele" als erstem Wort. Alternativen: überraschende Zahl, direkte Frage, eine kurze Szene, ein verblüffendes Faktum, ein Vergleich.**
+41. **Box-Doppelung: Eine Box darf KEINEN Satz enthalten, der im Fließtext bereits vorkommt (wörtlich oder sinngleich). Box-Inhalt muss neu sein — ein Zusatzfakt, eine Vertiefung, eine Überraschung. Kein Echo des Artikeltexts.**
+42. **Wunschdenken-Schluss (bei schweren/historischen Themen): Keine Sätze wie „Heute leben alle Länder in Frieden" oder „Die Welt hat daraus gelernt". Faktenbasiert bleiben: was tatsächlich beschlossen wurde, welche Institutionen entstanden — nicht was man sich erhofft.**
 
 ---
 
@@ -538,7 +547,7 @@ Kein Markdown, keine Kommentare, keine Erklärungen außerhalb des `<planung>`-B
 - `meta.id` Format: `<thema_slug>_l<level>` — z. B. `biene_l1`, `motor_l3`
 - `meta.generated_at` weglassen — wird vom Backend gesetzt
 - `sentences[].id` global fortlaufend über ALLE Abschnitte: `s001`, `s002`, `s003` …
-- `sentences[].img_index` Index aus `images[]` (0–5) oder `-1` wenn kein passendes Bild vorhanden
+- `sentences[].img_index` — Index aus `images[]` (0 bis `len(images)-1`) oder `-1` wenn kein passendes Bild vorhanden. **Verteile Bilder über alle Sections: jede Section soll mindestens ein Bild erhalten (sofern genug vorhanden). Nutze alle verfügbaren Bilder — ein Bild kann maximal 2× verwendet werden.** Wähle den Index **semantisch**: Das Bild soll zeigen, was der Satz beschreibt (Satz über Rüssel → Bild mit Rüssel; Satz über Feinde → Bild eines Feindes). Bei mehreren passenden Bildern das mit der höchsten Relevanz bevorzugen.
 - `boxes[]` darf leer sein `[]`; `stimmt_das` benötigt `reveal_text` + `"reveal_mode": "auto"`
 - `quiz.questions` genau 3 Fragen (Stufe 1+2), 4–5 (Stufe 3); je genau 3 Optionen A/B/C
 - `related_terms` immer vorhanden, darf leere Arrays enthalten

@@ -2,18 +2,18 @@
   "meta": {
     "id": "elefant_l3",
     "title": "Elefant",
-    "subtitle": "Wie Elefanten mit biologischen Tricks ihr Überleben sichern",
+    "subtitle": "Die feinfühligen Riesen unserer Erde",
     "emoji": "🐘",
     "age_level": 3,
     "pattern": "living_being",
-    "theme_color": "#708090",
-    "word_count": 580,
+    "theme_color": "#7F8C8D",
+    "word_count": 592,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Elefanten",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "tiere",
     "category_sub": "saeugetiere",
-    "generated_at": "2026-06-17T09:02:37.857680+00:00",
+    "generated_at": "2026-06-17T11:51:53.609253+00:00",
     "grounding_companions": [
       "Rüssel",
       "Stoßzahn",
@@ -27,8 +27,8 @@
     {
       "index": 0,
       "filename": "A_family_group_of_elephants_in_Mudumalai_TR_AJTJohnsingh.jpg",
-      "alt": "Drei Elefanten im Wald, darunter ein trinkendes Jungtier.",
-      "caption": "In den dichten Wäldern Asiens leben Elefanten in eng befreundeten Familiengruppen zusammen.",
+      "alt": "Drei Elefanten in einem grünen Wald, darunter ein Elefantenbaby, das bei seiner Mutter trinkt.",
+      "caption": "Ein kleiner asiatischer Elefant trinkt Milch bei seiner Mutter in einem Schutzgebiet in Indien.",
       "license": "CC BY-SA 4.0",
       "license_author": "A. J. T. Johnsingh, WWF-India and NCF",
       "source_url": "https://commons.wikimedia.org/wiki/File:A_family_group_of_elephants_in_Mudumalai_TR_AJTJohnsingh.jpg",
@@ -46,11 +46,11 @@
     {
       "index": 1,
       "filename": "Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33).jpg",
-      "alt": "Zwei junge Elefanten spielen mit ihren Rüsseln auf einer Wiese.",
-      "caption": "Das Spiel mit dem Rüssel stärkt den Zusammenhalt und schult die Geschicklichkeit der Jungtiere.",
+      "alt": "Zwei junge Elefanten spielen mit ihren Rüsseln auf einer grünen Wiese.",
+      "caption": "Junge Elefanten im Kaudulla-Nationalpark testen ihre Kräfte beim spielerischen Kampf.",
       "license": "CC BY-SA 4.0",
       "license_author": "Z thomas",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Elefantenfamilie_kaudulla_nationalpark_2017-10-17_%2833%29.jpg",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33).jpg",
       "wikimedia_id": "File:Elefantenfamilie_kaudulla_nationalpark_2017-10-17_(33).jpg",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/79/Elefantenfamilie_kaudulla_nationalpark_2017-10-17_%2833%29.jpg",
       "is_hero": false,
@@ -66,7 +66,7 @@
       "index": 2,
       "filename": "Elephant_dust_bath_park_w_niger.jpg",
       "alt": "Ein Elefant wirft mit seinem Rüssel Staub über seinen Rücken.",
-      "caption": "Ein Staubbad schützt die dicke, aber empfindliche Haut vor starker Sonne und lästigen Insekten.",
+      "caption": "Ein Staubbad schützt die dicke, aber empfindliche Haut vor der heißen Sonne und lästigen Insekten.",
       "license": "CC BY-SA 2.0",
       "license_author": "Roland Hunziker",
       "source_url": "https://commons.wikimedia.org/wiki/File:Elephant_dust_bath_park_w_niger.jpg",
@@ -83,9 +83,28 @@
     },
     {
       "index": 3,
+      "filename": "Mammut_Naturhist._Museum_Basel.JPG",
+      "alt": "Ein großes, braun behaartes Mammut-Modell mit langen, gebogenen Stoßzähnen in einem Museum.",
+      "caption": "Das Wollhaarmammut war ein eiszeitlicher Verwandter der heutigen Elefanten und besaß ein dichtes Fell.",
+      "license": "CC BY 2.5",
+      "license_author": "Adrian Michael",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Mammut_Naturhist._Museum_Basel.JPG",
+      "wikimedia_id": "File:Mammut_Naturhist._Museum_Basel.JPG",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/6/6e/Mammut_Naturhist._Museum_Basel.JPG",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/elefant/Mammut_Naturhist._Museum_Basel_300.jpg",
+        "800": "bilder/elefant/Mammut_Naturhist._Museum_Basel_800.jpg",
+        "1600": "bilder/elefant/Mammut_Naturhist._Museum_Basel_1600.jpg"
+      }
+    },
+    {
+      "index": 4,
       "filename": "African_Bush_Elephants.jpg",
-      "alt": "Ein ausgewachsener Elefant und ein Jungtier in einer offenen Graslandschaft.",
-      "caption": "Afrikanische Elefanten bewohnen die weitläufigen, offenen Savannen südlich der Sahara.",
+      "alt": "Ein ausgewachsener afrikanischer Elefant und ein Kalb im hohen Gras.",
+      "caption": "Ein afrikanischer Savannenelefant zieht mit seinem Kalb durch das hohe Gras.",
       "license": "Public domain",
       "license_author": "Gorgo",
       "source_url": "https://commons.wikimedia.org/wiki/File:African_Bush_Elephants.jpg",
@@ -101,31 +120,31 @@
       }
     },
     {
-      "index": 4,
-      "filename": "Elefants_comparative_anatomy.png",
-      "alt": "Zeichnung zum Vergleich der Köpfe von asiatischem und afrikanischem Elefant.",
-      "caption": "Im Profil gut zu erkennen: Asiatische Elefanten (links) haben deutlich kleinere Ohren als ihre afrikanischen Verwandten (rechts).",
-      "license": "Public domain",
-      "license_author": "Meyers Konversations-Lexikon",
-      "source_url": "https://commons.wikimedia.org/wiki/File:Elefants_comparative_anatomy.png",
-      "wikimedia_id": "File:Elefants_comparative_anatomy.png",
-      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/d/d7/Elefants_comparative_anatomy.png",
+      "index": 5,
+      "filename": "African_Elephants_(Loxodonta_africana)_drinking_(8291607694).jpg",
+      "alt": "Eine Gruppe nasser, schlammiger Elefanten an einem Wasserloch.",
+      "caption": "Wasserstellen sind Treffpunkte für ganze Herden – hier wird getrunken und im Schlamm gebadet.",
+      "license": "CC BY-SA 2.0",
+      "license_author": "Bernard DUPONT",
+      "source_url": "https://commons.wikimedia.org/wiki/File:African_Elephants_(Loxodonta_africana)_drinking_(8291607694).jpg",
+      "wikimedia_id": "File:African_Elephants_(Loxodonta_africana)_drinking_(8291607694).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/7b/African_Elephants_%28Loxodonta_africana%29_drinking_%288291607694%29.jpg",
       "is_hero": false,
-      "ab_stufe": 2,
+      "ab_stufe": 1,
       "grenzfall": false,
       "tiers": {
-        "300": "bilder/elefant/Elefants_comparative_anatomy_300.jpg",
-        "800": "bilder/elefant/Elefants_comparative_anatomy_800.jpg",
-        "1600": "bilder/elefant/Elefants_comparative_anatomy_1600.jpg"
+        "300": "bilder/elefant/African_Elephants_(Loxodonta_africana)_drinking_(8291607694)_300.jpg",
+        "800": "bilder/elefant/African_Elephants_(Loxodonta_africana)_drinking_(8291607694)_800.jpg",
+        "1600": "bilder/elefant/African_Elephants_(Loxodonta_africana)_drinking_(8291607694)_1600.jpg"
       }
     },
     {
-      "index": 5,
+      "index": 6,
       "filename": "Elephant_snorkeling.jpg",
-      "alt": "Ein schwimmender Elefant, der seinen Rüssel als Schnorchel aus dem Wasser streckt.",
-      "caption": "Elefanten sind hervorragende Schwimmer und nutzen ihren langen Rüssel im tiefen Wasser geschickt als Schnorchel.",
+      "alt": "Ein Elefant schwimmt in einem Fluss, wobei nur der Kopf und der Rüssel aus dem Wasser ragen.",
+      "caption": "Elefanten können exzellent schwimmen und nutzen ihren Rüssel im tiefen Wasser als Schnorchel.",
       "license": "CC BY-SA 3.0",
-      "license_author": "Profberger Lee R. Berger",
+      "license_author": "Lee R. Berger",
       "source_url": "https://commons.wikimedia.org/wiki/File:Elephant_snorkeling.jpg",
       "wikimedia_id": "File:Elephant_snorkeling.jpg",
       "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/d/d1/Elephant_snorkeling.jpg",
@@ -142,32 +161,37 @@
   "sections": [
     {
       "id": "sec1",
-      "heading": "Die Riesen unserer Erde",
+      "heading": "Giganten auf leisen Sohlen",
       "section_role": "intro",
       "sentences": [
         {
           "id": "s001",
-          "text": "Wer an Elefanten denkt, sieht meist friedliche Riesen mit großen Ohren und langen Rüsseln vor sich.",
-          "img_index": 3
+          "text": "Sie wiegen so viel wie ein kleines Flugzeug und schleichen dennoch fast geräuschlos durch das Gebüsch.",
+          "img_index": -1
         },
         {
           "id": "s002",
-          "text": "Doch hinter der grauen Haut verbirgt sich ein erstaunliches Meisterwerk der Evolution.",
+          "text": "Elefanten sind die größten heute lebenden Landtiere der Erde.",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Die Elefanten bilden eine Familie aus der Ordnung der Rüsseltiere und stellen die größten gegenwärtig lebenden Landtiere der Erde dar.",
+          "text": "In der Naturwissenschaft bilden sie die einzige übrig gebliebene Familie aus der alten Ordnung der Rüsseltiere.",
           "img_index": -1
         },
         {
           "id": "s004",
-          "text": "Heute gibt es noch drei Arten: den Afrikanischen Elefanten, den Waldelefanten und den Asiatischen Elefanten.",
-          "img_index": 4
+          "text": "Biologen unterscheiden heute drei Arten: den Afrikanischen Elefanten der offenen Savannen, den kleineren Waldelefanten in den dichten Regenwäldern Afrikas und den Asiatischen Elefanten.",
+          "img_index": 0
         },
         {
           "id": "s005",
-          "text": "Sie alle sind eng mit den eiszeitlichen Mammuts verwandt, die vor Jahrtausenden ausstarben.",
+          "text": "Obwohl sie riesig sind, laufen sie sanft vorwärts.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Ihre Füße dämpfen jeden Schritt ab.",
           "img_index": -1
         }
       ],
@@ -176,45 +200,45 @@
     },
     {
       "id": "sec2",
-      "heading": "Ein Körper voller Spezialwerkzeuge",
+      "heading": "Nase und Hand in einem",
       "section_role": "appearance_equipment",
       "sentences": [
         {
-          "id": "s006",
-          "text": "Ihre säulenförmigen Beine tragen das enorme Körpergewicht sicher wie die starken Pfeiler eines Hauses.",
-          "img_index": -1
-        },
-        {
           "id": "s007",
-          "text": "Unter den Fußknochen liegt ein elastisches Polster, das fast wie ein moderner Sportschuh dämpft.",
+          "text": "Das auffälligste Merkmal der Riesen ist ihr langer, biegsamer Rüssel.",
           "img_index": -1
         },
         {
           "id": "s008",
-          "text": "Das wichtigste Werkzeug ist jedoch der Rüssel, der aus der Nase und der Oberlippe zusammengewachsen ist.",
-          "img_index": 1
-        },
-        {
-          "id": "s009",
-          "text": "Dank rund 150.000 Muskelbündeln kann er kräftig zupacken, aber auch winzige Dinge feinfühlig greifen.",
+          "text": "Dieses erstaunliche Organ entstand im Laufe der Evolution, indem die Nase mit der Oberlippe verschmolz.",
           "img_index": -1
         },
         {
+          "id": "s009",
+          "text": "Im Rüssel steckt kein einziger Knochen, dafür aber bis zu 150.000 einzelne Muskelbündel, die ihn extrem beweglich machen.",
+          "img_index": 2
+        },
+        {
           "id": "s010",
-          "text": "Am Rüsselende haben afrikanische Elefanten zwei bewegliche Greiffinger, asiatische dagegen nur einen.",
+          "text": "Er dient als feine Greifhand, mit der ein Elefant sogar einzelne Grashalme zupfen kann, aber auch als Saugpumpe zum Trinken.",
           "img_index": -1
         },
         {
           "id": "s011",
-          "text": "Ihre Stoßzähne sind extrem verlängerte Schneidezähne aus Elfenbein, die beim Rindeschälen, Graben und zur Verteidigung helfen.",
+          "text": "Wenn du mit einem Rohr schnorchelst, machst du es ihnen nach: Elefanten können tiefe Flüsse durchqueren, während sie komplett untergetaucht sind und nur die Rüsselspitze aus dem Wasser ragt.",
+          "img_index": 6
+        },
+        {
+          "id": "s012",
+          "text": "Ein weiteres Kennzeichen sind die Stoßzähne, die ein Leben lang unaufhörlich weiterwachsen.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
           "type": "stimmt_das",
-          "text": "Können Elefanten im Galopp rennen?",
-          "reveal_text": "Nein. Wegen ihres Gewichts rennen sie nicht im klassischen Sinn. Sie bewegen sich im Passgang fort, bei dem fast immer mindestens ein Fuß den Boden berührt. So halten sie stets das Gleichgewicht.",
+          "text": "Sind Stoßzähne die Eckzähne der Elefanten?",
+          "reveal_text": "Nein! Biologisch gesehen sind die langen Stoßzähne die beiden mittleren Schneidezähne des Oberkiefers, die extrem stark gewachsen sind. Sie bestehen hauptsächlich aus elastischem Zahnbein, das wir auch als Elfenbein kennen.",
           "reveal_mode": "auto"
         }
       ],
@@ -222,91 +246,86 @@
     },
     {
       "id": "sec3",
-      "heading": "Klimaanlage und Knochenrätsel",
-      "section_role": "body_functions",
+      "heading": "Schlaue Köpfe und leise Töne",
+      "section_role": "behavior_life",
       "sentences": [
         {
-          "id": "s012",
-          "text": "Um nicht zu überhitzen, nutzen Elefanten ihre großen Ohren zum Wedeln wie eine eingebaute Klimaanlage.",
-          "img_index": 2
-        },
-        {
           "id": "s013",
-          "text": "Ihre stark runzelige Haut speichert in den tiefen Furchen kühlendes Wasser besonders lange.",
-          "img_index": -1
+          "text": "Elefanten sind hochintelligente, gesellige Tiere, die in festen Familienverbänden leben.",
+          "img_index": 1
         },
         {
           "id": "s014",
-          "text": "Einzigartig ist auch ihr horizontaler Zahnwechsel, der sich im Kiefer abspielt.",
-          "img_index": -1
+          "text": "Besonders bei den afrikanischen Arten führt eine erfahrene, ältere Leitkuh die Herde an und zeigt den Jüngeren die besten Wasserstellen und Wanderwege.",
+          "img_index": 4
         },
         {
           "id": "s015",
-          "text": "Elefanten nutzen pro Kieferseite immer nur einen großen Backenzahn gleichzeitig zum Zerkauen.",
+          "text": "Bullen hingegen verlassen die Familie als Jugendliche und ziehen als Einzelgänger oder in Junggesellengruppen umher.",
           "img_index": -1
         },
         {
           "id": "s016",
-          "text": "Ist dieser abgenutzt, schiebt sich von hinten ein neuer Zahn wie auf einem Fließband nach.",
+          "text": "Um über weite Strecken in Kontakt zu bleiben, nutzen die Tiere ein tiefes Grollen im Infraschallbereich, das für uns Menschen völlig unhörbar ist.",
           "img_index": -1
         },
         {
           "id": "s017",
-          "text": "Dieser Wechsel erfolgt im Leben nur fünfmal – sind alle Zähne abgenutzt, verhungert das Tier im Alter.",
+          "text": "Die Schallwellen wandern kilometerweit durch die Luft und den Erdboden und werden von anderen Elefanten mit den empfindlichen Fußsohlen wahrgenommen.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Ihr Gehirn ist riesig und sorgt für ein phänomenales Gedächtnis: Sie erkennen die Stimmen von Freunden selbst nach vielen Jahren wieder.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Tests zeigten sogar, dass Elefanten sich im Spiegel selbst erkennen – eine Fähigkeit, die nur wenige schlaue Tierarten besitzen.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
           "type": "wow",
-          "text": "Tauchkünstler ohne Atemnot! Elefanten können tiefes Wasser durchqueren und ihren Rüssel wie einen Schnorchel benutzen. Das klappt, weil ihre Lunge direkt mit der Brusthöhle verbunden ist, was die empfindlichen Blutgefäße vor dem Wasserdruck schützt."
+          "text": "Das Gehirn eines ausgewachsenen Elefanten besitzt rund 257 Milliarden Nervenzellen – das ist etwa die dreifache Menge des menschlichen Gehirns! Fast alle dieser Zellen liegen im Kleinhirn, das für die Steuerung des hochsensiblen Rüssels zuständig ist."
         }
       ],
       "table": null
     },
     {
       "id": "sec4",
-      "heading": "Zusammenhalt und Geheimsprache",
-      "section_role": "social_behavior",
+      "heading": "Die eiszeitlichen Verwandten",
+      "section_role": "historical_context",
       "sentences": [
         {
-          "id": "s018",
-          "text": "Elefanten leben in engen Familienclans aus verwandten Kühen und ihren Kälbern.",
-          "img_index": 0
-        },
-        {
-          "id": "s019",
-          "text": "Bei afrikanischen Elefanten führt eine erfahrene Leitkuh die Gruppe an und entscheidet über die Wanderwege.",
-          "img_index": -1
-        },
-        {
           "id": "s020",
-          "text": "Bei asiatischen Arten ist die Hierarchie flacher, und eine Leitkuh spielt eine kleinere Rolle.",
+          "text": "Die Geschichte der Rüsseltiere begann vor etwa 60 Millionen Jahren in Afrika.",
           "img_index": -1
         },
         {
           "id": "s021",
-          "text": "Diese Clans trennen und vereinen sich ständig, was Forscher als Fission-Fusion-Sozialgefüge bezeichnen.",
+          "text": "Im Laufe der Zeit entwickelten sich viele verschiedene Arten, die sich über die ganze Welt ausbreiteten.",
           "img_index": -1
         },
         {
           "id": "s022",
-          "text": "Ältere Geschwister helfen oft beim Aufpassen auf die Babys – fast wie echte Babysitter.",
+          "text": "Die bekanntesten ausgestorbenen Verwandten der heutigen Elefanten sind die Mammute.",
           "img_index": -1
         },
         {
           "id": "s023",
-          "text": "Junge Bullen verlassen die Herde mit etwa neun Jahren und bilden eigene Junggesellengruppen.",
-          "img_index": -1
+          "text": "Das berühmte Wollhaarmammut war perfekt an die eisige Kälte der Mammutsteppe angepasst.",
+          "img_index": 3
         },
         {
           "id": "s024",
-          "text": "Zur Kommunikation über kilometerweite Distanzen hinweg nutzen die Riesen tiefen Infraschall.",
+          "text": "Es hatte ein dichtes Fell, kleine Ohren gegen Kälte und gewaltige, gebogene Stoßzähne.",
           "img_index": -1
         },
         {
           "id": "s025",
-          "text": "Diese tiefen Töne sind für Menschen unhörbar, vibrieren aber spürbar durch Luft und Boden.",
+          "text": "Erst vor etwa 4000 Jahren starben die letzten Zwergmammute auf einer abgelegenen Insel im Arktischen Ozean aus.",
           "img_index": -1
         }
       ],
@@ -315,73 +334,44 @@
     },
     {
       "id": "sec5",
-      "heading": "Die Ingenieure der Wildnis",
-      "section_role": "predators_ecosystem",
+      "heading": "Ein schwieriges Miteinander",
+      "section_role": "human_animal",
       "sentences": [
         {
           "id": "s026",
-          "text": "Ausgewachsene Elefanten haben kaum natürliche Feinde, nur Löwen oder Tiger bedrohen manchmal Kälber.",
+          "text": "Schon vor Zehntausenden von Jahren spielten Elefanten und Mammute eine wichtige Rolle für uns Menschen, wie uralte Höhlenmalereien beweisen.",
           "img_index": -1
         },
         {
           "id": "s027",
-          "text": "Für die Natur sind Elefanten unverzichtbare Ökosystem-Ingenieure.",
+          "text": "Später halfen gezähmte asiatische Elefanten als Lasttiere beim Tragen schwerer Stämme.",
           "img_index": -1
         },
         {
           "id": "s028",
-          "text": "Sie brechen dichte Gebüsche auf und schaffen so Lichtungen und Lebensräume für andere Arten.",
+          "text": "Heute teilen sich Mensch und Tier immer engere Lebensräume, was zu heftigen Konflikten führt.",
           "img_index": -1
         },
         {
           "id": "s029",
-          "text": "In Trockenzeiten graben sie mit den Füßen Löcher nach Wasser, das dann auch anderen Tieren hilft.",
-          "img_index": -1
+          "text": "Elefanten plündern manchmal die Getreidefelder von Bauern, weil ihre natürlichen Wanderwege durch Siedlungen oder Straßen versperrt sind.",
+          "img_index": 5
         },
         {
           "id": "s030",
-          "text": "Zudem verbreiten sie durch ihren Kot Pflanzensamen über weite Strecken.",
+          "text": "Die größte Bedrohung ist jedoch die illegale Jagd durch Wilderer, die es auf das wertvolle Elfenbein der Stoßzähne abgesehen haben.",
           "img_index": -1
-        }
-      ],
-      "boxes": [],
-      "table": null
-    },
-    {
-      "id": "sec6",
-      "heading": "Die Riesen und der Mensch",
-      "section_role": "human_animal",
-      "sentences": [
+        },
         {
           "id": "s031",
-          "text": "Seit Jahrtausenden faszinieren Elefanten uns Menschen, was schon prähistorische Höhlenmalereien von Mammuts zeigen.",
-          "img_index": -1
-        },
-        {
-          "id": "s032",
-          "text": "Später dienten asiatische Elefanten als wichtige Arbeits- und Kriegstiere.",
-          "img_index": -1
-        },
-        {
-          "id": "s033",
-          "text": "Heute geraten Mensch und Tier oft in Konflikt, weil die wachsende Bevölkerung ihren Lebensraum einengt.",
-          "img_index": -1
-        },
-        {
-          "id": "s034",
-          "text": "Auf Nahrungssuche plündern hungrige Elefanten manchmal die Felder von Bauern.",
-          "img_index": -1
-        },
-        {
-          "id": "s035",
-          "text": "Um die Ernten friedlich zu schützen, nutzen Farmer clevere Pufferzonen aus Chili oder Bienengeräusche.",
+          "text": "Ein weltweites Handelsverbot für Elfenbein und die Errichtung geschützter Naturreservate sollen helfen, die sanften Riesen langfristig zu retten.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
           "type": "warnung",
-          "text": "Gefahr durch Wilderei! Neben dem Verlust der Heimat bedroht vor allem die illegale Jagd die Elefanten. Wilderer töten sie wegen des Elfenbeins ihrer Stoßzähne. Der weltweite Handel damit ist streng verboten, um die Riesen vor dem Aussterben zu schützen."
+          "text": "Die Weltnaturschutzunion stuft den asiatischen und den afrikanischen Savannenelefanten als stark gefährdet ein. Der afrikanische Waldelefant ist sogar vom Aussterben bedroht. Schutzgebiete und spezielle Wanderkorridore sind überlebenswichtig für sie."
         }
       ],
       "table": null
@@ -391,95 +381,95 @@
     "questions": [
       {
         "id": "q1",
-        "text": "Woher kommt der echte Rüssel eines Elefanten anatomisch?",
+        "text": "Aus welchen Körperteilen hat sich der Rüssel der Elefanten im Laufe der Zeit entwickelt?",
         "options": [
           {
             "key": "A",
-            "text": "Aus der Verschmelzung von Nase und Oberlippe."
+            "text": "Aus der Nase und der Oberlippe"
           },
           {
             "key": "B",
-            "text": "Aus einer Verlängerung des Nasenknochens."
+            "text": "Aus dem Unterkiefer und der Zunge"
           },
           {
             "key": "C",
-            "text": "Aus einem umgebauten Muskel des Kinns."
+            "text": "Aus dem Hals und den Schneidezähnen"
           }
         ],
         "correct_key": "A"
       },
       {
         "id": "q2",
-        "text": "Was versteht man unter dem horizontalen Zahnwechsel?",
+        "text": "Welche Zähne bilden biologisch gesehen die Stoßzähne der Elefanten?",
         "options": [
           {
             "key": "A",
-            "text": "Die Milchzähne fallen alle auf einmal zur Seite aus."
+            "text": "Die Eckzähne"
           },
           {
             "key": "B",
-            "text": "Die Backenzähne schieben sich wie auf einem Fließband von hinten nach vorne nach."
+            "text": "Die mittleren Schneidezähne im Oberkiefer"
           },
           {
             "key": "C",
-            "text": "Die Zähne wachsen von links nach rechts durch den Kiefer."
+            "text": "Die hinteren Mahlzähne"
           }
         ],
         "correct_key": "B"
       },
       {
         "id": "q3",
-        "text": "Warum können Elefanten tiefes Wasser durchqueren und durch den Rüssel schnorcheln?",
+        "text": "Wie können Elefanten tiefe Töne wahrnehmen, die für Menschen unhörbar sind?",
         "options": [
           {
             "key": "A",
-            "text": "Weil sie unter Wasser die Luft anhalten und durch die Haut atmen."
+            "text": "Mit ihren empfindlichen Fußsohlen über den Erdboden"
           },
           {
             "key": "B",
-            "text": "Weil ihr Herz im Wasser doppelt so schnell schlägt."
+            "text": "Mit ihren Stoßzähnen, die wie Antennen wirken"
           },
           {
             "key": "C",
-            "text": "Weil ihre Lunge direkt mit der Brusthöhle verbunden ist."
+            "text": "Gar nicht, sie können diese Töne nur aussenden, aber selbst nicht hören"
           }
         ],
-        "correct_key": "C"
+        "correct_key": "A"
       },
       {
         "id": "q4",
-        "text": "Wie funktioniert das soziale Fission-Fusion-Gefüge der Elefanten?",
+        "text": "Wann starben die letzten bekannten Mammute aus?",
         "options": [
           {
             "key": "A",
-            "text": "Die Clans trennen sich regelmäßig und kommen später wieder zusammen."
+            "text": "Vor etwa 4000 Jahren auf einer fernen Insel"
           },
           {
             "key": "B",
-            "text": "Die Herden kämpfen um Reviere und verschmelzen danach."
+            "text": "Schon vor 60 Millionen Jahren zusammen mit den Dinosauriern"
           },
           {
             "key": "C",
-            "text": "Die Männchen und Weibchen leben in einer festen, lebenslangen Ehe."
+            "text": "Erst im letzten Jahrhundert im sibirischen Wald"
           }
         ],
         "correct_key": "A"
       },
       {
         "id": "q5",
-        "text": "Mit welcher cleveren Methode schützen manche Bauern ihre Felder vor hungrigen Elefanten?",
+        "text": "Wer führt eine Familiengruppe bei den afrikanischen Elefanten an?",
         "options": [
           {
             "key": "A",
-            "text": "Mit hohen Mauern aus dicken Baumstämmen."
+            "text": "Der schwerste Elefantenbulle der Gegend"
           },
           {
             "key": "B",
-            "text": "Mit Zäunen aus Chili oder mit Bienengeräuschen."
+            "text": "Eine erfahrene, ältere Leitkuh"
           },
           {
             "key": "C",
-            "text": "Mit lauter Rockmusik aus großen Lautsprechern."
+            "text": "Ein junges, verspieltes Elefantenkalb"
           }
         ],
         "correct_key": "B"
@@ -488,50 +478,53 @@
   },
   "related_terms": {
     "core": [
-      "Afrikanischer Elefant",
-      "Asiatischer Elefant",
-      "Waldelefant",
-      "Rüssel",
-      "Stoßzahn"
+      "Rüsseltiere",
+      "Elfenbein",
+      "Savanne",
+      "Infraschall"
     ],
     "discover": [
-      "Mammute",
-      "Infraschall",
-      "Elfenbein",
-      "Leitkuh",
-      "Ökosystem-Ingenieur"
+      "Mammutsteppe",
+      "Eiszeit",
+      "Wollhaarmammut",
+      "Leitkuh"
     ]
   },
   "source_passages": [
     {
-      "claim": "Die Elefanten bilden eine Familie aus der Ordnung der Rüsseltiere und stellen die größten gegenwärtig lebenden Landtiere der Erde dar.",
+      "claim": "Elefanten sind die größten heute lebenden Landtiere der Erde.",
       "source": "Elefanten",
-      "passage": "Die Elefanten (Elephantidae) sind eine Familie aus der Ordnung der Rüsseltiere. Die Familie stellt die größten gegenwärtig lebenden Landtiere und schließt außerdem die einzigen heute noch lebenden Vertreter der Ordnungsgruppe ein."
+      "passage": "Die Familie stellt die größten gegenwärtig lebenden Landtiere und schließt außerdem die einzigen heute noch lebenden Vertreter der Ordnungsgruppe ein."
     },
     {
-      "claim": "Dank rund 150.000 Muskelbündeln kann er kräftig zupacken...",
-      "source": "Rüssel",
-      "passage": "Die Anzahl der Einzelmuskeln bei Elefanten beträgt schätzungsweise rund 150.000."
-    },
-    {
-      "claim": "Elefanten nutzen pro Kieferseite immer nur einen großen Backenzahn gleichzeitig zum Zerkauen.",
+      "claim": "Im Rüssel steckt kein einziger Knochen, dafür aber bis zu 150.000 einzelne Muskelbündel, die ihn extrem beweglich machen.",
       "source": "Elefanten",
-      "passage": "Da die Kiefer der Elefanten relativ kurz und die Backenzähne vergleichsweise groß sind, trägt eine Kieferhälfte immer nur eins bis drei Backenzähne gleichzeitig, wobei aber nur ein Teil durchgebrochen, also sichtbar ist. Die Kaufläche wird stets nur von dem Backenzahn oder den Backenzähnen gebildet, die sich nahe dem Diastema befinden..."
+      "passage": "Extrapolationen an einem sezierten Tier ergaben dagegen bis zu 150.000 Muskelbündel."
     },
     {
-      "claim": "Diese Clans trennen und vereinen sich ständig, was Forscher als Fission-Fusion-Sozialgefüge bezeichnen.",
+      "claim": "Biologisch gesehen sind die langen Stoßzähne die beiden mittleren Schneidezähne des Oberkiefers, die extrem stark gewachsen sind.",
+      "source": "Stoßzahn",
+      "passage": "Die Stoßzähne der Rüsseltiere, also der Elefanten und ihrer ausgestorbenen Verwandten, stellen extrem verlängerte und nach außen verlagerte Schneidezähne des Oberkiefers dar."
+    },
+    {
+      "claim": "Das Gehirn eines ausgewachsenen Elefanten besitzt rund 257 Milliarden Nervenzellen – das ist etwa die dreifache Menge des menschlichen Gehirns!",
       "source": "Elefanten",
-      "passage": "Sowohl beim Afrikanischen als auch beim Asiatischen Elefanten kommt es in loser Abfolge zu einem Zusammengehen und wieder Aufbrechen der höheren sozialen Einheiten, was allgemein als Fission-fusion-Sozialgefüge („Trennen und wieder Zusammenkommen“) bezeichnet wird."
+      "passage": "Das Gehirn der heutigen Elefanten hat 257 Milliarden Nervenzellen, was etwa der 3-fachen menge des Menschen entspricht."
     },
     {
-      "claim": "Das klappt, weil ihre Lunge direkt mit der Brusthöhle verbunden ist...",
+      "claim": "Die Schallwellen wandern kilometerweit durch die Luft und den Erdboden und werden von anderen Elefanten mit den empfindlichen Fußsohlen wahrgenommen.",
       "source": "Elefanten",
-      "passage": "Als Besonderheit kann herausgestellt werden, dass die Lunge im Unterschied zu den meisten anderen Säugetieren direkt mit der Brusthöhle verbunden ist. Es besteht daher kein Pleuraspalt, da der Zwischenraum durch lockeres Bindegewebe überbrückt ist. ... Dies ermöglicht es Elefanten beispielsweise, einen Fluss zu durchqueren und währenddessen mit ihrem langen Rüssel zu „schnorcheln“."
+      "passage": "Diese für Menschen unhörbaren Schwingungen werden durch die Luft und durch das Erdreich über mehrere Kilometer übertragen..."
     },
     {
-      "claim": "Um die Ernten friedlich zu schützen, nutzen Farmer clevere Pufferzonen aus Chili oder Bienengeräusche.",
-      "source": "Afrikanischer Elefant",
-      "passage": "In unmittelbarer Nachbarschaft zum Menschen gehören hierzu des Weiteren physische Barrieren wie Zäune und Gräben sowie Abschreckung durch Feuer, Lärm, Licht oder Schaffung von Pufferzonen mit ungenießbaren Pflanzen wie Chili. ... Andere Maßnahmen betreffen den Einsatz von Summgeräuschen von Bienen..."
+      "claim": "Erst vor etwa 4000 Jahren starben die letzten Zwergmammute auf einer abgelegenen Insel im Arktischen Ozean aus.",
+      "source": "Mammute",
+      "passage": "Die letzten Vertreter der Mammute, die der weitaus bekanntesten Art, dem Wollhaarmammut (Mammuthus primigenius) angehören, starben erst vor rund 4000 Jahren auf der nordsibirischen Wrangelinsel aus."
+    },
+    {
+      "claim": "Wenn du mit einem Rohr schnorchelst, machst du es ihnen nach: Elefanten können tiefe Flüsse durchqueren, während sie komplett untergetaucht sind und nur die Rüsselspitze aus dem Wasser ragt.",
+      "source": "Elefanten",
+      "passage": "Dies ermöglicht es Elefanten beispielsweise, einen Fluss zu durchqueren und währenddessen mit ihrem langen Rüssel zu „schnorcheln“."
     }
   ]
 }

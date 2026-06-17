@@ -2,18 +2,18 @@
   "meta": {
     "id": "zweiter_weltkrieg_l1",
     "title": "Zweiter Weltkrieg",
-    "subtitle": "Als fast die ganze Welt stritt",
-    "emoji": "🌍",
+    "subtitle": "Wie Länder stritten und wieder Frieden schlossen",
+    "emoji": "🕊️",
     "age_level": 1,
     "pattern": "place_geography",
-    "theme_color": "#42a5f5",
-    "word_count": 152,
+    "theme_color": "#4CAF50",
+    "word_count": 172,
     "source_wikipedia_url": "https://de.wikipedia.org/wiki/Zweiter_Weltkrieg",
     "schema_version": "1.0",
     "review_flag": false,
     "category_top": "geschichte",
-    "category_sub": "kriege",
-    "generated_at": "2026-06-17T09:21:37.486550+00:00",
+    "category_sub": "weltgeschichte",
+    "generated_at": "2026-06-17T11:52:36.120363+00:00",
     "grounding_companions": [
       "Anne Frank",
       "Weiße Rose",
@@ -25,28 +25,33 @@
   "images": [],
   "sections": [
     {
-      "id": "intro",
-      "heading": "Ein riesiger Streit auf der Erde",
+      "id": "sec1",
+      "heading": "Ein riesiger Streit",
       "section_role": "intro",
       "sentences": [
         {
           "id": "s001",
-          "text": "Vor langer Zeit gab es einen riesigen Krieg.",
+          "text": "Hast du schon mal Streit beim Spielen erlebt?",
           "img_index": -1
         },
         {
           "id": "s002",
-          "text": "Er hieß der Zweite Weltkrieg.",
+          "text": "Manchmal streiten sich sogar erwachsene Menschen.",
           "img_index": -1
         },
         {
           "id": "s003",
-          "text": "Dabei kämpften sehr viele Länder auf der Erde gegeneinander.",
+          "text": "Früher stritten sich sogar fast alle großen Länder.",
           "img_index": -1
         },
         {
           "id": "s004",
-          "text": "Es war der größte Kampf aller Zeiten.",
+          "text": "Dieser riesige Streit heißt der Zweite Weltkrieg.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Es war der schlimmste Krieg auf der Welt.",
           "img_index": -1
         }
       ],
@@ -54,97 +59,104 @@
       "table": null
     },
     {
-      "id": "how_it_was",
-      "heading": "Der schwere Alltag im Krieg",
+      "id": "sec2",
+      "heading": "Schutz und Hoffnung",
+      "section_role": "appearance_equipment",
       "sentences": [
         {
-          "id": "s005",
-          "text": "In dieser Zeit hatten die Menschen große Angst.",
-          "img_index": -1
-        },
-        {
           "id": "s006",
-          "text": "Flugzeuge warfen schwere Bomben auf die Städte.",
+          "text": "Die Menschen wollten ihre Kinder vor Gefahr schützen.",
           "img_index": -1
         },
         {
           "id": "s007",
-          "text": "Viele Häuser gingen dabei kaputt.",
+          "text": "Dafür bauten sie große Häuser aus dickem Beton.",
           "img_index": -1
         },
         {
           "id": "s008",
-          "text": "Es gab auch nur sehr wenig zu essen.",
+          "text": "Diese Häuser nennen Fachleute Luftschutzbunker.",
           "img_index": -1
         },
         {
           "id": "s009",
-          "text": "Deshalb hatten viele Kinder großen Hunger.",
+          "text": "Ein jüdisches Mädchen musste sich ganz leise verstecken.",
           "img_index": -1
         },
         {
           "id": "s010",
-          "text": "Sie mussten sich oft tief unter der Erde verstecken.",
+          "text": "Ihr Name war Anne Frank.",
           "img_index": -1
         },
         {
           "id": "s011",
-          "text": "Dafar bauten die Menschen dicke Häuser aus Beton.",
+          "text": "Sie wohnte heimlich in einem geheimen Hinterhaus.",
           "img_index": -1
         },
         {
           "id": "s012",
-          "text": "Diese Häuser nennt man Bunker.",
+          "text": "Dort malte und schrieb sie in ihr Tagebuch.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Mutige Menschen halfen ihr und brachten heimlich Essen.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Sie hoffte fest auf ein Ende des Streits.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Zusammen für den Frieden",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s015",
+          "text": "Nach vielen Jahren hörten die Länder endlich auf.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Die Menschen wünschten sich wieder ein sicheres Leben.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Deshalb gründeten sie eine wichtige Gruppe für Frieden.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Diese Gruppe heißt die Vereinten Nationen.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Dort reden die Länder heute friedlich miteinander.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "So lösen sie Streit ohne Waffen und Kampf.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Teilen und Vertragen machen das Leben viel schöner.",
           "img_index": -1
         }
       ],
       "boxes": [
         {
           "type": "warnung",
-          "text": "⚠️ Im Krieg verloren sehr viele Menschen ihr Leben. Das war ein großes Unrecht."
-        }
-      ],
-      "table": null
-    },
-    {
-      "id": "today_legacy",
-      "heading": "Wie wieder Frieden wurde",
-      "sentences": [
-        {
-          "id": "s013",
-          "text": "Nach sechs langen Jahren war der Krieg vorbei.",
-          "img_index": -1
-        },
-        {
-          "id": "s014",
-          "text": "Die Menschen vertrugen sich wieder.",
-          "img_index": -1
-        },
-        {
-          "id": "s015",
-          "text": "Sie gründeten eine große Gruppe für den Frieden.",
-          "img_index": -1
-        },
-        {
-          "id": "s016",
-          "text": "Heute wollen die Länder lieber miteinander reden.",
-          "img_index": -1
-        },
-        {
-          "id": "s017",
-          "text": "Sie helfen sich gegenseitig.",
-          "img_index": -1
-        },
-        {
-          "id": "s018",
-          "text": "So beschützen sie die Welt vor neuem Streit.",
-          "img_index": -1
-        }
-      ],
-      "boxes": [
-        {
-          "type": "wow",
-          "text": "🌟 Einige Menschen schrieben heimlich Briefe gegen den Krieg. Sie waren sehr mutig."
+          "text": "⚠️ Im Krieg sterben leider viele Menschen und Tiere. Deshalb ist Frieden für uns alle sehr wichtig."
         }
       ],
       "table": null
@@ -154,103 +166,99 @@
     "questions": [
       {
         "id": "q1",
-        "text": "Wo mussten sich die Menschen vor den Bomben verstecken?",
+        "text": "Wie hieß das mutige Mädchen, das heimlich ein Tagebuch schrieb?",
         "options": [
           {
             "key": "A",
-            "text": "In dicken Häusern aus Beton"
+            "text": "Leni Scholl"
           },
           {
             "key": "B",
-            "text": "Auf den höchsten Bäumen im Wald"
+            "text": "Anne Frank"
           },
           {
             "key": "C",
-            "text": "In großen Autos auf der Straße"
+            "text": "Marie Curie"
           }
         ],
-        "correct_key": "A"
+        "correct_key": "B"
       },
       {
         "id": "q2",
-        "text": "Wie lange dauerte der große Krieg?",
+        "text": "Was schützte die Familien vor Gefahren aus der Luft?",
         "options": [
           {
             "key": "A",
-            "text": "Sechs Jahre"
+            "text": "Dicke Betonhäuser namens Luftschutzbunker"
           },
           {
             "key": "B",
-            "text": "Zwei Tage"
+            "text": "Große Baumhäuser im dichten Wald"
           },
           {
             "key": "C",
-            "text": "Hundert Jahre"
+            "text": "Fliegende Regenschirme für alle Menschen"
           }
         ],
         "correct_key": "A"
       },
       {
         "id": "q3",
-        "text": "Was gründeten die Länder nach dem Krieg?",
+        "text": "Wie heißt die Gemeinschaft, die heute für Frieden sorgt?",
         "options": [
           {
             "key": "A",
-            "text": "Eine Gruppe für den Frieden"
+            "text": "Der Bund der lustigen Piraten"
           },
           {
             "key": "B",
-            "text": "Einen Verein für schnelles Fliegen"
+            "text": "Die wilden Sportfreunde"
           },
           {
             "key": "C",
-            "text": "Eine Schule für wilde Tiere"
+            "text": "Die Vereinten Nationen"
           }
         ],
-        "correct_key": "A"
+        "correct_key": "C"
       }
     ]
   },
   "related_terms": {
     "core": [
       "Krieg",
-      "Frieden"
+      "Frieden",
+      "Bunker"
     ],
     "discover": [
-      "Bunker",
-      "Welt"
+      "Anne Frank",
+      "Vereinte Nationen"
     ]
   },
   "source_passages": [
     {
-      "claim": "Er hieß der Zweite Weltkrieg.",
+      "claim": "Dieser riesige Streit heißt der Zweite Weltkrieg.",
       "source": "Zweiter Weltkrieg",
       "passage": "Als Zweiter Weltkrieg (1. September 1939 – 2. September 1945) wird der zweite global geführte Krieg sämtlicher Großmächte im 20. Jahrhundert bezeichnet."
     },
     {
-      "claim": "Flugzeuge warfen schwere Bomben auf die Städte.",
-      "source": "Zweiter Weltkrieg",
-      "passage": "Der Zweite Weltkrieg bestand in Europa aus Blitzkriegen, Eroberungsfeldzügen gegen die deutschen Nachbarländer mit Eingliederung besetzter Gebiete, der Einsetzung von Marionettenregierungen und Flächenbombardements."
-    },
-    {
-      "claim": "Dafür bauten die Menschen dicke Häuser aus Beton. Diese Häuser nennt man Bunker.",
+      "claim": "Dafür bauten sie große Häuser aus dickem Beton.",
       "source": "Luftschutzbunker",
-      "passage": "Ein Luftschutzbunker ist eine bauliche Anlage zum Schutz vor Luftangriffen. ... Luftschutzbunker sind hauptsächlich aus Stahlbeton hergestellt."
+      "passage": "Ein Luftschutzbunker ist eine bauliche Anlage zum Schutz vor Luftangriffen."
     },
     {
-      "claim": "Nach sechs langen Jahren war der Krieg vorbei.",
-      "source": "Zweiter Weltkrieg",
-      "passage": "Als Zweiter Weltkrieg (1. September 1939 – 2. September 1945)..."
+      "claim": "Ein jüdisches Mädchen musste sich ganz leise verstecken.",
+      "source": "Anne Frank",
+      "passage": "Anne Frank... war eine deutsche Jüdin, die 1934 mit ihren Eltern und ihrer Schwester Margot aus Deutschland in die Niederlande auswanderte... Von Juli 1942 bis August 1944 lebte sie mit ihrer Familie versteckt in einem Hinterhaus in Amsterdam."
     },
     {
-      "claim": "Sie gründeten eine große Gruppe für den Frieden.",
+      "claim": "Dort malte und schrieb sie in ihr Tagebuch.",
+      "source": "Anne Frank",
+      "passage": "Dort hielt sie ihre Erlebnisse und Gedanken in einem Tagebuch fest..."
+    },
+    {
+      "claim": "Diese Gruppe heißt die Vereinten Nationen.",
       "source": "Zweiter Weltkrieg",
       "passage": "Die Organisation der Vereinten Nationen (UNO) wurde gegründet..."
-    },
-    {
-      "claim": "Einige Menschen schrieben heimlich Briefe gegen den Krieg.",
-      "source": "Weiße Rose",
-      "passage": "Die Gruppe verfasste, druckte und verteilte ... insgesamt sechs Flugblätter..."
     }
   ]
 }
