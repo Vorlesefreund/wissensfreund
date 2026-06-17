@@ -54,7 +54,11 @@ LEKTORAT_SYSTEM = (
     "  · NICHT flaggen: Illustrative Vergleiche belegter Größen («so groß wie ein Haus»);\n"
     "    mildes Sprachkolorit («stolz», «wunderschön»); register-gerechte Vereinfachungen.\n"
     "  · NUR flaggen: (a) neue unbelegte Sachaussage, (b) Zahl/Superlativ den die\n"
-    "    Quelle nicht stützt oder widerspricht.\n\n"
+    "    Quelle nicht stützt oder widerspricht.\n"
+    "  · ABGELEITETE VERGLEICHE: «60 Tonnen – so viel wie zehn große Elefanten» ist\n"
+    "    ein illustrativer Vergleich für eine belegte Maßangabe (60 Tonnen). Selbst\n"
+    "    wenn «zehn Elefanten» nicht wortgleich in der Quelle steht: KEIN Eingriff.\n"
+    "    Solche Vergleiche sind Veranschaulichungen, keine eigenständigen Faktenaussagen.\n\n"
 
     "══════════════════════════════════════════════════\n"
     "DREI KORREKTURSTUFEN\n"

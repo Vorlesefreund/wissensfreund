@@ -1,12 +1,25 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T16:27:00Z -->
+<!-- updated: 2026-06-17T16:42:00Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Lektorat v3: Kindstil-Priorität + proaktive Auto-Korrektur (2026-06-17)** ← AKTUELL
+**Lektorat v3.1: Abgeleitete Vergleiche schützen — Verifikationstest bestanden (2026-06-17)** ← AKTUELL
+
+Zusatz-Fix nach Dino-S3-Verifikationstest: «60 Tonnen – zehn große Elefanten»-Regel.
+Abgeleitete Vergleiche für belegte Maßangaben sind KEIN Eingriffspunkt — auch wenn die
+Zahl selbst nicht in der Quelle steht. «zehn große Elefanten» überlebt jetzt ✅
+
+**Verifikationstest Dino S3 (v3.1):**
+- «zehn große Elefanten» → PRÜFEN (nicht KORRIGIERT, nicht geändert) ✅ Kindwelt-Vergleich geschützt
+- «fast 170 Mio. Jahre» → «rund 170 Mio. Jahre» SILENT ✅
+- Ei-Warm-Halten: KORRIGIERT zu Oviraptoridae-Kontext ✅
+- «Diese Kälteperiode» → nicht geflaggt (Grenzfall: Bezug durch Kontext erschließbar)
+- Pruefbericht vollständige Sätze ✅
+
+**Lektorat v3: Kindstil-Priorität + proaktive Auto-Korrektur (2026-06-17)**
 
 lektorat_common.py — 8 Korrekturen an Prompt + Pruefbericht-Anzeige:
 
