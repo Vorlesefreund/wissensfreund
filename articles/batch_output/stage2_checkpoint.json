@@ -1,23 +1,11 @@
 {
   "status": "done",
   "articles": {
-    "elefant_l1": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\elefant_l1.json",
-    "elefant_l2": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\elefant_l2.json",
-    "elefant_l3": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\elefant_l3.json",
     "hund_l1": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\hund_l1.json",
     "hund_l2": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\hund_l2.json",
-    "hund_l3": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\hund_l3.json",
-    "dinosaurier_l1": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\dinosaurier_l1.json",
-    "dinosaurier_l2": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\dinosaurier_l2.json",
-    "dinosaurier_l3": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\dinosaurier_l3.json",
-    "vulkan_l1": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\vulkan_l1.json",
-    "vulkan_l2": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\vulkan_l2.json",
-    "spartacus_l2": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\spartacus_l2.json",
-    "spartacus_l3": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\spartacus_l3.json",
-    "vulkan_l3": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\vulkan_l3.json",
-    "spartacus_l1": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\spartacus_l1.json",
     "zweiter_weltkrieg_l1": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\zweiter_weltkrieg_l1.json",
-    "zweiter_weltkrieg_l2": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\zweiter_weltkrieg_l2.json",
-    "zweiter_weltkrieg_l3": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\zweiter_weltkrieg_l3.json"
+    "zweiter_weltkrieg_l3": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\zweiter_weltkrieg_l3.json",
+    "hund_l3": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\hund_l3.json",
+    "zweiter_weltkrieg_l2": "C:\\Users\\Andreas\\wissensfreund_repo\\articles\\batch_output\\articles\\zweiter_weltkrieg_l2.json"
   }
 }
