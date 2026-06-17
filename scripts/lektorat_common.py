@@ -27,37 +27,93 @@ LEKTORAT_SYSTEM = (
     "Prüfe alle faktischen Aussagen AUSSCHLIESSLICH gegen die beigefügten "
     "Wikipedia-Volltexte — niemals aus eigenem Vorwissen.\n\n"
 
-    "GROUNDING-REGEL:\n"
-    "  · Der genaue Sachverhalt muss DIREKT in der Quelle stehen — nicht impliziert, nicht erschlossen.\n"
-    "  · Verbund-Satz (A UND B): beide Teilaussagen müssen direkt belegt sein.\n"
-    "  · NICHT flaggen: Illustrative Vergleiche belegter Größen («so groß wie ein Haus», "
-    "«56 m ≈ 18-stöckiges Hochhaus»); mildes Sprachkolorit («stolz», «wunderschön»); "
-    "register-gerechte Vereinfachungen die im Kern stimmen (z.B. «runde Zelte» für Tipis S1).\n"
-    "  · NUR flaggen: (a) neue unbelegte Sachaussage, (b) Zahl/Superlativ den Quelle nicht stützt "
-    "oder widerspricht («der höchste der Welt» wo Quelle «einer der höchsten» sagt).\n\n"
+    "══════════════════════════════════════════════════\n"
+    "GRUNDPRINZIP: KINDSTIL HAT VORRANG\n"
+    "══════════════════════════════════════════════════\n"
+    "Korrekturen müssen den Kindstil bewahren oder verbessern — NIE verschlechtern.\n"
+    "Wenn das Original kindgerechter, lebendiger oder anschaulicher ist als die\n"
+    "Wikipedia-Formulierung, bleibt das Original.\n\n"
+    "KONKRET VERBOTEN als Korrekturbegründung:\n"
+    "  · Parenthetische Alternativangaben («nach anderen Quellen…», «oder bis zu X»)\n"
+    "  · Wissenschaftliche Einheiten/Maße wenn das Original eine Näherung ist die\n"
+    "    sachlich stimmt — «fast einen Meter» ist keine Falschaussage wenn WP «95 cm»\n"
+    "    nennt. Keine Korrektur.\n"
+    "  · Synonym-Austausch wenn das Original genauso gut oder besser ist\n"
+    "    («ohne Zähne» ist nicht schlechter als «zahnlos», «überall auf der Erde»\n"
+    "    ist kindgerechter als «auf allen Kontinenten»)\n"
+    "  · Wikipedia-Wortlaut der akademischer klingt als das Original\n"
+    "  · Kindwelt-Metaphern und altersgerechte Vereinfachungen für S1/S2 (4–9 J.):\n"
+    "    «Elefanten-Oma» für Leitkuh, «runde Eier» als Vereinfachung — KEIN Eingriff\n"
+    "    solange die Aussage inhaltlich nicht falsch ist.\n\n"
 
-    "DREI KORREKTURSTUFEN:\n\n"
+    "══════════════════════════════════════════════════\n"
+    "GROUNDING-REGEL\n"
+    "══════════════════════════════════════════════════\n"
+    "  · Der genaue Sachverhalt muss DIREKT in der Quelle stehen — nicht impliziert.\n"
+    "  · Verbund-Satz (A UND B): beide Teilaussagen müssen direkt belegt sein.\n"
+    "  · NICHT flaggen: Illustrative Vergleiche belegter Größen («so groß wie ein Haus»);\n"
+    "    mildes Sprachkolorit («stolz», «wunderschön»); register-gerechte Vereinfachungen.\n"
+    "  · NUR flaggen: (a) neue unbelegte Sachaussage, (b) Zahl/Superlativ den die\n"
+    "    Quelle nicht stützt oder widerspricht.\n\n"
+
+    "══════════════════════════════════════════════════\n"
+    "DREI KORREKTURSTUFEN\n"
+    "══════════════════════════════════════════════════\n\n"
 
     "  SILENT — stillschweigend korrigieren:\n"
-    "    Wann: Minimaler Eingriff, Beleg eindeutig. Zahl/Datum angepasst, Superlativ abgemildert, "
-    "unbelegter Nebensatz gestrichen — ohne den Satzrhythmus zu brechen.\n"
+    "    Wann: Minimaler Eingriff, Beleg eindeutig. Zahl/Datum angepasst, Superlativ\n"
+    "    abgemildert, unbelegter Nebensatz gestrichen — ohne Satzrhythmus zu brechen.\n"
     "    Aktion: Satz in korrektur_neu korrigieren.\n\n"
 
-    "  KORRIGIERT — Häkchen-Kontrolle (Standard-Stufe bei Unsicherheit):\n"
-    "    Wann: Substanziellerer Eingriff (Satz umformuliert, Behauptung anders gerahmt), "
-    "Wikipedia-Evidenz aber klar. Im Zweifel KORRIGIERT statt PRÜFEN.\n"
+    "  KORRIGIERT — Häkchen-Kontrolle:\n"
+    "    Wann: Substanziellerer Eingriff ODER klar unbelegte Aussage mit eindeutiger\n"
+    "    kindgerechter Korrektur. Im Zweifel KORRIGIERT statt PRÜFEN.\n"
+    "    PROAKTIV KORRIGIEREN (nicht nur flaggen) wenn:\n"
+    "      - Superlativ ohne Beleg: «ältestes Haustier» → «eines der ältesten Haustiere»\n"
+    "      - Unbelegte Funktion streichbar: «kleine Ohren gegen Kälte» → «kleine Ohren»\n"
+    "      - Übertreibung abschwächbar: «völlig unabhängig» → «weitgehend unabhängig»\n"
+    "      - Tierverhalten-Zahl korrigierbar: «meistens durch Heulen» wenn Quelle\n"
+    "        ein anderes Lautbild belegt → auf Quellbasis korrigieren\n"
     "    Aktion: Satz in korrektur_neu korrigieren + kurzes WP-Zitat als Beleg.\n\n"
 
     "  PRÜFEN — nur markieren, nicht ändern:\n"
-    "    Wann: Echte Unsicherheit — Quelle widersprüchlich, Kontext fehlt, sensibler Sachverhalt, "
-    "Idealisierung/NPOV-Verstoß, struktureller Umbau nötig.\n"
+    "    Wann: Echte Unsicherheit — Quelle widersprüchlich, Kontext fehlt, struktureller\n"
+    "    Umbau nötig, oder die Korrektur würde den Kindstil substanziell verschlechtern.\n"
     "    Aktion: Artikel NICHT ändern. Problem und Begründung nennen.\n\n"
 
-    "KORREKTIONS-PRINZIP:\n"
-    "  · Gleichwertiger Ersatz: Zahl→Quell-Zahl, Superlativ→Quell-Form, "
-    "unbelegtes Detail→belegtes Pendant aus der Quelle.\n"
-    "  · KEINE Abschwächung ins Vage (NICHT «sehr groß» statt belegter Maßangabe).\n"
-    "  · Register wahren (S1 kindgerecht, S3 sachlich). BELEGT-Aussagen: nicht auflisten.\n\n"
+    "══════════════════════════════════════════════════\n"
+    "ZUSÄTZLICHE PRÜFPFLICHTEN\n"
+    "══════════════════════════════════════════════════\n\n"
+
+    "  STIMMT_DAS-KOHÄRENZ:\n"
+    "    Wenn eine stimmt_das-Box korrigiert wird: IMMER Frage UND reveal_text zusammen\n"
+    "    auf Kohärenz prüfen. Passen Frage und Auflösung nach der Korrektur noch zusammen?\n"
+    "    Falls nicht: Box KOMPLETT unverändert lassen und als PRÜFEN flaggen:\n"
+    "    «Stimmt_das-Kohärenz prüfen: Frage und Auflösung nach Korrektur widersprüchlich»\n\n"
+
+    "  UNVOLLSTÄNDIGE BOXEN:\n"
+    "    Prüfe alle Boxen auf Vollständigkeit: Titel/Text vorhanden, aber Inhalt leer\n"
+    "    oder bei stimmt_das: reveal_text fehlt → als PRÜFEN flaggen:\n"
+    "    «Box unvollständig: Titel vorhanden, Inhalt fehlt»\n\n"
+
+    "  STILISTISCHE PROBLEME (als PRÜFEN flaggen):\n"
+    "    - Abschnittstitel die wie Klausurfragen klingen («Wer ist der Hund?»)\n"
+    "      → «Titel wirkt wie Fragestellung statt Überschrift»\n"
+    "    - Direkte Leseransprache die den Lesefluss bricht\n"
+    "      → «Stilistisch holprig — Umformulierung empfohlen»\n"
+    "    - Registerbruch: Text passt nicht zu S1/S2/S3\n\n"
+
+    "  PRONOMEN UND BEZÜGE:\n"
+    "    Wenn «diese», «dabei», «dadurch» oder ein Substantiv einen unklaren Bezug hat\n"
+    "    weil der Begriff im vorherigen Satz nicht auftaucht → PRÜFEN:\n"
+    "    «Bezug unklar: [Begriff] wurde nicht eingeführt»\n\n"
+
+    "══════════════════════════════════════════════════\n"
+    "KORREKTIONS-PRINZIP\n"
+    "══════════════════════════════════════════════════\n"
+    "  · Gleichwertiger Ersatz: Zahl→Quell-Zahl, Superlativ→Quell-Form.\n"
+    "  · KEINE Abschwächung ins Vage wenn Quelle eine Zahl liefert.\n"
+    "  · Register wahren (S1 kindgerecht, S3 sachlich). Belegte Aussagen: nicht auflisten.\n\n"
 
     "Antworte NUR mit diesem JSON-Objekt:\n"
     "{\n"
@@ -109,7 +165,10 @@ def build_grounded_sources_block(
 # ── Artikel → lesbarer Fließtext ─────────────────────────────────────────────
 
 def article_to_lektorat_text(article: dict) -> str:
-    """Wandelt Artikel-JSON in lesbaren Text für den Lektorat-Prompt."""
+    """Wandelt Artikel-JSON in lesbaren Text für den Lektorat-Prompt.
+
+    Boxen: Typ + Text + bei stimmt_das auch reveal_text (für Kohärenz-Check).
+    """
     lines = []
     for sec in article.get("sections", []):
         heading = sec.get("heading", sec.get("title", "")).strip()
@@ -120,13 +179,17 @@ def article_to_lektorat_text(article: dict) -> str:
             if t:
                 lines.append(t)
         for box in sec.get("boxes", []):
+            btype = box.get("type", "box")
             t = box.get("text", "").strip()
             if t:
-                lines.append(f"  BOX: {t}")
+                lines.append(f"  BOX[{btype}]: {t}")
+            reveal = box.get("reveal_text", "").strip()
+            if reveal:
+                lines.append(f"  BOX[{btype}/reveal]: {reveal}")
             for s in box.get("sentences", []):
                 t = s.get("text", "").strip()
                 if t:
-                    lines.append(f"  BOX: {t}")
+                    lines.append(f"  BOX[{btype}]: {t}")
     return "\n".join(lines)
 
 
@@ -471,6 +534,39 @@ def parse_lektorat_v2(raw: str) -> dict:
     raise ValueError("Kein gültiges JSON-Objekt gefunden")
 
 
+def _diff_excerpt(orig: str, new: str, ctx: int = 35) -> tuple[str, str]:
+    """Zeigt den geänderten Teil mit Kontext; niemals nach fixer Zeichenzahl abschneiden.
+
+    Gibt (orig_excerpt, new_excerpt) zurück. Beide Strings haben Auslassungszeichen
+    am Rand wo Text vor/nach dem Kontextfenster weggelassen wurde, aber der
+    geänderte Teil selbst ist immer vollständig enthalten.
+    """
+    # Gemeinsamen Präfix finden
+    i = 0
+    min_len = min(len(orig), len(new))
+    while i < min_len and orig[i] == new[i]:
+        i += 1
+
+    # Gemeinsamen Suffix finden (von hinten)
+    j_o, j_n = len(orig), len(new)
+    while j_o > i and j_n > i and orig[j_o - 1] == new[j_n - 1]:
+        j_o -= 1
+        j_n -= 1
+
+    # Kontextfenster: ctx Zeichen vor/nach dem Diff
+    start   = max(0, i - ctx)
+    end_o   = min(len(orig), j_o + ctx)
+    end_n   = min(len(new),  j_n + ctx)
+
+    pre_o   = ("…" if start > 0 else "") + orig[start:end_o] + ("…" if end_o < len(orig) else "")
+    pre_n   = ("…" if start > 0 else "") + new[start:end_n]  + ("…" if end_n < len(new)  else "")
+
+    # Fallback: wenn beide Strings identisch oder sehr kurz → vollständig zurückgeben
+    if pre_o == pre_n or not pre_o or not pre_n:
+        return orig, new
+    return pre_o, pre_n
+
+
 def annotate_article_lektorat_v2(
     article: dict,
     lektorat_result: dict,
@@ -505,20 +601,19 @@ def annotate_article_lektorat_v2(
             )
             continue
 
-        claim_s = claim[:70] + ("…" if len(claim) > 70 else "")
-        neu_s   = neu[:70]   + ("…" if len(neu)   > 70 else "")
+        claim_s, neu_s = _diff_excerpt(claim, neu)
         if tier == "SILENT":
-            beleg_s = f" (WP: {beleg[:40]})" if beleg else ""
+            beleg_s = f" (WP: {beleg})" if beleg else ""
             silent_lines.append(f"«{claim_s}» → «{neu_s}»{beleg_s}")
         else:
-            beleg_s = f" — WP: «{beleg[:60]}»" if beleg else ""
+            beleg_s = f" — WP: «{beleg}»" if beleg else ""
             korrigiert_lines.append(f"«{claim_s}» → «{neu_s}»{beleg_s}")
 
     for p in pruefen_in:
         claim  = p.get("claim_original", "").strip()
         prob   = p.get("problem", "").strip()
         beg    = p.get("begruendung", "").strip()
-        entry  = f"«{claim[:70]}» — {prob}"
+        entry  = f"«{claim}» — {prob}"
         if beg:
             entry += f" ({beg})"
         pruefen_lines.append(entry)

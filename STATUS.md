@@ -1,12 +1,37 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T12:30:00Z -->
+<!-- updated: 2026-06-17T16:27:00Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Stage 3 Mini-Lauf v2 + Word-Review-Dokumente (2026-06-17)** ← AKTUELL
+**Lektorat v3: Kindstil-Priorität + proaktive Auto-Korrektur (2026-06-17)** ← AKTUELL
+
+lektorat_common.py — 8 Korrekturen an Prompt + Pruefbericht-Anzeige:
+
+1. **GRUNDPRINZIP Kindstil** (neu): "fast einen Meter" ≈ 95 cm → kein Eingriff. Keine
+   parenthetischen Alternativangaben. Synonyme ohne Mehrwert nicht ersetzen. Kindwelt-Metaphern
+   («Elefanten-Oma», «überall auf der Erde») schützen.
+2. **Proaktive Auto-Korrektur**: Superlative («ältestes Haustier» → «eines der ältesten»),
+   unbelegte Funktionsangaben streichbar, Tierverhalten auf Quellbasis korrigierbar.
+3. **Stimmt_das-Kohärenz**: Box nur korrigieren wenn Frage + reveal_text danach noch kohärent;
+   sonst PRÜFEN mit Hinweis.
+4. **Unvollständige Boxen**: Leere Boxen als PRÜFEN flaggen.
+5. **Stilistische Probleme**: Abschnittstitel als Klausurfragen, holprige Leseransprache → PRÜFEN.
+6. **Pronomen/Bezüge**: Unklare «diese»/«dabei»/Substantiv-Bezüge → PRÜFEN.
+7. **article_to_lektorat_text**: Boxtyp + reveal_text im Prompt (für Kohärenz-Check).
+8. **Pruefbericht-Display**: `_diff_excerpt()` — zeigt geänderten Teil mit Kontext, niemals
+   nach fixer Zeichenzahl abschneiden.
+
+**Test Hund S2+S3 (v3):**
+- "fast einen Meter" → PRÜFEN ✅ (Kindstil-Schutz greift, nicht auto-korrigiert)
+- "ältestes Haustier" → "eines der ältesten Haustiere" KORRIGIERT ✅ (proaktive Auto-Korrektur)
+- Dingo "meistens durch Heulen" → "vor allem durch Heulen und andere Laute" KORRIGIERT ✅
+- Pruefbericht: vollständige Sätze ✅ (kein Abschneiden nach 70 Zeichen mehr)
+- Kein parenthetisches "(nach anderen Quellen...)" ✅
+
+**Stage 3 Mini-Lauf v2 + Word-Review-Dokumente (2026-06-17)**
 
 ### Stage 3 — 18/18 Artikel lektoriert (v2: SILENT/KORRIGIERT/PRÜFEN)
 
