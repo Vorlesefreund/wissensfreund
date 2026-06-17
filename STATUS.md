@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-16T22:41:25Z -->
+<!-- updated: 2026-06-17T05:28:00Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -28,10 +28,14 @@ Gleicher System-Prompt v3.23b, gleiche Quelltexte (Stage-1-Checkpoint), gleicher
 - **Diagnose: Tages- oder Monats-Kontingent des API-Keys erschöpft** (Large-Call 77K Token)
 - Timings: Elefant V1–V5 (21:31–22:31), Vulkan V1–V5 (22:36–23:36), Indianer V1+ (23:41+)
 - Indianer-Wortziel-Quelle: ergiebigkeit (280–400), primary_text 107K Zeichen, 0 Bilder, 0 Companions
-- Script-Ende: 00:41 MESZ (17.06.) — 3h10min nach letztem Retry-Versuch, Rate-Limit nie erholt
-- Fehlercode `1300` (Mistral) = Token-Rate-Limit, kein Stunden-Reset in 3h40min → Tages-Limit
-- **Schlussfolgerung:** Medium-Test erfordert frisches Tages-/Monatsbudget — Large+Medium in einer Session nicht möglich mit diesem Key
-- **Nächster Schritt:** Heute Morgen (neues Tageskontingent) medium-only starten, OHNE vorherigen Large-Call
+- **ECHTE URSACHE (17.06. morgens ermittelt):** Key-Tier hat **25.000 Tokens/Minute Limit**
+  - System-Prompt: ~9K Tokens + kleinste User-Message (Vulkan): ~25K Tokens = ~34K gesamt
+  - Jede Produktions-Message überschreitet das Minuten-Limit → sofort 429, unabhängig von Wartezeit
+  - Bestätigt: kleine Test-Message (21 Tokens) → 200 OK ✅ | Vulkan 34K Tokens → sofort 429 ❌
+  - `mistral-large-latest` hat offenbar separates/höheres Limit auf diesem Key-Tier
+- **Response-Header:** `x-ratelimit-limit-tokens-minute: 25000` / `x-ratelimit-limit-req-minute: 50`
+- **Schlussfolgerung:** mistral-medium-latest auf diesem Key-Tier für Produktions-Messages NICHT nutzbar
+- **Optionen:** (a) Key-Tier upgraden auf ≥100K TPM, (b) Primary-only (keine Companions) testen ~14K Token
 
 ### gemini-3.5-flash
 - Weiterhin 503 UNAVAILABLE — Situation unverändert
@@ -128,9 +132,9 @@ nicht unser Code, betrifft alle Nutzer).
 
 ### Mistral-Test-Ergebnis
 Large 3 (Elefant S2): qualitativ stark, Schema-Abweichungen, 43% Wortzahl-Overshoot.
-Medium 3.5 (3 Topics): alle 429 — Key-Tagesbudget nach Large-Call erschöpft.
-→ Medium-Test: morgen (frisches Budget), medium-only (kein Large vorher).
-→ Für Produktion: Prompt-Tuning nötig, Post-Processing-Schicht für Schema-Keys.
+Medium 3.5 (3 Topics): alle 429 — Key-Tier-Limit 25K Tokens/min, Produktions-Messages 34–70K → nicht nutzbar.
+→ Für Medium: Key-Tier upgraden (≥100K TPM) oder Primary-only-Test (14K Token).
+→ Für Produktion (Large): Prompt-Tuning + Post-Processing-Schicht für Schema-Keys nötig.
 
 ---
 
