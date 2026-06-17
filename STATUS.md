@@ -1,23 +1,36 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T16:42:00Z -->
+<!-- updated: 2026-06-17T16:49:17Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Lektorat v3.1: Abgeleitete Vergleiche schützen — Verifikationstest bestanden (2026-06-17)** ← AKTUELL
+**Lektorat v3.1 Vollständig-Lauf mini_lektorat_v3: 18/18 Artikel, Word-Dokumente (2026-06-17)** ← AKTUELL
 
-Zusatz-Fix nach Dino-S3-Verifikationstest: «60 Tonnen – zehn große Elefanten»-Regel.
-Abgeleitete Vergleiche für belegte Maßangaben sind KEIN Eingriffspunkt — auch wenn die
-Zahl selbst nicht in der Quelle steht. «zehn große Elefanten» überlebt jetzt ✅
+### Stage 3 mit Lektorat v3.1 (Kind-Perspektive + abgeleitete Vergleiche)
 
-**Verifikationstest Dino S3 (v3.1):**
-- «zehn große Elefanten» → PRÜFEN (nicht KORRIGIERT, nicht geändert) ✅ Kindwelt-Vergleich geschützt
-- «fast 170 Mio. Jahre» → «rund 170 Mio. Jahre» SILENT ✅
-- Ei-Warm-Halten: KORRIGIERT zu Oviraptoridae-Kontext ✅
-- «Diese Kälteperiode» → nicht geflaggt (Grenzfall: Bezug durch Kontext erschließbar)
-- Pruefbericht vollständige Sätze ✅
+batch_id: msgbatch_01RFAif334D3SpHb3mPKhAeN — 18/18 in ~2 Min.
+
+| Thema | S1 S/K/P | S2 S/K/P | S3 S/K/P |
+|---|---|---|---|
+| **Elefant** | 0/0/2 | 0/0/1 | 1/1/5 |
+| **Hund** | 0/0/1 | 0/2/1 | 1/1/2 |
+| **Dinosaurier** | 0/0/3 | 0/0/0 | 1/1/3 |
+| **Vulkan** | 0/0/2 | 0/0/3 | 2/0/3 |
+| **Spartacus** | 0/0/1 | 0/1/1 | 1/1/4 |
+| **ZWK** | 0/1/2 | 0/0/2 | 0/2/3 |
+| **Gesamt** | **0/1/11** | **0/3/11** | **6/6/20** |
+
+Kosten: $0.232 (18 Requests Ø $0.013, cache_create=976.604 / cache_read=199.561)
+Vollkatalog-Projektion Stage 3: ~$168 (update von $205, kompaktere Outputs)
+
+Word-Dokumente: articles/mini_lektorat_v3/review/ (6 × .docx, 201–321 KB, Bilder eingebettet)
+
+**Lektorat v3.1: Abgeleitete Vergleiche schützen + Verifikationstest (2026-06-17)**
+
+Zusatz-Fix: «60 Tonnen – zehn große Elefanten»-Regel (abgeleitete Vergleiche kein Eingriff).
+Verifikationstest Dino S3: «zehn große Elefanten» überlebt als PRÜFEN ✅; Pruefbericht vollständig ✅
 
 **Lektorat v3: Kindstil-Priorität + proaktive Auto-Korrektur (2026-06-17)**
 
