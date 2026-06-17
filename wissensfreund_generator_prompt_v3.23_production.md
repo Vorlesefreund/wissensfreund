@@ -522,7 +522,14 @@ Kein Markdown, keine Kommentare, keine Erklärungen außerhalb des `<planung>`-B
   "related_terms": {
     "core":     [],
     "discover": []
-  }
+  },
+  "source_passages": [
+    {
+      "claim":   "Exakter Satz aus dem Artikel (Fließtext oder Box)",
+      "source":  "Wikipedia-Artikeltitel",
+      "passage": "Wörtliches Quellzitat aus dem eingebetteten Wikipedia-Text"
+    }
+  ]
 }
 ```
 
@@ -535,6 +542,7 @@ Kein Markdown, keine Kommentare, keine Erklärungen außerhalb des `<planung>`-B
 - `boxes[]` darf leer sein `[]`; `stimmt_das` benötigt `reveal_text` + `"reveal_mode": "auto"`
 - `quiz.questions` genau 3 Fragen (Stufe 1+2), 4–5 (Stufe 3); je genau 3 Optionen A/B/C
 - `related_terms` immer vorhanden, darf leere Arrays enthalten
+- `source_passages` immer vorhanden — je Fakten-Satz ein Eintrag mit wörtlichem Zitat aus den eingebetteten Wikipedia-Texten. Einleitungs- und Verbindungssätze auslassen. Max. 30 Einträge; darf leer sein `[]` wenn keine belegten Fakten-Sätze vorhanden.
 
 **Ausgabe-Disziplin (strikt):** Zuerst `<planung>`-Block, dann direkt `{`.
 KEINE weiteren Kommentare, Erklärungen oder Rückfragen außerhalb der `<planung>`-Tags.

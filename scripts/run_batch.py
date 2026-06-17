@@ -759,17 +759,9 @@ def _stage2_job(thema: str, data: dict, slug: str, stufe: int) -> dict:
 
 
 def _gen2_variable_suffix(job: dict, wmax: int) -> str:
-    """Variable Suffix für Stage-2-Batch: AGE_LEVEL + WORTZIEL + source_passages-Wrapper."""
-    base = _variable_suffix(job, wmax)
-    return (
-        base
-        + "\n\nAUSGABE-FORMAT (Stage 2 Batch): Antwort als Wrapper-JSON:\n"
-        '{"article": <Artikel nach Schema v1.0>, "source_passages": ['
-        '{"claim": "exakter Satz aus Artikel", "source": "Wikipedia-Artikeltitel", '
-        '"passage": "woertliches Quellzitat"}]}\n'
-        "source_passages: Je Fakten-Satz 1 Eintrag mit woertlichem Zitat aus den "
-        "eingebetteten Wikipedia-Texten. Einleitungs-/Verbindungssaetze auslassen. Max. 30 Eintraege."
-    )
+    """Variable Suffix für Stage-2-Batch: AGE_LEVEL + WORTZIEL.
+    source_passages ist jetzt kanonisches Schema-Feld (System-Prompt) — kein Wrapper mehr nötig."""
+    return _variable_suffix(job, wmax)
 
 
 def _parse_gen2_response(raw: str) -> tuple[dict, list]:
@@ -894,7 +886,9 @@ def stage2_generierung(
         slug       = thema.lower().replace(" ", "_").replace("/", "_")
         images_all = data.get("images", [])
         appeal     = data.get("appeal", "medium")
-        cache_name = caches.get(thema)
+        # cached_content in InlinedRequest ist inkompatibel mit Gemini Batch API
+        # → immer Fallback (volles System-Prompt + volles Message im Request)
+        cache_name = None
 
         for stufe in stufen:
             article_id    = f"{slug}_l{stufe}"

@@ -1,12 +1,46 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T05:28:00Z -->
+<!-- updated: 2026-06-17T06:15:11Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Mistral-Modellvergleich Elefant S2 (2026-06-16)** ← AKTUELL
+**Schema-Konsistenz Stage 2 (2026-06-17)** ← AKTUELL
+
+### source_passages kanonisch ins Schema (Prompt-Widerspruch behoben)
+- `_gen2_variable_suffix()` sendete eigene Wrapper-Anweisung `{article, source_passages}` die dem
+  `output_format`-Block im System-Prompt widersprach. ThinkingLevel.MEDIUM folgte dem System-Prompt,
+  kein Thinking der User-Message → instabil (A=0 SP, B=18 SP im ersten A/B-Test).
+- Fix: `source_passages` als kanonisches Feld ins Schema von `v3.23_production.md` aufgenommen.
+  `_gen2_variable_suffix()` auf `_variable_suffix()` vereinfacht (kein Wrapper mehr).
+- Verifikation (Elefant S2, synchron, 2026-06-17): A-MEDIUM sp=12 ✅ B-NOTHINK sp=? (Modell-Output
+  hatte eingebettetes Newline-Steuerzeichen im JSON → Parse-Fehler, nicht Code-Problem).
+  A-MEDIUM beweist: Widerspruch behoben.
+
+### A/B-Test ThinkingLevel.MEDIUM vs. kein Thinking (korrekt ausgewertet)
+| | A — MEDIUM | B — kein Thinking |
+|---|---|---|
+| Dauer | 75s | 23s (3.2× schneller) |
+| Wörter Fließtext | 307 | ~290 |
+| Sections | 4 | 4 |
+| Boxes | 2 (wow + stimmt_das) | 2 (wow + stimmt_das) |
+| source_passages | 12 ✅ | 18 ✅ (1. Lauf) / Parse-Fehler (2. Lauf) |
+- Beide Varianten folgen BOX_PLAN korrekt, produzieren vollständige Artikel.
+- Frühere "0 Boxes"-Meldung war Parse-Script-Bug (art['boxes'] statt sections[].boxes[]).
+- temp/_read_ab.py korrigiert: section_role/heading, boxes aus sections[].boxes[] aggregiert.
+
+### Quiz + stimmt_das Box: Schema-Mismatch App↔Prompt (OFFEN, noch nicht gefixt)
+Prompt/Modell generieren — App-Parser erwartet:
+- `quiz.questions[x].text` → App liest `j['question']` → Quizfragen LEER in App ❌
+- `boxes[x].reveal_text` → App liest `j['explanation']` → stimmt_das-Auflösung LEER ❌
+- `boxes[x].reveal_mode: "auto"` (String) → App: `j['reveal_mode'] == true` → immer false ❌
+- tts_compose.py liest korrekt `reveal_text` → ALIGNED mit Prompt.
+ENTSCHEIDUNG OFFEN: Prompt anpassen (`text`→`question`, `reveal_text`→`explanation`) ODER
+App-Dart anpassen (wf_article.dart) — tts_compose.py würde bei Prompt-Änderung brechen.
+Empfehlung: App-Dart fixen (ein File, tts_compose.py bleibt unangetastet).
+
+**Mistral-Modellvergleich Elefant S2 (2026-06-16)**
 
 `temp/mistral_test_elefant_s2.py` — synchroner Vergleichstest vs. Gemini-Produktionspfad.
 Gleicher System-Prompt v3.23b, gleiche Quelltexte (Stage-1-Checkpoint), gleicher User-Message-Aufbau.
@@ -107,21 +141,12 @@ Fix: `re.sub(r"[^a-zA-Z0-9_-]", "_", filename)[:41]`, Key max 63 Zeichen.
 - **Robustes Retry (gemini_client.py):** 5 Versuche, Backoff 10/20/40/80/160s + Jitter 0-5s,
   400/404 ohne Retry, klare Fehlermeldung mit Modell + Versuchsanzahl. 14 Tests grün.
 
-### OFFEN — wartet auf erreichbares gemini-3.5-flash
-Aktuell: 503 UNAVAILABLE (serverseitige Überlastung, neues GA-Modell, recherchiert bestätigt —
-nicht unser Code, betrifft alle Nutzer).
-
-- **Synchroner Diagnose-Einzeltest + A/B** (temp/_sync_test_s2.py, bereit):
-  - `python temp/_sync_test_s2.py` → Variante A (MEDIUM), rohe Response
-  - `python temp/_sync_test_s2.py --ab` → A (MEDIUM) + B (kein Thinking) Vergleich
-  - Zeigt: finish_reason, candidates, usage_metadata (prompt/candidates/thoughts_tokens),
-    Dauer, ~Wortanzahl. Artikel gespeichert unter articles/test_thinking_ab/ für Qualitätsbewertung.
-  - Ziel 1 (Diagnose): "leere Batch-Antwort" isolieren — Generierungslogik ok oder Batch-Bug?
-  - Ziel 2 (A/B): Thinking MEDIUM vs. kein Thinking — Qualität, Wortzahl, Dauer, Token
-- **Recherche-Befund Thinking-Vergleich:** Kein bewerteter A/B existiert. Alle bisherigen
-  3.5-flash-Artikel liefen mit MEDIUM (generation_method "gemini-3.5-flash/medium/v3.23").
-  Versehentlicher Batch ohne Thinking → leere Antworten (nicht auswertbar).
-- **Bestes Zeitfenster:** 2–7 Uhr Pazifik = ca. 11–16 Uhr MESZ (503-Rate dann <5%)
+### ERLEDIGT (2026-06-17)
+- Synchroner A/B-Test erfolgreich (Elefant S2): beide Varianten STOP, valider Output.
+- **BESTÄTIGT:** Batch-Schicht-Bug (leere Responses) ≠ Generierungslogik-Bug.
+- source_passages-Instabilität durch Prompt-Widerspruch erklärt und behoben.
+- A/B-Qualitätsvergleich: MEDIUM reichhaltigerer Planungsblock, ähnliche Artikelqualität.
+  Thinking-Entscheidung (MEDIUM beibehalten) bleibt Produktionskonfiguration.
 
 ### BEKANNTE STAGE-2-BEFUNDE (bereits gefixt)
 - Truncation bei max_output_tokens=8192 → auf 32768 erhöht (Thinking-Tokens zählen ins Budget)
@@ -140,8 +165,9 @@ Medium 3.5 (3 Topics): alle 429 — Key-Tier-Limit 25K Tokens/min, Produktions-M
 
 ## Gerade in Arbeit
 
-**Stage-2-Diagnose ausstehend** — gemini-3.5-flash 503-Situation abwarten.
-Sync-Test (temp/_sync_test_s2.py) bereit, sobald Modell erreichbar.
+**Quiz/stimmt_das App-Dart-Fix** — Entscheidung noch offen (s. Schema-Mismatch oben).
+Empfehlung: wf_article.dart anpassen (j['question']→j['text'], j['explanation']→j['reveal_text'],
+reveal_mode-Vergleich auf 'auto'-String), tts_compose.py bleibt unverändert.
 
 ---
 
