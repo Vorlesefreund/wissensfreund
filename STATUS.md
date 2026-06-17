@@ -196,6 +196,19 @@ tts_compose.py unverändert (liest bereits korrekt reveal_text).
 
 ## Batch-Härtung VOR Großlauf (Pflicht, nicht Mini-Lauf)
 
+### 0. age_floor-Gate in Stage 2 fehlt (run_batch.py) ⚠️
+Stage 2 prüft nicht ob `stufe >= age_floor` des Themas. Im Mini-Lauf irrelevant
+(alle 6 Themen haben age_floor=None/1). Im Großlauf würden Themen mit age_floor=2
+(Rauchen, Alkohol, Sucht etc.) fälschlicherweise einen S1-Artikel bekommen.
+Fix vor Großlauf: In `stage2_generierung()` jede Stufen-Iteration prüfen:
+```python
+age_floor = int(data.get("age_floor") or 1)
+if stufe < age_floor:
+    log.info("  age_floor-Gate: '%s' S%d < floor S%d — übersprungen", thema, stufe, age_floor)
+    continue
+```
+Dann für age_floor=2-Themen nur S2+S3 generieren, für age_floor=3 nur S3.
+
 ### 1. Batch-ID persistieren (`pending_batches.json`)
 Nach JEDEM `client.batches.create()` sofort in `out_dir/pending_batches.json` schreiben.
 
