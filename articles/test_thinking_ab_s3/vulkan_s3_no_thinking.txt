@@ -1,0 +1,223 @@
+<planung>
+MUSTER: tech_science
+QUELLEN: https://de.wikipedia.org/wiki/Vulkan + [Lava: https://de.wikipedia.org/wiki/Lava - Erklärt den Unterschied zwischen Pahoehoe und Aa-Lava] + [Magma: https://de.wikipedia.org/wiki/Magma - Klärt Entstehung und Aufstiegsprozesse] + [Vesuv: https://de.wikipedia.org/wiki/Vesuv - Liefert die historische Ausbruchsgeschichte von 79 n. Chr.] + [Geysir: https://de.wikipedia.org/wiki/Geysir - Erläutert die postvulkanischen Heißwasserfontänen]
+BEREICHERUNGS_LINKS: [https://de.wikipedia.org/wiki/Vesuv - Bietet mit dem Augenzeugenbericht von Plinius und den Ausgrabungen in Pompeji hochspannende, greifbare Geschichte.]
+APPEAL: S1 hoch · S2 hoch · S3 hoch
+CONTENT_DEPTH: 3
+FAKTEN_S1: [Vulkane sind Berge, aus denen glühend heißes, geschmolzenes Gestein bricht. Unter der Erde heißt dieses flüssige Gestein Magma, an der Oberfläche Lava. Wenn Vulkane ausbrechen, schleudern sie auch Asche und Gase in die Luft. Vulkane gibt es an Land, im Meer und sogar auf anderen Planeten.]
+FAKTEN_S2: [Magma schmilzt in über 100 km Tiefe bei 1000 bis 1300 Grad Celsius. Der Druck treibt das Magma durch Risse nach oben. Dünnflüssige Lava fließt ruhig aus (Schildvulkane), zähe Lava verstopft den Schlot und führt zu gewaltigen Explosionen (Schichtvulkane). Forscher überwachen Erdbeben, Gase und Bodenbeulen zur Vorhersage.]
+FAKTEN_S3: [Das größte Vulkangebiet im Sonnensystem liegt auf dem Jupitermond Io. Unterseeische Riesen wie das Tamu-Massiv übertreffen alle Vulkane an Land. Der Ausbruch des Vesuv 79 n. Chr. wurde von Plinius dem Jüngeren dokumentiert und konservierte Pompeji. Geysire entstehen als Heißwasserfontänen über vulkanischen Wärmequellen durch Siedeverzug.]
+KINDERWELT_ANKER: [Der berühmte Ausbruch des Vesuv zerstörte auch ein bronzezeitliches Dorf bei Avellino, in dem Archäologen tausende Fußspuren von fliehenden Menschen im erhärteten Staub fanden.]
+HAKEN: [Viele Menschen denken bei Vulkanen sofort an spitze Berge, die wie gigantische Wunderkerzen glühende Lava in den Nachthimmel jagen – doch diese spektakulären Feuerberge sind nur ein kleiner Teil einer riesigen, verborgenen Kraftwelt tief unter unseren Füßen.]
+BOX_PLAN_S1: [wow · Mitte · Unterwasser-Giganten]
+BOX_PLAN_S2: [stimmt_das · Mitte · Unterschied Magma und Lava]
+BOX_PLAN_S3: [warnung · Ende · Die rote Zone am Vesuv]
+</planung>{
+  "meta": {
+    "id": "vulkan_l3",
+    "title": "Vulkane",
+    "subtitle": "Die feurigen Riesen unserer Erde",
+    "emoji": "🌋",
+    "age_level": 3,
+    "pattern": "tech_science",
+    "theme_color": "#FF4500",
+    "word_count": 625,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Vulkan",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "naturwissenschaften",
+    "category_sub": "geologie"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Pahoeoe_fountain_edit2.jpg",
+      "alt": "Glühend rote Lavafontäne sprudelt aus einem flachen Vulkankrater.",
+      "caption": "Eine sprudelnde Lavafontäne speist einen glühenden Lavastrom.",
+      "license": "Public domain",
+      "license_author": "J.D. Griggs",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Pahoeoe_fountain_edit2.jpg",
+      "wikimedia_id": "File:Pahoeoe_fountain_edit2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/9/9f/Pahoeoe_fountain_edit2.jpg"
+    },
+    {
+      "index": 1,
+      "filename": "Lava_Lake_Nyiragongo_2.jpg",
+      "alt": "Blick von oben in einen riesigen Krater mit einem brodelnden, rot leuchtenden Lavasee.",
+      "caption": "Ein seltener Blick in einen dauerhaft aktiven Lavasee.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Cai Tjeenk Willink (Caitjeenk)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Lava_Lake_Nyiragongo_2.jpg",
+      "wikimedia_id": "File:Lava_Lake_Nyiragongo_2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/76/Lava_Lake_Nyiragongo_2.jpg"
+    },
+    {
+      "index": 2,
+      "filename": "Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "alt": "Ein Vulkan stößt eine riesige, graue Aschewolke kilometerweit in den Himmel aus.",
+      "caption": "Bei einer explosiven Eruption steigt eine gewaltige Aschesäule auf.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Michael W. Ishak (www.myreefsdiary.com)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Mount_Agung%2C_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "wikimedia_id": "File:Mount_Agung%2C_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Mount_Agung%2C_November_2017_eruption_-_27_Nov_2017_03.jpg"
+    },
+    {
+      "index": 3,
+      "filename": "Beehive_geyser.jpg",
+      "alt": "Ein Geysir stößt eine glänzende Wasser- und Dampffontäne hoch in die Luft.",
+      "caption": "Ein Geysir schleudert kochendes Wasser in einer dichten Fontäne empor.",
+      "license": "Public domain",
+      "license_author": "R Robinson",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Beehive_geyser.jpg",
+      "wikimedia_id": "File:Beehive_geyser.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/48/Beehive_geyser.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Die unbändige Kraft aus der Tiefe",
+      "section_role": "intro",
+      "sentences": [
+        {"id": "s001", "text": "Viele Menschen denken bei Vulkanen sofort an spitze Berge, die wie gigantische Wunderkerzen glühende Lava in den Nachthimmel jagen – doch diese spektakulären Feuerberge sind nur ein kleiner Teil einer riesigen, verborgenen Kraftwelt tief unter unseren Füßen.", "img_index": -1},
+        {"id": "s002", "text": "Ein Vulkan ist eine geologische Struktur, die entsteht, wenn heißes, geschmolzenes Gestein aus dem Erdmantel bis an die Erdoberfläche aufsteigt.", "img_index": -1},
+        {"id": "s003", "text": "Dieses flüssige Gestein schmilzt ab einer Tiefe von etwa 100 Kilometern bei extremen Temperaturen von 1000 bis 1300 Grad Celsius.", "img_index": -1},
+        {"id": "s004", "text": "Unter hohem Druck sucht sich das Magma über Spalten in der Erdkruste den Weg nach oben und sammelt sich zunächst in großen Kammern, bevor es schließlich als Lava ins Freie bricht.", "img_index": 0}
+      ],
+      "boxes": [
+        {"type": "stimmt_das", "text": "Ist Magma und Lava genau dasselbe?", "reveal_text": "Nicht ganz! Es handelt sich zwar um dieselbe geschmolzene Steinmasse, aber der Name ändert sich mit dem Ort. Solange sich die Glutmasse unter der Erdoberfläche befindet, nennen Geologen sie Magma. Sobald sie den Vulkan verlässt und ins Freie fließt, wird sie als Lava bezeichnet.", "reveal_mode": "auto"}
+      ],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Wie entstehen die unterschiedlichen Vulkane?",
+      "section_role": "process_how",
+      "sentences": [
+        {"id": "s005", "text": "Die Zusammensetzung des Magmas bestimmt, wie ein Ausbruch abläuft und welche Form der Vulkan annimmt.", "img_index": -1},
+        {"id": "s006", "text": "Entscheidend ist hierbei der Gehalt an Siliciumdioxid, einem natürlichen Mineral.", "img_index": -1},
+        {"id": "s007", "text": "Enthält die Masse wenig Siliciumdioxid, ist sie dünnflüssig und sehr heiß.", "img_index": -1},
+        {"id": "s008", "text": "Gase können leicht entweichen, und die rote Lava fließt friedlich aus dem Krater aus.", "img_index": 1},
+        {"id": "s009", "text": "Dabei breitet sie sich weitflächig aus und bildet flache, kuppelförmige Schildvulkane.", "img_index": -1},
+        {"id": "s010", "text": "Ist die Masse jedoch reich an Siliciumdioxid, wird sie zähflüssig und kühler.", "img_index": -1},
+        {"id": "s011", "text": "Gase stauen sich unter hohem Druck an, bis der Vulkan in einer grauen, explosiven Eruption regelrecht in die Luft gesprengt wird.", "img_index": 2},
+        {"id": "s012", "text": "Dabei lagern sich abwechselnd Asche und erstarrte Lava ab, wodurch steile Schichtvulkane entstehen.", "img_index": -1}
+      ],
+      "boxes": [
+        {"type": "wow", "text": "Der größte Vulkan unseres Sonnensystems befindet sich nicht auf der Erde. Der Olympus Mons auf dem Planeten Mars ist ein gigantischer Schildvulkan und mit einer Höhe von 22 Kilometern fast dreimal so hoch wie der Mount Everest!"}
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Ein Blick in die Geschichte: Der Untergang von Pompeji",
+      "section_role": "historical_context",
+      "sentences": [
+        {"id": "s013", "text": "Einer der berühmtesten Schichtvulkane der Erde ist der Vesuv in Italien.", "img_index": -1},
+        {"id": "s014", "text": "Im Herbst des Jahres 79 nach Christus brach er völlig unerwartet mit unvorstellbarer Wucht aus.", "img_index": -1},
+        {"id": "s015", "text": "Eine gigantische, 30 Kilometer hohe Säule aus Asche und heißen Gasen stieg in die Atmosphäre auf.", "img_index": -1},
+        {"id": "s016", "text": "Als diese Säule zusammenbrach, rasten glühend heiße Lawinen aus Staub und Gestein, sogenannte pyroklastische Ströme, die Hänge hinab.", "img_index": -1},
+        {"id": "s017", "text": "Die römischen Städte Pompeji und Herculaneum wurden komplett unter einer bis zu 20 Meter dicken Decke aus Asche und Bimsstein begraben.", "img_index": -1},
+        {"id": "s018", "text": "Diese Katastrophe wurde zum ersten Mal in der Geschichte von einem Augenzeugen, dem jungen Römer Plinius dem Jüngeren, in Briefen detailgetreu aufgeschrieben.", "img_index": -1},
+        {"id": "s019", "text": "Jahrhunderte später legten Archäologen die konservierten Städte wieder frei, was uns heute einen einzigartigen Blick in das damalige römische Alltagsleben ermöglicht.", "img_index": -1},
+        {"id": "s020", "text": "Noch ältere Spuren fanden Forscher bei Bauarbeiten nahe Avellino: Tausende versteinerte Fußabdrücke im weichen Staub zeigen, wie bronzezeitliche Bauern fluchtartig ihre Heimat verließen.", "img_index": -1}
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Wenn das Wasser kocht: Geysire und heiße Quellen",
+      "section_role": "today_legacy",
+      "sentences": [
+        {"id": "s021", "text": "Auch wenn ein Vulkan gerade nicht aktiv ausbricht, hinterlässt die Hitze tief im Boden spektakuläre Spuren an der Oberfläche.", "img_index": -1},
+        {"id": "s022", "text": "In vulkanischen Regionen erwärmt die Magmakammer das Grundwasser weit über 100 Grad Celsius.", "img_index": -1},
+        {"id": "s023", "text": "Wegen des enormen Drucks der Wassersäule in den engen Gesteinskanälen kann das Wasser zunächst nicht kochen.", "img_index": -1},
+        {"id": "s024", "text": "Erst wenn einzelne Dampfblasen aufsteigen und das obere Wasser wegdrücken, sinkt der Druck schlagartig.", "img_index": -1},
+        {"id": "s025", "text": "Das überhitzte Wasser verwandelt sich explosionsartig in Dampf und schießt als majestätische Heißwasserfontäne aus der Erde.", "img_index": 3},
+        {"id": "s026", "text": "Diese faszinierenden Springquellen nennen wir Geysire, benannt nach dem Großen Geysir auf Island.", "img_index": -1},
+        {"id": "s027", "text": "Der aktivste Ort für Geysire ist der Yellowstone-Nationalpark in den USA, wo der berühmte Geysir 'Old Faithful' fast stündlich seine kochende Fontäne in den Himmel jagt.", "img_index": -1}
+      ],
+      "boxes": [
+        {"type": "warnung", "text": "Der Vesuv befindet sich seit 1944 in einer Ruhephase, ist aber keineswegs erloschen. Heute leben mehr als eine Million Menschen im direkten Gefährdungsbereich des Berges. Trotz strenger Bauverbote in der rot markierten Gefahrenzone wurden dort in den letzten zwanzig Jahren tausende Häuser illegal errichtet."}
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wie unterscheidet sich Magma von Lava?",
+        "options": [
+          {"key": "A", "text": "Magma enthält viel mehr Wasser als Lava."},
+          {"key": "B", "text": "Magma befindet sich unter der Erde, Lava an der Oberfläche."},
+          {"key": "C", "text": "Lava ist deutlich heißer als flüssiges Magma."}
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Welcher Stoff im Magma bestimmt maßgeblich, ob ein Vulkan explosiv ausbricht?",
+        "options": [
+          {"key": "A", "text": "Kohlendioxid"},
+          {"key": "B", "text": "Siliciumdioxid"},
+          {"key": "C", "text": "Basaltgestein"}
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Welcher römische Augenzeuge dokumentierte den folgenschweren Ausbruch des Vesuv im Jahr 79 n. Chr.?",
+        "options": [
+          {"key": "A", "text": "Plinius der Jüngere"},
+          {"key": "B", "text": "Kaiser Augustus"},
+          {"key": "C", "text": "Julius Cäsar"}
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q4",
+        "text": "Was treibt die kochenden Wasserfontänen eines Geysirs aus dem Boden?",
+        "options": [
+          {"key": "A", "text": "Starke unterirdische Stürme"},
+          {"key": "B", "text": "Plötzlicher Druckabfall und schlagartige Dampfbildung"},
+          {"key": "C", "text": "Das Einwirken der Gezeitenkräfte des Mondes"}
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": ["Lava", "Magma", "Plattentektonik", "Erdbeben"],
+    "discover": ["Geysir", "Vesuv", "Pompeji", "Schildvulkan"]
+  },
+  "source_passages": [
+    {
+      "claim": "Ein Vulkan ist eine geologische Struktur, die entsteht, wenn Magma bis an die Oberfläche aufsteigt.",
+      "source": "Vulkan",
+      "passage": "Ein Vulkan ist eine geologische Struktur, die entsteht, wenn Magma (Gesteinsschmelze) bis an die Oberfläche eines Planeten (z. B. der Erde) aufsteigt."
+    },
+    {
+      "claim": "Dieses flüssige Gestein schmilzt ab einer Tiefe von etwa 100 Kilometern bei extremen Temperaturen von 1000 bis 1300 Grad Celsius.",
+      "source": "Vulkan",
+      "passage": "Im Fall der Erde schmelzen Gesteine ab 100 km Tiefe bei Temperaturen zwischen 1000 und 1300 °C."
+    },
+    {
+      "claim": "Je mehr Siliciumdioxid das Magma enthält, desto explosiver verhält sich der Vulkan.",
+      "source": "Vulkan",
+      "passage": "Je mehr SiO2 das Magma enthält, desto explosiver ist der damit verbundene Vulkanismus."
+    },
+    {
+      "claim": "Die Pompeji-Eruption traf die Anwohner völlig unvorbereitet und wurde von Plinius dokumentiert.",
+      "source": "Vesuv",
+      "passage": "Die Bezeichnung „plinianische Eruption“ bezieht sich auf Plinius den Jüngeren. Der spätere römische Senator beobachtete als junger Mann den letzten Großausbruch des Vesuv im Jahr 79 n. Chr., bei dem die antiken Städte Pompeji, Herculaneum, Stabiae und Oplontis verschüttet wurden, und schilderte diesen Jahre später in seinen Schriften."
+    },
+    {
+      "claim": "Geysire schleudern heißes Wasser durch die Erwärmung einer Magmakammer und anschließende Druckentlastung empor.",
+      "source": "Geysir",
+      "passage": "Die Wärme einer Magmakammer erhitzt das Grundwasser auf über 100 °C. Durch den Druck der darüber stehenden Wassersäule siedet das Wasser zunächst nicht (Siedepunktserhöhung)... Dadurch sinkt unten der Druck rapide ab und das überhitzte Wasser geht schlagartig in Dampf über."
+    }
+  ]
+}

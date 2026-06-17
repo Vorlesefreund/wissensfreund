@@ -1,12 +1,31 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T06:15:11Z -->
+<!-- updated: 2026-06-17T07:30:00Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Schema-Konsistenz Stage 2 (2026-06-17)** ← AKTUELL
+**A/B-Test Thinking S3 — Vulkan (2026-06-17)** ← AKTUELL
+
+Härterer Thinking-Test auf einem S3-Artikel (Länge/Komplexität: Plattentektonik, Magma, Geysire).
+
+| | A — MEDIUM | B — kein Thinking |
+|---|---|---|
+| Dauer | 124.9 s | 28.6 s (4.4× schneller) |
+| candidates_tokens | 8 051 | 4 923 |
+| thoughts_tokens | 16 985 | 0 |
+| Wörter (meta) | 638 ≤ 650 ✅ | 625 ≤ 650 ✅ |
+| Sections | 5 | 4 |
+| Boxes | 2 (warnung + wow) | 3 (stimmt_das + wow + warnung) |
+| source_passages | 33 ✅ | 5 ⚠️ |
+
+Hauptbefund: A hat 33 source_passages vs. B nur 5 — deutlich mehr Quellenverankerung durch Thinking.
+Strukturell: A vertieft Chemie/Mineralien und Monitoring (5 Sections), B schlanker (4 Sections).
+Wortziel ≤650: beide eingehalten. Lesbare Aufbereitung: `articles/test_thinking_ab_s3/vergleich_lesbar.md`.
+→ Entscheidung Thinking-Strategie liegt bei Andreas.
+
+**Schema-Konsistenz Stage 2 (2026-06-17)**
 
 ### source_passages kanonisch ins Schema (Prompt-Widerspruch behoben)
 - `_gen2_variable_suffix()` sendete eigene Wrapper-Anweisung `{article, source_passages}` die dem
@@ -165,9 +184,10 @@ Medium 3.5 (3 Topics): alle 429 — Key-Tier-Limit 25K Tokens/min, Produktions-M
 
 ## Gerade in Arbeit
 
-**Quiz/stimmt_das App-Dart-Fix** — Entscheidung noch offen (s. Schema-Mismatch oben).
-Empfehlung: wf_article.dart anpassen (j['question']→j['text'], j['explanation']→j['reveal_text'],
-reveal_mode-Vergleich auf 'auto'-String), tts_compose.py bleibt unverändert.
+**Quiz/stimmt_das App-Dart-Fix** — Entscheidung getroffen: wf_article.dart anpassen.
+Drei Mismatches: j['question']→j['text'], j['explanation']→j['reveal_text'],
+reveal_mode == true → reveal_mode == 'auto' (String). tts_compose.py bleibt unverändert.
+NÄCHSTER SCHRITT: wf_article.dart fixen + committen.
 
 ---
 

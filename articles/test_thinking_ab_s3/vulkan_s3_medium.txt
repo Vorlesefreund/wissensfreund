@@ -1,0 +1,413 @@
+<planung>
+MUSTER: place_geography
+QUELLEN: https://de.wikipedia.org/wiki/Vulkan + https://de.wikipedia.org/wiki/Lava + https://de.wikipedia.org/wiki/Magma + https://de.wikipedia.org/wiki/Vesuv + https://de.wikipedia.org/wiki/Geysir
+BEREICHERUNGS_LINKS: https://de.wikipedia.org/wiki/Vesuv (liefert fesselnde historische Dramatik und archäologische Funde von Katastrophenopfern); https://de.wikipedia.org/wiki/Geysir (erklärt faszinierende postvulkanische Phänomene als verständliche Auswirkung von Hitze und Druck)
+APPEAL: S1 [hoch] · S2 [hoch] · S3 [hoch]
+CONTENT_DEPTH: 3
+FAKTEN_S1: Vulkane spucken heiße Lava; sie sehen oft aus wie große Kegel; es gibt sie auch unter Wasser.
+FAKTEN_S2: Unterschied Magma/Lava; Gase erzeugen Druck; verschiedene Lavatypen (Pahoeoe, Aa); Pompeji wurde verschüttet.
+FAKTEN_S3: Siliciumdioxid-Gehalt bestimmt Explosivität; Caldera-Entstehung; historische Funde wie Fußspuren in Afragola und das Dorf in Nola; seismologische Überwachung mittels Tremor; Geysir-Mechanik und Bunsens Experiment.
+KINDERWELT_ANKER: Der Vergleich mit einer geschüttelten Sprudelflasche (Druckanstieg durch eingeschlossene Gase, die beim Öffnen schlagartig expandieren).
+HAKEN: Vom klassischen Bild des rauchenden Kegelbergs ausgehen, um dann zu zeigen, dass Vulkane weit vielfältigere Formen (Schildvulkane, unterseeische Massive) besitzen und im Kern geologische Aufstiegsstrukturen sind.
+BOX_PLAN_S1: [wow · Ende · Eisvulkane auf Pluto]
+BOX_PLAN_S2: [stimmt_das · Mitte · Denken alle Vulkane sind Kegel, aber es gibt flache Schildvulkane]
+BOX_PLAN_S3: [warnung · Mitte · Vesuvs aktive Bedrohung der Roten Zone mit 600.000 Einwohnern] · [wow · Ende · Eisvulkane im Weltall]
+</planung>{
+  "meta": {
+    "id": "vulkan_l3",
+    "title": "Vulkane – Die feurigen Riesen der Erde",
+    "subtitle": "Wie glühendes Gestein, enormer Druck und heiße Fontänen unseren Planeten formen",
+    "emoji": "🌋",
+    "age_level": 3,
+    "pattern": "place_geography",
+    "theme_color": "#D32F2F",
+    "word_count": 638,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Vulkan",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "natur",
+    "category_sub": "geografie"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Pahoeoe_fountain_edit2.jpg",
+      "alt": "Glühend rote Lava spritzt aus einem Vulkan und fließt über dunkles Gestein",
+      "caption": "Glühende Lavafontänen formen die Landschaft um den Vulkan herum neu.",
+      "license": "Public domain",
+      "license_author": "J.D. Griggs",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Pahoeoe_fountain_edit2.jpg",
+      "wikimedia_id": "File:Pahoeoe_fountain_edit2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/9/9f/Pahoeoe_fountain_edit2.jpg"
+    },
+    {
+      "index": 1,
+      "filename": "Aa_large.jpg",
+      "alt": "Glühende Lava fließt als zäher, brockiger Strom über dunkles Gestein",
+      "caption": "Die zähflüssige A-Lava kühlt ab und zerbricht in scharfkantige Brocken.",
+      "license": "Public domain",
+      "license_author": "USGS",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Aa_large.jpg",
+      "wikimedia_id": "File:Aa_large.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/f/f1/Aa_large.jpg"
+    },
+    {
+      "index": 2,
+      "filename": "Lava_Lake_Nyiragongo_2.jpg",
+      "alt": "Blick von oben in einen Vulkankrater mit einem rot glühenden Lavasee",
+      "caption": "In manchen Kratern sammelt sich die flüssige Lava zu einem riesigen See.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Cai Tjeenk Willink (Caitjeenk)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Lava_Lake_Nyiragongo_2.jpg",
+      "wikimedia_id": "File:Lava_Lake_Nyiragongo_2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/76/Lava_Lake_Nyiragongo_2.jpg"
+    },
+    {
+      "index": 3,
+      "filename": "Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "alt": "Ein großer Vulkan stößt eine riesige, graue Aschewolke in den Himmel aus",
+      "caption": "Bei einer explosiven Eruption schießen gigantische Aschewolken kilometerweit hinauf.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Michael W. Ishak",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "wikimedia_id": "File:Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Mount_Agung%2C_November_2017_eruption_-_27_Nov_2017_03.jpg"
+    },
+    {
+      "index": 4,
+      "filename": "Teide_Volcano_Tenerife_20060429.jpg",
+      "alt": "Ein großer, kegelförmiger Vulkan mit schneebedeckter Spitze unter blauem Himmel",
+      "caption": "Der klassische Schichtvulkan hat steile Hänge und die Form eines Kegels.",
+      "license": "CC BY 2.0",
+      "license_author": "ph_micchei",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Teide_Volcano_Tenerife_20060429.jpg",
+      "wikimedia_id": "File:Teide_Volcano_Tenerife_20060429.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/5/59/Teide_Volcano_Tenerife_20060429.jpg"
+    },
+    {
+      "index": 5,
+      "filename": "Beehive_geyser.jpg",
+      "alt": "Ein Geysir stößt eine hohe Säule aus Wasser und weißem Dampf in den Nachthimmel",
+      "caption": "Ein Geysir schleudert kochend heißes Wasser als Fontäne aus dem Boden.",
+      "license": "Public domain",
+      "license_author": "R Robinson",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Beehive_geyser.jpg",
+      "wikimedia_id": "File:Beehive_geyser.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/48/Beehive_geyser.jpg"
+    }
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "heading": "Faszination Feuerberge",
+      "section_role": "intro",
+      "sentences": [
+        {"id": "s001", "text": "Wer an einen Vulkan denkt, sieht meistens einen riesigen, spitz zulaufenden Berg vor sich.", "img_index": 4},
+        {"id": "s002", "text": "Doch diese klassischen Kegelberge zeigen nur einen Teil der gewaltigen Kräfte unserer Erde.", "img_index": -1},
+        {"id": "s003", "text": "Ein Vulkan ist eine geologische Struktur, die entsteht, wenn Magma bis an die Oberfläche aufsteigt.", "img_index": -1},
+        {"id": "s004", "text": "Diesen heißen Gesteinsbrei nennen Forscher Magma, solange er sich noch tief unter der Erdkruste befindet.", "img_index": -1},
+        {"id": "s005", "text": "Bricht das flüssige Gestein schließlich durch die Erdkruste aus, wird es an der Luft als Lava bezeichnet.", "img_index": 0},
+        {"id": "s006", "text": "Alle Begleiterscheinungen dieses feurigen Aufstiegs bezeichnen Wissenschaftler als Vulkanismus.", "img_index": -1}
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "shapes",
+      "heading": "Kegel, Schilde und verborgene Riesen",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {"id": "s007", "text": "Die Gestalt eines Vulkans hängt stark von der Zähigkeit der austretenden Lava ab.", "img_index": -1},
+        {"id": "s008", "text": "Die bekannteste Form ist der Schichtvulkan, der wie ein steiler Kegel aufgebaut ist.", "img_index": 4},
+        {"id": "s009", "text": "Er entsteht, wenn zähflüssige Lava ausbricht, schnell abkühlt und sich Schicht für Schicht auftürmt.", "img_index": -1},
+        {"id": "s010", "text": "Dünnflüssige Lava fließt weit flacher aus und bildet flache, breite Berge, sogenannte Schildvulkane.", "img_index": -1},
+        {"id": "s011", "text": "Jeder Vulkan besitzt einen Schlot, also eine Röhre, durch die flüssiges Gestein nach oben wandert.", "img_index": -1},
+        {"id": "s012", "text": "Oben befindet sich der Krater, die schüsselförmige Öffnung des Vulkans.", "img_index": 2},
+        {"id": "s013", "text": "Stürzt die Decke einer entleerten Magmakammer ein, entsteht ein riesiger Einbruchskrater, den man Caldera nennt.", "img_index": -1},
+        {"id": "s014", "text": "Der größte bekannte Einzelvulkan der Erde, das unterseeische Tamu-Massif, liegt völlig unsichtbar östlich von Japan.", "img_index": -1},
+        {"id": "s015", "text": "Er ist unglaubliche 650 Kilometer lang.", "img_index": -1}
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "chemistry",
+      "heading": "Der chemische Fingerabdruck des Feuers",
+      "section_role": "behavior_life",
+      "sentences": [
+        {"id": "s016", "text": "Warum brechen manche Vulkane ruhig aus, während andere in gigantischen Explosionen Luft und Asche schleudern?", "img_index": 3},
+        {"id": "s017", "text": "Das Geheimnis liegt im Siliciumdioxid, einem Baustein, der die Zähigkeit des Magmas bestimmt.", "img_index": -1},
+        {"id": "s018", "text": "Je mehr Siliciumdioxid im Magma steckt, desto zäher ist es und desto explosiver wird der Ausbruch.", "img_index": -1},
+        {"id": "s019", "text": "Eingeschlossene Gase können aus zähem Magma schwer entweichen, wodurch sich ein enormer Druck aufbaut.", "img_index": -1},
+        {"id": "s020", "text": "Das funktioniert ähnlich wie bei einer geschüttelten Sprudelflasche, bei der beim Öffnen plötzlich alles herausspritzt.", "img_index": -1},
+        {"id": "s021", "text": "Tritt die Lava schließlich aus, kühlt sie ab und bildet faszinierende Formen.", "img_index": -1},
+        {"id": "s022", "text": "Die dünnflüssige Pāhoehoe-Lava bildet glatte, glasige Oberflächen, die oft wie dicke, zusammengerollte Stricke aussehen.", "img_index": 0},
+        {"id": "s023", "text": "Die zähflüssige ʻAʻā-Lava erstarrt dagegen zu scharfkantigen Brocken, über die man kaum laufen kann.", "img_index": 1},
+        {"id": "s024", "text": "Kühlt Lava im kalten Meerwasser sehr schnell ab, formt sie runde Gebilde, die man Kissenlava nennt.", "img_index": -1}
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "history",
+      "heading": "Die Tragödie von Pompeji und der Vesuv",
+      "section_role": "historical_context",
+      "sentences": [
+        {"id": "s025", "text": "Einer der berühmtesten Vulkane der Welt ist der Vesuv am Golf von Neapel in Italien.", "img_index": -1},
+        {"id": "s026", "text": "Im Jahr 79 nach Christus brach dieser Schichtvulkan nach einer jahrhundertelangen Ruhepause völlig überraschend aus.", "img_index": -1},
+        {"id": "s027", "text": "Der junge Römer Plinius der Jüngere beobachtete die Katastrophe und schrieb seine Erlebnisse genau auf.", "img_index": -1},
+        {"id": "s028", "text": "Deshalb nennen Forscher solche explosiven Ausbrüche mit kilometerhohen Rauchwolken heute plinianische Eruptionen.", "img_index": 3},
+        {"id": "s029", "text": "Damals wurden die römischen Städte Pompeji und Herculaneum unter meterhohen Ascheschichten begraben.", "img_index": -1},
+        {"id": "s030", "text": "Besonders gefährlich waren die pyroklastischen Ströme – glühend heiße Lawinen aus Asche, Gas und Gestein.", "img_index": -1},
+        {"id": "s031", "text": "Bereits Jahrtausende vor Pompeji flohen Menschen vor dem Vesuv, wie versteinerte Fußspuren bei Afragola beweisen.", "img_index": -1},
+        {"id": "s032", "text": "Forscher fanden sogar ein bronzezeitliches Dorf in Nola, das von Asche perfekt konserviert wurde.", "img_index": -1},
+        {"id": "s033", "text": "Die Bewohner mussten damals ihr Hab und Gut in allergrößter Eile im Stich lassen.", "img_index": -1}
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Der Vesuv ist noch heute aktiv und gefährlich. In der dicht besiedelten 'Roten Zone' um den Vulkan leben über 600.000 Menschen direkt an seinen Hängen."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "monitoring",
+      "heading": "Forschung und die heißen Quellen der Erde",
+      "section_role": "today_legacy",
+      "sentences": [
+        {"id": "s034", "text": "Heute versuchen Wissenschaftler mit empfindlichen Seismometern, die winzigen Erdbeben vor einem Ausbruch aufzuzeichnen.", "img_index": -1},
+        {"id": "s035", "text": "Diese feinen Erschütterungen, auch vulkanischer Tremor genannt, verraten, dass Magma im Schlot aufsteigt.", "img_index": -1},
+        {"id": "s036", "text": "Auch Satelliten helfen, indem sie Temperaturerhöhungen messen oder Aufbeulungen des Bodens aus dem All erkennen.", "img_index": -1},
+        {"id": "s037", "text": "Manchmal zeigt sich die Hitze des Magmas auch auf ganz andere Weise an der Erdoberfläche.", "img_index": -1},
+        {"id": "s038", "text": "In vulkanischen Gebieten gibt es heiße Quellen, die ihr Wasser als Fontäne ausstoßen: die Geysire.", "img_index": 5},
+        {"id": "s039", "text": "Das Grundwasser wird tief unter der Erde durch die Hitze einer Magmakammer auf weit über 100 Grad erhitzt.", "img_index": -1},
+        {"id": "s040", "text": "Weil das Wasser durch eine enge Gesteinsröhre nach oben gepresst wird, gerät es schlagartig unter Druck.", "img_index": -1},
+        {"id": "s041", "text": "Sobald Dampfblasen aufsteigen, sinkt der Druck ab und das Wasser schießt kochend heiß in die Luft.", "img_index": 5},
+        {"id": "s042", "text": "Der berühmte Geysir Old Faithful im Yellowstone-Nationalpark bricht regelmäßig aus.", "img_index": -1}
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Vulkane gibt es nicht nur auf der Erde! Der Jupitermond Io ist die aktivste Vulkanwelt unseres Sonnensystems, und auf Pluto haben Forscher sogar riesige Eisvulkane entdeckt."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was unterscheidet Magma von Lava?",
+        "options": [
+          {"key": "A", "text": "Magma befindet sich unter der Erde, während Lava an die Erdoberfläche ausgetreten ist."},
+          {"key": "B", "text": "Magma ist bereits abgekühlt, während Lava noch flüssig und extrem heiß ist."},
+          {"key": "C", "text": "Magma enthält kein Siliciumdioxid, während Lava fast nur daraus besteht."}
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Welcher Baustein im Magma bestimmt maßgeblich, wie explosiv ein Vulkan ausbricht?",
+        "options": [
+          {"key": "A", "text": "Kohlenstoffdioxid"},
+          {"key": "B", "text": "Siliciumdioxid"},
+          {"key": "C", "text": "Helium"}
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Was versteht man unter einer Caldera?",
+        "options": [
+          {"key": "A", "text": "Ein unterirdischer Gang, durch den Geysire ihr heißes Wasser nach oben pressen."},
+          {"key": "B", "text": "Eine erstarrte Form von Lava, die wie zusammengerollte Stricke aussieht."},
+          {"key": "C", "text": "Ein großer Einbruchskrater, der durch das Einstürzen einer leeren Magmakammer entsteht."}
+        ],
+        "correct_key": "C"
+      },
+      {
+        "id": "q4",
+        "text": "Welches Phänomen bezeichnet man in der Seismologie als 'vulkanischen Tremor'?",
+        "options": [
+          {"key": "A", "text": "Ein lautes Knallen, das beim plötzlichen Ausströmen von Gasen entsteht."},
+          {"key": "B", "text": "Eine Serie feiner, niedrigfrequenter Erdbeben, die durch die Bewegung von Magma entstehen."},
+          {"key": "C", "text": "Das langsame Abkühlen von Lava in einem unterirdischen Keller."}
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": ["Vulkanismus", "Magma", "Lava", "Vesuv", "Geysir"],
+    "discover": ["Plattentektonik", "Seismometer", "Pompeji", "Caldera"]
+  },
+  "source_passages": [
+    {
+      "claim": "Ein Vulkan ist eine geologische Struktur, die entsteht, wenn Magma bis an die Oberfläche aufsteigt.",
+      "source": "Vulkan",
+      "passage": "Ein Vulkan ist eine geologische Struktur, die entsteht, wenn Magma (Gesteinsschmelze) bis an die Oberfläche eines Planeten (z. B. der Erde) aufsteigt."
+    },
+    {
+      "claim": "Diesen heißen Gesteinsbrei nennen Forscher Magma, solange er sich noch tief unter der Erdkruste befindet.",
+      "source": "Magma",
+      "passage": "Als Magma (sächlich; von altgriechisch μάγμα mágma, deutsch ‚geknetete Masse‘) wird im Untergrund befindliche Gesteinsschmelze bezeichnet."
+    },
+    {
+      "claim": "Bricht das flüssige Gestein schließlich durch die Erdkruste aus, wird es an der Luft als Lava bezeichnet.",
+      "source": "Lava",
+      "passage": "Lava (Mehrzahl Laven) ist die Bezeichnung for eruptiertes Magma, das flüssig an die Erdoberfläche ausgetreten ist."
+    },
+    {
+      "claim": "Alle Begleiterscheinungen dieses feurigen Aufstiegs bezeichnen Wissenschaftler als Vulkanismus.",
+      "source": "Vulkan",
+      "passage": "Alle Begleiterscheinungen, die mit dem Aufstieg und Austritt der glutflüssigen Gesteinsschmelze verbunden sind, bezeichnet man als Vulkanismus."
+    },
+    {
+      "claim": "Die Gestalt eines Vulkans hängt stark von der Zähigkeit der austretenden Lava ab.",
+      "source": "Vulkan",
+      "passage": "Die Gestalt kann aber auch unregelmäßig oder kuppelförmig aufgewölbt sein."
+    },
+    {
+      "claim": "Die bekannteste Form ist der Schichtvulkan, der wie ein steiler Kegel aufgebaut ist.",
+      "source": "Vulkan",
+      "passage": "Die meisten Vulkane haben annähernd die Form eines Kegels, dessen Hangneigung von der Viskosität der Lava abhängt."
+    },
+    {
+      "claim": "Stürzt die Decke einer entleerten Magmakammer ein, entsteht ein riesiger Einbruchskrater, den man Caldera nennt.",
+      "source": "Vulkan",
+      "passage": "Bricht ein Schlot über einer oberflächennahen Magmakammer zusammen, und es bildet sich ein großer Einbruchskrater, wird dieser als Caldera bezeichnet."
+    },
+    {
+      "claim": "Der größte bekannte Einzelvulkan der Erde, das unterseeische Tamu-Massif, liegt völlig unsichtbar östlich von Japan.",
+      "source": "Vulkan",
+      "passage": "Forscher das unterseeische Tamu-Massif östlich von Japan für den größten Vulkan der Erde halten."
+    },
+    {
+      "claim": "Er ist unglaubliche 650 Kilometer lang.",
+      "source": "Vulkan",
+      "passage": "Es handle sich wahrscheinlich um einen Einzelvulkan von 650 Kilometern Länge und 450 Kilometern Breite."
+    },
+    {
+      "claim": "Das Geheimnis liegt im Siliciumdioxid, einem Baustein, der die Zähigkeit des Magmas bestimmt.",
+      "source": "Vulkan",
+      "passage": "Einen entscheidenden Einfluss auf die Ausbildung eines Vulkans hat neben dem Gas- und Wassergehalt die Zusammensetzung seines Magmas, vor allem der Gehalt an Siliciumdioxid (SiO2)."
+    },
+    {
+      "claim": "Je mehr Siliciumdioxid im Magma steckt, desto zäher ist es und desto explosiver wird der Ausbruch.",
+      "source": "Vulkan",
+      "passage": "Je mehr SiO2 das Magma enthält, desto explosiver ist der damit verbundene Vulkanismus."
+    },
+    {
+      "claim": "Die dünnflüssige Pāhoehoe-Lava bildet glatte, glasige Oberflächen, die oft wie dicke, zusammengerollte Stricke aussehen.",
+      "source": "Lava",
+      "passage": "Pāhoehoe-Lava ist eine dünnflüssige... basaltische Lava, die als Lavastrom hangabwärts fließt. Sie bildet glasige Oberflächen. Erscheinungsformen... sind Stricklava"
+    },
+    {
+      "claim": "Die zähflüssige ʻAʻā-Lava erstarrt dagegen zu scharfkantigen Brocken, über die man kaum laufen kann.",
+      "source": "Lava",
+      "passage": "ʻAʻā-Lava – auch Brockenlava – ist eine zähflüssige basaltische Lava, die zu scharfkantigen Brocken und Klumpen erstarrt."
+    },
+    {
+      "claim": "Kühlt Lava im kalten Meerwasser sehr schnell ab, formt sie runde Gebilde, die man Kissenlava nennt.",
+      "source": "Lava",
+      "passage": "Pillow- oder Kissenlava... entsteht bei der sehr schnellen Abkühlung von Lava im Wasser."
+    },
+    {
+      "claim": "Einer der berühmtesten Vulkane der Welt ist der Vesuv am Golf von Neapel in Italien.",
+      "source": "Vesuv",
+      "passage": "Der Vesuv (italienisch Vesuvio, lateinisch Vesuvius) ist ein aktiver Vulkan. Er liegt am Golf von Neapel in der italienischen Region Kampanien..."
+    },
+    {
+      "claim": "Im Jahr 79 nach Christus brach dieser Schichtvulkan nach einer jahrhundertelangen Ruhepause völlig überraschend aus.",
+      "source": "Vesuv",
+      "passage": "Der letzte plinianische Ausbruch des Vesuv, bei dem die Orte Pompeji, Herculaneum... vollständig begraben wurden, ereignete sich laut Plinius im Jahr 79 n. Chr."
+    },
+    {
+      "claim": "Der junge Römer Plinius der Jüngere beobachtete die Katastrophe und schrieb seine Erlebnisse genau auf.",
+      "source": "Vesuv",
+      "passage": "Die Bezeichnung „plinianische Eruption“ bezieht sich auf Plinius den Jüngeren. Der spätere römische Senator beobachtete als junger Mann den letzten Großausbruch des Vesuv im Jahr 79 n. Chr..."
+    },
+    {
+      "claim": "Damals wurden die römischen Städte Pompeji und Herculaneum unter meterhohen Ascheschichten begraben.",
+      "source": "Vesuv",
+      "passage": "bei dem die antiken Städte Pompeji, Herculaneum... verschüttet wurden..."
+    },
+    {
+      "claim": "Besonders gefährlich waren die pyroklastischen Ströme – glühend heiße Lawinen aus Asche, Gas und Gestein.",
+      "source": "Vesuv",
+      "passage": "Die großen Vesuv-Ausbrüche sind zudem von pyroklastischen Strömen begleitet, die zu den gefährlichsten Formen des Vulkanismus zählen."
+    },
+    {
+      "claim": "Bereits Jahrtausende vor Pompeji flohen Menschen vor dem Vesuv, wie versteinerte Fußspuren bei Afragola beweisen.",
+      "source": "Vesuv",
+      "passage": "bei Afragola Tausende menschliche Fußspuren entdeckt. Geologische Analysen beweisen, dass die Abdrücke von bronzezeitlichen Bewohnern stammen, die vor der Avellino-Eruption flohen."
+    },
+    {
+      "claim": "Forscher fanden sogar ein bronzezeitliches Dorf in Nola, das von Asche perfekt konserviert wurde.",
+      "source": "Vesuv",
+      "passage": "In Nola 2001 entdeckte man... Reste eines kleinen Dorfes. Alle Häuser waren von dicken Ascheschichten aus ebendieser Zeit begraben... und damit konserviert wurde..."
+    },
+    {
+      "claim": "Die Bewohner mussten damals ihr Hab und Gut in allergrößter Eile im Stich lassen.",
+      "source": "Vesuv",
+      "passage": "von den damaligen Bewohnern in aller Eile verlassen... Reste von Gebrauchsgegenständen..."
+    },
+    {
+      "claim": "Heute versuchen Wissenschaftler mit empfindlichen Seismometern, die winzigen Erdbeben vor einem Ausbruch aufzuzeichnen.",
+      "source": "Vulkan",
+      "passage": "Um Tiefe und Herd der vulkanischen Beben zu ermitteln, wird in der Regel ein Netz von äußerst empfindlichen Seismometern rund um den Vulkan eingerichtet."
+    },
+    {
+      "claim": "Diese feinen Erschütterungen, auch vulkanischer Tremor genannt, verraten, dass Magma im Schlot aufsteigt.",
+      "source": "Vulkan",
+      "passage": "die Bewegung der Risse dagegen führt zu niedrig frequenten Beben, dem sogenannten vulkanischen Tremor."
+    },
+    {
+      "claim": "Auch Satelliten helfen, indem sie Temperaturerhöhungen messen oder Aufbeulungen des Bodens aus dem All erkennen.",
+      "source": "Vulkan",
+      "passage": "durch Infrarot-Aufnahmen von Satelliten aus können solche thermischen Aufheizungen festgestellt werden... Satellitenbilder zur Überwachung von Vulkanen und deren Verformung bzw. Aufwölbung"
+    },
+    {
+      "claim": "In vulkanischen Gebieten gibt es heiße Quellen, die ihr Wasser als Fontäne ausstoßen: die Geysire.",
+      "source": "Geysir",
+      "passage": "Ein Geysir, auch Geiser genannt, ist eine heiße Quelle, die ihr Wasser in regelmäßigen oder unregelmäßigen Abständen als Fontäne ausstößt."
+    },
+    {
+      "claim": "Das Grundwasser wird tief unter der Erde durch die Hitze einer Magmakammer auf weit über 100 Grad erhitzt.",
+      "source": "Geysir",
+      "passage": "Die Wärme einer Magmakammer erhitzt das Grundwasser auf über 100 °C."
+    },
+    {
+      "claim": "Weil das Wasser durch eine enge Gesteinsröhre nach oben gepresst wird, gerät es schlagartig unter Druck.",
+      "source": "Geysir",
+      "passage": "Eruptionskanal beziehungsweise Verengungen im Eruptionskanal spielen eine wesentliche Rolle... Druck, den die Wassersäule... ausübt"
+    },
+    {
+      "claim": "Sobald Dampfblasen aufsteigen, sinkt der Druck ab und das Wasser schießt kochend heiß in die Luft.",
+      "source": "Geysir",
+      "passage": "steigen einzelne Dampfblasen durch die Engstelle im Kanal aufwärts... Dadurch sinkt unten der Druck rapide ab und das überhitzte Wasser geht schlagartig in Dampf über."
+    },
+    {
+      "claim": "Der berühmte Geysir Old Faithful im Yellowstone-Nationalpark bricht regelmäßig aus.",
+      "source": "Geysir",
+      "passage": "Ein typischer Vertreter dieses Modells ist der Geysir Old Faithful im Yellowstone-Nationalpark."
+    },
+    {
+      "claim": "Vulkane gibt es nicht nur auf der Erde! Der Jupitermond Io ist die aktivste Vulkanwelt unseres Sonnensystems...",
+      "source": "Vulkan",
+      "passage": "Vulkanisch aktivste Welt des Sonnensystems ist der Jupitermond Io."
+    },
+    {
+      "claim": "auf Pluto haben Forscher sogar riesige Eisvulkane entdeckt.",
+      "source": "Vulkan",
+      "passage": "2022 wurde auf dem Zwergplaneten Pluto ebenfalls ein gigantischer Eisvulkan entdeckt."
+    },
+    {
+      "claim": "Der Vesuv ist noch heute aktiv und gefährlich. In der dicht besiedelten 'Roten Zone' um den Vulkan leben über 600.000 Menschen direkt an seinen Hängen.",
+      "source": "Vesuv",
+      "passage": "Rote Zone des Vulkans... Rote Zone 600.000 Einwohner... an den Hängen des Vesuv"
+    }
+  ]
+}
