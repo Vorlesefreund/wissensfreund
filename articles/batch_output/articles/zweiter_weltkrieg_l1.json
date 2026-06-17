@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "id": "zweiter_weltkrieg_l1",
+    "title": "Zweiter Weltkrieg",
+    "subtitle": "Als fast die ganze Welt stritt",
+    "emoji": "🌍",
+    "age_level": 1,
+    "pattern": "place_geography",
+    "theme_color": "#42a5f5",
+    "word_count": 152,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Zweiter_Weltkrieg",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "kriege",
+    "generated_at": "2026-06-17T09:21:37.486550+00:00",
+    "grounding_companions": [
+      "Anne Frank",
+      "Weiße Rose",
+      "Enigma (Maschine)",
+      "Luftschutzbunker"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b"
+  },
+  "images": [],
+  "sections": [
+    {
+      "id": "intro",
+      "heading": "Ein riesiger Streit auf der Erde",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Vor langer Zeit gab es einen riesigen Krieg.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Er hieß der Zweite Weltkrieg.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Dabei kämpften sehr viele Länder auf der Erde gegeneinander.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Es war der größte Kampf aller Zeiten.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "how_it_was",
+      "heading": "Der schwere Alltag im Krieg",
+      "sentences": [
+        {
+          "id": "s005",
+          "text": "In dieser Zeit hatten die Menschen große Angst.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Flugzeuge warfen schwere Bomben auf die Städte.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Viele Häuser gingen dabei kaputt.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Es gab auch nur sehr wenig zu essen.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Deshalb hatten viele Kinder großen Hunger.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Sie mussten sich oft tief unter der Erde verstecken.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Dafar bauten die Menschen dicke Häuser aus Beton.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Diese Häuser nennt man Bunker.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Im Krieg verloren sehr viele Menschen ihr Leben. Das war ein großes Unrecht."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "today_legacy",
+      "heading": "Wie wieder Frieden wurde",
+      "sentences": [
+        {
+          "id": "s013",
+          "text": "Nach sechs langen Jahren war der Krieg vorbei.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Die Menschen vertrugen sich wieder.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Sie gründeten eine große Gruppe für den Frieden.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Heute wollen die Länder lieber miteinander reden.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Sie helfen sich gegenseitig.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "So beschützen sie die Welt vor neuem Streit.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Einige Menschen schrieben heimlich Briefe gegen den Krieg. Sie waren sehr mutig."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wo mussten sich die Menschen vor den Bomben verstecken?",
+        "options": [
+          {
+            "key": "A",
+            "text": "In dicken Häusern aus Beton"
+          },
+          {
+            "key": "B",
+            "text": "Auf den höchsten Bäumen im Wald"
+          },
+          {
+            "key": "C",
+            "text": "In großen Autos auf der Straße"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Wie lange dauerte der große Krieg?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sechs Jahre"
+          },
+          {
+            "key": "B",
+            "text": "Zwei Tage"
+          },
+          {
+            "key": "C",
+            "text": "Hundert Jahre"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Was gründeten die Länder nach dem Krieg?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Eine Gruppe für den Frieden"
+          },
+          {
+            "key": "B",
+            "text": "Einen Verein für schnelles Fliegen"
+          },
+          {
+            "key": "C",
+            "text": "Eine Schule für wilde Tiere"
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Krieg",
+      "Frieden"
+    ],
+    "discover": [
+      "Bunker",
+      "Welt"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Er hieß der Zweite Weltkrieg.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Als Zweiter Weltkrieg (1. September 1939 – 2. September 1945) wird der zweite global geführte Krieg sämtlicher Großmächte im 20. Jahrhundert bezeichnet."
+    },
+    {
+      "claim": "Flugzeuge warfen schwere Bomben auf die Städte.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Der Zweite Weltkrieg bestand in Europa aus Blitzkriegen, Eroberungsfeldzügen gegen die deutschen Nachbarländer mit Eingliederung besetzter Gebiete, der Einsetzung von Marionettenregierungen und Flächenbombardements."
+    },
+    {
+      "claim": "Dafür bauten die Menschen dicke Häuser aus Beton. Diese Häuser nennt man Bunker.",
+      "source": "Luftschutzbunker",
+      "passage": "Ein Luftschutzbunker ist eine bauliche Anlage zum Schutz vor Luftangriffen. ... Luftschutzbunker sind hauptsächlich aus Stahlbeton hergestellt."
+    },
+    {
+      "claim": "Nach sechs langen Jahren war der Krieg vorbei.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Als Zweiter Weltkrieg (1. September 1939 – 2. September 1945)..."
+    },
+    {
+      "claim": "Sie gründeten eine große Gruppe für den Frieden.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Die Organisation der Vereinten Nationen (UNO) wurde gegründet..."
+    },
+    {
+      "claim": "Einige Menschen schrieben heimlich Briefe gegen den Krieg.",
+      "source": "Weiße Rose",
+      "passage": "Die Gruppe verfasste, druckte und verteilte ... insgesamt sechs Flugblätter..."
+    }
+  ]
+}

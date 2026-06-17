@@ -1,0 +1,704 @@
+{
+  "meta": {
+    "id": "dinosaurier_l3",
+    "title": "Dinosaurier",
+    "subtitle": "Die wahren Herrscher der Urzeit und ihre gefiederten Nachfahren",
+    "emoji": "🦖",
+    "age_level": 3,
+    "pattern": "living_being",
+    "theme_color": "#2E7D32",
+    "word_count": 515,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Dinosaurier",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "urzeit",
+    "category_sub": "dinosaurier",
+    "generated_at": "2026-06-17T09:08:48.877826+00:00",
+    "grounding_companions": [
+      "Tyrannosaurus",
+      "Vögel",
+      "Flugsaurier",
+      "Fossil",
+      "Triceratops"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "MUJA_04.jpg",
+      "alt": "Zwei große Dinosaurierskelette in einem Museum",
+      "caption": "Giganten im Museum: Die Skelette riesiger Raubsaurier wie dem Tyrannosaurus rex faszinieren Forscher weltweit.",
+      "license": "CC BY-SA 2.5 es",
+      "license_author": "Usuario:NeGRa",
+      "source_url": "https://commons.wikimedia.org/wiki/File:MUJA_04.jpg",
+      "wikimedia_id": "File:MUJA_04.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/e/e1/MUJA_04.jpg",
+      "is_hero": true,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/dinosaurier/MUJA_04_300.jpg",
+        "800": "bilder/dinosaurier/MUJA_04_800.jpg",
+        "1600": "bilder/dinosaurier/MUJA_04_1600.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Triceratops-Zachi-Evenor-003.jpg",
+      "alt": "Triceratops Skelett und farbiges Modell daneben",
+      "caption": "Vom Knochen zum Modell: Paläontologen rekonstruieren das Aussehen der Urzeittiere anhand ihrer versteinerten Überreste.",
+      "license": "CC BY 2.0",
+      "license_author": "Zachi Evenor (Photography)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Triceratops-Zachi-Evenor-003.jpg",
+      "wikimedia_id": "File:Triceratops-Zachi-Evenor-003.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/0c/Triceratops-Zachi-Evenor-003.jpg/1920px-Triceratops-Zachi-Evenor-003.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/dinosaurier/Triceratops-Zachi-Evenor-003_300.jpg",
+        "800": "bilder/dinosaurier/Triceratops-Zachi-Evenor-003_800.jpg",
+        "1600": "bilder/dinosaurier/Triceratops-Zachi-Evenor-003_1600.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "9119_-_Milano,_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall'Orto_22-Apr-2007.jpg",
+      "alt": "Ein gut erhaltenes Dinosaurier-Fossil im hellen Gesteinsblock",
+      "caption": "Seltener Glücksfall: Bei diesem Fossil des jungen Dinosauriers Scipionyx blieben sogar Abdrücke innerer Organe erhalten.",
+      "license": "CC BY-SA 2.5 it",
+      "license_author": "Giovanni Dall'Orto",
+      "source_url": "https://commons.wikimedia.org/wiki/File:9119_-_Milano%2C_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall%27Orto_22-Apr-2007.jpg",
+      "wikimedia_id": "File:9119_-_Milano%2C_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall%27Orto_22-Apr-2007.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/9119_-_Milano%2C_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall%27Orto_22-Apr-2007.jpg/1920px-9119_-_Milano%2C_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall%27Orto_22-Apr-2007.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/dinosaurier/9119_-_Milano,_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall'Orto_22-Apr-2007_300.jpg",
+        "800": "bilder/dinosaurier/9119_-_Milano,_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall'Orto_22-Apr-2007_800.jpg",
+        "1600": "bilder/dinosaurier/9119_-_Milano,_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall'Orto_22-Apr-2007_1600.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "alt": "Ein riesiges Brachiosaurus-Skelett in einer Museumshalle",
+      "caption": "Rekordverdächtig: Das über 13 Meter hohe Skelett des Brachiosaurus im Berliner Naturkundemuseum zeigt die enorme Größe mancher Sauropoden.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Raimond Spekking",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Berlin_-_Museum_f%C3%BCr_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "wikimedia_id": "File:Berlin_-_Museum_f%C3%BCr_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Berlin_-_Museum_f%C3%BCr_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/dinosaurier/Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai_300.jpg",
+        "800": "bilder/dinosaurier/Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai_800.jpg",
+        "1600": "bilder/dinosaurier/Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai_1600.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Dinosauriereier_in_Senckenberg-Sammlungen_Dresden.jpg",
+      "alt": "Mehrere versteinerte, runde Dinosaurier-Eier im Nest",
+      "caption": "Urzeitliche Kinderstube: Versteinerte Eier verraten viel über die Fortpflanzung und Brutbiologie der Dinosaurier.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Dr. Bernd Gross",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Dinosauriereier_in_Senckenberg-Sammlungen_Dresden.jpg",
+      "wikimedia_id": "File:Dinosauriereier_in_Senckenberg-Sammlungen_Dresden.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/92/Dinosauriereier_in_Senckenberg-Sammlungen_Dresden.jpg/1920px-Dinosauriereier_in_Senckenberg-Sammlungen_Dresden.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/dinosaurier/Dinosauriereier_in_Senckenberg-Sammlungen_Dresden_300.jpg",
+        "800": "bilder/dinosaurier/Dinosauriereier_in_Senckenberg-Sammlungen_Dresden_800.jpg",
+        "1600": "bilder/dinosaurier/Dinosauriereier_in_Senckenberg-Sammlungen_Dresden_1600.jpg"
+      }
+    },
+    {
+      "index": 5,
+      "filename": "Einiosaurus_and_Maiasaura.jpg",
+      "alt": "Zeichnung von Dinosauriern in einer urzeitlichen Waldlandschaft",
+      "caption": "Leben im Herdenverband: Viele Pflanzenfresser durchstreiften das prähistorische Festland in großen Gruppen zum Schutz vor Räubern.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "ABelov2014",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Einiosaurus_and_Maiasaura.jpg",
+      "wikimedia_id": "File:Einiosaurus_and_Maiasaura.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e9/Einiosaurus_and_Maiasaura.jpg/1920px-Einiosaurus_and_Maiasaura.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/dinosaurier/Einiosaurus_and_Maiasaura_300.jpg",
+        "800": "bilder/dinosaurier/Einiosaurus_and_Maiasaura_800.jpg",
+        "1600": "bilder/dinosaurier/Einiosaurus_and_Maiasaura_1600.jpg"
+      }
+    },
+    {
+      "index": 6,
+      "filename": "Herrerasaurusskeleton.jpg",
+      "alt": "Zwei frühe Dinosaurierskelette in einer Vitrine",
+      "caption": "Die Anfänge: Frühe Dinosaurier wie Herrerasaurus waren noch relativ kleine, zweibeinige Fleischfresser.",
+      "license": "CC BY-SA 2.0",
+      "license_author": "Zach Tirrell",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Herrerasaurusskeleton.jpg",
+      "wikimedia_id": "File:Herrerasaurusskeleton.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Herrerasaurusskeleton.jpg/1920px-Herrerasaurusskeleton.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/dinosaurier/Herrerasaurusskeleton_300.jpg",
+        "800": "bilder/dinosaurier/Herrerasaurusskeleton_800.jpg",
+        "1600": "bilder/dinosaurier/Herrerasaurusskeleton_1600.jpg"
+      }
+    },
+    {
+      "index": 7,
+      "filename": "Archeopterix-img_0293.jpg",
+      "alt": "Abguss eines Archaeopteryx-Fossils und farbige Vogelrekonstruktion",
+      "caption": "Das Bindeglied: Archaeopteryx vereint Merkmale von Reptilien und Vögeln und beweist die enge Verwandtschaft.",
+      "license": "CC BY-SA 2.0 fr",
+      "license_author": "Rama",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Archeopterix-img_0293.jpg",
+      "wikimedia_id": "File:Archeopterix-img_0293.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Archeopterix-img_0293.jpg/1920px-Archeopterix-img_0293.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/dinosaurier/Archeopterix-img_0293_300.jpg",
+        "800": "bilder/dinosaurier/Archeopterix-img_0293_800.jpg",
+        "1600": "bilder/dinosaurier/Archeopterix-img_0293_1600.jpg"
+      }
+    },
+    {
+      "index": 8,
+      "filename": "Triceratops.jpg",
+      "alt": "Großer Schädel eines Triceratops im Museum",
+      "caption": "Beeindruckende Waffen: Die langen Hörner und der Nackenschild des Triceratops dienten vermutlich auch der Kommunikation.",
+      "license": "CC BY 2.0",
+      "license_author": "Mark from Woking",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Triceratops.jpg",
+      "wikimedia_id": "File:Triceratops.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/Triceratops.jpg/1920px-Triceratops.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/dinosaurier/Triceratops_300.jpg",
+        "800": "bilder/dinosaurier/Triceratops_800.jpg",
+        "1600": "bilder/dinosaurier/Triceratops_1600.jpg"
+      }
+    },
+    {
+      "index": 9,
+      "filename": "Maiasaura_nest_(2).jpg",
+      "alt": "Großes Dinosaurierskelett über einem Nest mit Jungtieren",
+      "caption": "Gute Mütter: Fossilienfunde zeigen, dass Maiasaura-Eltern ihre Jungtiere im Nest umsorgten und beschützten.",
+      "license": "Public domain",
+      "license_author": "Dudo",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Maiasaura_nest_(2).jpg",
+      "wikimedia_id": "File:Maiasaura_nest_%282%29.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/0/00/Maiasaura_nest_%282%29.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/dinosaurier/Maiasaura_nest_(2)_300.jpg",
+        "800": "bilder/dinosaurier/Maiasaura_nest_(2)_800.jpg",
+        "1600": "bilder/dinosaurier/Maiasaura_nest_(2)_1600.jpg"
+      }
+    },
+    {
+      "index": 10,
+      "filename": "Aniksosaurus_histology.png",
+      "alt": "Mikroskopische Querschnitte von fossilen Knochen",
+      "caption": "Spurensuche im Labor: Mikroskopische Untersuchungen von Knochenquerschnitten enthüllen das Wachstumstempo der Tiere.",
+      "license": "CC BY 2.5",
+      "license_author": "Lucio M. Ibiricu, Rubén D. Martínez",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Aniksosaurus_histology.png",
+      "wikimedia_id": "File:Aniksosaurus_histology.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/8/85/Aniksosaurus_histology.png",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/dinosaurier/Aniksosaurus_histology_300.jpg",
+        "800": "bilder/dinosaurier/Aniksosaurus_histology_800.jpg",
+        "1600": "bilder/dinosaurier/Aniksosaurus_histology_1600.jpg"
+      }
+    },
+    {
+      "index": 11,
+      "filename": "Feathered_Tyrannosaurus_model.jpg",
+      "alt": "Statue eines lebensechten Dinosauriers mit Federkleid",
+      "caption": "Gefiederte Jäger: Viele Raubsaurier besaßen nach heutigen Erkenntnissen dichte Federn zur Wärmeisolierung.",
+      "license": "CC BY 2.0",
+      "license_author": "Marcin Polak",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Feathered_Tyrannosaurus_model.jpg",
+      "wikimedia_id": "File:Feathered_Tyrannosaurus_model.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/6/6f/Feathered_Tyrannosaurus_model.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/dinosaurier/Feathered_Tyrannosaurus_model_300.jpg",
+        "800": "bilder/dinosaurier/Feathered_Tyrannosaurus_model_800.jpg",
+        "1600": "bilder/dinosaurier/Feathered_Tyrannosaurus_model_1600.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Die lebenden Urzeit-Monster vor unserer Haustür",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Viele Menschen denken bei Dinosauriern sofort an riesige, schuppige Urzeitechsen.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Doch die Wahrheit ist viel überraschender.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Einige dieser faszinierenden Geschöpfe leben heute noch mitten unter uns.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Sie fliegen sogar täglich an unseren Fenstern vorbei!",
+          "img_index": 11
+        },
+        {
+          "id": "s005",
+          "text": "Aus kleinen, fleischfressenden Raubsaurier-Linien entwickelten sich im Laufe der Jahrmillionen die heutigen Vögel.",
+          "img_index": 7
+        },
+        {
+          "id": "s006",
+          "text": "Wissenschaftlich gesehen ist der Spatz im Garten also ein echter, lebender Dinosaurier!",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Die ursprünglichen Dinosaurier beherrschten im Erdmittelalter fast alle Lebensräume auf dem Festland.",
+          "img_index": 5
+        },
+        {
+          "id": "s008",
+          "text": "Sie lebten vor etwa 235 bis 66 Millionen Jahren.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Was machte diese Tiere anatomisch so besonders?",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s009",
+          "text": "Was machte diese Tiere anatomisch so besonders?",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Ein entscheidendes Merkmal betrifft ihre aufrechte Körperhaltung.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Heutige Reptilien wie Krokodile kriechen im Spreizgang flach über den Boden.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Bei den Dinosauriern dagegen standen die Beine senkrecht unter dem Rumpf.",
+          "img_index": 1
+        },
+        {
+          "id": "s013",
+          "text": "Diese aufrechte Haltung erleichterte das Atmen beim Laufen ungemein.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Sie verlieh den Tieren mehr Ausdauer und Aktivität.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Zudem erleichterte der gerade Stand die Evolution des Gigantismus.",
+          "img_index": 3
+        },
+        {
+          "id": "s016",
+          "text": "So konnten riesige Pflanzenfresser wie der Brachiosaurus entstehen.",
+          "img_index": 3
+        },
+        {
+          "id": "s017",
+          "text": "Die Formenvielfalt reichte von hühnergroßen Microraptoren bis zu tonnenschweren Riesen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Waren Flugsaurier echte Dinosaurier?",
+          "reveal_text": "Nein! Flugsaurier beherrschten zwar zeitgleich den Himmel, bildeten aber eine eigene Reptiliengruppe. Echte Dinosaurier lebten fast ausschließlich an Land und besaßen senkrecht nach unten gerichtete Beine.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Heißes Blut und rasantes Wachstum",
+      "section_role": "body_functions",
+      "sentences": [
+        {
+          "id": "s018",
+          "text": "Dinosaurier waren aktive, warmblütige Tiere mit hoher Stoffwechselrate.",
+          "img_index": 11
+        },
+        {
+          "id": "s019",
+          "text": "Diese Fähigkeit zur eigenen Wärmeregulierung nennt man Endothermie.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Paläontologen erforschen ihr Knochenwachstum mithilfe der Skeletochronologie.",
+          "img_index": 10
+        },
+        {
+          "id": "s021",
+          "text": "Dabei zählen sie die jährlichen Wachstumslinien in den Knochen.",
+          "img_index": 10
+        },
+        {
+          "id": "s022",
+          "text": "Ein jugendlicher Tyrannosaurus rex legte täglich rund zwei Kilogramm zu.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Weibliche Tiere bildeten vor der Eiablage eine spezielle Knochensubstanz.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Dieser medulläre Knochen diente als Kalziumspeicher für die Eischalenproduktion.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "So erreichten Dinosaurier ihre Geschlechtsreife schon vor dem Wachstumsende.",
+          "img_index": 2
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Überlebende Giganten",
+          "reveal_text": "Obwohl die riesigen Dinosaurier ausstarben, leben heute noch rund 11.000 Vogelarten auf der Erde. Das bedeutet, dass etwa ein Drittel aller heutigen Landwirbeltierarten biologisch gesehen zu den Dinosauriern gehört!",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Nestwärme und das Leben in der Herde",
+      "section_role": "social_behavior",
+      "sentences": [
+        {
+          "id": "s026",
+          "text": "Funde von Massengräbern und Fährten beweisen ihr ausgeprägtes Herdenleben.",
+          "img_index": 5
+        },
+        {
+          "id": "s027",
+          "text": "Viele Arten wanderten gemeinsam auf der Suche nach Nahrung.",
+          "img_index": -1
+        },
+        {
+          "id": "s028",
+          "text": "Einige Dinosaurier betrieben sogar liebevolle Brutpflege für ihre Jungen.",
+          "img_index": 9
+        },
+        {
+          "id": "s029",
+          "text": "Nestkolonien des Pflanzenfressers Maiasaura zeigen einen langanhaltenden Schutz der Jungtiere.",
+          "img_index": 4
+        },
+        {
+          "id": "s030",
+          "text": "Auch spektakuläre Knochenplatten und Hörner hatten wichtige Aufgaben.",
+          "img_index": 8
+        },
+        {
+          "id": "s031",
+          "text": "Die drei Hörner des Triceratops dienten vermutlich der Zurschaustellung.",
+          "img_index": 8
+        },
+        {
+          "id": "s032",
+          "text": "Sie halfen bei Drohgebärden oder Kämpfen mit Rivalen um Reviere.",
+          "img_index": 1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Der plötzliche Untergang der Giganten",
+      "section_role": "predators_ecosystem",
+      "sentences": [
+        {
+          "id": "s033",
+          "text": "Das Zeitalter endete abrupt vor etwa 66 Millionen Jahren.",
+          "img_index": -1
+        },
+        {
+          "id": "s034",
+          "text": "Ein riesiger Asteroid stürzte im heutigen Mexiko auf die Erde.",
+          "img_index": -1
+        },
+        {
+          "id": "s035",
+          "text": "Er hinterließ den gewaltigen, 180 Kilometer breiten Chicxulub-Krater.",
+          "img_index": -1
+        },
+        {
+          "id": "s036",
+          "text": "Der Einschlag wirbelte gigantische Mengen Staub und Ruß auf.",
+          "img_index": -1
+        },
+        {
+          "id": "s037",
+          "text": "Die Atmosphäre verdunkelte sich und ein nuklearer Winter setzte ein.",
+          "img_index": -1
+        },
+        {
+          "id": "s038",
+          "text": "Ohne Sonnenlicht starben Pflanzen und Algen weltweit ab.",
+          "img_index": -1
+        },
+        {
+          "id": "s039",
+          "text": "Gewaltige Vulkanausbrüche des indischen Dekkan-Trapps verschlimmerten die Klimakatastrophe.",
+          "img_index": -1
+        },
+        {
+          "id": "s040",
+          "text": "Alle Nichtvogeldinosaurier starben aus, während die Vögel überlebten.",
+          "img_index": 7
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Tödliche Kälte",
+          "reveal_text": "Durch den Asteroideneinschlag bildeten sich Schwefelsäure-Aerosole. Diese Tröpfchen ließen die Temperatur schlagartig um 26 Grad sinken. Das sorgte für eine jahrelange, globale Frostperiode.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec6",
+      "heading": "Vom Knochenkrieg zur Dinomanie",
+      "section_role": "human_animal",
+      "sentences": [
+        {
+          "id": "s041",
+          "text": "Unser Wissen stammt von hervorragend erhaltenen Fossilien.",
+          "img_index": 2
+        },
+        {
+          "id": "s042",
+          "text": "Das können Knochen, Eier oder versteinerte Magensteine sein.",
+          "img_index": 4
+        },
+        {
+          "id": "s043",
+          "text": "Im 19. Jahrhundert eskalierte die Forschung in den Knochenkriegen.",
+          "img_index": -1
+        },
+        {
+          "id": "s044",
+          "text": "Die Rivalen Edward Cope und Othniel Marsh bekämpften sich erbittert.",
+          "img_index": -1
+        },
+        {
+          "id": "s045",
+          "text": "Heute herrscht weltweit eine ungebrochene, begeisterte Dinomanie.",
+          "img_index": 0
+        },
+        {
+          "id": "s046",
+          "text": "Der private Handel mit Originalskeletten bereitet Experten jedoch Sorgen.",
+          "img_index": -1
+        },
+        {
+          "id": "s047",
+          "text": "Wohlhabende Sammler zahlen Millionenbeträge für die wertvollen Funde.",
+          "img_index": -1
+        },
+        {
+          "id": "s048",
+          "text": "Dadurch gehen wichtige Fossilien der paläontologischen Forschung verloren.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was unterscheidet Dinosaurier anatomisch von heutigen Krokodilen?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ihre Beine standen aufrecht und senkrecht unter dem Körper."
+          },
+          {
+            "key": "B",
+            "text": "Sie besaßen eine geschlossene, knöcherne Hüftgelenkpfanne."
+          },
+          {
+            "key": "C",
+            "text": "Ihre Arme waren grundsätzlich länger als die Hinterbeine."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Was erforscht die Skeletochronologie bei Dinosauriern?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Die Verwandtschaft zwischen Flugsauriern und Krokodilen."
+          },
+          {
+            "key": "B",
+            "text": "Das Alter und das Wachstum der Tiere anhand von Wachstumslinien in den Knochen."
+          },
+          {
+            "key": "C",
+            "text": "Die maximale Flughöhe der gefiederten Nichtvogeldinosaurier."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Wozu diente der medulläre Knochen bei weiblichen Dinosauriern?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Als Energiespeicher für weite Wanderungen während der Trockenzeit."
+          },
+          {
+            "key": "B",
+            "text": "Als zusätzliche Stütze für die enormen Muskeln der kräftigen Hinterbeine."
+          },
+          {
+            "key": "C",
+            "text": "Als Kalziumspeicher für die Produktion von harten Eischalen."
+          }
+        ],
+        "correct_key": "C"
+      },
+      {
+        "id": "q4",
+        "text": "Welcher Fundort in Montana (USA) beweist, dass einige Dinosaurier Brutpflege betrieben?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein unversehrtes Nestkolonie-Massengrab des Pflanzenfressers Maiasaura."
+          },
+          {
+            "key": "B",
+            "text": "Die versteinerten Fußabdrücke eines schwimmenden Raubsauriers."
+          },
+          {
+            "key": "C",
+            "text": "Der Chicxulub-Krater mit fossilen Eierschalen von Krokodilen."
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Theropoden",
+      "Sauropoden",
+      "Ornithischia",
+      "Saurischia"
+    ],
+    "discover": [
+      "Archosaurier",
+      "Chicxulub-Krater",
+      "Skeletochronologie",
+      "Brutpflege"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Aus kleinen, fleischfressenden Raubsaurier-Linien entwickelten sich im Laufe der Jahrmillionen die heutigen Vögel.",
+      "source": "Dinosaurier",
+      "passage": "Vögel gingen aus kleinen theropoden Dinosauriern hervor."
+    },
+    {
+      "claim": "Bei den Dinosauriern dagegen standen die Beine senkrecht unter dem Rumpf.",
+      "source": "Dinosaurier",
+      "passage": "Bei den Dinosauriern standen die Beine senkrecht unter dem Körper, ähnlich wie bei den meisten Säugetieren, aber anders als bei den meisten anderen Reptilien, deren Beine gespreizt nach außen hin abstehen (Spreizgang)."
+    },
+    {
+      "claim": "Dinosaurier waren aktive, warmblütige Tiere mit hoher Stoffwechselrate.",
+      "source": "Dinosaurier",
+      "passage": "Zahlreiche Studien seit den 1970er Jahren haben jedoch gezeigt, dass es sich um aktive Tiere mit erhöhten Stoffwechselraten und Anpassungen, die soziale Interaktionen ermöglichten, handelte."
+    },
+    {
+      "claim": "Paläontologen erforschen ihr Knochenwachstum mithilfe der Skeletochronologie.",
+      "source": "Dinosaurier",
+      "passage": "Um das Alter einzelner Individuen und darüber die mittlere Lebenserwartung der entsprechenden Spezies abzuschätzen, kamen und kommen histologischen Untersuchungen und insbesondere der Lebensaltersbestimmung anhand von Wachstumslamellen (Skeletochronologie) eine besondere Bedeutung zu."
+    },
+    {
+      "claim": "Weibliche Tiere bildeten vor der Eiablage eine spezielle Knochensubstanz.",
+      "source": "Vögel",
+      "passage": "Bei weiblichen Vögeln wächst, induziert durch Östrogene, vor der Eiablage eine sehr calciumreiche Knochensubstanz in den Beinknochen zwischen dem harten Außenknochen und dem Knochenmark, in der das Calcium für die Bildung der Eierschalen gespeichert wird. Diese Knochensubstanz, die sich nach der Eiablage wieder zurückbildet, wird als medullärer Knochen bezeichnet."
+    },
+    {
+      "claim": "Nestkolonien des Pflanzenfressers Maiasaura zeigen einen langanhaltenden Schutz der Jungtiere.",
+      "source": "Dinosaurier",
+      "passage": "Eine Maiasaura-Nestkolonie, die Jack Horner im Jahr 1978 in Montana (USA) entdeckt hat, zeigt, dass einige Dinosaurier ihre Jungen noch lange nach dem Schlüpfen betreuten und beschützten."
+    },
+    {
+      "claim": "Er hinterließ den gewaltigen, 180 Kilometer breiten Chicxulub-Krater.",
+      "source": "Dinosaurier",
+      "passage": "Die Hypothese wurde 1991 durch den Fund des 180 km durchmessenden Chicxulub-Kraters am Rande der Yucatán-Halbinsel im Golf von Mexiko untermauert, der zum passenden Zeitpunkt durch den Einschlag eines etwa 10 km großen Meteoriten entstanden ist."
+    }
+  ]
+}

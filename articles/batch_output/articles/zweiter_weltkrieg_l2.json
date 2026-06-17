@@ -1,0 +1,352 @@
+{
+  "meta": {
+    "id": "zweiter_weltkrieg_l2",
+    "title": "Zweiter Weltkrieg",
+    "subtitle": "Ein großer Schrecken und die Suche nach Frieden",
+    "emoji": "🌍",
+    "age_level": 2,
+    "pattern": "tech_science",
+    "theme_color": "#4A5568",
+    "word_count": 262,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Zweiter_Weltkrieg",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "kriege",
+    "generated_at": "2026-06-17T09:21:37.488488+00:00",
+    "grounding_companions": [
+      "Anne Frank",
+      "Weiße Rose",
+      "Enigma (Maschine)",
+      "Luftschutzbunker"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b",
+    "trim_passes": 1,
+    "review_reason": "Satz-ID 's002' an Position 1, erwartet 's001'"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Bletchley_Park_Mansion.jpg",
+      "alt": "Das historische Landhaus Bletchley Park in England.",
+      "caption": "Im Landhaus Bletchley Park in England knackten Forscher die geheimen Nachrichten der Enigma.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "DeFacto",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Bletchley_Park_Mansion.jpg",
+      "wikimedia_id": "File:Bletchley_Park_Mansion.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Bletchley_Park_Mansion.jpg/1920px-Bletchley_Park_Mansion.jpg",
+      "is_hero": true,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/zweiter_weltkrieg/Bletchley_Park_Mansion_300.jpg",
+        "800": "bilder/zweiter_weltkrieg/Bletchley_Park_Mansion_800.jpg",
+        "1600": "bilder/zweiter_weltkrieg/Bletchley_Park_Mansion_1600.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Der große Schrecken",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s002",
+          "text": "Doch der Zweite Weltkrieg veränderte das Leben von fast allen Menschen auf der Erde.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Er war der größte und schlimmste Krieg der Menschheit und dauerte von 1939 bis 1945.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Fast alle großen Länder der Erde kämpften damals mit.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Wer gegen wen kämpfte",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s005",
+          "text": "Deutschland wurde damals von einer grausamen Regierung beherrscht, den Nationalsozialisten.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Ihr Anführer war der Diktator Adolf Hitler.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Das ist ein Herrscher, der allein alles bestimmt.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Hitler überfiel andere Länder und begann so den Krieg.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Deutschland verbündete sich mit Italien und Japan.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Insgesamt machten über 60 Staaten bei dem weltweiten Krieg mit.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Ihnen standen die Alliierten gegenüber.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Das waren verbündete Länder wie Großbritannien, die Sowjetunion und die USA.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Leben im Versteck und im Bunker",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s014",
+          "text": "Der Alltag der Kinder war voller Angst vor Bomben.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Die Schulen blieben oft geschlossen und Familien mussten nachts flüchten.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Sie suchten Schutz in dicken Betonbauten, den Luftschutzbunkern.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Jüdische Menschen wurden von der Regierung grausam verfolgt.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Das Mädchen Anne Frank musste sich deshalb in einem Hinterhaus verstecken.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Dort schrieb sie ihr berühmtes Tagebuch.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Einige Deutsche wehrten sich heimlich gegen die böse Regierung.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Die Studenten der Gruppe „Weiße Rose“ verteilten Flugblätter, um die Menschen zu warnen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Geheimcodes und das Kriegsende",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s022",
+          "text": "Sogar mit geheimen Nachrichten wurde gekämpft.",
+          "img_index": 0
+        },
+        {
+          "id": "s023",
+          "text": "Deutschland verschlüsselte seine Funksprüche mit einer Maschine namens Enigma.",
+          "img_index": 0
+        },
+        {
+          "id": "s024",
+          "text": "Doch schlaue Forscher im englischen Landhaus Bletchley Park knackten diese Codes heimlich.",
+          "img_index": 0
+        },
+        {
+          "id": "s025",
+          "text": "Das Landhaus siehst du auch auf dem Bild in diesem Artikel.",
+          "img_index": 0
+        },
+        {
+          "id": "s026",
+          "text": "Das half den Alliierten, den Krieg im Jahr 1945 zu gewinnen.",
+          "img_index": -1
+        },
+        {
+          "id": "s027",
+          "text": "Der Krieg endete erst, als auch Japan nach schweren Kämpfen aufgab.",
+          "img_index": -1
+        },
+        {
+          "id": "s028",
+          "text": "Um künftige Kriege zu verhindern, gründeten die Länder danach die Vereinten Nationen.",
+          "img_index": -1
+        },
+        {
+          "id": "s029",
+          "text": "Diese Gemeinschaft setzt sich bis heute weltweit für den Frieden ein.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wann dauerte der Zweite Weltkrieg?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Von 1914 bis 1918"
+          },
+          {
+            "key": "B",
+            "text": "Von 1939 bis 1945"
+          },
+          {
+            "key": "C",
+            "text": "Von 1950 bis 1960"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Wie hieß das Verschlüsselungs-Gerät, das Deutschland im Krieg benutzte?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Enigma"
+          },
+          {
+            "key": "B",
+            "text": "Telex"
+          },
+          {
+            "key": "C",
+            "text": "Code-Box"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Was machten die Studenten der Gruppe „Weiße Rose“?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie bauten dicke Bunker aus Beton"
+          },
+          {
+            "key": "B",
+            "text": "Sie erfanden eine eigene Geheimsprache"
+          },
+          {
+            "key": "C",
+            "text": "Sie verteilten heimlich Flugblätter gegen die Diktatur"
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Anne Frank",
+      "Weiße Rose",
+      "Enigma (Maschine)",
+      "Luftschutzbunker"
+    ],
+    "discover": [
+      "Adolf Hitler",
+      "Bletchley Park",
+      "Vereinte Nationen"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Er war der größte und schlimmste Krieg der Menschheit und dauerte von 1939 bis 1945.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Als Zweiter Weltkrieg (1. September 1939 – 2. September 1945) wird der zweite global geführte Krieg sämtlicher Großmächte im 20. Jahrhundert bezeichnet."
+    },
+    {
+      "claim": "Deutschland wurde damals von einer grausamen Regierung beherrscht, den Nationalsozialisten.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Hauptgegner des nationalsozialistischen Deutschen Reiches waren..."
+    },
+    {
+      "claim": "Ihr Anführer war der Diktator Adolf Hitler.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "...mit dem von Adolf Hitler befohlenen Überfall auf Polen."
+    },
+    {
+      "claim": "Deutschland verbündete sich mit Italien und Japan.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Dreimächtepakt zwischen Deutschland, Italien und Japan..."
+    },
+    {
+      "claim": "Insgesamt machten über 60 Staaten bei dem weltweiten Krieg mit.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Über 60 Staaten waren direkt oder indirekt beteiligt..."
+    },
+    {
+      "claim": "Das Mädchen Anne Frank musste sich deshalb in einem Hinterhaus verstecken.",
+      "source": "Anne Frank",
+      "passage": "Von Juli 1942 bis August 1944 lebte sie mit ihrer Familie versteckt in einem Hinterhaus in Amsterdam."
+    },
+    {
+      "claim": "Dort schrieb sie ihr berühmtes Tagebuch.",
+      "source": "Anne Frank",
+      "passage": "Dort hielt sie ihre Erlebnisse und Gedanken in einem Tagebuch fest..."
+    },
+    {
+      "claim": "Die Studenten der Gruppe „Weiße Rose“ verteilten Flugblätter, um die Menschen zu warnen.",
+      "source": "Weiße Rose",
+      "passage": "Die Gruppe verfasste, druckte und verteilte... Flugblätter... In diesen Veröffentlichungen thematisierten sie Verbrechen des Regimes und riefen zum Widerstand gegen den Nationalsozialismus auf."
+    },
+    {
+      "claim": "Deutschland verschlüsselte seine Funksprüche mit einer Maschine namens Enigma.",
+      "source": "Enigma (Maschine)",
+      "passage": "Im Zweiten Weltkrieg wurden Enigma-Maschinen von den Achsenmächten eingesetzt, hauptsächlich von der Wehrmacht."
+    },
+    {
+      "claim": "Doch schlaue Forscher im englischen Landhaus Bletchley Park knackten diese Codes heimlich.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "...britischen Kryptoanalytikern in Bletchley Park bei London, den mit Hilfe der ENIGMA verschlüsselten Funkverkehr der deutschen U-Boote erneut zu brechen."
+    },
+    {
+      "claim": "Um künftige Kriege zu verhindern, gründeten die Länder danach die Vereinten Nationen.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Die Organisation der Vereinten Nationen (UNO) wurde gegründet..."
+    }
+  ]
+}

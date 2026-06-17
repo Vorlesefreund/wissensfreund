@@ -1,0 +1,402 @@
+{
+  "meta": {
+    "id": "spartacus_l2",
+    "title": "Spartacus",
+    "subtitle": "Der berühmteste Kämpfer für die Freiheit",
+    "emoji": "🗡️",
+    "age_level": 2,
+    "pattern": "history_person",
+    "theme_color": "#8B0000",
+    "word_count": 289,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Spartacus",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "antike",
+    "generated_at": "2026-06-17T09:21:37.477686+00:00",
+    "grounding_companions": [
+      "Gladiator",
+      "Sklaverei im Römischen Reich",
+      "Sklavenaufstände im Römischen Reich",
+      "Amphitheater"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "SpartacusStatue_Chichester.jpg",
+      "alt": "Bronzestatue von Spartacus mit erhobenen Armen und Fesseln",
+      "caption": "Diese Statue zeigt Spartacus, wie er mutig seine Ketten zerreißt.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Martinvl",
+      "source_url": "https://commons.wikimedia.org/wiki/File:SpartacusStatue_Chichester.jpg",
+      "wikimedia_id": "File:SpartacusStatue_Chichester.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/SpartacusStatue_Chichester.jpg/1920px-SpartacusStatue_Chichester.jpg",
+      "is_hero": true,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/spartacus/SpartacusStatue_Chichester_300.jpg",
+        "800": "bilder/spartacus/SpartacusStatue_Chichester_800.jpg",
+        "1600": "bilder/spartacus/SpartacusStatue_Chichester_1600.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Brot_und_Spiele_Gladiators1.jpg",
+      "alt": "Zwei Männer in Gladiatorenrüstungen kämpfen in einer Arena",
+      "caption": "Gladiatoren mussten zur Unterhaltung der Zuschauer gegeneinander kämpfen.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Medienfabrik Trier",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Brot_und_Spiele_Gladiators1.jpg",
+      "wikimedia_id": "File:Brot_und_Spiele_Gladiators1.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Brot_und_Spiele_Gladiators1.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/spartacus/Brot_und_Spiele_Gladiators1_300.jpg",
+        "800": "bilder/spartacus/Brot_und_Spiele_Gladiators1_800.jpg",
+        "1600": "bilder/spartacus/Brot_und_Spiele_Gladiators1_1600.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Amphitheater_santa_maria_capua_vetere.jpg",
+      "alt": "Ruinen des antiken Amphitheaters von Capua unter blauem Himmel",
+      "caption": "In den Ruinen von Capua stand früher die Kampfschule, aus der Spartacus floh.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Stanley-goodspeed",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Amphitheater_santa_maria_capua_vetere.jpg",
+      "wikimedia_id": "File:Amphitheater_santa_maria_capua_vetere.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Amphitheater_santa_maria_capua_vetere.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/spartacus/Amphitheater_santa_maria_capua_vetere_300.jpg",
+        "800": "bilder/spartacus/Amphitheater_santa_maria_capua_vetere_800.jpg",
+        "1600": "bilder/spartacus/Amphitheater_santa_maria_capua_vetere_1600.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Germanischer_Sklave.jpg",
+      "alt": "Eine steinerne Büste eines Sklaven mit einem einfachen Halsband",
+      "caption": "Sklaven im Römischen Reich hatten oft ein schweres Leben und keine Rechte.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Rabax63",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Germanischer_Sklave.jpg",
+      "wikimedia_id": "File:Germanischer_Sklave.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Germanischer_Sklave.jpg/1920px-Germanischer_Sklave.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/spartacus/Germanischer_Sklave_300.jpg",
+        "800": "bilder/spartacus/Germanischer_Sklave_800.jpg",
+        "1600": "bilder/spartacus/Germanischer_Sklave_1600.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Wer war Spartacus?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir vor, du verlierst deine Freiheit und musst zur Unterhaltung anderer im Sand kämpfen.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Das passierte Spartacus.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Er war ein römischer Sklave und Gladiator.",
+          "img_index": 3
+        },
+        {
+          "id": "s004",
+          "text": "Ein Sklave gehörte einem anderen Menschen und hatte keine eigenen Rechte.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Ein Gladiator war ein ausgebildeter Kämpfer.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Vor über 2000 Jahren führte Spartacus den berühmtesten Aufstand von unfreien Menschen an.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Das schwere Leben der Sklaven",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s007",
+          "text": "Im Römischen Reich arbeiteten unzählige Sklaven hart auf den Feldern oder in tiefen Bergwerken.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Einige Sklaven wurden zu Gladiatoren ausgebildet.",
+          "img_index": 1
+        },
+        {
+          "id": "s009",
+          "text": "Sie mussten in großen, runden Theatern ohne Dach auf Leben und Tod kämpfen.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Diese Gebäude nannten die Römer Amphitheater.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Wer Gladiator war, wurde beim Volk oft berühmt wie ein Popstar.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Der mutige Ausbruch",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s012",
+          "text": "Im Jahr 73 vor Christus floh Spartacus mit etwa 70 Gladiatoren aus einer Kampfschule in Capua.",
+          "img_index": 2
+        },
+        {
+          "id": "s013",
+          "text": "Sie versteckten sich zuerst auf dem Vulkan Vesuv.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Immer mehr Sklaven schlossen sich ihm an.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Spartacus war ein gerechter Anführer, der die Beute gleichmäßig unter allen aufteilte.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Seine Armee besiegte die römischen Soldaten mehrmals.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Später wollte Spartacus seine Männer mit Schiffen nach Sizilien bringen, doch Piraten betrogen ihn.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Die Betrüger nahmen sein Geld, ließen ihn aber einfach im Stich.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Geheimnisvolle Begleiterin: Die Ehefrau von Spartacus war eine Wahrsagerin. Sie prophezeite ihm eine große Zukunft."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Das traurige Ende",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s019",
+          "text": "Schließlich schickte der römische Senat den reichen Feldherrn Crassus mit einer riesigen Armee.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Im Jahr 71 vor Christus verlor das Sklavenheer die letzte Schlacht.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Spartacus selbst starb mutig im Kampf.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Harte Bestrafung: Nach dem Ende des Aufstands bestraften die Römer die Gefangenen grausam. Etwa 6000 überlebende Sklaven wurden entlang einer langen Straße gekreuzigt."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Ein Symbol für Freiheit",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s022",
+          "text": "Heute gilt Spartacus als Held, der für die Freiheit kämpfte.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Sein Name steht für den Mut, sich gegen Ungerechtigkeit zu wehren.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Sein Name wurde sogar zum Vorbild für Sportvereine und politische Gruppen.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "Viele Bücher und Filme erzählen seine Geschichte.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wer war Spartacus?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein römischer Kaiser"
+          },
+          {
+            "key": "B",
+            "text": "Ein Sklave und Gladiator"
+          },
+          {
+            "key": "C",
+            "text": "Ein reicher Pirat"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Wo begann der berühmte Ausbruch von Spartacus?",
+        "options": [
+          {
+            "key": "A",
+            "text": "In einer Kampfschule in Capua"
+          },
+          {
+            "key": "B",
+            "text": "Auf einem Schiff nach Sizilien"
+          },
+          {
+            "key": "C",
+            "text": "In einem Bergwerk in Rom"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Was passierte nach der letzten großen Schlacht mit dem Aufstand?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Die Sklaven gründeten eine eigene Stadt"
+          },
+          {
+            "key": "B",
+            "text": "Die Römer besiegten das Sklavenheer"
+          },
+          {
+            "key": "C",
+            "text": "Spartacus reiste erfolgreich nach Hause"
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Gladiator",
+      "Sklave",
+      "Vesuv",
+      "Capua"
+    ],
+    "discover": [
+      "Römisches Reich",
+      "Amphitheater",
+      "Crassus",
+      "Piraten"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Spartacus war ein römischer Sklave und Gladiator.",
+      "source": "Spartacus",
+      "passage": "Spartacus, deutsch Spartakus, war ein römischer Sklave und Gladiator..."
+    },
+    {
+      "claim": "Im Jahr 73 vor Christus floh Spartacus mit etwa 70 Gladiatoren aus einer Kampfschule in Capua.",
+      "source": "Spartacus",
+      "passage": "Spartacus floh nach einer spontanen Rebellion mit etwa 70 anderen Gladiatoren (die Zahlen variieren in den Quellen) im Jahr 73 v. Chr. aus der Gladiatorenschule des Gnaeus Cornelius Lentulus Batiatus in Capua..."
+    },
+    {
+      "claim": "Sie versteckten sich zuerst auf dem Vulkan Vesuv.",
+      "source": "Spartacus",
+      "passage": "Nach dem Ausbruch aus der Gladiatorenschule plünderten die geflohenen Sklaven die Gegend um Capua und zogen sich auf den Vesuv zurück..."
+    },
+    {
+      "claim": "Spartacus war ein gerechter Anführer, der die Beute gleichmäßig unter allen aufteilte.",
+      "source": "Spartacus",
+      "passage": "So erwähnt Appian, dass unter Spartacus die Beute der Feldzüge an alle Angehörigen seines Heeres gleichmäßig verteilt wurde..."
+    },
+    {
+      "claim": "Die Ehefrau von Spartacus war eine Wahrsagerin. Sie prophezeite ihm eine große Zukunft.",
+      "source": "Spartacus",
+      "passage": "Plutarch erwähnt, dass die Frau des Spartacus eine Seherin war, die ihm eine große und zugleich düstere Zukunft prophezeite."
+    },
+    {
+      "claim": "Später wollte Spartacus seine Männer mit Schiffen nach Sizilien bringen, doch Piraten betrogen ihn.",
+      "source": "Spartacus",
+      "passage": "Spartacus bezahlte dort kilikische Piraten, die ihn und 2.000 seiner Männer nach Sizilien übersetzen sollten. Er wurde jedoch von den Piraten betrogen, die zwar sein Geld nahmen, aber dann die Rebellen im Stich ließen."
+    },
+    {
+      "claim": "Im Jahr 71 vor Christus verlor das Sklavenheer die letzte Schlacht.",
+      "source": "Spartacus",
+      "passage": "In der Zweiten Schlacht am Silarus [71 v. Chr.] wurde die Sklavenarmee komplett aufgerieben."
+    },
+    {
+      "claim": "Etwa 6000 überlebende Sklaven wurden entlang einer langen Straße gekreuzigt.",
+      "source": "Spartacus",
+      "passage": "6.000 Rebellen wurden gefangen genommen und von Crassus entlang der Via Appia von Rom nach Capua gekreuzigt."
+    }
+  ]
+}

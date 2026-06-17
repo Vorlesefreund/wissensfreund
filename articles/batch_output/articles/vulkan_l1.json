@@ -1,0 +1,381 @@
+{
+  "meta": {
+    "id": "vulkan_l1",
+    "title": "Vulkan",
+    "subtitle": "Die Riesen aus Feuer und Stein",
+    "emoji": "🌋",
+    "age_level": 1,
+    "pattern": "place_geography",
+    "theme_color": "#FF5722",
+    "word_count": 211,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Vulkan",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geographie",
+    "category_sub": "naturphänomene",
+    "generated_at": "2026-06-17T09:08:48.879869+00:00",
+    "grounding_companions": [
+      "Lava",
+      "Magma",
+      "Vesuv",
+      "Geysir"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Teide_Volcano_Tenerife_20060429.jpg",
+      "alt": "Ein großer Vulkan mit schneebedeckter Spitze unter blauem Himmel.",
+      "caption": "Viele Vulkane sehen aus wie große, spitze Berge.",
+      "license": "CC BY 2.0",
+      "license_author": "ph_micchei",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Teide_Volcano_Tenerife_20060429.jpg",
+      "wikimedia_id": "File:Teide_Volcano_Tenerife_20060429.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/5/59/Teide_Volcano_Tenerife_20060429.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Teide_Volcano_Tenerife_20060429_300.jpg",
+        "800": "bilder/vulkan/Teide_Volcano_Tenerife_20060429_800.jpg",
+        "1600": "bilder/vulkan/Teide_Volcano_Tenerife_20060429_1600.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Vulkan_Arenal_Costa_Rica.JPG",
+      "alt": "Ein großer Vulkan inmitten eines grünen Waldes.",
+      "caption": "Manche Vulkane sind von dichten Wäldern umgeben.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Kryptonit",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Vulkan_Arenal_Costa_Rica.JPG",
+      "wikimedia_id": "File:Vulkan_Arenal_Costa_Rica.JPG",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Vulkan_Arenal_Costa_Rica.JPG",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Vulkan_Arenal_Costa_Rica_300.jpg",
+        "800": "bilder/vulkan/Vulkan_Arenal_Costa_Rica_800.jpg",
+        "1600": "bilder/vulkan/Vulkan_Arenal_Costa_Rica_1600.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Beehive_geyser.jpg",
+      "alt": "Ein Geysir schießt eine hohe Wasserfontäne in den Himmel.",
+      "caption": "Ein Geysir spuckt kochend heißes Wasser in die Luft.",
+      "license": "Public domain",
+      "license_author": "R Robinson",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Beehive_geyser.jpg",
+      "wikimedia_id": "File:Beehive_geyser.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/48/Beehive_geyser.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Beehive_geyser_300.jpg",
+        "800": "bilder/vulkan/Beehive_geyser_800.jpg",
+        "1600": "bilder/vulkan/Beehive_geyser_1600.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Dauner_Maar.jpg",
+      "alt": "Ein runder, blauer See in einem grünen Vulkankrater.",
+      "caption": "In alten Vulkankratern sammelt sich heute oft kühles Wasser.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Der ursprünglich hochladende Benutzer wa",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Dauner_Maar.jpg",
+      "wikimedia_id": "File:Dauner_Maar.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/e/e7/Dauner_Maar.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Dauner_Maar_300.jpg",
+        "800": "bilder/vulkan/Dauner_Maar_800.jpg",
+        "1600": "bilder/vulkan/Dauner_Maar_1600.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Ausbruch_Geysir_3.jpg",
+      "alt": "Eine große, blaue Wasserblase wölbt sich kurz vor dem Ausbruch.",
+      "caption": "Kurz vor dem Ausbruch bildet das Wasser eine glänzende Blase.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Andreas Tille",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Ausbruch_Geysir_3.jpg",
+      "wikimedia_id": "File:Ausbruch_Geysir_3.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Ausbruch_Geysir_3.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Ausbruch_Geysir_3_300.jpg",
+        "800": "bilder/vulkan/Ausbruch_Geysir_3_800.jpg",
+        "1600": "bilder/vulkan/Ausbruch_Geysir_3_1600.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Rauch am Himmel",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Viele denken bei einem Vulkan an einen gefährlichen Berg.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Doch das ist nur ein Teil der Wahrheit.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Ein Vulkan ist eine Spalte in der Erde.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Aus dieser Spalte steigt kochend heißer Stein auf.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Dieser flüssige Stein kommt tief aus unserer Erde.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Oben an der Luft kühlt er langsam ab.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "So entsteht mit der Zeit ein großer Berg.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Berge aus heißem Stein",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s008",
+          "text": "Die meisten dieser Berge sehen wie spitze Kegel aus.",
+          "img_index": 0
+        },
+        {
+          "id": "s009",
+          "text": "Manche Vulkane liegen sogar versteckt unter dem Meer.",
+          "img_index": 1
+        },
+        {
+          "id": "s010",
+          "text": "Tief im Boden schmilzt fester Stein zu Brei.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Die Wissenschaft nennt diesen heißen Brei Magma.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "An der Erdoberfläche heißt der Brei dann Lava.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Lava glüht wunderschön rot und gelb.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Sie fließt wie dicker Brei den Berg hinab.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Sie ist unglaublich heiß und verbrennt alles.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Doch im Wasser kühlt sie blitzschnell ab.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Dann formt sie runde Steine, die wie Kissen aussehen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Wasser-Fontänen aus dem Boden",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s018",
+          "text": "Ganz in der Nähe gibt es manchmal heiße Quellen.",
+          "img_index": 3
+        },
+        {
+          "id": "s019",
+          "text": "Ein Geysir ist eine ganz besondere Quelle.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Er schießt heißes Wasser hoch in die Luft.",
+          "img_index": 2
+        },
+        {
+          "id": "s021",
+          "text": "Das Wasser sprudelt wie aus einer riesigen Düse.",
+          "img_index": 4
+        },
+        {
+          "id": "s022",
+          "text": "In manchen alten Kratern sammelt sich heute kühles Wasser.",
+          "img_index": 3
+        },
+        {
+          "id": "s023",
+          "text": "Dort können wir an warmen Tagen herrlich baden gehen.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Vielleicht hast du so etwas schon einmal gesehen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Der größte Vulkan auf der Erde versteckt sich ganz tief im Meer. Er ist unvorstellbar riesig und breit."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wie heißt der flüssige, heiße Stein tief im Boden?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Magma"
+          },
+          {
+            "key": "B",
+            "text": "Lava"
+          },
+          {
+            "key": "C",
+            "text": "Geysir"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Wie nennen wir den flüssigen Stein, wenn er aus dem Vulkan fließt?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sand"
+          },
+          {
+            "key": "B",
+            "text": "Lava"
+          },
+          {
+            "key": "C",
+            "text": "Wasser"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Was spuckt ein Geysir aus dem Boden?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Kalten Schnee"
+          },
+          {
+            "key": "B",
+            "text": "Bunten Sand"
+          },
+          {
+            "key": "C",
+            "text": "Heißes Wasser"
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Lava",
+      "Magma",
+      "Geysir"
+    ],
+    "discover": [
+      "Fuji",
+      "Vesuv",
+      "Erde"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Ein Vulkan ist eine Spalte in der Erde.",
+      "source": "Vulkan",
+      "passage": "Ein Vulkan ist eine geologische Struktur, die entsteht, wenn Magma (Gesteinsschmelze) bis an die Oberfläche eines Planeten (z. B. der Erde) aufsteigt."
+    },
+    {
+      "claim": "Die meisten dieser Berge sehen wie spitze Kegel aus.",
+      "source": "Vulkan",
+      "passage": "Die meisten Vulkane haben annähernd die Form eines kegels"
+    },
+    {
+      "claim": "Die Wissenschaft nennt diesen heißen Brei Magma.",
+      "source": "Magma",
+      "passage": "Als Magma (sächlich...) wird im Untergrund befindliche Gesteinsschmelze bezeichnet."
+    },
+    {
+      "claim": "An der Erdoberfläche heißt der Brei dann Lava.",
+      "source": "Lava",
+      "passage": "Lava (Mehrzahl Laven) ist die Bezeichnung für eruptiertes Magma, das flüssig an die Erdoberfläche ausgetreten ist."
+    },
+    {
+      "claim": "Dann formt sie runde Steine, die wie Kissen aussehen.",
+      "source": "Lava",
+      "passage": "Pillow- oder Kissenlava besteht aus Anhäufungen von im Querschnitt runden oder elliptischen, schlauchartigen Basalt-Strukturen... Sie entsteht bei der sehr schnellen Abkühlung von Lava im Wasser."
+    },
+    {
+      "claim": "Ein Geysir ist eine ganz besondere Quelle. Er schießt heißes Wasser hoch in die Luft.",
+      "source": "Geysir",
+      "passage": "Ein Geysir... ist eine heiße Quelle, die ihr Wasser in regelmäßigen oder unregelmäßigen Abständen als Fontäne ausstößt."
+    }
+  ]
+}

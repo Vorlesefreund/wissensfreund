@@ -1,0 +1,510 @@
+{
+  "meta": {
+    "id": "hund_l3",
+    "title": "Hund",
+    "subtitle": "Vom wilden Wolf zum treuen Begleiter des Menschen",
+    "emoji": "🐶",
+    "age_level": 3,
+    "pattern": "living_being",
+    "theme_color": "#4CAF50",
+    "word_count": 698,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Haushund",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "tiere",
+    "category_sub": "saeugetiere",
+    "generated_at": "2026-06-17T09:02:37.865234+00:00",
+    "grounding_companions": [
+      "Wolf",
+      "Hunderasse",
+      "Welpe",
+      "Rettungshund",
+      "Dingo"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b",
+    "trim_passes": 1
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Akita_inu.jpeg",
+      "alt": "Ein Akita-Hund liegt entspannt auf einer Holzterrasse.",
+      "caption": "Der Haushund ist seit Jahrtausenden der treueste Begleiter des Menschen.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "B@rt",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Akita_inu.jpeg",
+      "wikimedia_id": "File:Akita_inu.jpeg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/78/Akita_inu.jpeg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Akita_inu_300.jpg",
+        "800": "bilder/hund/Akita_inu_800.jpg",
+        "1600": "bilder/hund/Akita_inu_1600.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
+      "alt": "Ein kleiner flauschiger Welpe mit blauen Augen.",
+      "caption": "Welpen kommen blind und taub zur Welt und lernen in den ersten Wochen unglaublich schnell.",
+      "license": "CC BY-SA 2.5",
+      "license_author": "Richard Bartz",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
+      "wikimedia_id": "File:Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Keeshond_Siberian_Husky_crossbreed_puppy.jpg/1920px-Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Keeshond_Siberian_Husky_crossbreed_puppy_300.jpg",
+        "800": "bilder/hund/Keeshond_Siberian_Husky_crossbreed_puppy_800.jpg",
+        "1600": "bilder/hund/Keeshond_Siberian_Husky_crossbreed_puppy_1600.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Great_Dane_and_Chihuahua_Skeletons.jpg",
+      "alt": "Zwei Hundeskelette unterschiedlicher Größe nebeneinander.",
+      "caption": "Der enorme Größenunterschied zwischen einer Dogge und einem Chihuahua im Skelett-Vergleich.",
+      "license": "CC0",
+      "license_author": "Sklmsta",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Great_Dane_and_Chihuahua_Skeletons.jpg",
+      "wikimedia_id": "File:Great_Dane_and_Chihuahua_Skeletons.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Great_Dane_and_Chihuahua_Skeletons.jpg/1920px-Great_Dane_and_Chihuahua_Skeletons.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Great_Dane_and_Chihuahua_Skeletons_300.jpg",
+        "800": "bilder/hund/Great_Dane_and_Chihuahua_Skeletons_800.jpg",
+        "1600": "bilder/hund/Great_Dane_and_Chihuahua_Skeletons_1600.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Deutscher_Boxer_Elmo_vom_Freudenreich.jpg",
+      "alt": "Ein braun gestromter Boxerhund steht im Wald auf einem Baumstumpf.",
+      "caption": "Einige Rassen haben durch Zucht eine sehr kurze Schnauze erhalten.",
+      "license": "CC BY 4.0",
+      "license_author": "OleNeitzel",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Deutscher_Boxer_Elmo_vom_Freudenreich.jpg",
+      "wikimedia_id": "File:Deutscher_Boxer_Elmo_vom_Freudenreich.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Deutscher_Boxer_Elmo_vom_Freudenreich.jpg/1920px-Deutscher_Boxer_Elmo_vom_Freudenreich.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Deutscher_Boxer_Elmo_vom_Freudenreich_300.jpg",
+        "800": "bilder/hund/Deutscher_Boxer_Elmo_vom_Freudenreich_800.jpg",
+        "1600": "bilder/hund/Deutscher_Boxer_Elmo_vom_Freudenreich_1600.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Canis_lupus_dingo.jpg",
+      "alt": "Ein brauner Dingo steht an einem Sandstrand.",
+      "caption": "Dingos sind Hunde, die vor Jahrtausenden in Australien verwildert sind.",
+      "license": "CC BY 2.0",
+      "license_author": "Sam Fraser-Smith",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Canis_lupus_dingo.jpg",
+      "wikimedia_id": "File:Canis_lupus_dingo.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1f/Canis_lupus_dingo.jpg/1920px-Canis_lupus_dingo.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Canis_lupus_dingo_300.jpg",
+        "800": "bilder/hund/Canis_lupus_dingo_800.jpg",
+        "1600": "bilder/hund/Canis_lupus_dingo_1600.jpg"
+      }
+    },
+    {
+      "index": 5,
+      "filename": "Atfire_rettungshund_nepal_1.jpg",
+      "alt": "Rettungshunde-Einsatz in den Trümmern.",
+      "caption": "Trümmerhunde leisten nach Naturkatastrophen wie Erdbeben lebenswichtige Arbeit.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "@fire – Internationaler Katastrophenschutz",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Atfire_rettungshund_nepal_1.jpg",
+      "wikimedia_id": "File:Atfire_rettungshund_nepal_1.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/8/8a/Atfire_rettungshund_nepal_1.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Atfire_rettungshund_nepal_1_300.jpg",
+        "800": "bilder/hund/Atfire_rettungshund_nepal_1_800.jpg",
+        "1600": "bilder/hund/Atfire_rettungshund_nepal_1_1600.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Ein treuer Freund auf vier Pfoten",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Ob als flauschiger Spielgefährte auf dem Sofa oder als aufmerksamer Wächter im Garten – der Haushund ist das mit dem Menschen am vielfältigsten verbundene Haustier.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Wissenschaftlich betrachtet ist der Haushund ein Haustier und eine Unterart des Wolfes, seiner wilden Stammform.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Er wird heute weltweit als geliebtes Heimtier oder nützliches Arbeitstier gehalten.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Wann genau die erste Zähmung und Anpassung an den Menschen stattfand, ist in der Wissenschaft noch umstritten.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Die Schätzungen reichen von 15.000 Jahren vor Christus bis zu 100.000 Jahren in der Vergangenheit.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Die Super-Sinne der Hunde",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s006",
+          "text": "Kein anderes Landwirbeltier zeigt so extreme Größenunterschiede wie der Hund.",
+          "img_index": 2
+        },
+        {
+          "id": "s007",
+          "text": "Vom winzigen Chihuahua, der weniger als ein Kilogramm wiegen kann, bis zur riesigen Deutschen Dogge gibt es hunderte verschiedene Rassen.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Ein erwachsener Hund besitzt ein kräftiges Gebiss mit 42 Zähnen, darunter die messerscharfen Reißzähne zum Zerteilen von Nahrung.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Hunde sehen Farben anders als wir Menschen.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Sie sind sogenannte Dichromaten: Sie besitzen in ihren Augen nur Farbrezeptoren für Blau und Grün, weshalb sie die Farbe Rot nicht wahrnehmen können.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Dafür verstärkt eine Spiegelschicht im Auge, das sogenannte Tapetum lucidum, das restliche Licht in der Dämmerung extrem gut.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Ihre Nase ist ein Meisterwerk mit bis zu 220 Millionen Riechzellen, wodurch sie räumlich riechen und Spuren zielsicher folgen können.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Auch ihr Gehör ist hochentwickelt und nimmt Frequenzen bis zu 50.000 Hertz wahr, was für das menschliche Ohr im unhörbaren Ultraschallbereich liegt.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Am Kopf tragen sie zudem Vibrissen.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Diese steifen Taststoppeln reagieren so empfindlich auf Druck und Luftwirbel, dass sie Hindernisse spüren, noch bevor sie diese berühren.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Sogar das Magnetfeld der Erde können Hunde wahrnehmen und richten sich beim Urinieren oft danach aus.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Hunde besitzen eine eingebaute Wärmekamera! Ihre feuchte, kühle Nase kann schwache Wärmestrahlung von fernen Objekten oder Beutetieren orten. Außer ihnen kann das unter den Säugetieren nur die Vampirfledermaus."
+        },
+        {
+          "type": "stimmt_das",
+          "text": "🤔 Sehen Hunde wirklich nur schwarz-weiß?",
+          "reveal_text": "Nein, das ist ein Irrglaube! Hunde sehen durchaus Farben, allerdings weniger als wir. Weil ihnen der Rezeptor für Rot fehlt, können sie diese Farbe nicht von Grün unterscheiden. Ihre Sicht ist also ähnlich wie bei einem Menschen mit einer Rot-Grün-Sehschwäche.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Vom Welpen zum erwachsenen Hund",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s017",
+          "text": "Hunde und Wölfe sind so eng verwandt, dass sie problemlos Nachkommen miteinander zeugen können.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Dennoch gibt es Unterschiede: Wölfe haben im Stehen einen eher quadratischen Körperbau und werden nur einmal im Jahr fruchtbar.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Haushündinnen hingegen kommen meist zweimal im Jahr in die sogenannte Läufigkeit.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Nach einer Trächtigkeit von etwa 63 bis 65 Tagen bringt die Hündin meist drei bis zwölf Welpen zur Welt.",
+          "img_index": 1
+        },
+        {
+          "id": "s021",
+          "text": "Welpen werden völlig zahnlos geboren.",
+          "img_index": -1
+        },
+        {
+          "id": "s022",
+          "text": "In ihrem ersten Lebensmonat ist ihre eigene Temperaturregelung noch nicht voll entwickelt, weshalb sie viel Wärme von der Mutter benötigen.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Zwischen der 3. und 12. Lebenswoche erleben die Welpen ihre wichtigste Sozialisationsphase.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "In dieser Zeit lernen sie die Körpersprache von Artgenossen kennen, gewöhnen sich an Geräusche und bauen tiefe Bindungen zum Menschen auf.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "Interessant ist der Prozess des Alterns: Große Hunde altern viel schneller als kleine.",
+          "img_index": -1
+        },
+        {
+          "id": "s026",
+          "text": "Während ein kleiner Dackel bis zu 15 oder sogar 20 Jahre alt werden kann, erreichen schwere Rassen wie die Deutsche Dogge selten ein Alter von über neun Jahren.",
+          "img_index": -1
+        },
+        {
+          "id": "s027",
+          "text": "Verantwortlich dafür ist unter anderem ein Gen, das für einen Wachstumsfaktor namens IGF-1 zuständig ist.",
+          "img_index": -1
+        },
+        {
+          "id": "s028",
+          "text": "Ein naher Verwandter, der australische Dingo, zeigt uns heute, wie ursprüngliche Hunde lebten: Er verwilderte vor Jahrtausenden und bellt fast nie, sondern kommuniziert hauptsächlich durch Heulen.",
+          "img_index": 4
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Partner und Helfer des Menschen",
+      "section_role": "human_animal",
+      "sentences": [
+        {
+          "id": "s029",
+          "text": "Die gemeinsame Geschichte von Mensch und Hund begann vermutlich als Jagdhilfe.",
+          "img_index": -1
+        },
+        {
+          "id": "s030",
+          "text": "Heute übernehmen sie vielseitige Aufgaben im Dienste der Gesellschaft.",
+          "img_index": -1
+        },
+        {
+          "id": "s031",
+          "text": "Als Gebrauchshunde unterstützen sie die Polizei mit ihrem feinen Geruchssinn, arbeiten als Blindenführhunde oder leisten wichtige Arbeit bei der Beruhigung von Menschen durch bloße Berührung.",
+          "img_index": -1
+        },
+        {
+          "id": "s032",
+          "text": "Speziell geprüfte Rettungshunde suchen vermisste Personen im Wald (Flächensuche), spüren Verschüttete unter eingestürzten Häusern auf (Trümmersuche) oder folgen dem individuellen Geruch einer Person beim sogenannten Mantrailing.",
+          "img_index": 5
+        },
+        {
+          "id": "s033",
+          "text": "Für dieses enge Zusammenleben müssen wir gut für sie sorgen.",
+          "img_index": -1
+        },
+        {
+          "id": "s034",
+          "text": "Obwohl sie vom fleischfressenden Wolf abstammen, haben sich Haushunde im Laufe der Jahrtausende an unsere Nahrung angepasst und sind zu Allesfressern geworden.",
+          "img_index": -1
+        },
+        {
+          "id": "s035",
+          "text": "Reines Fleisch als einziges Futtermittel ist für sie ungesund.",
+          "img_index": -1
+        },
+        {
+          "id": "s036",
+          "text": "Dennoch vertragen sie nicht alles, was uns schmeckt.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Schokolade ist für Hunde lebensgefährlich! Sie enthält den Stoff Theobromin, den der Hundekörper nur extrem langsam abbauen kann. Schon kleine Mengen können zu schweren Vergiftungen führen. Auch Zwiebeln, Weintrauben und der Süßstoff Xylit sind für Hunde hochgiftig."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wie viele Zähne hat das bleibende Gebiss eines erwachsenen Hundes?",
+        "options": [
+          {
+            "key": "A",
+            "text": "32 Zähne"
+          },
+          {
+            "key": "B",
+            "text": "42 Zähne"
+          },
+          {
+            "key": "C",
+            "text": "52 Zähne"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Warum können kleine Hunderassen wie der Dackel deutlich älter werden als große Rassen?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Weil kleine Hunde weniger von einem bestimmten Wachstumsfaktor namens IGF-1 im Körper haben."
+          },
+          {
+            "key": "B",
+            "text": "Weil große Hunde mehr schlafen und dadurch weniger Muskeln aufbauen."
+          },
+          {
+            "key": "C",
+            "text": "Weil kleine Hunde ausschließlich Gemüse fressen und dadurch gesünder leben."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Was versteht man unter dem Begriff 'Mantrailing' bei Rettungshunden?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Die Suche nach verunglückten Schiffen im tiefen Wasser vom Boot aus."
+          },
+          {
+            "key": "B",
+            "text": "Das Aufspüren einer vermissten Person anhand ihres ganz persönlichen Geruchs."
+          },
+          {
+            "key": "C",
+            "text": "Die Rettung von Menschen aus brennenden Häusern durch Apportieren von Seilen."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q4",
+        "text": "Welche Farbe können Hunde aufgrund ihrer Augenstruktur nicht als eigenständige Farbe wahrnehmen?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Blau"
+          },
+          {
+            "key": "B",
+            "text": "Gelb"
+          },
+          {
+            "key": "C",
+            "text": "Rot"
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Wolf",
+      "Welpe",
+      "Hunderasse"
+    ],
+    "discover": [
+      "Dingo",
+      "Rettungshund"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Der Haushund ist ein Haustier und eine Unterart des Wolfes.",
+      "source": "Haushund",
+      "passage": "Der Haushund (Canis lupus familiaris) ist ein Haustier und wird als Heim- und Nutztier gehalten. Seine wilde Stammform ist der Wolf, dem er als Unterart zugeordnet wird."
+    },
+    {
+      "claim": "Wissenschaftliche Schätzungen zur Domestizierung variieren zwischen 15.000 v. Chr. und 100.000 Jahren.",
+      "source": "Haushund",
+      "passage": "Wann die Domestizierung stattfand, ist umstritten; wissenschaftliche Schätzungen variieren zwischen etwa 15.000 v. Chr. und vor 100.000 Jahren."
+    },
+    {
+      "claim": "Ein erwachsener Hund besitzt ein Gebiss mit 42 Zähnen.",
+      "source": "Haushund",
+      "passage": "Das bleibende Gebiss der Hunde hat 42 Zähne."
+    },
+    {
+      "claim": "Hunde besitzen nur Farbrezeptoren für Blau und Grün und können Rot nicht wahrnehmen.",
+      "source": "Haushund",
+      "passage": "Der Hund hat nur zwei unterschiedliche Zapfentypen, die für Grün und Blau empfindlich sind. Dadurch wird nur ein Teil des menschlichen Farbspektrums abgedeckt: Rot ist eine Farbe, die der Hund nicht erkennt."
+    },
+    {
+      "claim": "Das Tapetum lucidum reflektiert das Licht für besseres Sehen in der Dämmerung.",
+      "source": "Haushund",
+      "passage": "Diese Tapetum lucidum genannte Schicht reflektiert einfallendes Licht, so dass es ein weiteres Mal auf die Stäbchen trifft. Hunde können in der Dämmerung viel besser sehen als Menschen."
+    },
+    {
+      "claim": "Der Hundekörper kann das in Schokolade enthaltene Theobromin nur langsam abbauen.",
+      "source": "Haushund",
+      "passage": "Viele menschliche Nahrungs- und Genussmittel sind für Hunde mehr oder weniger giftig, so zum Beispiel Schokolade aufgrund des enthaltenen Theobromins"
+    },
+    {
+      "claim": "Kleine Hunde wie der Dackel leben länger, da sie weniger IGF-1 exprimieren.",
+      "source": "Haushund",
+      "passage": "Kleine Hunde exprimieren weniger IGF-1. Ein im IGF1-Gen vorhandener Einzelnukleotid-Polymorphismus bewirkt bei kleinen Hunden deren geringeren Wuchs und möglicherweise auch deren verzögertes Altern."
+    },
+    {
+      "claim": "Der Dingo verwilderte vor Jahrtausenden und bellt fast nie, sondern kommuniziert hauptsächlich durch Heulen.",
+      "source": "Dingo",
+      "passage": "Der Dingo (Canis lupus dingo) ist ein Haushund, der vor mehreren tausend Jahren verwilderte... Wie alle Haushunde neigen auch Dingos stark zur lautlichen Verständigung, nur sind es in ihrem Fall meistens Heul- und Fieptöne und nicht wie bei anderen Haushunden das Bellen."
+    }
+  ]
+}

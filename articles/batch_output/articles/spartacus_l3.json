@@ -1,0 +1,513 @@
+{
+  "meta": {
+    "id": "spartacus_l3",
+    "title": "Spartacus",
+    "subtitle": "Der Gladiator, der Rom herausforderte",
+    "emoji": "⚔️",
+    "age_level": 3,
+    "pattern": "history_person",
+    "theme_color": "#8B0000",
+    "word_count": 446,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Spartacus",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "antike",
+    "generated_at": "2026-06-17T09:21:37.480020+00:00",
+    "grounding_companions": [
+      "Gladiator",
+      "Sklaverei im Römischen Reich",
+      "Sklavenaufstände im Römischen Reich",
+      "Amphitheater"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "SpartacusStatue_Chichester.jpg",
+      "alt": "Bronzene Statue von Spartacus, der mit gesprengten Ketten tanzt oder springt.",
+      "caption": "Eine moderne Statue zeigt Spartacus als Symbol der befreiten Sklaven.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Martinvl",
+      "source_url": "https://commons.wikimedia.org/wiki/File:SpartacusStatue_Chichester.jpg",
+      "wikimedia_id": "File:SpartacusStatue_Chichester.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/SpartacusStatue_Chichester.jpg/1920px-SpartacusStatue_Chichester.jpg",
+      "is_hero": true,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/spartacus/SpartacusStatue_Chichester_300.jpg",
+        "800": "bilder/spartacus/SpartacusStatue_Chichester_800.jpg",
+        "1600": "bilder/spartacus/SpartacusStatue_Chichester_1600.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Amphitheater_santa_maria_capua_vetere.jpg",
+      "alt": "Ruinen des antiken Amphitheaters von Capua unter blauem Himmel.",
+      "caption": "In Capua begann der Aufstand von Spartacus.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Stanley-goodspeed at de.wikipedia",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Amphitheater_santa_maria_capua_vetere.jpg",
+      "wikimedia_id": "File:Amphitheater_santa_maria_capua_vetere.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/Amphitheater_santa_maria_capua_vetere.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/spartacus/Amphitheater_santa_maria_capua_vetere_300.jpg",
+        "800": "bilder/spartacus/Amphitheater_santa_maria_capua_vetere_800.jpg",
+        "1600": "bilder/spartacus/Amphitheater_santa_maria_capua_vetere_1600.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Brot_und_Spiele_Gladiators1.jpg",
+      "alt": "Zwei Gladiatoren mit Helmen und Schilden im Schaukampf.",
+      "caption": "Gladiatoren mussten in der Arena auf Leben und Tod kämpfen.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Medienfabrik Trier",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Brot_und_Spiele_Gladiators1.jpg",
+      "wikimedia_id": "File:Brot_und_Spiele_Gladiators1.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/b/b2/Brot_und_Spiele_Gladiators1.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/spartacus/Brot_und_Spiele_Gladiators1_300.jpg",
+        "800": "bilder/spartacus/Brot_und_Spiele_Gladiators1_800.jpg",
+        "1600": "bilder/spartacus/Brot_und_Spiele_Gladiators1_1600.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "ServusCollare.jpg",
+      "alt": "Ein rostiges Eisenhalsband für Sklaven mit einer beschrifteten Plakette.",
+      "caption": "Solche Halsbänder trugen Sklaven im Römischen Reich.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Rabax63",
+      "source_url": "https://commons.wikimedia.org/wiki/File:ServusCollare.jpg",
+      "wikimedia_id": "File:ServusCollare.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/8/87/ServusCollare.jpg/1920px-ServusCollare.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/spartacus/ServusCollare_300.jpg",
+        "800": "bilder/spartacus/ServusCollare_800.jpg",
+        "1600": "bilder/spartacus/ServusCollare_1600.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Sklavenaufstand_Sizilien.JPG",
+      "alt": "Eine antike römische Münze, die an die Niederschlagung eines Sklavenaufstands erinnert.",
+      "caption": "Diese römische Münze erinnert an die Sklavenkriege.",
+      "license": "CC BY-SA 3.0 de",
+      "license_author": "Hermann Junghans",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Sklavenaufstand_Sizilien.JPG",
+      "wikimedia_id": "File:Sklavenaufstand_Sizilien.JPG",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/2/24/Sklavenaufstand_Sizilien.JPG",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/spartacus/Sklavenaufstand_Sizilien_300.jpg",
+        "800": "bilder/spartacus/Sklavenaufstand_Sizilien_800.jpg",
+        "1600": "bilder/spartacus/Sklavenaufstand_Sizilien_1600.jpg"
+      }
+    },
+    {
+      "index": 5,
+      "filename": "Colosseo_2020.jpg",
+      "alt": "Das Kolosseum in Rom mit seinen steinernen Rundbögen am Tag.",
+      "caption": "Das Kolosseum ist das berühmteste Amphitheater der Welt.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "FeaturedPics",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Colosseo_2020.jpg",
+      "wikimedia_id": "File:Colosseo_2020.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Colosseo_2020.jpg/1920px-Colosseo_2020.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/spartacus/Colosseo_2020_300.jpg",
+        "800": "bilder/spartacus/Colosseo_2020_800.jpg",
+        "1600": "bilder/spartacus/Colosseo_2020_1600.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Der Sklave, der Rom herausforderte",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Wer an das antike Rom denkt, stellt sich oft prächtige Tempel und glänzende Legionen vor.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Doch dieser Wohlstand ruhte auf Millionen unfreien Menschen, die im Schatten des Reiches lebten.",
+          "img_index": 3
+        },
+        {
+          "id": "s003",
+          "text": "Einer von ihnen brachte das Römische Reich zum Zittern: Spartacus.",
+          "img_index": 0
+        },
+        {
+          "id": "s004",
+          "text": "Er war ein Sklave und Gladiator, der als Anführer des berühmtesten Sklavenaufstands in die Geschichte einging.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Seine Rebellion bedrohte das Reich zeitweise schwer und zeigt, wie verzweifelt viele Sklaven damals waren.",
+          "img_index": -1
+        }
+      ],
+      "boxes": []
+    },
+    {
+      "id": "sec2",
+      "heading": "Das harte Training in der Arena",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s006",
+          "text": "Spartacus stammte wahrscheinlich aus Thrakien im Südosten Europas.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Er wurde gefangen genommen, versklavt und wegen seiner Kraft in eine Gladiatorenschule in Capua gesteckt.",
+          "img_index": 1
+        },
+        {
+          "id": "s008",
+          "text": "Viele denken bei Gladiatoren an glänzende Helden, doch in Wahrheit waren sie Gefangene ohne eigene Rechte.",
+          "img_index": 2
+        },
+        {
+          "id": "s009",
+          "text": "Sie trainierten täglich mit hölzernen Waffen an Holzpfählen, um Kraft und Ausdauer aufzubauen.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Das harte Training ähnelte heutigem Kampfsport, war aber kein Hobby, sondern bitterer Zwang.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Wer in der Arena verlor, musste mit dem Tod rechnen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "🤔 Starben Gladiatoren immer im Kampf?",
+          "reveal_text": "Nein! Nur etwa jeder achte Kampf endete tödlich. Da die Ausbildung, Unterkunft und medizinische Versorgung der Kämpfer sehr teuer waren, versuchten die Besitzer meist, das Leben ihrer Gladiatoren zu schonen.",
+          "reveal_mode": "auto"
+        }
+      ]
+    },
+    {
+      "id": "sec3",
+      "heading": "Der große Ausbruch am Vesuv",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s012",
+          "text": "Im Jahr 73 vor Christus floh Spartacus mit etwa 70 Gladiatoren mithilfe von Küchenmessern aus der Schule.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Sie flüchteten zum Vulkan Vesuv und versteckten sich dort.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Rasch schlossen sich ihnen tausende Sklaven aus den Landwirtschaftsbetrieben an, die sonst unter grausamen Bedingungen arbeiten mussten.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Auch arme, freie Bürger schlossen sich an.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Spartacus bewies großes Talent als Feldherr: Sein befreites Heer besiegte mehrere römische Armeen.",
+          "img_index": 4
+        },
+        {
+          "id": "s017",
+          "text": "Er sorgte für Disziplin, kaufte fair Waffen und teilte die Beute gerecht auf.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Er verbot seinen Kriegern den Besitz von Gold und Silber. Er wollte keinen persönlichen Reichtum anhäufen, sondern teilte jede Beute streng gleichmäßig unter allen Sklaven auf, um echte Gemeinschaft zu stiften."
+        }
+      ]
+    },
+    {
+      "id": "sec4",
+      "heading": "Verratene Hoffnung und die letzte Schlacht",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s018",
+          "text": "Spartacus wollte sein Heer über die Alpen nach Norden führen, damit alle in ihre Heimat zurückkehren konnten.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Doch seine Männer wollten nicht hören und zogen wieder nach Süden.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Dort wurde Spartacus von Piraten betrogen, die ihn nach Sizilien übersetzen sollten, aber mit dem Geld flohen.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Sie hofften, in Sizilien neuen Schwung für ihren Kampf zu finden.",
+          "img_index": -1
+        },
+        {
+          "id": "s022",
+          "text": "Schließlich kesselte der römische Feldherr Crassus die Rebellen ein.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Im Jahr 71 vor Christus kam es zur Schlacht am Silarus.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Die Sklavenarmee wurde aufgerieben, und Spartacus fiel im Kampf.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Nach der Niederlage bestraften die Römer die überlebenden Rebellen grausam: 6.000 Gefangene wurden entlang der Straße Via Appia von Rom bis Capua gekreuzigt, um andere Sklaven abzuschrecken."
+        }
+      ]
+    },
+    {
+      "id": "sec5",
+      "heading": "Ein Symbol, das die Zeit überdauert",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s025",
+          "text": "Heute gilt Spartacus als weltweites Symbol für den Kampf gegen Unterdrückung.",
+          "img_index": -1
+        },
+        {
+          "id": "s026",
+          "text": "Seine Geschichte inspiriert bis heute Romane, Musik und berühmte Kinofilme.",
+          "img_index": 5
+        },
+        {
+          "id": "s027",
+          "text": "Sogar Asteroiden und Sportvereine wurden nach ihm benannt.",
+          "img_index": -1
+        },
+        {
+          "id": "s028",
+          "text": "Sein Mut zeigt uns, dass Menschen sich auch in aussichtslosen Lagen für ihre Würde einsetzen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": []
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Woher stammte Spartacus vermutlich?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Aus Thrakien"
+          },
+          {
+            "key": "B",
+            "text": "Aus Gallien"
+          },
+          {
+            "key": "C",
+            "text": "Aus Ägypten"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Warum floh Spartacus aus der Gladiatorenschule?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Um römischer Kaiser zu werden"
+          },
+          {
+            "key": "B",
+            "text": "Um die Freiheit zurückzuerlangen"
+          },
+          {
+            "key": "C",
+            "text": "Um ein reicher Kaufmann zu werden"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Welcher römische Feldherr besiegte schließlich das Sklavenheer von Spartacus?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Julius Caesar"
+          },
+          {
+            "key": "B",
+            "text": "Kaiser Nero"
+          },
+          {
+            "key": "C",
+            "text": "Crassus"
+          }
+        ],
+        "correct_key": "C"
+      },
+      {
+        "id": "q4",
+        "text": "Was passierte nach der letzten Schlacht mit den 6.000 gefangenen Rebellen?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie durften alle friedlich in ihre Heimat zurückkehren"
+          },
+          {
+            "key": "B",
+            "text": "Sie wurden entlang der Via Appia gekreuzigt"
+          },
+          {
+            "key": "C",
+            "text": "Sie wurden zu Leibwächtern des Kaisers gemacht"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q5",
+        "text": "Womit trainierten Gladiatoren in den Schulen hauptsächlich, um fit zu werden?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Mit hölzernen Waffen an Holzpfählen"
+          },
+          {
+            "key": "B",
+            "text": "Mit stumpfen Eisenkeulen"
+          },
+          {
+            "key": "C",
+            "text": "Mit echten, scharfen Wurfspeeren"
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Gladiator",
+      "Sklaverei im Römischen Reich",
+      "Sklavenaufstände im Römischen Reich"
+    ],
+    "discover": [
+      "Amphitheater",
+      "Kolosseum",
+      "Vesuv"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Er war ein Sklave und Gladiator, der als Anführer des berühmtesten Sklavenaufstands in die Geschichte einging.",
+      "source": "Spartacus",
+      "passage": "Spartacus, deutsch Spartakus, war ein römischer Sklave und Gladiator... Historische Bedeutung erlangte er als Anführer eines nach ihm benannten Sklavenaufstandes..."
+    },
+    {
+      "claim": "Spartacus stammte wahrscheinlich aus Thrakien im Südosten Europas.",
+      "source": "Spartacus",
+      "passage": "Gemäß den Angaben späterer antiker Autoren stammte Spartacus aus Thrakien, was letztlich aber nur Vermutung bleibt."
+    },
+    {
+      "claim": "Er wurde gefangen genommen, versklavt und wegen seiner Kraft in eine Gladiatorenschule in Capua gesteckt.",
+      "source": "Spartacus",
+      "passage": "Appian beschreibt ihn zweihundert Jahre nach den Ereignissen als Thraker, der einst auf Seiten der Römer kämpfte, dann aber gefangen genommen und als Gladiator in Capua verkauft wurde."
+    },
+    {
+      "claim": "Sie trainierten täglich mit hölzernen Waffen an Holzpfählen, um Kraft und Ausdauer aufzubauen.",
+      "source": "Gladiator",
+      "passage": "Die Gladiatoren übten in der Regel mit hölzernen Waffen... Die Schüler übten an Pfählen..."
+    },
+    {
+      "claim": "Im Jahr 73 vor Christus floh Spartacus mit etwa 70 Gladiatoren mithilfe von Küchenmessern aus der Schule.",
+      "source": "Spartacus",
+      "passage": "Spartacus floh nach einer spontanen Rebellion mit etwa 70 anderen Gladiatoren... im Jahr 73 v. Chr. aus der Gladiatorenschule..."
+    },
+    {
+      "claim": "Rasch schlossen sich ihnen tausende Sklaven aus den Landwirtschaftsbetrieben an, die sonst unter grausamen Bedingungen arbeiten mussten.",
+      "source": "Spartacus",
+      "passage": "...vermochte zahlreiche weitere Sklaven, vor allem aus den landwirtschaftlichen Großbetrieben, den Latifundien, um sich zu sammeln."
+    },
+    {
+      "claim": "Er sorgte für Disziplin, kaufte fair Waffen und teilte die Beute gerecht auf.",
+      "source": "Spartacus",
+      "passage": "So erwähnt Appian, dass unter Spartacus die Beute der Feldzüge an alle Angehörigen seines Heeres gleichmäßig verteilt wurde... Ebenso ordnete er an, dass alle Waren, etwa Metalle zur Waffenherstellung, von seinen Kämpfern auch bezahlt wurden..."
+    },
+    {
+      "claim": "Dort wurde Spartacus von Piraten betrogen, die ihn nach Sizilien übersetzen sollten, aber mit dem Geld flohen.",
+      "source": "Spartacus",
+      "passage": "Spartacus bezahlte dort kilikische Piraten, die ihn und 2.000 seiner Männer nach Sizilien übersetzen sollten. Er wurde jedoch von den Piraten betrogen, die zwar sein Geld nahmen, aber dann die Rebellen im Stich ließen."
+    },
+    {
+      "claim": "Im Jahr 71 vor Christus kam es zur Schlacht am Silarus.",
+      "source": "Spartacus",
+      "passage": "In der Zweiten Schlacht am Silarus wurde die Sklavenarmee komplett aufgerieben. Spartacus selbst fiel."
+    },
+    {
+      "claim": "Er verbot seinen Kriegern den Besitz von Gold und Silber.",
+      "source": "Spartacus",
+      "passage": "Auch verbot er seinen Mitkämpfern den Besitz von Gold und Silber."
+    },
+    {
+      "claim": "Nach der Niederlage bestraften die Römer die überlebenden Rebellen grausam: 6.000 Gefangene wurden entlang der Straße Via Appia von Rom bis Capua gekreuzigt.",
+      "source": "Spartacus",
+      "passage": "6.000 Rebellen wurden gefangen genommen und von Crassus entlang der Via Appia von Rom nach Capua gekreuzigt."
+    },
+    {
+      "claim": "Nur etwa jeder achte Kampf endete tödlich.",
+      "source": "Gladiator",
+      "passage": "In der Arena starben weniger Gladiatoren als bisher angenommen – wahrscheinlich starb einer von acht."
+    }
+  ]
+}

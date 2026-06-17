@@ -1,0 +1,260 @@
+{
+  "meta": {
+    "id": "spartacus_l1",
+    "title": "Spartacus",
+    "subtitle": "Der Kampf für die Freiheit",
+    "emoji": "⚔️",
+    "age_level": 1,
+    "pattern": "history_person",
+    "theme_color": "#8B0000",
+    "word_count": 124,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Spartacus",
+    "schema_version": "1.0",
+    "review_flag": true,
+    "category_top": "geschichte",
+    "category_sub": "antike",
+    "generated_at": "2026-06-17T09:21:37.484763+00:00",
+    "grounding_companions": [
+      "Gladiator",
+      "Sklaverei im Römischen Reich",
+      "Sklavenaufstände im Römischen Reich",
+      "Amphitheater"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b",
+    "review_reason": "Wortzahl 124 < 128"
+  },
+  "images": [],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Gefangen im alten Rom",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir vor: Jemand nimmt dir deine Freiheit weg.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Du musst tun, was andere sagen.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "So ging es Spartacus.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Er war ein Sklave im alten Rom.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Ein Sklave gehört einem anderen Menschen.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Er musste für reiche Römer kämpfen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Der große Weglauf-Plan",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s007",
+          "text": "Spartacus wollte frei sein.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Er lief mit seinen Freunden heimlich weg.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Immer mehr unfreie Menschen kamen zu ihm.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Zusammen waren sie ein riesiges Team.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Sie wollten alle zurück nach Hause gehen.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Das römische Heer wollte das verhindern.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Aber Spartacus war ein schlauer Anführer.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Er teilte das Essen immer gerecht auf.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Spartacus floh zuerst nur mit Küchenmessern aus seiner Schule!"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Ein Held für immer",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s015",
+          "text": "Am Ende gab es einen großen Kampf.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Dabei verlor Spartacus sein Leben.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Heute kennen ihn immer noch viele Menschen.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Er ist ein Symbol für die Freiheit.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was war Spartacus im alten Rom?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein Sklave"
+          },
+          {
+            "key": "B",
+            "text": "Ein König"
+          },
+          {
+            "key": "C",
+            "text": "Ein Bäcker"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Was teilte Spartacus immer gerecht mit seinen Freunden?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Die Pferde"
+          },
+          {
+            "key": "B",
+            "text": "Das Essen"
+          },
+          {
+            "key": "C",
+            "text": "Die Hüte"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Was wollte Spartacus unbedingt erreichen?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Viel Gold besitzen"
+          },
+          {
+            "key": "B",
+            "text": "Die Freiheit bekommen"
+          },
+          {
+            "key": "C",
+            "text": "Ein neues Haus bauen"
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Gladiator",
+      "Rom",
+      "Sklave"
+    ],
+    "discover": [
+      "Römisches Reich",
+      "Freiheit"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Er war ein Sklave im alten Rom.",
+      "source": "Spartacus",
+      "passage": "Spartacus, deutsch Spartakus, war ein römischer Sklave und Gladiator..."
+    },
+    {
+      "claim": "Er musste für reiche Römer kämpfen.",
+      "source": "Gladiator",
+      "passage": "Ein Gladiator (lateinisch gladiator zu gladius für „(Kurz-)Schwert“) war im Römischen Reich ein Berufskämpfer, der in öffentlichen Schaustellungen gegen andere Gladiatoren kämpfte."
+    },
+    {
+      "claim": "Er lief mit seinen Freunden heimlich weg.",
+      "source": "Spartacus",
+      "passage": "Spartacus floh nach einer spontanen Rebellion mit etwa 70 anderen Gladiatoren (die Zahlen variieren in den Quellen) im Jahr 73 v. Chr. aus der Gladiatorenschule..."
+    },
+    {
+      "claim": "Er teilte das Essen immer gerecht auf.",
+      "source": "Spartacus",
+      "passage": "So erwähnt Appian, dass unter Spartacus die Beute der Feldzüge an alle Angehörigen seines Heeres gleichmäßig verteilt wurde..."
+    },
+    {
+      "claim": "Spartacus floh zuerst nur mit Küchenmessern aus seiner Schule!",
+      "source": "Gladiator",
+      "passage": "Anfangs nur mit Küchenmessern bewaffnet (die Waffen in der streng bewachten Waffenkammer waren während des Ausbruchs nicht zugänglich), gelangten die Entflohenen rasch..."
+    },
+    {
+      "claim": "Dabei verlor Spartacus sein Leben.",
+      "source": "Spartacus",
+      "passage": "In der Zweiten Schlacht am Silarus wurde die Sklavenarmee komplett aufgerieben. Spartacus selbst fiel."
+    },
+    {
+      "claim": "Er ist ein Symbol für die Freiheit.",
+      "source": "Spartacus",
+      "passage": "Auch in anderen Zusammenhängen taucht sein Name immer wieder als Symbolfigur gegen Unterdrückung und Knechtschaft auf."
+    }
+  ]
+}

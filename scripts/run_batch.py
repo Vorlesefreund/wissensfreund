@@ -879,6 +879,17 @@ def stage2_generierung(
     gen_reqs:  list[types.InlinedRequest] = []
     req_meta:  dict[str, dict]            = {}  # article_id → Metadaten für Post-Processing
 
+    # Bereits gespeicherte Artikel vormerken → Batch überspringt sie
+    articles: dict[str, str] = {}
+    for _t in themen:
+        _slug = _t.lower().replace(" ", "_").replace("/", "_")
+        for _s in stufen:
+            _aid = f"{_slug}_l{_s}"
+            _op  = articles_dir / f"{_aid}.json"
+            if _op.exists():
+                articles[_aid] = str(_op)
+                log.info("  %s: bereits vorhanden — wird nicht neu gebatcht", _aid)
+
     for thema in themen:
         data = topics_data.get(thema)
         if not data:
@@ -892,6 +903,8 @@ def stage2_generierung(
 
         for stufe in stufen:
             article_id    = f"{slug}_l{stufe}"
+            if article_id in articles:
+                continue  # bereits gespeichert — kein neuer Batch-Request
             wmin, wmax, _ = wortziel_for(thema, stufe)
             images_stufe  = select_images_for_stufe(images_all, stufe, appeal)
             job           = _stage2_job(thema, data, slug, stufe)
@@ -958,7 +971,7 @@ def stage2_generierung(
 
     # ── Step 4: Post-Processing (synchron, lokal) ────────────────────────────
     log.info("\n=== Stage 2 / Step 4: Post-Processing ===")
-    articles: dict[str, str] = {}  # article_id → Dateipfad
+    # articles wurde in Step 2 vorinitialisiert (bereits gespeicherte Artikel)
 
     for resp in _get_inlined_responses(gen_batch):
         meta_resp  = getattr(resp, "metadata", {}) or {}
@@ -1056,7 +1069,11 @@ def stage2_generierung(
                 article["meta"]["review_flag"] = True
 
         # Validierung
-        val_errors = validate_article(article, job)
+        try:
+            val_errors = validate_article(article, job)
+        except Exception as _ve:
+            log.error("  [%s] validate_article Exception: %s — review_flag", article_id, _ve)
+            val_errors = [f"validate_article exception: {_ve}"]
         if val_errors:
             log.warning("  [%s] Validierung: %s", article_id, "; ".join(val_errors[:3]))
             article["meta"].setdefault("review_flag", True)

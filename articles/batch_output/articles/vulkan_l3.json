@@ -1,0 +1,618 @@
+{
+  "meta": {
+    "id": "vulkan_l3",
+    "title": "Vulkan",
+    "subtitle": "Die feurigen Riesen unserer Erde",
+    "emoji": "🌋",
+    "age_level": 3,
+    "pattern": "place_geography",
+    "theme_color": "#D32F2F",
+    "word_count": 629,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Vulkan",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geographie",
+    "category_sub": "naturphänomene",
+    "generated_at": "2026-06-17T09:21:37.482632+00:00",
+    "grounding_companions": [
+      "Lava",
+      "Magma",
+      "Vesuv",
+      "Geysir"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Lava_Lake_Nyiragongo_2.jpg",
+      "alt": "Blick von oben in einen Vulkankrater mit einem rot glühenden Lavasee.",
+      "caption": "Ein brodelnder Lavasee im Krater des Vulkans Nyiragongo.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Cai Tjeenk Willink",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Lava_Lake_Nyiragongo_2.jpg",
+      "wikimedia_id": "File:Lava_Lake_Nyiragongo_2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/76/Lava_Lake_Nyiragongo_2.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Lava_Lake_Nyiragongo_2_300.jpg",
+        "800": "bilder/vulkan/Lava_Lake_Nyiragongo_2_800.jpg",
+        "1600": "bilder/vulkan/Lava_Lake_Nyiragongo_2_1600.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Pahoeoe_fountain_edit2.jpg",
+      "alt": "Glühend rote Lava spritzt wie eine Fontäne in die Luft.",
+      "caption": "Glühend rote Lava spritzt aus einem Vulkan und fließt hangabwärts.",
+      "license": "Public domain",
+      "license_author": "J.D. Griggs",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Pahoeoe_fountain_edit2.jpg",
+      "wikimedia_id": "File:Pahoeoe_fountain_edit2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/9/9f/Pahoeoe_fountain_edit2.jpg",
+      "is_hero": true,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Pahoeoe_fountain_edit2_300.jpg",
+        "800": "bilder/vulkan/Pahoeoe_fountain_edit2_800.jpg",
+        "1600": "bilder/vulkan/Pahoeoe_fountain_edit2_1600.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Stromboli_Eruption.jpg",
+      "alt": "Ein Vulkanausbruch bei Nacht mit rot leuchtenden Funken und glühender Lava.",
+      "caption": "Der Vulkan Stromboli speit bei Nacht glühendes Gestein in den Himmel.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Wolfgang Beyer",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Stromboli_Eruption.jpg",
+      "wikimedia_id": "File:Stromboli_Eruption.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/9/93/Stromboli_Eruption.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Stromboli_Eruption_300.jpg",
+        "800": "bilder/vulkan/Stromboli_Eruption_800.jpg",
+        "1600": "bilder/vulkan/Stromboli_Eruption_1600.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "alt": "Ein Vulkan, der eine riesige, dunkle Rauch- und Aschewolke ausstößt.",
+      "caption": "Der Vulkan Agung stößt eine gewaltige Aschewolke in den Himmel aus.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Michael W. Ishak",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "wikimedia_id": "File:Mount_Agung%2C_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Mount_Agung%2C_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03_300.jpg",
+        "800": "bilder/vulkan/Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03_800.jpg",
+        "1600": "bilder/vulkan/Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03_1600.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Teide_Volcano_Tenerife_20060429.jpg",
+      "alt": "Ein großer, kegelförmiger Vulkan mit schneebedeckter Spitze.",
+      "caption": "Der Teide auf Teneriffa zeigt die typisch steile Form eines Schichtvulkans.",
+      "license": "CC BY 2.0",
+      "license_author": "ph_micchei",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Teide_Volcano_Tenerife_20060429.jpg",
+      "wikimedia_id": "File:Teide_Volcano_Tenerife_20060429.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/5/59/Teide_Volcano_Tenerife_20060429.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Teide_Volcano_Tenerife_20060429_300.jpg",
+        "800": "bilder/vulkan/Teide_Volcano_Tenerife_20060429_800.jpg",
+        "1600": "bilder/vulkan/Teide_Volcano_Tenerife_20060429_1600.jpg"
+      }
+    },
+    {
+      "index": 5,
+      "filename": "Columnar_basalt_Sudurarhraun.jpg",
+      "alt": "Eine Felswand aus sechseckigen Basaltsäulen, die fächerförmig angeordnet sind.",
+      "caption": "Reguläre Basaltsäulen entstehen, wenn heiße Lava langsam abkühlt.",
+      "license": "CC BY 2.5",
+      "license_author": "Laurent Deschodt",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Columnar_basalt_Sudurarhraun.jpg",
+      "wikimedia_id": "File:Columnar_basalt_Sudurarhraun.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/2/24/Columnar_basalt_Sudurarhraun.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Columnar_basalt_Sudurarhraun_300.jpg",
+        "800": "bilder/vulkan/Columnar_basalt_Sudurarhraun_800.jpg",
+        "1600": "bilder/vulkan/Columnar_basalt_Sudurarhraun_1600.jpg"
+      }
+    },
+    {
+      "index": 6,
+      "filename": "Ausbruch_Geysir_3.jpg",
+      "alt": "Eine bläuliche Wasserblase wölbt sich kurz vor dem Ausbruch eines Geysirs aus dem Boden.",
+      "caption": "Eine kochend heiße Wasserblase wölbt sich kurz vor der Eruption eines Geysirs.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Andreas Tille",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Ausbruch_Geysir_3.jpg",
+      "wikimedia_id": "File:Ausbruch_Geysir_3.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/7e/Ausbruch_Geysir_3.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Ausbruch_Geysir_3_300.jpg",
+        "800": "bilder/vulkan/Ausbruch_Geysir_3_800.jpg",
+        "1600": "bilder/vulkan/Ausbruch_Geysir_3_1600.jpg"
+      }
+    },
+    {
+      "index": 7,
+      "filename": "Beehive_geyser.jpg",
+      "alt": "Ein Geysir schleudert eine hohe Fontäne aus Wasser und Dampf in den Nachthimmel.",
+      "caption": "Der Beehive-Geysir stößt eine gewaltige Fontäne aus heißem Dampf und Wasser aus.",
+      "license": "Public domain",
+      "license_author": "R Robinson",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Beehive_geyser.jpg",
+      "wikimedia_id": "File:Beehive_geyser.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/48/Beehive_geyser.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Beehive_geyser_300.jpg",
+        "800": "bilder/vulkan/Beehive_geyser_800.jpg",
+        "1600": "bilder/vulkan/Beehive_geyser_1600.jpg"
+      }
+    },
+    {
+      "index": 8,
+      "filename": "Hamilton-Campi_Phlegraei.jpg",
+      "alt": "Historisches Gemälde eines gewaltigen Vulkanausbruchs mit Lavaflüssen nahe einer Stadt.",
+      "caption": "Historische Darstellung eines Ausbruchs des Vesuvs.",
+      "license": "Public domain",
+      "license_author": "Pietro Fabris",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Hamilton-Campi_Phlegraei.jpg",
+      "wikimedia_id": "File:Hamilton-Campi_Phlegraei.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/d/de/Hamilton-Campi_Phlegraei.jpg",
+      "is_hero": false,
+      "ab_stufe": 3,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Hamilton-Campi_Phlegraei_300.jpg",
+        "800": "bilder/vulkan/Hamilton-Campi_Phlegraei_800.jpg",
+        "1600": "bilder/vulkan/Hamilton-Campi_Phlegraei_1600.jpg"
+      }
+    },
+    {
+      "index": 9,
+      "filename": "Herculano_Fornici_01.jpg",
+      "alt": "Menschliche Skelette liegen dicht gedrängt in einem Steingewölbe.",
+      "caption": "Skelette von Opfern des Vesuv-Ausbruchs in den Bootshäusern von Herculaneum.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Miguel Hermoso Cuesta",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Herculano_Fornici_01.jpg",
+      "wikimedia_id": "File:Herculano_Fornici_01.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Herculano_Fornici_01.jpg",
+      "is_hero": false,
+      "ab_stufe": 3,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Herculano_Fornici_01_300.jpg",
+        "800": "bilder/vulkan/Herculano_Fornici_01_800.jpg",
+        "1600": "bilder/vulkan/Herculano_Fornici_01_1600.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Wenn Berge Feuer speien",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Viele Menschen denken bei Vulkanen sofort an friedliche Berge, die plötzlich und ohne Vorwarnung explodieren.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Doch das ist nur ein kleiner Teil der Wahrheit: Vulkane sind faszinierende geologische Strukturen auf unserem Planeten.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Sie entstehen, wenn heiße Gesteinsschmelze tief aus dem Erdinneren bis an die Erdoberfläche aufsteigt.",
+          "img_index": 2
+        },
+        {
+          "id": "s004",
+          "text": "Solange sich diese glühende Masse im Untergrund befindet, nennen Geologen sie Magma.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Sobald sie jedoch durch Spalten nach oben gepresst wird und ins Freie tritt, heißt sie Lava.",
+          "img_index": 1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Wie sieht ein Vulkan von innen aus?",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s006",
+          "text": "In Tiefen ab 100 Kilometern schmilzt festes Gestein durch die enorme Hitze im Erdmantel.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Dieses flüssige Magma sammelt sich zunächst in großen Magmaherden in zwei bis 50 Kilometern Tiefe.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Wenn dort der Druck unerträglich groß wird, sucht sich das Magma einen Weg nach oben.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Es bahnt sich seinen Weg durch Spalten der Erdkruste und strömt durch den Vulkanschlot ins Freie.",
+          "img_index": 3
+        },
+        {
+          "id": "s010",
+          "text": "Die Temperatur der austretenden Lava liegt meist zwischen 800 und unvorstellbaren 1200 Grad Celsius.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Die Form des Vulkans hängt entscheidend von der Zusammensetzung und der Zähflüssigkeit dieser Lava ab.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Enthält das Magma viel Siliciumdioxid, ist es zähflüssig und bildet steile Schichtvulkane, die explosiv ausbrechen.",
+          "img_index": 4
+        },
+        {
+          "id": "s013",
+          "text": "Bei Magma mit wenig Siliciumdioxid fließt die Lava ruhig aus und formt flache, breite Schildvulkane.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Aus den unterschiedlichen Schmelzen entstehen charakteristische Gesteine wie der dunkle Basalt oder der hellere Rhyolith.",
+          "img_index": 5
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 **Unterseeischer Gigant**: Das größte bekannte Vulkangebilde der Erde ist das Tamu-Massiv östlich von Japan. Dieser gigantische Schildvulkan ist rund 650 Kilometer lang, 450 Kilometer breit und liegt tief unter der Meeresoberfläche!"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Zischende Fontänen und flüssiges Gestein",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s015",
+          "text": "Manche Vulkangebiete bieten ein ganz besonderes Schauspiel, das eng mit dem Magma im Untergrund zusammenhängt: Geysire.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Ein Geysir ist eine heiße Quelle, die in regelmäßigen oder unregelmäßigen Abständen eine kochende Wasserfontäne ausstößt.",
+          "img_index": 6
+        },
+        {
+          "id": "s017",
+          "text": "Die Wärme einer Magmakammer erhitzt das Grundwasser im Untergrund auf Temperaturen weit über 100 Grad.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Durch den enormen Druck der darüberstehenden Wassersäule kann das überhitzte Wasser im Reservoir zunächst nicht sieden.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Erst wenn einzelne Dampfblasen durch eine Engstelle im Kanal aufsteigen, sinkt der Druck im tiefen Reservoir rapide.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Das heiße Wasser verwandelt sich schlagartig in Dampf und schießt als majestätische Säule in die Luft.",
+          "img_index": 7
+        },
+        {
+          "id": "s021",
+          "text": "Das erste naturwissenschaftliche Modell für diese Funktion erklärte der deutsche Chemiker Robert Bunsen im Jahr 1846.",
+          "img_index": -1
+        },
+        {
+          "id": "s022",
+          "text": "Der berühmteste düsenartige Geysir der Welt ist der 'Old Faithful' im amerikanischen Yellowstone-Nationalpark.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "fakt",
+          "text": "💡 **Zwei Arten von Lava**: Dünnflüssige Lava wird auf Hawaii als 'Pāhoehoe-Lava' bezeichnet. Sie fließt sanft und erstarrt zu glatter, glasiger Stricklava. Die zähflüssigere 'ʻAʻā-Lava' bildet dagegen extrem scharfkantige, unregelmäßige Brocken."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Die Katastrophe von Pompeji",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s023",
+          "text": "Wie gefährlich das Leben nahe einem aktiven Vulkan sein kann, zeigt die Geschichte des berühmten Vesuvs.",
+          "img_index": 8
+        },
+        {
+          "id": "s024",
+          "text": "Im Jahr 79 nach Christus brach dieser italienische Schichtvulkan nach einer jahrhundertelangen Ruhephase völlig unerwartet aus.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "Er schleuderte eine kilometerhohe Eruptionssäule aus Asche, Wasserdampf und Bimsstein mit Überschallgeschwindigkeit in den Himmel.",
+          "img_index": -1
+        },
+        {
+          "id": "s026",
+          "text": "Zerstörerische Glutlawinen, sogenannte pyroklastische Ströme, rasten kurz darauf die Hänge des Vulkans herab.",
+          "img_index": -1
+        },
+        {
+          "id": "s027",
+          "text": "Sie verschütteten die blühenden römischen Städte Pompeji und Herculaneum unter einer meterdicken, heißen Schicht aus Asche.",
+          "img_index": 9
+        },
+        {
+          "id": "s028",
+          "text": "Archäologen fanden bei Ausgrabungen die Skelette von Opfern und sogar Tausende Fußspuren von Menschen auf der Flucht.",
+          "img_index": -1
+        },
+        {
+          "id": "s029",
+          "text": "Dank der detaillierten Briefe des Augenzeugen Plinius des Jüngeren ist diese antike Naturkatastrophe hervorragend dokumentiert.",
+          "img_index": -1
+        },
+        {
+          "id": "s030",
+          "text": "Der Vesuv ist nicht erloschen: Seit seinem bisher letzten Ausbruch im Jahr 1944 ruht er nur.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Die Jagd nach den Signalen der Riesen",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s031",
+          "text": "Heute versuchen Forscher mit modernsten Messgeräten, das gefährliche Erwachen eines Vulkans frühzeitig vorherzusagen.",
+          "img_index": -1
+        },
+        {
+          "id": "s032",
+          "text": "Sie überwachen die feurigen Riesen mit seismischen Messungen, um kleinste Erdbeben im Gestein aufzuzeichnen.",
+          "img_index": -1
+        },
+        {
+          "id": "s033",
+          "text": "Satelliten messen Bodenverformungen, während Sonden die Temperatur und die austretenden Gase chemisch analysieren.",
+          "img_index": -1
+        },
+        {
+          "id": "s034",
+          "text": "Zusätzlich lohnt sich die Beobachtung der Natur, da Tiere oft empfindlicher reagieren und Gefahrengebiete rechtzeitig verlassen.",
+          "img_index": -1
+        },
+        {
+          "id": "s035",
+          "text": "Trotz all dieser Technik bleibt jeder Vulkan in seinem Ausbruchsverhalten einzigartig und ein Stück weit unberechenbar.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ **Gefahr am Vesuv**: Obwohl Forscher wissen, dass die Magmakammer des Vesuvs wieder erwacht, leben heute über eine Million Menschen in seiner Umgebung. In den letzten Jahrzehnten wurden Tausende Häuser illegal direkt in der gefährlichsten Zone gebaut."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was unterscheidet Magma von Lava?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Magma befindet sich unter der Erde, Lava an der Oberfläche."
+          },
+          {
+            "key": "B",
+            "text": "Magma ist bereits abgekühlt und fest, während Lava flüssig ist."
+          },
+          {
+            "key": "C",
+            "text": "Magma enthält viel Siliciumdioxid, während Lava rein daraus besteht."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Welcher Vulkantyp entsteht, wenn die Lava sehr zähflüssig ist?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein flacher Schildvulkan"
+          },
+          {
+            "key": "B",
+            "text": "Ein steiler Schichtvulkan"
+          },
+          {
+            "key": "C",
+            "text": "Ein kreisrundes Maar"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Welcher physikalische Effekt verhindert im Geysir zunächst das Sieden des überhitzten Wassers?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Der hohe Druck der darüberstehenden Wassersäule"
+          },
+          {
+            "key": "B",
+            "text": "Die schnelle Abkühlung durch eisige Winde an der Oberfläche"
+          },
+          {
+            "key": "C",
+            "text": "Die chemische Verbindung mit aufsteigenden Heliumgasen"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q4",
+        "text": "Welche antike römische Stadt wurde beim Ausbruch des Vesuvs im Jahr 79 n. Chr. verschüttet?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Rom"
+          },
+          {
+            "key": "B",
+            "text": "Pompeji"
+          },
+          {
+            "key": "C",
+            "text": "Athen"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q5",
+        "text": "Wie können Forscher Verformungen des Bodens an Vulkanen genau messen?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Mit Hilfe von Satelliten und hochempfindlichen Neigungsmessern"
+          },
+          {
+            "key": "B",
+            "text": "Ausschließlich durch das Abwiegen von herabgefallenem Gestein"
+          },
+          {
+            "key": "C",
+            "text": "Durch das Einleiten von künstlichem Regenwasser in den Krater"
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "magma",
+      "lava",
+      "erdbeben",
+      "geysir"
+    ],
+    "discover": [
+      "plattentektonik",
+      "pompeji",
+      "vesuv"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Ein Vulkan ist eine geologische Struktur, die entsteht, wenn Magma bis an die Oberfläche eines Planeten aufsteigt.",
+      "source": "Vulkan",
+      "passage": "Ein Vulkan ist eine geologische Struktur, die entsteht, wenn Magma (Gesteinsschmelze) bis an die Oberfläche eines Planeten (z. B. der Erde) aufsteigt."
+    },
+    {
+      "claim": "In Tiefen ab 100 Kilometern schmilzt festes Gestein durch die enorme Hitze im Erdmantel.",
+      "source": "Vulkan",
+      "passage": "Im Fall der Erde schmelzen Gesteine ab 100 km Tiefe bei Temperaturen zwischen 1000 und 1300 °C."
+    },
+    {
+      "claim": "Dieses flüssige Magma sammelt sich zunächst in großen Magmaherden in zwei bis 50 Kilometern Tiefe.",
+      "source": "Vulkan",
+      "passage": "Das flüssige Magma sammelt sich in großen Magmaherden in 2 bis 50 km Tiefe."
+    },
+    {
+      "claim": "Lava hat beim Austritt Temperaturen zwischen 800 und 1200 Grad Celsius.",
+      "source": "Lava",
+      "passage": "Die Temperatur von Lava beträgt beim Austritt zwischen 800 °C (rhyolithische Lava) und 1200 °C (basaltische Lava)."
+    },
+    {
+      "claim": "Enthält das Magma viel Siliciumdioxid, bildet es steile Schichtvulkane.",
+      "source": "Vulkan",
+      "passage": "Je mehr SiO2 das Magma enthält, desto explosiver ist der damit verbundene Vulkanismus. [...] Die meisten Vulkane haben annähernd die Form eines Kegels, dessen Hangneigung von der Viskosität der Lava abhängt."
+    },
+    {
+      "claim": "Ein Geysir ist eine heiße Quelle, die in regelmäßigen oder unregelmäßigen Abständen eine kochende Wasserfontäne ausstößt.",
+      "source": "Geysir",
+      "passage": "Ein Geysir ist eine heiße Quelle, die ihr Wasser in regelmäßigen oder unregelmäßigen Abständen als Fontäne ausstößt."
+    },
+    {
+      "claim": "Durch den enormen Druck der darüberstehenden Wassersäule kann das überhitzte Wasser im Reservoir zunächst nicht sieden.",
+      "source": "Geysir",
+      "passage": "Durch den Druck der darüber stehenden Wassersäule siedet das Wasser zunächst nicht (Siedepunktserhöhung)."
+    },
+    {
+      "claim": "Im Jahr 79 nach Christus brach dieser italienische Schichtvulkan nach einer jahrhundertelangen Ruhephase völlig unerwartet aus.",
+      "source": "Vesuv",
+      "passage": "Der letzte plinianische Ausbruch des Vesuv, bei dem die Orte Pompeji, Herculaneum, Oplontis und das rund zwölf Kilometer entfernte Stabiae unter Staub- und Aschemassen vollständig begraben wurden, ereignete sich laut Plinius im Jahr 79 n. Chr."
+    },
+    {
+      "claim": "Zerstörerische Glutlawinen, sogenannte pyroklastische Ströme, rasten kurz darauf die Hänge des Vulkans herab.",
+      "source": "Vesuv",
+      "passage": "Die großen Vesuv-Ausbrüche sind zudem von pyroklastischen Strömen begleitet, die zu den gefährlichsten Formen des Vulkanismus zählen."
+    },
+    {
+      "claim": "Das größte bekannte Vulkangebilde der Erde ist das Tamu-Massiv östlich von Japan.",
+      "source": "Vulkan",
+      "passage": "...hielten Forscher das unterseeische Tamu-Massiv östlich von Japan für den größten Vulkan der Erde."
+    }
+  ]
+}

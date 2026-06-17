@@ -866,7 +866,7 @@ def validate_article(article: dict, job: dict) -> list[str]:
         errors.append(f"Nur {len(questions)} Quiz-Fragen (min. {min_q} für Stufe {level_str})")
 
     for q in questions:
-        keys = {o.get("key") for o in q.get("options", [])}
+        keys = {o.get("key") for o in q.get("options", []) if isinstance(o, dict)}
         if keys != {"A", "B", "C"}:
             errors.append(f"Quiz-Frage '{q.get('id')}' hat falsche Keys: {keys}")
         if q.get("correct_key") not in {"A", "B", "C"}:

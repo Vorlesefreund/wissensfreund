@@ -1,0 +1,408 @@
+{
+  "meta": {
+    "id": "hund_l2",
+    "title": "Hund",
+    "subtitle": "Vom wilden Wolf zum treuen Begleiter",
+    "emoji": "🐶",
+    "age_level": 2,
+    "pattern": "living_being",
+    "theme_color": "#8b5a2b",
+    "word_count": 410,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Haushund",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "tiere",
+    "category_sub": "säugetiere",
+    "generated_at": "2026-06-17T09:02:37.862719+00:00",
+    "grounding_companions": [
+      "Wolf",
+      "Hunderasse",
+      "Welpe",
+      "Rettungshund",
+      "Dingo"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Akita_inu.jpeg",
+      "alt": "Ein Akita-Hund mit beigem und weißem Fell liegt entspannt auf einer Holzterrasse",
+      "caption": "Ein Akita-Hund entspannt sich im Garten. Er gehört zu den vielen verschiedenen Hunderassen.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "B@rt",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Akita_inu.jpeg",
+      "wikimedia_id": "File:Akita_inu.jpeg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/78/Akita_inu.jpeg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Akita_inu_300.jpg",
+        "800": "bilder/hund/Akita_inu_800.jpg",
+        "1600": "bilder/hund/Akita_inu_1600.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Canis_lupus.jpg",
+      "alt": "Ein Wolf liegt entspannt im Schnee",
+      "caption": "Der wilde Wolf ist die Stammform aller unserer Haushunde.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Bernard Landgraf",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Canis_lupus.jpg",
+      "wikimedia_id": "File:Canis_lupus.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/2/23/Canis_lupus.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Canis_lupus_300.jpg",
+        "800": "bilder/hund/Canis_lupus_800.jpg",
+        "1600": "bilder/hund/Canis_lupus_1600.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Great_Dane_and_Chihuahua_Skeletons.jpg",
+      "alt": "Zwei Hundeskelette unterschiedlicher Größe, ein riesiges und ein winziges, nebeneinander",
+      "caption": "Die Skelette einer riesigen Dogge und eines winzigen Chihuahuas zeigen den Größenunterschied.",
+      "license": "CC0",
+      "license_author": "Sklmsta",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Great_Dane_and_Chihuahua_Skeletons.jpg",
+      "wikimedia_id": "File:Great_Dane_and_Chihuahua_Skeletons.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5c/Great_Dane_and_Chihuahua_Skeletons.jpg/1920px-Great_Dane_and_Chihuahua_Skeletons.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Great_Dane_and_Chihuahua_Skeletons_300.jpg",
+        "800": "bilder/hund/Great_Dane_and_Chihuahua_Skeletons_800.jpg",
+        "1600": "bilder/hund/Great_Dane_and_Chihuahua_Skeletons_1600.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
+      "alt": "Ein kleiner, flauschiger Welpe mit grauen Haaren und blauen Augen sitzt auf weißem Grund",
+      "caption": "Kleine Welpen kommen hilflos auf die Welt, lernen aber in den ersten Wochen unglaublich schnell.",
+      "license": "CC BY-SA 2.5",
+      "license_author": "Richard Bartz, Munich aka Makro Freak",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
+      "wikimedia_id": "File:Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Keeshond_Siberian_Husky_crossbreed_puppy.jpg/1920px-Keeshond_Siberian_Husky_crossbreed_puppy.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Keeshond_Siberian_Husky_crossbreed_puppy_300.jpg",
+        "800": "bilder/hund/Keeshond_Siberian_Husky_crossbreed_puppy_800.jpg",
+        "1600": "bilder/hund/Keeshond_Siberian_Husky_crossbreed_puppy_1600.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Atfire_rettungshund_nepal_1.jpg",
+      "alt": "Ein Rettungshund sucht konzentriert auf einem Haufen von Trümmern",
+      "caption": "Ein Rettungshund im Einsatz. Seine feine Nase spürt Menschen sogar unter dicken Trümmern auf.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "@fire – Internationaler Katastrophenschutz",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Atfire_rettungshund_nepal_1.jpg",
+      "wikimedia_id": "File:Atfire_rettungshund_nepal_1.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/8/8a/Atfire_rettungshund_nepal_1.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/hund/Atfire_rettungshund_nepal_1_300.jpg",
+        "800": "bilder/hund/Atfire_rettungshund_nepal_1_800.jpg",
+        "1600": "bilder/hund/Atfire_rettungshund_nepal_1_1600.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Unser treuester Freund",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Viele kennen den Hund als treuen, gemütlichen Freund auf dem Sofa.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Doch eigentlich steckt in jedem Haushund ein echter Wildfang, denn seine wilden Stammformen sind die Wölfe!",
+          "img_index": 1
+        },
+        {
+          "id": "s003",
+          "text": "Vor vielen tausend Jahren begannen die ersten Wölfe, sich an den Menschen zu gewöhnen, und wurden zahm.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Heute ist der Hund das am vielfältigsten mit uns verbundene Haustier überhaupt.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Obwohl alle Hunde vom Wolf abstammen, gibt es heute hunderte verschiedene Hunderassen.",
+          "img_index": 2
+        },
+        {
+          "id": "s006",
+          "text": "Sie unterscheiden sich stark in ihrer Größe: vom winzigen Chihuahua bis zur riesigen Deutschen Dogge.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Super-Sinne und schlaue Haare",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s007",
+          "text": "Hunde erleben ihre Umwelt vor allem als eine riesige Welt voller Gerüche.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Ihre Nase ist unglaublich empfindlich: Während ein Mensch nur fünf Millionen Riechzellen hat, besitzt ein Schäferhund rund 220 Millionen!",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Damit riechen Hunde etwa eine Million Mal besser als wir.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Auch ihre beweglichen Ohren fangen sehr hohe Töne ein.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Außerdem sehen Hunde entgegen einem alten Gerücht nicht nur schwarz-weiß.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Sie erkennen die Farben Blau und Gelb, können aber die Farbe Rot nicht wahrnehmen.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Im Gesicht tragen Hunde steife Spürhaare, die man Vibrissen nennt.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Diese feinen Haare spüren sogar die Luftwirbel vor einem Gegenstand und schützen den Hund vor Zusammenstößen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Vorsicht, giftig! Viele Dinge, die uns gut schmecken, sind für Hunde lebensgefährlich. Dazu gehören Schokolade, Weintrauben, Zwiebeln und der Süßstoff Birkenzucker (Xylit). Auch Putzmittel im Haushalt dürfen niemals in ihre Reichweite gelangen."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Vom Welpen zum Senior",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s015",
+          "text": "Hunde-Babys heißen Welpen und kommen ohne Zähne auf die Welt.",
+          "img_index": 3
+        },
+        {
+          "id": "s016",
+          "text": "Ab der dritten Lebenswoche wachsen ihnen die ersten Milchzähne.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Später wechseln sie diese, bis sie ein starkes Gebiss mit 42 Zähnen haben.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Wie alt ein Hund wird, hängt ganz besonders von seiner Rasse und seiner Körpergröße ab.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Kleine Hunde wie der Dackel haben eine hohe Lebenserwartung und können bis zu 15 Jahre alt werden.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Große, schwere Hunde altern dagegen viel schneller und werden oft kaum älter als neun Jahre.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Auch an ihrem Schwanz kann man viel erkennen: Während Wölfe ihn meist hängend tragen, halten Haushunde ihn oft nach oben oder eingerollt.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Eingebauter Kompass: Hunde können das unsichtbare Magnetfeld der Erde spüren! Forscher haben herausgefunden, dass Hunde sich beim Urinieren oder Koten am liebsten genau nach Norden oder Süden ausrichten."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Helfer auf vier Pfoten",
+      "section_role": "human_animal",
+      "sentences": [
+        {
+          "id": "s022",
+          "text": "Seit langer Zeit bewachen Hunde unser Zuhause oder helfen uns bei der Arbeit.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Wegen ihrer feinen Sinne arbeiten sie heute zum Beispiel als Spürhunde bei der Polizei oder als Blindenführhunde.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Besonders mutig sind ausgebildete Rettungshunde.",
+          "img_index": 4
+        },
+        {
+          "id": "s025",
+          "text": "Sie arbeiten eng mit ihren Hundeführern zusammen, um vermisste Personen aufzuspüren.",
+          "img_index": -1
+        },
+        {
+          "id": "s026",
+          "text": "Dabei suchen sie große Wälder ab, schnüffeln nach Katastrophen in Trümmern oder retten verschüttete Menschen aus tiefem Schnee.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Welche Farben können Hunde gut erkennen?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Rot und Grün"
+          },
+          {
+            "key": "B",
+            "text": "Blau und Gelb"
+          },
+          {
+            "key": "C",
+            "text": "Gar keine, sie sehen nur grau"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Wie viele Zähne hat das bleibende Gebiss eines erwachsenen Hundes?",
+        "options": [
+          {
+            "key": "A",
+            "text": "28 Zähne"
+          },
+          {
+            "key": "B",
+            "text": "32 Zähne"
+          },
+          {
+            "key": "C",
+            "text": "42 Zähne"
+          }
+        ],
+        "correct_key": "C"
+      },
+      {
+        "id": "q3",
+        "text": "Welche Hunde haben im Durchschnitt die längste Lebenserwartung?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Kleine Hunderassen wie der Dackel"
+          },
+          {
+            "key": "B",
+            "text": "Große, schwere Hunde wie die Dogge"
+          },
+          {
+            "key": "C",
+            "text": "Die wilden Wölfe im Wald"
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Wolf",
+      "Haustier",
+      "Hunderasse",
+      "Welpe"
+    ],
+    "discover": [
+      "Rettungshund",
+      "Dingo",
+      "Vibrissen",
+      "Spürhund"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Doch eigentlich steckt in jedem Haushund ein echter Wildfang, denn seine wilden Stammformen sind die Wölfe!",
+      "source": "Haushund",
+      "passage": "Seine wilde Stammform ist der Wolf, dem er als Unterart zugeordnet wird."
+    },
+    {
+      "claim": "Während ein Mensch nur fünf Millionen Riechzellen hat, besitzt ein Schäferhund rund 220 Millionen!",
+      "source": "Haushund",
+      "passage": "So hat der Mensch 5 Millionen Riechzellen, der Dackel 125 Millionen und der Schäferhund 220 Millionen."
+    },
+    {
+      "claim": "Sie erkennen die Farben Blau und Gelb, können aber die Farbe Rot nicht wahrnehmen.",
+      "source": "Haushund",
+      "passage": "Der Hund hat nur zwei unterschiedliche Zapfentypen, die für Grün und Blau empfindlich sind. Dadurch wird nur ein Teil des menschlichen Farbspektrums abgedeckt: Rot ist eine Farbe, die der Hund nicht erkennt."
+    },
+    {
+      "claim": "Diese feinen Haare spüren sogar die Luftwirbel vor einem Gegenstand und schützen den Hund vor Zusammenstößen.",
+      "source": "Haushund",
+      "passage": "Sie sind so sensibel, dass sie einen Gegenstand nicht einmal berühren müssen, um ihn wahrzunehmen – die im Vorbeigehen entstehenden Luftwirbel reichen zur Wahrnehmung aus. Damit dienen sie dem Hund als zusätzliches „Frühwarnsystem“ zum Schutz vor Zusammenstößen..."
+    },
+    {
+      "claim": "Kleine Hunde wie der Dackel haben eine hohe Lebenserwartung und können bis zu 15 Jahre alt werden.",
+      "source": "Haushund",
+      "passage": "So können Rassen wie der Dackel ein Alter von bis zu 15 Jahren erreichen, in Ausnahmefällen gar 20 Jahre. Größere, schwere Rassen wie etwa die Deutsche Dogge werden kaum älter als 9 Jahre."
+    },
+    {
+      "claim": "Während Wölfe ihn meist hängend tragen, halten Haushunde ihn oft nach oben oder eingerollt.",
+      "source": "Wolf",
+      "passage": "Wölfe lassen ihren Schwanz (Rute) in der Ruhe meist nach unten hängen, Haushunde tragen ihn häufig nach oben oder eingerollt."
+    }
+  ]
+}
