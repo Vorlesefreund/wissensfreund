@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T07:30:00Z -->
+<!-- updated: 2026-06-17T07:45:00Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -184,10 +184,13 @@ Medium 3.5 (3 Topics): alle 429 — Key-Tier-Limit 25K Tokens/min, Produktions-M
 
 ## Gerade in Arbeit
 
-**Quiz/stimmt_das App-Dart-Fix** — Entscheidung getroffen: wf_article.dart anpassen.
-Drei Mismatches: j['question']→j['text'], j['explanation']→j['reveal_text'],
-reveal_mode == true → reveal_mode == 'auto' (String). tts_compose.py bleibt unverändert.
-NÄCHSTER SCHRITT: wf_article.dart fixen + committen.
+**Quiz/stimmt_das App-Dart-Fix (2026-06-17)** ✅
+
+wf_article.dart korrigiert — drei Mismatches behoben:
+- `WfQuizQuestion.fromJson`: `j['question']` → `j['text']` (Quizfragen nicht mehr leer)
+- `WfBox.fromJson`: `j['explanation']` → `j['reveal_text']` (stimmt_das-Auflösung sichtbar)
+- `WfBox.fromJson`: `j['reveal_mode'] == true` → `j['reveal_mode'] == 'auto'` (String-Vergleich)
+tts_compose.py unverändert (liest bereits korrekt reveal_text).
 
 ---
 

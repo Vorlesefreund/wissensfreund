@@ -125,9 +125,9 @@ class WfBox {
         type:        j['type']        as String? ?? '',
         headline:    j['headline']    as String?,
         text:        j['text']        as String? ?? '',
-        revealMode:  j['reveal_mode'] == true,
+        revealMode:  j['reveal_mode'] == 'auto',
         answer:      j['answer']      as bool?,
-        explanation: j['explanation'] as String?,
+        explanation: j['reveal_text'] as String?,
       );
 }
 
@@ -209,7 +209,7 @@ class WfQuizQuestion {
 
   factory WfQuizQuestion.fromJson(Map<String, dynamic> j) => WfQuizQuestion(
         id:          j['id']          as String? ?? '',
-        question:    j['question']    as String? ?? '',
+        question:    j['text']        as String? ?? '',
         options: (j['options'] as List<dynamic>? ?? [])
             .map((o) => WfQuizOption.fromJson(o as Map<String, dynamic>))
             .toList(),
