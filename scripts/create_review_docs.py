@@ -457,7 +457,14 @@ def build_theme_doc(thema_name: str, slug: str) -> Path:
 
 
 def main() -> None:
+    import argparse
+    global OUT_DIR
     sys.stdout.reconfigure(encoding="utf-8")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--out-dir", default=None)
+    args = parser.parse_args()
+    if args.out_dir:
+        OUT_DIR = Path(args.out_dir).resolve()
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
     for thema_name, slug in THEMEN:

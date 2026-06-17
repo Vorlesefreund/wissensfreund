@@ -1,12 +1,58 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T15:39:08Z -->
+<!-- updated: 2026-06-17T15:49:12Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Lektorat v4: PRÜFEN als Ausnahme (0–1/Artikel), KORRIGIERT als Standard (2026-06-17)** ← AKTUELL
+**Lektorat v4 Vollständig-Lauf mini_lektorat_v32: 18/18, Word-Dokumente (2026-06-17)** ← AKTUELL
+
+### Stage 3 mit Lektorat v4 (PRÜFEN als Ausnahme)
+
+batch_id: msgbatch_01QppFRvNo4ysbFDRFyiK3RQ — 18/18 in ~1,5 Min.
+
+| Thema | S1 S/K/P | S2 S/K/P | S3 S/K/P |
+|---|---|---|---|
+| **Elefant** | 0/0/0 | 0/0/0 | 2/2/0 |
+| **Hund** | 2/0/0 | 1/1/1 | 0/1/0 |
+| **Dinosaurier** | 2/0/0 | 0/0/0 | 2/0/1 |
+| **Vulkan** | 0/0/0 | 2/2/1 | 0/0/0 |
+| **Spartacus** | 0/0/0 | 1/1/0 | 1/1/1 |
+| **ZWK** | 1/0/0 | 1/0/1 | 3/1/1 |
+| **Gesamt** | **5/0/0** | **5/4/2** | **8/5/3** |
+| **Total** | **18 SILENT** | **9 KORRIGIERT** | **6 PRÜFEN** |
+
+vs. v3.1: 6/10/39 → v4: 18/9/6 — PRÜFEN von 39 auf 6 (−85%). Kein Artikel >1 PRÜFEN. ✅
+
+Kosten: $0.151 cost_tracker (non-cached in+out) | in=17.796 cc=1.043.862 cr=131.295 out=6.477
+Hinweis: Cache-Write ($3.75/1M) nicht in cost_tracker erfasst — reale Batch-Kosten höher.
+
+Word-Dokumente: articles/mini_lektorat_v32/review/ (6 × .docx, 201–321 KB)
+
+### PRÜFEN-Analyse (6 Flags, alle maximal 1 pro Artikel)
+
+| Artikel | Flag | Kategorie |
+|---|---|---|
+| hund_l2 | "fast einen Meter" für 95 cm → GRUNDPRINZIP-Verletzung | ❌ falsch |
+| dinosaurier_l3 | "mindestens 26 Grad" aus spezifischem Schwefel-Klimamodell | ⚠️ Grenzfall |
+| vulkan_l2 | "Tiere spüren Gefahren früher" — nur vage belegt | ⚠️ Grenzfall |
+| spartacus_l3 | Heersgröße — Quelle sagt "angeblich bis zu 200.000" (Unsicherheit) | ✅ korrekt |
+| zweiter_weltkrieg_l2 | Alan Turing / Bletchley Park nicht in deklarierten Quellen | ✅ korrekt (Fall 3) |
+| zweiter_weltkrieg_l3 | "150 Trillionen" Enigma-Kombinationen — kein Quellenbeleg | ✅ korrekt (Fall 3) |
+
+4 von 6 PRÜFEN sind korrekt oder Grenzfall. 1 GRUNDPRINZIP-Verletzung (hund_l2 "fast einen Meter").
+Das war der einzige Regelverstoß — Modell ignorierte einmal das "keine Korrektur"-Gebot.
+
+### KORRIGIERT-Stichprobe (Kindstil erhalten?)
+
+- [elefant_l3] "kleine Ohren gegen Kälte" → "kleine Ohren" (unbelegte Funktion gestrichen ✅)
+- [hund_l2] Dingo-Lautäußerungen: präzise Quellzahlen eingebaut (Knurren 65%, Bellen 5% ✅)
+- [hund_l3] Barry-Datum ergänzt: "soll zwischen 1800 und 1812 … gerettet haben" ✅
+
+Kindstil in allen Stichproben erhalten. Korrekturen fügen Präzision hinzu ohne Kindersprache zu verlieren.
+
+**Lektorat v4: PRÜFEN als Ausnahme (0–1/Artikel), KORRIGIERT als Standard (2026-06-17)**
 
 ### Prompt-Änderungen (lektorat_common.py — LEKTORAT_SYSTEM)
 
