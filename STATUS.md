@@ -1,12 +1,18 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T09:24:03Z -->
+<!-- updated: 2026-06-17T11:15:03Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Stage 2 Mini-Lauf: 6 Themen × 3 Stufen (2026-06-17)** ← AKTUELL
+**Trim-Fixes verifiziert (2026-06-17)** ← AKTUELL
+
+hund_l3: 687W → Trim → 621W, **3 Boxen erhalten** ✅ (Prompt-Fix greift)
+zweiter_weltkrieg_l2: 257W, 1 Box, kein Trim nötig ✅
+Beide Fixes bestätigt — Stage 2 Mini-Lauf jetzt vollständig sauber.
+
+**Stage 2 Mini-Lauf: 6 Themen × 3 Stufen (2026-06-17)**
 
 18/18 Artikel vollständig generiert (gemini-3.5-flash, ThinkingLevel.MEDIUM, Batch).
 
@@ -56,10 +62,11 @@
 - `stage2_generierung`: skip-if-exists für Batch-Building (Resume-Fähigkeit)
 
 **Offene Issues nach Mini-Lauf:**
-- `hund_l3`: 698W > Cap 682, Trim scheiterte an 503 → manuell review nötig
-- `zweiter_weltkrieg_l2`: nach Trim 0 Boxen + Satz-ID-Warnung → review
+- ~~`hund_l3` Trim-Problem~~ → gefixt, 621W 3 Boxen ✅
+- ~~`zweiter_weltkrieg_l2` 0 Boxen~~ → gefixt, neu generiert 257W 1 Box ✅
 - `age_floor`-Gate fehlt (s. Batch-Härtung)
 - `spartacus/zwk`: fehlen in `ergiebigkeit_scores.json` → Fallback-Score 6 (Großlauf-TODO)
+- `spartacus_l1`: 124W < 128W min, review_flag (dünn, 0 Bilder) — inhaltliche Frage offen
 
 **A/B-Test Thinking S3 — Vulkan (2026-06-17)**
 
@@ -239,6 +246,46 @@ Medium 3.5 (3 Topics): alle 429 — Key-Tier-Limit 25K Tokens/min, Produktions-M
 
 ## Gerade in Arbeit
 
+**Stage 3 Lektorat Mini-Lauf (2026-06-17)** ✅
+
+18/18 Artikel lektoriert (Anthropic Message Batch, claude-sonnet-4-6, ~2.5 Min).
+batch_id: msgbatch_01RUc2TRBMUbL7UK91aVGy58 — persistiert in pending_batches.json.
+
+| Artikel | Verdikts | belegt | vorschlag | eskaliert |
+|---|---|---|---|---|
+| elefant_l1 | 28 | 25 | 2 | 1 |
+| elefant_l2 | 18 | 18 | 0 | 0 ✓ |
+| elefant_l3 | 37 | 35 | 2 | 0 |
+| hund_l1 | 22 | 17 | 1 | 4 ⚠ |
+| hund_l2 | 27 | 26 | 1 | 0 |
+| hund_l3 | 34 | 29 | 5 | 0 |
+| dinosaurier_l1 | 22 | 15 | 6 | 1 |
+| dinosaurier_l2 | 26 | 20 | 6 | 0 |
+| dinosaurier_l3 | 44 | 43 | 1 | 0 |
+| vulkan_l1 | 23 | 19 | 2 | 2 |
+| vulkan_l2 | 23 | 16 | 5 | 2 |
+| vulkan_l3 | 37 | 34 | 2 | 1 |
+| spartacus_l1 | 10 | 7 | 3 | 0 |
+| spartacus_l2 | 22 | 20 | 2 | 0 |
+| spartacus_l3 | 27 | 20 | 5 | 2 |
+| zweiter_weltkrieg_l1 | 14 | 10 | 3 | 1 |
+| zweiter_weltkrieg_l2 | 14 | 13 | 1 | 0 |
+| zweiter_weltkrieg_l3 | 23 | 19 | 1 | 3 |
+
+Kosten Stage 3: $1.255 (18 Requests, avg $0.070/Artikel)
+Vollkatalog-Projektion: ~$913 Stage 3 allein
+cache_read: 74.258 Tokens (elefant_l3 — zufällig gecached); create=1.110.973.
+auto_angewandt=0 (Modell zieht VORSCHLAG vor AUTO; mechanischer Beleg-Check streng)
+
+**Wichtigste Funde:**
+- **hund_l1** (4 Eskl.): "Nase immer kühl+feucht" (immer nicht belegt), "Augen nach 2 Wochen", "Schwanzwedeln aus Freude", "weiche Bälle" — alle aus Trainingswissen, nicht in WP-Quellen
+- **zwk_l3** (3 Eskl.): "verlustreichste Katastrophe der Menschheitsgeschichte" (Superlativ nicht in WP), "Generäle hielten für absolut sicher" (nicht belegt), "23 Nullen" für Enigma (nicht in WP)
+- **vulkan_l3**: "Old Faithful berühmteste düsenartige Geysir der Welt" (Superlativ unbelegt), Plinius als "Augenzeuge" (WP: nur mittelbar)
+- **dinosaurier_l1** (6 Vorschl.): "bunte Federn", "passte in deine Hand" (60 cm ≠ Handgröße), "alle legten Eier in gemütliche Nester", "Sie beschützten ihre Babys" (nicht alle Saurier), "kleine Vögel" (ALLE Vögel stammen ab)
+- **Kein Olympus-Mons-Fall** in Vulkan (kein Mars-Superlativ in den Artikeln)
+
+Output: articles/batch_output/lektorat/ (18 × lektorat_{id}.json)
+
 **Quiz/stimmt_das App-Dart-Fix (2026-06-17)** ✅
 
 wf_article.dart korrigiert — drei Mismatches behoben:
@@ -289,8 +336,8 @@ Vor Großlauf: (a) TTL-Maximum, (b) Cache komplett weglassen, oder (c) Implicit 
 ### ~~Stage-2-Diagnose~~ — ERLEDIGT (2026-06-17)
 Batch-Schicht verifiziert, Mini-Lauf 18/18 erfolgreich.
 
-### run_batch.py Stage 3 — LEKTORAT
-Anthropic Message Batches, 2 Pässe (source_passages + volle Companion-Texte).
+### ~~run_batch.py Stage 3 — LEKTORAT~~ — ERLEDIGT (2026-06-17)
+18/18 Mini-Lauf lektoriert. Ergebnisse in articles/batch_output/lektorat/.
 
 ### Baustein 3 — tts_produce.py (Produktions-TTS)
 compose → tagging (gemini-2.5-flash-lite) → gemini-3.1-flash-tts-preview → WAV/MP3 → R2
@@ -315,7 +362,8 @@ compose → tagging (gemini-2.5-flash-lite) → gemini-3.1-flash-tts-preview →
 | Artikel-Generierung | generate_grounded.py | ✅ lauffähig, synchron |
 | Batch-Orchestrator Stage 1 | run_batch.py | ✅ Stage 1 komplett |
 | Batch-Orchestrator Stage 2 | run_batch.py | ✅ Mini-Lauf 18/18, Batch verifiziert |
-| Batch-Orchestrator Stage 3-4 | run_batch.py | ⏳ Gerüst (TODOs) |
+| Batch-Orchestrator Stage 3 | run_batch.py | ✅ Mini-Lauf 18/18, Batch+pending_batches.json |
+| Batch-Orchestrator Stage 4 | run_batch.py | ⏳ Gerüst (TODO) |
 | Gemini-Retry | gemini_client.py | ✅ 503/429 Backoff + Jitter, 14 Tests |
 | Bild-Vision | image_vision_filter.py | ✅ lauffähig |
 | TTS-Vorlesetext | tts_compose.py | ✅ lauffähig |

@@ -1133,7 +1133,7 @@ def stage2_generierung(
     return articles
 
 
-# ── Stage 3: LEKTORAT (Gerüst) ────────────────────────────────────────────────
+# ── Stage 3: LEKTORAT ────────────────────────────────────────────────────────
 
 def stage3_lektorat(
     themen: list[str],
@@ -1145,24 +1145,18 @@ def stage3_lektorat(
     dry_run: bool = False,
 ) -> dict:
     """
-    Stage 3: Anthropic Message Batches — Lektorat (2 Pässe).
+    Stage 3: Anthropic Message Batches — Faktenlektorat aller Artikel.
 
-    TODO: Implementierung ausstehend.
+    Architektur:
+    - EIN Batch, alle Artikel (themenweise geordnet für Cache-Optimierung)
+    - System-Prompt + Quellblock mit cache_control: ephemeral
+    - Sonnet prüft alle Fakten gegen Wikipedia-Volltext
+    - Ergebnis: pruefbericht in lektorat_{article_id}.json
 
-    Pass 1 (schlank):
-      - Wenn Artikel source_passages[] enthält (von Flash extrahiert):
-        sources_block aus source_passages statt Companion-Volltexten
-      - Sonst: volles build_grounded_sources_block() als Fallback
-      - System-Prompt mit cache_control: ephemeral
-      - Sonnet gibt zurück: Verdikt-Liste + passagen_ausreichend: bool
-    Pass 2 (Nachschlag-Batch):
-      - Nur Artikel mit passagen_ausreichend=false
-      - Volle Companion-Volltexte
-      - Separater Anthropic Batch
-    Annotierung:
-      - annotate_article_lektorat(article, verdicts, primary_text)
-      - Artikel neu speichern
+    batch_id wird sofort in pending_batches.json gesichert (Pflicht).
     """
+    import anthropic
+
     cp = _load_cp(out_dir, 3)
     if cp:
         return cp.get("lektorat_results", {})
@@ -1170,12 +1164,209 @@ def stage3_lektorat(
     if dry_run:
         total = len(articles)
         print(f"\n=== DRY-RUN Stage 3 ===")
-        print(f"Lektorat Pass 1: {total} Requests (System-Prompt gecached)")
-        print(f"  Pass 2: Nachschlag-Batch für passagen_ausreichend=false Artikel")
+        print(f"Lektorat-Batch: {total} Requests (Anthropic Message Batches)")
+        print(f"  Modell: {LEKTORAT_MODEL} | cache_control: ephemeral auf System + Quellblock")
+        print(f"  Reihenfolge: themenweise (L1/L2/L3 benachbart) für Cache-Hit-Chance")
+        print(f"  Output: out_dir/lektorat/lektorat_{{article_id}}.json")
         return {}
 
-    log.warning("Stage 3 (Lektorat): TODO — noch nicht implementiert")
-    return {}
+    anth_client = anthropic.Anthropic(api_key=anthropic_key)
+    lektorat_dir = out_dir / "lektorat"
+    lektorat_dir.mkdir(exist_ok=True)
+    pending_path = out_dir / "pending_batches.json"
+
+    # ── Step 1: Requests aufbauen (themenweise geordnet) ─────────────────────
+    log.info("\n=== Stage 3 / Step 1: Lektorat-Requests aufbauen ===")
+
+    # Geordnete Liste: [(article_id, sources_prefix, article_task, art_dict, thema)]
+    ordered_requests: list[tuple[str, str, str, dict, str]] = []
+
+    for thema in themen:
+        data = topics_data.get(thema)
+        if not data:
+            log.warning("  '%s' fehlt in topics_data — Lektorat übersprungen", thema)
+            continue
+
+        slug          = thema.lower().replace(" ", "_").replace("/", "_")
+        primary_text  = data.get("primary_text", "")
+        companions    = data.get("valid_companions", [])
+        comp_texts    = data.get("companion_texts", {})
+
+        sources_block = build_grounded_sources_block(
+            thema, primary_text, companions, comp_texts
+        )
+
+        for stufe in stufen:
+            article_id   = f"{slug}_l{stufe}"
+            art_path_str = articles.get(article_id)
+            if not art_path_str:
+                log.warning("  [%s] kein Artikel-Pfad — übersprungen", article_id)
+                continue
+
+            art_path = Path(art_path_str)
+            if not art_path.exists():
+                log.warning("  [%s] Datei fehlt: %s", article_id, art_path)
+                continue
+
+            lekt_out = lektorat_dir / f"lektorat_{article_id}.json"
+            if lekt_out.exists():
+                log.info("  [%s] bereits lektoriert — übersprungen", article_id)
+                continue
+
+            try:
+                art = json.loads(art_path.read_text(encoding="utf-8"))
+            except Exception as exc:
+                log.error("  [%s] Laden fehlgeschlagen: %s", article_id, exc)
+                continue
+
+            sources_prefix, article_task = build_lektorat_parts(art, sources_block)
+            ordered_requests.append((article_id, sources_prefix, article_task, art, thema))
+            log.info("  [%s] OK", article_id)
+
+    if not ordered_requests:
+        log.info("Stage 3: keine offenen Artikel — Stage übersprungen")
+        _save_cp(out_dir, 3, {"status": "done", "lektorat_results": {}})
+        return {}
+
+    # ── Step 2: Anthropic-Batch aufbauen ─────────────────────────────────────
+    log.info("\n=== Stage 3 / Step 2: Batch aufbauen (%d Requests) ===",
+             len(ordered_requests))
+
+    batch_reqs = []
+    for aid, sources_prefix, article_task, _art, _thema in ordered_requests:
+        batch_reqs.append({
+            "custom_id": aid,
+            "params": {
+                "model":      LEKTORAT_MODEL,
+                "max_tokens": 16000,
+                "system": [
+                    {"type": "text", "text": LEKTORAT_SYSTEM,
+                     "cache_control": {"type": "ephemeral"}},
+                ],
+                "messages": [{"role": "user", "content": [
+                    {"type": "text", "text": sources_prefix,
+                     "cache_control": {"type": "ephemeral"}},
+                    {"type": "text", "text": article_task},
+                ]}],
+            },
+        })
+
+    # ── Step 3: Batch einreichen + batch_id persistieren ─────────────────────
+    log.info("\n=== Stage 3 / Step 3: Batch einreichen ===")
+    batch    = anth_client.messages.batches.create(requests=batch_reqs)
+    batch_id = batch.id
+    log.info("  Batch: %s (%d Requests)", batch_id, len(batch_reqs))
+
+    # batch_id sofort persistieren (vor dem Pollen — Pflicht)
+    pending: dict = {}
+    if pending_path.exists():
+        try:
+            pending = json.loads(pending_path.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    pending[f"stage3_{_RUN_ID}"] = {
+        "batch_id":   batch_id,
+        "stage":      3,
+        "run_id":     _RUN_ID,
+        "n_requests": len(batch_reqs),
+        "submitted":  datetime.now(timezone.utc).isoformat(),
+    }
+    pending_path.write_text(
+        json.dumps(pending, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
+    log.info("  batch_id persistiert → %s", pending_path.name)
+
+    # ── Step 4: Pollen ────────────────────────────────────────────────────────
+    log.info("\n=== Stage 3 / Step 4: Pollen ===")
+    batch = poll_anthropic_batch(anth_client, batch_id)
+
+    # ── Step 5: Ergebnisse verarbeiten ───────────────────────────────────────
+    log.info("\n=== Stage 3 / Step 5: Ergebnisse verarbeiten ===")
+
+    # Art-Dict + Thema schnell nachschlägbar machen
+    art_by_id:   dict[str, dict] = {r[0]: r[3] for r in ordered_requests}
+    thema_by_id: dict[str, str]  = {r[0]: r[4] for r in ordered_requests}
+
+    lektorat_results: dict[str, str] = {}
+    total_in = total_out = total_cache_create = total_cache_read = 0
+
+    for result in anth_client.messages.batches.results(batch_id):
+        rid   = result.custom_id
+        thema = thema_by_id.get(rid, rid)
+        stufe_num = rid.split("_l")[-1] if "_l" in rid else "?"
+
+        if result.result.type != "succeeded":
+            log.warning("  [%s] Batch-Fehler: %s — Original behalten", rid,
+                        result.result.type)
+            continue
+
+        msg = result.result.message
+        raw = msg.content[0].text
+        u   = msg.usage
+        cache_create = getattr(u, "cache_creation_input_tokens", 0) or 0
+        cache_read   = getattr(u, "cache_read_input_tokens", 0) or 0
+        total_in          += u.input_tokens
+        total_out         += u.output_tokens
+        total_cache_create += cache_create
+        total_cache_read   += cache_read
+
+        log.info(
+            "  [%s] in=%d create=%d read=%d out=%d",
+            rid, u.input_tokens, cache_create, cache_read, u.output_tokens,
+        )
+
+        cost_tracker.track(
+            run_id=_RUN_ID, thema=thema, stufe=f"S{stufe_num}",
+            schritt="lektorat", modell=LEKTORAT_MODEL,
+            input_tok=u.input_tokens,
+            output_tok=u.output_tokens,
+            cached_tok=cache_read,
+        )
+
+        # Verdikts parsen
+        try:
+            verdicts = parse_lektorat_json(raw)
+        except Exception as exc:
+            log.warning("  [%s] JSON-Parse fehlgeschlagen: %s — pruefbericht leer", rid, exc)
+            verdicts = []
+
+        art = art_by_id.get(rid)
+        if art is None:
+            log.warning("  [%s] Artikel nicht im Speicher", rid)
+            continue
+
+        # Prüfbericht einbauen + AUTO-Korrekturen anwenden
+        primary_text = topics_data.get(thema, {}).get("primary_text", "")
+        annotate_article_lektorat(art, verdicts, primary_text)
+
+        pb      = art.get("pruefbericht", {})
+        summary = pb.get("summary", {})
+        n_bel   = sum(1 for f in pb.get("findings", []) if f.get("verdikt") == "BELEGT")
+        n_prob  = summary.get("vorschlag_offen", 0) + summary.get("eskaliert", 0)
+        log.info(
+            "  [%s] %d Verdikts | belegt=%d auto=%d vorschlag=%d eskaliert=%d%s",
+            rid, len(verdicts), n_bel,
+            summary.get("auto_angewandt", 0),
+            summary.get("vorschlag_offen", 0),
+            summary.get("eskaliert", 0),
+            " ⚠ review_flag" if n_prob > 0 else "",
+        )
+
+        # Als lektorat_{id}.json speichern
+        lekt_out = lektorat_dir / f"lektorat_{rid}.json"
+        lekt_out.write_text(
+            json.dumps(art, ensure_ascii=False, indent=2, default=str),
+            encoding="utf-8",
+        )
+        lektorat_results[rid] = str(lekt_out)
+
+    log.info(
+        "\n=== Stage 3 Gesamt-Tokens: in=%d out=%d cache_create=%d cache_read=%d ===",
+        total_in, total_out, total_cache_create, total_cache_read,
+    )
+
+    _save_cp(out_dir, 3, {"status": "done", "lektorat_results": lektorat_results})
+    return lektorat_results
 
 
 # ── Stage 4: TTS (Stub) ───────────────────────────────────────────────────────
