@@ -197,8 +197,8 @@ def count_article_words(article: dict) -> int:
         for s in sec.get("sentences", []):
             words += len(s.get("text", "").split())
         for box in sec.get("boxes", []):
-            words += len(box.get("text", "").split())
-            words += len(box.get("reveal_text", "").split())
+            words += len((box.get("text") or "").split())
+            words += len((box.get("reveal_text") or "").split())
     return words
 
 

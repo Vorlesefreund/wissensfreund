@@ -322,6 +322,33 @@ wäre aber bei den ~20 anderen korrekten, aber nicht gelisteten Behauptungen üb
 Preisbasis: claude-sonnet-4-6 Batch ($1,50/1M Input, $7,50/1M Output).
 Echte Zahlen nach Mini-Lauf (6 Themen × 3 Stufen = 18 Calls).
 
+---
+
+## LEKTORAT-RETRIEVAL VERIFIZIERT (2026-06-17)
+
+**Tiefentest:** 15 Fakten × 3 Themen × 5 Positionsbänder (0–100% Textposition).
+Alle Fakten korrekt und im Wikipedia-Volltext belegt. 0/15 false positives.
+
+| Thema | False Positives | Primärtext | Kontextfüllung |
+|---|---|---|---|
+| Dinosaurier | 0/5 (0%) | 68k Zeichen | 21.8% von 200k |
+| Elefant | 0/5 (0%) | 116k Zeichen | 28.2% von 200k |
+| Zweiter Weltkrieg | 0/5 (0%) | 273k Zeichen | 48.6% von 200k |
+
+**Ergebnis:**
+- Keine Positionsabhängigkeit: Sonnet findet Belege zuverlässig bis 89% Textposition.
+- ZWK (273k) bei 48.6% Kontextfüllung — kein Overflow, kein Retrieval-Verlust.
+- SILENT-Einträge (Beleg gefunden + bestätigt, keine Änderung) zählen NICHT als false positive.
+
+**Entscheidungen (nicht rückgängig):**
+- **Option C (Retrieval verbessern / source_passages-Wegweiser) NICHT nötig** — Retrieval ist robust.
+- **Volltext-Lektorat bleibt wie es ist** (Primary ungekürzt + Companions bis 30k Zeichen).
+- **source_passages** sind ausschließlich für App-UI-Transparenz; kein Einfluss auf Lektorat-Qualität.
+
+**Skript:** `temp/_lektorat_depth_test.py` (falsche `eintraege`-Key-Referenz korrigiert auf `corrections`/`pruefen`).
+
+---
+
 ### Companion-Cap (30.000 Zeichen)
 
 Nicht gefahrlos kürzbar: Im Vesuv-Companion liegt kritische Sicherheitsinformation

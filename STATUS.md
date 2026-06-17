@@ -1,96 +1,67 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T18:27:06Z -->
+<!-- updated: 2026-06-17T20:06:53Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Generator v3.23d + Lektorat-Fehlerfixes + mini_s2_v3 Testlauf (2026-06-17)** ← AKTUELL
+**Lektorat-Retrieval-Tiefentest + mini_s2_v3d Stage-2-Lauf gestartet (2026-06-17)**
 
-### A: Generator-Prompt v3.23d (wissensfreund_generator_prompt_v3.23_production.md)
+### Lektorat-Retrieval VERIFIZIERT (2026-06-17)
 
-4 neue Belegtreue-Regeln in EISERNE REGEL + HÄUFIGE FEHLER (Einträge 43–46):
+Tiefentest: 15 Fakten × 3 Themen × 5 Positionsbänder (0–100% Textposition).
 
-| Regel | Ziel |
-|---|---|
-| 43 — Keine erfundenen Charakterzüge | «teilte gerecht», «immer freundlich» → verboten |
-| 44 — Beim Thema bleiben | Dingo-Lautäußerungs-Statistik im Hunde-Artikel → verboten |
-| 45 — Kein Modell-Detailwissen | Alan Turing/Bletchley nicht aus Training ergänzen |
-| 46 — Sensible Themen ernst nehmen | Keine kindlichen Schlüsse, keine pietätlosen Du-Vergleiche |
-
-Regeln auch in der EISERNE REGEL-Sektion als Fließtext verankert.
-
-### B: Lektorat-Fehlerfixes (lektorat_common.py LEKTORAT_SYSTEM)
-
-**Fall 1 — SELBSTKONSISTENZ-PFLICHT** (in ENTSCHEIDUNGSPRINZIP):
-Wenn Begründung kein Handlungsbedarf → Verdict MUSS «kein Flag» sein, NICHT PRÜFEN.
-Konkret: «fast einen Meter» bei 95 cm belegt → kein PRÜFEN, weil Begründung self-consistent.
-
-**Fall 2 — SINNGEMÄSSE BELEGE** (in GROUNDING-REGEL):
-«fliehen» wird durch «verlassen gefährdetes Gebiet» gedeckt — Wortgleichheit nicht nötig.
-Verhindert false-positive PRÜFEN bei synonym-belegten Aussagen.
-
-### C: mini_s2_v3 Testlauf (Spartacus, Hund, Zweiter Weltkrieg × 3 Stufen)
-
-⚠️ Artikel wurden mit v3.23b generiert (Stage 2 lief parallel zur Prompt-Änderung).
-Test prüft daher: Lektorat-Qualität auf v3.23b-Output; Generator-Issues als Baseline bestätigt.
-
-| Artikel | SILENT | KORRIGIERT | PRÜFEN |
+| Thema | False Positives | Primärtext | Kontextfüllung |
 |---|---|---|---|
-| spartacus_l1 | 0 | 0 | 0 |
-| spartacus_l2 | — | — | — (JSON-Parse-Fehler Gemini 503) |
-| spartacus_l3 | 1 | 1 | **2** ⚠️ |
-| hund_l1 | 0 | 0 | 0 |
-| hund_l2 | 0 | 2 | **1** ⚠️ |
-| hund_l3 | 4 | 0 | 0 |
-| zweiter_weltkrieg_l1 | 0 | 0 | 0 |
-| zweiter_weltkrieg_l2 | 3 | 0 | 0 |
-| zweiter_weltkrieg_l3 | 2 | 3 | 0 |
-| **Gesamt (8/9)** | **10** | **6** | **3** |
+| Dinosaurier | 0/5 (0%) | 68k Zeichen | 21.8% |
+| Elefant | 0/5 (0%) | 116k Zeichen | 28.2% |
+| Zweiter Weltkrieg | 0/5 (0%) | 273k Zeichen | 48.6% |
 
-**PRÜFEN-Analyse (alle 3 legitim):**
-- hund_l2: «Forscher haben herausgefunden» vs. Quelle «wendet dagegen ein» → Pädagogischer Kern (Fall 2 der PRÜFEN-Ausnahmen) ✅
-- spartacus_l3: «gleichmäßig verteilt» Einbau fehlgeschlagen (auto-correction konnte Satz nicht finden) + Zwei-Quellen-Widerspruch («zwangen zur Umkehr» vs. «ungeklärte Gründe») ✅
+**Fazit:**
+- Keine Positionsabhängigkeit — selbst bei 89% Textposition und 48% Kontextfüllung findet Sonnet den Beleg zuverlässig.
+- SILENT-Eintrag (ZWK Dünkirchen/68.000 Mann) = kein false positive, sondern Beleg gefunden + bestätigt.
+- **Option C (Retrieval verbessern / Volltext kürzen) NICHT nötig.**
+- **source_passages-Wegweiser fürs Lektorat NICHT nötig (Retrieval ist robust).**
+- Volltext-Lektorat bleibt wie es ist.
 
-**Generator-Violations in v3.23b bestätigt (Ziel für v3.23d-Test):**
-- Spartacus S1: «teilte ganz gerecht» → Rule 43 target ✅
-- Spartacus S3: «absolut gleichmäßig» → Rule 43 target ✅
-- Hund S2: Dingo Lautäußerungs-Statistik (5%/65%) im Artikel → Rule 44 target ✅
-- WW2: kein naiver Schluss («Frieden gelernt»), keine pietätlosen Du-Vergleiche ✅
+### Generator v3.23d + Lektorat-Fehlerfixes (2026-06-17)
 
-**Zweiter Weltkrieg Qualität (altersgerecht, ernst, ohne Verharmlosung):**
-ZWK-L3 Schlusssatz: «Nach dem Krieg gründeten die Siegerstaaten die Vereinten Nationen» ✅
-Anne Frank: in warnung-Box, seriös behandelt ✅ — kein «du auch Tagebuch schreiben»-Vergleich ✅
+4 neue Belegtreue-Regeln (43–46) in EISERNE REGEL + HÄUFIGE FEHLER:
+- 43: Keine erfundenen Charakterzüge/Tugenden
+- 44: Beim Thema bleiben (kein Companion-Exkurs)
+- 45: Kein Modell-Detailwissen (Namen/Zahlen nicht aus Training)
+- 46: Sensible Themen ernst nehmen (keine Verniedlichung)
+
+Lektorat-Fixes (lektorat_common.py):
+- Fall 1 SELBSTKONSISTENZ-PFLICHT: Begründung schlägt Verdict
+- Fall 2 SINNGEMÄSSE BELEGE: «fliehen» = «verlassen gefährdetes Gebiet»
 
 ---
 
-**Lektorat v4 Vollständig-Lauf mini_lektorat_v32: 18/18, Word-Dokumente (2026-06-17)**
+## Gerade in Arbeit
 
-| Thema | S1 S/K/P | S2 S/K/P | S3 S/K/P |
-|---|---|---|---|
-| **Elefant** | 0/0/0 | 0/0/0 | 2/2/0 |
-| **Hund** | 2/0/0 | 1/1/1 | 0/1/0 |
-| **Dinosaurier** | 2/0/0 | 0/0/0 | 2/0/1 |
-| **Vulkan** | 0/0/0 | 2/2/1 | 0/0/0 |
-| **Spartacus** | 0/0/0 | 1/1/0 | 1/1/1 |
-| **ZWK** | 1/0/0 | 1/0/1 | 3/1/1 |
-| **Gesamt** | **5/0/0** | **5/4/2** | **8/5/3** |
+**mini_s2_v3d — Stage-2-Lauf (v3.23d-Verifikation)** ← LÄUFT
 
-v3.1→v4: PRÜFEN 39→6 (−85%). Kein Artikel >1 PRÜFEN. ✅
+Verzeichnis: `articles/mini_s2_v3d/`
+Stage-1-Checkpoint von mini_s2_v3 kopiert (alle 6 Themen vorhanden).
+Stage-2-Batch läuft: 6 Themen × 3 Stufen = 18 Artikel mit v3.23d-Prompt.
+
+Prüfziele:
+- Spartacus: kein «teilte Essen/Beute gerecht» mehr?
+- Hund: kein Dingo-Statistik-Exkurs mehr?
+- ZWK S1: kein «Teilen und Vertragen ist schöner» mehr?
+- ZWK S2: kein «vielleicht schreibst du Tagebuch wie Anne Frank» mehr?
+- ZWK: kein Bletchley Park / Alan Turing wenn nicht in Quelle?
+- Artikel trotzdem noch lebendig?
 
 ---
 
-## Gerade in Arbeit / Offen nach Priorität
+## Offen nach Priorität
 
-### TODO sofort: v3.23d an frischen Artikeln verifizieren
-Spartacus-l2 neu generieren (JSON-Parse-Fehler Gemini 503, trailing comma).
-Dann Stage 2 neu für Spartacus mit v3.23d → prüfen ob «gleichmäßig» verschwindet.
-
-### TODO: Chicxulub-Krater als Dinosaurier-Companion (Stage 1)
-stage1_checkpoint.json — Companion für Dinosaurier um Chicxulub-Krater erweitern.
-Begründung: «mindestens 26 Grad» Claim hat keinen Quellbeleg (Companion fehlt).
-Nicht Teil von mini_s2_v3 — separater Stage-1-Update nötig.
+### TODO sofort: mini_s2_v3d Stage 3 (Lektorat)
+Nach Stage-2-Abschluss: Stage 3 für alle 18 Artikel + neue Word-Dokumente.
+Erwartung: deutlich weniger PRÜFEN/KORRIGIERT wegen weniger Generator-Angriffsfläche.
 
 ### Baustein 3 — tts_produce.py (Produktions-TTS)
 compose → tagging (gemini-2.5-flash-lite) → gemini-3.1-flash-tts-preview → WAV/MP3 → R2
@@ -98,7 +69,7 @@ compose → tagging (gemini-2.5-flash-lite) → gemini-3.1-flash-tts-preview →
 ### Baustein 4 — Quiz-Vertonung
 
 ### Offene Audio-Entscheidungen (Andreas)
-1. Iapetus-Qualität im Audio-Review bestätigen (tts_audio_compare.html)
+1. Iapetus-Qualität im Audio-Review bestätigen
 2. Feste Tag-Palette vs. freie Tags
 3. Tagging-Modell: gemini-3.5-flash vs. gemini-2.5-flash-lite
 
@@ -106,6 +77,7 @@ compose → tagging (gemini-2.5-flash-lite) → gemini-3.1-flash-tts-preview →
 - categories_backlog.json → categories-Array je Artikel
 - Flutter WfArticleListScreen + 3-flash-preview L3 Fix
 - Quiz/stimmt_das App-Dart-Fix (wf_article.dart) — schema mismatch noch offen
+- Chicxulub-Companion-Entscheidung: Option A (Kompass verbessern) vs. weiter Regel 45
 
 ---
 
@@ -127,5 +99,3 @@ compose → tagging (gemini-2.5-flash-lite) → gemini-3.1-flash-tts-preview →
 
 ### Catalog (final)
 catalog_full.json: **4346 primary**, 213 Leuchtturm, 563 sensibel, 56 exclude
-eignung_verdicts.json: 738 Verdicts ✅
-Ergiebigkeit: ergiebigkeit_scores.json, 134 Anker ✅
