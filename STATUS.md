@@ -1,12 +1,67 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T08:30:00Z -->
+<!-- updated: 2026-06-17T09:24:03Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**A/B-Test Thinking S3 — Vulkan (2026-06-17)** ← AKTUELL
+**Stage 2 Mini-Lauf: 6 Themen × 3 Stufen (2026-06-17)** ← AKTUELL
+
+18/18 Artikel vollständig generiert (gemini-3.5-flash, ThinkingLevel.MEDIUM, Batch).
+
+| | Ergebnis |
+|---|---|
+| Batch-Status | 18/18 STOP, alle angekommen ✅ |
+| source_passages | 3–12 je Artikel, alle embedded ✅ |
+| is_hero | gesetzt auf allen Artikeln mit Bildern ✅ |
+| Kosten Stage 2 | $0.60 (18 Varianten, avg $0.033/Variante) |
+| Vollkatalog-Projektion | ~$434 Stage 2 |
+
+**Wortzahl-Übersicht:**
+
+| Artikel | Wörter | Ziel | Status |
+|---|---|---|---|
+| elefant_l1 | 228 | 175–250 | ✓ |
+| elefant_l2 | 377 | 280–400 | ✓ |
+| elefant_l3 | 580 | 455–650 | ✓ |
+| hund_l1 | 256 | 175–250 | ⚠ +6 über Wmax, unter Cap |
+| hund_l2 | 410 | 280–400 | ⚠ +10 über Wmax, unter Cap |
+| hund_l3 | 698 | 455–650 | ⚠ 698 > Cap 682 (Trim 503-fail) |
+| dinosaurier_l1 | 177 | 175–250 | ✓ |
+| dinosaurier_l2 | 382 | 280–400 | ✓ |
+| dinosaurier_l3 | 515 | 455–650 | ✓ |
+| vulkan_l1 | 211 | 152–217 | ✓ |
+| vulkan_l2 | 366 | 280–400 | ✓ |
+| vulkan_l3 | 629 | 455–650 | ✓ |
+| spartacus_l1 | 124 | 128–183 | ⚠ < min, review_flag (0 Bilder, dünner Inhalt) |
+| spartacus_l2 | 289 | 205–293 | ✓ |
+| spartacus_l3 | 446 | 327–467 | ✓ |
+| zweiter_weltkrieg_l1 | 152 | 128–183 | ✓ |
+| zweiter_weltkrieg_l2 | 262 | 205–293 | ✓ (nach Trim, aber 0 Boxen) |
+| zweiter_weltkrieg_l3 | 408 | 327–467 | ✓ |
+
+**Besondere Prüfungen:**
+- **age_floor-Gate**: FEHLT in Stage 2 — Spartacus + ZWK S1 wurden generiert (kein Gate).
+  Spartacus S1: 124W, 3 Sections, 0 Bilder → dünn aber korrekt. ZWK S1: 152W, sachlich ✓
+- **ZWK Framing**: L1 BOX warnung "Das war ein großes Unrecht" ✓
+  L2: "Deutschland wurde von einer grausamen Regierung beherrscht, den Nationalsozialisten.
+  Ihr Anführer war der Diktator Adolf Hitler." ✓ — sachlich, NS klar als Unrecht
+- **Dinosaurier Bilder S1 vs S3**: S1 = 4 Bilder ab_stufe=1 (bunte Modelle),
+  S3 = 12 Bilder ab_stufe=2 (Museumsskelette) — Vision-Filter korrekt ✓
+
+**Bugs gefixt (Commit a710d54):**
+- `validate_article`: robust gegen string-options nach Trim (`isinstance`-Guard)
+- `stage2_generierung`: `validate_article` in try/except (kein Loop-Abbruch mehr)
+- `stage2_generierung`: skip-if-exists für Batch-Building (Resume-Fähigkeit)
+
+**Offene Issues nach Mini-Lauf:**
+- `hund_l3`: 698W > Cap 682, Trim scheiterte an 503 → manuell review nötig
+- `zweiter_weltkrieg_l2`: nach Trim 0 Boxen + Satz-ID-Warnung → review
+- `age_floor`-Gate fehlt (s. Batch-Härtung)
+- `spartacus/zwk`: fehlen in `ergiebigkeit_scores.json` → Fallback-Score 6 (Großlauf-TODO)
+
+**A/B-Test Thinking S3 — Vulkan (2026-06-17)**
 
 Härterer Thinking-Test auf einem S3-Artikel (Länge/Komplexität: Plattentektonik, Magma, Geysire).
 
@@ -192,6 +247,8 @@ wf_article.dart korrigiert — drei Mismatches behoben:
 - `WfBox.fromJson`: `j['reveal_mode'] == true` → `j['reveal_mode'] == 'auto'` (String-Vergleich)
 tts_compose.py unverändert (liest bereits korrekt reveal_text).
 
+**Stage 2 Mini-Lauf (2026-06-17)** ✅ — 18/18 Artikel, s. oben.
+
 ---
 
 ## Batch-Härtung VOR Großlauf (Pflicht, nicht Mini-Lauf)
@@ -229,9 +286,8 @@ Vor Großlauf: (a) TTL-Maximum, (b) Cache komplett weglassen, oder (c) Implicit 
 
 ## Offen nach Priorität
 
-### Stage-2-Diagnose abschließen (nächstes Ziel)
-Sync-Test mit gemini-3.5-flash sobald Modell stabil. Befund: Batch-Schicht-Bug vs.
-Generierungslogik-Bug.
+### ~~Stage-2-Diagnose~~ — ERLEDIGT (2026-06-17)
+Batch-Schicht verifiziert, Mini-Lauf 18/18 erfolgreich.
 
 ### run_batch.py Stage 3 — LEKTORAT
 Anthropic Message Batches, 2 Pässe (source_passages + volle Companion-Texte).
@@ -258,7 +314,7 @@ compose → tagging (gemini-2.5-flash-lite) → gemini-3.1-flash-tts-preview →
 |---|---|---|
 | Artikel-Generierung | generate_grounded.py | ✅ lauffähig, synchron |
 | Batch-Orchestrator Stage 1 | run_batch.py | ✅ Stage 1 komplett |
-| Batch-Orchestrator Stage 2 | run_batch.py | ⏳ implementiert, Diagnose offen |
+| Batch-Orchestrator Stage 2 | run_batch.py | ✅ Mini-Lauf 18/18, Batch verifiziert |
 | Batch-Orchestrator Stage 3-4 | run_batch.py | ⏳ Gerüst (TODOs) |
 | Gemini-Retry | gemini_client.py | ✅ 503/429 Backoff + Jitter, 14 Tests |
 | Bild-Vision | image_vision_filter.py | ✅ lauffähig |
