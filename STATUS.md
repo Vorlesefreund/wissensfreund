@@ -1,16 +1,71 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T15:49:12Z -->
+<!-- updated: 2026-06-17T18:27:06Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Lektorat v4 Vollständig-Lauf mini_lektorat_v32: 18/18, Word-Dokumente (2026-06-17)** ← AKTUELL
+**Generator v3.23d + Lektorat-Fehlerfixes + mini_s2_v3 Testlauf (2026-06-17)** ← AKTUELL
 
-### Stage 3 mit Lektorat v4 (PRÜFEN als Ausnahme)
+### A: Generator-Prompt v3.23d (wissensfreund_generator_prompt_v3.23_production.md)
 
-batch_id: msgbatch_01QppFRvNo4ysbFDRFyiK3RQ — 18/18 in ~1,5 Min.
+4 neue Belegtreue-Regeln in EISERNE REGEL + HÄUFIGE FEHLER (Einträge 43–46):
+
+| Regel | Ziel |
+|---|---|
+| 43 — Keine erfundenen Charakterzüge | «teilte gerecht», «immer freundlich» → verboten |
+| 44 — Beim Thema bleiben | Dingo-Lautäußerungs-Statistik im Hunde-Artikel → verboten |
+| 45 — Kein Modell-Detailwissen | Alan Turing/Bletchley nicht aus Training ergänzen |
+| 46 — Sensible Themen ernst nehmen | Keine kindlichen Schlüsse, keine pietätlosen Du-Vergleiche |
+
+Regeln auch in der EISERNE REGEL-Sektion als Fließtext verankert.
+
+### B: Lektorat-Fehlerfixes (lektorat_common.py LEKTORAT_SYSTEM)
+
+**Fall 1 — SELBSTKONSISTENZ-PFLICHT** (in ENTSCHEIDUNGSPRINZIP):
+Wenn Begründung kein Handlungsbedarf → Verdict MUSS «kein Flag» sein, NICHT PRÜFEN.
+Konkret: «fast einen Meter» bei 95 cm belegt → kein PRÜFEN, weil Begründung self-consistent.
+
+**Fall 2 — SINNGEMÄSSE BELEGE** (in GROUNDING-REGEL):
+«fliehen» wird durch «verlassen gefährdetes Gebiet» gedeckt — Wortgleichheit nicht nötig.
+Verhindert false-positive PRÜFEN bei synonym-belegten Aussagen.
+
+### C: mini_s2_v3 Testlauf (Spartacus, Hund, Zweiter Weltkrieg × 3 Stufen)
+
+⚠️ Artikel wurden mit v3.23b generiert (Stage 2 lief parallel zur Prompt-Änderung).
+Test prüft daher: Lektorat-Qualität auf v3.23b-Output; Generator-Issues als Baseline bestätigt.
+
+| Artikel | SILENT | KORRIGIERT | PRÜFEN |
+|---|---|---|---|
+| spartacus_l1 | 0 | 0 | 0 |
+| spartacus_l2 | — | — | — (JSON-Parse-Fehler Gemini 503) |
+| spartacus_l3 | 1 | 1 | **2** ⚠️ |
+| hund_l1 | 0 | 0 | 0 |
+| hund_l2 | 0 | 2 | **1** ⚠️ |
+| hund_l3 | 4 | 0 | 0 |
+| zweiter_weltkrieg_l1 | 0 | 0 | 0 |
+| zweiter_weltkrieg_l2 | 3 | 0 | 0 |
+| zweiter_weltkrieg_l3 | 2 | 3 | 0 |
+| **Gesamt (8/9)** | **10** | **6** | **3** |
+
+**PRÜFEN-Analyse (alle 3 legitim):**
+- hund_l2: «Forscher haben herausgefunden» vs. Quelle «wendet dagegen ein» → Pädagogischer Kern (Fall 2 der PRÜFEN-Ausnahmen) ✅
+- spartacus_l3: «gleichmäßig verteilt» Einbau fehlgeschlagen (auto-correction konnte Satz nicht finden) + Zwei-Quellen-Widerspruch («zwangen zur Umkehr» vs. «ungeklärte Gründe») ✅
+
+**Generator-Violations in v3.23b bestätigt (Ziel für v3.23d-Test):**
+- Spartacus S1: «teilte ganz gerecht» → Rule 43 target ✅
+- Spartacus S3: «absolut gleichmäßig» → Rule 43 target ✅
+- Hund S2: Dingo Lautäußerungs-Statistik (5%/65%) im Artikel → Rule 44 target ✅
+- WW2: kein naiver Schluss («Frieden gelernt»), keine pietätlosen Du-Vergleiche ✅
+
+**Zweiter Weltkrieg Qualität (altersgerecht, ernst, ohne Verharmlosung):**
+ZWK-L3 Schlusssatz: «Nach dem Krieg gründeten die Siegerstaaten die Vereinten Nationen» ✅
+Anne Frank: in warnung-Box, seriös behandelt ✅ — kein «du auch Tagebuch schreiben»-Vergleich ✅
+
+---
+
+**Lektorat v4 Vollständig-Lauf mini_lektorat_v32: 18/18, Word-Dokumente (2026-06-17)**
 
 | Thema | S1 S/K/P | S2 S/K/P | S3 S/K/P |
 |---|---|---|---|
@@ -21,488 +76,21 @@ batch_id: msgbatch_01QppFRvNo4ysbFDRFyiK3RQ — 18/18 in ~1,5 Min.
 | **Spartacus** | 0/0/0 | 1/1/0 | 1/1/1 |
 | **ZWK** | 1/0/0 | 1/0/1 | 3/1/1 |
 | **Gesamt** | **5/0/0** | **5/4/2** | **8/5/3** |
-| **Total** | **18 SILENT** | **9 KORRIGIERT** | **6 PRÜFEN** |
 
-vs. v3.1: 6/10/39 → v4: 18/9/6 — PRÜFEN von 39 auf 6 (−85%). Kein Artikel >1 PRÜFEN. ✅
-
-Kosten: $0.151 cost_tracker (non-cached in+out) | in=17.796 cc=1.043.862 cr=131.295 out=6.477
-Hinweis: Cache-Write ($3.75/1M) nicht in cost_tracker erfasst — reale Batch-Kosten höher.
-
-Word-Dokumente: articles/mini_lektorat_v32/review/ (6 × .docx, 201–321 KB)
-
-### PRÜFEN-Analyse (6 Flags, alle maximal 1 pro Artikel)
-
-| Artikel | Flag | Kategorie |
-|---|---|---|
-| hund_l2 | "fast einen Meter" für 95 cm → GRUNDPRINZIP-Verletzung | ❌ falsch |
-| dinosaurier_l3 | "mindestens 26 Grad" aus spezifischem Schwefel-Klimamodell | ⚠️ Grenzfall |
-| vulkan_l2 | "Tiere spüren Gefahren früher" — nur vage belegt | ⚠️ Grenzfall |
-| spartacus_l3 | Heersgröße — Quelle sagt "angeblich bis zu 200.000" (Unsicherheit) | ✅ korrekt |
-| zweiter_weltkrieg_l2 | Alan Turing / Bletchley Park nicht in deklarierten Quellen | ✅ korrekt (Fall 3) |
-| zweiter_weltkrieg_l3 | "150 Trillionen" Enigma-Kombinationen — kein Quellenbeleg | ✅ korrekt (Fall 3) |
-
-4 von 6 PRÜFEN sind korrekt oder Grenzfall. 1 GRUNDPRINZIP-Verletzung (hund_l2 "fast einen Meter").
-Das war der einzige Regelverstoß — Modell ignorierte einmal das "keine Korrektur"-Gebot.
-
-### KORRIGIERT-Stichprobe (Kindstil erhalten?)
-
-- [elefant_l3] "kleine Ohren gegen Kälte" → "kleine Ohren" (unbelegte Funktion gestrichen ✅)
-- [hund_l2] Dingo-Lautäußerungen: präzise Quellzahlen eingebaut (Knurren 65%, Bellen 5% ✅)
-- [hund_l3] Barry-Datum ergänzt: "soll zwischen 1800 und 1812 … gerettet haben" ✅
-
-Kindstil in allen Stichproben erhalten. Korrekturen fügen Präzision hinzu ohne Kindersprache zu verlieren.
-
-**Lektorat v4: PRÜFEN als Ausnahme (0–1/Artikel), KORRIGIERT als Standard (2026-06-17)**
-
-### Prompt-Änderungen (lektorat_common.py — LEKTORAT_SYSTEM)
-
-- SILENT: Jetzt explizite always-SILENT-Liste (Superlative, Tierverhalten, Zahlen, Kausalbrücken)
-- PRÜFEN: Auf 3 Ausnahmefälle beschränkt + "0–1 Fälle pro Artikel — NICHT 3–5" im Prompt
-- ENTSCHEIDUNGSPRINZIP: "Im Zweifel KORRIGIERT statt PRÜFEN" als Kernregel im Prompt verankert
-- PRONOMEN UND BEZÜGE: Von KORRIGIERT → SILENT (Kausalbrücken = kleine, klare Korrekturen)
-- STILISTISCHE PROBLEME: Aus PRÜFEN-Liste entfernt (gehören laut Designprinzip nicht dorthin)
-- Bug-Fix `_apply_auto_correction`: reveal_text in Boxen wird jetzt gefunden + korrigiert
-
-### Testlauf Elefant S3 + Hund S3 (synchron)
-
-| Artikel | SILENT | KORRIGIERT | PRÜFEN |
-|---|---|---|---|
-| Elefant S3 | 2 | 3 | **0** ✅ |
-| Hund S3 | 2 | 0 | **0** ✅ |
-
-Ziel (max. 1 PRÜFEN/Artikel) deutlich übertroffen. Cache greift: 75k+66k read_tokens.
-
-**Lektorat v3.1 Vollständig-Lauf mini_lektorat_v3: 18/18 Artikel, Word-Dokumente (2026-06-17)**
-
-### Stage 3 mit Lektorat v3.1 (Kind-Perspektive + abgeleitete Vergleiche)
-
-batch_id: msgbatch_01RFAif334D3SpHb3mPKhAeN — 18/18 in ~2 Min.
-
-| Thema | S1 S/K/P | S2 S/K/P | S3 S/K/P |
-|---|---|---|---|
-| **Elefant** | 0/0/2 | 0/0/1 | 1/1/5 |
-| **Hund** | 0/0/1 | 0/2/1 | 1/1/2 |
-| **Dinosaurier** | 0/0/3 | 0/0/0 | 1/1/3 |
-| **Vulkan** | 0/0/2 | 0/0/3 | 2/0/3 |
-| **Spartacus** | 0/0/1 | 0/1/1 | 1/1/4 |
-| **ZWK** | 0/1/2 | 0/0/2 | 0/2/3 |
-| **Gesamt** | **0/1/11** | **0/3/11** | **6/6/20** |
-
-Kosten: $0.232 (18 Requests Ø $0.013, cache_create=976.604 / cache_read=199.561)
-Vollkatalog-Projektion Stage 3: ~$168 (update von $205, kompaktere Outputs)
-
-Word-Dokumente: articles/mini_lektorat_v3/review/ (6 × .docx, 201–321 KB, Bilder eingebettet)
-
-> **LEKTORAT-DESIGNPRINZIP (nicht verhandelbar):**
-> Das Lektorat arbeitet selbstständig. Andreas macht KEINE vollständige Artikel-Review. Er setzt
-> maximal ein Häkchen bei wenigen, echten Grenzfällen. Die PRÜFEN-Quote muss nahe Null sein —
-> nur bei echter, fundamentaler Unsicherheit wo eine falsche Auto-Korrektur schlimmer wäre als
-> gar keine. In allen anderen Fällen entscheidet das Lektorat selbst: entweder SILENT
-> (auto-korrigiert, still) oder KORRIGIERT (auto-korrigiert, sichtbar markiert). PRÜFEN ist die
-> absolute Ausnahme, nicht die Regel. Eine PRÜFEN-Quote von 71% bedeutet, das Lektorat hat versagt.
-
-**Lektorat v3.1: Abgeleitete Vergleiche schützen + Verifikationstest (2026-06-17)**
-
-Zusatz-Fix: «60 Tonnen – zehn große Elefanten»-Regel (abgeleitete Vergleiche kein Eingriff).
-Verifikationstest Dino S3: «zehn große Elefanten» überlebt als PRÜFEN ✅; Pruefbericht vollständig ✅
-
-**Lektorat v3: Kindstil-Priorität + proaktive Auto-Korrektur (2026-06-17)**
-
-lektorat_common.py — 8 Korrekturen an Prompt + Pruefbericht-Anzeige:
-
-1. **GRUNDPRINZIP Kindstil** (neu): "fast einen Meter" ≈ 95 cm → kein Eingriff. Keine
-   parenthetischen Alternativangaben. Synonyme ohne Mehrwert nicht ersetzen. Kindwelt-Metaphern
-   («Elefanten-Oma», «überall auf der Erde») schützen.
-2. **Proaktive Auto-Korrektur**: Superlative («ältestes Haustier» → «eines der ältesten»),
-   unbelegte Funktionsangaben streichbar, Tierverhalten auf Quellbasis korrigierbar.
-3. **Stimmt_das-Kohärenz**: Box nur korrigieren wenn Frage + reveal_text danach noch kohärent;
-   sonst PRÜFEN mit Hinweis.
-4. **Unvollständige Boxen**: Leere Boxen als PRÜFEN flaggen.
-5. **Stilistische Probleme**: Abschnittstitel als Klausurfragen, holprige Leseransprache → PRÜFEN.
-6. **Pronomen/Bezüge**: Unklare «diese»/«dabei»/Substantiv-Bezüge → PRÜFEN.
-7. **article_to_lektorat_text**: Boxtyp + reveal_text im Prompt (für Kohärenz-Check).
-8. **Pruefbericht-Display**: `_diff_excerpt()` — zeigt geänderten Teil mit Kontext, niemals
-   nach fixer Zeichenzahl abschneiden.
-
-**Test Hund S2+S3 (v3):**
-- "fast einen Meter" → PRÜFEN ✅ (Kindstil-Schutz greift, nicht auto-korrigiert)
-- "ältestes Haustier" → "eines der ältesten Haustiere" KORRIGIERT ✅ (proaktive Auto-Korrektur)
-- Dingo "meistens durch Heulen" → "vor allem durch Heulen und andere Laute" KORRIGIERT ✅
-- Pruefbericht: vollständige Sätze ✅ (kein Abschneiden nach 70 Zeichen mehr)
-- Kein parenthetisches "(nach anderen Quellen...)" ✅
-
-**Stage 3 Mini-Lauf v2 + Word-Review-Dokumente (2026-06-17)**
-
-### Stage 3 — 18/18 Artikel lektoriert (v2: SILENT/KORRIGIERT/PRÜFEN)
-
-batch_id: msgbatch_01NBiusyosd5ivohN8ahzdNy (15 Artikel), Elefant aus lektorat_test.
-
-| Thema | S1 | S2 | S3 |
-|---|---|---|---|
-| **Elefant** | S=0 K=0 P=2 | S=2 K=0 P=1 | S=2 K=5 P=2 |
-| **Hund** | S=1 K=1 P=1 | S=2 K=2 P=2 | S=3 K=3 P=2 |
-| **Dinosaurier** | S=0 K=0 P=3 | S=0 K=0 P=2 | S=4 K=2 P=3 |
-| **Vulkan** | S=0 K=0 P=2 | S=2 K=2 P=3 | S=2 K=3 P=4 |
-| **Spartacus** | S=0 K=0 P=2 | S=0 K=1 P=1 | S=2 K=1 P=3 |
-| **ZWK** | S=0 K=0 P=2 | S=2 K=0 P=2 | S=4 K=1 P=2 |
-
-Kosten Stage 3: $0.236 (15 Requests Ø $0.016/Artikel, 50% Batch-Rabatt)
-cache: create=617.357 / read=312.370 Tokens (themenweise Sortierung greift)
-auto_angewandt: ALLE KORRIGIERT direkt eingebaut ✅
-Vollkatalog-Projektion Stage 3: ~$205 (war $913 — v2 spart 77% Output-Tokens durch
-kompaktes Format; Gesamt-Pipeline ~$1.934 statt ~$2.642)
-
-**Auffälligste Korrekturen:**
-- Hund S2 KORRIGIERT: "Irish Wolfhound fast einen Meter" → "bis zu 95 cm" (WP-Maßzahl)
-- Hund S2 KORRIGIERT: "Barry rettete so viele" → "Barry soll zwischen 1800 und 1812 über 40 Menschen gerettet haben" (WP-Zahl)
-- Elefant S3 KORRIGIERT: "Zwergmammute auf abgelegener Insel" → "Wollhaarmammute auf der Wrangelinsel" (korrekte Art + Inselname)
-- Elefant S3 KORRIGIERT: BOX "Eckzähne" → "Schneidezähne" (fundamental falsch)
-- Dinosaurier S1 PRÜFEN: "bunte Federn" (WP nicht belegt), "passte in deine Hand" (60cm ≠ Handgröße)
-- Vulkan L3 PRÜFEN: 4 Flags — "Lahar" Herkunftsbezeichnung, Plinius "Augenzeuge", Old Faithful "düsenartig"
-
-**Word-Review-Dokumente (articles/mini_s2_v2/review/):**
-- Elefant_Review.docx (233 KB), Hund_Review.docx (322 KB), Dinosaurier_Review.docx (306 KB)
-- Vulkan_Review.docx (227 KB), Spartacus_Review.docx (201 KB), ZweiterWeltkrieg_Review.docx (216 KB)
-- Deckblatt mit Gesamt-Statistik, S1/S2/S3 je Seitenumbruch, Hero-Bild, Begleitbilder
-- KORRIGIERT: gelb hinterlegt, Originaltext durchgestrichen; PRÜFEN: roter ⚑-Hinweis
-- Boxen farbig (WOW gelb, FAKT blau, WARNUNG orange, STIMMT_DAS grün)
-- Quiz: richtige Antwort fett + grün; Lektorat-Zusammenfassung am Artikelende
-
-**Prompt+Code-Fixes + Stage-1-Dino-Redo + Stage-2-Re-Run (2026-06-17)**
-
-### Fixes (alle 4 Gruppen implementiert):
-
-**Gruppe 1 — Bildmenge + -zuordnung:**
-- Fix 1a (Prompt v3.23c): `img_index` Semantik: semantische Zuordnung, alle Sections belegen,
-  alle verfügbaren Bilder nutzen (max 2×), Range `(0–5)` → `(0 bis len(images)-1)`
-- Fix 1b (`_set_is_hero`): Primary-Artikel-Images als Hero bevorzugt (`_source == resolved_title`);
-  Fallback: bester hero_candidate aus allen. ZWK: kein Primary-hero-candidate im Vision-Pool → Anne Frank bleibt (Vision-seitig korrekt)
-
-**Gruppe 2 — Prompt-Qualität:**
-- Fix 2a (Prompt v3.23c, Fehler #40): Einleitung mit „Viele…" verboten
-- Fix 2b (Prompt v3.23c, Fehler #41): Box-Doppelung explizit verboten (kein Echo des Fließtexts)
-- Fix 2c (Prompt v3.23c, Fehler #42): Wunschdenken-Schlüsse bei schweren Themen verboten
-
-**Gruppe 3 — Vision-Filter Skelette:**
-- `image_vision_filter.py`: Museumspräparate + Fossilien prähistorischer Tiere → ab_stufe=1
-  (Dino-Skelette, Ammoniten, Mammuts = Lernexponate); beide Prompts (VISION + OPUS_RECHECK) gefixt
-
-**Gruppe 4 — Stage-1-Redo Dinosaurier + Stage-2-Re-Run:**
-- Dinosaurier Stage 1 neu: S1=28 (vorher 6), S2=0 (vorher 23) — alle Skelette jetzt ab_stufe=1
-- Stage 2 Re-Run (mini_s2_v2): 18/18 Artikel ✅
-
-### Stage-2-v2 Ergebnisse:
-| Artikel | Bilder | Wörter | Status |
-|---|---|---|---|
-| elefant_l1 | 6 | 215 | ✓ |
-| elefant_l2 | 6 | 360 | ✓ |
-| elefant_l3 | 7 | 592 | ✓ |
-| hund_l1 | 9 | 226 | ✓ |
-| hund_l2 | 12 | 395 | ✓ (war 9) |
-| hund_l3 | 12 | 552 | ✓ (war 9) |
-| dinosaurier_l1 | 10 | 204 | ✓ (war 4) |
-| dinosaurier_l2 | 10 | 332 | ✓ (war 4) |
-| dinosaurier_l3 | 9 | 494 | ✓ (war 12 Skelette) |
-| vulkan_l1 | 4 | 174 | ✓ |
-| vulkan_l2 | 5 | 398 | ✓ |
-| vulkan_l3 | 6 | 520 | ⚠ Trim (741→520), review_flag (Satz-ID gap) |
-| spartacus_l1 | 0 | 175 | ✓ (keine S1-Bilder im Pool) |
-| spartacus_l2 | 4 | 270 | ✓ |
-| spartacus_l3 | 5 | 440 | ✓ |
-| zweiter_weltkrieg_l1 | 0 | 172 | ✓ (keine S1-Bilder im Pool) |
-| zweiter_weltkrieg_l2 | 1 | 288 | ✓ |
-| zweiter_weltkrieg_l3 | 5 | 423 | ✓ |
-
-Erste Sätze: Alle ohne „Viele…" ✅ (Szene/Frage/Faktum-Einstiege)
-
-**Trim-Fixes verifiziert (2026-06-17)**
-
-hund_l3: 687W → Trim → 621W, **3 Boxen erhalten** ✅ (Prompt-Fix greift)
-zweiter_weltkrieg_l2: 257W, 1 Box, kein Trim nötig ✅
-Beide Fixes bestätigt — Stage 2 Mini-Lauf jetzt vollständig sauber.
-
-**Stage 2 Mini-Lauf: 6 Themen × 3 Stufen (2026-06-17)**
-
-18/18 Artikel vollständig generiert (gemini-3.5-flash, ThinkingLevel.MEDIUM, Batch).
-
-| | Ergebnis |
-|---|---|
-| Batch-Status | 18/18 STOP, alle angekommen ✅ |
-| source_passages | 3–12 je Artikel, alle embedded ✅ |
-| is_hero | gesetzt auf allen Artikeln mit Bildern ✅ |
-| Kosten Stage 2 | $0.60 (18 Varianten, avg $0.033/Variante) |
-| Vollkatalog-Projektion | ~$434 Stage 2 · ~$205 Stage 3 · ~$1.295 TTS = **~$1.934 gesamt** |
-
-**Wortzahl-Übersicht:**
-
-| Artikel | Wörter | Ziel | Status |
-|---|---|---|---|
-| elefant_l1 | 228 | 175–250 | ✓ |
-| elefant_l2 | 377 | 280–400 | ✓ |
-| elefant_l3 | 580 | 455–650 | ✓ |
-| hund_l1 | 256 | 175–250 | ⚠ +6 über Wmax, unter Cap |
-| hund_l2 | 410 | 280–400 | ⚠ +10 über Wmax, unter Cap |
-| hund_l3 | 698 | 455–650 | ⚠ 698 > Cap 682 (Trim 503-fail) |
-| dinosaurier_l1 | 177 | 175–250 | ✓ |
-| dinosaurier_l2 | 382 | 280–400 | ✓ |
-| dinosaurier_l3 | 515 | 455–650 | ✓ |
-| vulkan_l1 | 211 | 152–217 | ✓ |
-| vulkan_l2 | 366 | 280–400 | ✓ |
-| vulkan_l3 | 629 | 455–650 | ✓ |
-| spartacus_l1 | 124 | 128–183 | ⚠ < min, review_flag (0 Bilder, dünner Inhalt) |
-| spartacus_l2 | 289 | 205–293 | ✓ |
-| spartacus_l3 | 446 | 327–467 | ✓ |
-| zweiter_weltkrieg_l1 | 152 | 128–183 | ✓ |
-| zweiter_weltkrieg_l2 | 262 | 205–293 | ✓ (nach Trim, aber 0 Boxen) |
-| zweiter_weltkrieg_l3 | 408 | 327–467 | ✓ |
-
-**Besondere Prüfungen:**
-- **age_floor-Gate**: FEHLT in Stage 2 — Spartacus + ZWK S1 wurden generiert (kein Gate).
-  Spartacus S1: 124W, 3 Sections, 0 Bilder → dünn aber korrekt. ZWK S1: 152W, sachlich ✓
-- **ZWK Framing**: L1 BOX warnung "Das war ein großes Unrecht" ✓
-  L2: "Deutschland wurde von einer grausamen Regierung beherrscht, den Nationalsozialisten.
-  Ihr Anführer war der Diktator Adolf Hitler." ✓ — sachlich, NS klar als Unrecht
-- **Dinosaurier Bilder S1 vs S3**: S1 = 4 Bilder ab_stufe=1 (bunte Modelle),
-  S3 = 12 Bilder ab_stufe=2 (Museumsskelette) — Vision-Filter korrekt ✓
-
-**Bugs gefixt (Commit a710d54):**
-- `validate_article`: robust gegen string-options nach Trim (`isinstance`-Guard)
-- `stage2_generierung`: `validate_article` in try/except (kein Loop-Abbruch mehr)
-- `stage2_generierung`: skip-if-exists für Batch-Building (Resume-Fähigkeit)
-
-**Offene Issues nach Mini-Lauf:**
-- ~~`hund_l3` Trim-Problem~~ → gefixt, 621W 3 Boxen ✅
-- ~~`zweiter_weltkrieg_l2` 0 Boxen~~ → gefixt, neu generiert 257W 1 Box ✅
-- `age_floor`-Gate fehlt (s. Batch-Härtung)
-- `spartacus/zwk`: fehlen in `ergiebigkeit_scores.json` → Fallback-Score 6 (Großlauf-TODO)
-- `spartacus_l1`: 124W < 128W min, review_flag (dünn, 0 Bilder) — inhaltliche Frage offen
-
-**A/B-Test Thinking S3 — Vulkan (2026-06-17)**
-
-Härterer Thinking-Test auf einem S3-Artikel (Länge/Komplexität: Plattentektonik, Magma, Geysire).
-
-| | A — MEDIUM | B — kein Thinking |
-|---|---|---|
-| Dauer | 124.9 s | 28.6 s (4.4× schneller) |
-| candidates_tokens | 8 051 | 4 923 |
-| thoughts_tokens | 16 985 | 0 |
-| Wörter (meta) | 638 ≤ 650 ✅ | 625 ≤ 650 ✅ |
-| Sections | 5 | 4 |
-| Boxes | 2 (warnung + wow) | 3 (stimmt_das + wow + warnung) |
-| source_passages | 33 ✅ | 5 ⚠️ |
-
-Hauptbefund: A hat 33 source_passages vs. B nur 5 — deutlich mehr Quellenverankerung durch Thinking.
-Strukturell: A vertieft Chemie/Mineralien und Monitoring (5 Sections), B schlanker (4 Sections).
-Wortziel ≤650: beide eingehalten. Lesbare Aufbereitung: `articles/test_thinking_ab_s3/vergleich_lesbar.md`.
-→ Entscheidung Thinking-Strategie liegt bei Andreas.
-
-**Schema-Konsistenz Stage 2 (2026-06-17)**
-
-### source_passages kanonisch ins Schema (Prompt-Widerspruch behoben)
-- `_gen2_variable_suffix()` sendete eigene Wrapper-Anweisung `{article, source_passages}` die dem
-  `output_format`-Block im System-Prompt widersprach. ThinkingLevel.MEDIUM folgte dem System-Prompt,
-  kein Thinking der User-Message → instabil (A=0 SP, B=18 SP im ersten A/B-Test).
-- Fix: `source_passages` als kanonisches Feld ins Schema von `v3.23_production.md` aufgenommen.
-  `_gen2_variable_suffix()` auf `_variable_suffix()` vereinfacht (kein Wrapper mehr).
-- Verifikation (Elefant S2, synchron, 2026-06-17): A-MEDIUM sp=12 ✅ B-NOTHINK sp=? (Modell-Output
-  hatte eingebettetes Newline-Steuerzeichen im JSON → Parse-Fehler, nicht Code-Problem).
-  A-MEDIUM beweist: Widerspruch behoben.
-
-### A/B-Test ThinkingLevel.MEDIUM vs. kein Thinking (korrekt ausgewertet)
-| | A — MEDIUM | B — kein Thinking |
-|---|---|---|
-| Dauer | 75s | 23s (3.2× schneller) |
-| Wörter Fließtext | 307 | ~290 |
-| Sections | 4 | 4 |
-| Boxes | 2 (wow + stimmt_das) | 2 (wow + stimmt_das) |
-| source_passages | 12 ✅ | 18 ✅ (1. Lauf) / Parse-Fehler (2. Lauf) |
-- Beide Varianten folgen BOX_PLAN korrekt, produzieren vollständige Artikel.
-- Frühere "0 Boxes"-Meldung war Parse-Script-Bug (art['boxes'] statt sections[].boxes[]).
-- temp/_read_ab.py korrigiert: section_role/heading, boxes aus sections[].boxes[] aggregiert.
-
-### Quiz + stimmt_das Box: Schema-Mismatch App↔Prompt (OFFEN, noch nicht gefixt)
-Prompt/Modell generieren — App-Parser erwartet:
-- `quiz.questions[x].text` → App liest `j['question']` → Quizfragen LEER in App ❌
-- `boxes[x].reveal_text` → App liest `j['explanation']` → stimmt_das-Auflösung LEER ❌
-- `boxes[x].reveal_mode: "auto"` (String) → App: `j['reveal_mode'] == true` → immer false ❌
-- tts_compose.py liest korrekt `reveal_text` → ALIGNED mit Prompt.
-ENTSCHEIDUNG OFFEN: Prompt anpassen (`text`→`question`, `reveal_text`→`explanation`) ODER
-App-Dart anpassen (wf_article.dart) — tts_compose.py würde bei Prompt-Änderung brechen.
-Empfehlung: App-Dart fixen (ein File, tts_compose.py bleibt unangetastet).
-
-**Mistral-Modellvergleich Elefant S2 (2026-06-16)**
-
-`temp/mistral_test_elefant_s2.py` — synchroner Vergleichstest vs. Gemini-Produktionspfad.
-Gleicher System-Prompt v3.23b, gleiche Quelltexte (Stage-1-Checkpoint), gleicher User-Message-Aufbau.
-
-### mistral-large-latest (mistral-large-3, $2/$6 pro 1M)
-- finish_reason: stop ✅, Dauer 145s, Input=70.098 / Output=7.296 Tokens, Kosten $0.184
-- Wortzahl: **574 / Ziel 280–400** (43% über Deckel) — Prompt-Tuning fehlt für Mistral
-- Schema-Abweichungen (3, alle fixbar per Post-Processing):
-  - `box.type` statt `box.box_type` (App-Parser bricht)
-  - `quiz` als `{"questions":[...]}` statt flaches Array
-  - Box-Key `warnung` statt `warn`
-- Inhalt: sehr gut — Kindwelt-Brücken (Kühlschrank, Wasserflaschen, Ventilator), gute stimmt_das-Box (Mäuse-Mythos), 25 source_passages mit echten WP-Zitaten, S2-Register flüssig
-- Artikel gespeichert: `articles/test_modelcompare2/mistral-large-3_elefant_s2.json`
-
-### mistral-medium-latest (mistral-medium-3.5, $0.40/$2 pro 1M) — 3-Topic-Test (2026-06-16)
-- Script: `temp/mistral_medium_3topics_s2.py` — Elefant, Vulkan, Indianer jeweils S2
-- **ALLE 3 TOPICS: 429 Rate-Limit** — 5 Retries × 15 Min je Topic, alle erschöpft
-- Rate-Limit persistiert 2h15min+ nach Large-Call (21:31–23:41+) → KEIN Stunden-Limit
-- **Diagnose: Tages- oder Monats-Kontingent des API-Keys erschöpft** (Large-Call 77K Token)
-- Timings: Elefant V1–V5 (21:31–22:31), Vulkan V1–V5 (22:36–23:36), Indianer V1+ (23:41+)
-- Indianer-Wortziel-Quelle: ergiebigkeit (280–400), primary_text 107K Zeichen, 0 Bilder, 0 Companions
-- **ECHTE URSACHE (17.06. morgens ermittelt):** Key-Tier hat **25.000 Tokens/Minute Limit**
-  - System-Prompt: ~9K Tokens + kleinste User-Message (Vulkan): ~25K Tokens = ~34K gesamt
-  - Jede Produktions-Message überschreitet das Minuten-Limit → sofort 429, unabhängig von Wartezeit
-  - Bestätigt: kleine Test-Message (21 Tokens) → 200 OK ✅ | Vulkan 34K Tokens → sofort 429 ❌
-  - `mistral-large-latest` hat offenbar separates/höheres Limit auf diesem Key-Tier
-- **Response-Header:** `x-ratelimit-limit-tokens-minute: 25000` / `x-ratelimit-limit-req-minute: 50`
-- **Schlussfolgerung:** mistral-medium-latest auf diesem Key-Tier für Produktions-Messages NICHT nutzbar
-- **Optionen:** (a) Key-Tier upgraden auf ≥100K TPM, (b) Primary-only (keine Companions) testen ~14K Token
-
-### gemini-3.5-flash
-- Weiterhin 503 UNAVAILABLE — Situation unverändert
-
-### Erkenntnisse Mistral-Integration
-- `mistralai` SDK v2.4.11 installiert (from mistralai.client.sdk import Mistral)
-- JSON-Mode: `ResponseFormat(type="json_object")` — kein strukturiertes Schema wie Gemini
-- timeout_ms=360.000 nötig (Default 60s reicht nicht für 70K Input-Token)
-- Schema-Keys weichen vom WF-Standard ab → Post-Processing-Schicht nötig bei Produktion
-- Wortzahl-Overshoot deutet auf Prompt-Tuning-Bedarf hin (Gemini-optimierter Prompt)
-- cost_tracker um Mistral-Preise erweitert (mistral-large-3, mistral-medium-3.5)
-
-**gemini_client.py: Robustes Retry (2026-06-16)**
-
-Exponentielles Backoff + Jitter für alle synchronen Gemini-Calls:
-- 503 UNAVAILABLE / 429 RESOURCE_EXHAUSTED → 5 Versuche, Wartezeiten 10/20/40/80/160s + Jitter 0-5s
-- 400 Bad Request / 404 Not Found → sofort raise, KEIN Retry
-- Logging je Retry: "503/429 bei [call_name] modell, Versuch N/5, warte Xs"
-- Finaler Fehler enthält Modellname + Versuchsanzahl + letzten Exception-Text
-- Neuer optionaler Parameter `call_name=""` für Kontext im Log
-- 14 Unit-Tests (temp/_test_retry.py), alle grün ✅
-  - 6× _is_retriable_error (503/429/quota/rate → True; 400/404 → False)
-  - 4× Retry-Verhalten (5× fail → raise; 3. Versuch OK; 429 auch retried; Backoff-Zeiten exakt)
-  - 2× No-Retry (400, 404 → 0 sleep-Calls, 1 gen-Call)
-  - 2× Fehlermeldungsqualität (Modell + Versuche im Text)
-
-Hintergrund: gemini-3.5-flash liefert persistent 503 (neues GA-Modell, serverseitige
-Überlastung, betrifft alle Nutzer). Stage-2-Batch ebenfalls blockiert (leere Responses /
-extreme Latenz). Stage-2-Diagnose offen (siehe unten).
+v3.1→v4: PRÜFEN 39→6 (−85%). Kein Artikel >1 PRÜFEN. ✅
 
 ---
 
-**Stage 2 Generierung + Opus-Cap-Fix + custom_id-Bug (2026-06-16)**
+## Gerade in Arbeit / Offen nach Priorität
 
-### Stage 2 implementiert (run_batch.py)
-- Gemini Context Cache je Thema (stable prefix via _split_grounded_user_message)
-- 3 InlinedRequests je Thema (Stufe 1/2/3), cache=NEIN (forced fallback, s.u.)
-- Variable Suffix (_gen2_variable_suffix): AGE_LEVEL + BILD-STUFEN-FILTER + WORTZIEL +
-  source_passages-Wrapper (Ausgabe als {article, source_passages})
-- Post-Processing: JSON-Parse (Wrapper-first, Fallback plain), Wortzahl-Guard (2 Trim-Pässe),
-  Box-Guard, validate_article, _set_is_hero, source_passages eingebettet, cost_tracker
+### TODO sofort: v3.23d an frischen Artikeln verifizieren
+Spartacus-l2 neu generieren (JSON-Parse-Fehler Gemini 503, trailing comma).
+Dann Stage 2 neu für Spartacus mit v3.23d → prüfen ob «gleichmäßig» verschwindet.
 
-**PRODUKTIONSKONFIGURATION Stage 2 (fix, nicht verhandelbar):**
-Modell: gemini-3.5-flash + ThinkingLevel.MEDIUM + max_output_tokens=32768.
-Thinking ist Pflicht für Artikelqualität — darf nicht zur Bug-Umgehung abgeschaltet werden.
-
-### Stage-2-Diagnose-Status (2026-06-16)
-- Elefant Durchstich Stage 1: ✅ (28 Bilder)
-- Stage 2 Batch (no-cache): nach 1,5h abgebrochen — Gemini-3.5-flash überlastet
-- Stage 2 Sync-Test: 5× 503 UNAVAILABLE — Modell für Sync-Calls nicht erreichbar
-- URSACHE: gemini-3.5-flash neu GA, serverseitige Kapazitätsengpässe
-- TODO: Sync-Test wiederholen sobald Modell stabil (Stunden bis Tage)
-
-### Opus-Recheck: OPUS_CAP=18 + Sicherheitsgarantie (run_batch.py)
-- `OPUS_CAP = max(APPEAL_TARGET.values()) + 3 = 18`
-- Sensible Themen: `data["images"] = accepted[:OPUS_CAP]` → Stage 2 nur aus Opus-geprüftem Pool
-- Nicht-sensibel: alle akzeptierten; grenzfall-Bilder (max 18) → Opus
-- Spartacus-Verifikation: 10 Bilder → Opus ✅, custom_id-Bug gefixt ✅
-
-### custom_id-Bug gefixt
-Anthropic-Batch erfordert `^[a-zA-Z0-9_-]{1,64}$`.
-Fix: `re.sub(r"[^a-zA-Z0-9_-]", "_", filename)[:41]`, Key max 63 Zeichen.
-
----
-
-## Gemini Stage-2 — offener Diagnoseschritt
-
-### ERLEDIGT
-- **Robustes Retry (gemini_client.py):** 5 Versuche, Backoff 10/20/40/80/160s + Jitter 0-5s,
-  400/404 ohne Retry, klare Fehlermeldung mit Modell + Versuchsanzahl. 14 Tests grün.
-
-### ERLEDIGT (2026-06-17)
-- Synchroner A/B-Test erfolgreich (Elefant S2): beide Varianten STOP, valider Output.
-- **BESTÄTIGT:** Batch-Schicht-Bug (leere Responses) ≠ Generierungslogik-Bug.
-- source_passages-Instabilität durch Prompt-Widerspruch erklärt und behoben.
-- A/B-Qualitätsvergleich: MEDIUM reichhaltigerer Planungsblock, ähnliche Artikelqualität.
-  Thinking-Entscheidung (MEDIUM beibehalten) bleibt Produktionskonfiguration.
-
-### BEKANNTE STAGE-2-BEFUNDE (bereits gefixt)
-- Truncation bei max_output_tokens=8192 → auf 32768 erhöht (Thinking-Tokens zählen ins Budget)
-- ThinkingLevel.MEDIUM ist Pflicht (Qualität), darf nicht zur Bug-Umgehung abgeschaltet werden —
-  nach irrtümlicher Deaktivierung wieder aktiviert
-- Context-Cache (cached_content) funktioniert NICHT in Gemini-Batch-InlinedRequests →
-  im Batch deaktiviert (Mehrkosten ~$70 Vollkatalog; Batch-Rabatt -50% bleibt Haupthebel)
-
-### Mistral-Test-Ergebnis
-Large 3 (Elefant S2): qualitativ stark, Schema-Abweichungen, 43% Wortzahl-Overshoot.
-Medium 3.5 (3 Topics): alle 429 — Key-Tier-Limit 25K Tokens/min, Produktions-Messages 34–70K → nicht nutzbar.
-→ Für Medium: Key-Tier upgraden (≥100K TPM) oder Primary-only-Test (14K Token).
-→ Für Produktion (Large): Prompt-Tuning + Post-Processing-Schicht für Schema-Keys nötig.
-
----
-
-## Gerade in Arbeit
-
-**Lektorat v2 (SILENT/KORRIGIERT/PRÜFEN) + Stage 3 vollständig (2026-06-17)** ✅
-
-18/18 Artikel mit neuem Drei-Stufen-Lektorat. Word-Review-Dokumente erstellt.
-→ Details in "Zuletzt abgeschlossen"
-
-**Quiz/stimmt_das App-Dart-Fix (2026-06-17)** ✅
-
-wf_article.dart korrigiert — drei Mismatches behoben:
-- `WfQuizQuestion.fromJson`: `j['question']` → `j['text']` (Quizfragen nicht mehr leer)
-- `WfBox.fromJson`: `j['explanation']` → `j['reveal_text']` (stimmt_das-Auflösung sichtbar)
-- `WfBox.fromJson`: `j['reveal_mode'] == true` → `j['reveal_mode'] == 'auto'` (String-Vergleich)
-tts_compose.py unverändert (liest bereits korrekt reveal_text).
-
-**Stage 2 Mini-Lauf (2026-06-17)** ✅ — 18/18 Artikel, s. oben.
-
----
-
-## Batch-Härtung VOR Großlauf (Pflicht, nicht Mini-Lauf)
-
-### 0. age_floor-Gate in Stage 2 ✅ IMPLEMENTIERT (2026-06-17)
-`run_batch.py` Stage-2-Schleife: `age_floor = int(data.get("age_floor") or 1)`
-→ `if stufe < age_floor: continue` — Tabak/Alkohol/Sucht-Themen (age_floor=2) bekommen kein S1.
-
-### 1. Batch-ID persistieren (`pending_batches.json`)
-Nach JEDEM `client.batches.create()` sofort in `out_dir/pending_batches.json` schreiben.
-
-### 2. Entkoppeltes Submit → Poll → Collect (`--resume`-Flag)
-`run_batch.py --resume` liest `pending_batches.json`, setzt Pipeline fort ohne Neueinreichen.
-
-### 3. Netzwerk-Retry beim Poll
-3 Retries mit Backoff (5s / 15s / 60s) um `client.batches.get()`.
-
-### 4. Zwischen-Checkpoint in Stage 1
-`stage1_mid_checkpoint.json` nach WP-Fetch + Kompass + Downloads (vor Vision-Submit).
-
-### 5. CACHE-TTL vs. BATCH-LATENZ (Großlauf-kritisch)
-Cache-TTL > Batch-Latenz; aktuell cache_name=None (forced) im Stage-2-Batch.
-Vor Großlauf: (a) TTL-Maximum, (b) Cache komplett weglassen, oder (c) Implicit Caching.
-
----
-
-## Offen nach Priorität
-
-### ~~Stage-2-Diagnose~~ — ERLEDIGT (2026-06-17)
-Batch-Schicht verifiziert, Mini-Lauf 18/18 erfolgreich.
-
-### ~~run_batch.py Stage 3 — LEKTORAT~~ — ERLEDIGT (2026-06-17)
-18/18 Mini-Lauf lektoriert. Ergebnisse in articles/batch_output/lektorat/.
+### TODO: Chicxulub-Krater als Dinosaurier-Companion (Stage 1)
+stage1_checkpoint.json — Companion für Dinosaurier um Chicxulub-Krater erweitern.
+Begründung: «mindestens 26 Grad» Claim hat keinen Quellbeleg (Companion fehlt).
+Nicht Teil von mini_s2_v3 — separater Stage-1-Update nötig.
 
 ### Baustein 3 — tts_produce.py (Produktions-TTS)
 compose → tagging (gemini-2.5-flash-lite) → gemini-3.1-flash-tts-preview → WAV/MP3 → R2
@@ -517,10 +105,11 @@ compose → tagging (gemini-2.5-flash-lite) → gemini-3.1-flash-tts-preview →
 ### Sonstiges
 - categories_backlog.json → categories-Array je Artikel
 - Flutter WfArticleListScreen + 3-flash-preview L3 Fix
+- Quiz/stimmt_das App-Dart-Fix (wf_article.dart) — schema mismatch noch offen
 
 ---
 
-## Pipeline-Zustand (Stand 2026-06-16)
+## Pipeline-Zustand (Stand 2026-06-17)
 
 | Baustein | Datei | Status |
 |---|---|---|

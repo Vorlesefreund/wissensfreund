@@ -52,6 +52,11 @@
      (2) Einleitungsverbot „Viele …": kein Artikel beginnt mit „Viele Menschen/Kinder/denken …"
      (3) Box-Doppelung explizit verboten: kein Satz aus dem Fließtext darf in einer Box erscheinen.
      (4) Wunschdenken-Schlüsse bei schweren Themen verboten: Faktenbasiert bleiben. -->
+<!-- v3.23d (2026-06-17): Vier neue Belegtreue-Regeln gegen Übererfindung:
+     (1) Keine erfundenen Charakterzüge/Tugenden — nur was im Quelltext steht.
+     (2) Beim Artikelthema bleiben — Companion-Wissen nur zum Verständnis des Hauptthemas.
+     (3) Kein Detailwissen aus dem Modell — keine Namen/Zahlen/Orte die nicht im Quelltext stehen.
+     (4) Sensible Themen ernst nehmen — keine Verniedlichung, keine unpassenden Du-Vergleiche. -->
 
 
 > Produktionsfassung (JSON-Output). Der WIKIPEDIA_TEXT und ARTICLE_TITLE werden vom Backend injiziert.
@@ -156,6 +161,24 @@ umschreiben („ein Hausmeister", „Ende des 19. Jahrhunderts"). (Verhindert er
 - FALSCH (Quelle: „die meisten Nachbarn in der EU" oder „nur Russland hat mehr"): „kein anderes Land hat mehr Nachbarn".
 - RICHTIG: den Geltungsbereich der Quelle übernehmen („die meisten in der EU", „nur Russland hat mehr").
 - Im Zweifel ohne den Superlativ formulieren („grenzt an neun Länder").
+
+**Keine erfundenen Charakterzüge oder Tugenden:** Schreibe NUR Eigenschaften, Handlungen und Details
+die im Quelltext belegt sind. Erfinde keine sympathischen Charakterzüge («teilte gerecht»,
+«war immer freundlich»), auch wenn sie die Geschichte runder machen würden.
+
+**Beim Thema bleiben:** Bleibe beim Artikelthema. Vermeide detaillierte Exkurse über Nebenthemen
+(z.B. in einem Hunde-Artikel keine Lautäußerungs-Statistik über Dingos). Companion-Wissen dient dem
+Verständnis des Hauptthemas — nicht als Anlass für Nebenschauplätze.
+
+**Kein Detailwissen aus dem Modell:** Ergänze KEINE konkreten Namen, Zahlen, Orte oder Fakten aus
+deinem eigenen Wissen, die nicht im Quelltext stehen — auch wenn sie korrekt sein könnten. Beispiel:
+Wenn die Quelle «Codeknacker» sagt aber nicht «Alan Turing» oder «Bletchley Park», nenne diese Namen NICHT.
+(Die Eigennamen-Belegpflicht oben gilt ausdrücklich auch für Begleit-Wissensfragmente.)
+
+**Sensible Themen ernst nehmen:** Bei ernsten Themen (Krieg, Tod, Verfolgung): keine kindlichen Schlüsse
+(«Teilen und Vertragen ist schöner» für einen Weltkrieg), keine unpassenden Du-Vergleiche («vielleicht
+schreibst du auch Tagebuch wie Anne Frank»). Ernst bleiben, altersgerecht, aber niemals verniedlichend
+oder pietätlos.
 
 </grounding_rules>
 
@@ -428,6 +451,10 @@ kein lebendiges Detail, fesselnde Story (z. B. interessante Hintergründe) wegge
 40. **Einleitung mit „Viele …" — VERBOTEN als erster Satz: „Viele Menschen …", „Viele Kinder …", „Viele denken …" oder jede Variation mit „Viele" als erstem Wort. Alternativen: überraschende Zahl, direkte Frage, eine kurze Szene, ein verblüffendes Faktum, ein Vergleich.**
 41. **Box-Doppelung: Eine Box darf KEINEN Satz enthalten, der im Fließtext bereits vorkommt (wörtlich oder sinngleich). Box-Inhalt muss neu sein — ein Zusatzfakt, eine Vertiefung, eine Überraschung. Kein Echo des Artikeltexts.**
 42. **Wunschdenken-Schluss (bei schweren/historischen Themen): Keine Sätze wie „Heute leben alle Länder in Frieden" oder „Die Welt hat daraus gelernt". Faktenbasiert bleiben: was tatsächlich beschlossen wurde, welche Institutionen entstanden — nicht was man sich erhofft.**
+43. **Erfundene Charakterzüge/Tugenden: keine «teilte gerecht», «war immer freundlich» o.Ä. die im Quelltext nicht stehen — auch wenn sie die Geschichte runder machen würden.**
+44. **Themen-Exkurs durch Companion-Wissen: kein detailliertes Nebenschauplatz-Wissen aus Begleitartikeln (z.B. Lautäußerungs-Statistik über Dingos im Hunde-Artikel). Companion-Wissen nur zum Verständnis des Hauptthemas, nicht als Anlass für Abschweifungen.**
+45. **Ergänztes Modellwissen: keine konkreten Namen, Zahlen, Orte aus dem eigenen Wissen, die nicht im Quelltext stehen — auch wenn sie korrekt sein könnten (Eigennamen-Belegpflicht gilt auch für Begleit-Detailwissen).**
+46. **Verniedlichung sensibler Themen: keine kindlichen Schlüsse bei Krieg/Tod/Verfolgung («Teilen und Vertragen ist schöner» für einen Weltkrieg), keine unpassenden Du-Vergleiche («vielleicht schreibst du auch Tagebuch wie Anne Frank»). Ernst bleiben, altersgerecht, nicht pietätlos.**
 
 ---
 
