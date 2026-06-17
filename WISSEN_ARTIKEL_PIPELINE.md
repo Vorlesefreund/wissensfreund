@@ -593,3 +593,26 @@ dublette_von / notiz`.
 Nachgelagert (Skript): Cross-Gebiet-Merge + Dedup + Round-Robin-Reihenfolge + erste 500 aus
 `leuchtturm`-Themen → Export Excel-Freigabeliste → `eignung_verdicts.json` + Produktionskatalog.
 Kleinstädte (> 10 000 EW, ohne Bedeutung) vorerst ausgenommen — separater späterer Lauf.
+
+---
+
+## Lektorat (Stage 3)
+
+### LEKTORAT-DESIGNPRINZIP (nicht verhandelbar)
+
+Das Lektorat arbeitet selbstständig. Andreas macht KEINE vollständige Artikel-Review. Er setzt
+maximal ein Häkchen bei wenigen, echten Grenzfällen. Die PRÜFEN-Quote muss nahe Null sein —
+nur bei echter, fundamentaler Unsicherheit wo eine falsche Auto-Korrektur schlimmer wäre als
+gar keine. In allen anderen Fällen entscheidet das Lektorat selbst: entweder SILENT
+(auto-korrigiert, still) oder KORRIGIERT (auto-korrigiert, sichtbar markiert). PRÜFEN ist die
+absolute Ausnahme, nicht die Regel. Eine PRÜFEN-Quote von 71% bedeutet, das Lektorat hat versagt.
+
+### Drei Korrektur-Stufen (v3.1)
+
+| Stufe | Bedeutung | Wann |
+|---|---|---|
+| SILENT | Auto-korrigiert, im Artikel unsichtbar | Klare Fehler ohne Leser-Relevanz |
+| KORRIGIERT | Auto-korrigiert, im Review markiert | Sichtbare Änderung am Inhalt |
+| PRÜFEN | Nur flaggen, kein Auto-Fix | Echte fundamentale Unsicherheit |
+
+Architektur + Großlauf-Strategie: → `scripts/WISSEN_PIPELINE_PRODUKTION.md`, Abschnitt Lektorat.

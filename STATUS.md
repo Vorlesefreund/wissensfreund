@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T16:49:17Z -->
+<!-- updated: 2026-06-17T15:26:15Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -26,6 +26,14 @@ Kosten: $0.232 (18 Requests Ø $0.013, cache_create=976.604 / cache_read=199.561
 Vollkatalog-Projektion Stage 3: ~$168 (update von $205, kompaktere Outputs)
 
 Word-Dokumente: articles/mini_lektorat_v3/review/ (6 × .docx, 201–321 KB, Bilder eingebettet)
+
+> **LEKTORAT-DESIGNPRINZIP (nicht verhandelbar):**
+> Das Lektorat arbeitet selbstständig. Andreas macht KEINE vollständige Artikel-Review. Er setzt
+> maximal ein Häkchen bei wenigen, echten Grenzfällen. Die PRÜFEN-Quote muss nahe Null sein —
+> nur bei echter, fundamentaler Unsicherheit wo eine falsche Auto-Korrektur schlimmer wäre als
+> gar keine. In allen anderen Fällen entscheidet das Lektorat selbst: entweder SILENT
+> (auto-korrigiert, still) oder KORRIGIERT (auto-korrigiert, sichtbar markiert). PRÜFEN ist die
+> absolute Ausnahme, nicht die Regel. Eine PRÜFEN-Quote von 71% bedeutet, das Lektorat hat versagt.
 
 **Lektorat v3.1: Abgeleitete Vergleiche schützen + Verifikationstest (2026-06-17)**
 

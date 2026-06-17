@@ -263,6 +263,15 @@ Für Stage 2 (Generierung):
 
 ## Lektorat — Architektur + Großlauf-Strategie
 
+### LEKTORAT-DESIGNPRINZIP (nicht verhandelbar)
+
+Das Lektorat arbeitet selbstständig. Andreas macht KEINE vollständige Artikel-Review. Er setzt
+maximal ein Häkchen bei wenigen, echten Grenzfällen. Die PRÜFEN-Quote muss nahe Null sein —
+nur bei echter, fundamentaler Unsicherheit wo eine falsche Auto-Korrektur schlimmer wäre als
+gar keine. In allen anderen Fällen entscheidet das Lektorat selbst: entweder SILENT
+(auto-korrigiert, still) oder KORRIGIERT (auto-korrigiert, sichtbar markiert). PRÜFEN ist die
+absolute Ausnahme, nicht die Regel. Eine PRÜFEN-Quote von 71% bedeutet, das Lektorat hat versagt.
+
 ### Was das Lektorat prüft (Sicherheitsnetz-Prinzip)
 
 Das Lektorat (claude-sonnet-4-6) erhält den **kompletten Wikipedia-Volltext** (Primary ungekürzt
