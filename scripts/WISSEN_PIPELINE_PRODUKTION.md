@@ -258,3 +258,64 @@ Für Stage 2 (Generierung):
 - resolve_lemma() macht Gemini-Call auch im dry-run (Flash-Doppelbedeutungs-Check)
 - Vision-Batch: Bilder als Base64 inline → Chunk-Größe 500 für Speicherschutz
 - Stage 2-4 noch nicht implementiert (Gerüst mit TODOs)
+
+---
+
+## Lektorat — Architektur + Großlauf-Strategie
+
+### Was das Lektorat prüft (Sicherheitsnetz-Prinzip)
+
+Das Lektorat (claude-sonnet-4-6) erhält den **kompletten Wikipedia-Volltext** (Primary ungekürzt
++ Companions je bis 30.000 Zeichen) und prüft **alle faktischen Aussagen des Artikels** dagegen —
+nicht nur die gelieferten source_passages.
+
+Warum Volltext und nicht passage-only:
+- Das Lektorat iteriert über **Artikel-Behauptungen**, nicht über Passagen.
+- passage-only würde korrekte Fakten, die im Volltext belegt sind, aber keine source_passage
+  haben, als NICHT_BELEGT flaggen → massiver False-Positive-Regen, Lektorat unbrauchbar.
+- Der Volltext verhindert zudem, dass das Modell implizit Trainingswissen einsetzt,
+  um Lücken zu füllen: ein dichter Wikipedia-Referenztext gibt dem Modell einen
+  vollständigen, unzweideutigen Bewertungsrahmen.
+- source_passages sind ausschließlich für App-Transparenz (Quellennachweis im UI,
+  Review-HTML) — sie spielen für die Lektorat-Kosten oder -Qualität keine Rolle.
+
+**Diagnose S3-Vulkan-Test:** Generator ohne Thinking erfand "Olympus Mons, 22 km,
+dreimal so hoch wie der Mount Everest" (Trainingswissen — nicht in geladenen Quellen).
+Das Lektorat mit Volltext erkennt diesen Satz korrekt als NICHT_BELEGT. Ein passage-only-
+Lektorat hätte denselben Satz formal auch als NICHT_BELEGT erkannt (keine Passage deckt ihn),
+wäre aber bei den ~20 anderen korrekten, aber nicht gelisteten Behauptungen überflutet.
+
+### LEKTORAT GROSSLAUF-STRATEGIE (entschieden, 2026-06-17)
+
+- Wenige große Anthropic-Batches (z.B. ~5–10 Jobs à ~1500 Requests), NICHT
+  4346 Mini-Batches pro Thema. Grund: 4346 Jobs = unpraktikabler
+  Orchestrierungs-Overhead (~36h reine Verwaltung) + viele Fehlerquellen.
+- Prompt-Caching (cache_control bleibt im Code, schadet nicht): wird im großen
+  Batch NICHT zuverlässig greifen (5-Min-TTL vs. unbekannte Verarbeitungs-
+  reihenfolge). Bewusst akzeptiert. Lektorat-Kosten ~$610 statt ~$375 möglich.
+- KOSTENLOSE ABSICHERUNG: Requests trotzdem so anordnen, dass die 3 Stufen
+  eines Themas BENACHBART im Batch liegen (S1, S2, S3 hintereinander). Das kostet
+  nichts und gibt Cache-Hits eine Chance, FALLS Anthropic grob in Reihenfolge
+  arbeitet — aber wir verlassen uns nicht darauf.
+- Echte Lektorat-Kosten erst nach Mini-Lauf (6 Themen) bekannt; $610/$375 sind
+  Hochrechnung aus EINEM reichen Thema (Vulkan). Nach Mini-Lauf verifizieren.
+- cache_read-Tokens im Mini-Lauf-Usage-Report prüfen: greift der Cache
+  zufällig doch? Dann ist die Entscheidung gratis abgesichert.
+
+### Kosten-Steckbrief (Schätzung, Stand 2026-06-17)
+
+| Szenario | Tokens/Thema | Preis/Thema | Vollkatalog |
+|---|---|---|---|
+| Vulkan (reichstes Thema, 4 Companions) | ~25k Input, ~1.5k Output | ~$0,14 | ~$610 |
+| Typisches Thema (2 Companions) | ~15k Input, ~1.5k Output | ~$0,09 | ~$390 |
+| Mit Cache-Hits (optimistisch) | — | ~$0,09 | ~$375 |
+
+Preisbasis: claude-sonnet-4-6 Batch ($1,50/1M Input, $7,50/1M Output).
+Echte Zahlen nach Mini-Lauf (6 Themen × 3 Stufen = 18 Calls).
+
+### Companion-Cap (30.000 Zeichen)
+
+Nicht gefahrlos kürzbar: Im Vesuv-Companion liegt kritische Sicherheitsinformation
+("1 Mio. Einwohner Rote Zone") bei Zeichen-Position ~21.000, "50.000 Häuser illegal"
+bei ~22.500 — beides knapp innerhalb der 30k-Grenze. 20k-Cap würde diese Facts verlieren.
+Vor Cap-Änderung companion-spezifische Größen messen.
