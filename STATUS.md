@@ -1,12 +1,47 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T12:07:53Z -->
+<!-- updated: 2026-06-17T12:21:25Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Prompt+Code-Fixes + Stage-1-Dino-Redo + Stage-2-Re-Run (2026-06-17)** ← AKTUELL
+**Stage 3 Mini-Lauf v2 + Word-Review-Dokumente (2026-06-17)** ← AKTUELL
+
+### Stage 3 — 18/18 Artikel lektoriert (v2: SILENT/KORRIGIERT/PRÜFEN)
+
+batch_id: msgbatch_01NBiusyosd5ivohN8ahzdNy (15 Artikel), Elefant aus lektorat_test.
+
+| Thema | S1 | S2 | S3 |
+|---|---|---|---|
+| **Elefant** | S=0 K=0 P=2 | S=2 K=0 P=1 | S=2 K=5 P=2 |
+| **Hund** | S=1 K=1 P=1 | S=2 K=2 P=2 | S=3 K=3 P=2 |
+| **Dinosaurier** | S=0 K=0 P=3 | S=0 K=0 P=2 | S=4 K=2 P=3 |
+| **Vulkan** | S=0 K=0 P=2 | S=2 K=2 P=3 | S=2 K=3 P=4 |
+| **Spartacus** | S=0 K=0 P=2 | S=0 K=1 P=1 | S=2 K=1 P=3 |
+| **ZWK** | S=0 K=0 P=2 | S=2 K=0 P=2 | S=4 K=1 P=2 |
+
+Kosten Stage 3: $0.236 (15 Requests Ø $0.016/Artikel, 50% Batch-Rabatt)
+cache: create=617.357 / read=312.370 Tokens (themenweise Sortierung greift)
+auto_angewandt: ALLE KORRIGIERT direkt eingebaut ✅
+
+**Auffälligste Korrekturen:**
+- Hund S2 KORRIGIERT: "Irish Wolfhound fast einen Meter" → "bis zu 95 cm" (WP-Maßzahl)
+- Hund S2 KORRIGIERT: "Barry rettete so viele" → "Barry soll zwischen 1800 und 1812 über 40 Menschen gerettet haben" (WP-Zahl)
+- Elefant S3 KORRIGIERT: "Zwergmammute auf abgelegener Insel" → "Wollhaarmammute auf der Wrangelinsel" (korrekte Art + Inselname)
+- Elefant S3 KORRIGIERT: BOX "Eckzähne" → "Schneidezähne" (fundamental falsch)
+- Dinosaurier S1 PRÜFEN: "bunte Federn" (WP nicht belegt), "passte in deine Hand" (60cm ≠ Handgröße)
+- Vulkan L3 PRÜFEN: 4 Flags — "Lahar" Herkunftsbezeichnung, Plinius "Augenzeuge", Old Faithful "düsenartig"
+
+**Word-Review-Dokumente (articles/mini_s2_v2/review/):**
+- Elefant_Review.docx (233 KB), Hund_Review.docx (322 KB), Dinosaurier_Review.docx (306 KB)
+- Vulkan_Review.docx (227 KB), Spartacus_Review.docx (201 KB), ZweiterWeltkrieg_Review.docx (216 KB)
+- Deckblatt mit Gesamt-Statistik, S1/S2/S3 je Seitenumbruch, Hero-Bild, Begleitbilder
+- KORRIGIERT: gelb hinterlegt, Originaltext durchgestrichen; PRÜFEN: roter ⚑-Hinweis
+- Boxen farbig (WOW gelb, FAKT blau, WARNUNG orange, STIMMT_DAS grün)
+- Quiz: richtige Antwort fett + grün; Lektorat-Zusammenfassung am Artikelende
+
+**Prompt+Code-Fixes + Stage-1-Dino-Redo + Stage-2-Re-Run (2026-06-17)**
 
 ### Fixes (alle 4 Gruppen implementiert):
 
@@ -293,34 +328,10 @@ Medium 3.5 (3 Topics): alle 429 — Key-Tier-Limit 25K Tokens/min, Produktions-M
 
 ## Gerade in Arbeit
 
-**Lektorat v2 (SILENT/KORRIGIERT/PRÜFEN) — Test Elefant (2026-06-17)** ✅
+**Lektorat v2 (SILENT/KORRIGIERT/PRÜFEN) + Stage 3 vollständig (2026-06-17)** ✅
 
-Drei-Stufen-Lektorat implementiert + getestet. Elefant alle 3 Stufen erfolgreich.
-batch_id: msgbatch_01WYhP5p8ibnV6oh66LcM3H1 — persistiert in pending_batches.json.
-
-| Artikel | gesamt | SILENT | KORRIGIERT | PRÜFEN |
-|---|---|---|---|---|
-| elefant_l1 | 2 | 0 | 0 | 2 |
-| elefant_l2 | 3 | 2 | 0 | 1 |
-| elefant_l3 | 9 | 2 | 5 | 2 |
-
-Kosten: in=3.203 / out=2.681 / cache_create=74.178 / cache_read=148.356 Tokens.
-Vollkatalog-Projektion (neue Architektur): wird nach Erst-Lauf aller 18 Artikel ermittelt.
-
-**Architektur-Änderungen (lektorat_common.py + run_batch.py):**
-- SILENT: Modell korrigiert direkt, kompakte 1-Zeiler-Log, keine manuelle Prüfung
-- KORRIGIERT (Standard bei Unsicherheit): Modell korrigiert, zeigt Vorher/Nachher + WP-Zitat
-- PRÜFEN: echte Unsicherheit, Artikel NICHT geändert, nur Flag → `review_flag=true`
-- `parse_lektorat_v2()` + `annotate_article_lektorat_v2()` neu in lektorat_common.py
-- Backward-Compat: `PROBLEMATIC_VERDICTS` als Alias zurück (generate_grounded.py-Import)
-
-**Exemplarischer Pruefbericht Elefant S3** (9 Einträge):
-- SILENT 2×: Evolutionssatz Oberlippe-Nase (Formulierung), Rüsseltier-Ursprung nördl.Afrika
-- KORRIGIERT 5×: Stoßzähne-Beschreibung (korrekt: Schneidezähne), Box-Text "Eckzähne"→"Schneidezähne",
-  Nervenzellen-Box (Kleinhirn-Anteil), "Zwergmammute auf abg.Insel"→"Wollhaarmammute auf Wrangelinsel",
-  IUCN-Box (präzise Einstufung beider Arten)
-- PRÜFEN 2×: Fußsohlen-Infraschall (Quellen belegen Erdreichübertragung, nicht explizit Fußsohlen),
-  kleine Ohren "gegen Kälte" (Funktion nicht direkt belegt)
+18/18 Artikel mit neuem Drei-Stufen-Lektorat. Word-Review-Dokumente erstellt.
+→ Details in "Zuletzt abgeschlossen"
 
 **Quiz/stimmt_das App-Dart-Fix (2026-06-17)** ✅
 
