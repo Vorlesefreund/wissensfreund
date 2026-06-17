@@ -106,8 +106,8 @@ from lektorat_common import (  # noqa: E402
     LEKTORAT_MODEL,
     COMPANION_CHAR_CAP,
     build_lektorat_parts,
-    parse_lektorat_json,
-    annotate_article_lektorat,
+    parse_lektorat_v2,
+    annotate_article_lektorat_v2,
     build_grounded_sources_block,
 )
 import gemini_client  # noqa: E402
@@ -1342,33 +1342,32 @@ def stage3_lektorat(
             cached_tok=cache_read,
         )
 
-        # Verdikts parsen
+        # Lektorat-Ergebnis parsen (V2: SILENT/KORRIGIERT/PRÜFEN)
         try:
-            verdicts = parse_lektorat_json(raw)
+            lektorat_result = parse_lektorat_v2(raw)
         except Exception as exc:
             log.warning("  [%s] JSON-Parse fehlgeschlagen: %s — pruefbericht leer", rid, exc)
-            verdicts = []
+            lektorat_result = {"corrections": [], "pruefen": []}
 
         art = art_by_id.get(rid)
         if art is None:
             log.warning("  [%s] Artikel nicht im Speicher", rid)
             continue
 
-        # Prüfbericht einbauen + AUTO-Korrekturen anwenden
-        primary_text = topics_data.get(thema, {}).get("primary_text", "")
-        annotate_article_lektorat(art, verdicts, primary_text)
+        # Korrekturen einbauen + Prüfbericht schreiben
+        annotate_article_lektorat_v2(
+            art, lektorat_result, thema=thema, stufe=f"S{stufe_num}"
+        )
 
-        pb      = art.get("pruefbericht", {})
-        summary = pb.get("summary", {})
-        n_bel   = sum(1 for f in pb.get("findings", []) if f.get("verdikt") == "BELEGT")
-        n_prob  = summary.get("vorschlag_offen", 0) + summary.get("eskaliert", 0)
+        pb         = art.get("pruefbericht", {})
+        n_silent   = pb.get("n_silent", 0)
+        n_korr     = pb.get("n_korrigiert", 0)
+        n_pr       = pb.get("n_pruefen", 0)
+        n_total    = len(lektorat_result.get("corrections", [])) + len(lektorat_result.get("pruefen", []))
         log.info(
-            "  [%s] %d Verdikts | belegt=%d auto=%d vorschlag=%d eskaliert=%d%s",
-            rid, len(verdicts), n_bel,
-            summary.get("auto_angewandt", 0),
-            summary.get("vorschlag_offen", 0),
-            summary.get("eskaliert", 0),
-            " ⚠ review_flag" if n_prob > 0 else "",
+            "  [%s] %d Einträge | silent=%d korrigiert=%d prüfen=%d%s",
+            rid, n_total, n_silent, n_korr, n_pr,
+            " ⚠ review_flag" if n_pr > 0 else "",
         )
 
         # Als lektorat_{id}.json speichern

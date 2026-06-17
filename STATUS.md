@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T11:54:30Z -->
+<!-- updated: 2026-06-17T12:07:53Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -293,45 +293,34 @@ Medium 3.5 (3 Topics): alle 429 — Key-Tier-Limit 25K Tokens/min, Produktions-M
 
 ## Gerade in Arbeit
 
-**Stage 3 Lektorat Mini-Lauf (2026-06-17)** ✅
+**Lektorat v2 (SILENT/KORRIGIERT/PRÜFEN) — Test Elefant (2026-06-17)** ✅
 
-18/18 Artikel lektoriert (Anthropic Message Batch, claude-sonnet-4-6, ~2.5 Min).
-batch_id: msgbatch_01RUc2TRBMUbL7UK91aVGy58 — persistiert in pending_batches.json.
+Drei-Stufen-Lektorat implementiert + getestet. Elefant alle 3 Stufen erfolgreich.
+batch_id: msgbatch_01WYhP5p8ibnV6oh66LcM3H1 — persistiert in pending_batches.json.
 
-| Artikel | Verdikts | belegt | vorschlag | eskaliert |
+| Artikel | gesamt | SILENT | KORRIGIERT | PRÜFEN |
 |---|---|---|---|---|
-| elefant_l1 | 28 | 25 | 2 | 1 |
-| elefant_l2 | 18 | 18 | 0 | 0 ✓ |
-| elefant_l3 | 37 | 35 | 2 | 0 |
-| hund_l1 | 22 | 17 | 1 | 4 ⚠ |
-| hund_l2 | 27 | 26 | 1 | 0 |
-| hund_l3 | 34 | 29 | 5 | 0 |
-| dinosaurier_l1 | 22 | 15 | 6 | 1 |
-| dinosaurier_l2 | 26 | 20 | 6 | 0 |
-| dinosaurier_l3 | 44 | 43 | 1 | 0 |
-| vulkan_l1 | 23 | 19 | 2 | 2 |
-| vulkan_l2 | 23 | 16 | 5 | 2 |
-| vulkan_l3 | 37 | 34 | 2 | 1 |
-| spartacus_l1 | 10 | 7 | 3 | 0 |
-| spartacus_l2 | 22 | 20 | 2 | 0 |
-| spartacus_l3 | 27 | 20 | 5 | 2 |
-| zweiter_weltkrieg_l1 | 14 | 10 | 3 | 1 |
-| zweiter_weltkrieg_l2 | 14 | 13 | 1 | 0 |
-| zweiter_weltkrieg_l3 | 23 | 19 | 1 | 3 |
+| elefant_l1 | 2 | 0 | 0 | 2 |
+| elefant_l2 | 3 | 2 | 0 | 1 |
+| elefant_l3 | 9 | 2 | 5 | 2 |
 
-Kosten Stage 3: $1.255 (18 Requests, avg $0.070/Artikel)
-Vollkatalog-Projektion: ~$913 Stage 3 allein
-cache_read: 74.258 Tokens (elefant_l3 — zufällig gecached); create=1.110.973.
-auto_angewandt=0 (Modell zieht VORSCHLAG vor AUTO; mechanischer Beleg-Check streng)
+Kosten: in=3.203 / out=2.681 / cache_create=74.178 / cache_read=148.356 Tokens.
+Vollkatalog-Projektion (neue Architektur): wird nach Erst-Lauf aller 18 Artikel ermittelt.
 
-**Wichtigste Funde:**
-- **hund_l1** (4 Eskl.): "Nase immer kühl+feucht" (immer nicht belegt), "Augen nach 2 Wochen", "Schwanzwedeln aus Freude", "weiche Bälle" — alle aus Trainingswissen, nicht in WP-Quellen
-- **zwk_l3** (3 Eskl.): "verlustreichste Katastrophe der Menschheitsgeschichte" (Superlativ nicht in WP), "Generäle hielten für absolut sicher" (nicht belegt), "23 Nullen" für Enigma (nicht in WP)
-- **vulkan_l3**: "Old Faithful berühmteste düsenartige Geysir der Welt" (Superlativ unbelegt), Plinius als "Augenzeuge" (WP: nur mittelbar)
-- **dinosaurier_l1** (6 Vorschl.): "bunte Federn", "passte in deine Hand" (60 cm ≠ Handgröße), "alle legten Eier in gemütliche Nester", "Sie beschützten ihre Babys" (nicht alle Saurier), "kleine Vögel" (ALLE Vögel stammen ab)
-- **Kein Olympus-Mons-Fall** in Vulkan (kein Mars-Superlativ in den Artikeln)
+**Architektur-Änderungen (lektorat_common.py + run_batch.py):**
+- SILENT: Modell korrigiert direkt, kompakte 1-Zeiler-Log, keine manuelle Prüfung
+- KORRIGIERT (Standard bei Unsicherheit): Modell korrigiert, zeigt Vorher/Nachher + WP-Zitat
+- PRÜFEN: echte Unsicherheit, Artikel NICHT geändert, nur Flag → `review_flag=true`
+- `parse_lektorat_v2()` + `annotate_article_lektorat_v2()` neu in lektorat_common.py
+- Backward-Compat: `PROBLEMATIC_VERDICTS` als Alias zurück (generate_grounded.py-Import)
 
-Output: articles/batch_output/lektorat/ (18 × lektorat_{id}.json)
+**Exemplarischer Pruefbericht Elefant S3** (9 Einträge):
+- SILENT 2×: Evolutionssatz Oberlippe-Nase (Formulierung), Rüsseltier-Ursprung nördl.Afrika
+- KORRIGIERT 5×: Stoßzähne-Beschreibung (korrekt: Schneidezähne), Box-Text "Eckzähne"→"Schneidezähne",
+  Nervenzellen-Box (Kleinhirn-Anteil), "Zwergmammute auf abg.Insel"→"Wollhaarmammute auf Wrangelinsel",
+  IUCN-Box (präzise Einstufung beider Arten)
+- PRÜFEN 2×: Fußsohlen-Infraschall (Quellen belegen Erdreichübertragung, nicht explizit Fußsohlen),
+  kleine Ohren "gegen Kälte" (Funktion nicht direkt belegt)
 
 **Quiz/stimmt_das App-Dart-Fix (2026-06-17)** ✅
 

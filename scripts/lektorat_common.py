@@ -17,59 +17,69 @@ log = logging.getLogger(__name__)
 
 COMPANION_CHAR_CAP   = 30_000          # positional slice je Companion-Text
 LEKTORAT_MODEL       = "claude-sonnet-4-6"
+TIER_VALUES_V2       = {"SILENT", "KORRIGIERT", "PRÜFEN"}
+# Aliase für Backward-Compat (generate_grounded.py, ältere Skripte)
 PROBLEMATIC_VERDICTS = {"NICHT_BELEGT", "ÜBERZOGEN", "WIDERSPRUCH"}
 TIER_VALUES          = {"AUTO", "VORSCHLAG", "ESKALATION"}
 
 LEKTORAT_SYSTEM = (
-    "Du bist Faktenprüfer und Korrektor für Kinderlexikon-Artikel. "
+    "Du bist Korrektor für Kinderlexikon-Artikel (Wissensfreund). "
     "Prüfe alle faktischen Aussagen AUSSCHLIESSLICH gegen die beigefügten "
-    "Quell-Volltexte — niemals aus Vorwissen.\n\n"
+    "Wikipedia-Volltexte — niemals aus eigenem Vorwissen.\n\n"
 
-    "FAERBUNGS-REGEL — diese Formulierungen NICHT flaggen (= BELEGT):\n"
-    "  · Illustrative Vergleiche belegter Zahlen/Größen: «56 m ≈ 18-stöckiges Hochhaus», "
-    "«so groß wie ein Haus», «so hoch wie Bäume» (bei aus Baumstämmen geschnitzten Pfählen)\n"
-    "  · Mildes sprachliches/emotionales Kolorit («stolz», «wunderschön»), "
-    "das den Sachverhalt nicht ändert\n"
-    "  · Register-gerechte Vereinfachungen, die im Kern stimmen "
-    "(z.B. «runde Zelte» für Tipis in Stufe 1)\n"
-    "NUR flaggen bei: (a) neuer, nicht belegter Sachaussage (Detail/Pflanze/Ereignis), "
-    "ODER (b) Zahl/Superlativ/Größenordnung, die Quelle nicht stützt oder widerspricht "
-    "(«der höchste der Welt» wo Quelle «einer der höchsten» sagt). "
-    "Idealisierung/NPOV-Verstoß: ESKALATION.\n"
-    "BELEGT-BEDINGUNG: Der genaue Sachverhalt muss DIREKT in der Quelle stehen — "
-    "nicht nur das Thema. «Ist impliziert» oder «lässt sich schließen» reicht NICHT aus.\n"
-    "VERBUND-REGEL: Enthält ein Satz zwei Sachverhalte (A UND B), müssen BEIDE einzeln "
-    "direkt in den Quellen stehen. Ist B nicht direkt belegt, ist der Gesamtsatz NICHT_BELEGT.\n\n"
+    "GROUNDING-REGEL:\n"
+    "  · Der genaue Sachverhalt muss DIREKT in der Quelle stehen — nicht impliziert, nicht erschlossen.\n"
+    "  · Verbund-Satz (A UND B): beide Teilaussagen müssen direkt belegt sein.\n"
+    "  · NICHT flaggen: Illustrative Vergleiche belegter Größen («so groß wie ein Haus», "
+    "«56 m ≈ 18-stöckiges Hochhaus»); mildes Sprachkolorit («stolz», «wunderschön»); "
+    "register-gerechte Vereinfachungen die im Kern stimmen (z.B. «runde Zelte» für Tipis S1).\n"
+    "  · NUR flaggen: (a) neue unbelegte Sachaussage, (b) Zahl/Superlativ den Quelle nicht stützt "
+    "oder widerspricht («der höchste der Welt» wo Quelle «einer der höchsten» sagt).\n\n"
 
-    "FÜR JEDE AUSSAGE diese Felder liefern:\n"
-    "  claim: EXAKTER vollständiger Satz aus dem Artikel (wird per Textersatz eingebaut)\n"
-    "  verdikt: BELEGT | NICHT_BELEGT | ÜBERZOGEN | WIDERSPRUCH\n"
-    "  tier (nur bei Nicht-BELEGT):\n"
-    "    AUTO      — eindeutiger, register-sicherer Ersatz-Satz bildbar; "
-    "beleg_fuer_korrektur WÖRTLICH in Quelle auffindbar\n"
-    "    VORSCHLAG — Ersatz möglich aber Umformulierung nötig / mehrere Optionen / "
-    "Beleg-Zitat nicht exakt wörtlich\n"
-    "    ESKALATION— kein gegroundeter Ersatz möglich / Idealisierung/NPOV / "
-    "Quelle mehrdeutig / struktureller Umbau\n"
-    "  beleg_oder_begruendung: wörtliches Quellzitat bei BELEGT; kurze Begründung sonst\n"
-    "  korrektur_neu: bei AUTO/VORSCHLAG der vollständig korrigierte Satz "
-    "(gleiches Register, quellenbasiert; NIE vage abschwächen, z.B. NICHT "
-    "«so hoch wie Bäume» durch «sehr groß» ersetzen); bei BELEGT/ESKALATION leer lassen\n"
-    "  beleg_fuer_korrektur: bei AUTO/VORSCHLAG WÖRTLICHES Quellzitat als Beleg für "
-    "korrektur_neu; bei BELEGT/ESKALATION leer lassen\n\n"
+    "DREI KORREKTURSTUFEN:\n\n"
+
+    "  SILENT — stillschweigend korrigieren:\n"
+    "    Wann: Minimaler Eingriff, Beleg eindeutig. Zahl/Datum angepasst, Superlativ abgemildert, "
+    "unbelegter Nebensatz gestrichen — ohne den Satzrhythmus zu brechen.\n"
+    "    Aktion: Satz in korrektur_neu korrigieren.\n\n"
+
+    "  KORRIGIERT — Häkchen-Kontrolle (Standard-Stufe bei Unsicherheit):\n"
+    "    Wann: Substanziellerer Eingriff (Satz umformuliert, Behauptung anders gerahmt), "
+    "Wikipedia-Evidenz aber klar. Im Zweifel KORRIGIERT statt PRÜFEN.\n"
+    "    Aktion: Satz in korrektur_neu korrigieren + kurzes WP-Zitat als Beleg.\n\n"
+
+    "  PRÜFEN — nur markieren, nicht ändern:\n"
+    "    Wann: Echte Unsicherheit — Quelle widersprüchlich, Kontext fehlt, sensibler Sachverhalt, "
+    "Idealisierung/NPOV-Verstoß, struktureller Umbau nötig.\n"
+    "    Aktion: Artikel NICHT ändern. Problem und Begründung nennen.\n\n"
 
     "KORREKTIONS-PRINZIP:\n"
     "  · Gleichwertiger Ersatz: Zahl→Quell-Zahl, Superlativ→Quell-Form, "
-    "unbelegtes Detail→belegtes Pendant aus der Quelle\n"
-    "  · KEINE Abschwächung ins Vage, KEINE ersatzlose Streichung\n"
-    "  · Register wahren (Stufe 1: kindgerecht; Stufe 3: sachlich)\n\n"
+    "unbelegtes Detail→belegtes Pendant aus der Quelle.\n"
+    "  · KEINE Abschwächung ins Vage (NICHT «sehr groß» statt belegter Maßangabe).\n"
+    "  · Register wahren (S1 kindgerecht, S3 sachlich). BELEGT-Aussagen: nicht auflisten.\n\n"
 
-    "Antworte NUR mit JSON-Array:\n"
-    '[{"claim":"exakter Satz aus Artikel","verdikt":"BELEGT|NICHT_BELEGT|ÜBERZOGEN|WIDERSPRUCH",'
-    '"tier":"AUTO|VORSCHLAG|ESKALATION|","beleg_oder_begruendung":"...",'
-    '"korrektur_neu":"...","beleg_fuer_korrektur":"..."}]\n\n'
+    "Antworte NUR mit diesem JSON-Objekt:\n"
+    "{\n"
+    '  "corrections": [\n'
+    "    {\n"
+    '      "claim_original": "Exakter Satz aus dem Artikel",\n'
+    '      "korrektur_neu":  "Korrigierter Satz (quellenbasiert, gleiches Register)",\n'
+    '      "stufe":          "SILENT|KORRIGIERT",\n'
+    '      "beleg":          "Wörtliches WP-Zitat (≤25 Wörter) oder Positionsangabe"\n'
+    "    }\n"
+    "  ],\n"
+    '  "pruefen": [\n'
+    "    {\n"
+    '      "claim_original": "Exakter Satz aus dem Artikel",\n'
+    '      "problem":        "Kurze Problembeschreibung (1 Satz)",\n'
+    '      "begruendung":    "Warum PRÜFEN statt KORRIGIERT (1 Satz)"\n'
+    "    }\n"
+    "  ]\n"
+    "}\n\n"
+    "Wenn alles belegt: {\"corrections\": [], \"pruefen\": []}\n"
     "JSON-Sicherheit: Innerhalb von Feldwerten keine geraden Anführungszeichen. "
-    "Zitierte Textstellen in «\xa0» oder Apostrophe einschliessen."
+    "Zitierte Textstellen in «» einschließen."
 )
 
 # Reihenfolge der Felder im JSON (für robust extractor)
@@ -134,8 +144,8 @@ def build_lektorat_parts(article: dict, sources_block: str) -> tuple[str, str]:
     title = article.get("meta", {}).get("title", "?")
     article_task = (
         f"PRÜF-ARTIKEL (Stufe {level}, Titel: {title}):\n{article_text}\n\n"
-        "Prüfe ALLE faktischen Aussagen im Artikel gegen die deklarierten Quellen. "
-        "Liefere für jede Aussage alle sechs Felder im JSON-Array."
+        "Prüfe alle faktischen Aussagen gegen die deklarierten Quellen. "
+        "Liefere corrections (SILENT/KORRIGIERT) und pruefen-Flags im vorgegebenen JSON-Format."
     )
     return sources_block, article_task
 
@@ -321,6 +331,10 @@ def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -
                 best_score = score
                 best_loc = ("sec", si, sj)
         for bi, box in enumerate(sec.get("boxes", [])):
+            score = _jaccard(claim_text, box.get("text", ""))
+            if score > best_score:
+                best_score = score
+                best_loc = ("box_text", si, bi)
             for sj, sent in enumerate(box.get("sentences", [])):
                 score = _jaccard(claim_text, sent.get("text", ""))
                 if score > best_score:
@@ -333,6 +347,9 @@ def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -
     if best_loc[0] == "sec":
         _, si, sj = best_loc
         article["sections"][si]["sentences"][sj]["text"] = korrektur_neu
+    elif best_loc[0] == "box_text":
+        _, si, bi = best_loc
+        article["sections"][si]["boxes"][bi]["text"] = korrektur_neu
     else:
         _, si, bi, sj = best_loc
         article["sections"][si]["boxes"][bi]["sentences"][sj]["text"] = korrektur_neu
@@ -424,6 +441,117 @@ def annotate_article_lektorat(
         article.setdefault("meta", {})["review_flag"] = True
         existing = article["meta"].get("review_reason", "")
         reason   = f"lektorat: {n_v} vorschlag, {n_e} eskaliert"
+        article["meta"]["review_reason"] = (existing + "; " + reason).lstrip("; ")
+
+
+# ── V2: Parser + Annotator (SILENT / KORRIGIERT / PRÜFEN) ────────────────────
+
+def parse_lektorat_v2(raw: str) -> dict:
+    """Parst das neue Lektorat-JSON-Format: {"corrections": [...], "pruefen": [...]}."""
+    if not raw:
+        raise ValueError("Leere Antwort")
+    cleaned = re.sub(r"```[a-zA-Z]*\n?", "", raw.strip())
+    cleaned = re.sub(r"```\s*$", "", cleaned).strip()
+
+    for attempt in (cleaned, _fix_inner_quotes(cleaned)):
+        start = attempt.find("{")
+        if start == -1:
+            continue
+        try:
+            inner = _extract_balanced(attempt[start:], "{", "}")
+            obj = json.loads(inner)
+            if isinstance(obj, dict):
+                return {
+                    "corrections": obj.get("corrections", []),
+                    "pruefen":     obj.get("pruefen", []),
+                }
+        except (ValueError, json.JSONDecodeError):
+            pass
+
+    raise ValueError("Kein gültiges JSON-Objekt gefunden")
+
+
+def annotate_article_lektorat_v2(
+    article: dict,
+    lektorat_result: dict,
+    thema:  str = "",
+    stufe:  str = "",
+) -> None:
+    """Wendet SILENT+KORRIGIERT-Korrekturen an; schreibt pruefbericht ins Artikel-JSON.
+
+    review_flag = True nur bei PRÜFEN-Flags oder nicht einbaubaren Korrekturen.
+    """
+    corrections = lektorat_result.get("corrections", [])
+    pruefen_in  = lektorat_result.get("pruefen", [])
+
+    silent_lines:     list[str] = []
+    korrigiert_lines: list[str] = []
+    pruefen_lines:    list[str] = []
+
+    for c in corrections:
+        claim  = c.get("claim_original", "").strip()
+        neu    = c.get("korrektur_neu", "").strip()
+        tier   = c.get("stufe", "KORRIGIERT")
+        beleg  = c.get("beleg", "").strip()
+
+        if not claim or not neu or claim == neu:
+            continue
+
+        applied = _apply_auto_correction(article, claim, neu)
+
+        if not applied:
+            pruefen_lines.append(
+                f"«{claim[:80]}» — Einbau fehlgeschlagen (Satz nicht gefunden)"
+            )
+            continue
+
+        claim_s = claim[:70] + ("…" if len(claim) > 70 else "")
+        neu_s   = neu[:70]   + ("…" if len(neu)   > 70 else "")
+        if tier == "SILENT":
+            beleg_s = f" (WP: {beleg[:40]})" if beleg else ""
+            silent_lines.append(f"«{claim_s}» → «{neu_s}»{beleg_s}")
+        else:
+            beleg_s = f" — WP: «{beleg[:60]}»" if beleg else ""
+            korrigiert_lines.append(f"«{claim_s}» → «{neu_s}»{beleg_s}")
+
+    for p in pruefen_in:
+        claim  = p.get("claim_original", "").strip()
+        prob   = p.get("problem", "").strip()
+        beg    = p.get("begruendung", "").strip()
+        entry  = f"«{claim[:70]}» — {prob}"
+        if beg:
+            entry += f" ({beg})"
+        pruefen_lines.append(entry)
+
+    # Pruefbericht aufbauen
+    header = f"## {thema} {stufe} — Lektorat" if thema else "## Lektorat"
+    parts  = [header]
+    if silent_lines:
+        parts.append(f"### SILENT ({len(silent_lines)} Korrekturen)")
+        parts.extend(f"- {l}" for l in silent_lines)
+    if korrigiert_lines:
+        parts.append(f"### KORRIGIERT ({len(korrigiert_lines)} Korrekturen)")
+        parts.extend(f"- {l}" for l in korrigiert_lines)
+    if pruefen_lines:
+        parts.append(f"### PRÜFEN ({len(pruefen_lines)} Flags)")
+        parts.extend(f"- {l}" for l in pruefen_lines)
+    n_pr = len(pruefen_lines)
+    parts.append(
+        f"Zusammenfassung: {len(silent_lines)} silent, "
+        f"{len(korrigiert_lines)} korrigiert, {n_pr} zu prüfen."
+    )
+
+    article["pruefbericht"] = {
+        "text":         "\n".join(parts),
+        "n_silent":     len(silent_lines),
+        "n_korrigiert": len(korrigiert_lines),
+        "n_pruefen":    n_pr,
+    }
+
+    if n_pr > 0:
+        article.setdefault("meta", {})["review_flag"] = True
+        existing = article["meta"].get("review_reason", "")
+        reason   = f"lektorat: {n_pr} zu prüfen"
         article["meta"]["review_reason"] = (existing + "; " + reason).lstrip("; ")
 
 
