@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T12:21:25Z -->
+<!-- updated: 2026-06-17T12:30:00Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -24,6 +24,8 @@ batch_id: msgbatch_01NBiusyosd5ivohN8ahzdNy (15 Artikel), Elefant aus lektorat_t
 Kosten Stage 3: $0.236 (15 Requests Ø $0.016/Artikel, 50% Batch-Rabatt)
 cache: create=617.357 / read=312.370 Tokens (themenweise Sortierung greift)
 auto_angewandt: ALLE KORRIGIERT direkt eingebaut ✅
+Vollkatalog-Projektion Stage 3: ~$205 (war $913 — v2 spart 77% Output-Tokens durch
+kompaktes Format; Gesamt-Pipeline ~$1.934 statt ~$2.642)
 
 **Auffälligste Korrekturen:**
 - Hund S2 KORRIGIERT: "Irish Wolfhound fast einen Meter" → "bis zu 95 cm" (WP-Maßzahl)
@@ -104,7 +106,7 @@ Beide Fixes bestätigt — Stage 2 Mini-Lauf jetzt vollständig sauber.
 | source_passages | 3–12 je Artikel, alle embedded ✅ |
 | is_hero | gesetzt auf allen Artikeln mit Bildern ✅ |
 | Kosten Stage 2 | $0.60 (18 Varianten, avg $0.033/Variante) |
-| Vollkatalog-Projektion | ~$434 Stage 2 |
+| Vollkatalog-Projektion | ~$434 Stage 2 · ~$205 Stage 3 · ~$1.295 TTS = **~$1.934 gesamt** |
 
 **Wortzahl-Übersicht:**
 
@@ -347,18 +349,9 @@ tts_compose.py unverändert (liest bereits korrekt reveal_text).
 
 ## Batch-Härtung VOR Großlauf (Pflicht, nicht Mini-Lauf)
 
-### 0. age_floor-Gate in Stage 2 fehlt (run_batch.py) ⚠️
-Stage 2 prüft nicht ob `stufe >= age_floor` des Themas. Im Mini-Lauf irrelevant
-(alle 6 Themen haben age_floor=None/1). Im Großlauf würden Themen mit age_floor=2
-(Rauchen, Alkohol, Sucht etc.) fälschlicherweise einen S1-Artikel bekommen.
-Fix vor Großlauf: In `stage2_generierung()` jede Stufen-Iteration prüfen:
-```python
-age_floor = int(data.get("age_floor") or 1)
-if stufe < age_floor:
-    log.info("  age_floor-Gate: '%s' S%d < floor S%d — übersprungen", thema, stufe, age_floor)
-    continue
-```
-Dann für age_floor=2-Themen nur S2+S3 generieren, für age_floor=3 nur S3.
+### 0. age_floor-Gate in Stage 2 ✅ IMPLEMENTIERT (2026-06-17)
+`run_batch.py` Stage-2-Schleife: `age_floor = int(data.get("age_floor") or 1)`
+→ `if stufe < age_floor: continue` — Tabak/Alkohol/Sucht-Themen (age_floor=2) bekommen kein S1.
 
 ### 1. Batch-ID persistieren (`pending_batches.json`)
 Nach JEDEM `client.batches.create()` sofort in `out_dir/pending_batches.json` schreiben.

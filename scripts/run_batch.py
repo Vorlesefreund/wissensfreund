@@ -920,10 +920,16 @@ def stage2_generierung(
         # → immer Fallback (volles System-Prompt + volles Message im Request)
         cache_name = None
 
+        age_floor = int(data.get("age_floor") or 1)
+
         for stufe in stufen:
             article_id    = f"{slug}_l{stufe}"
             if article_id in articles:
                 continue  # bereits gespeichert — kein neuer Batch-Request
+            if stufe < age_floor:
+                log.info("  age_floor-Gate: '%s' S%d < floor S%d — übersprungen",
+                         thema, stufe, age_floor)
+                continue
             wmin, wmax, _ = wortziel_for(thema, stufe)
             images_stufe  = select_images_for_stufe(images_all, stufe, appeal)
             job           = _stage2_job(thema, data, slug, stufe)
