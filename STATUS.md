@@ -1,12 +1,32 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-17T15:26:15Z -->
+<!-- updated: 2026-06-17T15:39:08Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Zuletzt abgeschlossen
 
-**Lektorat v3.1 Vollständig-Lauf mini_lektorat_v3: 18/18 Artikel, Word-Dokumente (2026-06-17)** ← AKTUELL
+**Lektorat v4: PRÜFEN als Ausnahme (0–1/Artikel), KORRIGIERT als Standard (2026-06-17)** ← AKTUELL
+
+### Prompt-Änderungen (lektorat_common.py — LEKTORAT_SYSTEM)
+
+- SILENT: Jetzt explizite always-SILENT-Liste (Superlative, Tierverhalten, Zahlen, Kausalbrücken)
+- PRÜFEN: Auf 3 Ausnahmefälle beschränkt + "0–1 Fälle pro Artikel — NICHT 3–5" im Prompt
+- ENTSCHEIDUNGSPRINZIP: "Im Zweifel KORRIGIERT statt PRÜFEN" als Kernregel im Prompt verankert
+- PRONOMEN UND BEZÜGE: Von KORRIGIERT → SILENT (Kausalbrücken = kleine, klare Korrekturen)
+- STILISTISCHE PROBLEME: Aus PRÜFEN-Liste entfernt (gehören laut Designprinzip nicht dorthin)
+- Bug-Fix `_apply_auto_correction`: reveal_text in Boxen wird jetzt gefunden + korrigiert
+
+### Testlauf Elefant S3 + Hund S3 (synchron)
+
+| Artikel | SILENT | KORRIGIERT | PRÜFEN |
+|---|---|---|---|
+| Elefant S3 | 2 | 3 | **0** ✅ |
+| Hund S3 | 2 | 0 | **0** ✅ |
+
+Ziel (max. 1 PRÜFEN/Artikel) deutlich übertroffen. Cache greift: 75k+66k read_tokens.
+
+**Lektorat v3.1 Vollständig-Lauf mini_lektorat_v3: 18/18 Artikel, Word-Dokumente (2026-06-17)**
 
 ### Stage 3 mit Lektorat v3.1 (Kind-Perspektive + abgeleitete Vergleiche)
 

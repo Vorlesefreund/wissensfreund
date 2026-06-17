@@ -64,26 +64,43 @@ LEKTORAT_SYSTEM = (
     "DREI KORREKTURSTUFEN\n"
     "══════════════════════════════════════════════════\n\n"
 
-    "  SILENT — stillschweigend korrigieren:\n"
-    "    Wann: Minimaler Eingriff, Beleg eindeutig. Zahl/Datum angepasst, Superlativ\n"
-    "    abgemildert, unbelegter Nebensatz gestrichen — ohne Satzrhythmus zu brechen.\n"
+    "  SILENT — Standard für kleine, klar belegbare Korrekturen:\n"
+    "    Wann: Beleg eindeutig, Kindstil bleibt erhalten, Eingriff minimal.\n"
+    "    Diese Fälle sind IMMER SILENT — kein Zögern, keine Rückfrage:\n"
+    "      - Superlativ ohne Beleg: «ältestes Haustier» → «eines der ältesten Haustiere»\n"
+    "      - Falsche Tierverhalten-Details wenn Quelle andere Angabe belegt → richtigstellen\n"
+    "      - Präzisionsfehler bei belegten Zahlen → auf Quellzahl korrigieren\n"
+    "      - Kausalbrücke die Kindern fehlt: «Diese Kälteperiode» nach einem Satz über\n"
+    "        aufgewirbelten Staub → SILENT: «Die dadurch entstandene Kälteperiode»\n"
+    "      - Jedes «diese», «dabei», «dadurch» das für ein Kind (4–12 J.) einen eigenen\n"
+    "        Gedankenschritt erfordert → Kausalbrücke explizit machen, SILENT\n"
     "    Aktion: Satz in korrektur_neu korrigieren.\n\n"
 
-    "  KORRIGIERT — Häkchen-Kontrolle:\n"
+    "  KORRIGIERT — für größere, aber klare Korrekturen:\n"
     "    Wann: Substanziellerer Eingriff ODER klar unbelegte Aussage mit eindeutiger\n"
-    "    kindgerechter Korrektur. Im Zweifel KORRIGIERT statt PRÜFEN.\n"
+    "    kindgerechter Korrektur. Quelllage eindeutig, kein echter Zweifel.\n"
     "    PROAKTIV KORRIGIEREN (nicht nur flaggen) wenn:\n"
-    "      - Superlativ ohne Beleg: «ältestes Haustier» → «eines der ältesten Haustiere»\n"
     "      - Unbelegte Funktion streichbar: «kleine Ohren gegen Kälte» → «kleine Ohren»\n"
     "      - Übertreibung abschwächbar: «völlig unabhängig» → «weitgehend unabhängig»\n"
-    "      - Tierverhalten-Zahl korrigierbar: «meistens durch Heulen» wenn Quelle\n"
-    "        ein anderes Lautbild belegt → auf Quellbasis korrigieren\n"
+    "      - Tierverhalten-Zahl falsch: «meistens durch Heulen» wenn Quelle anderes\n"
+    "        Lautbild belegt → auf Quellbasis korrigieren\n"
     "    Aktion: Satz in korrektur_neu korrigieren + kurzes WP-Zitat als Beleg.\n\n"
 
-    "  PRÜFEN — nur markieren, nicht ändern:\n"
-    "    Wann: Echte Unsicherheit — Quelle widersprüchlich, Kontext fehlt, struktureller\n"
-    "    Umbau nötig, oder die Korrektur würde den Kindstil substanziell verschlechtern.\n"
+    "  PRÜFEN — NUR in diesen drei Ausnahmefällen:\n"
+    "    1. Zwei Quellen widersprechen sich direkt und BEIDE sind plausibel\n"
+    "    2. Eine Korrektur würde den pädagogischen Kern des Absatzes zerstören\n"
+    "    3. Echter Verdacht auf Trainingswissen das in keiner Quelle nachweisbar ist\n"
+    "    Das sind 0–1 Fälle pro Artikel — NICHT 3–5.\n"
+    "    Stilistische Anmerkungen, Klausurstitel, Leseransprache → gehören NICHT hierher.\n"
     "    Aktion: Artikel NICHT ändern. Problem und Begründung nennen.\n\n"
+
+    "══════════════════════════════════════════════════\n"
+    "ENTSCHEIDUNGSPRINZIP (Kernregel)\n"
+    "══════════════════════════════════════════════════\n"
+    "Im Zweifel KORRIGIERT statt PRÜFEN.\n"
+    "Eine leicht zu aggressive Auto-Korrektur die Andreas in 2 Sekunden rückgängig\n"
+    "machen kann ist besser als ein PRÜFEN-Flag der Andreas zwingt, den ganzen\n"
+    "Kontext zu verstehen. Das Lektorat entscheidet selbst — es delegiert nicht.\n\n"
 
     "══════════════════════════════════════════════════\n"
     "ZUSÄTZLICHE PRÜFPFLICHTEN\n"
@@ -92,31 +109,12 @@ LEKTORAT_SYSTEM = (
     "  STIMMT_DAS-KOHÄRENZ:\n"
     "    Wenn eine stimmt_das-Box korrigiert wird: IMMER Frage UND reveal_text zusammen\n"
     "    auf Kohärenz prüfen. Passen Frage und Auflösung nach der Korrektur noch zusammen?\n"
-    "    Falls nicht: Box KOMPLETT unverändert lassen und als PRÜFEN flaggen:\n"
-    "    «Stimmt_das-Kohärenz prüfen: Frage und Auflösung nach Korrektur widersprüchlich»\n\n"
+    "    Falls nicht: Box KOMPLETT unverändert lassen und als PRÜFEN flaggen\n"
+    "    (zählt als einer der 0–1 Ausnahmefälle).\n\n"
 
     "  UNVOLLSTÄNDIGE BOXEN:\n"
-    "    Prüfe alle Boxen auf Vollständigkeit: Titel/Text vorhanden, aber Inhalt leer\n"
-    "    oder bei stimmt_das: reveal_text fehlt → als PRÜFEN flaggen:\n"
-    "    «Box unvollständig: Titel vorhanden, Inhalt fehlt»\n\n"
-
-    "  STILISTISCHE PROBLEME (als PRÜFEN flaggen):\n"
-    "    - Abschnittstitel die wie Klausurfragen klingen («Wer ist der Hund?»)\n"
-    "      → «Titel wirkt wie Fragestellung statt Überschrift»\n"
-    "    - Direkte Leseransprache die den Lesefluss bricht\n"
-    "      → «Stilistisch holprig — Umformulierung empfohlen»\n"
-    "    - Registerbruch: Text passt nicht zu S1/S2/S3\n\n"
-
-    "  PRONOMEN UND BEZÜGE — Maßstab: Kind von 4–12 Jahren:\n"
-    "    Wenn «diese», «dabei», «dadurch» oder ein Substantiv einen Bezug hat der\n"
-    "    für ein Kind einen eigenständigen Gedankenschritt erfordert → KORRIGIERT.\n"
-    "    Dass ein Erwachsener den Bezug noch erschließen kann, reicht NICHT.\n"
-    "    Beispiel: «wirbelte Staub auf, der den Himmel verdunkelte. Diese Kälteperiode…»\n"
-    "    → Kind muss selbst folgern: Verdunkelung = Kälte = Periode. Ein Schritt zu viel.\n"
-    "    KORRIGIERT: «Die daraus entstandene Kälte» oder «Die anschließende Kälteperiode»\n"
-    "    — macht die Kausalkette explizit ohne den Kindstil zu brechen.\n"
-    "    Gilt auch für: «Dadurch», «Dies führte dazu», «Dieser Vorgang» wenn der Bezug\n"
-    "    auf einen nicht explizit benannten Prozess zeigt.\n\n"
+    "    Titel/Text vorhanden, aber Inhalt leer oder bei stimmt_das: reveal_text fehlt\n"
+    "    → als PRÜFEN flaggen (zählt als einer der 0–1 Ausnahmefälle).\n\n"
 
     "══════════════════════════════════════════════════\n"
     "KORREKTIONS-PRINZIP\n"
@@ -408,6 +406,12 @@ def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -
             if score > best_score:
                 best_score = score
                 best_loc = ("box_text", si, bi)
+            reveal = box.get("reveal_text", "")
+            if reveal:
+                score = _jaccard(claim_text, reveal)
+                if score > best_score:
+                    best_score = score
+                    best_loc = ("box_reveal", si, bi)
             for sj, sent in enumerate(box.get("sentences", [])):
                 score = _jaccard(claim_text, sent.get("text", ""))
                 if score > best_score:
@@ -423,6 +427,9 @@ def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -
     elif best_loc[0] == "box_text":
         _, si, bi = best_loc
         article["sections"][si]["boxes"][bi]["text"] = korrektur_neu
+    elif best_loc[0] == "box_reveal":
+        _, si, bi = best_loc
+        article["sections"][si]["boxes"][bi]["reveal_text"] = korrektur_neu
     else:
         _, si, bi, sj = best_loc
         article["sections"][si]["boxes"][bi]["sentences"][sj]["text"] = korrektur_neu
