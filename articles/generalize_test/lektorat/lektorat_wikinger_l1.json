@@ -1,0 +1,368 @@
+{
+  "meta": {
+    "id": "wikinger_l1",
+    "title": "Wikinger",
+    "subtitle": "Mutige Seefahrer aus dem Norden",
+    "emoji": "⛵",
+    "age_level": 1,
+    "pattern": "history_person",
+    "theme_color": "#3F51B5",
+    "word_count": 181,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Wikinger",
+    "schema_version": "1.0",
+    "review_flag": true,
+    "category_top": "geschichte",
+    "category_sub": "völker",
+    "generated_at": "2026-06-18T09:15:33.939389+00:00",
+    "grounding_companions": [
+      "Wikingerschiff",
+      "Leif Eriksson",
+      "Nordische Mythologie",
+      "Haithabu",
+      "Runenstein"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b",
+    "review_reason": "Satz-ID 's008b' an Position 9, erwartet 's009'; lektorat: 1 zu prüfen"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Drakskepp2.PNG",
+      "alt": "Zeichnung eines Wikingerschiffs mit Segel und Drachenkopf",
+      "caption": "Ein Wikingerschiff mit einem großen Segel auf dem Meer.",
+      "license": "Public domain",
+      "license_author": "",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/6/66/Drakskepp2.PNG",
+      "wikimedia_id": "File:Drakskepp2.PNG",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/6/66/Drakskepp2.PNG",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wikinger/Drakskepp2_300.jpg",
+        "800": "bilder/wikinger/Drakskepp2_800.jpg",
+        "1600": "bilder/wikinger/Drakskepp2_1600.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Gjermundbu_helmet_-_cropped.jpg",
+      "alt": "Ein echter Wikingerhelm aus Eisen im Museum",
+      "caption": "So sah ein echter Helm der Wikinger aus.",
+      "license": "CC BY 2.0",
+      "license_author": "NTNU Vitenskapsmuseet",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Gjermundbu_helmet_-_cropped.jpg",
+      "wikimedia_id": "File:Gjermundbu_helmet_-_cropped.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/0/0e/Gjermundbu_helmet_-_cropped.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": true,
+      "tiers": {
+        "300": "bilder/wikinger/Gjermundbu_helmet_-_cropped_300.jpg",
+        "800": "bilder/wikinger/Gjermundbu_helmet_-_cropped_800.jpg",
+        "1600": "bilder/wikinger/Gjermundbu_helmet_-_cropped_1600.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Bayeux_Tapestry_1.jpg",
+      "alt": "Ausschnitt des Teppichs von Bayeux mit Wikingerschiffen",
+      "caption": "Auf diesem alten Stoffbild sieht man Schiffe der Wikinger.",
+      "license": "Public domain",
+      "license_author": "Gabriel Seah",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Bayeux_Tapestry_1.jpg",
+      "wikimedia_id": "File:Bayeux_Tapestry_1.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/a/a2/Bayeux_Tapestry_1.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": true,
+      "tiers": {
+        "300": "bilder/wikinger/Bayeux_Tapestry_1_300.jpg",
+        "800": "bilder/wikinger/Bayeux_Tapestry_1_800.jpg",
+        "1600": "bilder/wikinger/Bayeux_Tapestry_1_1600.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Bildstein-Bunge_1.jpg",
+      "alt": "Ein großer Runenstein auf einer grünen Wiese",
+      "caption": "Ein Runenstein mit eingeritzten Mustern und Figuren.",
+      "license": "CC BY-SA 2.0 de",
+      "license_author": "Jürgen Howaldt",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Bildstein-Bunge_1.jpg",
+      "wikimedia_id": "File:Bildstein-Bunge_1.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/e/e8/Bildstein-Bunge_1.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": true,
+      "tiers": {
+        "300": "bilder/wikinger/Bildstein-Bunge_1_300.jpg",
+        "800": "bilder/wikinger/Bildstein-Bunge_1_800.jpg",
+        "1600": "bilder/wikinger/Bildstein-Bunge_1_1600.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "heading": "Auf wilder Fahrt",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir ein großes Holzschiff mit einem Drachenkopf vor.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Das war das stolze Schiff der Wikinger.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Wikinger waren Seefahrer aus dem kalten Norden.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Sie lebten vor einer sehr langen Zeit.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Damals reisten sie mit Booten über das Meer.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Sie suchten Abenteuer, Ruhm und Reichtum.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "appearance_equipment",
+      "heading": "Bunte Segel und Schilde",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s007",
+          "text": "Die Wikinger bauten besonders flache Holzschiffe.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Ein großes Segel fing den starken Wind ein.",
+          "img_index": -1
+        },
+        {
+          "id": "s008b",
+          "text": "Vielleicht hast du selbst schon ein Holzboot gesehen.",
+          "img_index": 2
+        },
+        {
+          "id": "s009",
+          "text": "War denn jedes Segel rot und weiß gestreift?",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Nein, es gab auch bunte Segel in Blau, Rot und Grün.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Zum Schutz trugen die Männer eiserne Helme.",
+          "img_index": 1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Die Wikinger nahmen die Drachenköpfe am Schiff oft ab. So erschreckten sie die guten Geister nicht!"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "process_how",
+      "heading": "Leif entdeckt Amerika",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s012",
+          "text": "Ein berühmter Seefahrer hieß Leif der Glückliche.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Er steuerte sein Holzschiff durch sehr hohe Wellen.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Auf seiner großen Reise entdeckte er ein neues Land.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Dort wuchsen leckere, wilde Weintrauben an den Sträuchern.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Auf dem wilden Meer gab es oft gefährliche Stürme. Die Wellen rüttelten die Holzboote kräftig durch."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "today_legacy",
+      "heading": "Zeichen auf Steinen",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s016",
+          "text": "Die Wikinger ritzten Schrift in große Steine.",
+          "img_index": 3
+        },
+        {
+          "id": "s017",
+          "text": "Diese nennen wir heute Runensteine.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Darauf ritzten sie Bilder von Drachen und Schlangen.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Sie erinnern an mutige Seefahrer.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was für einen Kopf hatten viele Wikingerschiffe am Bug?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Einen Drachenkopf"
+          },
+          {
+            "key": "B",
+            "text": "Einen Hundekopf"
+          },
+          {
+            "key": "C",
+            "text": "Einen Hühnerkopf"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Welche Farben konnten die Segel der Wikinger haben?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie waren immer nur grau"
+          },
+          {
+            "key": "B",
+            "text": "Es gab bunte Segel in Blau oder Grün"
+          },
+          {
+            "key": "C",
+            "text": "Sie leuchteten nachts im Dunkeln"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Wie nennen wir die großen Steine mit Wikinger-Schrift?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Zaubersteine"
+          },
+          {
+            "key": "B",
+            "text": "Wassersteine"
+          },
+          {
+            "key": "C",
+            "text": "Runensteine"
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Leif Eriksson",
+      "Runenstein",
+      "Wikingerschiff"
+    ],
+    "discover": [
+      "Haithabu",
+      "Nordische Mythologie"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Wikinger waren Seefahrer aus dem kalten Norden.",
+      "source": "Wikinger",
+      "passage": "Als Wikinger werden die Angehörigen von schiffsreisenden, teilweise kriegerischen Personengruppen aus dem skandinavischen Raum..."
+    },
+    {
+      "claim": "Die Wikinger bauten besonders flache Holzschiffe.",
+      "source": "Wikingerschiff",
+      "passage": "Wikingerschiff ist die Bezeichnung für die Schiffstypen, die hauptsächlich während der Wikingerzeit (800–1100) in Nordeuropa benutzt..."
+    },
+    {
+      "claim": "Nein, es gab auch bunte Segel in Blau oder Grün.",
+      "source": "Wikingerschiff",
+      "passage": "Das Drachenschiff Hákon Jarls hatte ein blau, rot und grün gestreiftes Segel."
+    },
+    {
+      "claim": "Ein berühmter Seefahrer hieß Leif der Glückliche.",
+      "source": "Leif Eriksson",
+      "passage": "Leif „der Glückliche“ Eriksson... war vermutlich der erste Europäer, der um das Jahr 1000 das amerikanische Festland betrat."
+    },
+    {
+      "claim": "Dort wuchsen leckere, wilde Weintrauben an den Sträuchern.",
+      "source": "Leif Eriksson",
+      "passage": "Anschließend machten sie sich mit Holz und Trauben beladen auf die Rückreise nach Grönland."
+    },
+    {
+      "claim": "Die Wikinger ritzten Schrift in große Steine.",
+      "source": "Runenstein",
+      "passage": "Runensteine (dänisch Runesten; schwedisch Runsten; norwegisch Runestein) sind aufrechtstehende Steine, die mit Runeninschriften versehen sind."
+    },
+    {
+      "claim": "Die Wikinger nahmen die Drachenköpfe am Schiff oft ab.",
+      "source": "Wikingerschiff",
+      "passage": "Nach der Landnámabók war es verboten, mit dem Drachenkopf am Steven den Heimathafen anzusegeln. Die Schutzgeister des Landes könnten aufgebracht oder vertrieben werden."
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Wikinger S1 — Lektorat\n### SILENT (1 Korrekturen)\n- «…in, es gab auch bunte Segel in Blau oder Grün.» → «…in, es gab auch bunte Segel in Blau, Rot und Grün.» (WP: «Das Drachenschiff Hákon Jarls hatte ein blau, rot und grün gestreiftes Segel»)\n### KORRIGIERT (2 Korrekturen)\n- «Sie suchten Abenteuer, Ruhm und wertvolle Schätze.» → «Sie suchten Abenteuer, Ruhm und Reichtum.» — WP: ««junge Männer, die aus der heimatlichen Gebundenheit ausbrachen und Ruhm, Reichtum und Abenteuer in der Ferne suchten»»\n- «Darauf malten sie Bilder von Drachen.» → «Darauf ritzten sie Bilder von Drachen und Schlangen.» — WP: ««der ‚Schlangenbandstein', dessen Runenschrift sich vom Kopf eines Drachen oder einer Schlange über den gewundenen Körper hinzieht»»\n### PRÜFEN (1 Flags)\n- «🌟 Die Wikinger nahmen die Drachenköpfe am Schiff oft ab. So erschreckten sie die guten Geister nicht!» — Die Quelle belegt, dass der Drachenkopf verboten war beim Einlaufen in den Heimathafen, um die Schutzgeister des eigenen Landes nicht aufzubringen oder zu vertreiben — nicht die «guten Geister» allgemein. Die kindgerechte Vereinfachung «guten Geister» ist inhaltlich knapp akzeptabel, aber «nicht erschrecken» verdreht die Logik: laut Quelle sollten die Geister nicht vertrieben/aufgebracht werden, nicht nur nicht erschreckt. (Eine Korrektur würde den pädagogischen Kern der Box (Drachenkopf-Sitte erklärt) nicht zerstören, aber die nötige Umformulierung ist substanziell genug, dass das Lektorat entscheiden sollte, ob «aufschrecken» statt «erschrecken» oder eine andere Formulierung gewählt wird.)\nZusammenfassung: 1 silent, 2 korrigiert, 1 zu prüfen.",
+    "n_silent": 1,
+    "n_korrigiert": 2,
+    "n_pruefen": 1
+  }
+}

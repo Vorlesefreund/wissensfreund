@@ -1,0 +1,318 @@
+{
+  "meta": {
+    "id": "pest_l1",
+    "title": "Pest",
+    "subtitle": "Eine schwere Krankheit aus vergangener Zeit",
+    "emoji": "🦠",
+    "age_level": 1,
+    "pattern": "tech_science",
+    "theme_color": "#8B0000",
+    "word_count": 166,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Pest",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "epochen",
+    "generated_at": "2026-06-18T09:22:09.611051+00:00",
+    "grounding_companions": [
+      "Schwarzer Tod",
+      "Pestarzt",
+      "Rattenfloh",
+      "Quarantäne"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "WienPestsaeule.jpg",
+      "alt": "Die goldene Pestsäule in Wien",
+      "caption": "Diese Säule in Wien erinnert an eine schwere Zeit.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Briséis",
+      "source_url": "https://commons.wikimedia.org/wiki/File:WienPests%C3%A4ule.jpg",
+      "wikimedia_id": "File:WienPestsäule.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/5/5f/WienPests%C3%A4ule.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/pest/WienPestsaeule_300.jpg",
+        "800": "bilder/pest/WienPestsaeule_800.jpg",
+        "1600": "bilder/pest/WienPestsaeule_1600.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Xenopsylla_cheopis_ZSM.jpg",
+      "alt": "Ein Floh unter dem Mikroskop",
+      "caption": "Kleine Flöhe verbreiteten früher die Krankheit.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Katja ZSM",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Xenopsylla_cheopis_ZSM.jpg",
+      "wikimedia_id": "File:Xenopsylla_cheopis_ZSM.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a2/Xenopsylla_cheopis_ZSM.jpg/1920px-Xenopsylla_cheopis_ZSM.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/pest/Xenopsylla_cheopis_ZSM_300.jpg",
+        "800": "bilder/pest/Xenopsylla_cheopis_ZSM_800.jpg",
+        "1600": "bilder/pest/Xenopsylla_cheopis_ZSM_1600.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Was ist die Pest?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Kennst du das Gefühl, wenn du Fieber hast?",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Die Pest ist eine sehr schwere, ansteckende Krankheit.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Winzige Erreger im Blut lösen diese Krankheit aus.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Heute haben wir gute Medizin gegen diese Erreger.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Deshalb ist die Krankheit bei uns sehr selten.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Wie wanderte die Krankheit?",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s006",
+          "text": "Kleine Flöhe trugen die Erreger von Tier zu Tier.",
+          "img_index": 1
+        },
+        {
+          "id": "s007",
+          "text": "Oft saßen diese Flöhe auf wilden Ratten.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Die Flöhe bissen dann auch die Menschen.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "So wanderten die winzigen Erreger in das Blut.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Die Menschen bekamen dadurch sehr hohes Fieber.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Die Pest-Erreger leben heute noch heimlich. Sie wohnen in einigen wilden Nagetieren."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Seltsame Masken zum Schutz",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s011",
+          "text": "Damals trugen manche Ärzte sehr merkwürdige Kleidung.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Sie setzten große Masken mit einem langen Schnabel auf.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Im Schnabel steckten gut duftende Kräuter und Blumen.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Der gute Duft sollte vor der Krankheit schützen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Denkmäler in den Städten",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s015",
+          "text": "Heute erinnert eine goldene Säule in Wien an damals.",
+          "img_index": 0
+        },
+        {
+          "id": "s016",
+          "text": "Viele Menschen bauten solche Säulen nach der schweren Zeit.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Heute schützen uns saubere Häuser vor den Flöhen.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Und bei einer Ansteckung hilft uns die moderne Medizin.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Ärzte machen kranke Menschen heute schnell wieder gesund.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wer trug früher die Pest-Erreger zu den Menschen?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Kleine Flöhe"
+          },
+          {
+            "key": "B",
+            "text": "Fliegende Mücken"
+          },
+          {
+            "key": "C",
+            "text": "Wilde Bienen"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Was hatten die Masken der früheren Ärzte?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Einen langen Schnabel"
+          },
+          {
+            "key": "B",
+            "text": "Eine rote Nase"
+          },
+          {
+            "key": "C",
+            "text": "Große Schlappohren"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Was hilft heute am besten gegen die Pest-Erreger?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein warmer Kräutertee"
+          },
+          {
+            "key": "B",
+            "text": "Eine wirksame Medizin"
+          },
+          {
+            "key": "C",
+            "text": "Ein Pflaster auf der Haut"
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Krankheit",
+      "Medizin",
+      "Arzt"
+    ],
+    "discover": [
+      "Ratte",
+      "Floh",
+      "Wien"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Die Pest ist eine sehr schwere, ansteckende Krankheit.",
+      "source": "Pest",
+      "passage": "ist eine hochgradig ansteckende Infektionskrankheit"
+    },
+    {
+      "claim": "Winzige Erreger im Blut lösen diese Krankheit aus.",
+      "source": "Pest",
+      "passage": "die insbesondere durch das Bakterium Yersinia pestis hervorgerufen wird."
+    },
+    {
+      "claim": "Kleine Flöhe trugen die Erreger von Tier zu Tier.",
+      "source": "Pest",
+      "passage": "Der Übertragungsweg zum Menschen ist indirekt, klassischerweise über den Biss eines infizierten Flohs, der als Vektor dient"
+    },
+    {
+      "claim": "Oft saßen diese Flöhe auf wilden Ratten.",
+      "source": "Pest",
+      "passage": "Neben dem für die Beulenpest klassischen Weg von Ratten über Flöhe auf den Menschen"
+    },
+    {
+      "claim": "Sie setzten große Masken mit einem langen Schnabel auf.",
+      "source": "Pestarzt",
+      "passage": "Daraus entwickelte sich die nur südlich der Alpen von Ärzten als Pestmaske eingesetzte Schnabelmaske"
+    },
+    {
+      "claim": "Im Schnabel steckten gut duftende Kräuter und Blumen.",
+      "source": "Pestarzt",
+      "passage": "Um sich vor dem „Pesthauch“ zu schützen, hielt man sich Riechäpfel, Duftschwämme oder Kräuterbeutel vor die Nase."
+    },
+    {
+      "claim": "Heute erinnert eine goldene Säule in Wien an damals.",
+      "source": "Pest",
+      "passage": "Zum Dank für das Erlöschen von Pestepidemien wurden vielerorts prachtvolle Pestsäulen aufgestellt."
+    },
+    {
+      "claim": "Die Pest-Erreger leben heute noch heimlich. Sie wohnen in einigen wilden Nagetieren.",
+      "source": "Pest",
+      "passage": "Die Pestbakterien kommen auch heute noch in wild lebenden Nagetierpopulationen vor – wie beispielsweise bei den Präriehunden, Erdhörnchen und Murmeltieren."
+    }
+  ]
+}

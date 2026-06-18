@@ -1,0 +1,573 @@
+{
+  "meta": {
+    "id": "photosynthese_l3",
+    "title": "Photosynthese",
+    "subtitle": "Wie Pflanzen aus reinem Sonnenlicht ihre eigene Nahrung herstellen",
+    "emoji": "🌱",
+    "age_level": 3,
+    "pattern": "tech_science",
+    "theme_color": "#2E7D32",
+    "word_count": 546,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Photosynthese",
+    "schema_version": "1.0",
+    "review_flag": true,
+    "category_top": "natur_umwelt",
+    "category_sub": "biologie",
+    "generated_at": "2026-06-18T09:18:59.755584+00:00",
+    "grounding_companions": [
+      "Chlorophylle",
+      "Glucose",
+      "Stoma (Botanik)",
+      "Sauerstoff"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b",
+    "trim_passes": 1,
+    "review_reason": "Wortzahl 546 > Cap 490"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Blattgruen.jpg",
+      "alt": "Nahaufnahme von mehreren grünen Blättern an einem Baum, die im Sonnenlicht leuchten.",
+      "caption": "Blätter im Sonnenlicht fangen die nötige Energie für die Photosynthese ein.",
+      "license": "CC BY-SA 2.5",
+      "license_author": "btr",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Blattgruen.jpg",
+      "wikimedia_id": "File:Blattgruen.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/d/dd/Blattgruen.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/photosynthese/Blattgruen_300.jpg",
+        "800": "bilder/photosynthese/Blattgruen_800.jpg",
+        "1600": "bilder/photosynthese/Blattgruen_1600.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Plagiomnium_affine_laminazellen.jpeg",
+      "alt": "Pflanzenzellen unter dem Mikroskop, gefüllt mit vielen kleinen grünen Punkten.",
+      "caption": "Unter dem Mikroskop erkennt man die grünen Chloroplasten in den Pflanzenzellen.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Kristian Peters -- Fabelfroh",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Plagiomnium_affine_laminazellen.jpeg",
+      "wikimedia_id": "File:Plagiomnium_affine_laminazellen.jpeg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/49/Plagiomnium_affine_laminazellen.jpeg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/photosynthese/Plagiomnium_affine_laminazellen_300.jpg",
+        "800": "bilder/photosynthese/Plagiomnium_affine_laminazellen_800.jpg",
+        "1600": "bilder/photosynthese/Plagiomnium_affine_laminazellen_1600.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Anisocytische_Schließzellen.png",
+      "alt": "Schematische Darstellung von Pflanzenzellen mit gelb markierten Spaltöffnungen.",
+      "caption": "Die gelb markierten Spaltöffnungen (Stomata) steuern den Gasaustausch der Blätter.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Wandtattoo",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Anisocytische_Schlie%C3%9Fzellen.png",
+      "wikimedia_id": "File:Anisocytische_Schlie%C3%9Fzellen.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/3/3e/Anisocytische_Schlie%C3%9Fzellen.png",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/photosynthese/Anisocytische_Schließzellen_300.jpg",
+        "800": "bilder/photosynthese/Anisocytische_Schließzellen_800.jpg",
+        "1600": "bilder/photosynthese/Anisocytische_Schließzellen_1600.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Seawifs_global_biosphere_2002.png",
+      "alt": "Weltkarte mit grünen Flächen an Land und bunten Färbungen im Ozean.",
+      "caption": "Diese Satellitenkarte zeigt, wo weltweit auf der Erde Photosynthese stattfindet.",
+      "license": "Public domain",
+      "license_author": "Yikrazuul",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Seawifs_global_biosphere_2002.png",
+      "wikimedia_id": "File:Seawifs_global_biosphere_2002.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Seawifs_global_biosphere_2002.png",
+      "is_hero": false,
+      "ab_stufe": 3,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/photosynthese/Seawifs_global_biosphere_2002_300.jpg",
+        "800": "bilder/photosynthese/Seawifs_global_biosphere_2002_800.jpg",
+        "1600": "bilder/photosynthese/Seawifs_global_biosphere_2002_1600.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Carl_Wilhelm_Scheele_from_Familj-Journalen1874.png",
+      "alt": "Historisches Porträt von Carl Wilhelm Scheele im Profil.",
+      "caption": "Carl Wilhelm Scheele war einer der Entdecker des Sauerstoffs.",
+      "license": "Public domain",
+      "license_author": "",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Carl_Wilhelm_Scheele_from_Familj-Journalen1874.png",
+      "wikimedia_id": "File:Carl_Wilhelm_Scheele_from_Familj-Journalen1874.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/16/Carl_Wilhelm_Scheele_from_Familj-Journalen1874.png",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/photosynthese/Carl_Wilhelm_Scheele_from_Familj-Journalen1874_300.jpg",
+        "800": "bilder/photosynthese/Carl_Wilhelm_Scheele_from_Familj-Journalen1874_800.jpg",
+        "1600": "bilder/photosynthese/Carl_Wilhelm_Scheele_from_Familj-Journalen1874_1600.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Die unsichtbare Küche der Pflanzen",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Hast du dich schon einmal gefragt, wovon sich Bäume eigentlich ernähren?",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Im Gegensatz zu Tieren müssen Pflanzen nicht jagen oder mühsam nach Futter suchen.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Sie stellen ihre Nahrung einfach selbst her.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Diesen genialen Prozess nennen Forscher Photosynthese.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Es ist ein biochemischer Vorgang, bei dem grüne Pflanzen, Algen und manche Bakterien Lichtenergie nutzen.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Sie wandeln damit Kohlendioxid und Wasser in energiereiche organische Verbindungen, vor allem in den Einfachzucker Glucose, um.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Als wertvolles Nebenprodukt entsteht bei diesem Prozess lebenswichtiger Sauerstoff.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Wie funktioniert das grüne Kraftwerk?",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s008",
+          "text": "Die Fabriken der Photosynthese liegen in den Blättern, genauer gesagt in winzigen Zellteilen, den Chloroplasten.",
+          "img_index": 1
+        },
+        {
+          "id": "s009",
+          "text": "Darin befindet sich der Farbstoff Chlorophyll, auch Blattgrün genannt.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Das Chlorophyll wirkt wie eine winzige Antenne: Es fängt das Sonnenlicht ein und wandelt es in chemische Energie um.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Als Rohstoffe benötigt die Pflanze Wasser und Kohlenstoffdioxid.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Wasser saugt sie über die Wurzeln aus dem Boden auf.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Das Kohlenstoffdioxid holt sie sich durch winzige Poren auf den Blattunterseiten.",
+          "img_index": 2
+        },
+        {
+          "id": "s014",
+          "text": "Diese Poren heißen Spaltöffnungen oder Stomata.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Sie bestehen aus zwei Schließzellen, die sich wie ein aufgepumpter Fahrradschlauch verformen und so die Öffnung freigeben können.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Durch diese Öffnungen verdunstet auch Wasser.",
+          "img_index": -1
+        },
+        {
+          "id": "s017",
+          "text": "Dieser Dunst kühlt das Blatt und erzeugt einen Sog, der neue Mineralstoffe aus dem Boden nach oben zieht.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Mit der Lichtenergie spaltet die Pflanze das Wasser auf.",
+          "img_index": -1
+        },
+        {
+          "id": "s019",
+          "text": "Sie nutzt die gewonnenen Teilchen, um das Kohlenstoffdioxid in Glucose umzubauen.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Die Glucose dient als Nahrung für das Wachstum oder wird als Stärke gespeichert.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Der übrig gebliebene Sauerstoff wird wieder in die Luft abgegeben.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 **Die grüne Lücke:** Warum sind Blätter eigentlich grün? Chlorophyll schluckt vor allem blaues und rotes Licht sehr stark. Das grüne Licht hingegen wird vom Farbstoff kaum aufgenommen, sondern einfach zurückgeworfen und gestreut. Deshalb sehen Blätter für unsere Augen grün aus!"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Die Entdeckung des Geheimnisses",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s022",
+          "text": "Früher dachten die Menschen, Pflanzen würden sich rein aus der Erde ernähren.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Erst im 17. Jahrhundert vermutete man, dass das Sonnenlicht eine entscheidende Rolle beim Wachstum spielt.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "In den 1770er Jahren entdeckten Carl Wilhelm Scheele (um 1772) und Joseph Priestley (1771) unabhängig voneinander den Sauerstoff.",
+          "img_index": 4
+        },
+        {
+          "id": "s025",
+          "text": "Kurz darauf wies Jan Ingenhousz nach, dass grüne Blätter diesen Sauerstoff nur dann herstellen, wenn sie dem Licht ausgesetzt sind.",
+          "img_index": -1
+        },
+        {
+          "id": "s026",
+          "text": "Er fand auch heraus, dass Pflanzen der aufgenommenen Kohlensäure (Kohlendioxid) den Kohlenstoff als Nahrung entnehmen.",
+          "img_index": -1
+        },
+        {
+          "id": "s027",
+          "text": "Justus von Liebig bewies schließlich im 19. Jahrhundert endgültig, dass Pflanzen anorganische Stoffe aus der Umwelt verwerten können.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Die Grundlage für alles Leben",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s028",
+          "text": "Ohne Photosynthese gäbe es auf der Erde kein komplexes Leben.",
+          "img_index": 3
+        },
+        {
+          "id": "s029",
+          "text": "Fast alle Tiere und Menschen sind direkt oder indirekt von ihr abhängig.",
+          "img_index": -1
+        },
+        {
+          "id": "s030",
+          "text": "Wir atmen den Sauerstoff, den die Pflanzen ununterbrochen freisetzen.",
+          "img_index": -1
+        },
+        {
+          "id": "s031",
+          "text": "Aus diesem Sauerstoff hat sich auch die schützende Ozonschicht in der Atmosphäre gebildet, die gefährliche UV-Strahlung abfängt.",
+          "img_index": -1
+        },
+        {
+          "id": "s032",
+          "text": "Zudem ernähren wir uns von Pflanzen oder von Tieren, die diese gefressen haben.",
+          "img_index": -1
+        },
+        {
+          "id": "s033",
+          "text": "Selbst fossile Rohstoffe wie Kohle und Erdöl sind im Grunde gespeicherte, uralte Photosynthese-Produkte.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ **Giftige Dosis:** Sauerstoff ist für uns lebenswichtig, aber in sehr hohen Mengen wird das Gas für die meisten Lebewesen giftig. Auch Pflanzen müssen aufpassen: Wenn sie zu viel starkem Licht ausgesetzt sind, können in den Zellen schädliche, aggressive Sauerstoffteilchen entstehen, die ihre eigenen Organe beschädigen."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Photosynthese im ewigen Dunkeln",
+      "section_role": "curiosity",
+      "sentences": [
+        {
+          "id": "s034",
+          "text": "Interessanterweise findet Photosynthese nicht nur an Land statt.",
+          "img_index": -1
+        },
+        {
+          "id": "s035",
+          "text": "Ein großer Teil des weltweiten Sauerstoffs wird von winzigen Algen und Cyanobakterien im Wasser produziert.",
+          "img_index": -1
+        },
+        {
+          "id": "s036",
+          "text": "Sogar in der tiefen See gibt es an heißen Schwefelquellen Bakterien, die Photosynthese betreiben.",
+          "img_index": -1
+        },
+        {
+          "id": "s037",
+          "text": "Weil dorthin absolut kein Sonnenlicht gelangt, nutzen sie die extrem schwache Wärmestrahlung der heißen Quellen zum Überleben.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Welcher Farbstoff fängt in den Blättern das Sonnenlicht ein?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Melanin"
+          },
+          {
+            "key": "B",
+            "text": "Chlorophyll"
+          },
+          {
+            "key": "C",
+            "text": "Carotin"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Wie nennen Fachleute die winzigen Poren auf den Blattunterseiten?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Stomata"
+          },
+          {
+            "key": "B",
+            "text": "Tracheen"
+          },
+          {
+            "key": "C",
+            "text": "Alveolen"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Welcher Stoff entsteht neben Sauerstoff als Hauptprodukt bei der Photosynthese?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Salz"
+          },
+          {
+            "key": "B",
+            "text": "Glucose"
+          },
+          {
+            "key": "C",
+            "text": "Stickstoff"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q4",
+        "text": "Wer wies im 18. Jahrhundert nach, dass Blätter nur im Licht Sauerstoff freisetzen?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Jan Ingenhousz"
+          },
+          {
+            "key": "B",
+            "text": "Justus von Liebig"
+          },
+          {
+            "key": "C",
+            "text": "Aristoteles"
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Chlorophyll",
+      "Glucose",
+      "Stoma (Botanik)",
+      "Sauerstoff"
+    ],
+    "discover": [
+      "Chloroplasten",
+      "Kohlendioxid",
+      "Jan Ingenhousz",
+      "Cyanobakterien"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Es ist ein biochemischer Vorgang, bei dem grüne Pflanzen, Algen und manche Bakterien Lichtenergie nutzen.",
+      "source": "Photosynthese",
+      "passage": "Sie wird von Pflanzen, Algen und manchen Bakterien betrieben. Bei diesem biochemischen Vorgang wird Lichtenergie mit Hilfe von lichtabsorbierenden Farbstoffen wie Chlorophyll in chemische Energie umgewandelt."
+    },
+    {
+      "claim": "Sie wandeln damit Kohlendioxid und Wasser in energiereiche organische Verbindungen, vor allem in den Einfachzucker Glucose, um.",
+      "source": "Photosynthese",
+      "passage": "Diese wird dann genutzt, um aus energiearmen anorganischen Stoffen (vor allem Kohlenstoffdioxid (CO2) und Wasser (H2O)) energiereiche organische Verbindungen (vor allem Kohlenhydrate) aufzubauen."
+    },
+    {
+      "claim": "Als Nebenprodukt entsteht bei diesem Prozess lebenswichtiger Sauerstoff.",
+      "source": "Photosynthese",
+      "passage": "Bei der oxygenen Photosynthese wird molekularer Sauerstoff (O2) freigesetzt."
+    },
+    {
+      "claim": "Die Fabriken der Photosynthese liegen in den Blättern, genauer gesagt in winzigen Zellteilen, den Chloroplasten.",
+      "source": "Chlorophylle",
+      "passage": "Chlorophyll wird bei Eukaryoten in den Chloroplasten synthetisiert"
+    },
+    {
+      "claim": "Darin befindet sich der Farbstoff Chlorophyll, auch Blattgrün genannt.",
+      "source": "Chlorophylle",
+      "passage": "Chlorophylle (Plural von Chlorophyll; von altgriechisch χλωρός chlōrós „hellgrün, frisch“ und φύλλον phýllon „Blatt“, sinngemäß „grüner Blattfarbstoff“) oder Blattgrün bezeichnet eine Klasse natürlicher Farbstoffe..."
+    },
+    {
+      "claim": "Das Kohlenstoffdioxid holt sie sich durch winzige Poren auf den Blattunterseiten.",
+      "source": "Stoma (Botanik)",
+      "passage": "Die Stomata befinden sich bei den meisten Pflanzen in der unteren Epidermis der Blätter..."
+    },
+    {
+      "claim": "Diese Poren heißen Spaltöffnungen oder Stomata.",
+      "source": "Stoma (Botanik)",
+      "passage": "Ein Stoma oder eine Spaltöffnung (Plural Stomata; altgriechisch στόμα stóma, deutsch ‚Mund‘, ‚Mündung‘, ‚Öffnung‘) ist eine Pore in der Epidermis von Pflanzen."
+    },
+    {
+      "claim": "Sie bestehen aus zwei Schließzellen, die sich wie ein aufgepumpter Fahrradschlauch verformen und so die Öffnung freigeben können.",
+      "source": "Stoma (Botanik)",
+      "passage": "Das Stoma wird normalerweise von zwei bohnenförmigen Zellen, den Schließzellen, gebildet... Verbildlichen lässt sich dieses Prinzip anhand eines Fahrradschlauchs. Wird er aufgepumpt, lässt sich das Auseinanderbewegen beider Seiten erkennen."
+    },
+    {
+      "claim": "Dieser Dunst kühlt das Blatt und erzeugt einen Sog, der neue Mineralstoffe aus dem Boden nach oben zieht.",
+      "source": "Stoma (Botanik)",
+      "passage": "Zudem findet durch die Poren Verdunstung (stomatäre Transpiration) statt, die einen Transpirationssog erzeugt, durch den Wasser von den Wurzeln bis in die Blätter transportiert wird. Mit dem Wasser werden Mineralstoffe aus dem Boden aufgenommen und in der Pflanze verteilt. Zusätzlich kühlt die Verdunstung die Blätter..."
+    },
+    {
+      "claim": "Mit der Lichtenergie spaltet die Pflanze das Wasser auf.",
+      "source": "Photosynthese",
+      "passage": "Wasser (H2O) wird oxidiert, indem ihm Elektronen entzogen werden, und dabei werden molekularer Sauerstoff (O2) und Protonen (H+) freigesetzt (Photolyse des Wassers)."
+    },
+    {
+      "claim": "Die Glucose dient als Nahrung für das Wachstum oder wird als Stärke gespeichert.",
+      "source": "Glucose",
+      "passage": "Sie wird als polymeres Glucan gespeichert, in menschlichen/tierischen Zellen als Glycogen und in pflanzlichen Zellen als Stärke."
+    },
+    {
+      "claim": "Früher dachten die Menschen, Pflanzen würden sich rein aus der Erde ernähren.",
+      "source": "Photosynthese",
+      "passage": "Seit der Antike (Aristoteles) herrschte die Vorstellung, dass die Pflanze ihre Nahrung aus der Erde entnimmt."
+    },
+    {
+      "claim": "In den 1770er Jahren entdeckten Wissenschaftler wie Carl Wilhelm Scheele und Joseph Priestley den Sauerstoff.",
+      "source": "Sauerstoff",
+      "passage": "Im 18. Jahrhundert haben Carl Wilhelm Scheele (um 1772, veröffentlicht 1777) in Schweden und Joseph Priestley in England (1771, öffentlich beschrieben 1774) unabhängig voneinander im Zusammenhang mit der Erforschung von Verbrennungsvorgängen den Sauerstoff entdeckt."
+    },
+    {
+      "claim": "Kurz darauf wies Jan Ingenhousz nach, dass grüne Blätter diesen Sauerstoff nur dann herstellen, wenn sie dem Licht ausgesetzt sind.",
+      "source": "Photosynthese",
+      "passage": "zeigte Jan Ingenhousz 1779, dass dieser in grünen Blättern gebildet wird, wenn sie dem Licht ausgesetzt sind."
+    },
+    {
+      "claim": "Er fand auch heraus, dass Pflanzen Kohlendioxid aufnehmen.",
+      "source": "Photosynthese",
+      "passage": "In einer weiteren Publikation 1796 stellte er fest, dass die Pflanze der aufgenommenen „Kohlensäure“ (Kohlendioxid) den Kohlenstoff als Nahrung entnimmt und den Sauerstoff „aushaucht“."
+    },
+    {
+      "claim": "Justus von Liebig bewies schließlich im 19. Jahrhundert endgültig, dass Pflanzen anorganische Stoffe aus der Umwelt verwerten können.",
+      "source": "Photosynthese",
+      "passage": "Erst durch die Erfolge Justus von Liebigs (1840) mit Mineraldünger wurde es unabweisbar, dass Pflanzen anorganische Substanzen assimilieren können."
+    },
+    {
+      "claim": "Aus diesem Sauerstoff hat sich auch die schützende Ozonschicht in der Atmosphäre gebildet, die gefährliche UV-Strahlung abfängt.",
+      "source": "Sauerstoff",
+      "passage": "In der Stratosphäre wird aus Dioxygen (O2) Ozon (O3) gebildet, welches einen Großteil der für Lebewesen schädlichen UV-Strahlung absorbiert."
+    },
+    {
+      "claim": "Selbst fossile Rohstoffe wie Kohle und Erdöl sind im Grunde gespeicherte, uralte Photosynthese-Produkte.",
+      "source": "Photosynthese",
+      "passage": "Auch alle fossilen Rohstoffe und Energiespeicher wie Braunkohle, Steinkohle und Erdöl sind Folgeprodukte der Photosynthese."
+    },
+    {
+      "claim": "Ein großer Teil des weltweiten Sauerstoffs wird von winzigen Algen und Cyanobakterien im Wasser produziert.",
+      "source": "Photosynthese",
+      "passage": "30 % entfallen auf Algen und autotrophe Protisten etwa unter den Dinoflagellaten, 20 % auf Prokaryoten wie die Cyanobakterien."
+    },
+    {
+      "claim": "Sogar in der eisigen Tiefsee gibt es an heißen Schwefelquellen Bakterien, die Photosynthese betreiben.",
+      "source": "Photosynthese",
+      "passage": "An einem etwa 2.500 Meter tiefen schwarzen Raucher am ostpazifischen Rücken wurde ein Grünes Schwefelbakterium entdeckt, das eine anoxygene Photosynthese mit Schwefelwasserstoff oder Schwefel als Reduktans betreibt."
+    },
+    {
+      "claim": "Weil dorthin absolut kein Sonnenlicht gelangt, nutzen sie die extrem schwache Wärmestrahlung der heißen Quellen zum Überleben.",
+      "source": "Photosynthese",
+      "passage": "In dieser Tiefe gelangt kein Sonnenlicht zu den Bakterien. Seine äußerst lichtempfindlichen Chlorosomen vermögen aber die schwache Wärmestrahlung der hydrothermalen Quelle aufzufangen..."
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Photosynthese S3 — Lektorat\n### SILENT (2 Korrekturen)\n- «In den 1770er Jahren entdeckten Wissenschaftler wie Carl Wilhelm Scheele und Joseph Priestley unabhängig voneinander den Sauerst…» → «In den 1770er Jahren entdeckten Carl Wilhelm Scheele (um 1772) und Joseph Priestley (1771) unabhängig voneinander den Sauerst…» (WP: «Carl Wilhelm Scheele (um 1772, veröffentlicht 1777) in Schweden und Joseph Priestley in England (1771, öffentlich beschrieben 1774) unabhängig voneinander … den Sauerstoff entdeckt»)\n- «Sogar in der eisigen Tiefsee gibt es an heißen Schwefelquelle…» → «Sogar in der tiefen See gibt es an heißen Schwefelquelle…» (WP: «An einem etwa 2.500 Meter tiefen schwarzen Raucher am ostpazifischen Rücken wurde ein Grünes Schwefelbakterium entdeckt» — «eisig» ist nicht belegt, die Quelle nennt keine Temperatur des Wassers)\n### KORRIGIERT (1 Korrekturen)\n- «Er fand auch heraus, dass Pflanzen Kohlendioxid aufnehmen.» → «Er fand auch heraus, dass Pflanzen der aufgenommenen Kohlensäure (Kohlendioxid) den Kohlenstoff als Nahrung entnehmen.» — WP: ««stellte er fest, dass die Pflanze der aufgenommenen ‚Kohlensäure' (Kohlendioxid) den Kohlenstoff als Nahrung entnimmt» — es war Ingenhousz, der dies in einer Publikation 1796 feststellte»\nZusammenfassung: 2 silent, 1 korrigiert, 0 zu prüfen.",
+    "n_silent": 2,
+    "n_korrigiert": 1,
+    "n_pruefen": 0
+  }
+}

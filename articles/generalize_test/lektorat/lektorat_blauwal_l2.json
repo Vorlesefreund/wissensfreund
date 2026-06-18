@@ -1,0 +1,425 @@
+{
+  "meta": {
+    "id": "blauwal_l2",
+    "title": "Blauwal",
+    "subtitle": "Der sanfte Riese der Meere",
+    "emoji": "🐋",
+    "age_level": 2,
+    "pattern": "living_being",
+    "theme_color": "#0077B6",
+    "word_count": 270,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Blauwal",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "tiere",
+    "category_sub": "säugetiere",
+    "generated_at": "2026-06-18T09:22:09.605011+00:00",
+    "grounding_companions": [
+      "Walgesang",
+      "Krill",
+      "Bartenwale"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "2024-08-11_Blue_whale_Isfjord_Svalbard_05_(cropped).jpg",
+      "alt": "Ein Blauwal taucht an der Wasseroberfläche auf und bläst eine hohe Fontäne",
+      "caption": "Beim Auftauchen stößt der Blauwal eine hohe Fontäne aus.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Carina Gsottbauer",
+      "source_url": "https://commons.wikimedia.org/wiki/File:2024-08-11_Blue_whale_Isfjord_Svalbard_05_(cropped).jpg",
+      "wikimedia_id": "File:2024-08-11_Blue_whale_Isfjord_Svalbard_05_(cropped).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/2024-08-11_Blue_whale_Isfjord_Svalbard_05_%28cropped%29.jpg/1920px-2024-08-11_Blue_whale_Isfjord_Svalbard_05_%28cropped%29.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/blauwal/2024-08-11_Blue_whale_Isfjord_Svalbard_05_(cropped)_300.jpg",
+        "800": "bilder/blauwal/2024-08-11_Blue_whale_Isfjord_Svalbard_05_(cropped)_800.jpg",
+        "1600": "bilder/blauwal/2024-08-11_Blue_whale_Isfjord_Svalbard_05_(cropped)_1600.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "alt": "Ein Blauwal schwimmt von oben gesehen im dunklen Meer",
+      "caption": "Aus der Luft kann man den langen, schlanken Körper gut erkennen.",
+      "license": "Public domain",
+      "license_author": "NOAA Photo Library",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "wikimedia_id": "File:Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg/1920px-Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/blauwal/Anim1754_-_Flickr_-_NOAA_Photo_Library_300.jpg",
+        "800": "bilder/blauwal/Anim1754_-_Flickr_-_NOAA_Photo_Library_800.jpg",
+        "1600": "bilder/blauwal/Anim1754_-_Flickr_-_NOAA_Photo_Library_1600.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Fanons_rorqualbleu.jpg",
+      "alt": "Teil eines Bartenkamms eines Blauwals",
+      "caption": "Die dichten Barten wirken im Maul wie ein feines Sieb.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "André-Philippe D. Picard",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Fanons_rorqualbleu.jpg",
+      "wikimedia_id": "File:Fanons_rorqualbleu.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Fanons_rorqualbleu.jpg/1920px-Fanons_rorqualbleu.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/blauwal/Fanons_rorqualbleu_300.jpg",
+        "800": "bilder/blauwal/Fanons_rorqualbleu_800.jpg",
+        "1600": "bilder/blauwal/Fanons_rorqualbleu_1600.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Antarctic_krill_(Euphausia_superba).jpg",
+      "alt": "Ein kleiner, durchscheinender Krillkrebs im dunklen Wasser",
+      "caption": "Krillkrebse sind winzig, bilden aber riesige Schwärme.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Uwe Kils",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Antarctic_krill_(Euphausia_superba).jpg",
+      "wikimedia_id": "File:Antarctic_krill_(Euphausia_superba).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c7/Antarctic_krill_%28Euphausia_superba%29.jpg/1920px-Antarctic_krill_%28Euphausia_superba%29.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/blauwal/Antarctic_krill_(Euphausia_superba)_300.jpg",
+        "800": "bilder/blauwal/Antarctic_krill_(Euphausia_superba)_800.jpg",
+        "1600": "bilder/blauwal/Antarctic_krill_(Euphausia_superba)_1600.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Whalefilter.png",
+      "alt": "Schematische Darstellung des Filtervorgangs im Maul eines Bartenwals",
+      "caption": "So filtert der Wal seine Nahrung aus dem Wasser.",
+      "license": "CC0",
+      "license_author": "Martin-rnr",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Whalefilter.png",
+      "wikimedia_id": "File:Whalefilter.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Whalefilter.png/1920px-Whalefilter.png",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/blauwal/Whalefilter_300.jpg",
+        "800": "bilder/blauwal/Whalefilter_800.jpg",
+        "1600": "bilder/blauwal/Whalefilter_1600.jpg"
+      }
+    },
+    {
+      "index": 5,
+      "filename": "BlueWhaleSkeleton.jpg",
+      "alt": "Das riesige Skelett eines Blauwals, das im Freien ausgestellt ist",
+      "caption": "Das gewaltige Skelett zeigt die enorme Größe des Meeresriesen.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Bronwen Lea",
+      "source_url": "https://commons.wikimedia.org/wiki/File:BlueWhaleSkeleton.jpg",
+      "wikimedia_id": "File:BlueWhaleSkeleton.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/14/BlueWhaleSkeleton.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/blauwal/BlueWhaleSkeleton_300.jpg",
+        "800": "bilder/blauwal/BlueWhaleSkeleton_800.jpg",
+        "1600": "bilder/blauwal/BlueWhaleSkeleton_1600.jpg"
+      }
+    },
+    {
+      "index": 6,
+      "filename": "Zwei_Nasenlöcher_eines_Bartenwales.jpg",
+      "alt": "Kopf eines Bartenwals mit deutlich sichtbaren, geöffneten Blaslöchern",
+      "caption": "Die beiden Nasenlöcher befinden sich oben auf dem breiten Kopf.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Hp.Baumeler",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Zwei_Nasenl%C3%B6cher_eines_Bartenwales.jpg",
+      "wikimedia_id": "File:Zwei_Nasenlöcher_eines_Bartenwales.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/22/Zwei_Nasenl%C3%B6cher_eines_Bartenwales.jpg/1920px-Zwei_Nasenl%C3%B6cher_eines_Bartenwales.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/blauwal/Zwei_Nasenlöcher_eines_Bartenwales_300.jpg",
+        "800": "bilder/blauwal/Zwei_Nasenlöcher_eines_Bartenwales_800.jpg",
+        "1600": "bilder/blauwal/Zwei_Nasenlöcher_eines_Bartenwales_1600.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Der König der Meere",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir ein Tier vor, so lang wie drei große Busse!",
+          "img_index": 1
+        },
+        {
+          "id": "s002",
+          "text": "Es wiegt so viel wie 40 große Elefanten.",
+          "img_index": 1
+        },
+        {
+          "id": "s003",
+          "text": "Der Blauwal ist ein Bartenwal und das größte Tier, das je gelebt hat.",
+          "img_index": 1
+        },
+        {
+          "id": "s004",
+          "text": "Er ist ein Säugetier und muss zum Atmen an die Wasseroberfläche kommen.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Wie ein Riese gebaut ist",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s005",
+          "text": "Sein Herz wiegt bis zu eine Tonne – so schwer wie ein kleines Auto!",
+          "img_index": 5
+        },
+        {
+          "id": "s006",
+          "text": "Da der Wal im kalten Wasser viel Wärme verliert, schützt seine enorme Größe ihn vor dem Auskühlen.",
+          "img_index": 1
+        },
+        {
+          "id": "s007",
+          "text": "Er hat keine Zähne, sondern 260 bis 400 Barten im Oberkiefer.",
+          "img_index": 2
+        },
+        {
+          "id": "s008",
+          "text": "Das sind lange Hornplatten mit fransigen Kanten, die wie ein riesiges Sieb funktionieren.",
+          "img_index": 2
+        },
+        {
+          "id": "s009",
+          "text": "Sogar ein paar Haare wachsen an seinem breiten Kopf.",
+          "img_index": 6
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Sind Dinosaurier die größten Tiere aller Zeiten?",
+          "reveal_text": "Nein! Der Blauwal ist eines der größten Tiere aller Zeiten – schwerer als die meisten bekannten Urzeit-Saurier.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Auf der Suche nach Krill",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s010",
+          "text": "Der sanfte Riese ernährt sich fast nur von Krill.",
+          "img_index": 3
+        },
+        {
+          "id": "s011",
+          "text": "Das sind winzige, garnelenförmige Krebse, die in riesigen Schwärmen durch das Meer schweben.",
+          "img_index": 3
+        },
+        {
+          "id": "s012",
+          "text": "Beim Fressen dehnt sich seine gefurchte Kehle weit aus, sodass 65 Tonnen Wasser hineinpassen.",
+          "img_index": 4
+        },
+        {
+          "id": "s013",
+          "text": "Dann presst der Wal das Wasser mit der Zunge durch die Barten nach außen.",
+          "img_index": 4
+        },
+        {
+          "id": "s014",
+          "text": "Die Krebse bleiben im Sieb hängen und er schluckt sie hinunter.",
+          "img_index": 4
+        },
+        {
+          "id": "s015",
+          "text": "Bis zu vier Tonnen dieser Mini-Krebse filtert er an einem einzigen Tag aus dem Wasser.",
+          "img_index": 3
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Wenn der Blauwal ausatmet, schießt eine Fontäne aus Wasser und warmer Luft bis zu neun Meter hoch!"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Rettung der Meeresriesen",
+      "section_role": "human_animal",
+      "sentences": [
+        {
+          "id": "s016",
+          "text": "Früher wurden Blauwale von Menschen mit Harpunen stark gejagt.",
+          "img_index": 1
+        },
+        {
+          "id": "s017",
+          "text": "Sie drohten komplett auszusterben, doch heute stehen die sanften Riesen streng unter Schutz.",
+          "img_index": 0
+        },
+        {
+          "id": "s018",
+          "text": "Im Meer lauern jedoch neue Gefahren wie der Schiffslärm oder Zusammenstöße mit großen Containerschiffen.",
+          "img_index": 0
+        },
+        {
+          "id": "s019",
+          "text": "Mittlerweile haben sich die Bestände wieder auf geschätzte 10.000 bis 25.000 Tiere erholt.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was ist die Hauptnahrung des Blauwals?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Große Tintenfische"
+          },
+          {
+            "key": "B",
+            "text": "Winzige Krillkrebse"
+          },
+          {
+            "key": "C",
+            "text": "Seesterne und Muscheln"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Wie filtert der Blauwal seine Nahrung aus dem Wasser?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Mit seinen spitzen Zähnen"
+          },
+          {
+            "key": "B",
+            "text": "Mit seinen langen Barten"
+          },
+          {
+            "key": "C",
+            "text": "Mit den Kiemen an der Seite"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Wie schwer kann das Herz eines Blauwals werden?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Etwa 50 Kilogramm"
+          },
+          {
+            "key": "B",
+            "text": "Fast eine Tonne"
+          },
+          {
+            "key": "C",
+            "text": "Über zehn Tonnen"
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Bartenwale",
+      "Walgesang",
+      "Krill"
+    ],
+    "discover": [
+      "Säugetiere",
+      "Meeresbewohner",
+      "Artenschutz"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Der Blauwal ist ein Bartenwal und das größte Tier, das je gelebt hat.",
+      "source": "Blauwal",
+      "passage": "Mit einer Körperlänge von bis zu 33 Metern und einer Körpermasse von bis zu 200 Tonnen ist der Blauwal eines der größten und schwersten bekannten Tiere der Erdgeschichte."
+    },
+    {
+      "claim": "Sein Herz wiegt eine Tonne und ist so groß wie ein kleines Auto.",
+      "source": "Blauwal",
+      "passage": "Das Herz des Blauwals wiegt im Durchschnitt etwa 600 Kilogramm bis eine Tonne..."
+    },
+    {
+      "claim": "Da der Wal im kalten Wasser viel Wärme verliert, schützt seine enorme Größe ihn vor dem Auskühlen.",
+      "source": "Blauwal",
+      "passage": "beim Übergang zur dauerhaft aquatischen Lebensweise den im Wasser deutlich größeren Wärmeverlust kompensieren mussten. Da die Wärmeproduktion letztlich abhängig ist von der Anzahl der Körperzellen, können größere Tiere mehr Wärme produzieren und speichern als kleine."
+    },
+    {
+      "claim": "Er hat keine Zähne, sondern bis zu 400 Barten im Oberkiefer.",
+      "source": "Blauwal",
+      "passage": "Im Maul trägt ein Blauwal auf jeder Seite 260 bis 400 Barten..."
+    },
+    {
+      "claim": "Sogar ein paar Haare wachsen an seinem breiten Kopf.",
+      "source": "Blauwal",
+      "passage": "An verschiedenen Stellen des Kopfes befinden sich Haare, vor allem am Kinn, beidseitig am Unterkiefer und auf der Oberseite."
+    },
+    {
+      "claim": "Beim Fressen dehnt sich seine gefurchte Kehle weit aus, sodass 65 Tonnen Wasser hineinpassen.",
+      "source": "Blauwal",
+      "passage": "Dabei passen bis zu 65 Tonnen Meerwasser in den durch die gedehnten Kehlfurchen vergrößerten Maulraum."
+    },
+    {
+      "claim": "Bis zu vier Tonnen dieser Mini-Krebse filtert er an einem einzigen Tag aus dem Wasser.",
+      "source": "Blauwal",
+      "passage": "Ein erwachsenes Tier kann bis zu 4 Tonnen Krill... an einem Tag zu sich nehmen."
+    },
+    {
+      "claim": "Mittlerweile haben sich die Bestände wieder auf geschätzte 10.000 bis 25.000 Tiere erholt.",
+      "source": "Blauwal",
+      "passage": "Die Blauwalbestände haben sich mittlerweile erholt und wurden im Jahr 2024 auf etwa 10.000 bis 25.000 Individuen geschätzt."
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Blauwal S2 — Lektorat\n### SILENT (2 Korrekturen)\n- «Sein Herz wiegt eine Tonne und ist so groß wie ein kleines Auto.» → «Sein Herz wiegt bis zu eine Tonne – so schwer wie ein kleines Auto!» (WP: «Das Herz des Blauwals wiegt im Durchschnitt etwa 600 Kilogramm bis eine Tonne»)\n- «Er hat keine Zähne, sondern bis zu 400 Barten im Oberkiefer.» → «Er hat keine Zähne, sondern 260 bis 400 Barten im Oberkiefer.» (WP: «trägt ein Blauwal auf jeder Seite 260 bis 400 Barten»)\n### KORRIGIERT (1 Korrekturen)\n- «Nein! Der Blauwal übertrifft sie alle: Er ist viel schwerer als jeder bekannte Urzeit-Saurier.» → «Nein! Der Blauwal ist eines der größten Tiere aller Zeiten – schwerer als die meisten bekannten Urzeit-Saurier.» — WP: ««Die ausgestorbene Walart Perucetus colossus übertraf den Blauwal möglicherweise an Gewicht» – ein absoluter Superlativ ist nicht belegbar.»\nZusammenfassung: 2 silent, 1 korrigiert, 0 zu prüfen.",
+    "n_silent": 2,
+    "n_korrigiert": 1,
+    "n_pruefen": 0
+  }
+}

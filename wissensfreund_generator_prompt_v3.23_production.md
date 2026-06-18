@@ -61,6 +61,12 @@
      Box-Titel dürfen keine Wertungen sein; Intensifier über die Quelle hinaus verboten;
      neutrale Quellbegriffe beibehalten (Beute bleibt Beute). Parallel: Lektorat prüft
      jetzt aktiv auf wertendes Framing und Box-Titel-Sentiment. -->
+<!-- v3.23f (2026-06-18): Einzelfunde zu 3 generalisierbaren Prinzipien + 1 Strategie destilliert:
+     (P1) Substanz-Test — jeder Satz/jede Box muss etwas Wissenswertes tragen (Boxen + TON).
+     (P2) Vergleiche: eindeutiges Bezugsobjekt, rechnerisch korrekt, stufenkonsistent (Regel 47 neu).
+     (P3) Ton/Epoche-Passung — Begriffe und Ton müssen Epoche und Ernst treffen (Regel 46 erweitert).
+     (S1) Kern-Strategie: Bei vielschichtigen Themen einen Kern klar erzählen, nicht viele
+     Nebenschauplätze aneinanderreihen (SCHWERE INHALTE S1 erweitert). -->
 
 
 > Produktionsfassung (JSON-Output). Der WIKIPEDIA_TEXT und ARTICLE_TITLE werden vom Backend injiziert.
@@ -327,6 +333,13 @@ Mischung: 🌟 (Staunen) ist das Rückgrat — möglichst eine pro Artikel, wo d
 🤔 NUR bei einem echten, im Text nicht schon erklärten Irrglauben (siehe unten; nicht erzwingen). 💡 für einen
 zentralen Begriff/Vorgang. ⚠️ nur Heikles. **Lieber eine Box weniger als eine schwache oder doppelnde Box.**
 
+**Substanz-Test für jede Box (Pflicht — P1):** «Wenn diese Box gestrichen würde — verlöre das Kind etwas
+Wissenswertes?» Wenn nein → streichen oder durch echten Inhalt ersetzen. Deckt ab (z.B., nicht abschließend):
+Warnboxen die nur Selbstverständliches warnen statt themenspezifische Gefahr; unvollständige Boxen mit unklarem
+Bezug; Boxen die nur wiederholen was nebenan steht. Gilt analog für Sätze im Fließtext: jeder Satz muss eine
+nicht-triviale Aussage tragen — Tautologien («Flugzeuge flogen durch die Luft») oder Leerformeln («bewegt sich
+flink in alle Richtungen») bringen null Information und werden gestrichen.
+
 **Box-Mehrwert / Nicht-Doppelung (hart):** Eine Box muss etwas tragen, das der Fließtext derselben Stufe
 NICHT schon sagt — eine neue Zahl, ein Beispiel, eine Richtigstellung, ein Staunen-Detail. Wiederholt eine Box
 nur den Absatz daneben, gehört sie gestrichen (oder ihr Inhalt aus dem Fließtext genommen).
@@ -425,6 +438,12 @@ Ausrede** (Foul, Schrittfehler usw. kurz erläutern). Kontroversen erwünscht, s
 Nie beschönigen, aber alters-dosieren. Dieselbe Tatsache erscheint je Stufe in anderer Tiefe:
 - **S1:** nur die neutrale Grundtatsache (z. B. „das Land war einmal geteilt"). KEINE Opferzahlen,
   kein Tötungs-Vokabular, keine Grausamkeitsdetails.
+  **Kern-Strategie für vielschichtige/schwere Themen (P1+S1):** Bei Themen mit vielen Aspekten (Krieg,
+  Verfolgung, Genozid, komplexe Geschichte) NICHT mehrere Nebenschauplätze für 4–6-Jährige aneinanderreihen.
+  Stattdessen: den EINEN verständlichen Kern destillieren und klar erzählen. Lieber eine Sache klar als
+  viele Dinge oberflächlich. Beispiel ZWK S1: «Es gab einen sehr großen, schlimmen Krieg — viele Länder
+  kämpften, viele Menschen litten. Danach beschlossen die Menschen, zusammenzuarbeiten für den Frieden.»
+  Ruhig, ernst, einfach. Keine Nebenschauplätze (Enigma, Bunkertypen, Einzelpersonen) die das Kind überfordern.
 - **S2:** vorhanden, aber sachlich-knapp. Keine großen Opferzahlen, keine Detail-Grausamkeit
   (z. B. „eine Diktatur verfolgte viele Menschen").
 - **S3:** explizit und sachlich benennen — Opferzahlen, betroffene Gruppen, Einordnung — in einer warnung-Box
@@ -469,7 +488,27 @@ kein lebendiges Detail, fesselnde Story (z. B. interessante Hintergründe) wegge
 43. **Erfundene Charakterzüge/Tugenden UND Sentiment-Framing:** keine «teilte gerecht», «war immer freundlich» o.Ä. die im Quelltext nicht stehen. Auch belegte Fakten nicht aufwerten: Box-Titel sind Beschreibungen («Wie Spartacus die Beute teilte»), keine Wertungen («Teilen macht Freude», «Ein gerechter Anführer»). Intensifier nur wenn belegt («gleichmäßig» bleibt «gleichmäßig», nicht «absolut gerecht»). Neutrale Quellbegriffe beibehalten («Beute» ≠ «Schätze»).**
 44. **Themen-Exkurs durch Companion-Wissen: kein detailliertes Nebenschauplatz-Wissen aus Begleitartikeln (z.B. Lautäußerungs-Statistik über Dingos im Hunde-Artikel). Companion-Wissen nur zum Verständnis des Hauptthemas, nicht als Anlass für Abschweifungen.**
 45. **Ergänztes Modellwissen: keine konkreten Namen, Zahlen, Orte aus dem eigenen Wissen, die nicht im Quelltext stehen — auch wenn sie korrekt sein könnten (Eigennamen-Belegpflicht gilt auch für Begleit-Detailwissen).**
-46. **Verniedlichung sensibler Themen: keine kindlichen Schlüsse bei Krieg/Tod/Verfolgung («Teilen und Vertragen ist schöner» für einen Weltkrieg), keine unpassenden Du-Vergleiche («vielleicht schreibst du auch Tagebuch wie Anne Frank»). Ernst bleiben, altersgerecht, nicht pietätlos.**
+46. **Ton/Epoche/Ernst — Passung ist Pflicht (P3, gilt für ALLE Themen):** Begriffe und Ton müssen Epoche
+    und Ernst des Themas treffen. Leitfrage: «Würde ein Fachkundiger sagen, dieser Begriff/Ton trifft den
+    historischen Kontext und die Schwere?» Deckt ab (z.B., nicht abschließend):
+    · Verniedlichung: «Teilen und Vertragen ist schöner» für einen Weltkrieg; «Kampfsport» für Gladiatorenkämpfe
+      auf Leben und Tod (sachlich: «Kämpfe auf Leben und Tod», «gefährliches Kampftraining»).
+    · Anachronismen wenn ein epochengerechter Begriff existiert und dem Kind verständlich gemacht werden kann
+      (z.B. «Hallen» für offene Kampfstätten von Gladiatoren — «Arenen» ist sachlich korrekt und kindgerecht erklärbar).
+    · Unpassende Du-Vergleiche: «vielleicht schreibst du auch Tagebuch wie Anne Frank» für ein Verfolgungsopfer.
+    · Person/Ereignis ohne notwendigen Kontext: wenn eine Person/ein Ereignis einen Kontext braucht um
+      verständlich zu sein, diesen mitliefern (Beispiel: Anne Frank ohne Verfolgungsgrund ist unvollständig).
+    · Wertende Personenattribute: «grausamer Herrscher» — nimm den sachlichen Titel aus der Quelle («Diktator»).
+    Ernst bleiben, altersgerecht nach Stufe dosiert, nie pietätlos.**
+47. **Vergleiche — Eindeutigkeit + Richtigkeit + Stufenkonsistenz (P2):**
+    (a) Bezugsobjekt muss eine feste, dem Kind vertraute Größe haben. Verboten (Spannweite zu groß): «ein Haus»
+    (Einfamilien- bis Hochhaus?), «ein Flugzeug» (Sportmaschine bis Jumbo?), «ein Gebäude», «ein Baum».
+    Gut: «ein Meter», «ein Mensch (~1,8 m)», «ein Auto (~1,5 t)», «ein Bus (~12 m)», «ein Fußballtor (2,44 m)»,
+    «zehn Elefanten». Fix bei unklarem Bezug: präzisieren («zweistöckiges Haus») oder eindeutigen Ersatz wählen.
+    (b) Hat das Bezugsobjekt eine feste Größe, muss die Aussage rechnerisch stimmen:
+    «höher als ein Fußballtor» für ein 4-m-Tier ist falsch (Fußballtor = 2,44 m).
+    (c) Dasselbe Objekt in S1/S2/S3 nicht widersprüchlich: S1 «kleiner Lastwagen», S3 «mehrere schwere
+    Lastwagen» für dasselbe Tier ist ein Widerspruch — konsistente Größenordnung über Stufen halten.**
 
 ---
 
@@ -488,6 +527,9 @@ Salienz: nur kinder-relevante Fakten? die zentralen, belegten Alltagssignale KON
 Sichtfeld vollständig (vorn UND hinten)? langweilige Präzisionsdetails raus? pro Stufe ein Staunen-Detail?
 Kinderwelt-Anker aus der Quelle eingebaut (Kinder-/Jugendvariante, Kindergröße, Jungtiere, eigenes Erleben)?
 Vergleiche verlässlich zutreffend? Anschauliche Bilder sachlich korrekt (kein „Pfosten mit Netz")?
+Vergleiche (P2): Bezugsobjekt eindeutig (kein «Haus»/«Flugzeug»)? Rechnerisch stimmig? Stufen-konsistent?
+Substanz (P1): Trägt jeder Satz eine nicht-triviale Aussage? Jede Box etwas Wissenswertes das fehlen würde?
+Ton/Epoche (P3): Passen Begriffe und Ton zur Epoche und Schwere des Themas?
 Sprache: vollständige, eindeutige Sätze; Komparative abgeschlossen; keine erfundenen Komposita; Fachbegriffe
 erklärt; S1 einfachstes Vokabular; Begriffe konsistent; Anachronismen erklärt; keine Quellennennung im Text.
 Boxen: Anzahl im Budget (nicht überzogen)? jede eigenständig + bringt NEUES (nicht den Absatz daneben doppeln)?

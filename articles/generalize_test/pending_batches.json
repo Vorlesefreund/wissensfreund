@@ -1,0 +1,9 @@
+{
+  "stage3_generalize_test": {
+    "batch_id": "msgbatch_01MXoPrPSa8vkt1DxaN74tHA",
+    "stage": 3,
+    "run_id": "generalize_test",
+    "n_requests": 12,
+    "submitted": "2026-06-18T09:31:10.805070+00:00"
+  }
+}

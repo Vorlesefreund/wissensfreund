@@ -1,0 +1,391 @@
+{
+  "meta": {
+    "id": "photosynthese_l1",
+    "title": "Photosynthese",
+    "subtitle": "Wie Pflanzen Sonnenlicht in Essen verwandeln",
+    "emoji": "🌱",
+    "age_level": 1,
+    "pattern": "tech_science",
+    "theme_color": "#4CAF50",
+    "word_count": 182,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Photosynthese",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "natur_und_umwelt",
+    "category_sub": "pflanzen",
+    "generated_at": "2026-06-18T09:18:59.749276+00:00",
+    "grounding_companions": [
+      "Chlorophylle",
+      "Glucose",
+      "Stoma (Botanik)",
+      "Sauerstoff"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v3.23b"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Blattgruen.jpg",
+      "alt": "Nahaufnahme von mehreren grünen Blättern an einem Baum oder Strauch, die im Sonnenlicht leuchten. Im Hintergrund ist eine grüne Wiese zu sehen.",
+      "caption": "Grüne Blätter fangen das warme Sonnenlicht ein.",
+      "license": "CC BY-SA 2.5",
+      "license_author": "btr",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/d/dd/Blattgruen.jpg",
+      "wikimedia_id": "File:Blattgruen.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/d/dd/Blattgruen.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/photosynthese/Blattgruen_300.jpg",
+        "800": "bilder/photosynthese/Blattgruen_800.jpg",
+        "1600": "bilder/photosynthese/Blattgruen_1600.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Plagiomnium_affine_laminazellen.jpeg",
+      "alt": "Das Bild zeigt Pflanzenzellen unter dem Mikroskop, gefüllt mit vielen kleinen grünen Chloroplasten, die für die Photosynthese wichtig sind. Die Zellen sind durch helle Zellwände voneinander getrennt.",
+      "caption": "Unter dem Mikroskop siehst du winzige grüne Punkte.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Kristian Peters -- Fabelfroh",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/4/49/Plagiomnium_affine_laminazellen.jpeg",
+      "wikimedia_id": "File:Plagiomnium_affine_laminazellen.jpeg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/49/Plagiomnium_affine_laminazellen.jpeg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/photosynthese/Plagiomnium_affine_laminazellen_300.jpg",
+        "800": "bilder/photosynthese/Plagiomnium_affine_laminazellen_800.jpg",
+        "1600": "bilder/photosynthese/Plagiomnium_affine_laminazellen_1600.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Anisocytische_Schließzellen.png",
+      "alt": "Das Bild zeigt eine schematische Darstellung von Pflanzenzellen mit mehreren Spaltöffnungen (Stomata), die gelb hervorgehoben sind. Diese Öffnungen sind wichtig für den Gasaustausch bei der Photosynthese.",
+      "caption": "Kleine Spaltöffnungen helfen der Pflanze beim Atmen.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Wandtattoo",
+      "source_url": "https://upload.wikimedia.org/wikipedia/commons/3/3e/Anisocytische_Schlie%C3%9Fzellen.png",
+      "wikimedia_id": "File:Anisocytische_Schlie%C3%9Fzellen.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/3/3e/Anisocytische_Schlie%C3%9Fzellen.png",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/photosynthese/Anisocytische_Schließzellen_300.jpg",
+        "800": "bilder/photosynthese/Anisocytische_Schließzellen_800.jpg",
+        "1600": "bilder/photosynthese/Anisocytische_Schließzellen_1600.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Was essen eigentlich Pflanzen?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Hast du dich schon gefragt, was Pflanzen essen?",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Sie gehen nicht einkaufen.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Pflanzen machen ihr Essen einfach selbst.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Sie nutzen dafür das helle Sonnenlicht.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Diesen Vorgang nennt man Photosynthese.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Dabei machen Pflanzen aus Licht eigene Nahrung.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Auch winzige Algen im Wasser machen das.",
+          "img_index": -1
+        },
+        {
+          "id": "s008",
+          "text": "Sogar manche kleine Bakterien nutzen die Sonne.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Wie Pflanzen ihr Essen kochen",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s009",
+          "text": "Pflanzen brauchen drei Dinge für ihre Nahrung.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Zuerst fangen die Blätter das Licht.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Das macht der grüne Stoff Chlorophyll.",
+          "img_index": 1
+        },
+        {
+          "id": "s012",
+          "text": "Er färbt fast alle Blätter grün.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Dann trinken die Wurzeln Wasser aus der Erde.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Zuletzt holen die Blätter Luft.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Sie haben dafür winzige Öffnungen auf der Unterseite.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Man nennt diese kleinen Öffnungen auch Spaltöffnungen.",
+          "img_index": 2
+        },
+        {
+          "id": "s017",
+          "text": "Daraus machen die Pflanzen süßen Zucker.",
+          "img_index": -1
+        },
+        {
+          "id": "s018",
+          "text": "Dieser Zucker gibt der Pflanze Kraft zum Wachsen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Der süße Pflanzen-Zucker ist genau derselbe wie echter Traubenzucker!"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Warum wir Pflanzen brauchen",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s019",
+          "text": "Pflanzen machen aber noch etwas sehr Wichtiges.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Sie stellen frischen Sauerstoff her.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Die Pflanzen geben diesen in die Luft ab.",
+          "img_index": -1
+        },
+        {
+          "id": "s022",
+          "text": "Menschen und Tiere brauchen diesen Sauerstoff dringend.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Wir müssen ihn nämlich einatmen.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Ohne die Pflanzen gäbe es keine Atemluft.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "Auch alle Bäume im Wald machen das so.",
+          "img_index": -1
+        },
+        {
+          "id": "s026",
+          "text": "Sie retten also das Leben auf der Erde.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was nutzen Pflanzen für die Photosynthese?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Das Sonnenlicht"
+          },
+          {
+            "key": "B",
+            "text": "Kaltes Eis"
+          },
+          {
+            "key": "C",
+            "text": "Blauen Sand"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Welche Farbe hat der Stoff Chlorophyll?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Blau"
+          },
+          {
+            "key": "B",
+            "text": "Grün"
+          },
+          {
+            "key": "C",
+            "text": "Rot"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Welchen wichtigen Stoff machen Pflanzen für uns?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sauerstoff zum Atmen"
+          },
+          {
+            "key": "B",
+            "text": "Kohlensäure zum Prickeln"
+          },
+          {
+            "key": "C",
+            "text": "Milch zum Trinken"
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Pflanzen",
+      "Chlorophyll",
+      "Sauerstoff",
+      "Zucker"
+    ],
+    "discover": [
+      "Blätter",
+      "Sonne",
+      "Luft",
+      "Wurzeln"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Dabei machen Pflanzen aus Licht eigene Nahrung.",
+      "source": "Photosynthese",
+      "passage": "Die Photosynthese ... ist ein physiologischer Prozess zur Erzeugung energiereicher Biomoleküle aus energieärmeren Stoffen mit Hilfe von Lichtenergie. Sie wird von Pflanzen, Algen und manchen Bakterien betrieben."
+    },
+    {
+      "claim": "Auch winzige Algen im Wasser machen das.",
+      "source": "Photosynthese",
+      "passage": "Sie wird von Pflanzen, Algen und manchen Bakterien betrieben."
+    },
+    {
+      "claim": "Sogar manche kleine Bakterien nutzen die Sonne.",
+      "source": "Photosynthese",
+      "passage": "Sie wird von Pflanzen, Algen und manchen Bakterien betrieben."
+    },
+    {
+      "claim": "Das macht der grüne Stoff Chlorophyll.",
+      "source": "Photosynthese",
+      "passage": "Bei diesem biochemischen Vorgang wird Lichtenergie mit Hilfe von lichtabsorbierenden Farbstoffen wie Chlorophyll in chemische Energie umgewandelt."
+    },
+    {
+      "claim": "Er färbt fast alle Blätter grün.",
+      "source": "Chlorophylle",
+      "passage": "Insbesondere Pflanzen erlangen ihre grüne Farbe durch Chlorophylle."
+    },
+    {
+      "claim": "Dann trinken die Wurzeln Wasser aus der Erde.",
+      "source": "Photosynthese",
+      "passage": "Diese wird dann genutzt, um aus energiearmen anorganischen Stoffen (vor allem Kohlenstoffdioxid (CO2) und Wasser (H2O)) energiereiche organische Verbindungen (vor allem Kohlenhydrate) aufzubauen."
+    },
+    {
+      "claim": "Sie haben dafür winzige Öffnungen auf der Unterseite.",
+      "source": "Stoma (Botanik)",
+      "passage": "Die Stomata befinden sich bei den meisten Pflanzen in der unteren Epidermis der Blätter..."
+    },
+    {
+      "claim": "Man nennt diese kleinen Öffnungen auch Spaltöffnungen.",
+      "source": "Stoma (Botanik)",
+      "passage": "Ein Stoma oder eine Spaltöffnung (Plural Stomata; altgriechisch στόμα stóma, deutsch ‚Mund‘, ‚Mündung‘, ‚Öffnung‘) ist eine Pore in der Epidermis von Pflanzen."
+    },
+    {
+      "claim": "Daraus machen die Pflanzen süßen Zucker.",
+      "source": "Glucose",
+      "passage": "Glucose entsteht in Pflanzen und den meisten Algen mit Hilfe der Photosynthese aus Wasser und Kohlenstoffdioxid."
+    },
+    {
+      "claim": "Der süße Pflanzen-Zucker ist genau derselbe wie echter Traubenzucker!",
+      "source": "Glucose",
+      "passage": "D-Glucose... Sie wird auch als Traubenzucker... bezeichnet."
+    },
+    {
+      "claim": "Sie stellen frischen Sauerstoff her.",
+      "source": "Photosynthese",
+      "passage": "Bei der oxygenen Photosynthese wird molekularer Sauerstoff (O2) freigesetzt."
+    },
+    {
+      "claim": "Menschen und Tiere brauchen diesen Sauerstoff dringend.",
+      "source": "Sauerstoff",
+      "passage": "Ohne die oxygene Photosynthese könnten aerobe Organismen wie Menschen und Tiere nicht leben, da sie ihn für die Atmung benötigen."
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Photosynthese S1 — Lektorat\nZusammenfassung: 0 silent, 0 korrigiert, 0 zu prüfen.",
+    "n_silent": 0,
+    "n_korrigiert": 0,
+    "n_pruefen": 0
+  }
+}

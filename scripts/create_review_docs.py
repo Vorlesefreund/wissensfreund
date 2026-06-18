@@ -468,12 +468,23 @@ def main() -> None:
     parser.add_argument("--theme-lektorat", action="append", default=[],
                         metavar="SLUG:PATH",
                         help="Per-Thema Lektorat-Dir, z.B. spartacus:/pfad/zu/lektorat")
+    parser.add_argument("--themen", nargs="+", default=None,
+                        metavar="NAME:SLUG",
+                        help="Themen überschreiben, z.B. Wikinger:wikinger Blauwal:blauwal")
     args = parser.parse_args()
     if args.out_dir:
         OUT_DIR = Path(args.out_dir).resolve()
     if args.lektorat_dir:
         LEKTORAT_DIR = Path(args.lektorat_dir).resolve()
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    themen = THEMEN
+    if args.themen:
+        themen = []
+        for entry in args.themen:
+            name, _, slug = entry.partition(":")
+            if name and slug:
+                themen.append((name.strip(), slug.strip()))
 
     # Per-Thema Lektorat-Dir-Overrides aufbauen
     theme_lektorat_map: dict[str, Path] = {}
@@ -482,7 +493,7 @@ def main() -> None:
         if slug and path_str:
             theme_lektorat_map[slug.strip()] = Path(path_str.strip()).resolve()
 
-    for thema_name, slug in THEMEN:
+    for thema_name, slug in themen:
         print(f"Erstelle {thema_name}_Review.docx ...", end=" ", flush=True)
         try:
             lektorat_dir = theme_lektorat_map.get(slug)
