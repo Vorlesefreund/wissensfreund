@@ -1,101 +1,70 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-18T09:51:46Z -->
+<!-- updated: 2026-06-18T13:34:54Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## Zuletzt abgeschlossen
+## Abgeschlossen (2026-06-18) — Daten-Konsistenz-Audit + Exclude-Backstop
 
-**Generalisierungstest: 4 neue Themen (generalize_test) — ABGESCHLOSSEN (2026-06-18)**
+**Wortziel-Bug behoben.** ergiebigkeit_scores.json aus catalog_full.json neu gebaut:
+134 → 4375 Einträge. XLSX == catalog_full für erg verifiziert (1 trivialer Diff: 9/11
+erg_s1). Alte Datei in _alt/. Pipeline nutzt jetzt echte Scores statt Fallback-6.
+Builder: build_ergiebigkeit_scores.py (Format aus Altdatei gespiegelt, bricht bei
+unbekanntem Format ab).
 
-Ergebnisse: articles/generalize_test/ (articles + lektorat + review)
-Word-Docs: articles/generalize_test/review/ (Wikinger, Blauwal, Pest, Photosynthese)
+**Exclude-Gate geprüft + gehärtet.** Befund: 58 XLSX-Excludes sind NICHT in
+catalog_full (0 vorhanden) → per Omission unerreichbar (unbekanntes Thema → Skip).
+Gate war damit einschichtig; zwei gedachte Backstops waren inert (Job-Builder prüfte
+falsches Feld; eignung_verdicts.json hat kein exclude-Feld, nur age_floor+framing).
+Fix: eignung_exclude.json (58 normalisierte Lemmata, aus XLSX) als Positiv-Liste;
+eignung_for() und _build_catalog_jobs() prüfen sie jetzt → Laufzeit-Gate (Z.1515)
+feuert wieder auf JEDEM Pfad. Verifiziert: napoleon→exclude, biene→include.
+Builder: build_eignung_exclude.py.
 
-### Lektorat-Last generalize_test (v3.23f) vs. v3d-Baseline
+**Schema-Drift bestätigt + entschärft.** Excludes waren in 3 Dateien unterschiedlich
+markiert (XLSX eignung="exclude" / catalog_full droppt sie / eignung_verdicts.json
+neues Schema exclude:true, Feld fehlt). Positiv-Liste vereinheitlicht den Check.
 
-| Artikel        | S | K | P | | Artikel          | S | K | P |
-|---|---|---|---|---|---|---|---|---|
-| wikinger_l1    | 1 | 2 | 1⚠| | photosynthese_l1 | 0 | 0 | 0 |
-| wikinger_l2    | 0 | 0 | 0 | | photosynthese_l2 | 0 | 1 | 0 |
-| wikinger_l3    | 3 | 2 | 1⚠| | photosynthese_l3 | 2 | 1 | 0 |
-| blauwal_l1     | 0 | 0 | 0 | | pest_l1          | 1 | 0 | 1⚠|
-| blauwal_l2     | 2 | 1 | 0 | | pest_l2          | 0 | 0 | 0 |
-| blauwal_l3     | 2 | 1 | 0 | | pest_l3          | 5 | 1 | 0 |
-| **GESAMT**     |**16**|**9**|**3**| | v3d-Baseline (18 Art.) |19|7|4|
+## Derived-File-Disziplin (NEU — einhalten)
 
-Normiert: v3.23f 1,33S/1Art — v3d 1,05S/1Art | K: 0,75 vs 0,39 | P: 0,25 vs 0,22
+catalog_review_master.xlsx = EINZIGE Wahrheitsquelle. Bei jeder XLSX-Änderung neu bauen:
+- build_ergiebigkeit_scores.py → ergiebigkeit_scores.json
+- build_eignung_exclude.py     → eignung_exclude.json
+catalog_full.json ist abgeleitet (Excludes weggelassen, age_floor enthalten).
 
-### Evaluation der 3 Prinzipien + 1 Strategie
+## Restlücken (niedrigprior)
 
-**P1 Substanz:** Generator produzierte für die 4 neuen Themen keine Tautologien/Leerformeln.
-Kein einziger P1-Fund im Lektorat — Prinzip greift im Generator (kein Stoff zum Flaggen).
+- ~249 erg_s1-Lücken in XLSX UND catalog_full (gleicher Stand, kein Sync-Problem) → S1-Fallback.
+- eignung_verdicts.json: 738 Einträge, nur age_floor+framing_note. exclude jetzt über
+  _EXCLUDE_SET abgefangen; age_floor via catalog_full im Job-Builder verdrahtet.
+- EIGNUNG_STRICT=False (Bulk-Default); "True vor Bulk" unrealistisch (3813 ohne Verdict).
+- audit_*.py (Einmal-Diagnosen) im Repo-Root → im Aufräumschritt entfernen.
 
-**P2 Vergleiche:** Alle generierten Vergleiche verwendeten eindeutige Bezugsobjekte
-(«drei große Busse», «kleines Auto»). Keine P2-Korrektur nötig. Prinzip im Generator wirksam.
+## Nächste Schritte (Reihenfolge)
 
-**P3 Ton/Epoche:** Lektorat korrekt: «Schätze» → «Reichtum» (Framing, wikinger_l1),
-Helme «völlig glatt gestaltet» → «hatten keine Hörner» (sachliche Anachronismus-Korrektur).
-Pest-Ton: angemessen ernst, keine Verharmlosung. Kein P3-Überkorrektur-Fall.
+1. Enge Datenfluss-Karte: welches Skript erzeugt welche Datei aus welcher Quelle;
+   jede abgeleitete Datei aus XLSX reproduzierbar? (Fortsetzung des Audits)
+2. Aufräumen: Spare-Clone, scrape_out, verwaiste _alt-Stände, audit_*-Einmalskripte.
+3. PROJEKTDOKUMENT.md NACH dem Aufräumen neu generieren (nicht vorher — sonst Drift festgeschrieben).
+4. KERN: Generierung + Lektorat (eigentlicher Engpass, Qualität noch nicht gut genug).
+5. Danach Bilder, dann TTS.
 
-**S1 Kern-Strategie:** Pest_l1 fokussiert (1S+1P total), kein Nebenschauplatz-Problem.
-Wikinger_l1 ähnlich einfach (1S+2K+1P). Keine S1-Überladung sichtbar.
+## Offen aus Artikel-Review (nach dem Audit)
 
-**3 PRÜFEN-Flags** sind legitime Fakten-Fragen (kein P1/P2/P3-induziertes Überflaggen):
-- wikinger_l1: Drachenkopf «guten Geister erschrecken» (Quelle: «vertreiben/aufbringen»)
-- wikinger_l3: Opfer «unter freiem Himmel» (Quelle belegt Ort nicht explizit)
-- pest_l1: «goldene Säule in Wien» (Quelle nennt keine goldene Säule)
+1. PRÜFEN braucht immer Korrekturvorschlag (A/B) — nicht umgesetzt.
+2. Lektorat soll mehr auto-korrigieren statt PRÜFEN (Pest "goldene Säule Wien").
+3. Innerartikel-Konsistenz: Fließtext vs. Box (Blauwal "größtes Tier je" vs Box).
+4. Sprachliche Fehlbezüge ("dankbare Denkmäler", "Wärmestrahlung" als Licht).
+5. Roter Faden / Wesentliches zuerst, bes. S1 (Photosynthese, Wikinger-Einstieg).
+6. Lektorat-Gründlichkeit ungleich über Stufen (Drachenkopf nur in S3 gefangen).
+7. EINBAU-BUG: Korrekturen zerstören manchmal Satzgrammatik (Wikinger S3) — technisch.
+- Nächster Generierungstest: wieder 3 NEUE Themen (Overfitting-Check).
 
-**Fazit:** Prinzipien greifen im Generator, kein Overfitting. Lektorat-Last stabil.
-Der höhere K-Wert (9 vs 7) spiegelt echte Sach-Korrekturen (Zahlenwerte, Superlative),
-nicht Über-Korrekturen durch neue Prinzipien.
+## Weiter offen (unverändert)
 
----
-
-**Generator v3.23f: Einzelfunde → 3 Prinzipien + 1 Strategie (2026-06-18)**
-
-- **P1 Substanz-Test** in CALLOUT-BOXEN: «Wenn diese Box/Satz gestrichen würde — verlöre das Kind etwas?»
-- **P3 Ton/Epoche**: Rule 46 von «Verniedlichung» zu vollständigem Prinzip erweitert
-- **P2 Vergleiche**: Neue Rule 47 (eindeutiges Bezugsobjekt + rechnerisch korrekt + stufenkonsistent)
-- **S1 Kern-Strategie**: SCHWERE INHALTE S1 erweitert — Kern destillieren, Nebenschauplätze vermeiden
-- Lektorat: FRAMING-TON-EPOCHENPASSUNG + SUBSTANZ-PRÜFUNG + VERGLEICHE neu
-
----
-
-## mini_s2_v3d: Referenzergebnisse
-
-| Artikel | S | K | P | | Artikel | S | K | P |
-|---|---|---|---|---|---|---|---|---|
-| elefant_l1 | 0 | 0 | 0 | | dinosaurier_l1 | 0 | 0 | 0 |
-| elefant_l2 | 0 | 0 | 0 | | dinosaurier_l2 | 2 | 1 | 0 |
-| elefant_l3 | 0 | 2 | 0 | | dinosaurier_l3 | 5 | 1 | 1 ⚠ |
-| hund_l1 | 1 | 0 | 0 | | vulkan_l1 | 0 | 0 | 0 |
-| hund_l2 | 1 | 0 | 0 | | vulkan_l2 | 0 | 0 | 0 |
-| hund_l3 | 0 | 2 | 0 | | vulkan_l3 | 2 | 0 | 2 ⚠ |
-| spartacus_l1 | 0 | 0 | 0 | | zwk_l1 | 1 | 0 | 0 |
-| spartacus_l2 | 2 | 0 | 0 | | zwk_l2 | 4 | 0 | 1 ⚠ |
-| spartacus_l3 | 1 | 1 | 0 | | zwk_l3 | 0 | 0 | 0 |
-| **GESAMT** | **19** | **7** | **4** | | | | | |
+age_floor-Gate Stage 2 · Stage 4 TTS (tts_produce.py fehlt) · Bildbaustelle · Stage-3-Idempotenz
+· Box-Sentiment-Feinschliff · Quiz/stimmt_das schema mismatch (Flutter)
 
 ---
 
-## Offen nach Priorität
-
-### Baustein 3 — tts_produce.py (Produktions-TTS)
-### Baustein 4 — Quiz-Vertonung
-### Flutter/App-Fixes (WfArticleListScreen, Quiz/stimmt_das schema mismatch)
-
----
-
-## Pipeline-Zustand (Stand 2026-06-18)
-
-| Baustein | Datei | Status |
-|---|---|---|
-| Artikel-Generierung | generate_grounded.py | ✅ lauffähig |
-| Generator-Prompt | v3.23_production.md | ✅ v3.23f (P1/P2/P3/S1) |
-| Lektorat-System | lektorat_common.py | ✅ v3.23f (Framing+Ton+Substanz+Vergleiche) |
-| Batch Stage 1-3 | run_batch.py | ✅ generalize_test abgeschlossen |
-| Review-Docs | create_review_docs.py | ✅ --themen + --theme-lektorat |
-| TTS-Generierung | tts_produce.py | ❌ fehlt |
-| Cost-Tracking | cost_tracker.py | ✅ verdrahtet |
-
-Catalog: **4346 primary**, 213 Leuchtturm, 563 sensibel, 56 exclude
+Catalog: 4346 primary · 213 Leuchtturm · 563 sensibel · 58 exclude (XLSX)

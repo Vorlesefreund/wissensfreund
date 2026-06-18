@@ -1,0 +1,827 @@
+{
+ "_meta": {
+  "source": "wortziele_ergiebigkeit_134_v2.xlsx",
+  "formel": "target_S = round(Wlo + clamp((Erg-2)/6,0,1)*(Whi-Wlo))",
+  "baender": {
+   "1": [
+    50,
+    250
+   ],
+   "2": [
+    80,
+    400
+   ],
+   "3": [
+    100,
+    650
+   ]
+  },
+  "n": 134
+ },
+ "scores": {
+  "dinosaurier": {
+   "thema": "Dinosaurier",
+   "S1": 8,
+   "S2": 9,
+   "S3": 9
+  },
+  "hund": {
+   "thema": "Hund",
+   "S1": 9,
+   "S2": 9,
+   "S3": 8
+  },
+  "elefant": {
+   "thema": "Elefant",
+   "S1": 9,
+   "S2": 9,
+   "S3": 8
+  },
+  "feuerwehr": {
+   "thema": "Feuerwehr",
+   "S1": 9,
+   "S2": 8,
+   "S3": 8
+  },
+  "haie": {
+   "thema": "Haie",
+   "S1": 7,
+   "S2": 9,
+   "S3": 9
+  },
+  "hai": {
+   "thema": "Hai",
+   "S1": 7,
+   "S2": 9,
+   "S3": 9
+  },
+  "vulkan": {
+   "thema": "Vulkan",
+   "S1": 7,
+   "S2": 9,
+   "S3": 9
+  },
+  "lego": {
+   "thema": "Lego",
+   "S1": 8,
+   "S2": 8,
+   "S3": 7
+  },
+  "brachiosaurus": {
+   "thema": "Brachiosaurus",
+   "S1": 7,
+   "S2": 8,
+   "S3": 8
+  },
+  "deutschland": {
+   "thema": "Deutschland",
+   "S1": 6,
+   "S2": 8,
+   "S3": 9
+  },
+  "deutschland (übersicht)": {
+   "thema": "Deutschland (Übersicht)",
+   "S1": 6,
+   "S2": 8,
+   "S3": 9
+  },
+  "gorillas": {
+   "thema": "Gorillas",
+   "S1": 7,
+   "S2": 8,
+   "S3": 8
+  },
+  "süßigkeiten": {
+   "thema": "Süßigkeiten",
+   "S1": 8,
+   "S2": 8,
+   "S3": 7
+  },
+  "chamäleon": {
+   "thema": "Chamäleon",
+   "S1": 7,
+   "S2": 8,
+   "S3": 8
+  },
+  "bundesrepublik deutschland": {
+   "thema": "Bundesrepublik Deutschland",
+   "S1": 6,
+   "S2": 8,
+   "S3": 9
+  },
+  "schiffe": {
+   "thema": "Schiffe",
+   "S1": 7,
+   "S2": 8,
+   "S3": 8
+  },
+  "indianer": {
+   "thema": "Indianer",
+   "S1": 6,
+   "S2": 8,
+   "S3": 9
+  },
+  "blackbeard": {
+   "thema": "Blackbeard",
+   "S1": 6,
+   "S2": 8,
+   "S3": 9
+  },
+  "düsseldorf": {
+   "thema": "Düsseldorf",
+   "S1": 7,
+   "S2": 8,
+   "S3": 8
+  },
+  "fußball": {
+   "thema": "Fußball",
+   "S1": 6,
+   "S2": 8,
+   "S3": 8
+  },
+  "waldbrand": {
+   "thema": "Waldbrand",
+   "S1": 6,
+   "S2": 8,
+   "S3": 8
+  },
+  "fossilien": {
+   "thema": "Fossilien",
+   "S1": 6,
+   "S2": 8,
+   "S3": 8
+  },
+  "pfeil und bogen": {
+   "thema": "Pfeil und Bogen",
+   "S1": 6,
+   "S2": 8,
+   "S3": 8
+  },
+  "ägypten": {
+   "thema": "Ägypten",
+   "S1": 5,
+   "S2": 8,
+   "S3": 9
+  },
+  "science center": {
+   "thema": "Science Center",
+   "S1": 5,
+   "S2": 8,
+   "S3": 8
+  },
+  "skateboard": {
+   "thema": "Skateboard",
+   "S1": 6,
+   "S2": 8,
+   "S3": 7
+  },
+  "kolosseum": {
+   "thema": "Kolosseum",
+   "S1": 5,
+   "S2": 8,
+   "S3": 8
+  },
+  "jahreszeiten": {
+   "thema": "Jahreszeiten",
+   "S1": 7,
+   "S2": 7,
+   "S3": 7
+  },
+  "markt": {
+   "thema": "Markt",
+   "S1": 6,
+   "S2": 7,
+   "S3": 8
+  },
+  "erdmännchen": {
+   "thema": "Erdmännchen",
+   "S1": 7,
+   "S2": 7,
+   "S3": 6
+  },
+  "seefahrer": {
+   "thema": "Seefahrer",
+   "S1": 5,
+   "S2": 7,
+   "S3": 8
+  },
+  "trojanischer krieg": {
+   "thema": "Trojanischer Krieg",
+   "S1": 4,
+   "S2": 7,
+   "S3": 9
+  },
+  "eis": {
+   "thema": "Eis",
+   "S1": 7,
+   "S2": 7,
+   "S3": 6
+  },
+  "schmetterling": {
+   "thema": "Schmetterling",
+   "S1": 7,
+   "S2": 7,
+   "S3": 6
+  },
+  "looney tunes": {
+   "thema": "Looney Tunes",
+   "S1": 7,
+   "S2": 7,
+   "S3": 6
+  },
+  "billy the kid": {
+   "thema": "Billy The Kid",
+   "S1": 5,
+   "S2": 7,
+   "S3": 8
+  },
+  "gemüse": {
+   "thema": "Gemüse",
+   "S1": 6,
+   "S2": 7,
+   "S3": 7
+  },
+  "wirtschaft": {
+   "thema": "Wirtschaft",
+   "S1": 4,
+   "S2": 7,
+   "S3": 9
+  },
+  "schule": {
+   "thema": "Schule",
+   "S1": 6,
+   "S2": 6,
+   "S3": 7
+  },
+  "giftpilz": {
+   "thema": "Giftpilz",
+   "S1": 5,
+   "S2": 7,
+   "S3": 7
+  },
+  "imker": {
+   "thema": "Imker",
+   "S1": 5,
+   "S2": 7,
+   "S3": 7
+  },
+  "magnetschwebebahn": {
+   "thema": "Magnetschwebebahn",
+   "S1": 4,
+   "S2": 7,
+   "S3": 8
+  },
+  "kristall": {
+   "thema": "Kristall",
+   "S1": 5,
+   "S2": 7,
+   "S3": 7
+  },
+  "wüstenfuchs": {
+   "thema": "Wüstenfuchs",
+   "S1": 6,
+   "S2": 7,
+   "S3": 6
+  },
+  "tell": {
+   "thema": "Tell",
+   "S1": 5,
+   "S2": 7,
+   "S3": 7
+  },
+  "maschine": {
+   "thema": "Maschine",
+   "S1": 4,
+   "S2": 7,
+   "S3": 7
+  },
+  "bunker": {
+   "thema": "Bunker",
+   "S1": 3,
+   "S2": 7,
+   "S3": 8
+  },
+  "corona-virus": {
+   "thema": "Corona-Virus",
+   "S1": 4,
+   "S2": 7,
+   "S3": 7
+  },
+  "regenbogen": {
+   "thema": "Regenbogen",
+   "S1": 6,
+   "S2": 6,
+   "S3": 6
+  },
+  "hades": {
+   "thema": "Hades",
+   "S1": 3,
+   "S2": 7,
+   "S3": 8
+  },
+  "ingo siegner": {
+   "thema": "Ingo Siegner",
+   "S1": 7,
+   "S2": 6,
+   "S3": 5
+  },
+  "lexikon": {
+   "thema": "Lexikon",
+   "S1": 5,
+   "S2": 6,
+   "S3": 7
+  },
+  "autoscooter": {
+   "thema": "Autoscooter",
+   "S1": 6,
+   "S2": 6,
+   "S3": 5
+  },
+  "lunge": {
+   "thema": "Lunge",
+   "S1": 4,
+   "S2": 6,
+   "S3": 7
+  },
+  "kinderrechte": {
+   "thema": "Kinderrechte",
+   "S1": 4,
+   "S2": 6,
+   "S3": 7
+  },
+  "krankenschwester": {
+   "thema": "Krankenschwester",
+   "S1": 5,
+   "S2": 6,
+   "S3": 6
+  },
+  "zunge": {
+   "thema": "Zunge",
+   "S1": 5,
+   "S2": 6,
+   "S3": 6
+  },
+  "martin luther king": {
+   "thema": "Martin Luther King",
+   "S1": 3,
+   "S2": 6,
+   "S3": 8
+  },
+  "gestein": {
+   "thema": "Gestein",
+   "S1": 4,
+   "S2": 6,
+   "S3": 7
+  },
+  "nase": {
+   "thema": "Nase",
+   "S1": 5,
+   "S2": 6,
+   "S3": 6
+  },
+  "stephen hawking": {
+   "thema": "Stephen Hawking",
+   "S1": 3,
+   "S2": 6,
+   "S3": 8
+  },
+  "england (übersicht)": {
+   "thema": "England (Übersicht)",
+   "S1": 4,
+   "S2": 6,
+   "S3": 7
+  },
+  "arabien": {
+   "thema": "Arabien",
+   "S1": 4,
+   "S2": 6,
+   "S3": 7
+  },
+  "beethoven": {
+   "thema": "Beethoven",
+   "S1": 4,
+   "S2": 6,
+   "S3": 7
+  },
+  "mozart": {
+   "thema": "Mozart",
+   "S1": 4,
+   "S2": 6,
+   "S3": 7
+  },
+  "airbag": {
+   "thema": "Airbag",
+   "S1": 3,
+   "S2": 6,
+   "S3": 7
+  },
+  "hochofen": {
+   "thema": "Hochofen",
+   "S1": 3,
+   "S2": 6,
+   "S3": 7
+  },
+  "schmerz": {
+   "thema": "Schmerz",
+   "S1": 4,
+   "S2": 6,
+   "S3": 6
+  },
+  "pupille": {
+   "thema": "Pupille",
+   "S1": 4,
+   "S2": 6,
+   "S3": 6
+  },
+  "schneekanone": {
+   "thema": "Schneekanone",
+   "S1": 4,
+   "S2": 6,
+   "S3": 6
+  },
+  "goldschakal": {
+   "thema": "Goldschakal",
+   "S1": 4,
+   "S2": 6,
+   "S3": 6
+  },
+  "brennessel": {
+   "thema": "Brennessel",
+   "S1": 5,
+   "S2": 6,
+   "S3": 5
+  },
+  "bauch": {
+   "thema": "Bauch",
+   "S1": 5,
+   "S2": 6,
+   "S3": 5
+  },
+  "kürbis": {
+   "thema": "Kürbis",
+   "S1": 5,
+   "S2": 6,
+   "S3": 5
+  },
+  "augsburger puppenkiste": {
+   "thema": "Augsburger Puppenkiste",
+   "S1": 5,
+   "S2": 6,
+   "S3": 5
+  },
+  "pangolin": {
+   "thema": "Pangolin",
+   "S1": 4,
+   "S2": 6,
+   "S3": 6
+  },
+  "humboldt": {
+   "thema": "Humboldt",
+   "S1": 3,
+   "S2": 5,
+   "S3": 7
+  },
+  "vw": {
+   "thema": "VW",
+   "S1": 4,
+   "S2": 5,
+   "S3": 6
+  },
+  "frida kahlo": {
+   "thema": "Frida Kahlo",
+   "S1": 3,
+   "S2": 5,
+   "S3": 7
+  },
+  "zigaretten": {
+   "thema": "Zigaretten",
+   "S1": 3,
+   "S2": 5,
+   "S3": 7
+  },
+  "chaplin": {
+   "thema": "Chaplin",
+   "S1": 3,
+   "S2": 5,
+   "S3": 7
+  },
+  "zigarette": {
+   "thema": "Zigarette",
+   "S1": 3,
+   "S2": 5,
+   "S3": 7
+  },
+  "apfel": {
+   "thema": "Apfel",
+   "S1": 5,
+   "S2": 5,
+   "S3": 5
+  },
+  "johann sebastian bach": {
+   "thema": "Johann Sebastian Bach",
+   "S1": 3,
+   "S2": 5,
+   "S3": 7
+  },
+  "jugendlicher": {
+   "thema": "Jugendlicher",
+   "S1": 3,
+   "S2": 5,
+   "S3": 6
+  },
+  "geschlechtsorgane": {
+   "thema": "Geschlechtsorgane",
+   "S1": 2,
+   "S2": 5,
+   "S3": 7
+  },
+  "ingenieur": {
+   "thema": "Ingenieur",
+   "S1": 3,
+   "S2": 5,
+   "S3": 6
+  },
+  "bücherei": {
+   "thema": "Bücherei",
+   "S1": 4,
+   "S2": 5,
+   "S3": 5
+  },
+  "ader": {
+   "thema": "Ader",
+   "S1": 3,
+   "S2": 5,
+   "S3": 6
+  },
+  "verwandte": {
+   "thema": "Verwandte",
+   "S1": 4,
+   "S2": 5,
+   "S3": 5
+  },
+  "argentinien": {
+   "thema": "Argentinien",
+   "S1": 3,
+   "S2": 5,
+   "S3": 6
+  },
+  "unicef": {
+   "thema": "Unicef",
+   "S1": 3,
+   "S2": 5,
+   "S3": 6
+  },
+  "vene": {
+   "thema": "Vene",
+   "S1": 3,
+   "S2": 5,
+   "S3": 6
+  },
+  "masern": {
+   "thema": "Masern",
+   "S1": 3,
+   "S2": 5,
+   "S3": 6
+  },
+  "homosexuell": {
+   "thema": "Homosexuell",
+   "S1": 2,
+   "S2": 5,
+   "S3": 7
+  },
+  "ozonloch": {
+   "thema": "Ozonloch",
+   "S1": 2,
+   "S2": 5,
+   "S3": 7
+  },
+  "tinte": {
+   "thema": "Tinte",
+   "S1": 4,
+   "S2": 5,
+   "S3": 5
+  },
+  "erzieher": {
+   "thema": "Erzieher",
+   "S1": 4,
+   "S2": 5,
+   "S3": 5
+  },
+  "shanghai": {
+   "thema": "Shanghai",
+   "S1": 3,
+   "S2": 5,
+   "S3": 6
+  },
+  "nazis": {
+   "thema": "Nazis",
+   "S1": 1,
+   "S2": 4,
+   "S3": 8
+  },
+  "schädlingsbekämpfer": {
+   "thema": "Schädlingsbekämpfer",
+   "S1": 3,
+   "S2": 5,
+   "S3": 5
+  },
+  "kühlschrank": {
+   "thema": "Kühlschrank",
+   "S1": 3,
+   "S2": 5,
+   "S3": 5
+  },
+  "kinderschreck": {
+   "thema": "Kinderschreck",
+   "S1": 4,
+   "S2": 5,
+   "S3": 4
+  },
+  "zentripetalkraft": {
+   "thema": "Zentripetalkraft",
+   "S1": 2,
+   "S2": 4,
+   "S3": 7
+  },
+  "wachs": {
+   "thema": "Wachs",
+   "S1": 3,
+   "S2": 5,
+   "S3": 5
+  },
+  "persischer golf": {
+   "thema": "Persischer Golf",
+   "S1": 2,
+   "S2": 5,
+   "S3": 6
+  },
+  "anschlag vom 11. september": {
+   "thema": "Anschlag vom 11. September",
+   "S1": 1,
+   "S2": 4,
+   "S3": 7
+  },
+  "tetanus": {
+   "thema": "Tetanus",
+   "S1": 2,
+   "S2": 4,
+   "S3": 6
+  },
+  "viereck": {
+   "thema": "Viereck",
+   "S1": 4,
+   "S2": 4,
+   "S3": 4
+  },
+  "fasten": {
+   "thema": "Fasten",
+   "S1": 3,
+   "S2": 4,
+   "S3": 5
+  },
+  "bottrop": {
+   "thema": "Bottrop",
+   "S1": 3,
+   "S2": 4,
+   "S3": 5
+  },
+  "ingolstadt": {
+   "thema": "Ingolstadt",
+   "S1": 3,
+   "S2": 4,
+   "S3": 5
+  },
+  "wendekreis": {
+   "thema": "Wendekreis",
+   "S1": 2,
+   "S2": 4,
+   "S3": 6
+  },
+  "casablanca": {
+   "thema": "Casablanca",
+   "S1": 3,
+   "S2": 4,
+   "S3": 5
+  },
+  "graz": {
+   "thema": "Graz",
+   "S1": 3,
+   "S2": 4,
+   "S3": 5
+  },
+  "antisemitismus": {
+   "thema": "Antisemitismus",
+   "S1": 1,
+   "S2": 3,
+   "S3": 7
+  },
+  "verbannung": {
+   "thema": "Verbannung",
+   "S1": 2,
+   "S2": 4,
+   "S3": 5
+  },
+  "symptom": {
+   "thema": "Symptom",
+   "S1": 2,
+   "S2": 4,
+   "S3": 5
+  },
+  "kurdische sprache": {
+   "thema": "Kurdische Sprache",
+   "S1": 2,
+   "S2": 4,
+   "S3": 5
+  },
+  "dänische sprache": {
+   "thema": "Dänische Sprache",
+   "S1": 2,
+   "S2": 4,
+   "S3": 5
+  },
+  "papua-neuguinea": {
+   "thema": "Papua-Neuguinea",
+   "S1": 2,
+   "S2": 4,
+   "S3": 5
+  },
+  "graubünden": {
+   "thema": "Graubünden",
+   "S1": 2,
+   "S2": 4,
+   "S3": 5
+  },
+  "suriname": {
+   "thema": "Suriname",
+   "S1": 2,
+   "S2": 4,
+   "S3": 5
+  },
+  "bruges": {
+   "thema": "Bruges",
+   "S1": 2,
+   "S2": 4,
+   "S3": 5
+  },
+  "gesamtschule": {
+   "thema": "Gesamtschule",
+   "S1": 2,
+   "S2": 4,
+   "S3": 4
+  },
+  "robespierre": {
+   "thema": "Robespierre",
+   "S1": 1,
+   "S2": 3,
+   "S3": 6
+  },
+  "negerkuss": {
+   "thema": "Negerkuss",
+   "S1": 2,
+   "S2": 3,
+   "S3": 4
+  },
+  "fdp (deutschland)": {
+   "thema": "FDP (Deutschland)",
+   "S1": 1,
+   "S2": 3,
+   "S3": 5
+  },
+  "linke politik": {
+   "thema": "Linke Politik",
+   "S1": 1,
+   "S2": 3,
+   "S3": 5
+  },
+  "vevey": {
+   "thema": "Vevey",
+   "S1": 2,
+   "S2": 3,
+   "S3": 4
+  },
+  "somatropin": {
+   "thema": "Somatropin",
+   "S1": 1,
+   "S2": 2,
+   "S3": 5
+  },
+  "erotik": {
+   "thema": "Erotik",
+   "S1": 1,
+   "S2": 2,
+   "S3": 4
+  },
+  "gatte": {
+   "thema": "Gatte",
+   "S1": 1,
+   "S2": 2,
+   "S3": 3
+  },
+  "arenhusen": {
+   "thema": "Arenhusen",
+   "S1": 1,
+   "S2": 2,
+   "S3": 3
+  }
+ }
+}

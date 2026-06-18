@@ -170,10 +170,21 @@ def _load_eignung() -> dict[str, dict]:
 
 _EIGNUNG: dict[str, dict] = _load_eignung()
 
+# Safety-Backstop: positive Exclude-Liste aus dem XLSX (reproduzierbar via build_eignung_exclude.py)
+try:
+    _EXCLUDE_SET = set(json.load(open(ROOT / "eignung_exclude.json", encoding="utf-8")).get("exclude", []))
+    log.info("  Eignung: %d Excludes geladen (Backstop)", len(_EXCLUDE_SET))
+except FileNotFoundError:
+    _EXCLUDE_SET = set()
+    log.warning("  Eignung: eignung_exclude.json fehlt — Exclude-Backstop INAKTIV")
+
 
 def eignung_for(thema: str) -> dict:
     """Eignungs-Urteil: {eignung, age_floor, framing_note, source}. Kein Urteil → Fallback (sichtbar)."""
-    rec = _EIGNUNG.get(thema.strip().lower())
+    key = thema.strip().lower()
+    if key in _EXCLUDE_SET:
+        return {"eignung": "exclude", "age_floor": 1, "framing_note": "", "source": "exclude-set"}
+    rec = _EIGNUNG.get(key)
     if rec is None:
         if EIGNUNG_STRICT:
             log.warning("  Eignung: kein Urteil für '%s' → STRICT: blockiert", thema)
@@ -1337,7 +1348,7 @@ def _build_catalog_jobs(themen: list[str], stufen: list[int]) -> list[dict]:
         if entry is None:
             log.warning("  Catalog: Thema '%s' nicht gefunden — uebersprungen", thema)
             continue
-        if entry.get("eignung") == "exclude":
+        if entry.get("eignung") == "exclude" or thema.strip().lower() in _EXCLUDE_SET:
             log.info("  Catalog: '%s' ist exclude — uebersprungen", thema)
             continue
         age_floor = int(entry.get("age_floor") or 1)
