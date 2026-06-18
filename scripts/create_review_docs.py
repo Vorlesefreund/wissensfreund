@@ -400,8 +400,10 @@ def build_article_section(doc: Document, article: dict, stufe_num: int) -> None:
     add_lektorat_summary(doc, pb)
 
 
-def build_theme_doc(thema_name: str, slug: str) -> Path:
+def build_theme_doc(thema_name: str, slug: str,
+                    lektorat_dir: Path | None = None) -> Path:
     """Erstellt ein vollständiges Review-Dokument für ein Thema."""
+    effective_lektorat_dir = lektorat_dir if lektorat_dir is not None else LEKTORAT_DIR
     doc = Document()
 
     # Seitenränder
@@ -420,7 +422,7 @@ def build_theme_doc(thema_name: str, slug: str) -> Path:
     articles_by_stufe: dict[int, dict] = {}
     total_k = total_p = total_s = 0
     for stufe_num in [1, 2, 3]:
-        lekt_path = LEKTORAT_DIR / f"lektorat_{slug}_l{stufe_num}.json"
+        lekt_path = effective_lektorat_dir / f"lektorat_{slug}_l{stufe_num}.json"
         if not lekt_path.exists():
             continue
         art = json.loads(lekt_path.read_text(encoding="utf-8"))
@@ -458,19 +460,33 @@ def build_theme_doc(thema_name: str, slug: str) -> Path:
 
 def main() -> None:
     import argparse
-    global OUT_DIR
+    global OUT_DIR, LEKTORAT_DIR
     sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-dir", default=None)
+    parser.add_argument("--lektorat-dir", default=None)
+    parser.add_argument("--theme-lektorat", action="append", default=[],
+                        metavar="SLUG:PATH",
+                        help="Per-Thema Lektorat-Dir, z.B. spartacus:/pfad/zu/lektorat")
     args = parser.parse_args()
     if args.out_dir:
         OUT_DIR = Path(args.out_dir).resolve()
+    if args.lektorat_dir:
+        LEKTORAT_DIR = Path(args.lektorat_dir).resolve()
     OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    # Per-Thema Lektorat-Dir-Overrides aufbauen
+    theme_lektorat_map: dict[str, Path] = {}
+    for entry in args.theme_lektorat:
+        slug, _, path_str = entry.partition(":")
+        if slug and path_str:
+            theme_lektorat_map[slug.strip()] = Path(path_str.strip()).resolve()
 
     for thema_name, slug in THEMEN:
         print(f"Erstelle {thema_name}_Review.docx ...", end=" ", flush=True)
         try:
-            path = build_theme_doc(thema_name, slug)
+            lektorat_dir = theme_lektorat_map.get(slug)
+            path = build_theme_doc(thema_name, slug, lektorat_dir=lektorat_dir)
             size_kb = path.stat().st_size // 1024
             print(f"OK ({size_kb} KB) → {path.name}")
         except Exception as e:

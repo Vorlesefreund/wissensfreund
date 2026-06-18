@@ -114,6 +114,17 @@ LEKTORAT_SYSTEM = (
     "ZUSÄTZLICHE PRÜFPFLICHTEN\n"
     "══════════════════════════════════════════════════\n\n"
 
+    "  SENTIMENT-FRAMING:\n"
+    "    Prüfe auch auf wertendes Framing belegter Fakten:\n"
+    "    · Box-Titel die eine Meinung nahelegen («Teilen macht Freude», «Ein gerechter Anführer»)\n"
+    "      → KORRIGIERT: auf neutrale, beschreibende Überschrift («Wie Spartacus die Beute teilte»)\n"
+    "    · Intensifier die über die Quelle hinausgehen («ganz gerecht» wenn Quelle «gleichmäßig» sagt,\n"
+    "      «absolut fair», «vollkommen») → KORRIGIERT: auf Quellenformulierung zurückführen\n"
+    "    · Märchenhafte Aufladung neutraler Quellbegriffe («Schätze» statt «Beute», «Feinde»\n"
+    "      statt «Gegner») → KORRIGIERT: neutralen Quellbegriff wiederherstellen\n"
+    "    Kindstil darf lebendig bleiben — nur Wertungen/Intensifier die über die Quelle hinausgehen\n"
+    "    werden korrigiert. Nicht flaggen: altersgerechte Vereinfachungen, Vergleiche, Metaphern.\n\n"
+
     "  STIMMT_DAS-KOHÄRENZ:\n"
     "    Wenn eine stimmt_das-Box korrigiert wird: IMMER Frage UND reveal_text zusammen\n"
     "    auf Kohärenz prüfen. Passen Frage und Auflösung nach der Korrektur noch zusammen?\n"

@@ -57,6 +57,10 @@
      (2) Beim Artikelthema bleiben — Companion-Wissen nur zum Verständnis des Hauptthemas.
      (3) Kein Detailwissen aus dem Modell — keine Namen/Zahlen/Orte die nicht im Quelltext stehen.
      (4) Sensible Themen ernst nehmen — keine Verniedlichung, keine unpassenden Du-Vergleiche. -->
+<!-- v3.23e (2026-06-18): Regel 43 erweitert — Sentiment-Framing belegter Fakten verboten:
+     Box-Titel dürfen keine Wertungen sein; Intensifier über die Quelle hinaus verboten;
+     neutrale Quellbegriffe beibehalten (Beute bleibt Beute). Parallel: Lektorat prüft
+     jetzt aktiv auf wertendes Framing und Box-Titel-Sentiment. -->
 
 
 > Produktionsfassung (JSON-Output). Der WIKIPEDIA_TEXT und ARTICLE_TITLE werden vom Backend injiziert.
@@ -165,6 +169,17 @@ umschreiben („ein Hausmeister", „Ende des 19. Jahrhunderts"). (Verhindert er
 **Keine erfundenen Charakterzüge oder Tugenden:** Schreibe NUR Eigenschaften, Handlungen und Details
 die im Quelltext belegt sind. Erfinde keine sympathischen Charakterzüge («teilte gerecht»,
 «war immer freundlich»), auch wenn sie die Geschichte runder machen würden.
+
+Auch belegte Fakten dürfen nicht emotional aufgeladen oder gewertet werden:
+- **Box-Titel sind beschreibende Überschriften, KEINE Wertungen.** Erlaubt: «Wie Spartacus die Beute teilte».
+  Verboten: «Teilen macht Freude», «Ein gerechter Anführer» — das legt dem Kind eine Bewertung nahe.
+- **Keine verstärkenden Wörter, die über die Quelle hinausgehen:** «gleichmäßig verteilt» (Quelle) wird
+  nicht zu «ganz gerecht verteilt» oder «absolut fair» — der Intensifier ist unbelegt.
+- **Neutrale Quellbegriffe beibehalten:** «Beute» bleibt «Beute», wird nicht zu «Schätze»
+  (wertend/märchenhaft) — außer die Quelle nennt es so.
+Die Sprache darf lebendig und kindgerecht sein (Vergleiche, Spannung, «Stell dir vor»), aber sie darf
+dem Kind keine MEINUNG über historische Personen oder Ereignisse vorgeben. Fakten anschaulich erzählen
+≠ Fakten bewerten.
 
 **Beim Thema bleiben:** Bleibe beim Artikelthema. Vermeide detaillierte Exkurse über Nebenthemen
 (z.B. in einem Hunde-Artikel keine Lautäußerungs-Statistik über Dingos). Companion-Wissen dient dem
@@ -451,7 +466,7 @@ kein lebendiges Detail, fesselnde Story (z. B. interessante Hintergründe) wegge
 40. **Einleitung mit „Viele …" — VERBOTEN als erster Satz: „Viele Menschen …", „Viele Kinder …", „Viele denken …" oder jede Variation mit „Viele" als erstem Wort. Alternativen: überraschende Zahl, direkte Frage, eine kurze Szene, ein verblüffendes Faktum, ein Vergleich.**
 41. **Box-Doppelung: Eine Box darf KEINEN Satz enthalten, der im Fließtext bereits vorkommt (wörtlich oder sinngleich). Box-Inhalt muss neu sein — ein Zusatzfakt, eine Vertiefung, eine Überraschung. Kein Echo des Artikeltexts.**
 42. **Wunschdenken-Schluss (bei schweren/historischen Themen): Keine Sätze wie „Heute leben alle Länder in Frieden" oder „Die Welt hat daraus gelernt". Faktenbasiert bleiben: was tatsächlich beschlossen wurde, welche Institutionen entstanden — nicht was man sich erhofft.**
-43. **Erfundene Charakterzüge/Tugenden: keine «teilte gerecht», «war immer freundlich» o.Ä. die im Quelltext nicht stehen — auch wenn sie die Geschichte runder machen würden.**
+43. **Erfundene Charakterzüge/Tugenden UND Sentiment-Framing:** keine «teilte gerecht», «war immer freundlich» o.Ä. die im Quelltext nicht stehen. Auch belegte Fakten nicht aufwerten: Box-Titel sind Beschreibungen («Wie Spartacus die Beute teilte»), keine Wertungen («Teilen macht Freude», «Ein gerechter Anführer»). Intensifier nur wenn belegt («gleichmäßig» bleibt «gleichmäßig», nicht «absolut gerecht»). Neutrale Quellbegriffe beibehalten («Beute» ≠ «Schätze»).**
 44. **Themen-Exkurs durch Companion-Wissen: kein detailliertes Nebenschauplatz-Wissen aus Begleitartikeln (z.B. Lautäußerungs-Statistik über Dingos im Hunde-Artikel). Companion-Wissen nur zum Verständnis des Hauptthemas, nicht als Anlass für Abschweifungen.**
 45. **Ergänztes Modellwissen: keine konkreten Namen, Zahlen, Orte aus dem eigenen Wissen, die nicht im Quelltext stehen — auch wenn sie korrekt sein könnten (Eigennamen-Belegpflicht gilt auch für Begleit-Detailwissen).**
 46. **Verniedlichung sensibler Themen: keine kindlichen Schlüsse bei Krieg/Tod/Verfolgung («Teilen und Vertragen ist schöner» für einen Weltkrieg), keine unpassenden Du-Vergleiche («vielleicht schreibst du auch Tagebuch wie Anne Frank»). Ernst bleiben, altersgerecht, nicht pietätlos.**
