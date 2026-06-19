@@ -44,6 +44,14 @@ from google.genai import types
 ROOT = Path(__file__).parent.parent
 load_dotenv(ROOT / ".env")
 
+
+def _normalize_custom_id(s: str) -> str:
+    """Normalize to ^[a-zA-Z0-9_-]{1,64}$ (Anthropic Batch API requirement)."""
+    for src, dst in [("ä","ae"),("ö","oe"),("ü","ue"),("Ä","Ae"),("Ö","Oe"),("Ü","Ue"),("ß","ss")]:
+        s = s.replace(src, dst)
+    s = re.sub(r"[^a-zA-Z0-9_-]", "_", s)
+    return s[:64]
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s  %(levelname)-8s %(message)s",
@@ -623,7 +631,7 @@ def stage1_sourcing(
                                 cand["img"].get("filename", "")[:40])
                     continue
                 prompt = OPUS_RECHECK_PROMPT.format(thema=cand["thema"])
-                custom_id = cand["key"]
+                custom_id = _normalize_custom_id(cand["key"])
                 key_to_thema[custom_id] = cand["thema"]
                 opus_reqs.append({
                     "custom_id": custom_id,
@@ -1258,9 +1266,12 @@ def stage3_lektorat(
              len(ordered_requests))
 
     batch_reqs = []
+    norm_to_aid: dict[str, str] = {}   # normalized custom_id → original aid
     for aid, sources_prefix, article_task, _art, _thema in ordered_requests:
+        nid = _normalize_custom_id(aid)
+        norm_to_aid[nid] = aid
         batch_reqs.append({
-            "custom_id": aid,
+            "custom_id": nid,
             "params": {
                 "model":      LEKTORAT_MODEL,
                 "max_tokens": 16000,
@@ -1316,7 +1327,7 @@ def stage3_lektorat(
     total_in = total_out = total_cache_create = total_cache_read = 0
 
     for result in anth_client.messages.batches.results(batch_id):
-        rid   = result.custom_id
+        rid   = norm_to_aid.get(result.custom_id, result.custom_id)
         thema = thema_by_id.get(rid, rid)
         stufe_num = rid.split("_l")[-1] if "_l" in rid else "?"
 
