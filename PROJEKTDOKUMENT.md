@@ -1,6 +1,7 @@
 # Wissensfreund — Projektdokument v21
 
 **Stand:** 18. Juni 2026 · ersetzt v20 (1. Juni 2026)
+
 **Pipeline-Fakten zuletzt gegen Code geprüft:** Commit `e8ad07c`, 18.06.2026, via `verify_project_facts.py` (12/12 PASS · 2 KNOWN_OPEN · 0 FAIL)
 
 > **Wichtigste Änderung gegenüber v20:** Die Klexikon-/ZIM-Architektur ist entfallen. Die App liefert ausschließlich selbst generierte Artikel. Die alte Doku war an mehreren Stellen veraltet (u. a. „Claude generiert Artikel" — tatsächlich Gemini; feste Wortziele; 3-stufiger Bildfilter).
