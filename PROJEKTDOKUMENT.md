@@ -1,10 +1,10 @@
 # Wissensfreund — Projektdokument v21
 
-**Stand:** 18. Juni 2026 · ersetzt v20 (1. Juni 2026)
+**Stand:** 20. Juni 2026 · ersetzt v20 (1. Juni 2026)
 
-**Pipeline-Fakten zuletzt gegen Code geprüft:** Commit `e8ad07c`, 18.06.2026, via `verify_project_facts.py` (12/12 PASS · 2 KNOWN_OPEN · 0 FAIL)
+**Pipeline-Fakten zuletzt gegen Code geprüft:** Commit `338f50b`, 20.06.2026, via `verify_project_facts.py` (12/12 PASS · 2 KNOWN_OPEN · 0 FAIL)
 
-> **Wichtigste Änderung gegenüber v20:** Die Klexikon-/ZIM-Architektur ist entfallen. Die App liefert ausschließlich selbst generierte Artikel. Die alte Doku war an mehreren Stellen veraltet (u. a. „Claude generiert Artikel" — tatsächlich Gemini; feste Wortziele; 3-stufiger Bildfilter).
+> **Wichtigste Änderung gegenüber v20:** Die Klexikon-/ZIM-Architektur als Inhaltsquelle ist entfallen — das Inhaltsmodell sind ausschließlich selbst generierte, Wikipedia-basierte Artikel. (Übergang: die ausgelieferte App liefert noch Klexikon-Inhalt, siehe Kap. 1/7.) Die alte Doku war an mehreren Stellen veraltet (u. a. „Claude generiert Artikel" — tatsächlich Gemini; feste Wortziele; 3-stufiger Bildfilter).
 
 **Verifikations-Stempel** (vor jedem Abschnitt):
 - **[✓ CI]** — unter den Fakten, die `verify_project_facts.py` + CI **automatisch** prüfen; Drift bricht den Build.
@@ -18,7 +18,7 @@
 
 ## 1. Kurzfassung — was Wissensfreund heute ist  [PO]
 
-Wissensfreund ist ein deutschsprachiges, KI-gestütztes Kinderlexikon als Flutter-App (Android-first, Testgerät Samsung S23). Inhalte sind **ausschließlich selbst generierte, kindgerechte Artikel auf Wikipedia-Basis** — Klexikon ist vollständig abgelöst. Jeder Artikel existiert in drei Lesestufen (S1/S2/S3) mit Vorlesefunktion (TTS), Quiz, lizenzgeprüften Bildern und Freemium-Modell. Ein animierter Erklär-Charakter („Professor") ist als Figur vorgesehen, aber **noch zu erstellen**.
+Wissensfreund ist ein deutschsprachiges, KI-gestütztes Kinderlexikon als Flutter-App (Android-first, Testgerät Samsung S23). Das Inhaltsmodell sind **ausschließlich selbst generierte, kindgerechte Artikel auf Wikipedia-Basis**; Klexikon ist als Inhalts-/Faktenquelle abgelöst und dient nur noch als informelle Orientierung (Register, Themenauswahl), nie als Quelle. **Übergang:** Die aktuell ausgelieferte App liefert noch Klexikon-Artikel; sie werden ersetzt, sobald genügend finale generierte Artikel vorliegen. Jeder Artikel existiert in drei Lesestufen (S1/S2/S3) mit Vorlesefunktion (TTS), Quiz, lizenzgeprüften Bildern und Freemium-Modell. Ein animierter Erklär-Charakter („Professor") ist als Figur vorgesehen, aber **noch zu erstellen**.
 
 ---
 
@@ -38,8 +38,8 @@ Wissensfreund ist ein deutschsprachiges, KI-gestütztes Kinderlexikon als Flutte
 | S2 | 7–9 | Einleitungssatz, erste Fachbegriffe mit Erklärung |
 | S3 | 10–12 | fachlich korrekt, lockerer Ton, kritische/ethische Abschnitte |
 
-- **Wortziele (Ergiebigkeit):** `target_S = round(Wlo + clamp((Erg−2)/6, 0, 1) × (Whi−Wlo))`; Bänder S1 [50, 250] / S2 [80, 400] / S3 [100, 650]. **Obergrenzen sind harte Limits** (S3 max **650**, nicht 700). Verdrahtet über `wortziel_for` + `ergiebigkeit_scores.json` (4.375 Einträge). Bei dünner Quelle: kürzer schreiben statt aufblähen.
-- **Eignungs-Gate:** 12-Kategorien-Rubrik, Schalter `EIGNUNG_STRICT`, Loader `eignung_for()`, Exclude-Filter vor Phase 1, `age_floor`-Stufen-Skipping.
+- **Wortziele (Ergiebigkeit):** `target_S = round(Wlo + clamp((Erg−2)/6, 0, 1) × (Whi−Wlo))`; Bänder S1 [75, 250] / S2 [100, 400] / S3 [150, 650] (Untergrenzen seit v3.24 angehoben — Cap-Spielraum für die S1-Szene). **Obergrenzen sind harte Limits** (S3 max **650**, nicht 700). Verdrahtet über `wortziel_for` + `ergiebigkeit_scores.json` (4.375 Einträge). Bei dünner Quelle: kürzer schreiben statt aufblähen.
+- **Eignungs-Gate:** 12-Kategorien-Rubrik, Schalter `EIGNUNG_STRICT`, Loader `eignung_for()`, Exclude-Filter vor Phase 1, `age_floor`-Stufen-Skipping (Mechanismus vorhanden; per Entscheidung 20.06. NICHT genutzt, um wichtige abstrakte Themen aus S1 zu kippen — siehe Kap. 9).
 - **Temperatur:** Sync-Pfad 0.6 (`gemini_client.py`). *Batch-Pfad-Temperatur noch zu bestätigen — siehe offene Punkte.*
 
 ---
@@ -87,7 +87,7 @@ Bezug über die **MediaWiki-API** (Originale laden, lokal mit Pillow auf 300/800
 ## 7. Produkt & App  [PO / ? zu prüfen]
 
 - **Plattform:** Flutter, Android-first; Testgerät Samsung S23. **[PO]**
-- **Inhaltsquelle:** nur generierte R2-Artikel; Klexikon vollständig raus. **[PO]**
+- **Inhaltsquelle — Ziel:** nur generierte R2-Artikel. **Ist-Zustand:** die ausgelieferte App liefert noch Klexikon-Artikel; Umstellung steht aus (Klexikon raus, sobald finale Artikel vorliegen). Klexikon nur noch informelle Orientierung (Register/Themenauswahl), nie Quelle. **[PO]**
 - **Animierter Professor:** als Erklär-Figur vorgesehen, **noch zu erstellen**. **[PO]**
 - **Altersmodell:** durchgängig S1 / S2 / S3 (das alte 3–10 / Mini·Normal·Erweitert entfällt). **[PO]**
 - **TTS (geplant, v1.1):** Gemini 3.1 Flash TTS, Intonation über Style-Prefix + Inline-Tags steuerbar; Vorlesetext bleibt tag-frei (separate TTS-Variante). **[PO / geplant]**
@@ -120,6 +120,7 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 | — | **Ergiebigkeits-Kurve** statt fester Wortziele; S3-Obergrenze hart bei **650**. |
 | — | **Stimmt-das-Pflicht verworfen** (widerspricht der „nicht erzwingen"-Philosophie). |
 | 18.06.2026 | **Schlüsselstein** eingeführt: `verify_project_facts.py` + CI-Action `verify_facts.yml`. |
+| 20.06.2026 | **S1-Strategie / v3.24:** age_floor-Skipping für schwere/abstrakte Themen verworfen — wichtige Themen (Demokratie, Sklaverei) müssen auch S1 erreichen. Stattdessen den Kern durch EINE durchgehende konkrete Szene erzählen statt per Definition (Zwei-Fälle-Logik: leichte Begriffe = Alltagsszene; schwere = dem Kind bekanntes Gefühl, keine niedliche Analogie). ERG_BANDS-Untergrenzen 50/80/100 → 75/100/150 (Cap-Spielraum, kein erzwungenes Soll; „kürzer statt aufblähen" bleibt dominant). Neue Regeln R48–R52, R46 geschärft. |
 
 ---
 
@@ -128,8 +129,16 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 - **CI-Migration:** `artikel_pipeline.yml` ist dispatch-only, ruft den Claude-Legacy-Generator (`generate_articles.py`) und würde mangels Prompt-Datei scheitern → auf `run_batch.py` migrieren; `generate_articles.py` stilllegen; YAML fixen/löschen.
 - **Lektorat-Fehlerquote messen** (False-Positive/Negative gegen Ground-Truth) vor dem Skalieren. Ziel: ≥ 50–70 % ohne Korrektur durch.
 - **Grounding v3.17/v2.8** committen und im Pipeline-Lauf validieren (in Dateien gebaut, nicht getestet).
-- **Prompt v3.23 (c–f)** wurde nie in einem echten Lauf getestet (der Test-Lauf trug v3.23b) → auf **frischen** Themen prüfen. *Nicht* „Mittelalter/Ritter" — das ist ein Referenz-Artikel (Overfitting-Risiko).
+- **v3.24-Validierung (vor Skalierung):** S1-Szenen-Strategie auf Demokratie/Sklaverei prüfen (feuert die durchgehende Szene? Budget 75/100/150 tragfähig, ohne dünne Themen aufzublähen?); R47/R52 mit einem Größenvergleich-Thema (Blauwal/Pyramide) testen; R46 generator-seitig (Gladiator) erneut prüfen.
 - **Batch-Pfad-Temperatur** bestätigen.
 - **Source-Cache vor Bulk-Run** (spart Re-Fetches, hält Lektorat auf dem Generator-Snapshot).
 - **Gemini-Cache-Hygiene** (per-Topic-Löschung nach 3 Stufen, TTL ~15 min).
 - **Aufräumen:** Audit-/Probe-Skripte, Spare-Clone, `scrape_out`, ZIM-Zweig einfrieren; Modell-Konstanten zentralisieren.
+- **PRÜFEN → konkrete Vorschläge:** Lektorat soll bei PRÜFEN-Flags fertige Korrektur-Optionen (A/B) liefern, nicht nur flaggen (Beleg: Zugvögel S3 PRÜFEN ohne Vorschlag).
+- **Lektorat-Backstops für die neuen Generator-Regeln (zweite Schicht):** R52 (Quantoren-/Geltungsbereich-Inflation — korrektheitsrelevant, höchste Priorität), R50 (STIMMT_DAS-Leckage — sicher auto-korrigierbar), R49 (Schlüsselbegriff-Konsistenz — sicher auto-korrigierbar).
+- **R48 ↔ Companion-Auswahl:** Kompass soll für zentrale Fachbegriffe den definierenden Companion mitliefern, damit eine belegte Erklärung möglich ist (sonst Begriff vereinfachen/vermeiden).
+- **Box-Platzierung (R51):** Code/Schema-Untersuchung — werden Boxen mechanisch ans Abschnittsende gerendert, oder steuert das Modell die Position? Ggf. Positions-/Ankerfeld pro Box.
+- **Anführungszeichen-Normalisierung:** deterministischer Post-Process (Regex) auf Hausnorm („…"), statt LLM-Lektorat.
+- **Lektorat-Regression verifizieren:** Sklaverei S3 „Harriet Greens Mutter" widerspricht der zitierten Quelle (Harriet Green IST die Mutter) — gegen Volltext prüfen; konkrete Evidenz für die Fehlerquoten-Messung.
+- **generation_method-Versionsstring nachziehen:** Artikel-Meta trug v3.23b trotz Prompt-Inhalt v3.24 → Konstante an den tatsächlichen Prompt koppeln.
+- **Optional-Polish:** ZWK-Beispiel und Edit-2-Beispiel („das Land war einmal geteilt") als konkrete Szene schärfen (demonstrieren noch die alte „eindampfen"-Idee).
