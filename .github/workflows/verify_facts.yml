@@ -1,5 +1,7 @@
 name: verify-project-facts
 on:
+  schedule:
+    - cron: '0 6 * * 1'   # woechentlich Mo 06:00 UTC: Drift-Check unabhaengig von Commits
   push:
     branches: [ main ]
   pull_request:
