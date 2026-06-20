@@ -91,7 +91,7 @@ MAX_IMG_COMPANION = 6
 COMPANION_CAP = {"low": 4, "medium": 5, "high": 6}
 
 # Ergiebigkeits-Bänder je Stufe: (Wlo, Whi). Wortziel = Kurve über Ergiebigkeits-Score.
-ERG_BANDS: dict[int, tuple[int, int]] = {1: (50, 250), 2: (80, 400), 3: (100, 650)}
+ERG_BANDS: dict[int, tuple[int, int]] = {1: (75, 250), 2: (100, 400), 3: (150, 650)}
 RETRY_FLOOR_FRAC   = 0.70   # Retry-Untergrenze als Bruchteil des Ziels (nur klares Untertreiben nachfordern)
 ERG_FALLBACK_SCORE = 6      # medium, wenn Thema (noch) nicht gerated — sichtbar geloggt
 APPEAL_TIER_HIGH   = 7.0    # Erg-Mittel ≥ → high   (steuert Companion-/Bildmenge)

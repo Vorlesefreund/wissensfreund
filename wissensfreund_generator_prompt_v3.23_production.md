@@ -67,6 +67,7 @@
      (P3) Ton/Epoche-Passung — Begriffe und Ton müssen Epoche und Ernst treffen (Regel 46 erweitert).
      (S1) Kern-Strategie: Bei vielschichtigen Themen einen Kern klar erzählen, nicht viele
      Nebenschauplätze aneinanderreihen (SCHWERE INHALTE S1 erweitert). -->
+<!-- v3.24 (2026-06-20): S1-Szenen-Strategie (Kern durch durchgehende konkrete Szene statt Definition; Zwei-Fälle-Logik leicht/schwer). R46 um Gladiator-«Schausteller» (sachlich falsch + verharmlosend) ergänzt. Neue Regeln R48 (Begriffe stufengerecht + belegt erklären, deferiert an R44/R45), R49 (Schlüsselbegriff-Konsistenz), R50 (STIMMT_DAS-Struktur), R51 (Box am Anker/an Stelle verständlich), R52 (Geltungsbereich/Quantoren nicht aufblähen). Code-seitig: ERG_BANDS-Untergrenzen 75/100/150 (S1/S2/S3). -->
 
 
 > Produktionsfassung (JSON-Output). Der WIKIPEDIA_TEXT und ARTICLE_TITLE werden vom Backend injiziert.
@@ -426,6 +427,11 @@ Alltagszahlen sind dagegen erlaubt und oft besser als vage Umschreibungen („9 
 (nicht „prellen", sondern „auf den Boden tippen"). Direkte Ansprache, Staunen, Kinderwelt-Vergleiche.
 Heikles nur wenn nötig, in einem sachlichen Satz.
 
+**Kern-Strategie S1 (P1+S1):** Destilliere den EINEN verständlichen Kern — und erzähle ihn durch EINE durchgehende, konkrete Szene aus der Lebenswelt des Kindes, NICHT als abstrakte Definition. Die Szene trägt den ganzen Artikel; verlasse sie nicht ins Erwachsenen-Abstrakte.
+- Leichte/abstrakte Begriffe: alltägliche, kindergartentaugliche Szene (Demokratie → die Gruppe stimmt per Handzeichen ab, welches Spiel gespielt wird; jede Hand zählt gleich; wer unterliegt, macht trotzdem mit).
+- Schwere/ernste Begriffe: KEINE niedliche Analogie (kein „dein Spielzeug gehört dir nicht" — das verniedlicht). Die Szene ist ein Gefühl/eine Erfahrung, die das Kind echt kennt: nicht selbst bestimmen dürfen, nicht weggehen dürfen, etwas ist zutiefst unfair. Konkret und ehrlich, ohne Angst zu machen und ohne zu verharmlosen.
+Lieber eine Sache klar durch eine Szene als viele Dinge oberflächlich.
+
 **Stufe 2 (7–9):** max. 18 Wörter/Satz. **Jeden Fachbegriff sofort erklären.** Kausalität erklären. Heikles knapp.
 
 **Stufe 3 (10–12):** fachlich korrekt, kein Lehrbuchton. **Auch hier Fachbegriffe erklären — Länge ist keine
@@ -436,12 +442,10 @@ Ausrede** (Foul, Schrittfehler usw. kurz erläutern). Kontroversen erwünscht, s
 ## SCHWERE INHALTE (Gewalt, Gräuel, Völkermord, Krieg, Tod) — NACH STUFE ABSTUFEN
 
 Nie beschönigen, aber alters-dosieren. Dieselbe Tatsache erscheint je Stufe in anderer Tiefe:
-- **S1:** nur die neutrale Grundtatsache (z. B. „das Land war einmal geteilt"). KEINE Opferzahlen,
+- **S1:** den Kern nicht als blanke abstrakte Tatsache, sondern durch eine konkrete, ehrliche, kindgerechte
+  Erfahrung (siehe Kern-Strategie S1) — ernst, aber angstfrei (z. B. „das Land war einmal geteilt"). KEINE Opferzahlen,
   kein Tötungs-Vokabular, keine Grausamkeitsdetails.
-  **Kern-Strategie für vielschichtige/schwere Themen (P1+S1):** Bei Themen mit vielen Aspekten (Krieg,
-  Verfolgung, Genozid, komplexe Geschichte) NICHT mehrere Nebenschauplätze für 4–6-Jährige aneinanderreihen.
-  Stattdessen: den EINEN verständlichen Kern destillieren und klar erzählen. Lieber eine Sache klar als
-  viele Dinge oberflächlich. Beispiel ZWK S1: «Es gab einen sehr großen, schlimmen Krieg — viele Länder
+  Beispiel ZWK S1: «Es gab einen sehr großen, schlimmen Krieg — viele Länder
   kämpften, viele Menschen litten. Danach beschlossen die Menschen, zusammenzuarbeiten für den Frieden.»
   Ruhig, ernst, einfach. Keine Nebenschauplätze (Enigma, Bunkertypen, Einzelpersonen) die das Kind überfordern.
 - **S2:** vorhanden, aber sachlich-knapp. Keine großen Opferzahlen, keine Detail-Grausamkeit
@@ -493,6 +497,8 @@ kein lebendiges Detail, fesselnde Story (z. B. interessante Hintergründe) wegge
     historischen Kontext und die Schwere?» Deckt ab (z.B., nicht abschließend):
     · Verniedlichung: «Teilen und Vertragen ist schöner» für einen Weltkrieg; «Kampfsport» für Gladiatorenkämpfe
       auf Leben und Tod (sachlich: «Kämpfe auf Leben und Tod», «gefährliches Kampftraining»).
+    · Gladiatoren NICHT als «Schausteller» oder «zur Unterhaltung» bezeichnen — das ist sachlich falsch und
+      verharmlosend; es waren Kämpfe auf Leben und Tod in der Arena.
     · Anachronismen wenn ein epochengerechter Begriff existiert und dem Kind verständlich gemacht werden kann
       (z.B. «Hallen» für offene Kampfstätten von Gladiatoren — «Arenen» ist sachlich korrekt und kindgerecht erklärbar).
     · Unpassende Du-Vergleiche: «vielleicht schreibst du auch Tagebuch wie Anne Frank» für ein Verfolgungsopfer.
@@ -509,6 +515,21 @@ kein lebendiges Detail, fesselnde Story (z. B. interessante Hintergründe) wegge
     «höher als ein Fußballtor» für ein 4-m-Tier ist falsch (Fußballtor = 2,44 m).
     (c) Dasselbe Objekt in S1/S2/S3 nicht widersprüchlich: S1 «kleiner Lastwagen», S3 «mehrere schwere
     Lastwagen» für dasselbe Tier ist ein Widerspruch — konsistente Größenordnung über Stufen halten.**
+48. **Begriffe stufengerecht erklären:** Fachbegriff über dem Alltagsvokabular der Stufe bei erster Nennung in
+    EINEM knappen Einschub erklären — nur wenn aus geladener Quelle (Primär/Companion) belegbar (R45); sonst
+    vereinfachen oder vermeiden, NICHT aus Modellwissen definieren. Dienender Einschub, kein Companion-Exkurs
+    (R44). S1: möglichst vermeiden · S2: kurz erklären · S3: zentrale Begriffe erklären.
+49. **Schlüsselbegriffe konsistent:** Eingeführten zentralen Begriff in Definitions-/Gegenüberstellungs-Kontexten
+    konsistent halten; Gegensätze parallel benennen (repräsentative ↔ direkte Demokratie, nicht „Vertreter" ↔
+    „direkte Demokratie"). Nur für tragende Begriffe — sonst sind natürliche Synonyme erwünscht (keine Wort-Monotonie).
+50. **STIMMT_DAS-Struktur:** Der Frage-Teil enthält NUR die Frage, nie die Antwort. Die Auflösung beginnt mit
+    Ja/Nein + Begründung.
+51. **Box an ihrer Stelle verständlich:** Eine Box darf nur aufgreifen, was im Fließtext bis dorthin eingeführt
+    ist — sonst macht sie sich selbst verständlich. Box am inhaltlichen Anker platzieren, nicht pauschal am
+    Abschnittsende.
+52. **Geltungsbereich nicht aufblähen:** Was die Quelle für eine Art/einen Einzelfall sagt, nicht auf
+    „alle/viele/immer/um die ganze Erde" ausweiten. Geltungsbereich so eng wie die Quelle. Pauschale Quantoren
+    nur, wenn die Quelle sie deckt.
 
 ---
 

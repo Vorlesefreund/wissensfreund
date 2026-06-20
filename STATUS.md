@@ -1,10 +1,21 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-20T08:21:48Z -->
+<!-- updated: 2026-06-20T11:41:19Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-20)
+
+**Generator-Revision v3.24** (Prompt + ERG_BANDS).
+- S1-Kern-Strategie umgestellt: Kern durch EINE durchgehende, konkrete Szene aus der Kinder-Lebenswelt
+  statt abstrakter Definition (Zwei-Fälle-Logik leicht/schwer). Als allgemeine S1-Regel zu den Stufen-
+  Satzlängenregeln verschoben (nicht mehr nur im Schwere-Inhalte-Kontext).
+- R46 geschärft: Gladiatoren NICHT als „Schausteller"/„zur Unterhaltung" (sachlich falsch + verharmlosend)
+  — schließt die Generator-Lücke, die im v3.23f-Test erst das Lektorat fing.
+- Neue Regeln R48 (Begriffe stufengerecht + belegt erklären, deferiert an R44/R45), R49 (Schlüsselbegriff-
+  Konsistenz), R50 (STIMMT_DAS-Struktur), R51 (Box am Anker), R52 (Geltungsbereich/Quantoren nicht aufblähen).
+- ERG_BANDS-Untergrenzen 50/80/100 → 75/100/150 (S1/S2/S3): hebt das Wortbudget abstrakt-schwerer
+  Themen (erg 1–2) an, damit S1 nicht auf ~50 Wörter kollabiert. Obergrenzen unverändert. Greift ab nächstem Gen-Lauf.
 
 **v3.23f-Test (3 neue Themen) + Validator-Fix.**
 - Pipeline-Lauf Zugvögel/Demokratie/Sklaverei (S1–3) komplett durch alle 3 Stages. Lektorat:
