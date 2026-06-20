@@ -809,10 +809,16 @@ def parse_article_json(raw: str) -> dict:
     return article
 
 
-def validate_article(article: dict, job: dict) -> list[str]:
+def validate_article(article: dict, job: dict, word_floor: int | None = None) -> list[str]:
     """
     Grundlegende Plausibilitätsprüfung.
     Gibt eine Liste von Fehlern zurück (leer = OK).
+
+    word_floor: Wort-Untergrenze (Retry-Floor wmin). Ist sie gesetzt, wird die
+    Satz-UNTERgrenze nur dann als Fehler gewertet, wenn der Artikel auch in
+    Wörtern darunter liegt — d.h. ein echtes Stub-Signal. Bei gesundem
+    Wortbudget ist eine niedrige Satzzahl stilistisch (längere Sätze), kein
+    Defekt. Ohne word_floor (Legacy-Pfad) bleibt das alte Verhalten erhalten.
     """
     errors = []
     level_str = str(job["age_level"])
@@ -836,7 +842,12 @@ def validate_article(article: dict, job: dict) -> list[str]:
     n = len(all_sentences)
     lo = MIN_SENTENCES_PER_ARTICLE.get(level_str, 8)
     hi = MAX_SENTENCES_PER_ARTICLE.get(level_str, 100)
-    if not (lo <= n <= hi):
+    # Untergrenze nur als Stub-Signal werten, wenn auch die Wortzahl unter dem
+    # Ziel liegt (siehe word_floor-Doku oben). Obergrenze bleibt immer scharf.
+    wc_real  = meta.get("word_count")
+    too_few  = n < lo and (word_floor is None or wc_real is None or wc_real < word_floor)
+    too_many = n > hi
+    if too_few or too_many:
         errors.append(f"{n} Sätze außerhalb [{lo},{hi}] für Stufe {level_str}")
 
     # Satz-IDs fortlaufend

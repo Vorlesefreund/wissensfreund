@@ -1,10 +1,23 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-19T06:25:53Z -->
+<!-- updated: 2026-06-20T06:51:20Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## Abgeschlossen (2026-06-18)
+## Abgeschlossen (2026-06-20)
+
+**v3.23f-Test (3 neue Themen) + Validator-Fix.**
+- Pipeline-Lauf Zugvögel/Demokratie/Sklaverei (S1–3) komplett durch alle 3 Stages. Lektorat:
+  15 SILENT / 11 KORRIGIERT / 3 PRÜFEN (alle 3 redaktionelle Grenzfälle, kein klarer Fehler:
+  Pfuhlschnepfe-Box „kleiner Vogel"/Dauer · Kranich V- vs. Ketten-Formation · Dreieckshandel-Mythos).
+  Lesefassung: articles/test_v323f/LESEFASSUNG_v323f.md.
+- BEFUND: Satz-Untergrenze (MIN_SENTENCES {1:8,2:15,3:25}) kollidierte mit Wortbudget (ERG_BANDS):
+  bei Erg 1–2 ist wmax≈50 → 8 Sätze mathematisch unerfüllbar → Falsch-Positive (demokratie/
+  sklaverei S1, demokratie S2 bei 14<15 trotz gesundem Budget).
+- FIX: validate_article(…, word_floor=wmin) — untere Satzgrenze flaggt nur noch bei
+  word_count < wmin (echtes Stub-Signal). Obergrenze + Legacy-Pfad unverändert. Empirisch
+  verifiziert: 3 FP weg, Stub-Erkennung intakt. Zusätzlich word_target + ergiebigkeit in
+  article.meta persistiert (waren bisher None → nicht auditierbar; greift ab nächstem Gen-Lauf).
 
 **Daten-Konsistenz-Audit + Exclude-Backstop** (Commit 4db81a2).
 - ergiebigkeit_scores.json aus catalog_full.json neu gebaut: 134 → 4375. XLSX==catalog_full

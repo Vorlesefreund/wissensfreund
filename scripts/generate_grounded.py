@@ -135,6 +135,14 @@ def wortziel_for(thema: str, level: int) -> tuple[int, int, str]:
     return wmin, wmax, source
 
 
+def ergiebigkeit_for(thema: str, level: int) -> int:
+    """Roher Ergiebigkeits-Score (1–10) für Thema+Stufe; Fallback wenn ungerated."""
+    rec = _ERGIEBIGKEIT.get(thema.strip().lower())
+    if rec is None:
+        return ERG_FALLBACK_SCORE
+    return int(rec.get(f"S{level}", ERG_FALLBACK_SCORE))
+
+
 def appeal_for(thema: str, job_appeal: str | None = None) -> tuple[str, str]:
     """Appeal-Tier (high/medium/low) aus Ergiebigkeit (Mittel der 3 Stufen).
 
@@ -1286,7 +1294,9 @@ def generate_one_level(
             article["meta"]["review_reason"] = f"Wortzahl {word_count} > Cap {cap} nach Trim"
 
     report["phase2"]["word_count"] = word_count
-    article["meta"]["word_count"] = word_count
+    article["meta"]["word_count"]   = word_count
+    article["meta"]["word_target"]  = f"{wmin}–{wmax}"
+    article["meta"]["ergiebigkeit"] = ergiebigkeit_for(thema, job["age_level"])
 
     # ── Box-Verteilungs-Guard: Clusterung → Auto-Reparatur, sonst review_flag ──
     box_issue = _box_lint(article)
@@ -1318,7 +1328,7 @@ def generate_one_level(
             article["meta"]["review_reason"] = (
                 article["meta"].get("review_reason", "") + f"; {box_issue}").lstrip("; ")
 
-    val_errors = validate_article(article, job)
+    val_errors = validate_article(article, job, word_floor=wmin)
     if val_errors:
         for e in val_errors:
             log.warning("  Validierungsfehler: %s", e)
