@@ -1,6 +1,16 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-20T13:13:51Z -->
+<!-- updated: 2026-06-21T10:14:36Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
+
+---
+
+## In Arbeit (Branch)
+
+**Schritt 1 Vergleichs-Metadaten** (Branch `feature/comparisons-metadata`, noch nicht in main):
+optionales `comparisons[]`-Feld in AUSGABEFORMAT + abwärtskompatible Formprüfung in
+`validate_article` (Selbsttest: 9/9 Bestandsartikel ok, 4 Fehlerfälle feuern). Schritt 2
+(Code-Check `factor × Referenzgröße ≈ source_value` + Prosa↔`text`-Abgleich + Referenz-Saat-Tabelle)
+ausstehend.
 
 ---
 

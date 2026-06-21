@@ -892,6 +892,32 @@ def validate_article(article: dict, job: dict, word_floor: int | None = None) ->
                 if box.get("reveal_mode") not in ("auto", "manual"):
                     errors.append(f"myth-Box hat ungültigen reveal_mode: {box.get('reveal_mode')}")
 
+    # comparisons[] (optional, additiv) — Formprüfung NUR wenn vorhanden.
+    # Fehlt das Feld → kein Fehler (abwärtskompatibel mit Artikeln vor diesem Schema).
+    comparisons = article.get("comparisons")
+    if comparisons is not None:
+        if not isinstance(comparisons, list):
+            errors.append("comparisons ist kein Array")
+        else:
+            valid_ids = set(ids)  # Satz-IDs, oben gesammelt
+            req_keys = {"text", "reference_object", "factor", "dimension",
+                        "source_value", "source_unit", "sentence_id"}
+            for i, c in enumerate(comparisons):
+                if not isinstance(c, dict):
+                    errors.append(f"comparisons[{i}] ist kein Objekt")
+                    continue
+                missing = req_keys - set(c.keys())
+                if missing:
+                    errors.append(f"comparisons[{i}] fehlen Keys: {sorted(missing)}")
+                # bool ist Subtyp von int — explizit ausschließen (factor/source_value sind Zahlen)
+                if "factor" in c and (isinstance(c["factor"], bool) or not isinstance(c["factor"], (int, float))):
+                    errors.append(f"comparisons[{i}].factor nicht numerisch")
+                if "source_value" in c and (isinstance(c["source_value"], bool) or not isinstance(c["source_value"], (int, float))):
+                    errors.append(f"comparisons[{i}].source_value nicht numerisch")
+                sid = c.get("sentence_id")
+                if sid is not None and valid_ids and sid not in valid_ids:
+                    errors.append(f"comparisons[{i}].sentence_id '{sid}' nicht im Artikel")
+
     return errors
 
 
