@@ -435,16 +435,39 @@ def _jaccard(a: str, b: str) -> float:
     return len(wa & wb) / len(wa | wb)
 
 
+def _split_sentences(text: str) -> list[str]:
+    """Leichtgewichtiges Satz-Splitting für Box-Prosa (Mehr-Satz-Strings).
+
+    Trennt nach .!? + Whitespace, ohne NLP-Abhängigkeit. Gibt die ECHTEN
+    Teil-Strings zurück (sind exakte Substrings des Originals → für punktgenauen
+    .replace-Einbau). Kein Satzende-Zeichen → [text] (= heutiges Ganzfeld-Verhalten).
+
+    Bewusst konservativ: Bei Fehlschnitt (z. B. Abkürzung „z. B.") matcht der
+    Ein-Satz-claim höchstens nicht (≥0.40-Gate) → „Einbau fehlgeschlagen", aber
+    NIE ein zerstörender Ersatz (es wird nur der exakt getroffene Teil-String ersetzt).
+    """
+    if not text or not text.strip():
+        return []
+    return [s for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s]
+
+
 def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -> bool:
     """Ersetzt den Satz in article, der claim_text am besten trifft, mit korrektur_neu.
 
     Gibt True zurück wenn Jaccard >= 0.4 und Ersatz vorgenommen wurde.
+
+    Mehr-Satz-Box-Strings (box.text / box.reveal_text) werden satz-granular
+    behandelt: das Feld wird in Sätze geteilt, der claim gegen jeden Box-Satz
+    gematcht und nur der beste Treffer ersetzt — die übrigen Box-Sätze bleiben
+    erhalten. Ein-Satz-Felder verhalten sich wie bisher (Split liefert ein Element).
     """
     if not claim_text or not korrektur_neu or claim_text == korrektur_neu:
         return False
 
     best_score = 0.0
-    best_loc: tuple | None = None  # ("sec", si, sj) or ("box", si, bi, sj)
+    # ("sec", si, sj) | ("box", si, bi, sj)
+    # | ("box_text"|"box_reveal", si, bi, satz_str)  ← satz_str = exakt zu ersetzender Teil
+    best_loc: tuple | None = None
 
     for si, sec in enumerate(article.get("sections", [])):
         for sj, sent in enumerate(sec.get("sentences", [])):
@@ -453,16 +476,16 @@ def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -
                 best_score = score
                 best_loc = ("sec", si, sj)
         for bi, box in enumerate(sec.get("boxes", [])):
-            score = _jaccard(claim_text, box.get("text", ""))
-            if score > best_score:
-                best_score = score
-                best_loc = ("box_text", si, bi)
-            reveal = box.get("reveal_text", "")
-            if reveal:
-                score = _jaccard(claim_text, reveal)
+            for satz in _split_sentences(box.get("text", "") or ""):
+                score = _jaccard(claim_text, satz)
                 if score > best_score:
                     best_score = score
-                    best_loc = ("box_reveal", si, bi)
+                    best_loc = ("box_text", si, bi, satz)
+            for satz in _split_sentences(box.get("reveal_text", "") or ""):
+                score = _jaccard(claim_text, satz)
+                if score > best_score:
+                    best_score = score
+                    best_loc = ("box_reveal", si, bi, satz)
             for sj, sent in enumerate(box.get("sentences", [])):
                 score = _jaccard(claim_text, sent.get("text", ""))
                 if score > best_score:
@@ -476,11 +499,13 @@ def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -
         _, si, sj = best_loc
         article["sections"][si]["sentences"][sj]["text"] = korrektur_neu
     elif best_loc[0] == "box_text":
-        _, si, bi = best_loc
-        article["sections"][si]["boxes"][bi]["text"] = korrektur_neu
+        _, si, bi, satz = best_loc
+        box = article["sections"][si]["boxes"][bi]
+        box["text"] = box["text"].replace(satz, korrektur_neu, 1)
     elif best_loc[0] == "box_reveal":
-        _, si, bi = best_loc
-        article["sections"][si]["boxes"][bi]["reveal_text"] = korrektur_neu
+        _, si, bi, satz = best_loc
+        box = article["sections"][si]["boxes"][bi]
+        box["reveal_text"] = box["reveal_text"].replace(satz, korrektur_neu, 1)
     else:
         _, si, bi, sj = best_loc
         article["sections"][si]["boxes"][bi]["sentences"][sj]["text"] = korrektur_neu
