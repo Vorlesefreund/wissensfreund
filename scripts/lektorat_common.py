@@ -723,7 +723,7 @@ def annotate_article_lektorat_v2(
 def run_lektorat_sync(
     parts_by_id: dict[str, tuple[str, str]],
     api_key: str,
-) -> tuple[dict[str, list[dict]], dict[str, dict]]:
+) -> tuple[dict[str, dict], dict[str, dict]]:
     """Führt Lektorat-Calls SEQUENZIELL aus (schnell für ≤5 Artikel).
 
     Gibt (results, usage_by_id) zurück.
@@ -736,7 +736,7 @@ def run_lektorat_sync(
     import anthropic
 
     client    = anthropic.Anthropic(api_key=api_key)
-    results:    dict[str, list[dict]] = {}
+    results:    dict[str, dict] = {}   # aid -> {"corrections": [...], "pruefen": [...]}
     usage_by_id: dict[str, dict]     = {}
 
     for aid, (sources_prefix, article_task) in parts_by_id.items():
@@ -771,13 +771,13 @@ def run_lektorat_sync(
                 "cache_read_tok":   getattr(u, "cache_read_input_tokens", 0),
             }
             try:
-                results[aid] = parse_lektorat_json(raw)
+                results[aid] = parse_lektorat_v2(raw)
             except Exception as exc:
                 log.warning("  Lektorat JSON-Parse [%s]: %s", aid, exc)
-                results[aid] = []
+                results[aid] = {"corrections": [], "pruefen": []}
         except Exception as exc:
             log.warning("  Lektorat-Sync [%s] fehlgeschlagen: %s", aid, exc)
-            results[aid] = []
+            results[aid] = {"corrections": [], "pruefen": []}
             usage_by_id[aid] = {}
 
     return results, usage_by_id
@@ -788,7 +788,7 @@ def run_lektorat_sync(
 def run_lektorat_batch(
     parts_by_id: dict[str, tuple[str, str]],
     api_key: str,
-) -> dict[str, list[dict]]:
+) -> dict[str, dict]:
     """Reicht alle Lektorat-Anfragen als Anthropic Message Batch ein.
 
     parts_by_id: {article_id: (sources_prefix, article_task)}
@@ -835,7 +835,7 @@ def run_lektorat_batch(
             c.succeeded, c.errored, c.processing,
         )
 
-    results: dict[str, list[dict]] = {}
+    results: dict[str, dict] = {}   # aid -> {"corrections": [...], "pruefen": [...]}
     for result in client.messages.batches.results(batch.id):
         rid = result.custom_id
         if result.result.type == "succeeded":
@@ -850,12 +850,12 @@ def run_lektorat_batch(
                 u.output_tokens,
             )
             try:
-                results[rid] = parse_lektorat_json(raw)
+                results[rid] = parse_lektorat_v2(raw)
             except Exception as exc:
                 log.warning("  Lektorat JSON-Parse [%s]: %s", rid, exc)
-                results[rid] = []
+                results[rid] = {"corrections": [], "pruefen": []}
         else:
             log.warning("  Lektorat-Batch [%s]: %s", rid, result.result.type)
-            results[rid] = []
+            results[rid] = {"corrections": [], "pruefen": []}
 
     return results

@@ -70,7 +70,7 @@ from lektorat_common import (            # noqa: E402
     PROBLEMATIC_VERDICTS,
     build_grounded_sources_block,
     build_lektorat_parts,
-    annotate_article_lektorat,
+    annotate_article_lektorat_v2,
     run_lektorat_batch,
     run_lektorat_sync,
 )
@@ -1725,16 +1725,19 @@ def main() -> None:
                         )
                 for job, article, _ in topic_articles:
                     aid = job["article_id"]
-                    verdicts = lektorat_results.get(aid, [])
-                    annotate_article_lektorat(article, verdicts, primary_text)
+                    lektorat_result = lektorat_results.get(aid, {"corrections": [], "pruefen": []})
+                    _thema_a, _level_a = aid_to_meta.get(aid, (thema, job["age_level"]))
+                    annotate_article_lektorat_v2(
+                        article, lektorat_result, thema=_thema_a, stufe=f"S{_level_a}"
+                    )
                     pb = article.get("pruefbericht", {})
-                    sm = pb.get("summary", {})
                     log.info(
-                        "  Lektorat [%s]: %d Aussagen — angewandt:%d vorschlag:%d eskaliert:%d",
-                        aid, len(pb.get("findings", [])),
-                        sm.get("auto_angewandt", 0),
-                        sm.get("vorschlag_offen", 0),
-                        sm.get("eskaliert", 0),
+                        "  Lektorat [%s]: silent=%d korrigiert=%d pruefen=%d%s",
+                        aid,
+                        pb.get("n_silent", 0),
+                        pb.get("n_korrigiert", 0),
+                        pb.get("n_pruefen", 0),
+                        " ⚠ review_flag" if pb.get("n_pruefen", 0) > 0 else "",
                     )
 
             # Artikel schreiben (mit ggf. annotiertem lektorat-Feld)
