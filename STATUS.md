@@ -1,10 +1,19 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-21T18:15:26Z -->
+<!-- updated: 2026-06-21T18:45:14Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-21)
+
+**Prompt-Disziplin-Edits gelandet** (Commit ed0fc2f). Drei Schaden-Muster an der LEKTORAT_SYSTEM-
+Quelle entschärft: (1) GRUNDPRINZIP „bewahren oder verbessern" → „bewahren" + Verbot, bei Korrektur
+Sprachkolorit/Sinnesdetail/neuen Vergleich hinzuzufügen (kein Ausschmücken); (2) KORREKTIONS-PRINZIP
+neuer Bullet „Minimaler Eingriff" — kleinste Änderung, jedes nicht ausdrücklich korrigierte
+quellbelegte Detail erhalten («stumpfe» Lanze nicht fallen lassen); (3) SUBSTANZ-PRÜFUNG: engagierende
+Hinführungen/«Warum»-Fragen/Denkanstöße sind KEINE Leerformeln, nur echte Tautologien streichen
+(Rhetorik geschützt). Aggressivitäts-Bias (ENTSCHEIDUNGSPRINZIP „im Zweifel KORRIGIERT statt PRÜFEN")
+bewusst behalten — dokumentiert begründet durch das 71-%-PRÜFEN-Versagen (85fc5c9/5573986).
 
 **Box-internes Satz-Matching gelandet** (Commit 3702399). `_apply_auto_correction` teilt Mehr-Satz-
 Box-Strings (`box.text`/`reveal_text`) jetzt in Sätze, matcht satz-granular (gleiche `_jaccard`-Logik,
