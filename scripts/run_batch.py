@@ -1131,7 +1131,7 @@ def stage2_generierung(
             val_errors = [f"validate_article exception: {_ve}"]
         if val_errors:
             log.warning("  [%s] Validierung: %s", article_id, "; ".join(val_errors[:3]))
-            article["meta"].setdefault("review_flag", True)
+            article["meta"]["review_flag"] = True
             article["meta"]["review_reason"] = (
                 article["meta"].get("review_reason", "") + "; " + "; ".join(val_errors[:3])
             ).lstrip("; ")

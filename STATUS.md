@@ -1,8 +1,24 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-20T13:13:51Z -->
+<!-- updated: 2026-06-21T13:47:20Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
+
+## Abgeschlossen (2026-06-21)
+
+**review_flag-Fix auf main.** In beiden Pfaden (`generate_grounded.py`/`run_batch.py`) im
+`if val_errors:`-Block `setdefault("review_flag", True)` → hartes Setzen `["review_flag"] = True`,
+damit echte Validierungsfehler `review_flag` auch dann heben, wenn der Generator
+`review_flag:false` ins JSON vorsetzt (`setdefault` wäre dann No-op). Kein-Fehler-Pfad unverändert.
+
+**Deterministischer Vergleichs-Check verworfen** (Entscheidung). Falsches Werkzeug:
+Referenzgrößen sind offenes Weltwissen, nicht tabellierbar — 14/37 Objekte unbekannt; 0 echte
+Arithmetik-Treffer in 37 Vergleichen; Fehlalarm-dominiert; und Kinderwelt-Qualität (das eigentliche
+Anliegen) ist arithmetisch gar nicht prüfbar. `comparisons[]`-Feld + `comparison_check.py` + Wiring
+bleiben **unmerged auf `feature/comparisons-metadata`** (Archiv, nicht gelöscht). Vergleichs-Qualität
+wandert in Generator-Anleitung (Kinderwelt-/Tier-Bevorzugung, grob stimmig — Generator macht das
+laut Diagnose schon größtenteils gut) + fokussierte Plausibilitätsprüfung im Lektorat-Umbau
+(Komponente C). Die früheren OFFEN-Punkte (b)/(c) des Vergleichs-Checks sind damit obsolet.
 
 ## Abgeschlossen (2026-06-20)
 

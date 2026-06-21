@@ -1332,7 +1332,7 @@ def generate_one_level(
     if val_errors:
         for e in val_errors:
             log.warning("  Validierungsfehler: %s", e)
-        article["meta"].setdefault("review_flag", True)
+        article["meta"]["review_flag"] = True
         existing_reason = article["meta"].get("review_reason", "")
         extra = "; ".join(val_errors[:3])
         article["meta"]["review_reason"] = (existing_reason + "; " + extra).lstrip("; ")
