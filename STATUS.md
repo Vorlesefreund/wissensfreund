@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-21T10:14:36Z -->
+<!-- updated: 2026-06-21T10:32:31Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -8,9 +8,13 @@
 
 **Schritt 1 Vergleichs-Metadaten** (Branch `feature/comparisons-metadata`, noch nicht in main):
 optionales `comparisons[]`-Feld in AUSGABEFORMAT + abwärtskompatible Formprüfung in
-`validate_article` (Selbsttest: 9/9 Bestandsartikel ok, 4 Fehlerfälle feuern). Schritt 2
-(Code-Check `factor × Referenzgröße ≈ source_value` + Prosa↔`text`-Abgleich + Referenz-Saat-Tabelle)
-ausstehend.
+`validate_article` (Selbsttest: 9/9 Bestandsartikel ok, 4 Fehlerfälle feuern).
+
+**Schritt 1b:** `relation`-Feld (`approx`/`greater`/`less`, Default `approx`) zu `comparisons[]`
+ergänzt — Generator-Regel + Schema-Beispiel + `validate_article`-Enumprüfung (Selbsttest grün).
+Branch `feature/comparisons-metadata`, noch nicht in main. Schritt 2 (Code-Check
+`factor × Referenzgröße` mit `relation`-Operator + Toleranzband + Prosa↔`text`-Abgleich +
+Referenz-Saat-Tabelle) als nächstes.
 
 ---
 

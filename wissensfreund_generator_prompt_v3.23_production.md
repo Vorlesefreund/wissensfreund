@@ -652,6 +652,7 @@ Kein Markdown, keine Kommentare, keine Erklärungen außerhalb des `<planung>`-B
       "dimension":        "Masse",
       "source_value":     200000,
       "source_unit":      "kg",
+      "relation":         "approx",
       "sentence_id":      "s007"
     }
   ]
@@ -668,7 +669,7 @@ Kein Markdown, keine Kommentare, keine Erklärungen außerhalb des `<planung>`-B
 - `quiz.questions` genau 3 Fragen (Stufe 1+2), 4–5 (Stufe 3); je genau 3 Optionen A/B/C
 - `related_terms` immer vorhanden, darf leere Arrays enthalten
 - `source_passages` immer vorhanden — je Fakten-Satz ein Eintrag mit wörtlichem Zitat aus den eingebetteten Wikipedia-Texten. Einleitungs- und Verbindungssätze auslassen. Max. 30 Einträge; darf leer sein `[]` wenn keine belegten Fakten-Sätze vorhanden.
-- `comparisons` optional — für JEDEN kindgerechten Vergleich im Body (eine belegte Rohzahl in ein vertrautes Bezugsobjekt übersetzt, z. B. «so lang wie drei Busse», «so viel wie vierzig Elefanten») ein Eintrag. Felder: `text` = die Vergleichsphrase WÖRTLICH wie im Fließtext; `reference_object` = das Bezugsobjekt (z. B. «Elefant»); `factor` = der Multiplikator (numerisch, z. B. `40`); `dimension` = Größenart («Masse»/«Länge»/«Höhe» …); `source_value` (numerisch) + `source_unit` = die belegte Rohzahl, die der Vergleich übersetzt (eindeutig die GEMEINTE Größe — z. B. Herzgewicht ≠ Körpergewicht); `sentence_id` = der Satz, der die Phrase enthält. `reference_size` NICHT angeben (liefert der Prüfer). Ergänzt R47, ersetzt es nicht. Darf weggelassen werden oder `[]` sein, wenn der Artikel keine Vergleiche enthält.
+- `comparisons` optional — für JEDEN kindgerechten Vergleich im Body (eine belegte Rohzahl in ein vertrautes Bezugsobjekt übersetzt, z. B. «so lang wie drei Busse», «so viel wie vierzig Elefanten») ein Eintrag. Felder: `text` = die Vergleichsphrase WÖRTLICH wie im Fließtext; `reference_object` = das Bezugsobjekt (z. B. «Elefant»); `factor` = der Multiplikator (numerisch, z. B. `40`); `dimension` = Größenart («Masse»/«Länge»/«Höhe» …); `source_value` (numerisch) + `source_unit` = die belegte Rohzahl, die der Vergleich übersetzt (eindeutig die GEMEINTE Größe — z. B. Herzgewicht ≠ Körpergewicht); `relation` = Art des Vergleichs, einer von `"approx"`/`"greater"`/`"less"` (Default `"approx"` wenn weggelassen): Setze `relation` nach der Formulierung der Vergleichsphrase — Steigerung + «als» («länger/größer/schwerer als …») → `"greater"`, («kürzer/kleiner/leichter als …») → `"less"`; «so … wie» / «etwa» → `"approx"`; `sentence_id` = der Satz, der die Phrase enthält. `reference_size` NICHT angeben (liefert der Prüfer). Ergänzt R47, ersetzt es nicht. Darf weggelassen werden oder `[]` sein, wenn der Artikel keine Vergleiche enthält.
 
 **Ausgabe-Disziplin (strikt):** Zuerst `<planung>`-Block, dann direkt `{`.
 KEINE weiteren Kommentare, Erklärungen oder Rückfragen außerhalb der `<planung>`-Tags.

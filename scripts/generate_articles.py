@@ -917,6 +917,11 @@ def validate_article(article: dict, job: dict, word_floor: int | None = None) ->
                 sid = c.get("sentence_id")
                 if sid is not None and valid_ids and sid not in valid_ids:
                     errors.append(f"comparisons[{i}].sentence_id '{sid}' nicht im Artikel")
+                # relation optional (Default "approx") — wenn vorhanden, muss Wert gültig sein.
+                rel = c.get("relation")
+                if rel is not None and rel not in ("approx", "greater", "less"):
+                    errors.append(f"comparisons[{i}].relation '{rel}' ungültig "
+                                  f"(erlaubt: approx/greater/less)")
 
     return errors
 
