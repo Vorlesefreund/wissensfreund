@@ -228,23 +228,25 @@ def article_to_lektorat_text(article: dict) -> str:
     """
     lines = []
     for sec in article.get("sections", []):
-        heading = sec.get("heading", sec.get("title", "")).strip()
+        # null-Werte wie leer/fehlend behandeln ((x or "") fängt None ab, .get-Default
+        # greift nur bei fehlendem Schlüssel, nicht bei JSON-null).
+        heading = (sec.get("heading") or sec.get("title") or "").strip()
         if heading:
             lines.append(f"\n[{heading}]")
         for s in sec.get("sentences", []):
-            t = s.get("text", "").strip()
+            t = (s.get("text") or "").strip()
             if t:
                 lines.append(t)
         for box in sec.get("boxes", []):
             btype = box.get("type", "box")
-            t = box.get("text", "").strip()
+            t = (box.get("text") or "").strip()
             if t:
                 lines.append(f"  BOX[{btype}]: {t}")
-            reveal = box.get("reveal_text", "").strip()
+            reveal = (box.get("reveal_text") or "").strip()
             if reveal:
                 lines.append(f"  BOX[{btype}/reveal]: {reveal}")
             for s in box.get("sentences", []):
-                t = s.get("text", "").strip()
+                t = (s.get("text") or "").strip()
                 if t:
                     lines.append(f"  BOX[{btype}]: {t}")
     return "\n".join(lines)
