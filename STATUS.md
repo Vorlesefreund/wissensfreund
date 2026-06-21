@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-21T10:32:31Z -->
+<!-- updated: 2026-06-21T10:49:17Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -12,9 +12,13 @@ optionales `comparisons[]`-Feld in AUSGABEFORMAT + abwärtskompatible Formprüfu
 
 **Schritt 1b:** `relation`-Feld (`approx`/`greater`/`less`, Default `approx`) zu `comparisons[]`
 ergänzt — Generator-Regel + Schema-Beispiel + `validate_article`-Enumprüfung (Selbsttest grün).
-Branch `feature/comparisons-metadata`, noch nicht in main. Schritt 2 (Code-Check
-`factor × Referenzgröße` mit `relation`-Operator + Toleranzband + Prosa↔`text`-Abgleich +
-Referenz-Saat-Tabelle) als nächstes.
+
+**Schritt 2:** eigenständiges, unit-getestetes Vergleichs-Check-Modul `scripts/comparison_check.py`
+(+ `test_comparison_check.py`, 26/26 grün, Gelenkbus-Kronzeuge schlägt an). relation-bewusste
+Arithmetik (approx ±30 %-Band; greater/less strikt), Zahl-Bindung (Ziffer↔dt. Zahlwort),
+Prosa-Bindung, Saat-Tabelle (10 Anker, TOL=0.30, einziger Ort für Referenzwerte). NOCH NICHT in
+die Pipeline verdrahtet. Branch `feature/comparisons-metadata`, nicht in main. Schritt 3 (wiren +
+kleiner Gen-Lauf → messen, ob Generator `comparisons[]` füllt und Check echte Fehler fängt) als nächstes.
 
 ---
 
