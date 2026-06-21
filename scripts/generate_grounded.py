@@ -57,6 +57,7 @@ from generate_articles import (          # noqa: E402
     MIN_SENTENCES_PER_ARTICLE,
     MAX_SENTENCES_PER_ARTICLE,
 )
+from comparison_check import annotate_article_comparisons  # noqa: E402
 import gemini_client                     # noqa: E402
 from image_vision_filter import (        # noqa: E402
     fetch_image_candidates,
@@ -1339,6 +1340,11 @@ def generate_one_level(
 
     report["phase2"]["validation_errors"]  = val_errors
     report["phase2"]["companions_fetched"] = list(companion_texts.keys())
+
+    # Nicht-blockierender Vergleichs-Check am Generierungs-Stand (vor dem Lektorat,
+    # auf dem comparisons[] entstanden ist). Annotiert nur Review-Metadaten.
+    annotate_article_comparisons(article)
+    report["phase2"]["comparison_report"] = article.get("comparison_report")
 
     return article, report
 

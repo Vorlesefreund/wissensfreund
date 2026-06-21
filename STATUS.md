@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-21T11:17:17Z -->
+<!-- updated: 2026-06-21T11:56:35Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -25,8 +25,18 @@ fängt echte Faktor-/Objekt-Mismatches weiter. Saat-Tabelle auf 20 Objekte erwei
 30/30 Tests grün, Gelenkbus bleibt FLAG, CLI 5/5 PASS auf `articles/test_step3a/`. Bekannte weiche
 Stellen (Substring-Over-Match kurzer Tokens; factor=1 trivial) bewusst akzeptiert
 (Fehl-Nichtflag-Richtung). Watch: multiplikative Adverbien (doppelt/dreifach/halb) noch nicht in
-Zahl-Normalisierung. Branch `feature/comparisons-metadata`, nicht in main. Schritt 3b (Check als
-nicht-blockierender PRÜFEN-Report in die Pipeline wiren) als nächstes.
+Zahl-Normalisierung. Branch `feature/comparisons-metadata`, nicht in main.
+
+**Schritt 3b:** Vergleichs-Check als nicht-blockierender PRÜFEN-Report verdrahtet —
+pfad-neutraler Helfer `annotate_article_comparisons` (`comparison_check.py`), aufgerufen vor dem
+Lektorat in sync (`generate_grounded.py`, Ende `generate_one_level`) und batch (`run_batch.py`,
+`stage2_generierung`). Schreibt `article['comparison_report']` {findings, summary}; setzt
+`meta.review_flag` hart auf True bei ≥1 FLAG (LLM emittiert `review_flag:false` → `setdefault` wäre
+No-op), `review_reason` additiv; inhalts-neutral, nie werfend. Verifikationslauf sauber, Flag greift.
+Branch `feature/comparisons-metadata`, nicht in main. OFFEN: (a) fokussierter
+`validate_article`-`setdefault`-Fix (gleicher Defekt, eigener Commit); (b) Fehlalarm-Diagnose der
+`_nicht_im_satz`-Flags (sentence_id-Verlässlichkeit / Body-Fallback) vor Skalierung; (c) Saat-Tabelle
+wächst pro Lauf (Wohnmobil/Lineal → langfristig Auto-Grow).
 
 ---
 

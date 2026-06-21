@@ -31,9 +31,12 @@ CLI (optional, nur Diagnose):
 
 from __future__ import annotations
 
+import logging
 import re
 import sys
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 # ── Tuning-Konstanten (EINZIGER Ort für Referenzwerte / Toleranz) ───────────────
 
@@ -455,6 +458,63 @@ def check_article(article: dict) -> list[CheckResult]:
         results.append(check_comparison(comp, body=body, sentence_text=smap.get(sid),
                                         entry_index=i))
     return results
+
+
+# ── Pipeline-Andockpunkt: nicht-blockierender PRÜFEN-Report ──────────────────────
+
+def annotate_article_comparisons(article: dict) -> None:
+    """Prüft comparisons[] und annotiert NUR Review-Metadaten — nicht-blockierend.
+
+    Pfad-neutral (sync + batch), analog annotate_article_lektorat. Liest nur; ändert
+    WEDER Inhalt NOCH sentences[] NOCH comparisons[]. Wirft nie.
+
+    - Kein comparisons[] → No-op (kein Feld, kein Flag).
+    - Sonst: schreibt immer article["comparison_report"] = {findings[], summary}.
+    - Nur bei >=1 FLAG: meta.review_flag=True + review_reason additiv ergänzt
+      (spiegelt das validate_article-Meta-Muster; überschreibt nichts).
+    """
+    try:
+        comps = article.get("comparisons")
+        if not isinstance(comps, list) or not comps:
+            return  # No-op: kein Vergleich vorhanden
+
+        results = check_article(article)
+        findings = [{
+            "entry_index": r.entry_index,
+            "sentence_id": r.sentence_id,
+            "status":      "pass" if r.ok else "flag",
+            "flags":       list(r.flags),
+        } for r in results]
+        n_flag = sum(1 for f in findings if f["status"] == "flag")
+        article["comparison_report"] = {
+            "findings": findings,
+            "summary": {
+                "n_comparisons": len(findings),
+                "n_pass":        len(findings) - n_flag,
+                "n_flag":        n_flag,
+            },
+        }
+
+        if n_flag:
+            meta = article.setdefault("meta", {})
+            # Hart setzen (NICHT setdefault): der Generator emittiert meta.review_flag
+            # mitunter selbst als false — setdefault wäre dann ein No-op und der Fund
+            # würde das Flag nicht heben. (validate_article-Block bleibt separat.)
+            meta["review_flag"] = True
+            # Kurze, als Vergleichs-Fund erkennbare Liste (erste ~3 geflaggte Einträge).
+            kurz = "; ".join(
+                f"Vergleich #{f['entry_index']}: {f['flags'][0]['code']}"
+                for f in findings if f["status"] == "flag" and f["flags"]
+            )
+            kurz_3 = "; ".join(kurz.split("; ")[:3])
+            existing = meta.get("review_reason", "")
+            meta["review_reason"] = (existing + "; " + kurz_3).lstrip("; ")
+    except Exception as exc:  # nie werfen — Lauf muss weiterlaufen
+        log.error("annotate_article_comparisons Exception: %s — review_flag gesetzt", exc)
+        meta = article.setdefault("meta", {})
+        meta["review_flag"] = True  # hart setzen (s. o.): fehlgeschlagener Check = review-würdig
+        existing = meta.get("review_reason", "")
+        meta["review_reason"] = (existing + "; comparison_check exception").lstrip("; ")
 
 
 # ── CLI (nur Diagnose) ──────────────────────────────────────────────────────────

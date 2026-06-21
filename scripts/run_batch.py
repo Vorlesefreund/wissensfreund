@@ -70,6 +70,7 @@ from generate_articles import (  # noqa: E402
     validate_article,
     USER_AGENT,
 )
+from comparison_check import annotate_article_comparisons  # noqa: E402
 from generate_grounded import (  # noqa: E402
     COMPANION_SYSTEM_PROMPT,
     COMPANION_PROMPT_TMPL,
@@ -1135,6 +1136,9 @@ def stage2_generierung(
             article["meta"]["review_reason"] = (
                 article["meta"].get("review_reason", "") + "; " + "; ".join(val_errors[:3])
             ).lstrip("; ")
+
+        # Nicht-blockierender Vergleichs-Check am Generierungs-Stand (vor Lektorat).
+        annotate_article_comparisons(article)
 
         # is_hero + tiers setzen (Primary-Artikel-Hero bevorzugt)
         _set_is_hero(article, imgs_s, thema, data.get("resolved_title", thema))
