@@ -16,10 +16,12 @@ wird geprüft:
                       der dimension umrechnen. Unkonvertibel → FLAG.
   3. Erwartung      — [factor×low, factor×high].
   4. relation       — approx (Toleranzband TOL) / greater / less (strikt).
-  5. Zahl-Bindung   — factor muss im text vorkommen (Ziffer ODER deutsches
-                      Zahlwort).
-  6. Prosa-Bindung  — text muss wörtlich im referenzierten Satz (sonst im
-                      gesamten Body) vorkommen.
+  5. Zahl-Bindung   — factor muss im referenzierten SATZ vorkommen (Ziffer
+                      ODER deutsches Zahlwort).
+  6. Bezugs-Bindung — reference_object (Hauptwort, plural-/flexionstolerant)
+                      muss im referenzierten Satz vorkommen. Beide Bindungen
+                      gegen den über sentence_id referenzierten Satz, Fallback
+                      ganzer Body. text bleibt nur Anzeige-/Review-Feld.
 
 Robust: fehlende Felder / unbekannte Einheiten führen zu FLAG, nie zu Crash.
 
@@ -52,6 +54,17 @@ SEED_REFERENCE_SIZES: dict[str, dict[str, tuple[float, float]]] = {
     "fußballfeld":           {"länge":  (100.0, 110.0)},
     "fußballtor":            {"höhe":   (2.44, 2.44)},
     "eiffelturm":            {"höhe":   (300.0, 330.0)},
+    # Erweiterung Schritt 3: häufige Alltags-Bezugsobjekte (Erststand, tunbar).
+    "pferd":                 {"masse":  (400.0, 1000.0), "höhe": (1.4, 1.8)},
+    "transporter":           {"länge":  (5.0, 7.5)},
+    "lkw":                   {"länge":  (12.0, 18.75)},
+    "giraffe":               {"höhe":   (4.5, 5.5)},
+    "banane":                {"länge":  (0.15, 0.25)},
+    "fußball":               {"länge":  (0.20, 0.23)},
+    "tür":                   {"höhe":   (1.9, 2.1)},
+    "kühlschrank":           {"höhe":   (1.5, 2.0)},
+    "katze":                 {"länge":  (0.40, 0.50), "masse": (3.0, 6.0)},
+    "eisbär":                {"länge":  (2.0, 2.5),   "masse": (300.0, 600.0)},
 }
 
 # Synonyme → kanonischer Schlüssel in SEED_REFERENCE_SIZES (alles lowercase,
@@ -82,6 +95,31 @@ _REFERENCE_SYNONYMS: dict[str, str] = {
     "fußballtor": "fußballtor",
     "fussballtor": "fußballtor",
     "eiffelturm": "eiffelturm",
+    # Erweiterung Schritt 3:
+    "reisebus": "linienbus",
+    "pferd": "pferd",
+    "transporter": "transporter",
+    "lieferwagen": "transporter",
+    "kleintransporter": "transporter",
+    "lkw": "lkw",
+    "lastwagen": "lkw",
+    "laster": "lkw",
+    "sattelschlepper": "lkw",
+    "sattelzug": "lkw",
+    "giraffe": "giraffe",
+    "banane": "banane",
+    "fußball": "fußball",
+    "fussball": "fußball",
+    "tür": "tür",
+    "tuer": "tür",
+    "zimmertür": "tür",
+    "kühlschrank": "kühlschrank",
+    "kuehlschrank": "kühlschrank",
+    "katze": "katze",
+    "hauskatze": "katze",
+    "eisbär": "eisbär",
+    "eisbaer": "eisbär",
+    "polarbär": "eisbär",
 }
 
 # Dimension-Aliase → kanonische Dimension.
@@ -210,6 +248,31 @@ def _to_canonical(value: float, unit, dim: str) -> float | None:
     return value * factor
 
 
+def _head_noun(s) -> str:
+    """Letztes Token (Hauptwort) eines normalisierten Strings, lowercase."""
+    n = _norm(s)
+    return n.split()[-1] if n else ""
+
+
+def _reference_tokens(reference_object) -> set[str]:
+    """Hauptwort-Kandidaten für die Satz-Bindung: das reference_object selbst plus
+    alle Synonyme, die auf denselben kanonischen Schlüssel zeigen (deren Hauptwörter).
+    Substring-Match ist plural-/flexionstolerant ('bus' in 'busse', 'elefant' in
+    'elefanten')."""
+    out: set[str] = set()
+    base = _norm(reference_object)
+    if not base:
+        return out
+    out.add(_head_noun(base))
+    key = _resolve_reference(reference_object)
+    if key:
+        out.add(_head_noun(key))
+        for syn, target in _REFERENCE_SYNONYMS.items():
+            if target == key:
+                out.add(_head_noun(syn))
+    return {t for t in out if t}
+
+
 # ── Kernprüfung ─────────────────────────────────────────────────────────────────
 
 class CheckResult:
@@ -263,24 +326,35 @@ def check_comparison(comp: dict, *, body: str = "", sentence_text: str | None = 
                  f"relation '{relation}' nicht in {_VALID_RELATIONS}")
         relation = "approx"  # für die weitere Prüfung neutral annehmen
 
-    # ── 5. Zahl-Bindung (factor im text) ────────────────────────────────────────
+    # ── 5./6. Satz-Bindung (Token-Bindung statt Phrasen-Substring) ───────────────
+    # Deutsche Vergleiche weben Wörter ein ("…ist so schwer wie vierzig … Elefanten…"),
+    # darum ist der wörtliche text-Substring zu brüchig (er bricht schon an einem
+    # eingeschobenen Verb). Stattdessen muss der referenzierte SATZ (über sentence_id;
+    # Fallback: ganzer Body) BEIDES enthalten: den factor (Ziffer/Zahlwort) UND das
+    # reference_object (Hauptwort, plural-/flexionstolerant). Das text-Feld bleibt im
+    # Schema für Anzeige/Review, wird aber nicht mehr als wörtlicher Substring verlangt.
+    sent = sentence_text if (isinstance(sentence_text, str) and sentence_text.strip()) else body
+
+    # factor im Satz
     if factor is None or isinstance(factor, bool) or not isinstance(factor, (int, float)):
         res.flag("fehlender_factor", f"factor fehlt/nicht numerisch: {factor!r}")
-    elif not isinstance(text, str) or not text.strip():
-        res.flag("fehlender_text", "text fehlt — Zahl-/Prosa-Bindung nicht prüfbar")
-    elif not factor_in_text(factor, text):
-        res.flag("zahl_nicht_im_text",
-                 f"factor {factor} weder als Ziffer noch als Zahlwort in text «{text}»")
+    elif not (isinstance(sent, str) and sent.strip()):
+        res.flag("kein_satztext",
+                 "weder sentence_id-Satz noch Body verfügbar — Satz-Bindung nicht prüfbar")
+    elif not factor_in_text(factor, sent):
+        res.flag("zahl_nicht_im_satz",
+                 f"factor {factor} weder als Ziffer noch als Zahlwort im Satz {res.sentence_id}")
 
-    # ── 6. Prosa-Bindung (text im Satz / Body) ──────────────────────────────────
-    if isinstance(text, str) and text.strip():
-        target = sentence_text if sentence_text else body
-        found = bool(target) and text in target
-        if not found and sentence_text and body:
-            found = text in body  # lenienter Fallback auf ganzen Body
-        if not found:
-            res.flag("prosa_nicht_im_artikel",
-                     f"text «{text}» wörtlich weder im Satz {res.sentence_id} noch im Body")
+    # reference_object im Satz
+    if isinstance(sent, str) and sent.strip():
+        ref_tokens = _reference_tokens(reference_object)
+        sent_l = sent.lower()
+        if not ref_tokens:
+            res.flag("fehlendes_bezugsobjekt", f"reference_object fehlt: {reference_object!r}")
+        elif not any(tok in sent_l for tok in ref_tokens):
+            res.flag("bezug_nicht_im_satz",
+                     f"reference_object '{reference_object}' (Token {sorted(ref_tokens)}) "
+                     f"nicht im Satz {res.sentence_id}")
 
     # ── 1./2./3./4. Arithmetik ──────────────────────────────────────────────────
     dim = _resolve_dimension(dimension)

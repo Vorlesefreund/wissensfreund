@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-21T10:49:17Z -->
+<!-- updated: 2026-06-21T11:17:17Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -17,8 +17,16 @@ ergänzt — Generator-Regel + Schema-Beispiel + `validate_article`-Enumprüfung
 (+ `test_comparison_check.py`, 26/26 grün, Gelenkbus-Kronzeuge schlägt an). relation-bewusste
 Arithmetik (approx ±30 %-Band; greater/less strikt), Zahl-Bindung (Ziffer↔dt. Zahlwort),
 Prosa-Bindung, Saat-Tabelle (10 Anker, TOL=0.30, einziger Ort für Referenzwerte). NOCH NICHT in
-die Pipeline verdrahtet. Branch `feature/comparisons-metadata`, nicht in main. Schritt 3 (wiren +
-kleiner Gen-Lauf → messen, ob Generator `comparisons[]` füllt und Check echte Fehler fängt) als nächstes.
+die Pipeline verdrahtet. Branch `feature/comparisons-metadata`, nicht in main.
+
+**Schritt-3-Tuning:** Prosa-/Zahl-Bindung umgebaut auf satzbezogene Token-Bindung (factor +
+reference_object-Hauptwort im `sentence_id`-Satz, Fallback Body) — robust gegen eingewobene Verben,
+fängt echte Faktor-/Objekt-Mismatches weiter. Saat-Tabelle auf 20 Objekte erweitert (+ Synonyme).
+30/30 Tests grün, Gelenkbus bleibt FLAG, CLI 5/5 PASS auf `articles/test_step3a/`. Bekannte weiche
+Stellen (Substring-Over-Match kurzer Tokens; factor=1 trivial) bewusst akzeptiert
+(Fehl-Nichtflag-Richtung). Watch: multiplikative Adverbien (doppelt/dreifach/halb) noch nicht in
+Zahl-Normalisierung. Branch `feature/comparisons-metadata`, nicht in main. Schritt 3b (Check als
+nicht-blockierender PRÜFEN-Report in die Pipeline wiren) als nächstes.
 
 ---
 

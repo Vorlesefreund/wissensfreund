@@ -95,21 +95,47 @@ class TestCheckComparison(unittest.TestCase):
         self.assertFalse(r.ok, "grob falscher approx sollte FLAGGEN")
         self.assertTrue(r.has("wert_ausserhalb_approx"), r.flags)
 
-    # ── Zahl-Bindung ────────────────────────────────────────────────────────────
+    # ── Satz-Bindung: factor im Satz ────────────────────────────────────────────
     def test_number_mismatch_flags(self):
-        # factor 3, aber text nennt "vier"
-        body = "so viel wie vier Busse"
-        comp = _comp(text="so viel wie vier Busse", reference_object="Bus",
+        # Metadaten factor 3, aber der Satz nennt "vier" → zahl_nicht_im_satz
+        sent = "Er ist so lang wie vier Busse."
+        comp = _comp(text="so lang wie vier Busse", reference_object="Bus",
                      factor=3, dimension="Länge", source_value=36, source_unit="m",
                      relation="approx")
-        r = cc.check_comparison(comp, body=body, sentence_text=body)
+        r = cc.check_comparison(comp, body=sent, sentence_text=sent)
         self.assertFalse(r.ok)
-        self.assertTrue(r.has("zahl_nicht_im_text"), r.flags)
+        self.assertTrue(r.has("zahl_nicht_im_satz"), r.flags)
 
     def test_spelled_number_binding_pass(self):
-        # "vierzig" + factor 40 → Zahl-Bindung erfüllt (kein zahl_nicht_im_text)
+        # "vierzig" + factor 40 → Zahl-Bindung erfüllt (kein zahl_nicht_im_satz)
         r = cc.check_comparison(_comp(), body=_BODY, sentence_text=_BODY)
-        self.assertFalse(r.has("zahl_nicht_im_text"), r.flags)
+        self.assertFalse(r.has("zahl_nicht_im_satz"), r.flags)
+
+    def test_factor_in_sentence_differs_flags(self):
+        # (b) Metadaten factor 40, aber der Satz nennt "dreißig" → FLAG
+        sent = "Es ist so schwer wie dreißig große Elefanten zusammen."
+        comp = _comp(factor=40)
+        r = cc.check_comparison(comp, body=sent, sentence_text=sent)
+        self.assertFalse(r.ok)
+        self.assertTrue(r.has("zahl_nicht_im_satz"), r.flags)
+
+    # ── Satz-Bindung: eingewobenes Verb (Kern des Tunings) ──────────────────────
+    def test_woven_verb_pass(self):
+        # (a) "…ist so schwer wie vierzig … Elefanten…" → PASS trotz eingeschobenem Verb
+        sent = ("Stell dir ein Lebewesen vor, das so schwer ist wie vierzig "
+                "große afrikanische Elefanten zusammen.")
+        comp = _comp(text="so schwer wie vierzig große afrikanische Elefanten zusammen",
+                     reference_object="afrikanischer Elefant")
+        r = cc.check_comparison(comp, body=sent, sentence_text=sent)
+        self.assertTrue(r.ok, f"eingewobenes Verb sollte PASS sein, bekam {r.flags}")
+
+    # ── Satz-Bindung: Bezugsobjekt fehlt im Satz ────────────────────────────────
+    def test_reference_not_in_sentence_flags(self):
+        # (c) Satz nennt den factor, aber nicht das reference_object → FLAG
+        sent = "Es ist so schwer wie vierzig große Tiere zusammen."
+        r = cc.check_comparison(_comp(), body=sent, sentence_text=sent)
+        self.assertFalse(r.ok)
+        self.assertTrue(r.has("bezug_nicht_im_satz"), r.flags)
 
     # ── Bezugsobjekt / Einheit ──────────────────────────────────────────────────
     def test_unknown_reference_flags(self):
@@ -137,12 +163,23 @@ class TestCheckComparison(unittest.TestCase):
         self.assertFalse(r.ok)
         self.assertTrue(r.has("unbekannte_einheit"), r.flags)
 
-    # ── Prosa-Bindung ───────────────────────────────────────────────────────────
-    def test_prose_mismatch_flags(self):
-        body = "Ein ganz anderer Satz ohne die Phrase."
-        r = cc.check_comparison(_comp(), body=body, sentence_text=body)
-        self.assertFalse(r.ok)
-        self.assertTrue(r.has("prosa_nicht_im_artikel"), r.flags)
+    # ── Neue Saat-Tabellen-Objekte (d) ──────────────────────────────────────────
+    def test_new_seed_pferd_pass(self):
+        # Pferd Masse (400,1000); factor 1 → 400..1000 (+30 % bis 1300); 1000 kg → PASS
+        sent = "Sein Herz ist so schwer wie ein großes Pferd."
+        comp = _comp(text="so schwer wie ein großes Pferd", reference_object="Pferd",
+                     factor=1, dimension="Masse", source_value=1000, source_unit="kg")
+        r = cc.check_comparison(comp, body=sent, sentence_text=sent)
+        self.assertTrue(r.ok, f"Pferd sollte PASS sein, bekam {r.flags}")
+
+    def test_new_seed_transporter_pass(self):
+        # Transporter Länge (5.0,7.5); factor 1 → 5..7.5 (+30 % bis 9.75); 7 m → PASS
+        sent = "Allein die Schwanzflosse ist so lang wie ein großer Transporter."
+        comp = _comp(text="so lang wie ein großer Transporter",
+                     reference_object="Transporter", factor=1, dimension="Länge",
+                     source_value=7, source_unit="m")
+        r = cc.check_comparison(comp, body=sent, sentence_text=sent)
+        self.assertTrue(r.ok, f"Transporter sollte PASS sein, bekam {r.flags}")
 
     # ── relation less: erfüllt + verletzt ───────────────────────────────────────
     def test_less_satisfied_pass(self):
