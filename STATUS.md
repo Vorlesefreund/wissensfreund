@@ -1,10 +1,19 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-21T17:26:43Z -->
+<!-- updated: 2026-06-21T18:15:26Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-21)
+
+**Box-internes Satz-Matching gelandet** (Commit 3702399). `_apply_auto_correction` teilt Mehr-Satz-
+Box-Strings (`box.text`/`reveal_text`) jetzt in Sätze, matcht satz-granular (gleiche `_jaccard`-Logik,
+Schwelle ≥0.40) und ersetzt nur den getroffenen Satz. Behebt „Einbau fehlgeschlagen" bei
+box-zielenden Korrekturen (Jaccard-Verdünnung gegen Ganzfeld) und schließt den latenten
+Geschwister-Lösch-Datenverlust (Ganzfeld-Überschreibung). Verifiziert an den 3 ritter_l2-Box-Fällen
+(test_syncv2) + Regressionen (Abschnitt/box.sentences/Ein-Satz-Feld/kein-Treffer). Geteilt von V1+V2.
+- Offene Folge: Teil B — Kategorientrennung „Einbau fehlgeschlagen" (Matcher-Limit) ≠ inhaltliches
+  PRÜFEN (echte Eskalation); abhängig davon, wie viele Rest-Fehlschläge nach diesem Fix bleiben.
 
 **Sync-Lektorat-V2-Mismatch behoben & de-dupliziert** (Commit 5989ee6). Sync-Pfad parste die
 V2-Prompt-Ausgabe mit V1-Funktionen → `verdikt`→UNBEKANNT, `claim_original`→"", 0 Korrekturen
