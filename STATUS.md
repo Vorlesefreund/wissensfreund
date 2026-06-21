@@ -1,10 +1,20 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-21T13:47:20Z -->
+<!-- updated: 2026-06-21T17:26:43Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-21)
+
+**Sync-Lektorat-V2-Mismatch behoben & de-dupliziert** (Commit 5989ee6). Sync-Pfad parste die
+V2-Prompt-Ausgabe mit V1-Funktionen → `verdikt`→UNBEKANNT, `claim_original`→"", 0 Korrekturen
+angewandt. Sync UND die generate_grounded-lokale Batch-Sub-Option auf `parse_lektorat_v2` /
+`annotate_article_lektorat_v2` umgestellt (run_batch-Pipeline war schon V2). Via 3-Themen-Lauf
+(Schwerkraft/Ritter/Vulkan, 9 Artikel) verifiziert: KORRIGIERT wird in `sentences[].text` eingebaut,
+PRÜFEN eskaliert mit `review_flag`, Header themen-/stufenkorrekt. Auf main.
+- Offene Folge: V1-Cleanup — `annotate_article_lektorat` ist verwaist; `parse_lektorat_json` noch von
+  `run_lektorat_catchtest.py` genutzt → separat aufräumen. Strukturiertes `findings[]` im V2-pruefbericht
+  (PROJEKTDOKUMENT Kap. 10) als eigener Schritt.
 
 **review_flag-Fix auf main.** In beiden Pfaden (`generate_grounded.py`/`run_batch.py`) im
 `if val_errors:`-Block `setdefault("review_flag", True)` → hartes Setzen `["review_flag"] = True`,

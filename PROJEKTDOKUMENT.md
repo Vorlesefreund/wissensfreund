@@ -128,6 +128,7 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 
 - **CI-Migration:** `artikel_pipeline.yml` ist dispatch-only, ruft den Claude-Legacy-Generator (`generate_articles.py`) und würde mangels Prompt-Datei scheitern → auf `run_batch.py` migrieren; `generate_articles.py` stilllegen; YAML fixen/löschen.
 - **Lektorat-Fehlerquote messen** (False-Positive/Negative gegen Ground-Truth) vor dem Skalieren. Ziel: ≥ 50–70 % ohne Korrektur durch.
+- **Strukturiertes, maschinenlesbares `findings[]` im V2-`pruefbericht`** (verdikt/claim_original/korrektur_neu pro Finding) — derzeit nur Markdown-Summary + Zähler (`text`, `n_silent`, `n_korrigiert`, `n_pruefen`). Voraussetzung für die geplante Lektorat-FP/FN-Messung gegen Ground Truth. Eigener Schritt, wirkt auf beide Pfade.
 - **Grounding v3.17/v2.8** committen und im Pipeline-Lauf validieren (in Dateien gebaut, nicht getestet).
 - **v3.24-Validierung (vor Skalierung):** S1-Szenen-Strategie auf Demokratie/Sklaverei prüfen (feuert die durchgehende Szene? Budget 75/100/150 tragfähig, ohne dünne Themen aufzublähen?); R47/R52 mit einem Größenvergleich-Thema (Blauwal/Pyramide) testen; R46 generator-seitig (Gladiator) erneut prüfen.
 - **Batch-Pfad-Temperatur** bestätigen.
