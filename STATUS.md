@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-21T11:56:35Z -->
+<!-- updated: 2026-06-21T12:01:18Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
@@ -33,10 +33,14 @@ Lektorat in sync (`generate_grounded.py`, Ende `generate_one_level`) und batch (
 `stage2_generierung`). Schreibt `article['comparison_report']` {findings, summary}; setzt
 `meta.review_flag` hart auf True bei ≥1 FLAG (LLM emittiert `review_flag:false` → `setdefault` wäre
 No-op), `review_reason` additiv; inhalts-neutral, nie werfend. Verifikationslauf sauber, Flag greift.
-Branch `feature/comparisons-metadata`, nicht in main. OFFEN: (a) fokussierter
-`validate_article`-`setdefault`-Fix (gleicher Defekt, eigener Commit); (b) Fehlalarm-Diagnose der
-`_nicht_im_satz`-Flags (sentence_id-Verlässlichkeit / Body-Fallback) vor Skalierung; (c) Saat-Tabelle
-wächst pro Lauf (Wohnmobil/Lineal → langfristig Auto-Grow).
+Branch `feature/comparisons-metadata`, nicht in main.
+
+**validate_article-review_flag-Fix:** in beiden Pfaden (`generate_grounded.py`/`run_batch.py`) im
+`if val_errors:`-Block `setdefault` → hartes Setzen, damit echte Validierungsfehler `review_flag`
+auch dann heben, wenn der Generator `review_flag:false` vorsetzt. Kein-Fehler-Pfad unverändert.
+Branch `feature/comparisons-metadata`, nicht in main. [OFFEN (a) erledigt.] OFFEN bleibt:
+(b) Fehlalarm-Diagnose der `_nicht_im_satz`-Flags (sentence_id-Verlässlichkeit / Body-Fallback);
+(c) Saat-Tabellen-Wachstum (Auto-Grow langfristig).
 
 ---
 
