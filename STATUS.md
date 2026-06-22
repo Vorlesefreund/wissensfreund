@@ -1,10 +1,19 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-22T19:22:31Z -->
+<!-- updated: 2026-06-22T20:09:59Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-22)
+
+**Bildwechsel pro Section begrenzt** (Commit e0c5348, feature/img-per-section → main FF). Neuer Post-Process
+`_limit_images_per_section` in run_batch.py, greift nach `_set_is_hero`, vor dem Speichern. S1: genau 1 Bild
+pro Section; S2/S3: 1 Bild bei <4 Sätzen, bis 2 ab >=4 Sätzen (erste floor(n/2) Sätze Bild A, Rest B).
+Bild-Wahl: häufigster img_index (Generator-Mehrheit) + Tiebreaker Vision-relevanz aus Stage-1-Pool (imgs_s,
+fehlt→0) + kleinerer Index. -1-Sätze erben das Section-Bild (kein Flackern); bildlose Sections unverändert;
+images[] nicht beschnitten (Galerie bleibt). Diagnose-Basis: img_index kommt vom Generator-LLM (Code
+normalisiert nur None→-1); relevanz (0-10, Vision) liegt nur im Stage-1-Pool, nicht im finalen JSON. 6 Inline-
+Tests grün. **OFFEN: noch nicht durch echten Batch-Lauf verifiziert** — Verifikationslauf (3 Themen × S1-3) folgt.
 
 **1600px-Phantom-Tier entfernt** (Commit 18172dc, feature/fix-tiers → main FF). `tiers`-Dict in
 `_set_hero_and_tiers` (run_batch.py) trägt jetzt nur noch 300 + 800. Diagnose ergab: der „1600"-Pfad
