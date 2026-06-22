@@ -1,10 +1,18 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-22T13:34:14Z -->
+<!-- updated: 2026-06-22T13:59:13Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-22)
+
+**Strukturiertes `findings[]` im V2-pruefbericht** (Commit fec90f5, feature/findings-v2 → main FF).
+`annotate_article_lektorat_v2` schreibt additiv eine `findings`-Liste (verdikt/claim_original/
+korrektur_neu/beleg/problem/begruendung) parallel zu `text`/`n_silent`/`n_korrigiert`/`n_pruefen` —
+Verdikte SILENT | KORRIGIERT | EINBAU_FEHLGESCHLAGEN | PRÜFEN. claim/korrektur als Display-Variante
+(`_strip_render_markers`), leere Strings → null. Inline-Unittest (4-Fälle) grün; keine bestehenden
+Konsumenten geändert. Erledigt den offenen Folgepunkt aus 2026-06-21 (Commit 5989ee6). Hinweis:
+`n_pruefen` zählt weiterhin auch EINBAU_FEHLGESCHLAGEN-Zeilen (Bestandsverhalten); `findings[]` trennt sauber.
 
 **Quell-Snapshot-Konsistenz CI-geguardet.** Diagnose bestätigt: Sync-Lektorat prüft gegen den
 Phase-1-Snapshot (`primary_text`/`companion_texts` → `sources_block`), kein eigener Fetch/`resolve_lemma`
