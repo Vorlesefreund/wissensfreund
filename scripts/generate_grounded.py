@@ -338,14 +338,21 @@ THEMA: {thema}
 PRIMAERARTIKEL-EINLEITUNG:
 {lead}
 
-Schlage bis zu 5 deutschsprachige Wikipedia-Begleitartikel vor, die diesen Kinderartikel bereichern.
-Kriterien:
-- Vertiefen das Thema fuer ein Kind: konkret, anschaulich, lebendig
-- Auch solche, mit denen sich laendlaeufige Vorstellungen aufgreifen und richtigstellen lassen
-- Fokuserhaltend: Thema vertiefen, NICHT zu Eltern-/Nachbarthemen wechseln
-- Lieber weniger als ungeeignete auffuellen (kein Mindestwert)
-- Wenn es zum Thema passt: HOECHSTENS EINEN konkreten, beruehmten Anker — ein benanntes Beispiel, einen historischen Fall oder ein bekanntes Einzelobjekt (fuer "Vulkan" etwa einen beruehmten Ausbruch), das als eigener deutscher Wikipedia-Artikel existiert und einem Kind ein greifbares Bild gibt. Der Anker muss das Thema vertiefen, nicht davon wegfuehren. Nur waehlen, wenn ein passender existiert — niemals erzwingen, nie mehr als einen.
-- Kindgerechter Anker: einer mit faszinierendem, kindgerechtem Blickwinkel. Meide Anker, die im Kern nur von Tod, Gewalt, Leid oder Katastrophe handeln.
+Schlage bis zu 5 deutschsprachige Wikipedia-Begleitartikel vor, die diesen Kinderartikel LEBENDIG und TIEF machen. Der Artikel soll spannend und unterhaltsam werden, kein droeges Lexikon. Die Begleitartikel liefern Wuerze und Tiefe: konkrete Beispiele, beruehmte Ereignisse, greifbare Einzelobjekte.
+
+NUTZE DEIN WISSEN ueber das Thema: Schlage auch Begleitartikel vor, die in der Einleitung NICHT erwaehnt sind, dir aber als praegend oder faszinierend zum Thema bekannt sind - sofern sie als eigener deutscher Wikipedia-Artikel existieren. (Beispiel: Thema "Vulkan" -> der "Vesuv" und ein beruehmter Ausbruch gehoeren dazu, auch wenn die Einleitung sie nicht ausfuehrt.)
+
+Auswahlkriterien:
+- Vertiefen das Thema fuer ein Kind: konkret, anschaulich, lebendig.
+- Greifbare Anker ausdruecklich erwuenscht: benannte Beispiele, historische Faelle, beruehmte Einzelobjekte, Personen oder Ereignisse, die dem Kind ein Bild geben. MEHRERE Anker sind erlaubt - keine Obergrenze ausser den 5 Slots insgesamt. Anker muessen das Thema VERTIEFEN, nicht davon wegfuehren.
+- Auch solche, mit denen sich laendlaeufige Vorstellungen aufgreifen und richtigstellen lassen.
+- Fokuserhaltend: beim Thema bleiben, nicht zu Eltern-/Nachbarthemen abdriften.
+- Lieber weniger als ungeeignete auffuellen (kein Mindestwert).
+
+Ernste oder tragische Themen:
+- Ein Begleitartikel DARF ein ernstes oder tragisches Thema beruehren (Vulkanausbrueche, Schiffsungluecke, historische Konflikte) - waehle ihn so, dass er fuer ein Kind KINDGERECHT ERSCHLIESSBAR ist: das Staunen, das Greifbare, das Lehrreiche (eine konservierte Stadt, eine Ausgrabung, die Technik, der Mut).
+- Vermeide NUR Begleitartikel, deren einziger Gehalt grafische Gewalt, Leid oder Grauen ohne erschliessbaren Sachkern ist.
+
 Ausgabe NUR JSON: {{"companions": ["Lemma1","Lemma2",...]}}"""
 
 
