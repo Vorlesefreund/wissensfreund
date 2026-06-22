@@ -1,10 +1,20 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-22T20:09:59Z -->
+<!-- updated: 2026-06-22T20:50:04Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-22)
+
+**Companion-Auswahl auf „Würze & Tiefe" umgestellt** (Commit a953031, feature/companion-anchors → main FF).
+`COMPANION_PROMPT_TMPL` überarbeitet (kanonische Quelle generate_grounded.py; run_batch.py importiert sie).
+(1) Trainingswissen bei der AUSWAHL erlaubt — auch Begleitartikel die im Primärartikel fehlen, aber als
+prägend bekannt sind (Vesuv-Beispiel); eiserne Grounding-Regel unberührt (Inhalt weiter nur aus geholten
+Quelltexten). (2) Anker-Obergrenze entfernt (mehrere Anker, max 5 Slots). (3) Tod/Katastrophe-Regel
+differenziert: ernste Themen erlaubt wenn kindgerecht erschließbar; nur reine Gräuel ohne Sachkern gemieden.
+COMPANION_SYSTEM_PROMPT unverändert. Anlass: Vulkan-Lauf zog 5 Sachbegriffe, keinen Anker → kein Vesuv/Pompeji.
+**OFFEN: Companion-only-Verifikationslauf** (inkl. Gegencheck heikler Themen — hält die differenzierte Regel?).
+Kompass ist weiterhin stufen-/sensibel-BLIND (nur thema+lead, 1× pro Thema) — Verfeinerung bleibt offen.
 
 **Bildwechsel pro Section begrenzt** (Commit e0c5348, feature/img-per-section → main FF). Neuer Post-Process
 `_limit_images_per_section` in run_batch.py, greift nach `_set_is_hero`, vor dem Speichern. S1: genau 1 Bild
@@ -194,6 +204,9 @@ laut Diagnose schon größtenteils gut) + fokussierte Plausibilitätsprüfung im
 - **Exclude-Quelle konsolidieren**: exclude liegt jetzt in eignung_exclude.json UND (leer) in
   eignung_verdicts.json. Eine kanonische Quelle festlegen (Vorschlag: eignung_exclude.json).
 - **ZIM-Zweig eingefroren** bis App auf generierte Artikel (R2) umgestellt ist — dann stilllegen.
+- **batch_run.py Legacy stilllegen**: ruft `COMPANION_PROMPT_TMPL.format(...)` mit veralteter Signatur
+  (age_level/ages/appeal/excerpt/n_links/link_list, KEIN `lead`) → würde `KeyError: 'lead'` werfen.
+  Produktion läuft über run_batch.py (thema+lead). batch_run.py ist toter Pfad — entfernen/archivieren.
 
 ## Derived-File-Disziplin (einhalten)
 
