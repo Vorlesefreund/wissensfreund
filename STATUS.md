@@ -1,10 +1,19 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-22T13:59:13Z -->
+<!-- updated: 2026-06-22T14:13:39Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-22)
+
+**Shape-A-Abnehmer auf V2-`findings[]` umgestellt** (Commit 20bec3f, feature/orphan-consumers → main FF).
+`render_review_html.py:render_lektorat` und `generate_grounded.py:1843` lasen noch Shape A
+(findings/summary mit status/auto_angewandt/vorschlag_offen/eskaliert) und lieferten seit der
+findings[]-Einführung (fec90f5) Fehlausgaben (alles als ESKALATION, leere Belege bzw. `[…0A/0V/0E]`).
+Beide auf verdikt-Branching + Felder beleg/problem/begruendung umgestellt: SILENT→v-AUTO,
+KORRIGIERT→v-VORSCHLAG, PRÜFEN/EINBAU_FEHLGESCHLAGEN→v-ESKALATION; Zähler aus findings[]; lekt_note
+neu `[LEKTORAT N:NS/NK/NP/NE]`. Rückwärtskompatibel (leeres findings[] → ""). py_compile beide OK.
+Damit hängt kein Konsument mehr an Shape A.
 
 **Strukturiertes `findings[]` im V2-pruefbericht** (Commit fec90f5, feature/findings-v2 → main FF).
 `annotate_article_lektorat_v2` schreibt additiv eine `findings`-Liste (verdikt/claim_original/
