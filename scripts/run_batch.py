@@ -837,6 +837,57 @@ def _set_is_hero(article: dict, images_stufe: list[dict], thema: str,
         }
 
 
+def _limit_images_per_section(article: dict, images_stufe: list[dict]) -> None:
+    """Begrenzt Bildwechsel pro Section (greift NACH der Generierung).
+
+    S1 (age_level 1): genau EIN Bild pro Section.
+    S2/S3 (age_level 2/3): ein Bild bei <4 Sätzen; bis zu ZWEI ab >=4 Sätzen
+      (erste floor(n/2) Sätze Bild A, Rest Bild B).
+    Bild-Wahl: häufigster img_index ("Mehrheit"); Tiebreaker = höhere Vision-
+    relevanz aus dem Stage-1-Pool (fehlt → 0), dann kleinerer Index.
+    Sätze mit img_index=-1 ERBEN das Section-Bild (kein Flackern). Bildlose
+    Sections (alle -1) bleiben unverändert. images[] wird NICHT beschnitten.
+    """
+    images = article.get("images", [])
+    if not images:
+        return
+    age     = article.get("meta", {}).get("age_level", 1)
+    relpool = {img.get("filename"): img for img in (images_stufe or [])}
+
+    def relevanz_of(ix: int) -> float:
+        if ix < 0 or ix >= len(images):
+            return 0
+        fn = images[ix].get("filename", "")
+        r  = relpool.get(fn, {}).get("relevanz")
+        return r if isinstance(r, (int, float)) else 0
+
+    for sec in article.get("sections", []):
+        sents = sec.get("sentences", [])
+        votes = [s.get("img_index", -1) for s in sents
+                 if s.get("img_index", -1) is not None and s.get("img_index", -1) != -1]
+        if not votes:
+            continue  # bildlose Section unverändert lassen
+
+        counts: dict[int, int] = {}
+        for ix in votes:
+            counts[ix] = counts.get(ix, 0) + 1
+        # häufigster zuerst; Tiebreaker höhere relevanz, dann kleinerer Index
+        ranked = sorted(counts, key=lambda ix: (-counts[ix], -relevanz_of(ix), ix))
+
+        n         = len(sents)
+        allow_two = age in (2, 3) and n >= 4 and len(ranked) >= 2
+
+        if not allow_two:
+            chosen = ranked[0]
+            for s in sents:
+                s["img_index"] = chosen
+        else:
+            a, b = ranked[0], ranked[1]
+            half = n // 2  # floor(n/2) Sätze → Bild A, Rest → Bild B
+            for i, s in enumerate(sents):
+                s["img_index"] = a if i < half else b
+
+
 # ── Stage 2: GENERIERUNG ──────────────────────────────────────────────────────
 
 def stage2_generierung(
@@ -1142,6 +1193,9 @@ def stage2_generierung(
 
         # is_hero + tiers setzen (Primary-Artikel-Hero bevorzugt)
         _set_is_hero(article, imgs_s, thema, data.get("resolved_title", thema))
+
+        # Bildwechsel pro Section begrenzen (S1=1 Bild, S2/3 bis 2 ab >=4 Sätzen)
+        _limit_images_per_section(article, imgs_s)
 
         # source_passages einbetten
         if source_passages:
