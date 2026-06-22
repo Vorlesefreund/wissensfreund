@@ -834,7 +834,6 @@ def _set_is_hero(article: dict, images_stufe: list[dict], thema: str,
         art_img["tiers"] = {
             "300":  f"bilder/{thema_slug}/{stem}_300.jpg",
             "800":  f"bilder/{thema_slug}/{stem}_800.jpg",
-            "1600": f"bilder/{thema_slug}/{stem}_1600.jpg",
         }
 
 
