@@ -1841,11 +1841,14 @@ def main() -> None:
                 retry   = " [RETRY]" if report["phase2"].get("retry_needed") else ""
                 review  = " [REVIEW]" if article["meta"].get("review_flag") else ""
                 pb      = article.get("pruefbericht", {})
-                sm      = pb.get("summary", {})
-                n_f     = len(pb.get("findings", []))
+                findings_list = pb.get("findings", [])
+                n_f   = len(findings_list)
+                n_s   = sum(1 for f in findings_list if f.get("verdikt") == "SILENT")
+                n_k   = sum(1 for f in findings_list if f.get("verdikt") == "KORRIGIERT")
+                n_p   = sum(1 for f in findings_list if f.get("verdikt") == "PRÜFEN")
+                n_e   = sum(1 for f in findings_list if f.get("verdikt") == "EINBAU_FEHLGESCHLAGEN")
                 lekt_note = (
-                    f" [LEKTORAT {n_f}:{sm.get('auto_angewandt',0)}A"
-                    f"/{sm.get('vorschlag_offen',0)}V/{sm.get('eskaliert',0)}E]"
+                    f" [LEKTORAT {n_f}:{n_s}S/{n_k}K/{n_p}P/{n_e}E]"
                     if n_f else ""
                 )
                 gen_m   = article["meta"].get("generation_method", "?")

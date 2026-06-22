@@ -409,42 +409,33 @@ def render_lektorat(pruefbericht: dict) -> str:
     findings = pruefbericht.get("findings", [])
     if not findings:
         return ""
-    sm = pruefbericht.get("summary", {})
 
-    # Stufe-2-Format: status-basiert
-    n_auto = sm.get("auto_angewandt", sm.get("AUTO", 0))
-    n_vor  = sm.get("vorschlag_offen", sm.get("VORSCHLAG", 0))
-    n_esk  = sm.get("eskaliert", sm.get("ESKALATION", 0))
-    total  = len(findings)
-    belegt = sum(1 for f in findings
-                 if f.get("status", f.get("verdikt", "")) in ("belegt", "BELEGT"))
+    # V2-Format: verdikt-basiert (SILENT/KORRIGIERT/PRÜFEN/EINBAU_FEHLGESCHLAGEN)
+    total     = len(findings)
+    n_silent  = sum(1 for f in findings if f.get("verdikt") == "SILENT")
+    n_korr    = sum(1 for f in findings if f.get("verdikt") == "KORRIGIERT")
+    n_pruefen = sum(1 for f in findings if f.get("verdikt") == "PRÜFEN")
+    n_fehl    = sum(1 for f in findings if f.get("verdikt") == "EINBAU_FEHLGESCHLAGEN")
 
-    summary_parts = [f"{total} Aussagen — {belegt} belegt"]
-    if n_auto:
-        summary_parts.append(
-            f"<strong style='color:#2E7D32'>{n_auto} auto-korrigiert ✓</strong>")
-    if n_vor:
-        summary_parts.append(
-            f"<strong style='color:#E65100'>{n_vor} Vorschlag ⚑</strong>")
-    if n_esk:
-        summary_parts.append(
-            f"<strong style='color:#B71C1C'>{n_esk} Eskalation ⚠</strong>")
-    summary_html = " · ".join(summary_parts)
+    summary_html = (
+        f"{total} Findings — {n_silent} silent · {n_korr} korrigiert · "
+        f"{n_pruefen} zu prüfen"
+    )
+    if n_fehl > 0:
+        summary_html += f" · {n_fehl} Einbau fehlgeschlagen"
 
     items = []
     for f in findings:
-        status     = f.get("status") or f.get("verdikt", "?")
-        claim_orig = f.get("claim_original", f.get("claim", ""))
+        verdikt    = f.get("verdikt", "?")
+        claim_orig = f.get("claim_original", "")
         kor_neu    = f.get("korrektur_neu", "")
-        beleg_k    = f.get("beleg_fuer_korrektur", "")
-        beleg      = f.get("beleg_oder_begruendung", "")
+        beleg      = f.get("beleg", "")
+        problem    = f.get("problem", "")
+        begruendung = f.get("begruendung", "")
 
-        if status in ("belegt", "BELEGT"):
-            continue  # Belegte Aussagen: kein Review nötig, nicht anzeigen
-
-        if status == "auto_angewandt":
+        if verdikt == "SILENT":
             css   = "v-AUTO"
-            label = "AUTO-KORRIGIERT ✓"
+            label = "AUTO-ANGEWANDT ✓"
             items.append(
                 f'<div class="lektorat-item {css}">'
                 f'<div class="lektorat-verdikt">{label}</div>'
@@ -458,12 +449,12 @@ def render_lektorat(pruefbericht: dict) -> str:
                 f'    <div class="lektorat-neu">{e(kor_neu)}</div>'
                 f'  </div>'
                 f'</div>'
-                f'<div class="lektorat-src">{e(beleg_k)}</div>'
-                f'</div>'
+                + (f'<div class="lektorat-src">{e(beleg)}</div>' if beleg else "")
+                + f'</div>'
             )
-        elif status in ("vorschlag_offen", "NICHT_BELEGT", "ÜBERZOGEN", "WIDERSPRUCH"):
+        elif verdikt == "KORRIGIERT":
             css   = "v-VORSCHLAG"
-            label = "VORSCHLAG — bitte prüfen"
+            label = "KORRIGIERT ✓"
             items.append(
                 f'<div class="lektorat-item {css}">'
                 f'<div class="lektorat-verdikt">{label}</div>'
@@ -473,26 +464,38 @@ def render_lektorat(pruefbericht: dict) -> str:
                 f'    <div class="lektorat-orig">{e(claim_orig)}</div>'
                 f'  </div>'
                 f'  <div class="lektorat-col">'
-                f'    <div class="lektorat-col-label">Vorschlag</div>'
+                f'    <div class="lektorat-col-label">Korrektur</div>'
                 f'    <div class="lektorat-neu-v">{e(kor_neu)}</div>'
                 f'  </div>'
                 f'</div>'
-                f'<div class="lektorat-src">{e(beleg_k) or e(beleg)}</div>'
-                f'</div>'
+                + (f'<div class="lektorat-src">{e(beleg)}</div>' if beleg else "")
+                + f'</div>'
             )
-        else:  # eskaliert
+        elif verdikt == "PRÜFEN":
             css   = "v-ESKALATION"
-            label = "ESKALATION ⚠"
+            label = "PRÜFEN ⚠"
             items.append(
                 f'<div class="lektorat-item {css}">'
                 f'<div class="lektorat-verdikt">{label}</div>'
                 f'<div class="lektorat-claim">{e(claim_orig)}</div>'
-                f'<div class="lektorat-beleg">{e(beleg)}</div>'
-                f'</div>'
+                + (f'<div class="lektorat-beleg">{e(problem)}</div>' if problem else "")
+                + (f'<div class="lektorat-beleg">{e(begruendung)}</div>' if begruendung else "")
+                + f'</div>'
+            )
+        else:  # EINBAU_FEHLGESCHLAGEN
+            css   = "v-ESKALATION"
+            label = "EINBAU FEHLGESCHLAGEN ⚠"
+            items.append(
+                f'<div class="lektorat-item {css}">'
+                f'<div class="lektorat-verdikt">{label}</div>'
+                f'<div class="lektorat-claim">{e(claim_orig)}</div>'
+                + (f'<div class="lektorat-neu-v">{e(kor_neu)}</div>' if kor_neu else "")
+                + f'<div class="lektorat-beleg">Einbau technisch gescheitert</div>'
+                + f'</div>'
             )
 
     if not items:
-        items = [f'<div style="color:#777;font-size:.85rem">Alle {total} Aussagen belegt — kein Review nötig.</div>']
+        items = [f'<div style="color:#777;font-size:.85rem">Alle {total} Findings verarbeitet — kein Review nötig.</div>']
 
     return f"""
   <div class="lektorat-section">
