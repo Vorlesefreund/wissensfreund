@@ -463,6 +463,43 @@ def _split_sentences(text: str) -> list[str]:
     return [s for s in re.split(r"(?<=[.!?])\s+", text.strip()) if s]
 
 
+_RENDER_MARKER_RE = re.compile(r"\s*BOX\[[^\]]*\]:\s*")
+
+
+def _strip_render_markers(text: str) -> str:
+    """Entfernt interne Render-Marker (BOX[...]: / BOX[.../reveal]:) aus LLM-Rückgaben.
+
+    Das Lektorat-Prompt rendert Boxen mit dem Präfix «BOX[typ]: …» (article_to_lektorat_text).
+    Das Modell kopiert dieses Präfix mitunter in claim_original/korrektur_neu zurück. Ungestrippt
+    würde es das Matching verfälschen UND (bei Ganzbox-Ersatz) wörtlich in box["text"] landen.
+    """
+    if not text:
+        return text
+    return _RENDER_MARKER_RE.sub(" ", text).strip()
+
+
+def _is_single_sentence(text: str) -> bool:
+    return len(_split_sentences(text)) <= 1
+
+
+def _covers_whole_box(claim: str, box_text: str) -> bool:
+    """True, wenn der (Marker-bereinigte) claim die GANZE Box abdeckt.
+
+    Kriterium (strukturell, Option A): jeder Box-Satz hat ein ≥0.5-Jaccard-Gegenstück
+    unter den claim-Sätzen → der claim ist ein Rewrite der gesamten Box. Ein-Satz-Boxen
+    sind trivial abgedeckt. Bei nur teilweiser Abdeckung (mehrdeutiger Mehr-Satz-Match)
+    liefert dies False → der Aufrufer flaggt statt zu spleißen.
+    """
+    box_sents = _split_sentences(box_text)
+    if len(box_sents) <= 1:
+        return True
+    claim_sents = _split_sentences(claim) or [claim]
+    return all(
+        max((_jaccard(bs, cs) for cs in claim_sents), default=0.0) >= 0.5
+        for bs in box_sents
+    )
+
+
 def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -> bool:
     """Ersetzt den Satz in article, der claim_text am besten trifft, mit korrektur_neu.
 
@@ -473,6 +510,13 @@ def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -
     gematcht und nur der beste Treffer ersetzt — die übrigen Box-Sätze bleiben
     erhalten. Ein-Satz-Felder verhalten sich wie bisher (Split liefert ein Element).
     """
+    if not claim_text or not korrektur_neu or claim_text == korrektur_neu:
+        return False
+
+    # Ursache A: interne Render-Marker aus den LLM-Strings entfernen, bevor gematcht
+    # oder geschrieben wird (sonst leakt «BOX[...]:» ins box["text"]).
+    claim_text    = _strip_render_markers(claim_text)
+    korrektur_neu = _strip_render_markers(korrektur_neu)
     if not claim_text or not korrektur_neu or claim_text == korrektur_neu:
         return False
 
@@ -511,13 +555,24 @@ def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -
         _, si, sj = best_loc
         article["sections"][si]["sentences"][sj]["text"] = korrektur_neu
     elif best_loc[0] == "box_text":
+        # Ursache B: Granularitäts-Guard. Ganzbox-Korrektur nie in einen Einzelsatz spleißen.
         _, si, bi, satz = best_loc
         box = article["sections"][si]["boxes"][bi]
-        box["text"] = box["text"].replace(satz, korrektur_neu, 1)
+        if _covers_whole_box(claim_text, box.get("text", "") or ""):
+            box["text"] = korrektur_neu                       # deckt ganze Box ab → ganz ersetzen
+        elif _is_single_sentence(claim_text):
+            box["text"] = box["text"].replace(satz, korrektur_neu, 1)   # genau ein Satz → ersetzen
+        else:
+            return False                                      # mehrdeutiger Mehr-Satz-Match → flaggen
     elif best_loc[0] == "box_reveal":
         _, si, bi, satz = best_loc
         box = article["sections"][si]["boxes"][bi]
-        box["reveal_text"] = box["reveal_text"].replace(satz, korrektur_neu, 1)
+        if _covers_whole_box(claim_text, box.get("reveal_text", "") or ""):
+            box["reveal_text"] = korrektur_neu
+        elif _is_single_sentence(claim_text):
+            box["reveal_text"] = box["reveal_text"].replace(satz, korrektur_neu, 1)
+        else:
+            return False
     else:
         _, si, bi, sj = best_loc
         article["sections"][si]["boxes"][bi]["sentences"][sj]["text"] = korrektur_neu
@@ -700,13 +755,18 @@ def annotate_article_lektorat_v2(
 
         applied = _apply_auto_correction(article, claim, neu)
 
+        # Display-only: interne Render-Marker strippen, damit nie ein «BOX[...]:»-
+        # Fragment in den Prüfbericht leakt (Apply-Logik bleibt unberührt).
+        claim_disp = _strip_render_markers(claim)
+        neu_disp   = _strip_render_markers(neu)
+
         if not applied:
             pruefen_lines.append(
-                f"«{claim[:80]}» — Einbau fehlgeschlagen (Satz nicht gefunden)"
+                f"«{claim_disp[:80]}» — Einbau fehlgeschlagen (Satz nicht gefunden)"
             )
             continue
 
-        claim_s, neu_s = _diff_excerpt(claim, neu)
+        claim_s, neu_s = _diff_excerpt(claim_disp, neu_disp)
         if tier == "SILENT":
             beleg_s = f" (WP: {beleg})" if beleg else ""
             silent_lines.append(f"«{claim_s}» → «{neu_s}»{beleg_s}")

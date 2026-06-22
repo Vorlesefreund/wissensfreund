@@ -1,10 +1,22 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-22T11:51:47Z -->
+<!-- updated: 2026-06-22T13:08:52Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-22)
+
+**Lektorat-Box-Apply-Bug behoben** (`_apply_auto_correction`, lektorat_common.py). Aufgedeckt durch die
+E2E-Validierung (Titanic-S3-wow-Box: `BOX[wow]:`-Leak + duplizierter Satz + doppelte 1:7-Fassung).
+Fix: (A) interne Render-Marker (`BOX[...]:`) aus claim/korrektur strippen; (B) Granularitäts-Guard
+(Option A, covers_all über ≥0,5-Pro-Satz-Alignment) — Ganzbox-Korrektur ersetzt die Box ganz,
+Ein-Satz-Korrektur nur den Satz, mehrdeutiger Mehr-Satz-Match → PRÜFEN statt Spleiß. Plus Display-Strip
+vor `_diff_excerpt` (kein Label-Fragment im Prüfbericht). Verifiziert: Titanic-S3 sauber + Ein-Satz-
+Regressionen (Carpathia/Sperrklinken/reveal) + Flag-Fall (17/17 Checks).
+
+**E2E-Validierung (v4 + Kompass + Lektorat)** als Meilenstein: voller Pfad 4 Themen × S1/S2/S3 + Lektorat
+sauber; S1-Floor-88 korrekt (Elektron S1 word_target 62–88). Offen: Lektorat-Fehlflag-Qualitätspass,
+Dosierungs-Nuance (Titanic-S2-Opferzahl), strukturiertes Box-Korrektur-Protokoll (Härtung).
 
 **Kompass-Anker nach main** (rebased auf v4-Stand, FF→main). +2 Kriterien in `COMPANION_PROMPT_TMPL`:
 höchstens ein konkreter, kindgerechter, belegbarer Anker je Thema; drastische Tod-/Gewalt-/Katastrophe-Anker
