@@ -950,6 +950,7 @@ def stage2_generierung(
                 )
                 cfg = types.GenerateContentConfig(
                     cached_content=cache_name,
+                    temperature=1.0,
                     thinking_config=thinking_cfg,
                     max_output_tokens=32768,
                 )
@@ -967,6 +968,7 @@ def stage2_generierung(
                 )
                 cfg = types.GenerateContentConfig(
                     system_instruction=system_prompt,
+                    temperature=1.0,
                     thinking_config=thinking_cfg,
                     max_output_tokens=32768,
                 )
@@ -1050,6 +1052,8 @@ def stage2_generierung(
         article["meta"]["grounding_companions"] = data.get("valid_companions", [])
         _prompt_version = SYSTEM_PROMPT_PATH.stem.split("_v")[-1].split("_")[0]
         article["meta"]["generation_method"]    = f"{GEN_MODEL}/batch/v{_prompt_version}"
+        article["meta"]["generation_temperature"] = 1.0
+        article["meta"]["generation_thinking"]    = "MEDIUM"
 
         # Wortzahl-Guard
         word_count = count_article_words(article)
