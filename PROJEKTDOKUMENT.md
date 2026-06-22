@@ -125,6 +125,7 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 | 22.06.2026 | **v4 als Produktions-Generator-Prompt übernommen** (`wissensfreund_generator_prompt_v4_production.md`; alte v3.23-Datei bleibt unreferenziert als Historie). Gekoppelt: **S1-ERG_BANDS-Untergrenze 75→88** (nur S1-lo; S2/S3 unverändert). Begründung: A/B-Lauf (v3.24 vs v4) + Belegtreue-Verifikation (3 Themen × S3, Grounding mitgesichert) zeigen reichere, **quellentreue** Ausschöpfung; v3.24 schöpfte unter (frühere Dünn-/Trockenheitsprobleme = Unter-Ausschöpfung, nicht fehlender Stoff). |
 | 22.06.2026 | **Kompass-Anker übernommen** (+2 Kriterien in `COMPANION_PROMPT_TMPL`: höchstens ein konkreter, kindgerechter, belegbarer Anker je Thema; drastische Tod-/Gewalt-/Katastrophe-Anker meiden). **Eignungs-geprüft** (companion-only, 5 Themen × 2 Läufe): Anker-Leitplanke hält auf heiklen Themen — Zweiter Weltkrieg → Enigma/Luftschutzbunker/Kindertransport statt Tod/Gewalt; Titanic → Robert Ballard/Olympic, „Wrack der Titanic" verworfen; unkritische Themen erhalten sinnvolle Anker (Saturn V, Sphinx/Cheops, Megachile pluto). |
 | 22.06.2026 | **Lektorat-Box-Apply-Bug behoben** (Marker-Strip + Granularitäts-Guard Option A in `_apply_auto_correction`; aufgedeckt durch die E2E-Validierung, Titanic-S3-wow-Box). Interne `BOX[...]:`-Render-Marker werden aus claim/korrektur gestrippt (kein Leak in `box["text"]`); Ganzbox-Korrekturen ersetzen die Box als Ganzes, Ein-Satz-Korrekturen nur den Satz. **Fail-safe:** mehrdeutiger Mehr-Satz-Match → PRÜFEN statt Spleiß. Plus Display-Strip vor `_diff_excerpt` (kein Label-Fragment im Prüfbericht). |
+| 22.06.2026 | **findings[] + Abnehmer-Umstellung abgeschlossen:** strukturiertes findings[] im V2-pruefbericht (fec90f5); Shape-A-Abnehmer auf Shape B umgestellt (20bec3f). FP/FN-Messung jetzt technisch möglich. |
 
 ---
 
@@ -132,7 +133,12 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 
 - **CI-Migration:** `artikel_pipeline.yml` ist dispatch-only, ruft den Claude-Legacy-Generator (`generate_articles.py`) und würde mangels Prompt-Datei scheitern → auf `run_batch.py` migrieren; `generate_articles.py` stilllegen; YAML fixen/löschen.
 - **Lektorat-Fehlerquote messen** (False-Positive/Negative gegen Ground-Truth) vor dem Skalieren. Ziel: ≥ 50–70 % ohne Korrektur durch.
-- **Strukturiertes, maschinenlesbares `findings[]` im V2-`pruefbericht`** (verdikt/claim_original/korrektur_neu pro Finding) — derzeit nur Markdown-Summary + Zähler (`text`, `n_silent`, `n_korrigiert`, `n_pruefen`). Voraussetzung für die geplante Lektorat-FP/FN-Messung gegen Ground Truth. Eigener Schritt, wirkt auf beide Pfade.
+- ~~**Strukturiertes, maschinenlesbares `findings[]` im V2-`pruefbericht`**~~ →
+  **ERLEDIGT (22.06.):** findings[] additiv in Shape B eingebaut
+  (fec90f5); Shape-A-Abnehmer (render_review_html.py, generate_grounded.py)
+  auf V2 umgestellt (20bec3f). Alle vier Verdikte (SILENT/KORRIGIERT/PRÜFEN/
+  EINBAU_FEHLGESCHLAGEN) maschinenlesbar; kein Abnehmer mehr an Shape A.
+  Voraussetzung für FP/FN-Messung erfüllt.
 - **Grounding v3.17/v2.8** committen und im Pipeline-Lauf validieren (in Dateien gebaut, nicht getestet).
 - **v3.24-Validierung (vor Skalierung):** S1-Szenen-Strategie auf Demokratie/Sklaverei prüfen (feuert die durchgehende Szene? Budget tragfähig, ohne dünne Themen aufzublähen?); R47/R52 mit einem Größenvergleich-Thema (Blauwal/Pyramide) testen; R46 generator-seitig (Gladiator) erneut prüfen.
 - **~~Generator-Prompt-Konsolidierung / A-B (v3.24 vs v4)~~ → ERLEDIGT (22.06.):** v4 als Produktion übernommen, S1-Untergrenze 75→88 (Kap. 9). Daraus neu offen:
