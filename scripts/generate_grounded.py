@@ -344,6 +344,8 @@ Kriterien:
 - Auch solche, mit denen sich laendlaeufige Vorstellungen aufgreifen und richtigstellen lassen
 - Fokuserhaltend: Thema vertiefen, NICHT zu Eltern-/Nachbarthemen wechseln
 - Lieber weniger als ungeeignete auffuellen (kein Mindestwert)
+- Wenn es zum Thema passt: HOECHSTENS EINEN konkreten, beruehmten Anker — ein benanntes Beispiel, einen historischen Fall oder ein bekanntes Einzelobjekt (fuer "Vulkan" etwa einen beruehmten Ausbruch), das als eigener deutscher Wikipedia-Artikel existiert und einem Kind ein greifbares Bild gibt. Der Anker muss das Thema vertiefen, nicht davon wegfuehren. Nur waehlen, wenn ein passender existiert — niemals erzwingen, nie mehr als einen.
+- Kindgerechter Anker: einer mit faszinierendem, kindgerechtem Blickwinkel. Meide Anker, die im Kern nur von Tod, Gewalt, Leid oder Katastrophe handeln.
 Ausgabe NUR JSON: {{"companions": ["Lemma1","Lemma2",...]}}"""
 
 

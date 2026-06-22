@@ -1,22 +1,24 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-22T11:15:10Z -->
+<!-- updated: 2026-06-22T11:51:47Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## In Arbeit (2026-06-22) — wartet auf Freigabe
-
-**v4 als Produktions-Generator-Prompt** (Branch `feature/adopt-v4-generator`, off sauberem main, **noch kein Commit**).
-Neue getrackte Datei `wissensfreund_generator_prompt_v4_production.md` (Inhalt = ehemals `…_experimental.md`,
-Kopf „v4.0 — Produktion"; experimental-Datei entfernt). `SYSTEM_PROMPT_PATH` (generate_grounded.py:85)
-→ v4. **S1-ERG_BANDS-Untergrenze 75→88** (nur S1; S2/S3 unverändert). `verify_project_facts.py` nachgezogen:
-Prompt-Pfad/-Existenz auf v4, neuer Hart-Check `ERG_BANDS[1]=(88,250)` → 13/13 PASS · 2 KNOWN_OPEN · 0 FAIL.
-PROJEKTDOKUMENT.md (Entscheidungs-Log, [✓ CI]-Fakten, Kap.-10-Offene-Punkte) + STATUS aktualisiert.
-Alte v3.23-Datei bleibt unreferenziert als Historie. Begründung: A/B + Belegtreue-Verifikation zeigen
-reichere, quellentreue Ausschöpfung; v3.24 schöpfte unter.
-**Geparkt:** Kompass-Anker-Änderung gesichert auf `feature/kompass-anker` (Commit 1f82898), FF→main ausstehend.
-
 ## Abgeschlossen (2026-06-22)
+
+**Kompass-Anker nach main** (rebased auf v4-Stand, FF→main). +2 Kriterien in `COMPANION_PROMPT_TMPL`:
+höchstens ein konkreter, kindgerechter, belegbarer Anker je Thema; drastische Tod-/Gewalt-/Katastrophe-Anker
+meiden. Eignungs-geprüft (companion-only, 5 Themen × 2 Läufe): Leitplanke hält auf heiklen Themen
+(WW2 → Enigma/Luftschutzbunker; Titanic → Ballard/Olympic, „Wrack der Titanic" verworfen). Offen: BKS-Über-
+Verwerfung (Cheops: Sonnenbarke/Kufu-Schiff verworfen — selbe Familie wie Knappe/Rüstung).
+
+**v4 als Produktions-Generator-Prompt** (Commit aa88200 auf main). `wissensfreund_generator_prompt_v4_production.md`
+(„v4.0 — Produktion"); `SYSTEM_PROMPT_PATH` → v4; **S1-ERG_BANDS-Untergrenze 75→88**; `generation_method`
+in beiden Pfaden aus Prompt-Pfad abgeleitet (Batch-Hardcode `v3.23b` entfernt) → `…/v4`. `verify_project_facts.py`
+nachgezogen (15 Fakten, 13 hart, 13/13 PASS). Alte v3.23-Datei bleibt unreferenziert als Historie.
+
+**BKS-Companion-Fehlauflösung behoben** (Commit folgt, fix/bks-companion → main). `validate_and_resolve_companions`
+erkennt Begriffsklärungsseiten jetzt per `pageprops.disambiguation` und plausibilisiert BKS-Companions
 
 **BKS-Companion-Fehlauflösung behoben** (Commit folgt, fix/bks-companion → main). `validate_and_resolve_companions`
 erkennt Begriffsklärungsseiten jetzt per `pageprops.disambiguation` und plausibilisiert BKS-Companions
