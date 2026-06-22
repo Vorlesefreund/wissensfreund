@@ -1,10 +1,17 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-22T19:13:42Z -->
+<!-- updated: 2026-06-22T19:22:31Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-22)
+
+**1600px-Phantom-Tier entfernt** (Commit 18172dc, feature/fix-tiers → main FF). `tiers`-Dict in
+`_set_hero_and_tiers` (run_batch.py) trägt jetzt nur noch 300 + 800. Diagnose ergab: der „1600"-Pfad
+(`bilder/{thema}/{stem}_1600.jpg`) war deklariert, aber nie befüllt — kein Code schreibt nach `bilder/`,
+das Verzeichnis existiert nicht. 1600px-Bytes existieren nur im Vision-Cache (`.cache/downloads/{md5}_1600.jpg`,
+image_vision_filter.py) und bleiben unangetastet. Rest-Drift dokumentiert: 600er-Tier wird nur gemessen
+(Speicher-Tabelle), weder gecacht noch deklariert; kein 2048 irgendwo. Bild-Publishing nach `bilder/`/R2 bleibt offen.
 
 **Batch-Pfad-Temperatur explizit + meta-Audit** (Commit 8230d6d, feature/batch-temperature → main FF).
 Diagnose: Stage-2-`GenerateContentConfig` (gecacht + Fallback) trug keine `temperature` → stiller Gemini-
