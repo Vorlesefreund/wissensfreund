@@ -743,6 +743,7 @@ def annotate_article_lektorat_v2(
     silent_lines:     list[str] = []
     korrigiert_lines: list[str] = []
     pruefen_lines:    list[str] = []
+    findings:         list[dict] = []
 
     for c in corrections:
         claim  = c.get("claim_original", "").strip()
@@ -764,15 +765,39 @@ def annotate_article_lektorat_v2(
             pruefen_lines.append(
                 f"«{claim_disp[:80]}» — Einbau fehlgeschlagen (Satz nicht gefunden)"
             )
+            findings.append({
+                "verdikt":        "EINBAU_FEHLGESCHLAGEN",
+                "claim_original": claim_disp,
+                "korrektur_neu":  neu_disp,
+                "beleg":          beleg or None,
+                "problem":        None,
+                "begruendung":    None,
+            })
             continue
 
         claim_s, neu_s = _diff_excerpt(claim_disp, neu_disp)
         if tier == "SILENT":
             beleg_s = f" (WP: {beleg})" if beleg else ""
             silent_lines.append(f"«{claim_s}» → «{neu_s}»{beleg_s}")
+            findings.append({
+                "verdikt":        "SILENT",
+                "claim_original": claim_disp,
+                "korrektur_neu":  neu_disp,
+                "beleg":          beleg or None,
+                "problem":        None,
+                "begruendung":    None,
+            })
         else:
             beleg_s = f" — WP: «{beleg}»" if beleg else ""
             korrigiert_lines.append(f"«{claim_s}» → «{neu_s}»{beleg_s}")
+            findings.append({
+                "verdikt":        "KORRIGIERT",
+                "claim_original": claim_disp,
+                "korrektur_neu":  neu_disp,
+                "beleg":          beleg or None,
+                "problem":        None,
+                "begruendung":    None,
+            })
 
     for p in pruefen_in:
         claim  = p.get("claim_original", "").strip()
@@ -782,6 +807,14 @@ def annotate_article_lektorat_v2(
         if beg:
             entry += f" ({beg})"
         pruefen_lines.append(entry)
+        findings.append({
+            "verdikt":        "PRÜFEN",
+            "claim_original": claim,
+            "korrektur_neu":  None,
+            "beleg":          None,
+            "problem":        prob or None,
+            "begruendung":    beg or None,
+        })
 
     # Pruefbericht aufbauen
     header = f"## {thema} {stufe} — Lektorat" if thema else "## Lektorat"
@@ -806,6 +839,7 @@ def annotate_article_lektorat_v2(
         "n_silent":     len(silent_lines),
         "n_korrigiert": len(korrigiert_lines),
         "n_pruefen":    n_pr,
+        "findings":     findings,
     }
 
     if n_pr > 0:
