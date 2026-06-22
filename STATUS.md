@@ -1,10 +1,18 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-22T18:30:17Z -->
+<!-- updated: 2026-06-22T19:13:42Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-22)
+
+**Batch-Pfad-Temperatur explizit + meta-Audit** (Commit 8230d6d, feature/batch-temperature → main FF).
+Diagnose: Stage-2-`GenerateContentConfig` (gecacht + Fallback) trug keine `temperature` → stiller Gemini-
+API-Default 1.0 griff (Stage-1: Kompass 0.3, Vision 0.1; Sync-Pfad gemini_client 0.6 — im Batch nicht
+genutzt). Jetzt `temperature=1.0` in beiden Stage-2-Configs explizit (kein inhaltlicher Wechsel; die mit
+1.0 erzeugten fp_measurement-Artikel wurden für gut befunden). Zusätzlich `generation_temperature=1.0`
+und `generation_thinking="MEDIUM"` ins `article.meta` (bisher dokumentierte nur `generation_method` Modell/
+Pfad/Prompt-Version) → Lauf-Parameter auditierbar. Greift ab nächstem Batch-Lauf. py_compile OK.
 
 **LEKTORAT_SYSTEM: zwei Beispiel-Ergänzungen** (Commit 7523785, feature/lektorat-grounding-examples → main FF).
 Rein additiv in der Prompt-Konstante, kein Bestandstext geändert. (1) GROUNDING-REGEL: neuer Bullet
