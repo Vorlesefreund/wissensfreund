@@ -1,10 +1,19 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-22T14:13:39Z -->
+<!-- updated: 2026-06-22T18:30:17Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-22)
+
+**LEKTORAT_SYSTEM: zwei Beispiel-Ergänzungen** (Commit 7523785, feature/lektorat-grounding-examples → main FF).
+Rein additiv in der Prompt-Konstante, kein Bestandstext geändert. (1) GROUNDING-REGEL: neuer Bullet
+„Domänen-/Fächerlisten" — sinngemäße Deckung durch Quelllisten explizit (z. B. „Sprachen" als Lehrfach
+deckt „sprachen mehrere Sprachen"). (2) SELBSTKONSISTENZ-PFLICHT: zweites Beispiel — Begründung mit
+„sachgerecht"/„kein Handlungsbedarf"/„nicht falsch" erzwingt Silence, niemals PRÜFEN. Adressiert zwei
+FPs aus dem fp_measurement-Lauf (Ritter S2 / Vulkan S3). py_compile OK. **Kontext:** FP/FN-Mess-Lauf
+(3 Themen × S1–S3, 9 Artikel, 21 findings) gelaufen → `articles/fp_measurement/` + annotierbare
+`findings_annotation.xlsx`; HTML-Viewer rendert V2-findings[] korrekt (verifiziert).
 
 **Shape-A-Abnehmer auf V2-`findings[]` umgestellt** (Commit 20bec3f, feature/orphan-consumers → main FF).
 `render_review_html.py:render_lektorat` und `generate_grounded.py:1843` lasen noch Shape A
