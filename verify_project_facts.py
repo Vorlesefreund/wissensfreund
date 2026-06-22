@@ -37,6 +37,13 @@ CHECKS = [
   {"desc":"ergiebigkeit_scores deckt Katalog (nicht der 134-Stub)","sev":"FAIL","type":"json_min",
    "file":"ergiebigkeit_scores.json","path":"scores","min":4000},
   {"desc":"eignung_exclude.json == XLSX-Excludes (reproduzierbar)","sev":"FAIL","type":"exclude_matches_xlsx"},
+  {"desc":"Lektorat prueft Phase-1-Snapshot (kein eigener Quell-Fetch)","sev":"FAIL","type":"regex_absent",
+   "file":"scripts/lektorat_common.py",
+   "patterns":[r"\bfetch_wikipedia_text\s*\(", r"\bresolve_lemma\s*\(",
+               r"(?m)^\s*(?:import\s+requests|from\s+requests\b)", r"\brequests\.[A-Za-z_]",
+               r"(?m)^\s*import\s+urllib", r"\burllib\.request\b", r"\burlopen\s*\(",
+               r"\bhttpx\."],
+   "note":"Snapshot-Konsistenz: Lektorat darf die Quelle nicht neu holen (sonst Phantom-Flags durch Drift)."},
   {"desc":"CI-Workflow ruft Produktions-Skript run_batch.py","sev":"KNOWN_OPEN","type":"contains",
    "file":".github/workflows/artikel_pipeline.yml","needle":"run_batch.py",
    "note":"Migration ausstehend: Workflow ruft noch generate_articles.py (Legacy-Claude)."},
@@ -92,6 +99,18 @@ def run_check(c):
                        if str(r["eignung"]).strip().lower() == "exclude"}
             if ex_json == ex_xlsx: return "PASS", f"{len(ex_json)} Excludes deckungsgleich"
             return "FAIL", f"JSON {len(ex_json)} vs XLSX {len(ex_xlsx)} — build_eignung_exclude.py neu laufen"
+        if t == "regex_absent":
+            # Verbotene Aufruf-/Import-Muster duerfen NICHT vorkommen. Robust gegen
+            # Falschtreffer: zuerst Docstrings (''' / """) und #-Kommentare entfernen,
+            # dann nur gegen echten Code matchen (Aufruf-/Import-Pattern, kein Substring).
+            txt = read(c["file"])
+            if txt is None: return "FAIL", f"{c['file']} fehlt"
+            code = re.sub(r'""".*?"""', "", txt, flags=re.S)
+            code = re.sub(r"'''.*?'''", "", code, flags=re.S)
+            code = "\n".join(re.sub(r"#.*$", "", ln) for ln in code.splitlines())
+            hits = [p for p in c["patterns"] if re.search(p, code)]
+            return ("PASS", "keine verbotenen Aufruf-/Import-Muster") if not hits else \
+                   ("FAIL", f"verbotenes Muster gefunden: {hits}")
         return "FAIL", f"unbekannter Check-Typ {t}"
     except Exception as e:
         return "FAIL", f"Check-Fehler: {type(e).__name__}: {e}"

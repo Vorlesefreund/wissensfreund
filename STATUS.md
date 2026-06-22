@@ -1,10 +1,16 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-22T13:08:52Z -->
+<!-- updated: 2026-06-22T13:34:14Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-22)
+
+**Quell-Snapshot-Konsistenz CI-geguardet.** Diagnose bestätigt: Sync-Lektorat prüft gegen den
+Phase-1-Snapshot (`primary_text`/`companion_texts` → `sources_block`), kein eigener Fetch/`resolve_lemma`
+im Lektorat-Pfad → kein Phantom-Beanstandungs-Risiko durch Quell-Drift. Neuer `regex_absent`-Check in
+`verify_project_facts.py` (auf `lektorat_common.py`, robust gegen Docstring-/Kommentar-Falschtreffer)
+schlägt fehl, falls je ein Re-Fetch eingebaut wird. Fakten-Check jetzt 16 (14 hart) → 14/14 PASS · 2 KNOWN_OPEN.
 
 **Lektorat-Box-Apply-Bug behoben** (`_apply_auto_correction`, lektorat_common.py). Aufgedeckt durch die
 E2E-Validierung (Titanic-S3-wow-Box: `BOX[wow]:`-Leak + duplizierter Satz + doppelte 1:7-Fassung).

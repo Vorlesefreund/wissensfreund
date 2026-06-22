@@ -2,7 +2,7 @@
 
 **Stand:** 22. Juni 2026 · ersetzt v20 (1. Juni 2026)
 
-**Pipeline-Fakten zuletzt gegen Code geprüft:** 22.06.2026 (v4-Adoption), via `verify_project_facts.py` (13/13 PASS · 2 KNOWN_OPEN · 0 FAIL)
+**Pipeline-Fakten zuletzt gegen Code geprüft:** 22.06.2026, via `verify_project_facts.py` (14/14 PASS · 2 KNOWN_OPEN · 0 FAIL)
 
 > **Wichtigste Änderung gegenüber v20:** Die Klexikon-/ZIM-Architektur als Inhaltsquelle ist entfallen — das Inhaltsmodell sind ausschließlich selbst generierte, Wikipedia-basierte Artikel. (Übergang: die ausgelieferte App liefert noch Klexikon-Inhalt, siehe Kap. 1/7.) Die alte Doku war an mehreren Stellen veraltet (u. a. „Claude generiert Artikel" — tatsächlich Gemini; feste Wortziele; 3-stufiger Bildfilter).
 
@@ -12,7 +12,7 @@
 - **[PO]** — Stand laut Product Owner (Andreas), nicht code-verifiziert.
 - **[? zu prüfen]** — aus v20 übernommen, wartet auf den Review-Durchgang des PO.
 
-> **Was die CI heute automatisch prüft (15 Fakten, 13 hart + 2 KNOWN_OPEN):** Produktions-Generator `gemini-3.5-flash`; Thinking-Stufe MEDIUM; `run_batch.py` erbt das Generator-Modell (kein eigener Owner); Lektorat `claude-sonnet-4-6`; Vision-Modell `gemini-2.5-flash`; Bild-Recheck Opus 4.8; aktiver Generator-Prompt verdrahtet (`wissensfreund_generator_prompt_v4_production.md`); Prompt-Datei existiert; S1-Wortziel-Untergrenze `ERG_BANDS[1]=(88,250)`; Exclude-Backstop verdrahtet; `catalog_review_master.xlsx` existiert; `ergiebigkeit_scores` deckt den Katalog (nicht der 134-Stub); `eignung_exclude.json` == XLSX-Excludes (reproduzierbar). **KNOWN_OPEN** (brechen den Build nicht): CI ruft `run_batch.py` / CI ruft *nicht* den Legacy-Claude-Generator. — Alles andere in den [✓ audit]-Abschnitten ist von Hand verifiziert, aber nicht in diesem Satz enthalten.
+> **Was die CI heute automatisch prüft (16 Fakten, 14 hart + 2 KNOWN_OPEN):** Produktions-Generator `gemini-3.5-flash`; Thinking-Stufe MEDIUM; `run_batch.py` erbt das Generator-Modell (kein eigener Owner); Lektorat `claude-sonnet-4-6`; Vision-Modell `gemini-2.5-flash`; Bild-Recheck Opus 4.8; aktiver Generator-Prompt verdrahtet (`wissensfreund_generator_prompt_v4_production.md`); Prompt-Datei existiert; S1-Wortziel-Untergrenze `ERG_BANDS[1]=(88,250)`; Exclude-Backstop verdrahtet; `catalog_review_master.xlsx` existiert; `ergiebigkeit_scores` deckt den Katalog (nicht der 134-Stub); `eignung_exclude.json` == XLSX-Excludes (reproduzierbar); Lektorat prüft den Phase-1-Snapshot (kein eigener Quell-Fetch im Lektorat-Pfad). **KNOWN_OPEN** (brechen den Build nicht): CI ruft `run_batch.py` / CI ruft *nicht* den Legacy-Claude-Generator. — Alles andere in den [✓ audit]-Abschnitten ist von Hand verifiziert, aber nicht in diesem Satz enthalten.
 
 ---
 
@@ -72,7 +72,8 @@ Bezug über die **MediaWiki-API** (Originale laden, lokal mit Pillow auf 300/800
 ## 5. Qualität & Anti-Drift  [✓ CI / ✓ audit]
 
 - **Lektorat** korrigiert aktiv (siehe Kap. 2). Geplant: PRÜFEN-Schwelle senken, im PRÜFEN-Fall zwei fertige Alternativen A/B liefern (PO setzt nur ein Häkchen). *[✓ audit]*
-- **Schlüsselstein:** `verify_project_facts.py` deklariert **15 Fakten** (13 hart geprüft, 2 KNOWN_OPEN) und prüft sie gegen den Code. Die CI-Action `verify_facts.yml` bricht den Build bei jedem Drift (push auf main + PR). Aktueller Lauf: 13/13 PASS. *[✓ CI — das ist die CI selbst]*
+- **Schlüsselstein:** `verify_project_facts.py` deklariert **16 Fakten** (14 hart geprüft, 2 KNOWN_OPEN) und prüft sie gegen den Code. Die CI-Action `verify_facts.yml` bricht den Build bei jedem Drift (push auf main + PR). Aktueller Lauf: 14/14 PASS. *[✓ CI — das ist die CI selbst]*
+- **Quell-Snapshot-Konsistenz:** Das Sync-Lektorat prüft gegen den Phase-1-Snapshot (`primary_text`/`companion_texts`, gereicht als `sources_block`); **kein eigener Fetch/`resolve_lemma` im Lektorat-Pfad** — also kein Phantom-Beanstandungs-Risiko durch Quell-Drift seit der Generierung. Guarded in `verify_project_facts.py` (`regex_absent` auf `scripts/lektorat_common.py`). *[✓ CI]*
 - **Prinzip:** Doku wird aus dem Manifest abgeleitet, nicht von Hand gepflegt. Memory ist ein verlustbehafteter Cache und nie die Quelle — jede Konfig-Behauptung wird mit einem gelesenen Artefakt belegt. Rangfolge: Lauf-Artefakt > Code-Default > Prosa-Zusammenfassung.
 
 ---
@@ -140,6 +141,8 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
   - **Spätere Verfeinerung:** Companion-Auswahl **stufen-/sensibel-bewusst** machen (Lesestufe S1/S2/S3 und `sensibel`-Flag fließen bisher nicht in den Kompass ein — z. B. bei sensiblen Themen die Anker-Kriterien noch konservativer, bei S1 einfachere Anker).
 - **~~Lektorat-Box-Apply-Bug~~ → ERLEDIGT (22.06.):** Marker-Strip + Granularitäts-Guard Option A in `_apply_auto_correction` (Kap. 9); fail-safe (mehrdeutig → PRÜFEN).
 - **~~E2E-Validierung (v4 + Kompass + Lektorat kombiniert)~~ → ERLEDIGT (22.06., Meilenstein):** voller Pfad auf 4 Themen × S1/S2/S3 + Lektorat sauber durchgelaufen; **S1-Floor-88 verhält sich korrekt** (Elektron S1: word_target 62–88, Modell schreibt kürzer statt aufzublähen).
+- **~~Quell-Snapshot-Konsistenz (Lektorat)~~ → ERLEDIGT (22.06.):** Diagnose sauber (gleicher Phase-1-Snapshot, kein Re-Fetch); jetzt CI-geguardet (`regex_absent` in `verify_project_facts.py`, Kap. 5).
+- **Primärtext-Trunkierung beim Fetch prüfen (niedrige Priorität):** klären, ob `fetch_wikipedia_text` den Primärartikel beim Abruf kürzt (Inhalts-**Vollständigkeit** für den Generator — getrennt von der gelösten Snapshot-Frage, hier geht es nur um den Generator-Input). Niedrige Priorität, da v4 reiche Artikel liefert.
 - **Lektorat-Fehlflag-Qualitätspass:** beobachtete Fehl-/Über-Korrekturen aus der E2E gezielt prüfen — Aristoteles-S3 „Selbstrückzug"-Flag (Lektorat flaggt eine eigene/korrekte Aussage), Ritter-S1 „Helm"-Überkorrektur, Titanic-S2 Überlebendenzahl. Input für die geplante FP/FN-Messung.
 - **Dosierungs-Nuance (v4-Mikro-Tuning erwägen):** Titanic S2 nennt eine große Opferzahl, die der Prompt eigentlich erst für S3 vorsieht → Stufen-Dosierung sensibler Zahlen im v4-Prompt nachschärfen.
 - **Strukturiertes Box-Korrektur-Protokoll (Härtung, später):** statt Freitext-`claim_original` ein maschinenlesbares Ziel (Box-ID + Satz-Index) vom Lektorat anfordern — eliminiert das Matching-/Granularitäts-Risiko an der Wurzel.
