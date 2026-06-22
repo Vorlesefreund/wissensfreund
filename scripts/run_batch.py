@@ -393,7 +393,7 @@ def stage1_sourcing(
     log.info("\n=== Stage 1 / Step 3: Companion Validate + Fetch ===")
     for thema, data in wp_data.items():
         companion_cap = COMPANION_CAP.get(data["appeal"], 5)
-        valid_companions, _ = validate_and_resolve_companions(
+        valid_companions, _, _ = validate_and_resolve_companions(
             session,
             raw_companions_by_thema.get(thema, []),
             data["resolved_title"],

@@ -1,8 +1,19 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-21T18:45:14Z -->
+<!-- updated: 2026-06-22T07:50:53Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
+
+## Abgeschlossen (2026-06-22)
+
+**BKS-Companion-Fehlauflösung behoben** (Commit folgt, fix/bks-companion → main). `validate_and_resolve_companions`
+erkennt Begriffsklärungsseiten jetzt per `pageprops.disambiguation` und plausibilisiert BKS-Companions
+über `_flash_check_doppelbedeutung` statt sie größenbasiert (`_resolve_bks` = größter Byte-Umfang, keine
+Plausibilität) auf den falschen Treffer aufzulösen. Neuer Guard `_companion_target_ok` verwirft Ziel,
+wenn es nicht existiert, selbst noch BKS ist oder = Ausgangs-BKS (verhindert Knappe→Knappe→Schalke-Schleife).
+Funktion gibt jetzt 3-Tupel `(valid, rejected, resolution)` zurück; `companion_resolution` wird in
+report.json (phase1) persistiert. Beide Aufrufer angepasst (prepare_topic_sources / stage1_sourcing),
+Grep bestätigt: keine weiteren Aufrufer. Normale Companions unverändert.
 
 ## Abgeschlossen (2026-06-21)
 

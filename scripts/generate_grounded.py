@@ -52,6 +52,8 @@ from generate_articles import (          # noqa: E402
     resolve_lemma,
     parse_article_json,
     validate_article,
+    _resolve_bks,
+    _flash_check_doppelbedeutung,
     WIKIPEDIA_API,
     USER_AGENT,
     MIN_SENTENCES_PER_ARTICLE,
@@ -501,24 +503,62 @@ def select_companions_raw(
     return [], {}
 
 
+def _companion_target_ok(
+    session: requests.Session, title: str | None, orig_bks: str
+) -> tuple[bool, str]:
+    """Prüft ein BKS-Auflösungsziel: existiert, KONKRET (keine BKS), ≠ Ausgangs-BKS.
+
+    Verhindert, dass ein Companion auf die BKS selbst (oder eine weitere BKS) fällt —
+    sonst würde der spätere fetch_wikipedia_text() erneut größenbasiert fehlauflösen.
+    """
+    if not title or not title.strip():
+        return False, "kein Zielvorschlag (child_lemma leer)"
+    if title.strip().lower() == orig_bks.strip().lower():
+        return False, "Ziel = Ausgangs-BKS"
+    try:
+        resp = session.get(WIKIPEDIA_API, params={
+            "action": "query", "format": "json", "redirects": "1",
+            "titles": title, "prop": "info|pageprops",
+        }, timeout=30)
+        resp.raise_for_status()
+        pages = resp.json().get("query", {}).get("pages", {})
+    except Exception as e:
+        return False, f"Ziel-Prüfung API-Fehler: {e}"
+    for page in pages.values():
+        if "missing" in page:
+            return False, "Zielartikel fehlt"
+        if "disambiguation" in (page.get("pageprops") or {}):
+            return False, "Ziel ist erneut BKS"
+    return True, "ok"
+
+
 def validate_and_resolve_companions(
     session: requests.Session,
     raw_companions: list[str],
     primary_title: str,
     cap: int = 5,
-) -> tuple[list[str], list[dict]]:
+) -> tuple[list[str], list[dict], list[dict]]:
     """
     Prüft Wikipedia-Existenz, löst Weiterleitungen auf, dedupliziert.
-    Gibt (valid_canonical, rejected_log) zurück.
+
+    BKS-Companions (Begriffsklärung) werden erkannt (pageprops.disambiguation) und
+    NICHT größenbasiert (über _resolve_bks allein) aufgelöst — der größenbasierte
+    Kandidat wird mit _flash_check_doppelbedeutung plausibilisiert (gleiche Mechanik
+    wie der Primär-Lemma-Pfad). Plausibel → nehmen; sonst Companion VERWERFEN statt
+    falsch auflösen (ein falscher Companion kontaminiert das Grounding, ein fehlender
+    ist harmlos).
+
+    Gibt (valid_canonical, rejected_log, resolution_log) zurück. resolution_log
+    hält den Ausgang JE Companion fest (für persistente Sichtbarkeit im report.json).
     """
     if not raw_companions:
-        return [], []
+        return [], [], []
 
     params = {
         "action": "query", "format": "json",
         "titles": "|".join(raw_companions[:10]),
         "redirects": "1",
-        "prop": "info",
+        "prop": "info|pageprops",   # pageprops → BKS-Erkennung (disambiguation)
     }
     try:
         resp = session.get(WIKIPEDIA_API, params=params, timeout=30)
@@ -526,8 +566,9 @@ def validate_and_resolve_companions(
         query = resp.json().get("query", {})
     except Exception as e:
         log.error("  Companion-Validierung API-Fehler: %s", e)
-        return [], [{"title": c, "resolved": None, "reason": f"API-Fehler: {e}"}
-                    for c in raw_companions]
+        rej = [{"title": c, "resolved": None, "reason": f"API-Fehler: {e}"}
+               for c in raw_companions]
+        return [], rej, [dict(r, outcome="rejected") for r in rej]
 
     # Auflösungskette aufbauen: Normalisierung + Weiterleitungen
     resolve: dict[str, str] = {}
@@ -549,37 +590,75 @@ def validate_and_resolve_companions(
         for page in query.get("pages", {}).values()
         if "missing" not in page
     }
+    bks_titles: set[str] = {
+        page["title"]
+        for page in query.get("pages", {}).values()
+        if "disambiguation" in (page.get("pageprops") or {})
+    }
 
     valid: list[str] = []
     rejected: list[dict] = []
+    resolution: list[dict] = []
     seen_resolved: set[str] = set()
     primary_lower = primary_title.lower()
 
+    def _reject(comp, resolved, reason):
+        rejected.append({"title": comp, "resolved": resolved, "reason": reason})
+        resolution.append({"input": comp, "resolved": resolved,
+                            "outcome": "rejected", "reason": reason})
+        log.warning("  Verworfen: '%s'%s (%s)", comp,
+                    f" -> '{resolved}'" if resolved != comp else "", reason)
+
     for comp in raw_companions:
         resolved = follow(comp)
-        resolved_lower = resolved.lower()
-        changed = resolved != comp
 
         if resolved not in existing:
-            rejected.append({"title": comp, "resolved": resolved, "reason": "nicht gefunden"})
-            log.warning("  Verworfen: '%s'%s (nicht gefunden)", comp,
-                        f" -> '{resolved}'" if changed else "")
+            _reject(comp, resolved, "nicht gefunden")
             continue
+
+        # ── BKS-Companion: plausibilisieren statt größenbasiert auflösen ──────────
+        bks_note = None
+        if resolved in bks_titles:
+            orig_bks = resolved
+            cand = _resolve_bks(session, orig_bks)   # größenbasierter Kandidat (nur Eingabe)
+            if not cand:
+                _reject(comp, orig_bks, "BKS ohne Artikel-Link")
+                continue
+            vc = _flash_check_doppelbedeutung(session, comp, cand)
+            verdict = vc.get("verdict", "a")
+            if verdict in ("a", "b"):
+                target, why = cand, f"Flash {verdict}, plausibel"
+            else:  # verdict "c": größenbasierter Kandidat unplausibel → Flash-Vorschlag
+                target, why = vc.get("child_lemma"), f"Flash c → child_lemma '{vc.get('child_lemma')}'"
+            # Ziel muss existieren, ein KONKRETER Artikel sein (keine BKS) und nicht
+            # die Ausgangs-BKS selbst — sonst würde der spätere Fetch wieder
+            # größenbasiert falsch auflösen. Kein plausibles Ziel → verwerfen.
+            ok, reason = _companion_target_ok(session, target, orig_bks)
+            if not ok:
+                _reject(comp, orig_bks,
+                        f"BKS unplausibel ({reason}; größenbasiert '{cand}', Flash {verdict})")
+                continue
+            bks_note = f"BKS '{orig_bks}' → '{target}' ({why})"
+            resolved = target
+            log.warning("  Companion-BKS: %s", bks_note)
+
+        resolved_lower = resolved.lower()
         if resolved_lower == primary_lower:
-            rejected.append({"title": comp, "resolved": resolved, "reason": "= Primaerartikel"})
-            log.warning("  Verworfen: '%s' (= Primaerartikel)", comp)
+            _reject(comp, resolved, "= Primaerartikel")
             continue
         if resolved_lower in seen_resolved:
-            rejected.append({"title": comp, "resolved": resolved, "reason": "Duplikat"})
-            log.warning("  Verworfen: '%s' (Duplikat nach Aufloesung)", comp)
+            _reject(comp, resolved, "Duplikat")
             continue
 
         seen_resolved.add(resolved_lower)
-        if changed:
+        if resolved != comp:
             log.info("  Companion aufgeloest: '%s' -> '%s'", comp, resolved)
         valid.append(resolved)
+        resolution.append({"input": comp, "resolved": resolved,
+                           "outcome": ("bks_resolved" if bks_note else "kept"),
+                           "reason": bks_note or "ok"})
 
-    return valid[:cap], rejected
+    return valid[:cap], rejected, resolution
 
 
 # ── Bildpool ──────────────────────────────────────────────────────────────────
@@ -945,15 +1024,16 @@ def prepare_topic_sources(
 
     # Validierung + Weiterleitungsauflösung (cap gestaffelt nach Appeal)
     companion_cap = COMPANION_CAP.get(appeal, 5)
-    valid_companions, rejected = validate_and_resolve_companions(
+    valid_companions, rejected, companion_resolution = validate_and_resolve_companions(
         session, raw_companions, primary_wikipedia, cap=companion_cap
     )
     log.info("  Validiert (final): %s", valid_companions)
 
     phase1_report: dict = {
-        "raw_companions":   raw_companions,
-        "valid_companions": valid_companions,
-        "rejected":         rejected,
+        "raw_companions":       raw_companions,
+        "valid_companions":     valid_companions,
+        "rejected":             rejected,
+        "companion_resolution": companion_resolution,
     }
 
     # Companion-Volltexte holen
