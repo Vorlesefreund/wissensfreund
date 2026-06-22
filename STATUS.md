@@ -1,8 +1,20 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-22T07:50:53Z -->
+<!-- updated: 2026-06-22T11:15:10Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
+
+## In Arbeit (2026-06-22) — wartet auf Freigabe
+
+**v4 als Produktions-Generator-Prompt** (Branch `feature/adopt-v4-generator`, off sauberem main, **noch kein Commit**).
+Neue getrackte Datei `wissensfreund_generator_prompt_v4_production.md` (Inhalt = ehemals `…_experimental.md`,
+Kopf „v4.0 — Produktion"; experimental-Datei entfernt). `SYSTEM_PROMPT_PATH` (generate_grounded.py:85)
+→ v4. **S1-ERG_BANDS-Untergrenze 75→88** (nur S1; S2/S3 unverändert). `verify_project_facts.py` nachgezogen:
+Prompt-Pfad/-Existenz auf v4, neuer Hart-Check `ERG_BANDS[1]=(88,250)` → 13/13 PASS · 2 KNOWN_OPEN · 0 FAIL.
+PROJEKTDOKUMENT.md (Entscheidungs-Log, [✓ CI]-Fakten, Kap.-10-Offene-Punkte) + STATUS aktualisiert.
+Alte v3.23-Datei bleibt unreferenziert als Historie. Begründung: A/B + Belegtreue-Verifikation zeigen
+reichere, quellentreue Ausschöpfung; v3.24 schöpfte unter.
+**Geparkt:** Kompass-Anker-Änderung gesichert auf `feature/kompass-anker` (Commit 1f82898), FF→main ausstehend.
 
 ## Abgeschlossen (2026-06-22)
 

@@ -4,7 +4,7 @@ Einzige Stelle fuer tragende Fakten (CHECKS). Bei ABSICHTLICHER Aenderung: hier 
 Code anpassen, sonst FAIL. Severity FAIL bricht (exit 1); KNOWN_OPEN ist nur Hinweis (exit 0).
 Aufruf:  python verify_project_facts.py          (Pruefung)
          python verify_project_facts.py --dump    (Fakten als JSON, fuer PROJEKTDOKUMENT)
-Stand der Deklaration: 2026-06-18, aus Code + Lauf-Artefakten verifiziert.
+Stand der Deklaration: 2026-06-22, aus Code + Lauf-Artefakten verifiziert.
 """
 import json, re, sys
 from pathlib import Path
@@ -24,10 +24,12 @@ CHECKS = [
    "file":"scripts/run_batch.py","const":"VISION_MODEL","expect":"gemini-2.5-flash"},
   {"desc":"Bild-Recheck sensibler Themen = Opus 4.8","sev":"FAIL","type":"contains",
    "file":"scripts/run_batch.py","needle":"claude-opus-4-8"},
-  {"desc":"Aktiver Generator-Prompt verdrahtet","sev":"FAIL","type":"contains",
-   "file":"scripts/generate_grounded.py","needle":"wissensfreund_generator_prompt_v3.23_production.md"},
-  {"desc":"Generator-Prompt-Datei existiert","sev":"FAIL","type":"file_exists",
-   "file":"wissensfreund_generator_prompt_v3.23_production.md"},
+  {"desc":"Aktiver Generator-Prompt verdrahtet (v4 Produktion)","sev":"FAIL","type":"contains",
+   "file":"scripts/generate_grounded.py","needle":"wissensfreund_generator_prompt_v4_production.md"},
+  {"desc":"Generator-Prompt-Datei existiert (v4 Produktion)","sev":"FAIL","type":"file_exists",
+   "file":"wissensfreund_generator_prompt_v4_production.md"},
+  {"desc":"S1-Wortziel-Untergrenze ERG_BANDS[1]=(88,250)","sev":"FAIL","type":"contains",
+   "file":"scripts/generate_grounded.py","needle":"1: (88, 250)"},
   {"desc":"Exclude-Backstop in Pipeline verdrahtet","sev":"FAIL","type":"contains",
    "file":"scripts/generate_grounded.py","needle":"_EXCLUDE_SET"},
   {"desc":"Wahrheitsquelle catalog_review_master.xlsx existiert","sev":"FAIL","type":"file_exists",

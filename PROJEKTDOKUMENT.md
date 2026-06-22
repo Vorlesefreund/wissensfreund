@@ -1,8 +1,8 @@
 # Wissensfreund — Projektdokument v21
 
-**Stand:** 20. Juni 2026 · ersetzt v20 (1. Juni 2026)
+**Stand:** 22. Juni 2026 · ersetzt v20 (1. Juni 2026)
 
-**Pipeline-Fakten zuletzt gegen Code geprüft:** Commit `338f50b`, 20.06.2026, via `verify_project_facts.py` (12/12 PASS · 2 KNOWN_OPEN · 0 FAIL)
+**Pipeline-Fakten zuletzt gegen Code geprüft:** 22.06.2026 (v4-Adoption), via `verify_project_facts.py` (13/13 PASS · 2 KNOWN_OPEN · 0 FAIL)
 
 > **Wichtigste Änderung gegenüber v20:** Die Klexikon-/ZIM-Architektur als Inhaltsquelle ist entfallen — das Inhaltsmodell sind ausschließlich selbst generierte, Wikipedia-basierte Artikel. (Übergang: die ausgelieferte App liefert noch Klexikon-Inhalt, siehe Kap. 1/7.) Die alte Doku war an mehreren Stellen veraltet (u. a. „Claude generiert Artikel" — tatsächlich Gemini; feste Wortziele; 3-stufiger Bildfilter).
 
@@ -12,7 +12,7 @@
 - **[PO]** — Stand laut Product Owner (Andreas), nicht code-verifiziert.
 - **[? zu prüfen]** — aus v20 übernommen, wartet auf den Review-Durchgang des PO.
 
-> **Was die CI heute automatisch prüft (14 Fakten, 12 hart + 2 KNOWN_OPEN):** Produktions-Generator `gemini-3.5-flash`; Thinking-Stufe MEDIUM; `run_batch.py` erbt das Generator-Modell (kein eigener Owner); Lektorat `claude-sonnet-4-6`; Vision-Modell `gemini-2.5-flash`; Bild-Recheck Opus 4.8; aktiver Generator-Prompt verdrahtet; Prompt-Datei existiert; Exclude-Backstop verdrahtet; `catalog_review_master.xlsx` existiert; `ergiebigkeit_scores` deckt den Katalog (nicht der 134-Stub); `eignung_exclude.json` == XLSX-Excludes (reproduzierbar). **KNOWN_OPEN** (brechen den Build nicht): CI ruft `run_batch.py` / CI ruft *nicht* den Legacy-Claude-Generator. — Alles andere in den [✓ audit]-Abschnitten ist von Hand verifiziert, aber nicht in diesem Satz enthalten.
+> **Was die CI heute automatisch prüft (15 Fakten, 13 hart + 2 KNOWN_OPEN):** Produktions-Generator `gemini-3.5-flash`; Thinking-Stufe MEDIUM; `run_batch.py` erbt das Generator-Modell (kein eigener Owner); Lektorat `claude-sonnet-4-6`; Vision-Modell `gemini-2.5-flash`; Bild-Recheck Opus 4.8; aktiver Generator-Prompt verdrahtet (`wissensfreund_generator_prompt_v4_production.md`); Prompt-Datei existiert; S1-Wortziel-Untergrenze `ERG_BANDS[1]=(88,250)`; Exclude-Backstop verdrahtet; `catalog_review_master.xlsx` existiert; `ergiebigkeit_scores` deckt den Katalog (nicht der 134-Stub); `eignung_exclude.json` == XLSX-Excludes (reproduzierbar). **KNOWN_OPEN** (brechen den Build nicht): CI ruft `run_batch.py` / CI ruft *nicht* den Legacy-Claude-Generator. — Alles andere in den [✓ audit]-Abschnitten ist von Hand verifiziert, aber nicht in diesem Satz enthalten.
 
 ---
 
@@ -27,9 +27,9 @@ Wissensfreund ist ein deutschsprachiges, KI-gestütztes Kinderlexikon als Flutte
 *CI-geguardet: Modelle, Thinking-Stufe, `run_batch`-Vererbung, Prompt-Verdrahtung. Audit-Stand (18.06., nicht CI-geguardet): Lesestufen-Altersbänder, Wortziel-Formel, Eignungs-Rubrik-Details, Temperatur.*
 
 - **Inhaltsquelle:** deutsche Wikipedia (API). Kein Fremd-/Trainingswissen. Vor-Schritt holt den Artikel und injiziert ihn als `WIKIPEDIA_TEXT`.
-- **Generator:** `gemini-3.5-flash`, Thinking **MEDIUM** (`GEMINI_MODEL` in `generate_grounded.py`; `run_batch.py` importiert ihn als `GEN_MODEL` — kein eigener Model-Owner). Belegt durch den Lauf-Stempel `generation_method = "gemini-3.5-flash/batch/v3.23b"`.
+- **Generator:** `gemini-3.5-flash`, Thinking **MEDIUM** (`GEMINI_MODEL` in `generate_grounded.py`; `run_batch.py` importiert ihn als `GEN_MODEL` — kein eigener Model-Owner). Belegt durch den Lauf-Stempel `generation_method = "gemini-3.5-flash/batch/v4"`.
 - **Lektorat:** separater Pass mit `claude-sonnet-4-6` (Sprache, Quiz-Fairness, Wikipedia-Grounding, Box-Regeln, Wortzahl-Caps). Tiers: SILENT (kleine Korrekturen), KORRIGIERT (größere klare Korrekturen direkt eingebaut), PRÜFEN (Ausnahmefall).
-- **Aktiver Prompt:** `wissensfreund_generator_prompt_v3.23_production.md`.
+- **Aktiver Prompt:** `wissensfreund_generator_prompt_v4_production.md` (v4.0 — Produktion; seit 22.06. übernommen, siehe Kap. 9). Die alte `…_v3.23_production.md` bleibt unreferenziert als Historie liegen.
 - **Lesestufen:**
 
 | Stufe | Alter | Richtwort |
@@ -38,7 +38,7 @@ Wissensfreund ist ein deutschsprachiges, KI-gestütztes Kinderlexikon als Flutte
 | S2 | 7–9 | Einleitungssatz, erste Fachbegriffe mit Erklärung |
 | S3 | 10–12 | fachlich korrekt, lockerer Ton, kritische/ethische Abschnitte |
 
-- **Wortziele (Ergiebigkeit):** `target_S = round(Wlo + clamp((Erg−2)/6, 0, 1) × (Whi−Wlo))`; Bänder S1 [75, 250] / S2 [100, 400] / S3 [150, 650] (Untergrenzen seit v3.24 angehoben — Cap-Spielraum für die S1-Szene). **Obergrenzen sind harte Limits** (S3 max **650**, nicht 700). Verdrahtet über `wortziel_for` + `ergiebigkeit_scores.json` (4.375 Einträge). Bei dünner Quelle: kürzer schreiben statt aufblähen.
+- **Wortziele (Ergiebigkeit):** `target_S = round(Wlo + clamp((Erg−2)/6, 0, 1) × (Whi−Wlo))`; Bänder S1 [88, 250] / S2 [100, 400] / S3 [150, 650] (S1-Untergrenze 22.06. mit der v4-Adoption 75→88 angehoben; S2/S3 unverändert — Cap-Spielraum für die S1-Szene). **Obergrenzen sind harte Limits** (S3 max **650**, nicht 700). Verdrahtet über `wortziel_for` + `ergiebigkeit_scores.json` (4.375 Einträge). Bei dünner Quelle: kürzer schreiben statt aufblähen.
 - **Eignungs-Gate:** 12-Kategorien-Rubrik, Schalter `EIGNUNG_STRICT`, Loader `eignung_for()`, Exclude-Filter vor Phase 1, `age_floor`-Stufen-Skipping (Mechanismus vorhanden; per Entscheidung 20.06. NICHT genutzt, um wichtige abstrakte Themen aus S1 zu kippen — siehe Kap. 9).
 - **Temperatur:** Sync-Pfad 0.6 (`gemini_client.py`). *Batch-Pfad-Temperatur noch zu bestätigen — siehe offene Punkte.*
 
@@ -72,7 +72,7 @@ Bezug über die **MediaWiki-API** (Originale laden, lokal mit Pillow auf 300/800
 ## 5. Qualität & Anti-Drift  [✓ CI / ✓ audit]
 
 - **Lektorat** korrigiert aktiv (siehe Kap. 2). Geplant: PRÜFEN-Schwelle senken, im PRÜFEN-Fall zwei fertige Alternativen A/B liefern (PO setzt nur ein Häkchen). *[✓ audit]*
-- **Schlüsselstein:** `verify_project_facts.py` deklariert **14 Fakten** (12 hart geprüft, 2 KNOWN_OPEN) und prüft sie gegen den Code. Die CI-Action `verify_facts.yml` bricht den Build bei jedem Drift (push auf main + PR). Aktueller Lauf: 12/12 PASS. *[✓ CI — das ist die CI selbst]*
+- **Schlüsselstein:** `verify_project_facts.py` deklariert **15 Fakten** (13 hart geprüft, 2 KNOWN_OPEN) und prüft sie gegen den Code. Die CI-Action `verify_facts.yml` bricht den Build bei jedem Drift (push auf main + PR). Aktueller Lauf: 13/13 PASS. *[✓ CI — das ist die CI selbst]*
 - **Prinzip:** Doku wird aus dem Manifest abgeleitet, nicht von Hand gepflegt. Memory ist ein verlustbehafteter Cache und nie die Quelle — jede Konfig-Behauptung wird mit einem gelesenen Artefakt belegt. Rangfolge: Lauf-Artefakt > Code-Default > Prosa-Zusammenfassung.
 
 ---
@@ -121,6 +121,7 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 | — | **Stimmt-das-Pflicht verworfen** (widerspricht der „nicht erzwingen"-Philosophie). |
 | 18.06.2026 | **Schlüsselstein** eingeführt: `verify_project_facts.py` + CI-Action `verify_facts.yml`. |
 | 20.06.2026 | **S1-Strategie / v3.24:** age_floor-Skipping für schwere/abstrakte Themen verworfen — wichtige Themen (Demokratie, Sklaverei) müssen auch S1 erreichen. Stattdessen den Kern durch EINE durchgehende konkrete Szene erzählen statt per Definition (Zwei-Fälle-Logik: leichte Begriffe = Alltagsszene; schwere = dem Kind bekanntes Gefühl, keine niedliche Analogie). ERG_BANDS-Untergrenzen 50/80/100 → 75/100/150 (Cap-Spielraum, kein erzwungenes Soll; „kürzer statt aufblähen" bleibt dominant). Neue Regeln R48–R52, R46 geschärft. |
+| 22.06.2026 | **v4 als Produktions-Generator-Prompt übernommen** (`wissensfreund_generator_prompt_v4_production.md`; alte v3.23-Datei bleibt unreferenziert als Historie). Gekoppelt: **S1-ERG_BANDS-Untergrenze 75→88** (nur S1-lo; S2/S3 unverändert). Begründung: A/B-Lauf (v3.24 vs v4) + Belegtreue-Verifikation (3 Themen × S3, Grounding mitgesichert) zeigen reichere, **quellentreue** Ausschöpfung; v3.24 schöpfte unter (frühere Dünn-/Trockenheitsprobleme = Unter-Ausschöpfung, nicht fehlender Stoff). |
 
 ---
 
@@ -130,7 +131,13 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 - **Lektorat-Fehlerquote messen** (False-Positive/Negative gegen Ground-Truth) vor dem Skalieren. Ziel: ≥ 50–70 % ohne Korrektur durch.
 - **Strukturiertes, maschinenlesbares `findings[]` im V2-`pruefbericht`** (verdikt/claim_original/korrektur_neu pro Finding) — derzeit nur Markdown-Summary + Zähler (`text`, `n_silent`, `n_korrigiert`, `n_pruefen`). Voraussetzung für die geplante Lektorat-FP/FN-Messung gegen Ground Truth. Eigener Schritt, wirkt auf beide Pfade.
 - **Grounding v3.17/v2.8** committen und im Pipeline-Lauf validieren (in Dateien gebaut, nicht getestet).
-- **v3.24-Validierung (vor Skalierung):** S1-Szenen-Strategie auf Demokratie/Sklaverei prüfen (feuert die durchgehende Szene? Budget 75/100/150 tragfähig, ohne dünne Themen aufzublähen?); R47/R52 mit einem Größenvergleich-Thema (Blauwal/Pyramide) testen; R46 generator-seitig (Gladiator) erneut prüfen.
+- **v3.24-Validierung (vor Skalierung):** S1-Szenen-Strategie auf Demokratie/Sklaverei prüfen (feuert die durchgehende Szene? Budget tragfähig, ohne dünne Themen aufzublähen?); R47/R52 mit einem Größenvergleich-Thema (Blauwal/Pyramide) testen; R46 generator-seitig (Gladiator) erneut prüfen.
+- **~~Generator-Prompt-Konsolidierung / A-B (v3.24 vs v4)~~ → ERLEDIGT (22.06.):** v4 als Produktion übernommen, S1-Untergrenze 75→88 (Kap. 9). Daraus neu offen:
+  - **Kompass-Companion-Erweiterung (nächster Schritt):** die geparkte Anker-Kriterien-Änderung (`feature/kompass-anker`, FF→main ausstehend) — höchstens ein konkreter, kindgerechter, belegbarer Anker je Thema.
+  - **Ritter-BKS-Dünn-Grounding:** „Knappe" und „Rüstung" werden als unplausible BKS verworfen → Ritter bekommt teils nur 2 Companions. Bessere BKS-Auflösung/Alternativ-Kandidaten erwägen, damit zentrale Ritter-Begriffe belegt zur Verfügung stehen.
+  - **Wachposten „lebendig ≠ ausschmücken":** v4 streut gelegentlich kleine **unbelegte** Tupfer ein (z. B. „Zahnräder" statt des belegten Sperrklinken-Mechanismus; „maßgeschneiderte Stahlplatten") — bei Lektorat/Feintuning beobachten, ggf. R45-Backstop im Lektorat schärfen.
+  - **Ungetestet:** S1-Wortziel-Effekt (88) an **erg-schwachen** Themen (die vier A/B-Themen sind erg-stark, der Lever bewegt sie kaum); Lektorat×v4-Zusammenspiel (A/B war Roh-Output ohne Lektorat).
+  - **Kosmetisch:** v4-Wortziel-Tabelle „Appeal" → „Ergiebigkeit" relabeln (Wortbudget hängt an Ergiebigkeit, nicht am Appeal).
 - **Batch-Pfad-Temperatur** bestätigen.
 - **Source-Cache vor Bulk-Run** (spart Re-Fetches, hält Lektorat auf dem Generator-Snapshot).
 - **Gemini-Cache-Hygiene** (per-Topic-Löschung nach 3 Stufen, TTL ~15 min).
@@ -141,5 +148,6 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 - **Box-Platzierung (R51):** Code/Schema-Untersuchung — werden Boxen mechanisch ans Abschnittsende gerendert, oder steuert das Modell die Position? Ggf. Positions-/Ankerfeld pro Box.
 - **Anführungszeichen-Normalisierung:** deterministischer Post-Process (Regex) auf Hausnorm („…"), statt LLM-Lektorat.
 - **Lektorat-Regression verifizieren:** Sklaverei S3 „Harriet Greens Mutter" widerspricht der zitierten Quelle (Harriet Green IST die Mutter) — gegen Volltext prüfen; konkrete Evidenz für die Fehlerquoten-Messung.
-- **generation_method-Versionsstring nachziehen:** Artikel-Meta trug v3.23b trotz Prompt-Inhalt v3.24 → Konstante an den tatsächlichen Prompt koppeln.
+- **~~generation_method-Versionsstring nachziehen~~ → ERLEDIGT (22.06.):** Beide Pfade leiten den Versionsstring jetzt aus `SYSTEM_PROMPT_PATH.stem` ab (Sync ohnehin; Batch-Hardcode `v3.23b` in `run_batch.py:1051` ersetzt) → stempeln `…/v4`.
+- **verify-Check gegen hartcodierte Versionsstempel erwägen** (damit diese Drift nicht wiederkehrt): ein `verify_project_facts.py`-Check, der sicherstellt, dass `generation_method` aus dem Prompt-Pfad abgeleitet und nicht erneut hartcodiert wird.
 - **Optional-Polish:** ZWK-Beispiel und Edit-2-Beispiel („das Land war einmal geteilt") als konkrete Szene schärfen (demonstrieren noch die alte „eindampfen"-Idee).

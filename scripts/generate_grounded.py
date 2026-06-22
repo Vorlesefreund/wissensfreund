@@ -82,7 +82,7 @@ OUT_DIR            = ROOT / "articles" / "test_grounded"
 CATALOG_PATH       = ROOT / "catalog_full.json"
 
 _RUN_ID: str = ""   # wird in main() gesetzt (--run-id)
-SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v3.23_production.md"
+SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v4_production.md"
 
 APPEAL_TARGET     = {"high": 15, "medium": 10, "low": 6}
 MAX_VISION_CHECKS = 40
@@ -93,7 +93,7 @@ MAX_IMG_COMPANION = 6
 COMPANION_CAP = {"low": 4, "medium": 5, "high": 6}
 
 # Ergiebigkeits-Bänder je Stufe: (Wlo, Whi). Wortziel = Kurve über Ergiebigkeits-Score.
-ERG_BANDS: dict[int, tuple[int, int]] = {1: (75, 250), 2: (100, 400), 3: (150, 650)}
+ERG_BANDS: dict[int, tuple[int, int]] = {1: (88, 250), 2: (100, 400), 3: (150, 650)}
 RETRY_FLOOR_FRAC   = 0.70   # Retry-Untergrenze als Bruchteil des Ziels (nur klares Untertreiben nachfordern)
 ERG_FALLBACK_SCORE = 6      # medium, wenn Thema (noch) nicht gerated — sichtbar geloggt
 APPEAL_TIER_HIGH   = 7.0    # Erg-Mittel ≥ → high   (steuert Companion-/Bildmenge)

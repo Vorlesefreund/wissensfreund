@@ -1048,7 +1048,8 @@ def stage2_generierung(
         article["meta"]["title"]                = thema
         article["meta"]["generated_at"]         = datetime.now(timezone.utc).isoformat()
         article["meta"]["grounding_companions"] = data.get("valid_companions", [])
-        article["meta"]["generation_method"]    = f"{GEN_MODEL}/batch/v3.23b"
+        _prompt_version = SYSTEM_PROMPT_PATH.stem.split("_v")[-1].split("_")[0]
+        article["meta"]["generation_method"]    = f"{GEN_MODEL}/batch/v{_prompt_version}"
 
         # Wortzahl-Guard
         word_count = count_article_words(article)
