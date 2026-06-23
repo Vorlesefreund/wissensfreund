@@ -470,8 +470,15 @@ def stage1_sourcing(
             topic_img_keys[thema].append(key)
 
             # Synchroner Einzelaufruf statt Batch (kein 24h-Queue-Risiko)
+            # Companion-Bilder bekommen präzisen Kontext: aus welchem Begleitartikel
+            source = img.get("_source", "")
+            primary_wp = data.get("resolved_title", thema)
+            if source and source != primary_wp:
+                thema_vision = f"{thema} (Bild aus Begleitartikel: {source})"
+            else:
+                thema_vision = thema
             result, usage = analyze_with_vision(
-                client, img_bytes, "image/jpeg", thema, model=VISION_MODEL
+                client, img_bytes, "image/jpeg", thema_vision, model=VISION_MODEL
             )
             if result is None:
                 log.warning("  Vision '%s': kein Ergebnis", key[:40])

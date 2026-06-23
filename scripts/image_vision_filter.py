@@ -118,7 +118,10 @@ SCHRITT 2 — ALTERSFREIGABE (unter Berücksichtigung des grenzfall-Ergebnisses)
                 Nacktheit, Kriegsfotos, grafische Gewalt, beängstigende Inhalte
 
 Im Zweifel IMMER die höhere Stufe wählen.
-Abstrakte Diagramme ohne erkennbares Motiv, reine Texttafeln, leere Karten → ab_stufe=0.
+Rein dekorative oder inhaltlich leere Grafiken ohne erkennbaren thematischen Bezug → ab_stufe=0.
+Thematisch relevante Diagramme, Karten, Querschnitte oder Skizzen (z.B. Vulkanquerschnitt,
+Enigma-Schema, Stadtplan Pompeji) erhalten ab_stufe=2 oder 3 — sie sind lehrreich und für
+ältere Kinder wertvoll.
 
 SCHRITT 3 — WEITERE FELDER:
 
