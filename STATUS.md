@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-23T19:10:27Z -->
+<!-- updated: 2026-06-23T20:02:22Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **OFFEN — Verifikationslauf steht aus (Gemini-503).** Lauf verify_20260623b am 2026-06-23 ~21:10 abgebrochen.
@@ -14,7 +14,23 @@
 
 ## Abgeschlossen (2026-06-23)
 
+**Stage-1-Resilienz: Pro-Topic-Checkpoint + 503-Sichtbarkeit** (Commit 331773f, feature/stage1-resilience →
+main FF). Fix 1: 0-Companion-Topics werden mit `companions_failed=True` markiert (statt still als done) →
+`failed_topics` + `log.error` am Stage-1-Ende; Stage 2 überspringt solche Topics. Fix 2 (Ansatz B/Variante b):
+Stage 1 zu Pro-Topic-Außenschleife umgebaut, schreibt nach jedem Topic atomar `stage1_partial.json`
+(tmp+os.replace); Opus-Recheck als cross-topic Nachlauf (Phase B, resume-fest via deterministischem
+`_img_key`); Resume übernimmt nur sauber verarbeitete Topics (`companions_failed != True`), gescheiterte
+werden neu durchlaufen; Phase C schreibt finalen Checkpoint + löscht Partial. Neue Helfer `_partial_path/
+_save_partial/_load_partial/_img_key/_opus_recheck`; tote `_img_candidates`/`defaultdict` entfernt.
+py_compile + Helfer-Inline-Test grün. **Verifikationslauf steht weiterhin aus** — wartet auf stabilen
+Gemini-Zustand; die Resilienz-Fixes machen einen erneuten Lauf nun abbruch-/degradations-robust.
+
 **Kompass-Auswahl Batch→Sync** (Commit f6135be, feature/kompass-sync → main FF). In run_batch.py Step 2 den
+Kompass-Batch-Block (client.batches.create + poll_gemini_batch + _get_inlined_responses) durch synchrone
+Schleife mit `select_companions_raw` (aus generate_grounded.py) ersetzt — bringt Retry (6×, exp. Backoff),
+Structured Output (response_schema) und Usage-Tracking mit. Tote Imports COMPANION_PROMPT_TMPL/
+COMPANION_SYSTEM_PROMPT entfernt; Dry-Run-Print + Stage-1-Docstring auf Sync-Terminologie. Anlass:
+verify_20260623b hing >2h im Kompass-BATCH (JOB_STATE_RUNNING) — derselbe Gemini-Batch-Queue-Stau wie zuvor In run_batch.py Step 2 den
 Kompass-Batch-Block (client.batches.create + poll_gemini_batch + _get_inlined_responses) durch synchrone
 Schleife mit `select_companions_raw` (aus generate_grounded.py) ersetzt — bringt Retry (6×, exp. Backoff),
 Structured Output (response_schema) und Usage-Tracking mit. Tote Imports COMPANION_PROMPT_TMPL/
