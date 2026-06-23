@@ -1,10 +1,19 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-23T14:03:37Z -->
+<!-- updated: 2026-06-23T18:19:31Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-23)
+
+**Kompass-Auswahl Batch→Sync** (Commit f6135be, feature/kompass-sync → main FF). In run_batch.py Step 2 den
+Kompass-Batch-Block (client.batches.create + poll_gemini_batch + _get_inlined_responses) durch synchrone
+Schleife mit `select_companions_raw` (aus generate_grounded.py) ersetzt — bringt Retry (6×, exp. Backoff),
+Structured Output (response_schema) und Usage-Tracking mit. Tote Imports COMPANION_PROMPT_TMPL/
+COMPANION_SYSTEM_PROMPT entfernt; Dry-Run-Print + Stage-1-Docstring auf Sync-Terminologie. Anlass:
+verify_20260623b hing >2h im Kompass-BATCH (JOB_STATE_RUNNING) — derselbe Gemini-Batch-Queue-Stau wie zuvor
+bei Vision, NICHT modell-/schritt-spezifisch sondern batch-spezifisch. Jetzt sind Kompass + Vision sync;
+nur noch Stage-2-Generierung + Opus-Recheck + Lektorat laufen über Batch. py_compile OK. Lauf wird neu gestartet.
 
 **Vision: Companion-Bildkontext + Diagramme freigeben** (Commit 177ca72, feature/vision-context → main FF).
 run_batch.py: vor `analyze_with_vision` wird `thema_vision` gebildet — Companion-Bilder (img["_source"] ≠
