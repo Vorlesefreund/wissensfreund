@@ -32,7 +32,6 @@ import os
 import re
 import sys
 import time
-from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -166,6 +165,32 @@ def _load_cp(out_dir: Path, stage: int) -> dict | None:
     return None
 
 
+def _partial_path(out_dir: Path) -> Path:
+    return out_dir / "stage1_partial.json"
+
+
+def _save_partial(out_dir: Path, topics: dict) -> None:
+    """Atomar (temp + os.replace) den bisherigen Stage-1-Stand wegschreiben."""
+    p   = _partial_path(out_dir)
+    tmp = p.with_suffix(".json.tmp")
+    tmp.write_text(
+        json.dumps({"topics": topics}, ensure_ascii=False, indent=2, default=str),
+        encoding="utf-8",
+    )
+    os.replace(tmp, p)
+
+
+def _load_partial(out_dir: Path) -> dict:
+    """Bereits verarbeitete Topics aus stage1_partial.json laden (oder {})."""
+    p = _partial_path(out_dir)
+    if not p.exists():
+        return {}
+    try:
+        return json.loads(p.read_text(encoding="utf-8")).get("topics", {})
+    except (json.JSONDecodeError, OSError):
+        return {}
+
+
 # ── Poll-Helfer ───────────────────────────────────────────────────────────────
 
 def _state_str(batch_job) -> str:
@@ -257,6 +282,99 @@ def _get_inlined_responses(batch_job) -> list:
 
 # ── Stage 1: SOURCING ─────────────────────────────────────────────────────────
 
+def _img_key(thema: str, filename: str) -> str:
+    """Deterministischer Bild-Key (= Opus-custom_id-Basis), nur [a-zA-Z0-9_-], max 64 Zeichen."""
+    safe_t  = re.sub(r"[^a-zA-Z0-9_-]", "_", thema)[:20]
+    safe_fn = re.sub(r"[^a-zA-Z0-9_-]", "_", filename)[:41]
+    return f"{safe_t}__{safe_fn}"
+
+
+def _opus_recheck(anthropic_key: str, kandidaten: list[dict], topics_data: dict) -> None:
+    """Cross-Topic Opus-Recheck-Batch über alle Kandidaten; aktualisiert images[] in
+    topics_data in place. Resume-fest: keys werden deterministisch neu berechnet,
+    Bild-Bytes aus .cache/downloads (graceful bei Cache-Miss)."""
+    try:
+        import anthropic as _anthropic
+        anth = _anthropic.Anthropic(api_key=anthropic_key)
+
+        opus_reqs = []
+        cid_target: dict[str, tuple[str, str]] = {}  # custom_id → (thema, filename)
+        for cand in kandidaten:
+            img   = cand["img"]
+            thema = cand["thema"]
+            fn    = img.get("filename", "")
+            img_bytes = load_cached_image_bytes(img.get("thumb_url", ""))
+            if img_bytes is None:
+                log.warning("  Opus: Cache fehlt für %s — Gemini-Urteil behalten", fn[:40])
+                continue
+            custom_id = _normalize_custom_id(_img_key(thema, fn))
+            cid_target[custom_id] = (thema, fn)
+            opus_reqs.append({
+                "custom_id": custom_id,
+                "params": {
+                    "model":      "claude-opus-4-8",
+                    "max_tokens": 256,
+                    "system":     OPUS_RECHECK_SYSTEM,
+                    "messages": [{
+                        "role": "user",
+                        "content": [
+                            {
+                                "type": "image",
+                                "source": {
+                                    "type":       "base64",
+                                    "media_type": "image/jpeg",
+                                    "data": base64.standard_b64encode(img_bytes).decode(),
+                                },
+                            },
+                            {"type": "text", "text": OPUS_RECHECK_PROMPT.format(thema=thema)},
+                        ],
+                    }],
+                },
+            })
+
+        if not opus_reqs:
+            return
+        opus_batch = anth.messages.batches.create(requests=opus_reqs)
+        log.info("Opus-Recheck-Batch eingereicht: %s (%d Requests)", opus_batch.id, len(opus_reqs))
+        poll_anthropic_batch(anth, opus_batch.id)
+
+        for result in anth.messages.batches.results(opus_batch.id):
+            if result.result.type != "succeeded":
+                continue
+            raw = result.result.message.content[0].text.strip()
+            raw = re.sub(r"^```[a-zA-Z]*\n?", "", raw)
+            raw = re.sub(r"\n?```$", "", raw)
+            try:
+                opus_res = json.loads(raw)
+            except Exception:
+                continue
+
+            thema, target_fn = cid_target.get(result.custom_id, ("", ""))
+            new_ab   = int(opus_res.get("ab_stufe", 0))
+            new_desc = opus_res.get("beschreibung", "")
+            u        = result.result.message.usage
+            cost_tracker.track(
+                run_id=_RUN_ID, thema=thema, stufe="S0",
+                schritt="vision_recheck", modell="claude-opus-4-8",
+                input_tok=u.input_tokens, output_tok=u.output_tokens,
+            )
+
+            if thema and thema in topics_data:
+                imgs = topics_data[thema]["images"]
+                for i, img in enumerate(imgs):
+                    if img.get("filename") == target_fn:
+                        if new_ab == 0:
+                            imgs.pop(i)
+                            log.info("  Opus SPERRT: %s", target_fn[:40])
+                        else:
+                            if new_ab != img["ab_stufe"]:
+                                log.info("  Opus: %s %d→%d", target_fn[:35], img["ab_stufe"], new_ab)
+                            imgs[i] = {**img, "ab_stufe": new_ab, "beschreibung": new_desc}
+                        break
+    except Exception as e:
+        log.error("Opus-Recheck-Batch Fehler: %s — Gemini-Urteile behalten", e)
+
+
 def stage1_sourcing(
     themen: list[str],
     out_dir: Path,
@@ -343,33 +461,46 @@ def stage1_sourcing(
         print(f"Opus-Recheck: {n_sens} sensible Themen → top-{OPUS_CAP} Bilder (relevanz-sortiert); sonst → grenzfall=true (max {OPUS_CAP})")
         return {}
 
-    # ── Step 2: Kompass-Auswahl (sync, kein Batch-Queue-Risiko) ───────────────
-    log.info("\n=== Stage 1 / Step 2: Kompass-Auswahl (sync, %d Themen) ===", len(wp_data))
-    raw_companions_by_thema: dict[str, list[str]] = {t: [] for t in wp_data}
+    # ── Resume: bereits sauber verarbeitete Topics aus Partial übernehmen ─────
+    partial_topics = _load_partial(out_dir)
+    done_topics = {
+        t: e for t, e in partial_topics.items()
+        if t in wp_data and not e.get("companions_failed", False)
+    }
+    if done_topics:
+        log.info("Resume: %d Topics aus stage1_partial.json übernommen — %s",
+                 len(done_topics), list(done_topics.keys()))
+
+    # ── Phase A: Pro-Topic-Loop (Kompass → Companion → Bild+Vision → Pool) ────
+    log.info("\n=== Stage 1 / Phase A: Pro-Topic-Verarbeitung (%d Themen) ===", len(wp_data))
+    topics_data: dict[str, dict] = dict(done_topics)
+    failed_topics: list[str] = []
+
     for thema, data in wp_data.items():
-        companions, usage = select_companions_raw(
+        if thema in done_topics:
+            log.info("  '%s': Resume — übersprungen (bereits verarbeitet)", thema)
+            continue
+
+        # — Kompass (sync) — companions_failed-Marker bei 0 Companions (Fix 1) —
+        companions_raw, usage = select_companions_raw(
             client, thema, data["primary_text"], model=GEN_MODEL
         )
-        raw_companions_by_thema[thema] = companions
         if usage:
-            cost_tracker.track(
-                run_id=_RUN_ID, thema=thema, stufe="S0",
-                schritt="kompass", modell=GEN_MODEL, **usage
-            )
-        log.info("  Kompass '%s': %d Vorschläge", thema, len(companions))
+            cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe="S0",
+                               schritt="kompass", modell=GEN_MODEL, **usage)
+        companions_failed = not companions_raw
+        if companions_failed:
+            failed_topics.append(thema)
+            log.warning("  Kompass '%s': 0 Companions — Topic in failed_topics", thema)
+        else:
+            log.info("  Kompass '%s': %d Vorschläge", thema, len(companions_raw))
 
-    # ── Step 3: Companion Validate + Fetch (sync) ─────────────────────────────
-    log.info("\n=== Stage 1 / Step 3: Companion Validate + Fetch ===")
-    for thema, data in wp_data.items():
+        # — Companion-Validate + Fetch —
         companion_cap = COMPANION_CAP.get(data["appeal"], 5)
         valid_companions, _, _ = validate_and_resolve_companions(
-            session,
-            raw_companions_by_thema.get(thema, []),
-            data["resolved_title"],
-            cap=companion_cap,
+            session, companions_raw, data["resolved_title"], cap=companion_cap,
         )
         log.info("  '%s': %d Companions validiert", thema, len(valid_companions))
-
         companion_texts: dict[str, str] = {}
         for comp in valid_companions:
             time.sleep(0.5)
@@ -380,50 +511,32 @@ def stage1_sourcing(
             except Exception as e:
                 log.warning("    Companion '%s' Fehler: %s", comp, e)
 
-        data["valid_companions"] = valid_companions
-        data["companion_texts"]  = companion_texts
-
-    # ── Step 4: Image Candidates + Download (sync, kein 10s-Sleep) ────────────
-    log.info("\n=== Stage 1 / Step 4: Image Download + Vision-Check (sync) ===")
-    img_meta_by_key:   dict[str, dict] = {}
-    topic_img_keys:    dict[str, list[str]] = defaultdict(list)
-    all_vision_results: dict[str, dict] = {}  # key → {ab_stufe, confidence, ...}
-
-    for thema, data in wp_data.items():
+        # — Bild-Kandidaten + Download + Vision-Sync —
         primary_wp = data["resolved_title"]
-        companions = [c for c in data["valid_companions"] if c in data["companion_texts"]]
-
-        # Kandidaten sammeln
+        comp_with_text = [c for c in valid_companions if c in companion_texts]
         all_candidates: list[dict] = []
-        primary_imgs = fetch_image_candidates(
-            session, primary_wp, max_candidates=MAX_IMG_PRIMARY
-        )
+        primary_imgs = fetch_image_candidates(session, primary_wp, max_candidates=MAX_IMG_PRIMARY)
         for img in primary_imgs:
             img["_source"] = primary_wp
         all_candidates.extend(primary_imgs)
-
-        for comp in companions:
+        for comp in comp_with_text:
             time.sleep(0.3)
-            comp_imgs = fetch_image_candidates(
-                session, comp, max_candidates=MAX_IMG_COMPANION
-            )
+            comp_imgs = fetch_image_candidates(session, comp, max_candidates=MAX_IMG_COMPANION)
             for img in comp_imgs:
                 img["_source"] = comp
             all_candidates.extend(comp_imgs)
 
-        # Deduplizieren
         seen_fn: set[str] = set()
         unique: list[dict] = []
         for img in all_candidates:
             if img["filename"] not in seen_fn:
                 seen_fn.add(img["filename"])
                 unique.append(img)
-
         to_check = unique[:MAX_VISION_CHECKS]
-        log.info("  '%s': %d Kandidaten, Vision-Check max %d",
-                 thema, len(unique), len(to_check))
+        log.info("  '%s': %d Kandidaten, Vision-Check max %d", thema, len(unique), len(to_check))
 
-        # Herunterladen + synchroner Vision-Check (3s pre-download, Wikimedia-konform)
+        topic_meta:   dict[str, dict] = {}  # key → img-meta
+        topic_vision: dict[str, dict] = {}  # key → vision-result
         for i, img in enumerate(to_check):
             if i > 0:
                 time.sleep(3.0)
@@ -431,55 +544,34 @@ def stage1_sourcing(
             if img_bytes is None:
                 log.debug("    Download fehlgeschlagen: %s", img["filename"][:40])
                 continue
-
-            # Schlüssel: nur [a-zA-Z0-9_-], max 64 Zeichen (für Opus-custom_id-Lookup)
-            safe_t  = re.sub(r"[^a-zA-Z0-9_-]", "_", thema)[:20]
-            safe_fn = re.sub(r"[^a-zA-Z0-9_-]", "_", img["filename"])[:41]
-            key     = f"{safe_t}__{safe_fn}"
-            img_meta_by_key[key] = {**img, "thema": thema}
-            topic_img_keys[thema].append(key)
-
-            # Synchroner Einzelaufruf statt Batch (kein 24h-Queue-Risiko)
+            key = _img_key(thema, img["filename"])
+            topic_meta[key] = {**img, "thema": thema}
             # Companion-Bilder bekommen präzisen Kontext: aus welchem Begleitartikel
             source = img.get("_source", "")
-            primary_wp = data.get("resolved_title", thema)
             if source and source != primary_wp:
                 thema_vision = f"{thema} (Bild aus Begleitartikel: {source})"
             else:
                 thema_vision = thema
-            result, usage = analyze_with_vision(
+            result, vusage = analyze_with_vision(
                 client, img_bytes, "image/jpeg", thema_vision, model=VISION_MODEL
             )
             if result is None:
                 log.warning("  Vision '%s': kein Ergebnis", key[:40])
                 continue
-            all_vision_results[key] = result
-            if usage:
+            topic_vision[key] = result
+            if vusage:
                 cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe="S0",
                                    schritt="vision", modell=VISION_MODEL,
-                                   input_tok=usage["input_tok"], output_tok=usage["output_tok"])
+                                   input_tok=vusage["input_tok"], output_tok=vusage["output_tok"])
 
-        data["_img_candidates"] = unique
-
-    log.info("Vision-Check (sync): %d Bilder analysiert", len(all_vision_results))
-
-    # ── Step 6: Conservative Upgrade + Bildpool aufbauen ──────────────────────
-    log.info("\n=== Stage 1 / Step 6: Vision-Ergebnisse verarbeiten ===")
-    opus_kandidaten: list[dict] = []
-
-    for thema, data in wp_data.items():
+        # — Conservative Upgrade + Pool (roh, ohne Opus) —
         accepted: list[dict] = []
         n_rejected = 0
-        # Lookup: filename → Batch-Key (für Opus custom_id)
-        filename_to_key: dict[str, str] = {}
-
-        for key in topic_img_keys.get(thema, []):
-            img_meta = img_meta_by_key.get(key, {})
-            result   = all_vision_results.get(key)
+        for key, img_meta in topic_meta.items():
+            result = topic_vision.get(key)
             if result is None:
                 n_rejected += 1
                 continue
-
             ab_stufe        = result.get("ab_stufe", 0)
             grenzfall       = result.get("grenzfall", False)
             grenzfall_grund = result.get("grenzfall_grund", "")
@@ -487,18 +579,14 @@ def stage1_sourcing(
             beschreibung    = result.get("beschreibung", "")
             relevanz        = result.get("relevanz", 0)
             hero            = result.get("hero_candidate", False)
-
-            # Conservative Upgrade: grenzfall=true verhindert ab_stufe=1
             if grenzfall and ab_stufe == 1:
                 ab_stufe = 2
                 log.info("    grenzfall=true: '%s' → ab_stufe 1→2 (%s)",
                          img_meta.get("filename", "")[:40], grenzfall_grund[:60])
-
             if ab_stufe == 0 or relevanz < 4:
                 n_rejected += 1
                 continue
-
-            entry = {
+            accepted.append({
                 **img_meta,
                 "ab_stufe":        ab_stufe,
                 "grenzfall":       grenzfall,
@@ -507,145 +595,50 @@ def stage1_sourcing(
                 "relevanz":        relevanz,
                 "hero_candidate":  hero,
                 "beschreibung":    beschreibung,
-            }
-            accepted.append(entry)
-            filename_to_key[img_meta.get("filename", "")] = key
-
+            })
         accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))
+        # Sensible Themen: Pool auf top-OPUS_CAP begrenzen (Stage 2 zieht nur daraus)
+        images = accepted[:OPUS_CAP] if data["sensibel"] else accepted
+        s1 = sum(1 for i in images if i.get("ab_stufe", 0) == 1)
+        s2 = sum(1 for i in images if i.get("ab_stufe", 0) == 2)
+        s3 = sum(1 for i in images if i.get("ab_stufe", 0) == 3)
+        log.info("  '%s': %d akzeptiert, %d verworfen → Pool %d (S1=%d S2=%d S3=%d)",
+                 thema, len(accepted), n_rejected, len(images), s1, s2, s3)
 
-        if data["sensibel"]:
-            # Sensible Themen: nur top-OPUS_CAP Bilder prüfen lassen;
-            # Stage 2 zieht ausschließlich aus diesem geprüften Pool.
-            opus_pool = accepted[:OPUS_CAP]
-            data["images"] = opus_pool
-            if anthropic_key:
-                for e in opus_pool:
-                    opus_kandidaten.append({
-                        "thema": thema,
-                        "key":   filename_to_key.get(e.get("filename", ""), ""),
-                        "img":   e,
-                    })
-        else:
-            data["images"] = accepted
-            # Nicht-sensibel: nur grenzfall=true-Bilder → Opus, auch gecappt
-            if anthropic_key:
-                gz_pool = [e for e in accepted if e.get("grenzfall", False)][:OPUS_CAP]
-                for e in gz_pool:
-                    opus_kandidaten.append({
-                        "thema": thema,
-                        "key":   filename_to_key.get(e.get("filename", ""), ""),
-                        "img":   e,
-                    })
-
-        n_sensibel_opus = len([c for c in opus_kandidaten if c["thema"] == thema])
-        log.info("  '%s': %d akzeptiert, %d verworfen → Opus: %d",
-                 thema, len(accepted), n_rejected, n_sensibel_opus)
-
-    # ── Step 7: Opus-Recheck (Anthropic Batch) ────────────────────────────────
-    if opus_kandidaten and anthropic_key:
-        log.info("\n=== Stage 1 / Step 7: Opus-Recheck (%d Bilder) ===",
-                 len(opus_kandidaten))
-        try:
-            import anthropic as _anthropic
-            anth = _anthropic.Anthropic(api_key=anthropic_key)
-
-            opus_reqs = []
-            key_to_thema: dict[str, str] = {}
-            for cand in opus_kandidaten:
-                img_bytes = load_cached_image_bytes(cand["img"]["thumb_url"])
-                if img_bytes is None:
-                    log.warning("  Opus: Cache fehlt für %s — Gemini-Urteil behalten",
-                                cand["img"].get("filename", "")[:40])
-                    continue
-                prompt = OPUS_RECHECK_PROMPT.format(thema=cand["thema"])
-                custom_id = _normalize_custom_id(cand["key"])
-                key_to_thema[custom_id] = cand["thema"]
-                opus_reqs.append({
-                    "custom_id": custom_id,
-                    "params": {
-                        "model":      "claude-opus-4-8",
-                        "max_tokens": 256,
-                        "system":     OPUS_RECHECK_SYSTEM,
-                        "messages": [{
-                            "role": "user",
-                            "content": [
-                                {
-                                    "type": "image",
-                                    "source": {
-                                        "type":       "base64",
-                                        "media_type": "image/jpeg",
-                                        "data": base64.standard_b64encode(img_bytes).decode(),
-                                    },
-                                },
-                                {"type": "text", "text": prompt},
-                            ],
-                        }],
-                    },
-                })
-
-            if opus_reqs:
-                opus_batch = anth.messages.batches.create(requests=opus_reqs)
-                log.info("Opus-Recheck-Batch eingereicht: %s (%d Requests)",
-                         opus_batch.id, len(opus_reqs))
-                poll_anthropic_batch(anth, opus_batch.id)
-
-                for result in anth.messages.batches.results(opus_batch.id):
-                    if result.result.type != "succeeded":
-                        continue
-                    raw = result.result.message.content[0].text.strip()
-                    raw = re.sub(r"^```[a-zA-Z]*\n?", "", raw)
-                    raw = re.sub(r"\n?```$", "", raw)
-                    try:
-                        opus_res = json.loads(raw)
-                    except Exception:
-                        continue
-
-                    cid      = result.custom_id
-                    thema    = key_to_thema.get(cid, "")
-                    new_ab   = int(opus_res.get("ab_stufe", 0))
-                    new_desc = opus_res.get("beschreibung", "")
-                    u        = result.result.message.usage
-                    cost_tracker.track(
-                        run_id=_RUN_ID, thema=thema, stufe="S0",
-                        schritt="vision_recheck", modell="claude-opus-4-8",
-                        input_tok=u.input_tokens, output_tok=u.output_tokens,
-                    )
-
-                    # Bild in pool aktualisieren
-                    if thema and thema in wp_data:
-                        imgs = wp_data[thema]["images"]
-                        target_fn = img_meta_by_key.get(cid, {}).get("filename", "")
-                        for i, img in enumerate(imgs):
-                            if img.get("filename") == target_fn:
-                                if new_ab == 0:
-                                    imgs.pop(i)
-                                    log.info("  Opus SPERRT: %s", target_fn[:40])
-                                else:
-                                    if new_ab != img["ab_stufe"]:
-                                        log.info("  Opus: %s %d→%d",
-                                                 target_fn[:35], img["ab_stufe"], new_ab)
-                                    imgs[i] = {**img, "ab_stufe": new_ab,
-                                               "beschreibung": new_desc}
-                                break
-
-        except Exception as e:
-            log.error("Opus-Recheck-Batch Fehler: %s — Gemini-Urteile behalten", e)
-
-    # ── Ergebnis zusammenbauen + Checkpoint ───────────────────────────────────
-    topics_data: dict[str, dict] = {}
-    for thema, data in wp_data.items():
-        imgs = data.get("images", [])
+        # — Topic-Eintrag assemblieren + Partial atomar persistieren —
         topics_data[thema] = {
-            "primary_text":    data["primary_text"],
-            "resolved_title":  data["resolved_title"],
-            "lemma_flags":     data["lemma_flags"],
-            "framing_note":    data["framing_note"],
-            "appeal":          data["appeal"],
-            "sensibel":        data["sensibel"],
-            "valid_companions": data["valid_companions"],
-            "companion_texts":  data["companion_texts"],
-            "images":          imgs,
+            "primary_text":      data["primary_text"],
+            "resolved_title":    data["resolved_title"],
+            "lemma_flags":       data["lemma_flags"],
+            "framing_note":      data["framing_note"],
+            "appeal":            data["appeal"],
+            "sensibel":          data["sensibel"],
+            "valid_companions":  valid_companions,
+            "companion_texts":   companion_texts,
+            "companions_failed": companions_failed,
+            "images":            images,
         }
+        _save_partial(out_dir, topics_data)
+
+    # ── Phase B: Opus-Recheck-Nachlauf (cross-topic, über alle Partial-Topics) ─
+    if anthropic_key:
+        opus_kandidaten: list[dict] = []
+        for thema, entry in topics_data.items():
+            imgs = entry.get("images", [])
+            if entry.get("sensibel"):
+                pool = imgs  # bereits auf OPUS_CAP begrenzt (Phase A)
+            else:
+                # Nicht-sensibel: nur grenzfall=true-Bilder → Opus, gecappt
+                pool = [e for e in imgs if e.get("grenzfall", False)][:OPUS_CAP]
+            for e in pool:
+                opus_kandidaten.append({"thema": thema, "img": e})
+        if opus_kandidaten:
+            log.info("\n=== Stage 1 / Phase B: Opus-Recheck (%d Bilder) ===", len(opus_kandidaten))
+            _opus_recheck(anthropic_key, opus_kandidaten, topics_data)
+
+    # ── Pool-Übersicht je Thema (nach Opus) ───────────────────────────────────
+    for thema, entry in topics_data.items():
+        imgs = entry.get("images", [])
         s1 = sum(1 for i in imgs if i.get("ab_stufe", 0) == 1)
         s2 = sum(1 for i in imgs if i.get("ab_stufe", 0) == 2)
         s3 = sum(1 for i in imgs if i.get("ab_stufe", 0) == 3)
@@ -668,7 +661,15 @@ def stage1_sourcing(
         log.info("  (600+800: nur Messung — noch nicht gecacht)")
     clear_download_sizes()
 
+    # ── Phase C: Finalisierung (Checkpoint schreiben, Partial aufräumen) ──────
+    if failed_topics:
+        log.error("Stage 1 abgeschlossen — %d Topics ohne Companions: %s — Neustart empfohlen",
+                  len(failed_topics), failed_topics)
     _save_cp(out_dir, 1, {"status": "done", "topics": topics_data})
+    try:
+        _partial_path(out_dir).unlink(missing_ok=True)
+    except OSError:
+        pass
     return topics_data
 
 
@@ -866,6 +867,9 @@ def stage2_generierung(
             log.warning("  '%s' fehlt in topics_data — kein Cache", thema)
             caches[thema] = None
             continue
+        if data.get("companions_failed"):
+            caches[thema] = None
+            continue
         slug = thema.lower().replace(" ", "_").replace("/", "_")
         dummy_job = _stage2_job(thema, data, slug, stufe=1)
         stable, _ = _split_grounded_user_message(
@@ -897,6 +901,9 @@ def stage2_generierung(
     for thema in themen:
         data = topics_data.get(thema)
         if not data:
+            continue
+        if data.get("companions_failed"):
+            log.warning("  '%s': companions_failed — Stage 2 übersprungen", thema)
             continue
         slug       = thema.lower().replace(" ", "_").replace("/", "_")
         images_all = data.get("images", [])
