@@ -165,6 +165,17 @@ def _load_cp(out_dir: Path, stage: int) -> dict | None:
     return None
 
 
+def _load_cp_raw(out_dir: Path, stage: int) -> dict | None:
+    """Checkpoint-Daten bei status=='done' liefern — OHNE Skip-Log.
+    Skip-Entscheidung + Logging trifft die Aufrufstelle (z.B. Stage-1-Resume,
+    der companions_failed-Topics neu durchlaufen statt überspringen muss)."""
+    p = _cp_path(out_dir, stage)
+    if not p.exists():
+        return None
+    data = json.loads(p.read_text(encoding="utf-8"))
+    return data if data.get("status") == "done" else None
+
+
 def _partial_path(out_dir: Path) -> Path:
     return out_dir / "stage1_partial.json"
 
@@ -392,9 +403,22 @@ def stage1_sourcing(
     Rückgabe: {thema: {primary_text, resolved_title, appeal, sensibel,
                         valid_companions, companion_texts, images}}
     """
-    cp = _load_cp(out_dir, 1)
+    # Checkpoint-Resume: alle Topics sauber → ganze Stage überspringen (Schnellpfad,
+    # kein Regress). Mind. ein companions_failed-Topic → Checkpoint wird Resume-Quelle,
+    # Fall-through in Phase A; der done_topics-Filter überspringt nur die sauberen.
+    cp = _load_cp_raw(out_dir, 1)
+    cp_resume: dict | None = None
     if cp:
-        return cp["topics"]
+        cp_topics = cp.get("topics", {})
+        n_failed = sum(1 for e in cp_topics.values() if e.get("companions_failed"))
+        if n_failed == 0:
+            log.info("Checkpoint Stage 1 (status=done, alle Topics sauber) — Stage übersprungen")
+            return cp_topics
+        log.warning(
+            "Checkpoint Stage 1 enthält %d companions_failed-Topic(s) — Resume: "
+            "gescheiterte neu durchlaufen, saubere übersprungen", n_failed
+        )
+        cp_resume = cp_topics
 
     # Catalog für sensibel/eignung laden
     catalog_by_thema: dict[str, dict] = {}
@@ -461,15 +485,21 @@ def stage1_sourcing(
         print(f"Opus-Recheck: {n_sens} sensible Themen → top-{OPUS_CAP} Bilder (relevanz-sortiert); sonst → grenzfall=true (max {OPUS_CAP})")
         return {}
 
-    # ── Resume: bereits sauber verarbeitete Topics aus Partial übernehmen ─────
+    # ── Resume: saubere Topics übernehmen — EINE Quelle (Partial > Checkpoint) ─
+    # Existiert ein Partial, war der letzte Lauf mitten in Phase A → aktuellster Stand.
+    # Sonst die companions_failed-Checkpoint-Topics (cp_resume). EIN Filter für beide.
     partial_topics = _load_partial(out_dir)
+    if partial_topics:
+        resume_src, resume_origin = partial_topics, "stage1_partial.json"
+    else:
+        resume_src, resume_origin = (cp_resume or {}), "stage1_checkpoint.json"
     done_topics = {
-        t: e for t, e in partial_topics.items()
+        t: e for t, e in resume_src.items()
         if t in wp_data and not e.get("companions_failed", False)
     }
     if done_topics:
-        log.info("Resume: %d Topics aus stage1_partial.json übernommen — %s",
-                 len(done_topics), list(done_topics.keys()))
+        log.info("Resume aus %s: %d saubere Topics übernommen — %s",
+                 resume_origin, len(done_topics), list(done_topics.keys()))
 
     # ── Phase A: Pro-Topic-Loop (Kompass → Companion → Bild+Vision → Pool) ────
     log.info("\n=== Stage 1 / Phase A: Pro-Topic-Verarbeitung (%d Themen) ===", len(wp_data))
