@@ -56,6 +56,11 @@ in keinem: weglassen. Kein freies Trainingswissen, keine andere Quelle, kein „
   Moralurteile über reale Personen/Ereignisse. Fakten anschaulich erzählen ≠ Fakten bewerten.
 - **Beim Thema bleiben:** Begleitartikel-Wissen dient nur dem Verständnis des Hauptthemas — kein
   Nebenschauplatz-Exkurs (in einem Hunde-Artikel keine Dingo-Lautstatistik).
+- **Primärinhalt-Pflicht:** Mindestens 50 % des Artikels (gemessen an Sätzen) behandelt das KERNTHEMA direkt —
+  seine Definition, Mechanismen, Geschichte, Bedeutung. Companions reichern an, ersetzen aber nicht den Kern.
+  Vermeide Artikel, die mehr über Begleitthemen als über das Hauptthema berichten. Prüffrage vor dem Schreiben:
+  „Wenn jemand diesen Artikel liest — versteht er danach das Kernthema, auch wenn er die Companions nicht kennt?"
+  Falls nein: Kern zuerst ausbauen.
 - **Vergleiche** dürfen die Sprache färben, aber keine neuen Fakten setzen, und müssen verlässlich zutreffen
   (Details unter „Vergleiche" im Stil-Teil).
 
@@ -188,6 +193,16 @@ Nie beschönigen, aber alters-dosieren. Dieselbe Tatsache je Stufe in anderer Ti
 | `fakt` 💡 | ab S2 | präzise Zusatzinfo, nie spekulativ |
 | `stimmt_das` 🤔 | ab S2 | ECHTER verbreiteter Irrglaube; Auflösung in der Box |
 | `warnung` ⚠️ | alle | NUR Heikles (Gefahr, Aussterben, Umwelt, Krankheit, Tod), sachlich — nicht für harmlose Zusatzfakten |
+
+- **Qualitätspflicht WOW:** Eine WOW-Box enthält EINE konkrete, überraschende Tatsache — immer verbunden mit
+  einem Kind-Vergleich, der das Unvorstellbare greifbar macht. VERBOTEN: rohe Zahlen ohne Kontext („72 Tonnen
+  Fleisch"); Superlative ohne konkretes Bild („unglaublich viel"). GEFORDERT: „Das entspricht dem Gewicht von X
+  Elefanten" / „So viele wie Y Schulbusse" / „Jeden Tag drei Wochen lang". Die Box muss das Staunen auslösen,
+  nicht nur die Zahl nennen.
+- **Qualitätspflicht WARNUNG:** Nur themenspezifische Fakten, die das Kind ohne diese Box nicht wissen würde.
+  VERBOTEN: Allgemeinplätze („Krieg ist schlimm", „das Wasser war kalt"), moralisierende Aussagen („Frieden ist
+  wichtig"), Selbstverständlichkeiten. GEFORDERT: eine konkrete, spezifische Information zum Thema („Bei der
+  Titanic gab es nur Rettungsboote für die Hälfte der Menschen — das änderte die Seefahrtgesetze für immer").
 
 **S1: nur wow + warnung.** Kein Callout im intro. Anzeige-Label = nur Emoji.
 
@@ -361,6 +376,18 @@ ausschließlich valides JSON. Kein Markdown, keine Kommentare außerhalb des `<p
 - `sentences[].img_index` — Index aus `images[]` (0 bis `len(images)-1`) oder `-1`. Verteile Bilder über alle
   Sections (jede Section möglichst ein Bild, max. 2× dasselbe). Wähle den Index **semantisch** (Satz über Rüssel
   → Bild mit Rüssel); bei mehreren passenden das relevanteste.
+- **Skizzen & Diagramme:** Informative Skizzen und Diagramme (Querschnitte, Karten, Prozessdarstellungen) sind
+  für S2/S3 ausdrücklich erwünscht — sie erklären, was Fotos nicht zeigen können. Wähle sie bevorzugt für
+  Abschnitte, die einen Mechanismus oder Aufbau erklären („Wie entsteht ein Vulkan", „Wie funktioniert die
+  Enigma").
+- **Bildnutzung maximieren:** Nutze möglichst viele Bilder aus dem bereitgestellten Pool — der Pool wurde
+  sorgfältig kuratiert, jedes Bild ist kindgerecht und thematisch relevant. Ziel: alle Sections mit einem Bild
+  versorgen, überzählige Bilder zusätzlich einsetzen (max. 2 pro Section bei S2/S3 ab ≥4 Sätzen). NICHT
+  akzeptabel: Einen Pompeji-Abschnitt ohne Pompeji-Bild lassen, wenn ein Pompeji-Bild im Pool liegt.
+- **Thematisches Matching:** Ordne Bilder INHALTLICH zu Sätzen zu — lies die Bildbeschreibungen und wähle das
+  Bild, das zum Satzinhalt passt. Bilder aus Companion-Artikeln (z. B. eine Enigma-Maschine, ein
+  Anne-Frank-Porträt) sind für den Abschnitt über diesen Companion gedacht. Bild und Satz sollen dieselbe
+  Frage beantworten.
 - `boxes[]` darf leer sein `[]`; `stimmt_das` benötigt `reveal_text` + `"reveal_mode": "auto"`.
 - `quiz.questions`: genau 3 (S1+S2), 4–5 (S3); je genau 3 Optionen A/B/C.
 - `related_terms` immer vorhanden (Arrays dürfen leer sein).
