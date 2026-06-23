@@ -71,8 +71,7 @@ from generate_articles import (  # noqa: E402
     USER_AGENT,
 )
 from generate_grounded import (  # noqa: E402
-    COMPANION_SYSTEM_PROMPT,
-    COMPANION_PROMPT_TMPL,
+    select_companions_raw,
     COMPANION_CAP,
     SYSTEM_PROMPT_PATH,
     GEMINI_MODEL as GEN_MODEL,
@@ -269,8 +268,8 @@ def stage1_sourcing(
 ) -> dict:
     """
     Stage 1 vollständig:
-    WP-Fetch → Kompass-Batch → Companion-Fetch → Image-Download
-    → Vision-Batch → Conservative Upgrade → Opus-Recheck-Batch
+    WP-Fetch → Kompass (sync) → Companion-Fetch → Image-Download
+    → Vision-Check (sync) → Conservative Upgrade → Opus-Recheck-Batch
 
     Rückgabe: {thema: {primary_text, resolved_title, appeal, sensibel,
                         valid_companions, companion_texts, images}}
@@ -338,55 +337,26 @@ def stage1_sourcing(
     if dry_run:
         print(f"\n=== DRY-RUN Stage 1 ===")
         print(f"WP-Fetch OK: {list(wp_data.keys())}")
-        print(f"Kompass-Batch: {len(wp_data)} InlinedRequests")
+        print(f"Kompass-Auswahl (sync): {len(wp_data)} Aufrufe")
         n_sens = sum(1 for d in wp_data.values() if d["sensibel"])
         print(f"Vision-Check (sync): ~{len(wp_data) * MAX_VISION_CHECKS} Aufrufe (max {MAX_VISION_CHECKS}/Thema)")
         print(f"Opus-Recheck: {n_sens} sensible Themen → top-{OPUS_CAP} Bilder (relevanz-sortiert); sonst → grenzfall=true (max {OPUS_CAP})")
         return {}
 
-    # ── Step 2: Kompass-Batch (Gemini) ────────────────────────────────────────
-    log.info("\n=== Stage 1 / Step 2: Kompass-Batch (%d Requests) ===", len(wp_data))
-    kompass_reqs: list[types.InlinedRequest] = []
-    for thema, data in wp_data.items():
-        lead   = data["primary_text"][:1500]
-        prompt = COMPANION_PROMPT_TMPL.format(thema=thema, lead=lead)
-        kompass_reqs.append(types.InlinedRequest(
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=COMPANION_SYSTEM_PROMPT,
-                temperature=0.3,
-                thinking_config=types.ThinkingConfig(thinking_level=types.ThinkingLevel.MEDIUM),
-                response_mime_type="application/json",
-            ),
-            metadata={"key": thema},
-        ))
-
-    batch_k      = client.batches.create(model=GEN_MODEL, src=kompass_reqs)
-    log.info("Kompass-Batch eingereicht: %s", batch_k.name)
-    batch_k_done = poll_gemini_batch(client, batch_k.name)
-    if _state_str(batch_k_done) not in SUCCESS_STATES:
-        raise RuntimeError(f"Kompass-Batch fehlgeschlagen: {_state_str(batch_k_done)}")
-
+    # ── Step 2: Kompass-Auswahl (sync, kein Batch-Queue-Risiko) ───────────────
+    log.info("\n=== Stage 1 / Step 2: Kompass-Auswahl (sync, %d Themen) ===", len(wp_data))
     raw_companions_by_thema: dict[str, list[str]] = {t: [] for t in wp_data}
-    for resp in _get_inlined_responses(batch_k_done):
-        thema_key = (resp.metadata or {}).get("key", "")
-        if not thema_key or thema_key not in wp_data:
-            continue
-        if resp.error:
-            log.warning("  Kompass '%s': %s", thema_key, resp.error)
-            continue
-        text = _strip_md(_extract_text(resp.response))
-        try:
-            raw = [str(c) for c in json.loads(text).get("companions", [])][:10]
-        except json.JSONDecodeError:
-            log.warning("  Kompass '%s': JSON-Fehler (%r)", thema_key, text[:60])
-            raw = []
-        u = _extract_usage(resp.response)
-        if u:
-            cost_tracker.track(run_id=_RUN_ID, thema=thema_key, stufe="S0",
-                               schritt="kompass", modell=GEN_MODEL, **u)
-        log.info("  Kompass '%s': %d Vorschläge", thema_key, len(raw))
-        raw_companions_by_thema[thema_key] = raw
+    for thema, data in wp_data.items():
+        companions, usage = select_companions_raw(
+            client, thema, data["primary_text"], model=GEN_MODEL
+        )
+        raw_companions_by_thema[thema] = companions
+        if usage:
+            cost_tracker.track(
+                run_id=_RUN_ID, thema=thema, stufe="S0",
+                schritt="kompass", modell=GEN_MODEL, **usage
+            )
+        log.info("  Kompass '%s': %d Vorschläge", thema, len(companions))
 
     # ── Step 3: Companion Validate + Fetch (sync) ─────────────────────────────
     log.info("\n=== Stage 1 / Step 3: Companion Validate + Fetch ===")
