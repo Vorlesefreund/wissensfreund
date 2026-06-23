@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-23T20:02:22Z -->
+<!-- updated: 2026-06-23T21:16:54Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **OFFEN — Verifikationslauf steht aus (Gemini-503).** Lauf verify_20260623b am 2026-06-23 ~21:10 abgebrochen.
@@ -13,6 +13,17 @@
 ---
 
 ## Abgeschlossen (2026-06-23)
+
+**Checkpoint-Resume-Lücke geschlossen** (Commit 8acc43e, feature/stage1-resume-fix → main FF). Diagnose
+bestätigte: Nach einem Exit-0-Lauf mit Degradation übersprang der Stage-Level-Checkpoint (status=done) die
+GANZE Stage 1 (`if cp: return cp["topics"]`) und zementierte companions_failed-Topics — die Fix-2-Partial-
+Resume-Logik kam nie zur Ausführung (Partial in Phase C gelöscht). Fix in run_batch.py: neuer `_load_cp_raw`
+(Checkpoint ohne Skip-Log); Checkpoint-Resume jetzt mit Pro-Topic-Prüfung — alle Topics sauber → ganze Stage
+skip (kein Regress); ≥1 companions_failed → Checkpoint wird Resume-Quelle, Fall-through in Phase A. Eine
+Resume-Quelle (Partial > Checkpoint), EIN `done_topics`-Filter für beide Pfade (identische Option-1-Semantik).
+Selbstheilend: scheitert ein Resume erneut, bleibt der Topic companions_failed im bedingungslos geschriebenen
+Phase-C-Checkpoint, nächster Re-Run greift ihn wieder. py_compile OK. **Macht den 2. Resilienz-Test-Teil
+(Vulkan-Resume in verify_20260623b) jetzt möglich** — steht als Nächstes an.
 
 **Stage-1-Resilienz: Pro-Topic-Checkpoint + 503-Sichtbarkeit** (Commit 331773f, feature/stage1-resilience →
 main FF). Fix 1: 0-Companion-Topics werden mit `companions_failed=True` markiert (statt still als done) →
