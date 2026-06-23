@@ -1,10 +1,23 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-22T20:50:04Z -->
+<!-- updated: 2026-06-23T09:37:54Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
-## Abgeschlossen (2026-06-22)
+## Abgeschlossen (2026-06-23)
+
+**Vision-Check von Batch auf Sync umgestellt** (Commit fad46a3, feature/vision-sync → main FF).
+`analyze_with_vision()` um optionalen `model=`-Parameter erweitert (image_vision_filter.py; `None`→Default
+`GEMINI_MODEL`, sonst übergebener Name — kein Breaking Change für batch_run.py/generate_grounded.py). In
+run_batch.py den gesamten Vision-Batch-Block (Step 5: `client.batches.create` + `poll_gemini_batch` +
+Chunk-Loop, ~48 Z.) durch synchronen Einzelaufruf direkt im Download-Loop ersetzt (`model=VISION_MODEL`,
+cost_tracker wie zuvor, None-Guard). Schnittstelle zu Step 6 (`all_vision_results[key]`) unverändert;
+`img_meta_by_key`/`topic_img_keys` bleiben (von Step 6 + Opus-Lookup gebraucht). Tote Imports
+(VISION_SYSTEM_PROMPT, VISION_PROMPT_TEMPLATE) entfernt; VISION_CHUNK_SIZE als toter Code kommentiert.
+**VISION_MODEL bleibt gemini-2.5-flash** (günstig). Anlass: Vision-Batch klemmte modellspezifisch >3 h in
+der Gemini-Batch-Queue (Kompass-Batch auf gemini-3.5-flash in 1 Min durch) — Queue-Problem ist
+batch-spezifisch, nicht modellspezifisch; Sync eliminiert es ohne Modellwechsel. py_compile + Mock-Test grün.
+**OFFEN: noch nicht durch echten Batch-Lauf verifiziert** — Mini-Verifikationslauf (3 Themen × S1-3) folgt.
 
 **Companion-Auswahl auf „Würze & Tiefe" umgestellt** (Commit a953031, feature/companion-anchors → main FF).
 `COMPANION_PROMPT_TMPL` überarbeitet (kanonische Quelle generate_grounded.py; run_batch.py importiert sie).
