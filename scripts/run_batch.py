@@ -104,8 +104,7 @@ from image_vision_filter import (  # noqa: E402
     load_cached_image_bytes,
     get_download_sizes,
     clear_download_sizes,
-    VISION_SYSTEM_PROMPT,
-    VISION_PROMPT_TEMPLATE,
+    analyze_with_vision,
     OPUS_RECHECK_SYSTEM,
     OPUS_RECHECK_PROMPT,
 )
@@ -123,7 +122,7 @@ import gemini_client  # noqa: E402
 # ── Konstanten ────────────────────────────────────────────────────────────────
 
 VISION_MODEL         = "gemini-2.5-flash"
-VISION_CHUNK_SIZE    = 500   # Max InlinedRequests pro Vision-Batch-Job
+VISION_CHUNK_SIZE    = 500   # ungenutzt seit Sync-Umbau (war: max InlinedRequests/Batch)
 POLL_SECS_GEMINI     = 30
 POLL_SECS_ANTHROPIC  = 30
 GEMINI_TIMEOUT_H     = 48.0
@@ -341,7 +340,7 @@ def stage1_sourcing(
         print(f"WP-Fetch OK: {list(wp_data.keys())}")
         print(f"Kompass-Batch: {len(wp_data)} InlinedRequests")
         n_sens = sum(1 for d in wp_data.values() if d["sensibel"])
-        print(f"Vision-Batch: ~{len(wp_data) * MAX_VISION_CHECKS} Requests (max {MAX_VISION_CHECKS}/Thema)")
+        print(f"Vision-Check (sync): ~{len(wp_data) * MAX_VISION_CHECKS} Aufrufe (max {MAX_VISION_CHECKS}/Thema)")
         print(f"Opus-Recheck: {n_sens} sensible Themen → top-{OPUS_CAP} Bilder (relevanz-sortiert); sonst → grenzfall=true (max {OPUS_CAP})")
         return {}
 
@@ -415,10 +414,10 @@ def stage1_sourcing(
         data["companion_texts"]  = companion_texts
 
     # ── Step 4: Image Candidates + Download (sync, kein 10s-Sleep) ────────────
-    log.info("\n=== Stage 1 / Step 4: Image Download ===")
-    vision_reqs:       list[types.InlinedRequest] = []
+    log.info("\n=== Stage 1 / Step 4: Image Download + Vision-Check (sync) ===")
     img_meta_by_key:   dict[str, dict] = {}
     topic_img_keys:    dict[str, list[str]] = defaultdict(list)
+    all_vision_results: dict[str, dict] = {}  # key → {ab_stufe, confidence, ...}
 
     for thema, data in wp_data.items():
         primary_wp = data["resolved_title"]
@@ -454,7 +453,7 @@ def stage1_sourcing(
         log.info("  '%s': %d Kandidaten, Vision-Check max %d",
                  thema, len(unique), len(to_check))
 
-        # Herunterladen + Vision-Request aufbauen (3s pre-download, Wikimedia-konform)
+        # Herunterladen + synchroner Vision-Check (3s pre-download, Wikimedia-konform)
         for i, img in enumerate(to_check):
             if i > 0:
                 time.sleep(3.0)
@@ -463,78 +462,29 @@ def stage1_sourcing(
                 log.debug("    Download fehlgeschlagen: %s", img["filename"][:40])
                 continue
 
-            prompt  = VISION_PROMPT_TEMPLATE.format(thema=thema)
-            # Schlüssel: nur [a-zA-Z0-9_-], max 64 Zeichen (Anthropic-Batch-Pflicht)
+            # Schlüssel: nur [a-zA-Z0-9_-], max 64 Zeichen (für Opus-custom_id-Lookup)
             safe_t  = re.sub(r"[^a-zA-Z0-9_-]", "_", thema)[:20]
             safe_fn = re.sub(r"[^a-zA-Z0-9_-]", "_", img["filename"])[:41]
             key     = f"{safe_t}__{safe_fn}"
-
-            vision_reqs.append(types.InlinedRequest(
-                contents=types.Content(
-                    role="user",
-                    parts=[
-                        types.Part.from_bytes(data=img_bytes, mime_type="image/jpeg"),
-                        types.Part.from_text(text=prompt),
-                    ],
-                ),
-                config=types.GenerateContentConfig(
-                    system_instruction=VISION_SYSTEM_PROMPT,
-                    response_mime_type="application/json",
-                    temperature=0.1,
-                    thinking_config=types.ThinkingConfig(thinking_budget=0),
-                ),
-                metadata={"key": key, "thema": thema},
-            ))
             img_meta_by_key[key] = {**img, "thema": thema}
             topic_img_keys[thema].append(key)
 
+            # Synchroner Einzelaufruf statt Batch (kein 24h-Queue-Risiko)
+            result, usage = analyze_with_vision(
+                client, img_bytes, "image/jpeg", thema, model=VISION_MODEL
+            )
+            if result is None:
+                log.warning("  Vision '%s': kein Ergebnis", key[:40])
+                continue
+            all_vision_results[key] = result
+            if usage:
+                cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe="S0",
+                                   schritt="vision", modell=VISION_MODEL,
+                                   input_tok=usage["input_tok"], output_tok=usage["output_tok"])
+
         data["_img_candidates"] = unique
 
-    log.info("Vision-Batch: %d Requests gesamt", len(vision_reqs))
-
-    # ── Step 5: Vision-Batch(es) (Gemini) ─────────────────────────────────────
-    log.info("\n=== Stage 1 / Step 5: Vision-Batch ===")
-    all_vision_results: dict[str, dict] = {}  # key → {ab_stufe, confidence, ...}
-
-    for chunk_start in range(0, max(len(vision_reqs), 1), VISION_CHUNK_SIZE):
-        chunk    = vision_reqs[chunk_start : chunk_start + VISION_CHUNK_SIZE]
-        chunk_nr = chunk_start // VISION_CHUNK_SIZE + 1
-        if not chunk:
-            break
-        log.info("  Vision-Chunk %d: %d Requests", chunk_nr, len(chunk))
-
-        try:
-            batch_v = client.batches.create(model=VISION_MODEL, src=chunk)
-            log.info("  Vision-Batch %d eingereicht: %s", chunk_nr, batch_v.name)
-        except Exception as e:
-            log.error("  Vision-Batch %d Einreichung fehlgeschlagen: %s", chunk_nr, e)
-            continue
-
-        batch_v_done = poll_gemini_batch(client, batch_v.name)
-        if _state_str(batch_v_done) not in SUCCESS_STATES:
-            log.error("  Vision-Batch %d fehlgeschlagen: %s", chunk_nr, _state_str(batch_v_done))
-            continue
-
-        for resp in _get_inlined_responses(batch_v_done):
-            key       = (resp.metadata or {}).get("key", "")
-            thema_key = (resp.metadata or {}).get("thema", "")
-            if not key:
-                continue
-            if resp.error:
-                log.warning("  Vision '%s': %s", key[:40], resp.error)
-                continue
-            text = _strip_md(_extract_text(resp.response))
-            try:
-                result = json.loads(text)
-            except json.JSONDecodeError:
-                log.warning("  Vision JSON-Fehler: %r", text[:60])
-                continue
-            u = _extract_usage(resp.response)
-            if u:
-                cost_tracker.track(run_id=_RUN_ID, thema=thema_key, stufe="S0",
-                                   schritt="vision", modell=VISION_MODEL,
-                                   input_tok=u["input_tok"], output_tok=u["output_tok"])
-            all_vision_results[key] = result
+    log.info("Vision-Check (sync): %d Bilder analysiert", len(all_vision_results))
 
     # ── Step 6: Conservative Upgrade + Bildpool aufbauen ──────────────────────
     log.info("\n=== Stage 1 / Step 6: Vision-Ergebnisse verarbeiten ===")

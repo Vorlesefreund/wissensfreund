@@ -475,14 +475,16 @@ def prefetch_images(
 # ── Vision-Analyse ───────────────────────────────────────────────────────────
 
 def analyze_with_vision(
-    client: genai.Client, image_bytes: bytes, mime_type: str, thema: str
+    client: genai.Client, image_bytes: bytes, mime_type: str, thema: str,
+    model: str | None = None,
 ) -> tuple[dict | None, dict]:
-    """Gibt (result, usage_dict) zurueck. usage_dict kann {} sein."""
+    """Gibt (result, usage_dict) zurueck. usage_dict kann {} sein.
+    model=None -> Default GEMINI_MODEL; sonst der uebergebene Modellname."""
     prompt = VISION_PROMPT_TEMPLATE.format(thema=thema)
     for attempt in range(1, 3):
         try:
             response = client.models.generate_content(
-                model=GEMINI_MODEL,
+                model=model or GEMINI_MODEL,
                 contents=[
                     types.Part(inline_data=types.Blob(mime_type=mime_type, data=image_bytes)),
                     types.Part(text=prompt),
