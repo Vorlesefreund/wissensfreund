@@ -1,6 +1,14 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-23T18:19:31Z -->
+<!-- updated: 2026-06-23T19:10:27Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
+
+> **OFFEN — Verifikationslauf steht aus (Gemini-503).** Lauf verify_20260623b am 2026-06-23 ~21:10 abgebrochen.
+> Der Kompass-Sync-Fix (f6135be) funktioniert korrekt (kein Batch-Queue-Hang). ABER: externer Gemini-503-Sturm
+> auf gemini-3.5-flash degradierte den Lauf — Vulkan bekam 0 Companion-Vorschläge (Sync-Retry 6× von 503ern
+> erschöpft → leer), A–G-Verifikation damit wertlos. Code ist NICHT schuld. **Neustart, sobald die API stabil
+> ist** (`python scripts/run_batch.py --themen "Vulkan" "Titanic" "Zweiter Weltkrieg" --stufen 1 2 3
+> --output-dir articles/verify_20260623b --run-id verify_20260623b`). Zu verifizieren bleiben: Edit-1–5
+> (Box-Qualität, Primärinhalt, Bildnutzung) + Vision-Companion-Kontext (177ca72) + Diagramm-Freigabe.
 
 ---
 
