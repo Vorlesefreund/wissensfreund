@@ -1,10 +1,21 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-23T13:53:22Z -->
+<!-- updated: 2026-06-23T14:03:37Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-23)
+
+**Vision: Companion-Bildkontext + Diagramme freigeben** (Commit 177ca72, feature/vision-context → main FF).
+run_batch.py: vor `analyze_with_vision` wird `thema_vision` gebildet — Companion-Bilder (img["_source"] ≠
+resolved_title) erhalten präzisen Kontext „Thema (Bild aus Begleitartikel: X)", Primär-/quellenlose Bilder
+bleiben beim reinen thema. Keine Signatur-Änderung. image_vision_filter.py: pauschale ab_stufe=0-Regel für
+Diagramme im VISION_PROMPT_TEMPLATE ersetzt — nur noch rein dekorative/leere Grafiken → 0; thematisch relevante
+Diagramme/Karten/Querschnitte/Skizzen (Vulkanquerschnitt, Enigma-Schema, Stadtplan Pompeji) → ab_stufe 2/3.
+Anlass: Vision bewertete Companion-Bilder (Enigma, Pompeji) gegen das falsche Thema; Skizzen wurden pauschal
+gesperrt (verify_20260623: kein einziges Diagramm im Pool akzeptiert). py_compile + Inline-Check (inkl. BKS) grün.
+**OFFEN: Wirkung noch nicht durch Lauf verifiziert** — bei nächstem Lauf prüfen: relevanz der Companion-Bilder↑,
+Diagramme/Karten erscheinen im Pool.
 
 **Generator-Prompt v4: Box-Qualität + Primärinhalt-Pflicht + Bildnutzung** (Commit 26fd462,
 feature/generator-box-primary → main FF). 5 rein additive Edits in `wissensfreund_generator_prompt_v4_production.md`:
