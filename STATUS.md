@@ -1,10 +1,20 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-23T09:37:54Z -->
+<!-- updated: 2026-06-23T13:53:22Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 ---
 
 ## Abgeschlossen (2026-06-23)
+
+**Generator-Prompt v4: Box-Qualität + Primärinhalt-Pflicht + Bildnutzung** (Commit 26fd462,
+feature/generator-box-primary → main FF). 5 rein additive Edits in `wissensfreund_generator_prompt_v4_production.md`:
+(1) Qualitätspflicht WOW (konkrete Tatsache + Kind-Vergleich, keine rohen Zahlen), (2) Qualitätspflicht Warnung
+(themenspezifisch, kein Allgemeinplatz/Moralisieren), (3) Primärinhalt-Pflicht (≥50 % der Sätze = Kernthema;
+Companions reichern an, ersetzen nicht) in grounding_rules, (4) Skizzen & Diagramme für S2/S3 explizit einladen,
+(5) Bildnutzung maximieren + thematisches Matching (Pompeji-Abschnitt → Pompeji-Bild) — beide bei img_index.
+Anlass: Verifikationslauf verify_20260623 — Generator nutzte nur 20–50 % des kuratierten Bild-Pools
+(Vulkan 10/22, WW2 4/13), Boxen mit Qualitätslücken, WW2 zu nebenschauplatz-lastig. **OFFEN: Wirkung noch nicht
+durch neuen Lauf verifiziert** — bei nächstem Lauf prüfen: Bild-Ausnutzung↑, Box-Konkretheit↑, Kern-Anteil↑.
 
 **Vision-Check von Batch auf Sync umgestellt** (Commit fad46a3, feature/vision-sync → main FF).
 `analyze_with_vision()` um optionalen `model=`-Parameter erweitert (image_vision_filter.py; `None`→Default
