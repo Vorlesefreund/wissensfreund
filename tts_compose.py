@@ -145,6 +145,10 @@ def compose(article: dict, stufe: str | None = None) -> str:
         # Überschrift als gesprochener Satz
         heading = strip_emoji((sec.get("heading") or "").strip())
         if heading:
+            # Kapitel-Pause (~2.0 s) vor jeder Überschrift außer der ersten.
+            # tts_produce.py setzt [pause=N] als echte Stille um (Modell cappt bei ~1.9 s).
+            if parts:
+                parts.append("[pause=2.0]")
             parts.append(heading if heading[-1] in ".!?" else heading + ".")
 
         # Fließtext-Sätze
@@ -163,12 +167,19 @@ def compose(article: dict, stufe: str | None = None) -> str:
             if box_type == "stimmt_das":
                 reveal = strip_emoji((box.get("reveal_text") or "").strip())
                 intro  = _phrase("stimmt_das", stufe)
-                # Frage, dann Absatzpause, dann Antwort
+                # [thoughtful]-Stil + 5 s Nachdenkpause vor der Auflösung
+                frage = f"[thoughtful] {intro}{box_text}"
                 if reveal:
                     answer_intro = _REVEAL_INTRO.get(stufe, "")
-                    parts.append(f"{intro}{box_text}\n\n{answer_intro}{reveal}")
+                    parts.append(f"{frage} [pause=5.0] {answer_intro}{reveal}")
                 else:
-                    parts.append(f"{intro}{box_text}")
+                    parts.append(frage)
+            elif box_type == "wow":
+                intro = _phrase("wow", stufe)
+                parts.append(f"[excited] {intro}{box_text}")
+            elif box_type == "warnung":
+                intro = _phrase("warnung", stufe)
+                parts.append(f"[serious] {intro}{box_text}")
             else:
                 intro = _phrase(box_type, stufe)
                 parts.append(f"{intro}{box_text}")
