@@ -1,0 +1,700 @@
+{
+  "meta": {
+    "id": "vulkan_l3",
+    "title": "Vulkan",
+    "subtitle": "Die feurigen Kräfte aus dem Inneren unserer Erde",
+    "emoji": "🌋",
+    "age_level": 3,
+    "pattern": "tech_science",
+    "theme_color": "#D32F2F",
+    "word_count": 685,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Vulkan",
+    "schema_version": "1.0",
+    "review_flag": true,
+    "category_top": "natur_und_umwelt",
+    "category_sub": "geologie",
+    "generated_at": "2026-06-24T06:21:45.341290+00:00",
+    "grounding_companions": [
+      "Vesuv",
+      "Pompeji",
+      "Surtsey",
+      "Geysir",
+      "Lava"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM",
+    "trim_passes": 1,
+    "review_reason": "Wortzahl 685 > Cap 682; lektorat: 1 zu prüfen"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Lava_Lake_Nyiragongo_2.jpg",
+      "alt": "Blick in einen aktiven Vulkankrater mit brodelnder, rot-orange glühender Lava",
+      "caption": "Ein Blick in den Schlund: Tief im Inneren des Kraters brodelt die glühende, flüssige Lava.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Cai Tjeenk Willink (Caitjeenk)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Lava_Lake_Nyiragongo_2.jpg",
+      "wikimedia_id": "File:Lava_Lake_Nyiragongo_2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/76/Lava_Lake_Nyiragongo_2.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Lava_Lake_Nyiragongo_2_300.jpg",
+        "800": "bilder/vulkan/Lava_Lake_Nyiragongo_2_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "alt": "Ein Vulkan, der eine riesige, dunkle Rauch- und Aschewolke in den bewölkten Himmel ausstößt",
+      "caption": "Wenn der Druck zu groß wird: Ein Vulkan stößt eine gigantische Wolke aus Asche und Gasen aus.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Michael W. Ishak (www.myreefsdiary.com)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "wikimedia_id": "File:Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Mount_Agung%2C_November_2017_eruption_-_27_Nov_2017_03.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03_300.jpg",
+        "800": "bilder/vulkan/Mount_Agung,_November_2017_eruption_-_27_Nov_2017_03_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Stromboli_Eruption.jpg",
+      "alt": "Ausbruch eines Vulkans bei Nacht, der glühende Gesteinsbrocken und rote Lavafontänen in den dunklen Himmel schleudert",
+      "caption": "Feuerwerk der Natur: Bei nächtlichen Ausbrüchen leuchtet die herausgeschleuderte Lava besonders hell.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Wolfgang Beyer",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Stromboli_Eruption.jpg",
+      "wikimedia_id": "File:Stromboli_Eruption.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/9/93/Stromboli_Eruption.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Stromboli_Eruption_300.jpg",
+        "800": "bilder/vulkan/Stromboli_Eruption_800.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Skjaldbreidur_Herbst_2004.jpg",
+      "alt": "Eine weite isländische Landschaft mit einem sehr flachen, breiten Schildvulkan im Hintergrund",
+      "caption": "Flach und breit: Ein Schildvulkan entsteht, wenn sehr dünnflüssige Lava weit über das Land fließt.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "User:Reykholt",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Skjaldbreidur_Herbst_2004.jpg",
+      "wikimedia_id": "File:Skjaldbreidur_Herbst_2004.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/a/a4/Skjaldbreidur_Herbst_2004.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Skjaldbreidur_Herbst_2004_300.jpg",
+        "800": "bilder/vulkan/Skjaldbreidur_Herbst_2004_800.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Pahoeoe_fountain_edit2.jpg",
+      "alt": "Flüssige, rotglühende Lava spritzt wie eine Fontäne in die Höhe und fließt als dünner Strom über dunkles Gestein",
+      "caption": "Dünnflüssig und heiß: Pāhoehoe-Lava fließt schnell und bildet nach dem Abkühlen glatte Oberflächen.",
+      "license": "Public domain",
+      "license_author": "J.D. Griggs",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Pahoeoe_fountain_edit2.jpg",
+      "wikimedia_id": "File:Pahoeoe_fountain_edit2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/9/9f/Pahoeoe_fountain_edit2.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Pahoeoe_fountain_edit2_300.jpg",
+        "800": "bilder/vulkan/Pahoeoe_fountain_edit2_800.jpg"
+      }
+    },
+    {
+      "index": 5,
+      "filename": "Columnar_basalt_Sudurarhraun.jpg",
+      "alt": "Eine Felswand aus perfekt geformten, meist sechseckigen Steinsäulen aus Basalt",
+      "caption": "Naturkunstwerke: Diese geometrischen Basaltsäulen entstehen, wenn heiße Lava ganz langsam abkühlt.",
+      "license": "CC BY 2.5",
+      "license_author": "Laurent Deschodt",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Columnar_basalt_Sudurarhraun.jpg",
+      "wikimedia_id": "File:Columnar_basalt_Sudurarhraun.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/2/24/Columnar_basalt_Sudurarhraun.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Columnar_basalt_Sudurarhraun_300.jpg",
+        "800": "bilder/vulkan/Columnar_basalt_Sudurarhraun_800.jpg"
+      }
+    },
+    {
+      "index": 6,
+      "filename": "Beehive_geyser.jpg",
+      "alt": "Ein Geysir stößt eine gewaltige weiße Säule aus heißem Wasser und Dampf hoch in den Himmel aus",
+      "caption": "Unterirdischer Druck: Ein Geysir schleudert kochendes Wasser und Dampf wie eine riesige Düse empor.",
+      "license": "Public domain",
+      "license_author": "R Robinson",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Beehive_geyser.jpg",
+      "wikimedia_id": "File:Beehive_geyser.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/48/Beehive_geyser.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Beehive_geyser_300.jpg",
+        "800": "bilder/vulkan/Beehive_geyser_800.jpg"
+      }
+    },
+    {
+      "index": 7,
+      "filename": "Hamilton-Campi_Phlegraei.jpg",
+      "alt": "Historisches Gemälde eines gewaltigen Vulkanausbruchs mit einer riesigen Rauchwolke und glühenden Lavaströmen bei Nacht",
+      "caption": "Schrecken der Geschichte: Eine historische Malerei zeigt die dramatische Kraft eines Vesuvausbruchs.",
+      "license": "Public domain",
+      "license_author": "Pietro Fabris",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Hamilton-Campi_Phlegraei.jpg",
+      "wikimedia_id": "File:Hamilton-Campi_Phlegraei.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/d/de/Hamilton-Campi_Phlegraei.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": true,
+      "tiers": {
+        "300": "bilder/vulkan/Hamilton-Campi_Phlegraei_300.jpg",
+        "800": "bilder/vulkan/Hamilton-Campi_Phlegraei_800.jpg"
+      }
+    },
+    {
+      "index": 8,
+      "filename": "Aerial_image_of_Pompeii_and_Mount_Vesuvius_(view_from_the_southeast).jpg",
+      "alt": "Luftaufnahme mit den weitläufigen Ruinen von Pompeji im Vordergrund und dem rauchenden Gipfel des Vesuvs im Hintergrund",
+      "caption": "Untergegangene Welt: Im Vordergrund liegen die Ruinen von Pompeji, im Hintergrund wacht der Vesuv.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Carsten Steger",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Aerial_image_of_Pompeii_and_Mount_Vesuvius_(view_from_the_southeast).jpg",
+      "wikimedia_id": "File:Aerial_image_of_Pompeii_and_Mount_Vesuvius_(view_from_the_southeast).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/Aerial_image_of_Pompeii_and_Mount_Vesuvius_%28view_from_the_southeast%29.jpg/1920px-Aerial_image_of_Pompeii_and_Mount_Vesuvius_%28view_from_the_southeast%29.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Aerial_image_of_Pompeii_and_Mount_Vesuvius_(view_from_the_southeast)_300.jpg",
+        "800": "bilder/vulkan/Aerial_image_of_Pompeii_and_Mount_Vesuvius_(view_from_the_southeast)_800.jpg"
+      }
+    },
+    {
+      "index": 9,
+      "filename": "Amphitheatre_in_Pompeji.JPG",
+      "alt": "Die gut erhaltenen Steinbögen und Ränge des antiken Amphitheaters in Pompeji",
+      "caption": "Ort der Krawalle: Das antike Amphitheater von Pompeji, in dem einst Gladiatoren kämpften.",
+      "license": "CC BY-SA 3.0 de",
+      "license_author": "Heinz-Josef Lücking",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Amphitheatre_in_Pompeji.JPG",
+      "wikimedia_id": "File:Amphitheatre_in_Pompeji.JPG",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Amphitheatre_in_Pompeji.JPG/1920px-Amphitheatre_in_Pompeji.JPG",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Amphitheatre_in_Pompeji_300.jpg",
+        "800": "bilder/vulkan/Amphitheatre_in_Pompeji_800.jpg"
+      }
+    },
+    {
+      "index": 10,
+      "filename": "Cakile_maritima01.jpg",
+      "alt": "Grüne Pflanzen mit kleinen, hellvioletten Blüten, die auf kargem, sandigem Boden wachsen",
+      "caption": "Zäher Pionier: Der Meersenf gehört zu den ersten Pflanzen, die die neue Vulkaninsel Surtsey besiedelten.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "CC BY-SA 3.0",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Cakile_maritima01.jpg",
+      "wikimedia_id": "File:Cakile_maritima01.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/2/2c/Cakile_maritima01.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Cakile_maritima01_300.jpg",
+        "800": "bilder/vulkan/Cakile_maritima01_800.jpg"
+      }
+    },
+    {
+      "index": 11,
+      "filename": "Puffin2.jpg",
+      "alt": "Ein Papageitaucher mit schwarz-weißem Gefieder und einem leuchtend bunten Schnabel steht auf einem Küstenfelsen",
+      "caption": "Neuer Bewohner: Bunte Papageitaucher nisten heute in den Klippen der jungen Vulkaninsel Surtsey.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Tomi",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Puffin2.jpg",
+      "wikimedia_id": "File:Puffin2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/8/89/Puffin2.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Puffin2_300.jpg",
+        "800": "bilder/vulkan/Puffin2_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Die feurigen Pforten tief unter unseren Füßen",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Wenn die Erde tief in ihrem Inneren kocht, entsteht ein Vulkan.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Ab einer Tiefe von 100 Kilometern schmilzt festes Gestein bei extremen Temperaturen von 1000 bis 1300 Grad Celsius zu einer glühenden Masse: dem Magma.",
+          "img_index": 0
+        },
+        {
+          "id": "s003",
+          "text": "Dieses sammelt sich in riesigen Kammern, den Magmaherden, zwei bis 50 Kilometer unter der Erdoberfläche.",
+          "img_index": 0
+        },
+        {
+          "id": "s004",
+          "text": "Steigt der Druck dort unten stark an, sucht sich die flüssige Masse ihren Weg nach oben.",
+          "img_index": 0
+        },
+        {
+          "id": "s005",
+          "text": "Sobald das Magma die Erdoberfläche erreicht, nennen Forscher es Lava.",
+          "img_index": 1
+        },
+        {
+          "id": "s006",
+          "text": "Doch Vulkane speien nicht nur flüssigen Stein – bei einem Ausbruch werden auch riesige Mengen an Gasen, Asche und festen Gesteinsbrocken freigesetzt.",
+          "img_index": 1
+        },
+        {
+          "id": "s007",
+          "text": "Der Name „Vulkan“ geht auf die italienische Insel Vulcano zurück.",
+          "img_index": 1
+        },
+        {
+          "id": "s008",
+          "text": "Die alten Römer glaubten, dort befinde sich die Schmiede ihres Feuergottes Vulcanus.",
+          "img_index": 1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Die Alchemie der Lava und springende Quellen",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s009",
+          "text": "Wie ein Vulkan ausbricht und welche Form er annimmt, entscheidet die Zusammensetzung der Gesteinsschmelze.",
+          "img_index": 4
+        },
+        {
+          "id": "s010",
+          "text": "Ausschlaggebend ist der Gehalt an Siliciumdioxid.",
+          "img_index": 4
+        },
+        {
+          "id": "s011",
+          "text": "Enthält das Magma viel davon, ist es zähflussig und führt zu hochexplosiven, grauen Schichtvulkanen.",
+          "img_index": 4
+        },
+        {
+          "id": "s012",
+          "text": "Dagegen ist basaltische Lava mit wenig Siliciumdioxid dünnflüssig.",
+          "img_index": 4
+        },
+        {
+          "id": "s013",
+          "text": "Sie fließt heißer aus roten Schildvulkanen und bildet glatte, strickartige Oberflächen, die sogenannte Pāhoehoe-Lava.",
+          "img_index": 4
+        },
+        {
+          "id": "s014",
+          "text": "Kühlt diese Masse langsam ab, schrumpft das Gestein und reißt geometrisch auf.",
+          "img_index": 6
+        },
+        {
+          "id": "s015",
+          "text": "So entstehen oft meist sechseckige Basaltsäulen.",
+          "img_index": 6
+        },
+        {
+          "id": "s016",
+          "text": "In aktiven Gebieten trifft kochendes Magma im Untergrund manchmal auf Grundwasser.",
+          "img_index": 6
+        },
+        {
+          "id": "s017",
+          "text": "In engen, röhrenartigen Kanälen staut sich das Wasser und wird weit über 100 Grad Celsius überhitzt.",
+          "img_index": 6
+        },
+        {
+          "id": "s018",
+          "text": "Sinkt der Druck durch aufsteigende Dampfblasen schlagartig ab, verdampft das überhitzt flüssige Wasser explosionsartig und schießt als kochende Fontäne eines Geysirs empor.",
+          "img_index": 6
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Liegt der größte Vulkan der Erde an Land?",
+          "reveal_text": "Nein! Der gigantischste bekannte Vulkan unseres Planeten liegt tief im Pazifischen Ozean östlich von Japan begraben. Das schildförmige Tamu-Massiv ist etwa 650 Kilometer lang und 450 Kilometer breit. Damit ist dieser gigantische, erloschene Einzelvulkan fast so groß wie ganz Deutschland!",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Der Tag, an dem Pompeji unterging",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s019",
+          "text": "Ein berühmter Vulkanausbruch ereignete sich im Jahr 79 nach Christus am Golf von Neapel.",
+          "img_index": 7
+        },
+        {
+          "id": "s020",
+          "text": "Der Vesuv, ein mächtiger Schichtvulkan, explodierte völlig unvorbereitet für die Menschen.",
+          "img_index": 7
+        },
+        {
+          "id": "s021",
+          "text": "Der Innendruck sprengte den verstopften Schlot frei und schleuderte eine gigantische Eruptionssäule aus heißem Wasserdampf, Asche und Bimsstein bis zu 20 Kilometer hoch.",
+          "img_index": 7
+        },
+        {
+          "id": "s022",
+          "text": "Der Wind trug die glühende Wolke nach Südosten.",
+          "img_index": 7
+        },
+        {
+          "id": "s023",
+          "text": "Binnen Stunden stürzten Dächer unter der Last des herabregnenden Gesteins ein.",
+          "img_index": 7
+        },
+        {
+          "id": "s024",
+          "text": "Kurz nach Mitternacht brach die riesige Säule in sich zusammen.",
+          "img_index": 8
+        },
+        {
+          "id": "s025",
+          "text": "Pyroklastische Ströme – extrem heiße Lawinen aus Gas und Asche – rasten den Berghang hinab.",
+          "img_index": 8
+        },
+        {
+          "id": "s026",
+          "text": "Sie verschütteten die römischen Städte Pompeji und Herculaneum meterhoch.",
+          "img_index": 8
+        },
+        {
+          "id": "s027",
+          "text": "Der Römer Plinius der Jüngere beobachtete die Katastrophe aus der Ferne und hielt sie detailgetreu in Briefen fest.",
+          "img_index": 8
+        },
+        {
+          "id": "s028",
+          "text": "Nach ihm nennen Wissenschaftler solche explosiven Ausbrüche heute „plinianische Eruptionen“.",
+          "img_index": 8
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Die tödliche Glutlawine: Bei plinianischen Ausbrüchen wie dem des Vesuvs im Jahr 79 n. Chr. droht die größte Gefahr nicht durch die herabregnende Asche, sondern durch pyroklastische Ströme. Diese glühenden Lawinen aus heißem Gas und zertrümmertem Gestein erreichen Geschwindigkeiten von mehreren hundert Kilometern pro Stunde und Temperaturen von bis zu 800 Grad Celsius. Ihnen kann niemand entkommen."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Geburt einer Insel und die Suche nach Warnzeichen",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s029",
+          "text": "Vulkane zerstören jedoch nicht nur, sie erschaffen auch neues Land.",
+          "img_index": 11
+        },
+        {
+          "id": "s030",
+          "text": "Am 14. November 1963 begann südlich von Island ein submariner Ausbruch.",
+          "img_index": 11
+        },
+        {
+          "id": "s031",
+          "text": "Eine unterseeische Erdspalte spie Lava, die im Wasser abkühlte, bis der wachsende Kegel die Meeresoberfläche durchbrach: Die Vulkaninsel Surtsey war geboren.",
+          "img_index": 11
+        },
+        {
+          "id": "s032",
+          "text": "Nach dem Ende der Eruptionen durften Forscher beobachten, wie das Leben ein völlig nacktes Stück Land erobert.",
+          "img_index": 11
+        },
+        {
+          "id": "s033",
+          "text": "Zuerst trieben Samen des Meersenfes und der Salzmiere über das Meer an die Strände.",
+          "img_index": 11
+        },
+        {
+          "id": "s034",
+          "text": "Später brachten Vögel weitere Pflanzensamen und nisteten dort.",
+          "img_index": 10
+        },
+        {
+          "id": "s035",
+          "text": "Robben sonnten sich an den geschützten Buchten und Insekten wie Springschwänze siedelten sich an.",
+          "img_index": 10
+        },
+        {
+          "id": "s036",
+          "text": "Heute ist die Insel ein geschütztes UNESCO-Welterbe.",
+          "img_index": 10
+        },
+        {
+          "id": "s037",
+          "text": "Um Menschen vor Vulkanausbrüchen zu schützen, überwachen Vulkanologen aktive Berge rund um die Uhr.",
+          "img_index": 10
+        },
+        {
+          "id": "s038",
+          "text": "Mit empfindlichen Seismometern lauschen sie auf das seismische Zittern aufsteigenden Magmas, den vulkanischen Tremor.",
+          "img_index": 10
+        },
+        {
+          "id": "s039",
+          "text": "Neigungsmesser registrieren, ob sich die Flanken des Berges durch den Druck aufbeulen, während chemische Analysen von Gasen wie Helium im Grundwasser wertvolle Warnzeichen liefern.",
+          "img_index": 10
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Surtseys Perlen-Geheimnis: Wie kommen Pflanzen auf eine nagelneue Insel im stürmischen Meer? Forscher machten ein Experiment und warfen 10 Millionen winzige Plastikperlen ins Wasser bei der Nachbarinsel Heimaey. Tatsächlich schwamm etwa ein Prozent davon bis an Surtseys Strände. Das beweist, dass Pflanzensamen weite Strecken im kalten Ozean treiben können, um neues Land zu besiedeln!"
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was entscheidet maßgeblich darüber, wie explosiv ein Vulkan ausbricht?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Die Wassertemperatur des nahen Meeres."
+          },
+          {
+            "key": "B",
+            "text": "Der Gehalt an Siliciumdioxid im Magma."
+          },
+          {
+            "key": "C",
+            "text": "Die Anzahl der Erdbeben im Vormonat."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Wie entstand die isländische Vulkaninsel Surtsey im Jahr 1963?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Durch einen riesigen Erdrutsch an der Südküste."
+          },
+          {
+            "key": "B",
+            "text": "Durch das plötzliche Abschmelzen eines riesigen Gletschers."
+          },
+          {
+            "key": "C",
+            "text": "Durch einen unterseeischen Vulkanausbruch."
+          }
+        ],
+        "correct_key": "C"
+      },
+      {
+        "id": "q3",
+        "text": "Warum bricht ein Geysir in regelmäßigen Abständen aus?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Weil der Mond das heiße Wasser wie Ebbe und Flut anzieht."
+          },
+          {
+            "key": "B",
+            "text": "Weil überhitztes Wasser durch den Druckabfall beim Aufsteigen von Dampfblasen schlagartig verdampft."
+          },
+          {
+            "key": "C",
+            "text": "Weil kalte Winde das heiße Wasser im Kanal schlagartig abkühlen."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q4",
+        "text": "Welche antike Stadt wurde im Jahr 79 n. Chr. durch den Vesuv-Ausbruch unter Bimsstein und Asche begraben und so konserviert?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Rom"
+          },
+          {
+            "key": "B",
+            "text": "Pompeji"
+          },
+          {
+            "key": "C",
+            "text": "Neapel"
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Magma",
+      "Lava",
+      "Basalt",
+      "Tuffstein",
+      "Schichtvulkan"
+    ],
+    "discover": [
+      "Plattentektonik",
+      "Seismometer",
+      "Geysir",
+      "Caldera",
+      "Subduktionszone"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Ab einer Tiefe von 100 Kilometern schmilzt festes Gestein bei extremen Temperaturen von 1000 bis 1300 Grad Celsius zu einer glühenden Masse: dem Magma.",
+      "source": "Vulkan",
+      "passage": "Im Fall der Erde schmelzen Gesteine ab 100 km Tiefe bei Temperaturen zwischen 1000 und 1300 °C. Das flüssige Magma sammelt sich in großen Magmaherden in 2 bis 50 km Tiefe."
+    },
+    {
+      "claim": "Enthält das Magma viel davon, ist es zähflüssig und führt zu hochexplosiven, grauen Schichtvulkanen.",
+      "source": "Vulkan",
+      "passage": "Je mehr SiO2 das Magma enthält, desto explosiver ist der damit verbundene Vulkanismus."
+    },
+    {
+      "claim": "Sie fließt heißer aus roten Schildvulkanen und bildet glatte, strickartige Oberflächen, die sogenannte Pāhoehoe-Lava.",
+      "source": "Lava",
+      "passage": "Pāhoehoe-Lava [pa:ˌhoeˈhoe] ist eine dünnflüssige (d. h. niedrigviskose) basaltische Lava, die als Lavastrom hangabwärts fließt. Sie bildet glasige Oberflächen."
+    },
+    {
+      "claim": "Kühlt diese Masse langsam ab, schrumpft das Gestein und reißt geometrisch auf. So entstehen oft meist sechseckige Basaltsäulen.",
+      "source": "Lava",
+      "passage": "Regulär ausgebildete Basaltlavasäulen hingegen bilden sich bei langsamere Abkühlung... Die meisten dieser Basaltsäulen sind sechseckig"
+    },
+    {
+      "claim": "Sinkt der Druck durch aufsteigende Dampfblasen schlagartig abs, verdampft das überhitzt flüssige Wasser explosionsartig und schießt als kochende Fontäne eines Geysirs empor.",
+      "source": "Geysir",
+      "passage": "Erst wenn die Temperatur im Reservoir auf weit über den Siedepunkt angestiegen ist, steigen einzelne Dampfblasen durch die Engstelle im Kanal aufwärts und pressen einen Teil der Wassersäule nach oben. Dadurch sinkt unten der Druck rapide ab und das überhitzte Wasser geht schlagartig in Dampf über."
+    },
+    {
+      "claim": "Der Vesuv, ein mächtiger Schichtvulkan, explodierte völlig unvorbereitet für die Menschen.",
+      "source": "Vesuv",
+      "passage": "Der Berg ist heute 1281 m hoch. Er besteht aus den Resten eines früher wesentlich höheren, älteren Schichtvulkans, des Monte Somma, dessen Spitze bei seinem Ausbruch 79 n. Chr. zu einer Caldera eingestürzt ist"
+    },
+    {
+      "claim": "Der Innendruck sprengte den verstopften Schlot frei und schleuderte eine gigantische Eruptionssäule aus heißem Wasserdampf, Asche und Bimsstein bis zu 20 Kilometer hoch.",
+      "source": "Vesuv",
+      "passage": "Die Eruptionssäule hatte mittlerweile eine Höhe von etwa 20 km erreicht."
+    },
+    {
+      "claim": "Pyroklastische Ströme – extrem heiße Lawinen aus Gas und Asche – rasten mit Überschallgeschwindigkeit den Berghang hinab. Sie verschütteten die römischen Städte Pompeji und Herculaneum meterhoch.",
+      "source": "Vesuv",
+      "passage": "Die großen Vesuv-Ausbrüche sind zudem von pyroklastischen Strömen begleitet, die zu den gefährlichsten Formen des Vulkanismus zählen."
+    },
+    {
+      "claim": "Am 14. November 1963 begann südlich von Island ein submariner Ausbruch.",
+      "source": "Surtsey",
+      "passage": "Surtsey ['sør̥tsɛi] (isländisch für Insel des Surt) ist eine ab dem 14. November 1963 in einer Ausbruchsserie entstandene Vulkaninsel im Atlantischen Ozean, die etwa 30 Kilometer vor der Südküste Islands liegt."
+    },
+    {
+      "claim": "Zuerst trieben Samen der Salzmiere und des Meersenfes über das Meer an die Strände.",
+      "source": "Surtsey",
+      "passage": "Erstbesiedler war der Meersenf (Cakile arctica), gefolgt von Strandroggen (Leymus arenarius, 1966), Salzmiere (Honckenya peploides, 1967) und Austernpflanze (Mertensia maritima, 1967)."
+    },
+    {
+      "claim": "Später brachten Vögel weitere Pflanzensamen und nisteten dort.",
+      "source": "Surtsey",
+      "passage": "Trotzdem schätzen Wissenschaftler, dass insgesamt 75 Prozent der Gefäßpflanzenarten auf Surtsey durch Vögel eingebracht wurden... Die ersten Vögel nisteten drei Jahre nach dem Ende der Eruptionen auf Surtsey"
+    },
+    {
+      "claim": "Mit empfindlichen Seismometern lauschen sie auf das seismische Zittern aufsteigenden Magmas, den vulkanischen Tremor.",
+      "source": "Vulkan",
+      "passage": "Die Bewegung der Risse dagegen führt zu niedrig frequenten Beben, dem sogenannten vulkanischen Tremor. Um Tiefe und Herd der vulkanischen Beben zu ermitteln, wird in der Regel ein Netz von äußerst empfindlichen Seismometern rund um den Vulkan eingerichtet."
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Vulkan 3 — Lektorat\n### SILENT (2 Korrekturen)\n- «Zuerst trieben Samen der Salzmiere und des Meersenfes über das Meer an die Strände.» → «Zuerst trieben Samen des Meersenfes und der Salzmiere über das Meer an die Strände.» (WP: «Erstbesiedler war der Meersenf (Cakile arctica), gefolgt von Strandroggen (Leymus arenarius, 1966), Salzmiere (Honckenya peploides, 1967)» — Meersenf kam zuerst, Salzmiere später.)\n- «Der junge Römer Plinius der Jüngere beobachtete die Katastrophe und hielt sie detailgetreu in Bri…» → «Der Römer Plinius der Jüngere beobachtete die Katastrophe aus der Ferne und hielt sie detailgetreu in Bri…» (WP: «Plinius beschrieb viele Jahre später in zwei Briefen an den Historiker Tacitus den Tod seines Onkels» — er war kein «junger» Römer mehr beim Schreiben; zudem war er kein direkter Augenzeuge am Vulkan.)\n### KORRIGIERT (1 Korrekturen)\n- «…Lawinen aus Gas und Asche – rasten mit Überschallgeschwindigkeit den Berghang hinab.» → «…Lawinen aus Gas und Asche – rasten den Berghang hinab.» — WP: «Die Quelle (Vesuv) nennt Überschallgeschwindigkeit nur für das aufsteigende Magma im Schlot: «Die 700–800 °C heiße Magma bewegte sich mit Überschallgeschwindigkeit aufwärts.» Für pyroklastische Ströme wird keine Überschallgeschwindigkeit genannt.»\n### PRÜFEN (1 Flags)\n- «Eine unterseeische Erdspalte spie Lava, die im Wasser abkühlte, bis der wachsende Kegel die Meeresoberfläche durchbrach: Die Vulkaninsel Surtsey war geboren.» — Die Quelle beschreibt den Ausbruch als submarinen Vulkanausbruch an einer Spalte, aber die Formulierung «unterseeische Erdspalte spie Lava» ist unvollständig: Die erste Phase war phreatomagmatisch-explosiv mit Tephra, nicht primär Lava; Lava kam erst ab April 1964. → Vorschlag: «Ein unterseeischer Vulkan spie Lava und Asche, bis der wachsende Kegel die Meeresoberfläche durchbrach: Die Vulkaninsel Surtsey war geboren.» (Die Quelllage ist eindeutig (phreatomagmatische Explosionen zuerst, Lava erst später), aber eine Korrektur würde den kindgerechten Kern der Entstehungsgeschichte stark umstrukturieren — PRÜFEN statt automatischer Eingriff.)\nZusammenfassung: 2 silent, 1 korrigiert, 1 zu prüfen.",
+    "n_silent": 2,
+    "n_korrigiert": 1,
+    "n_pruefen": 1,
+    "findings": [
+      {
+        "verdikt": "KORRIGIERT",
+        "claim_original": "Pyroklastische Ströme – extrem heiße Lawinen aus Gas und Asche – rasten mit Überschallgeschwindigkeit den Berghang hinab.",
+        "korrektur_neu": "Pyroklastische Ströme – extrem heiße Lawinen aus Gas und Asche – rasten den Berghang hinab.",
+        "korrektur_alt": null,
+        "beleg": "Die Quelle (Vesuv) nennt Überschallgeschwindigkeit nur für das aufsteigende Magma im Schlot: «Die 700–800 °C heiße Magma bewegte sich mit Überschallgeschwindigkeit aufwärts.» Für pyroklastische Ströme wird keine Überschallgeschwindigkeit genannt.",
+        "problem": null,
+        "begruendung": null
+      },
+      {
+        "verdikt": "SILENT",
+        "claim_original": "Zuerst trieben Samen der Salzmiere und des Meersenfes über das Meer an die Strände.",
+        "korrektur_neu": "Zuerst trieben Samen des Meersenfes und der Salzmiere über das Meer an die Strände.",
+        "korrektur_alt": null,
+        "beleg": "«Erstbesiedler war der Meersenf (Cakile arctica), gefolgt von Strandroggen (Leymus arenarius, 1966), Salzmiere (Honckenya peploides, 1967)» — Meersenf kam zuerst, Salzmiere später.",
+        "problem": null,
+        "begruendung": null
+      },
+      {
+        "verdikt": "SILENT",
+        "claim_original": "Der junge Römer Plinius der Jüngere beobachtete die Katastrophe und hielt sie detailgetreu in Briefen fest.",
+        "korrektur_neu": "Der Römer Plinius der Jüngere beobachtete die Katastrophe aus der Ferne und hielt sie detailgetreu in Briefen fest.",
+        "korrektur_alt": null,
+        "beleg": "«Plinius beschrieb viele Jahre später in zwei Briefen an den Historiker Tacitus den Tod seines Onkels» — er war kein «junger» Römer mehr beim Schreiben; zudem war er kein direkter Augenzeuge am Vulkan.",
+        "problem": null,
+        "begruendung": null
+      },
+      {
+        "verdikt": "PRÜFEN",
+        "claim_original": "Eine unterseeische Erdspalte spie Lava, die im Wasser abkühlte, bis der wachsende Kegel die Meeresoberfläche durchbrach: Die Vulkaninsel Surtsey war geboren.",
+        "korrektur_neu": "Ein unterseeischer Vulkan spie Lava und Asche, bis der wachsende Kegel die Meeresoberfläche durchbrach: Die Vulkaninsel Surtsey war geboren.",
+        "korrektur_alt": null,
+        "beleg": null,
+        "problem": "Die Quelle beschreibt den Ausbruch als submarinen Vulkanausbruch an einer Spalte, aber die Formulierung «unterseeische Erdspalte spie Lava» ist unvollständig: Die erste Phase war phreatomagmatisch-explosiv mit Tephra, nicht primär Lava; Lava kam erst ab April 1964.",
+        "begruendung": "Die Quelllage ist eindeutig (phreatomagmatische Explosionen zuerst, Lava erst später), aber eine Korrektur würde den kindgerechten Kern der Entstehungsgeschichte stark umstrukturieren — PRÜFEN statt automatischer Eingriff."
+      }
+    ]
+  }
+}

@@ -1,0 +1,414 @@
+{
+  "meta": {
+    "id": "vulkan_l1",
+    "title": "Vulkan",
+    "subtitle": "Wenn Berge Feuer spucken",
+    "emoji": "🌋",
+    "age_level": 1,
+    "pattern": "place_geography",
+    "theme_color": "#FF5722",
+    "word_count": 210,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Vulkan",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "natur",
+    "category_sub": "berge",
+    "generated_at": "2026-06-24T06:21:45.328326+00:00",
+    "grounding_companions": [
+      "Vesuv",
+      "Pompeji",
+      "Surtsey",
+      "Geysir",
+      "Lava"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Lava_Lake_Nyiragongo_2.jpg",
+      "alt": "Rote, glühende Lava brodelt im Krater eines Vulkans.",
+      "caption": "In einem Vulkan brodelt heiße, rote Suppe aus geschmolzenem Stein.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Cai Tjeenk Willink (Caitjeenk)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Lava_Lake_Nyiragongo_2.jpg",
+      "wikimedia_id": "File:Lava_Lake_Nyiragongo_2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/76/Lava_Lake_Nyiragongo_2.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Lava_Lake_Nyiragongo_2_300.jpg",
+        "800": "bilder/vulkan/Lava_Lake_Nyiragongo_2_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Stromboli_Eruption.jpg",
+      "alt": "Ein Vulkan bricht bei Nacht aus und schleudert rote Lava in die Luft.",
+      "caption": "Manche Vulkane schleudern nachts glühende Funken in den Himmel.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Wolfgang Beyer",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Stromboli_Eruption.jpg",
+      "wikimedia_id": "File:Stromboli_Eruption.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/9/93/Stromboli_Eruption.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Stromboli_Eruption_300.jpg",
+        "800": "bilder/vulkan/Stromboli_Eruption_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Vulkan_Arenal_Costa_Rica.JPG",
+      "alt": "Ein spitzer, grüner Vulkanberg mit Wolken an der Spitze.",
+      "caption": "Ein Vulkan sieht oft aus wie ein spitzer Kegel.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Kryptonit",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Vulkan_Arenal_Costa_Rica.JPG",
+      "wikimedia_id": "File:Vulkan_Arenal_Costa_Rica.JPG",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/7/7a/Vulkan_Arenal_Costa_Rica.JPG",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Vulkan_Arenal_Costa_Rica_300.jpg",
+        "800": "bilder/vulkan/Vulkan_Arenal_Costa_Rica_800.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Beehive_geyser.jpg",
+      "alt": "Ein Geysir spritzt eine hohe Wasserfontäne in die Luft.",
+      "caption": "Ein Geysir schießt heißes Wasser wie eine riesige Düse empor.",
+      "license": "Public domain",
+      "license_author": "R Robinson",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Beehive_geyser.jpg",
+      "wikimedia_id": "File:Beehive_geyser.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/4/48/Beehive_geyser.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Beehive_geyser_300.jpg",
+        "800": "bilder/vulkan/Beehive_geyser_800.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Pahoeoe_fountain_edit2.jpg",
+      "alt": "Ein Lavastrom fließt über schwarzen, abgekühlten Stein.",
+      "caption": "Flüssige Lava bahnt sich glühend ihren Weg.",
+      "license": "Public domain",
+      "license_author": "J.D. Griggs",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Pahoeoe_fountain_edit2.jpg",
+      "wikimedia_id": "File:Pahoeoe_fountain_edit2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/9/9f/Pahoeoe_fountain_edit2.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/vulkan/Pahoeoe_fountain_edit2_300.jpg",
+        "800": "bilder/vulkan/Pahoeoe_fountain_edit2_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Der Berg, der Feuer speit",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir einen ganz besonderen Berg vor.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Dieser Berg hat oben ein riesiges Loch.",
+          "img_index": 0
+        },
+        {
+          "id": "s003",
+          "text": "Manchmal spuckt er rotes Feuer in den Himmel.",
+          "img_index": 0
+        },
+        {
+          "id": "s004",
+          "text": "Das ist ein Vulkan.",
+          "img_index": 0
+        },
+        {
+          "id": "s005",
+          "text": "Er funktioniert wie ein kochender Suppentopf.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Wie entsteht die rote Suppe?",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s006",
+          "text": "Tief unter unseren Füßen ist es sehr heiß.",
+          "img_index": 0
+        },
+        {
+          "id": "s007",
+          "text": "Dort schmilzt sogar fester Stein.",
+          "img_index": 0
+        },
+        {
+          "id": "s008",
+          "text": "Er wird flüssig wie dicker Brei.",
+          "img_index": 0
+        },
+        {
+          "id": "s009",
+          "text": "Wir nennen diesen heißen Gesteinsbrei Magma.",
+          "img_index": 0
+        },
+        {
+          "id": "s010",
+          "text": "Er will unbedingt nach oben klettern.",
+          "img_index": 0
+        },
+        {
+          "id": "s011",
+          "text": "Er sammelt sich in großen Kammern.",
+          "img_index": 0
+        },
+        {
+          "id": "s012",
+          "text": "Es gibt viele Kammern tief im Boden.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Wenn der Berg spuckt",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s013",
+          "text": "Das Magma drückt gegen die Erdoberfläche.",
+          "img_index": 4
+        },
+        {
+          "id": "s014",
+          "text": "Irgendwann bricht der Berg oben auf.",
+          "img_index": 4
+        },
+        {
+          "id": "s015",
+          "text": "Die rote Glut schießt ins Freie.",
+          "img_index": 4
+        },
+        {
+          "id": "s016",
+          "text": "Ab jetzt heißt der rote Fluss Lava.",
+          "img_index": 4
+        },
+        {
+          "id": "s017",
+          "text": "Sie kühlt an der Luft ab.",
+          "img_index": 4
+        },
+        {
+          "id": "s018",
+          "text": "Dabei wird sie wieder zu festem Gestein.",
+          "img_index": 4
+        },
+        {
+          "id": "s019",
+          "text": "Manchmal entsteht so ein ganz neuer Berg.",
+          "img_index": 4
+        },
+        {
+          "id": "s020",
+          "text": "Er sieht oft aus wie ein spitzer Kegel.",
+          "img_index": 4
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Ein Vulkan spuckte Lava mitten im Meer. Aus der Lava wurde eine Insel. Sie heißt Surtsey."
+        },
+        {
+          "type": "warnung",
+          "text": "⚠️ Lava ist unglaublich heiß. Sie kann alles verbrennen. Man darf niemals nah herangehen."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Spannende Wasser-Vulkane",
+      "section_role": "curiosity",
+      "sentences": [
+        {
+          "id": "s021",
+          "text": "Manchmal spuckt die Erde kein Feuer.",
+          "img_index": 3
+        },
+        {
+          "id": "s022",
+          "text": "Sie schießt heißes Wasser in die Luft.",
+          "img_index": 3
+        },
+        {
+          "id": "s023",
+          "text": "Das sieht aus wie ein riesiger Springbrunnen.",
+          "img_index": 3
+        },
+        {
+          "id": "s024",
+          "text": "Wir nennen diese warmen Quellen Geysire.",
+          "img_index": 3
+        },
+        {
+          "id": "s025",
+          "text": "Sie kochen tief in der Erde.",
+          "img_index": 3
+        },
+        {
+          "id": "s026",
+          "text": "Das Wasser ist auch sehr heiß.",
+          "img_index": 3
+        },
+        {
+          "id": "s027",
+          "text": "Es zischt und dampft beim Ausbrechen.",
+          "img_index": 3
+        },
+        {
+          "id": "s028",
+          "text": "Dann spritzen sie plötzlich hoch empor.",
+          "img_index": 3
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wie heißt geschmolzener Stein, wenn er aus dem Vulkan fließt?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Wasser"
+          },
+          {
+            "key": "B",
+            "text": "Lava"
+          },
+          {
+            "key": "C",
+            "text": "Holz"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Was spuckt ein Geysir aus?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Heißes Wasser"
+          },
+          {
+            "key": "B",
+            "text": "Kalten Schnee"
+          },
+          {
+            "key": "C",
+            "text": "Grüne Blätter"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Welche Form hat ein Vulkan meistens?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Viereckig wie eine Kiste"
+          },
+          {
+            "key": "B",
+            "text": "Spitz wie ein Kegel"
+          },
+          {
+            "key": "C",
+            "text": "Flach wie ein Teller"
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Lava",
+      "Magma",
+      "Vulkaninsel"
+    ],
+    "discover": [
+      "Geysir",
+      "Vesuv",
+      "Surtsey"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Ab jetzt heißt der rote Fluss Lava.",
+      "source": "Vulkan",
+      "passage": "Magma, das an die Erdoberfläche gelangt, wird als Lava bezeichnet."
+    },
+    {
+      "claim": "Er sieht oft aus wie ein spitzer Kegel.",
+      "source": "Vulkan",
+      "passage": "Die meisten Vulkane haben annähernd die Form eines Kegels"
+    },
+    {
+      "claim": "Wir nennen diese warmen Quellen Geysire.",
+      "source": "Geysir",
+      "passage": "Ein Geysir ... ist eine heiße Quelle, die ihr Wasser in regelmäßigen oder unregelmäßigen Abständen als Fontäne ausstößt."
+    },
+    {
+      "claim": "Aus der Lava wurde eine Insel. Sie heißt Surtsey.",
+      "source": "Surtsey",
+      "passage": "Surtsey entstand durch einen submarinen Vulkanausbruch, der später die Meeresoberfläche durchbrach und aus Tephra und Laven die heutige Insel aufbaute."
+    },
+    {
+      "claim": "Lava ist unglaublich heiß.",
+      "source": "Lava",
+      "passage": "Die temperatur von Lava beträgt beim Austritt zwischen 800 °C ... und 1200 °C."
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Vulkan 1 — Lektorat\nZusammenfassung: 0 silent, 0 korrigiert, 0 zu prüfen.",
+    "n_silent": 0,
+    "n_korrigiert": 0,
+    "n_pruefen": 0,
+    "findings": []
+  }
+}
