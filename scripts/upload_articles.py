@@ -313,6 +313,40 @@ def upload_to_r2(staging_dir: Path, bucket: str, endpoint: str,
     return True
 
 
+def upload_audio_to_r2(audio_dir: Path, bucket: str, endpoint: str,
+                       access_key: str, secret_key: str) -> bool:
+    """Lädt audio_dir nach r2:{bucket}/audio/ (gleiche rclone-Flags wie upload_to_r2)."""
+    env = os.environ.copy()
+    env.update({
+        "RCLONE_CONFIG_R2_TYPE":              "s3",
+        "RCLONE_CONFIG_R2_PROVIDER":          "Cloudflare",
+        "RCLONE_CONFIG_R2_ACCESS_KEY_ID":     access_key,
+        "RCLONE_CONFIG_R2_SECRET_ACCESS_KEY": secret_key,
+        "RCLONE_CONFIG_R2_ENDPOINT":          endpoint,
+    })
+
+    cmd = [
+        _find_rclone(), "copy",
+        str(audio_dir),
+        f"r2:{bucket}/audio/",
+        "--transfers", "20",
+        "--checkers", "40",
+        "--progress",
+        "--stats", "30s",
+        "--log-level", "INFO",
+    ]
+
+    log.info("rclone copy → r2:%s/audio/", bucket)
+    result = subprocess.run(cmd, env=env)
+
+    if result.returncode != 0:
+        log.error("rclone (audio) fehlgeschlagen (exit %d)", result.returncode)
+        return False
+
+    log.info("R2-Audio-Upload erfolgreich")
+    return True
+
+
 _RCLONE_WINGET = (
     Path.home() / "AppData/Local/Microsoft/WinGet/Packages"
 )
@@ -344,7 +378,10 @@ def check_rclone() -> bool:
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Wissensfreund Artikel-Pipeline — Schritt 3: upload_articles")
     p.add_argument("--articles-dir",  required=True,          type=Path)
-    p.add_argument("--topic-tree",    required=True,          type=Path)
+    p.add_argument("--topic-tree",    default=None,           type=Path,
+                   help="Optional: Topic-Tree für Index-Anreicherung")
+    p.add_argument("--audio-dir",     default=None,           type=Path,
+                   help="Verzeichnis mit WAV-Dateien → wird nach audio/ im R2-Bucket hochgeladen")
     p.add_argument("--out-dir",       default="upload_staging", type=Path)
     p.add_argument("--bucket",        default="wissensfreund-articles")
     p.add_argument("--include-errors", action="store_true",
@@ -391,16 +428,19 @@ def main() -> None:
     # 2. Artikel ins Staging kopieren
     stage_articles(articles, args.out_dir)
 
-    # 3. Topic-Tree anreichern + schreiben
-    tree = load_topic_tree(args.topic_tree)
-    enriched_tree = enrich_topic_tree(tree, articles)
-    tree_path = args.out_dir / "index" / "topic_tree.json"
-    tree_path.parent.mkdir(parents=True, exist_ok=True)
-    tree_path.write_text(
-        json.dumps(enriched_tree, ensure_ascii=False, indent=2),
-        encoding="utf-8",
-    )
-    log.info("Topic-Tree (angereichert): %s", tree_path)
+    # 3. Topic-Tree anreichern + schreiben (optional)
+    if args.topic_tree:
+        tree = load_topic_tree(args.topic_tree)
+        enriched_tree = enrich_topic_tree(tree, articles)
+        tree_path = args.out_dir / "index" / "topic_tree.json"
+        tree_path.parent.mkdir(parents=True, exist_ok=True)
+        tree_path.write_text(
+            json.dumps(enriched_tree, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        log.info("Topic-Tree (angereichert): %s", tree_path)
+    else:
+        log.info("Kein --topic-tree angegeben — Index-Anreicherung übersprungen")
 
     # 4. Indices bauen
     indices = build_indices(articles, args.out_dir)
@@ -416,13 +456,28 @@ def main() -> None:
 
     if args.dry_run:
         log.info("DRY-RUN: kein R2-Upload")
+        if args.audio_dir and args.audio_dir.exists():
+            n_wav = len(list(args.audio_dir.glob("*.wav")))
+            log.info("DRY-RUN: %d WAVs würden nach r2:%s/audio/ hochgeladen (%s)",
+                     n_wav, args.bucket, args.audio_dir)
+        elif args.audio_dir:
+            log.warning("DRY-RUN: --audio-dir %s existiert nicht", args.audio_dir)
         _print_staging_summary(args.out_dir)
         return
 
-    # 6. R2 Upload
+    # 6. R2 Upload (Artikel-JSON + Indizes)
     ok = upload_to_r2(args.out_dir, args.bucket, endpoint, access_key, secret_key)
     if not ok:
         sys.exit(1)
+
+    # 6b. Audio-Upload (optional)
+    if args.audio_dir and args.audio_dir.exists():
+        n_wav = len(list(args.audio_dir.glob("*.wav")))
+        if not upload_audio_to_r2(args.audio_dir, args.bucket, endpoint, access_key, secret_key):
+            sys.exit(1)
+        log.info("Audio-Upload: %d WAVs → r2:%s/audio/", n_wav, args.bucket)
+    elif args.audio_dir:
+        log.warning("--audio-dir %s existiert nicht — Audio-Upload übersprungen", args.audio_dir)
 
     log.info("Pipeline Schritt 3 abgeschlossen ✓")
 

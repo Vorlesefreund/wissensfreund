@@ -1579,6 +1579,30 @@ def stage4_tts(
     log.info("Stage 4 abgeschlossen: %d OK, %d Fehler", ok, fehler)
 
 
+# ── Stage 5: UPLOAD (Artikel-JSON + Audio → R2) ───────────────────────────────
+
+def stage5_upload(themen: list[str], stufen: list[int],
+                  out_dir: Path, dry_run: bool = False) -> None:
+    """Stage 5: Artikel-JSONs + Audio-WAVs nach R2 hochladen."""
+    import subprocess, sys
+    upload_script = Path(__file__).parent / "upload_articles.py"
+    articles_dir = out_dir / "articles"
+    audio_dir = out_dir / "audio"
+    cmd = [
+        sys.executable, str(upload_script),
+        "--articles-dir", str(articles_dir),
+        "--audio-dir", str(audio_dir),
+    ]
+    if dry_run:
+        cmd.append("--dry-run")
+    log.info("Stage 5 (Upload): %s", " ".join(str(c) for c in cmd))
+    result = subprocess.run(cmd, check=False)
+    if result.returncode != 0:
+        log.error("Stage 5: upload_articles.py mit Exit %d beendet", result.returncode)
+    else:
+        log.info("Stage 5: Upload abgeschlossen")
+
+
 # ── CLI ───────────────────────────────────────────────────────────────────────
 
 def main() -> None:
@@ -1745,6 +1769,13 @@ def main() -> None:
         log.info("STAGE 4: TTS")
         log.info("=" * 60)
         stage4_tts(themen_raw, stufen, out_dir, dry_run=args.dry_run)
+
+    # ── Stage 5: Upload (NICHT in run_all — explizit auslösen) ─────────────────
+    if args.stage == 5:
+        log.info("\n" + "=" * 60)
+        log.info("STAGE 5: UPLOAD → R2")
+        log.info("=" * 60)
+        stage5_upload(themen_raw, stufen, out_dir, dry_run=args.dry_run)
 
     log.info("\n=== Batch-Run abgeschlossen (Run-ID: %s) ===", _RUN_ID)
 

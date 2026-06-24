@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T18:36:25Z -->
+<!-- updated: 2026-06-24T19:18:54Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -40,8 +40,14 @@
 >   `vulkan_l1_artikel.wav` (== article_id). **Encoding-Fix:** produce_article wrappt stdout auf UTF-8
 >   (io.TextIOWrapper) → Lauf braucht KEIN `PYTHONIOENCODING` mehr. Verifiziert: Vulkan l1–l3 ohne
 >   Env-Var, 3 OK / 0 Fehler, 48 WAVs mit sauberen Namen.
-> - **Mini-Produktionslauf (5×3=15 Artikel)** — OFFEN: **Audio→R2-Verdrahtung** (Bucket trägt heute nur
->   JSON), restliche Themen vertonen (Dino/Elefant/Hund/Spartacus/WW2 via Stage 4).
+> - **Audio→R2-Verdrahtung FERTIG** — (1) `upload_articles.py` um `--audio-dir` erweitert (lädt WAVs nach
+>   `r2:{bucket}/audio/`, `upload_audio_to_r2()`, gleiche rclone-Flags); `--topic-tree` jetzt optional.
+>   (2) `stage5_upload()` in run_batch.py ruft upload_articles.py mit articles+audio. `--stage 5` (NICHT in
+>   run_all — explizit). Verifiziert: Vulkan-Upload → 18 Artikel-JSON + **48 WAVs in r2/audio/** (sauberes
+>   Naming). ⚠️ Indizes werden aus --articles-dir neu gebaut → global.json zeigt nur die hochgeladene Menge
+>   (Bucket noch nicht live, App auf klexikon.zim — unkritisch; bei Voll-Katalog-Upload beachten).
+> - **Mini-Produktionslauf (5×3=15 Artikel)** — OFFEN: restliche Themen vertonen (Dino/Elefant/Hund/
+>   Spartacus/WW2 via Stage 4) + per Stage 5 hochladen.
 
 ---
 
