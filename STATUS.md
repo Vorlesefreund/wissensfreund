@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T08:46:53Z -->
+<!-- updated: 2026-06-24T09:51:19Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -9,12 +9,10 @@
 > neu, Titanic+WW2 per Datei-Existenz unberührt (Zeitstempel unverändert). Alle 9 Artikel + 9 Lektorate vorhanden.
 >
 > **OFFENE Punkte nach Priorität:**
-> - **[NÄCHSTE SESSION, kritischer Pfad] Lektorat-Vollständigkeit (Recall):** claim-weise Prüfarchitektur statt
->   holistischem Freidurchgang — die Testläufe zeigten, dass jeder Lauf nur eine Teilmenge der echten Grenzfälle
->   findet. ERST nach Ground-Truth-Messung angehen.
-> - **[Voraussetzung Recall-Umbau] Ground Truth** (zweiseitig: echte Faktfehler + zulässige Vereinfachungen, die NICHT
->   geflaggt werden dürfen) — von Claude Chat zu erstellen; misst Recall UND False-Positive-Rate der Eingriffsgrenze.
-> - **Baustein 2: HTML-Review-Tool** mit Ankreuz-Logik + Rücklauf in Artikel-JSON — erst nach verlässlichem Lektorat.
+> - **Lektorat-Recall GT_v1 abgeschlossen** — Recall 100 % / FPR 0 % auf 3 Themen (Vulkan,
+>   Titanic, WW2). Zwei neue Prompt-Regeln committed (Detailattribute + Starke Quantoren).
+>   **Offen: Overfitting-Check auf 3 neue Themen** (GT-Basis ist noch schmal).
+> - **Baustein 2: HTML-Review-Tool** — kann jetzt angegangen werden, Lektorat ist verlässlich genug.
 > - vulkan_l3 `review_flag` (685 > 682 W) — bei redaktioneller Durchsicht 3 Wörter kürzen, unkritisch.
 > - vulkan_l3 Mitternachts-/Pompeji-Herculaneum-Stelle: Snapshot-Befund liegt vor (gemeinsame Zuordnung nicht gedeckt);
 >   Korrektur-Entscheidung offen — ein Lektorat-Lauf mit der neuen Regel würde einen Vorschlag liefern.
