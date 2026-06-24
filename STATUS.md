@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T17:54:54Z -->
+<!-- updated: 2026-06-24T18:14:13Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -33,9 +33,15 @@
 >   **PAUSEN-BEFUND:** gemini-3.1-flash-tts cappt [pause=N] bei ~1.9 s → `synth_with_pauses` splittet
 >   den Text an großen Pausen (>=1.5 s) und fügt ECHTE Stille ein (Kapitel 2.0 s, stimmt_das 4.0 s;
 >   kleine 0.3/0.5 s bleiben inline). Verifiziert: Vulkan l1–l3 + WW2_l2 → 63 valide WAVs; gemessene
->   Artikel-Pausen 1×~5.6 s + 4×~2.5 s exakt wie gesetzt. Stage-4-Wiring in run_batch.py weiter OFFEN.
-> - **Mini-Produktionslauf (5×3=15 Artikel)** — OFFEN: **Stage-4-Wiring** (stage4_tts → tts_produce
->   importieren), **Audio→R2-Verdrahtung** (Bucket trägt heute nur JSON), restliche Themen vertonen.
+>   Artikel-Pausen 1×~5.6 s + 4×~2.5 s exakt wie gesetzt.
+> - **Stage-4-Wiring FERTIG** — `stage4_tts()` in run_batch.py ruft `tts_produce.produce_article(quiz=True,
+>   run_id=_RUN_ID)` je Artikel, Output → `out_dir/audio/`. Quelle: **Lektorat bevorzugt** (korrigierter
+>   Text), Fallback articles/. Echter Lauf Vulkan l1–l3: 3 OK / 0 Fehler, 48 WAVs. **ACHTUNG Naming:**
+>   WAVs erben den `lektorat_`-Präfix aus json_path.stem → `lektorat_vulkan_l1_artikel.wav` statt
+>   `vulkan_l1_*`. Audio korrekt, aber Dateischlüssel ≠ article_id — vor R2/App fixen (Präfix strippen).
+>   HINWEIS: Lauf braucht `PYTHONIOENCODING=utf-8` (produce_article druckt Unicode, bleibt unverändert).
+> - **Mini-Produktionslauf (5×3=15 Artikel)** — OFFEN: **lektorat_-Präfix im Audio-Naming**, **Audio→R2-
+>   Verdrahtung** (Bucket trägt heute nur JSON), restliche Themen vertonen.
 
 ---
 

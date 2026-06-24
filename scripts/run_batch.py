@@ -1517,20 +1517,62 @@ def stage4_tts(
     out_dir: Path,
     dry_run: bool = False,
 ) -> None:
-    """
-    Stage 4: TTS via ThreadPool.
+    """Stage 4: TTS-Vertonung aller Artikel via tts_produce.produce_article()."""
+    import tts_produce  # Root liegt bereits im sys.path (wie cost_tracker)
 
-    TODO: tts_produce.py (nächster Baustein) muss existieren.
-    Wichtig: tts_audio_sec je Datei an cost_tracker melden.
-    """
+    audio_dir = out_dir / "audio"
+    audio_dir.mkdir(parents=True, exist_ok=True)
+
+    # Erwartete Artikel-Liste aufbauen (analog Stage-2-expected_ids-Muster)
+    targets = []
+    for thema in themen:
+        slug = thema.lower().replace(" ", "_").replace("/", "_")
+        for stufe in stufen:
+            article_id = f"{slug}_l{stufe}"
+            # Lektorat-Fassung bevorzugen (korrigierter Text), Fallback auf articles/
+            lektorat_path = out_dir / "lektorat" / f"lektorat_{article_id}.json"
+            articles_path = out_dir / "articles" / f"{article_id}.json"
+            if lektorat_path.exists():
+                json_path, quelle = lektorat_path, "lektorat"
+            elif articles_path.exists():
+                json_path, quelle = articles_path, "articles (kein Lektorat)"
+            else:
+                log.warning("Stage 4: Artikel nicht gefunden: %s", article_id)
+                continue
+            targets.append((article_id, json_path, quelle))
+
+    log.info("Stage 4 (TTS): %d Artikel zu vertonen → %s", len(targets), audio_dir)
+
     if dry_run:
-        print(f"\n=== DRY-RUN Stage 4 ===")
-        print(f"TTS: {len(themen) * len(stufen)} Slots (ThreadPool)")
-        print(f"  Modell: gemini-3.1-flash-tts-preview")
-        print(f"  cost_tracker.track(schritt='tts', tts_audio_sec=<echte Laenge>)")
-        print("  -> WARTEN auf tts_produce.py")
+        for article_id, json_path, quelle in targets:
+            print(f"[dry-run] TTS: {article_id} ({quelle}) -> {audio_dir}")
         return
-    log.warning("Stage 4 (TTS): TODO — warte auf tts_produce.py")
+
+    ok, fehler = 0, 0
+    for article_id, json_path, quelle in targets:
+        log.info("TTS: %s (aus %s)", article_id, quelle)
+        try:
+            result = tts_produce.produce_article(
+                json_path=json_path,
+                out_dir=audio_dir,
+                quiz=True,
+                run_id=_RUN_ID,
+            )
+            wav_count = (1 if result.get("article_wav") else 0) + len(result.get("quiz_wavs", []))
+            errs = result.get("errors", [])
+            if errs and not result.get("article_wav"):
+                fehler += 1
+                log.error("TTS FEHLER %s: %s", article_id, "; ".join(errs))
+            else:
+                ok += 1
+                log.info("TTS OK: %s — %d WAVs, %.1f s%s",
+                         article_id, wav_count, result.get("article_sec", 0.0),
+                         f" (Teilfehler: {'; '.join(errs)})" if errs else "")
+        except Exception as e:
+            fehler += 1
+            log.error("TTS FEHLER %s: %s", article_id, e)
+
+    log.info("Stage 4 abgeschlossen: %d OK, %d Fehler", ok, fehler)
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
