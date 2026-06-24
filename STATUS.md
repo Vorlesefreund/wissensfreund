@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T10:12:34Z -->
+<!-- updated: 2026-06-24T10:25:28Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -9,13 +9,12 @@
 > neu, Titanic+WW2 per Datei-Existenz unberührt (Zeitstempel unverändert). Alle 9 Artikel + 9 Lektorate vorhanden.
 >
 > **OFFENE Punkte nach Priorität:**
-> - **Lektorat Recall + Overfitting-Check abgeschlossen** — GT_v1 (Vulkan/Titanic/WW2) +
->   GT_v2 (Zugvögel/Demokratie/Sklaverei): Recall 100 %, neue Regeln generalisieren.
->   **Offenes Problem: Precision 53 %** — 8/17 Findings unnötig (Synonym-FPs + Additiv-FPs).
->   Ursache: bestehende Prompt-Regeln werden inkonsistent befolgt; Fix: Negativ-Beispiele
->   direkt an Verletzungs-Stelle. Kein Recall-Risiko, nur Review-Rauschen.
-> - **Baustein 2: HTML-Review-Tool** — kann parallel angegangen werden; FP-Fix erhöht
->   Review-Effizienz, blockiert Baustein 2 aber nicht.
+> - **Lektorat: Stand 3 = bester Stand** (Recall 100 %, Precision 53 % auf GT_v1+v2).
+>   Precision-Fix via Prompt-Tuning gescheitert (Rollback nach Stand 4). Precision-Lösung
+>   erfordert claim-weise Architektur — deferred. FPs sind Stil-Tausche/Additionen,
+>   keine Faktenfehler; mit Baustein 2 im Review handhabbar.
+> - **[NÄCHSTER SCHRITT] Baustein 2: HTML-Review-Tool** — Ankreuz-Logik +
+>   Rücklauf in Artikel-JSON. Entblockt durch GT-Arbeit.
 > - vulkan_l3 `review_flag` (685 > 682 W) — bei redaktioneller Durchsicht 3 Wörter kürzen, unkritisch.
 > - vulkan_l3 Mitternachts-/Pompeji-Herculaneum-Stelle: Snapshot-Befund liegt vor (gemeinsame Zuordnung nicht gedeckt);
 >   Korrektur-Entscheidung offen — ein Lektorat-Lauf mit der neuen Regel würde einen Vorschlag liefern.

@@ -159,6 +159,18 @@ direkt an der Verletzungs-Stelle (nahe am Entscheidungsmoment, nicht nur im Prin
 ## STATUS
 
 GT_v2 abgeschlossen 2026-06-24.
-Overfitting-Check: Recall-Regeln generalisieren (100 % Recall, keine neuen FNs durch neue Themen).
-Offenes Problem: FP-Precision 53 % — Synonym- und Additiv-FPs durch Prompt-Anpassung adressierbar.
-Nächster Schritt: Negativ-Beispiele in KONKRET VERBOTEN + UNVOLLSTÄNDIGKEIT-Block.
+
+Stand 3 (dd98942): Recall 100 %, Precision 53 % — bester erreichter Stand.
+
+Stand 4 (2026-06-24, ROLLBACK):
+Prompt-Tuning-Versuch für Precision (Negativ-Beispiele in KONKRET VERBOTEN +
+UNVOLLSTÄNDIGKEIT) gescheitert:
+  - FPs: 7/8 weiterhin geflaggt; Beispiele wörtlich ignoriert
+  - Recall-Regression: A3 (Indigofinken) + A7 (Fünfjährige) verloren → Recall 78 %
+  - Neue FPs entstanden (4 zusätzliche)
+  - Befund: holistische Lektorat-Architektur wählt wechselnde Findings-Teilmenge;
+    Prompt-Ergänzungen verschieben Aufmerksamkeit, beheben keine systematischen FPs
+  → Rollback auf Stand 3. Kein weiterer Prompt-Tuning-Versuch für Precision.
+
+Precision-Fix erfordert claim-weise Architektur (wie Recall-Umbau).
+Kurzfristig: Baustein 2 (HTML-Review-Tool) macht FPs im Review handhabbar.
