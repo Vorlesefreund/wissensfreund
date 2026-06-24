@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T06:53:41Z -->
+<!-- updated: 2026-06-24T07:39:48Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -8,15 +8,34 @@
 > 2026-06-24 lief selektiv: Stage 1 komplett übersprungen, Stage 2/3 nur die 3 fehlenden Vulkan-Artikel/-Lektorate
 > neu, Titanic+WW2 per Datei-Existenz unberührt (Zeitstempel unverändert). Alle 9 Artikel + 9 Lektorate vorhanden.
 >
-> **Zwei kleine OFFENE Punkte (keine Blocker):**
+> **OFFENE Punkte (keine Blocker):**
+> - **Baustein 2: HTML-Review-Tool mit Ankreuz-Logik + Rücklauf in Artikel-JSON** — noch zu bauen (konsumiert die
+>   neuen PRÜFEN-Vorschläge aus Baustein 1).
+> - **Test der PRÜFEN-Vorschläge an echten Daten ausstehend:** geänderten Lektorat über die 9 Verify-Artikel laufen
+>   lassen (bes. vulkan_l3) — entstehen brauchbare Vorschläge, greift die Zurückschneide-Maxime? (Claude Chat gibt
+>   separat OK.)
 > - vulkan_l3 `review_flag` (685 > 682 W) — bei redaktioneller Durchsicht 3 Wörter zu kürzen, unkritisch.
-> - vulkan_l3 PRÜFEN-Finding (Mitternachts-Säulenkollaps „verschütteten Pompeji UND Herculaneum" — mögliche
->   zeitliche Zusammenziehung) — Quelltext-Prüfung gegen den Generierungs-Snapshot ausstehend; Claude Chat
->   entscheidet anhand des Befunds über eine evtl. Korrektur.
+> - vulkan_l3 PRÜFEN-Finding (Mitternachts-Kollaps „verschütteten Pompeji UND Herculaneum"): Quelltext-Prüfung gegen
+>   den Generierungs-Snapshot ERLEDIGT — Befund: (a) Mitternacht + (b) Herculaneum belegt, (c) gemeinsame Zuordnung
+>   beider Städte zum selben Kollaps NICHT gedeckt (Snapshot: erster Strom → Herculaneum, Pompeji separat). Korrektur-
+>   Entscheidung offen; ein erneuter Lektorat-Lauf (Baustein 1) würde hier nun einen konkreten Vorschlag liefern.
 
 ---
 
 ## Abgeschlossen (2026-06-24)
+
+**Lektorat PRÜFEN liefert jetzt Korrekturvorschläge** (Commit 616c19f, feature/lektorat-pruefen-vorschlag → main FF)
+— Baustein 1 von 2 des Review-Workflows. Bisher gab PRÜFEN nur Problem+Begründung aus („Artikel NICHT ändern") →
+im Review nicht zustimmungsfähig. Jetzt liefert jedes PRÜFEN-Finding mindestens einen konkreten, ankreuzbaren
+Vorschlag. Drei Eingriffe in lektorat_common.py: (1) Prompt — PRÜFEN-Schwelle als Qualitätskriterium statt hartem
+Zähllimit (Ziel 0–1, aber ALLE echten Zweifelsfälle melden, kein Umdeklarieren zu KORRIGIERT); fallabhängige
+Vorschlagsvorgabe (Fall 1 zwei Varianten/Schnittbereich, Fall 2 Kern bewahren, Fall 3 zurücknehmen ohne ungedeckte
+Weichmacher); verbindliche Maxime „im Zweifel zurückschneiden, nie hinzudichten". (2) Output-Schema — pruefen-Block
+um `korrektur_vorschlag` (Pflicht) + `korrektur_alt` (optional, nur Fall-1) erweitert. (3) Builder — PRÜFEN-Zweig
+liest die neuen Felder statt `korrektur_neu=None`; `korrektur_alt` konsistent in allen findings[]-Zweigen.
+parse_lektorat_v2 unverändert (reicht generisch durch), Renderer/HTML bewusst nicht angefasst (Baustein 2).
+py_compile + verify_project_facts (14/14 PASS, regex_absent grün) + Inline-Funktionstest grün. **OFFEN: Test an
+echten Daten (9 Verify-Artikel) + Baustein 2 (HTML-Review-Tool).**
 
 **Stage-1/2/3-Resilienz-Thema geschlossen + Vulkan-Verifikation grün.** Finaler Resume in verify_20260623b
 selektiv gelaufen: Stage 1 kompletter Skip (alle Topics sauber), Stage 2 „unvollständig (3/9 fehlen:
