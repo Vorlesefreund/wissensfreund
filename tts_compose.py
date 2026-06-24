@@ -167,11 +167,11 @@ def compose(article: dict, stufe: str | None = None) -> str:
             if box_type == "stimmt_das":
                 reveal = strip_emoji((box.get("reveal_text") or "").strip())
                 intro  = _phrase("stimmt_das", stufe)
-                # [thoughtful]-Stil + 5 s Nachdenkpause vor der Auflösung
+                # [thoughtful]-Stil + 4 s Nachdenkpause vor der Auflösung
                 frage = f"[thoughtful] {intro}{box_text}"
                 if reveal:
                     answer_intro = _REVEAL_INTRO.get(stufe, "")
-                    parts.append(f"{frage} [pause=5.0] {answer_intro}{reveal}")
+                    parts.append(f"{frage} [pause=4.0] {answer_intro}{reveal}")
                 else:
                     parts.append(frage)
             elif box_type == "wow":

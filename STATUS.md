@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T17:22:42Z -->
+<!-- updated: 2026-06-24T17:54:54Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -31,7 +31,7 @@
 >   Falsch-Varianten** (per Frage-Index%5); **5 Abschluss-Clips** je Ergebnis (alle_richtig…alle_falsch);
 >   **Stil-Tags** [excited]/[thoughtful]/[serious] vor wow/stimmt_das/warnung-Boxen.
 >   **PAUSEN-BEFUND:** gemini-3.1-flash-tts cappt [pause=N] bei ~1.9 s → `synth_with_pauses` splittet
->   den Text an großen Pausen (>=1.5 s) und fügt ECHTE Stille ein (Kapitel 2.0 s, stimmt_das 5.0 s;
+>   den Text an großen Pausen (>=1.5 s) und fügt ECHTE Stille ein (Kapitel 2.0 s, stimmt_das 4.0 s;
 >   kleine 0.3/0.5 s bleiben inline). Verifiziert: Vulkan l1–l3 + WW2_l2 → 63 valide WAVs; gemessene
 >   Artikel-Pausen 1×~5.6 s + 4×~2.5 s exakt wie gesetzt. Stage-4-Wiring in run_batch.py weiter OFFEN.
 > - **Mini-Produktionslauf (5×3=15 Artikel)** — OFFEN: **Stage-4-Wiring** (stage4_tts → tts_produce
