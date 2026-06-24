@@ -97,13 +97,33 @@ LEKTORAT_SYSTEM = (
     "        Lautbild belegt → auf Quellbasis korrigieren\n"
     "    Aktion: Satz in korrektur_neu korrigieren + kurzes WP-Zitat als Beleg.\n\n"
 
-    "  PRÜFEN — NUR in diesen drei Ausnahmefällen:\n"
+    "  PRÜFEN — der seltene Zweifelsfall, der NICHT eindeutig auflösbar ist:\n"
     "    1. Zwei Quellen widersprechen sich direkt und BEIDE sind plausibel\n"
     "    2. Eine Korrektur würde den pädagogischen Kern des Absatzes zerstören\n"
     "    3. Echter Verdacht auf Trainingswissen das in keiner Quelle nachweisbar ist\n"
-    "    Das sind 0–1 Fälle pro Artikel — NICHT 3–5.\n"
+    "    SCHWELLE ist ein Qualitätskriterium, kein Zähllimit: PRÜFEN nur bei echtem,\n"
+    "    nicht eindeutig auflösbarem Zweifel — eindeutige Fälle gehören nach KORRIGIERT.\n"
+    "    Ziel sind möglichst wenige PRÜFEN-Fälle, in der Regel 0–1 pro Artikel. ABER:\n"
+    "    Hat ein Artikel mehrere ECHTE Zweifelsfälle, melde ALLE — kein Verschweigen und\n"
+    "    kein Umdeklarieren zu KORRIGIERT, nur um eine Quote zu halten.\n"
     "    Stilistische Anmerkungen, Klausurstitel, Leseransprache → gehören NICHT hierher.\n"
-    "    Aktion: Artikel NICHT ändern. Problem und Begründung nennen.\n\n"
+    "    Aktion: Artikel NICHT automatisch ändern, ABER IMMER mindestens einen konkreten,\n"
+    "    ankreuzbaren Korrekturvorschlag mitliefern (korrektur_vorschlag) — plus Problem\n"
+    "    und Begründung. Je nach Fall:\n"
+    "      · Fall 1 (Quellenwiderspruch): ENTWEDER zwei Varianten — korrektur_vorschlag\n"
+    "        und korrektur_alt, je eine pro Quelle — ODER eine einzige widerspruchsfreie\n"
+    "        Formulierung im Schnittbereich beider Quellen. Kriterium: Sind beide\n"
+    "        Quellangaben für das Kind relevant UND unterscheidbar → zwei Varianten;\n"
+    "        fällt der Unterschied für die kindgerechte Aussage nicht ins Gewicht → eine\n"
+    "        Formulierung im Schnittbereich. NIE eine dritte, in keiner Quelle belegte Aussage.\n"
+    "      · Fall 2 (pädagogischer Kern): ein konkreter Vorschlag, der den Kern bewahrt und\n"
+    "        die ungedeckte Stelle korrigiert.\n"
+    "      · Fall 3 (Trainingswissen-Verdacht): weglassen ODER auf das von der Quelle\n"
+    "        gedeckte Maß zurücknehmen. GRENZE: «zurücknehmen» heißt auf das Belegte kürzen,\n"
+    "        NICHT ein aufweichendes ungedecktes Wort hinzufügen («vermutlich»,\n"
+    "        «möglicherweise» sind selbst ungedeckt und damit unzulässig).\n"
+    "    MAXIME: Im Zweifel zurückschneiden, nie hinzudichten. Jeder Vorschlag bleibt\n"
+    "    innerhalb dessen, was die deklarierten Quelltexte hergeben.\n\n"
 
     "══════════════════════════════════════════════════\n"
     "ENTSCHEIDUNGSPRINZIP (Kernregel)\n"
@@ -205,9 +225,11 @@ LEKTORAT_SYSTEM = (
     "  ],\n"
     '  "pruefen": [\n'
     "    {\n"
-    '      "claim_original": "Exakter Satz aus dem Artikel",\n'
-    '      "problem":        "Kurze Problembeschreibung (1 Satz)",\n'
-    '      "begruendung":    "Warum PRÜFEN statt KORRIGIERT (1 Satz)"\n'
+    '      "claim_original":      "Exakter Satz aus dem Artikel",\n'
+    '      "korrektur_vorschlag": "Konkreter Korrektursatz (quellenbasiert, gleiches Register)",\n'
+    '      "korrektur_alt":       "Optionaler zweiter Vorschlag NUR bei Fall-1-Quellenwiderspruch mit zwei relevanten Varianten; sonst weglassen",\n'
+    '      "problem":             "Kurze Problembeschreibung (1 Satz)",\n'
+    '      "begruendung":         "Warum PRÜFEN statt KORRIGIERT (1 Satz)"\n'
     "    }\n"
     "  ]\n"
     "}\n\n"
@@ -778,6 +800,7 @@ def annotate_article_lektorat_v2(
                 "verdikt":        "EINBAU_FEHLGESCHLAGEN",
                 "claim_original": claim_disp,
                 "korrektur_neu":  neu_disp,
+                "korrektur_alt":  None,
                 "beleg":          beleg or None,
                 "problem":        None,
                 "begruendung":    None,
@@ -792,6 +815,7 @@ def annotate_article_lektorat_v2(
                 "verdikt":        "SILENT",
                 "claim_original": claim_disp,
                 "korrektur_neu":  neu_disp,
+                "korrektur_alt":  None,
                 "beleg":          beleg or None,
                 "problem":        None,
                 "begruendung":    None,
@@ -803,6 +827,7 @@ def annotate_article_lektorat_v2(
                 "verdikt":        "KORRIGIERT",
                 "claim_original": claim_disp,
                 "korrektur_neu":  neu_disp,
+                "korrektur_alt":  None,
                 "beleg":          beleg or None,
                 "problem":        None,
                 "begruendung":    None,
@@ -812,14 +837,21 @@ def annotate_article_lektorat_v2(
         claim  = p.get("claim_original", "").strip()
         prob   = p.get("problem", "").strip()
         beg    = p.get("begruendung", "").strip()
+        vor    = (p.get("korrektur_vorschlag") or "").strip()
+        alt    = (p.get("korrektur_alt") or "").strip()
         entry  = f"«{claim}» — {prob}"
+        if vor:
+            entry += f" → Vorschlag: «{vor}»"
+            if alt:
+                entry += f" / «{alt}»"
         if beg:
             entry += f" ({beg})"
         pruefen_lines.append(entry)
         findings.append({
             "verdikt":        "PRÜFEN",
             "claim_original": claim,
-            "korrektur_neu":  None,
+            "korrektur_neu":  vor or None,
+            "korrektur_alt":  alt or None,
             "beleg":          None,
             "problem":        prob or None,
             "begruendung":    beg or None,
