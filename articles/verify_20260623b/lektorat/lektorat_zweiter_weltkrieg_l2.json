@@ -1,0 +1,300 @@
+{
+  "meta": {
+    "id": "zweiter_weltkrieg_l2",
+    "title": "Zweiter Weltkrieg",
+    "subtitle": "Wie der schwerste Krieg der Geschichte die Welt veränderte",
+    "emoji": "🌍",
+    "age_level": 2,
+    "pattern": "history_person",
+    "theme_color": "#4A5568",
+    "word_count": 87,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Zweiter_Weltkrieg",
+    "schema_version": "1.0",
+    "review_flag": true,
+    "category_top": "geschichte",
+    "category_sub": "neuzeit",
+    "generated_at": "2026-06-23T20:51:03.856921+00:00",
+    "grounding_companions": [
+      "Tagebuch der Anne Frank",
+      "Enigma (Maschine)",
+      "Weiße Rose",
+      "Operation Overlord"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM",
+    "trim_passes": 1,
+    "review_reason": "8 Sätze außerhalb [15,60] für Stufe 2"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "AnneFrankHouseAmsterdam.jpg",
+      "alt": "Das historische Anne-Frank-Haus an einer Gracht in Amsterdam",
+      "caption": "In diesem Amsterdamer Hinterhaus versteckte sich Anne Frank zwei Jahre lang.",
+      "license": "Public domain",
+      "license_author": "Unbekannt",
+      "source_url": "https://commons.wikimedia.org/wiki/File:AnneFrankHouseAmsterdam.jpg",
+      "wikimedia_id": "File:AnneFrankHouseAmsterdam.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/6/61/AnneFrankHouseAmsterdam.jpg",
+      "is_hero": true,
+      "ab_stufe": 2,
+      "grenzfall": true,
+      "tiers": {
+        "300": "bilder/zweiter_weltkrieg/AnneFrankHouseAmsterdam_300.jpg",
+        "800": "bilder/zweiter_weltkrieg/AnneFrankHouseAmsterdam_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Bletchley_Park_Mansion.jpg",
+      "alt": "Das prachtvolle englische Herrenhaus Bletchley Park",
+      "caption": "Bletchley Park war der geheime Ort der britischen Codeknacker.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "DeFacto",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Bletchley_Park_Mansion.jpg",
+      "wikimedia_id": "File:Bletchley_Park_Mansion.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Bletchley_Park_Mansion.jpg/1920px-Bletchley_Park_Mansion.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/zweiter_weltkrieg/Bletchley_Park_Mansion_300.jpg",
+        "800": "bilder/zweiter_weltkrieg/Bletchley_Park_Mansion_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Gestapo_photo_of_Kurt_Huber.jpg",
+      "alt": "Portraitfoto von Kurt Huber aus den Gestapo-Akten",
+      "caption": "Professor Kurt Huber unterstützte die Widerstandsgruppe Weiße Rose.",
+      "license": "Public domain",
+      "license_author": "Unknown German military officer",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Gestapo_photo_of_Kurt_Huber.jpg",
+      "wikimedia_id": "File:Gestapo_photo_of_Kurt_Huber.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/a/a9/Gestapo_photo_of_Kurt_Huber.jpg",
+      "is_hero": false,
+      "ab_stufe": 2,
+      "grenzfall": true,
+      "tiers": {
+        "300": "bilder/zweiter_weltkrieg/Gestapo_photo_of_Kurt_Huber_300.jpg",
+        "800": "bilder/zweiter_weltkrieg/Gestapo_photo_of_Kurt_Huber_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Eine schwere Zeit für die Welt",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Das Tagebuch von Anne Frank erinnert an den Zweiten Weltkrieg.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Er begann 1939 mit dem deutschen Überfall auf Polen.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Ein Streit auf der ganzen Erde",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s003",
+          "text": "Diktator Adolf Hitler wollte andere Länder gewaltsam beherrschen.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Über 60 Staaten kämpften weltweit mit.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Geheime Maschinen im Einsatz",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s005",
+          "text": "Die Wehrmacht verschlüsselte ihre Funksprüche mit der Maschine Enigma.",
+          "img_index": 1
+        },
+        {
+          "id": "s006",
+          "text": "Forscher in England knackten diesen Code.",
+          "img_index": 1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "In dem geheimen englischen Landhaus Bletchley Park arbeiteten kluge Köpfe rund um die Uhr daran, die Rätsel der Enigma-Maschine zu lösen."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Mutiger Widerstand gegen Gewalt",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s007",
+          "text": "Die Studenten der „Weißen Rose“ wehrten sich heimlich mit Flugblättern gegen Hitler.",
+          "img_index": 2
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Das Ende des Krieges",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s008",
+          "text": "Der Weltkrieg endete im Jahr 1945.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wann begann der Zweite Weltkrieg in Europa?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Am 1. September 1939"
+          },
+          {
+            "key": "B",
+            "text": "Am 8. Mai 1945"
+          },
+          {
+            "key": "C",
+            "text": "Am 12. Juni 1942"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Wie hieß die Verschlüsselungsmaschine der deutschen Armee?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Bletchley"
+          },
+          {
+            "key": "B",
+            "text": "Enigma"
+          },
+          {
+            "key": "C",
+            "text": "Weserübung"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Womit protestierte die „Weiße Rose“ gegen Adolf Hitler?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Mit Radiosendungen"
+          },
+          {
+            "key": "B",
+            "text": "Mit heimlichen Flugblättern"
+          },
+          {
+            "key": "C",
+            "text": "Mit Computern"
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Adolf Hitler",
+      "Anne Frank",
+      "Enigma",
+      "Weiße Rose"
+    ],
+    "discover": [
+      "Polen",
+      "Bletchley Park",
+      "Diktator"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Das Tagebuch des Mädchens Anne Frank erinnert uns an eine schwere Zeit: den Zweiten Weltkrieg.",
+      "source": "Tagebuch der Anne Frank",
+      "passage": "Das Tagebuch der Anne Frank... machten die Autorin zu einem der bekanntesten Opfer des Holocausts... eine Stimme spricht für sechs Millionen... eines gewöhnlichen kleinen Mädchens."
+    },
+    {
+      "claim": "Dieser begann am 1. September 1939 durch den deutschen Überfall auf Polen.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "In Europa begann der Zweite Weltkrieg am 1. September 1939 mit dem von Adolf Hitler befohlenen Überfall auf Polen."
+    },
+    {
+      "claim": "Adolf Hitler regierte Deutschland als Diktator und wollte andere Länder gewaltsam beherrschen.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "der von Adolf Hitler befohlenen Überfall... unter der Diktatur Josef Stalins... ein vom nationalsozialistischen Deutschland ausgelöster Raub-, Eroberungs- und Vernichtungskrieg"
+    },
+    {
+      "claim": "Über 60 Staaten kämpften schließlich weltweit mit.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Über 60 Staaten waren direkt oder indirekt beteiligt..."
+    },
+    {
+      "claim": "Die deutsche Wehrmacht verschlüsselte ihre geheimen Funksprüche mit einer Maschine namens Enigma.",
+      "source": "Enigma (Maschine)",
+      "passage": "Im Zweiten Weltkrieg (1939–1945) wurden Enigma-Maschinen von den Achsenmächten eingesetzt, hauptsächlich von der Wehrmacht."
+    },
+    {
+      "claim": "Doch Forscher in England knackten diesen Code.",
+      "source": "Enigma (Maschine)",
+      "passage": "Den Alliierten gelang es, die damit verschlüsselten Funksprüche nahezu kontinuierlich zu entziffern..."
+    },
+    {
+      "claim": "Im Land wehrten sich mutige Studenten der „Weißen Rose“ heimlich mit Flugblättern gegen Hitler.",
+      "source": "Weiße Rose",
+      "passage": "Weiße Rose nannte sich eine hauptsächlich von Studenten getragene... Widerstandsgruppe gegen die nationalsozialistische Diktatur... verteilte... Flugblätter"
+    },
+    {
+      "claim": "Nach schweren Kämpfen endete der weltweite Krieg im Jahr 1945 durch die Befreiung.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Mit der bedingungslosen Kapitulation der Wehrmacht endeten die Kampfhandlungen in Europa am 8. Mai 1945... zum Kriegsende."
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Zweiter Weltkrieg S2 — Lektorat\nZusammenfassung: 0 silent, 0 korrigiert, 0 zu prüfen.",
+    "n_silent": 0,
+    "n_korrigiert": 0,
+    "n_pruefen": 0,
+    "findings": []
+  }
+}

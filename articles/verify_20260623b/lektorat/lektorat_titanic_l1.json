@@ -1,0 +1,317 @@
+{
+  "meta": {
+    "id": "titanic_l1",
+    "title": "Titanic",
+    "subtitle": "Das größte Schiff der Welt",
+    "emoji": "🚢",
+    "age_level": 1,
+    "pattern": "tech_science",
+    "theme_color": "#1A365D",
+    "word_count": 120,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Titanic_(Schiff)",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "erfindungen",
+    "generated_at": "2026-06-23T20:46:15.863695+00:00",
+    "grounding_companions": [
+      "Robert Ballard (Unterwasserarchäologe)",
+      "Millvina Dean"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Brochure_for_White_Star_Line’s_Two_Ships_“Olympic”_and_“Titanic”_WDL11257.pdf",
+      "alt": "Ein historisches Werbeplakat zeigt die Titanic auf dem Meer.",
+      "caption": "So schön sah das riesige Schiff aus.",
+      "license": "Public domain",
+      "license_author": "White Star Line",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Brochure_for_White_Star_Line%E2%80%99s_Two_Ships_%E2%80%9COlympic%E2%80%9D_and_%E2%80%9CTitanic%E2%80%9D_WDL11257.pdf",
+      "wikimedia_id": "File:Brochure_for_White_Star_Line’s_Two_Ships_“Olympic”_and_“Titanic”_WDL11257.pdf",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Brochure_for_White_Star_Line%E2%80%99s_Two_Ships_%E2%80%9COlympic%E2%80%9D_and_%E2%80%9CTitanic%E2%80%9D_WDL11257.pdf/page1-1920px-Brochure_for_White_Star_Line%E2%80%99s_Two_Ships_%E2%80%9COlympic%E2%80%9D_and_%E2%80%9CTitanic%E2%80%9D_WDL11257.pdf.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/titanic/Brochure_for_White_Star_Line’s_Two_Ships_“Olympic”_and_“Titanic”_WDL11257_300.jpg",
+        "800": "bilder/titanic/Brochure_for_White_Star_Line’s_Two_Ships_“Olympic”_and_“Titanic”_WDL11257_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Iceberg_and_titanic_clean.PNG",
+      "alt": "Eine einfache Zeichnung zeigt, wie Wasser in das Schiff läuft.",
+      "caption": "Wasser läuft durch ein Loch in das Schiff.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Iceberg_and_titanic_clean.PNG",
+      "wikimedia_id": "File:Iceberg_and_titanic_clean.PNG",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/f/f9/Iceberg_and_titanic_clean.PNG",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/titanic/Iceberg_and_titanic_clean_300.jpg",
+        "800": "bilder/titanic/Iceberg_and_titanic_clean_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Millvina_Dean_and_her_brother,_Bertram.jpg",
+      "alt": "Ein altes Foto zeigt zwei kleine Kinder nebeneinander.",
+      "caption": "Das ist das Baby Millvina mit ihrem Bruder.",
+      "license": "Public domain",
+      "license_author": "Autor/-in unbekannt",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Millvina_Dean_and_her_brother,_Bertram.jpg",
+      "wikimedia_id": "File:Millvina_Dean_and_her_brother,_Bertram.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Millvina_Dean_and_her_brother%2C_Bertram.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/titanic/Millvina_Dean_and_her_brother,_Bertram_300.jpg",
+        "800": "bilder/titanic/Millvina_Dean_and_her_brother,_Bertram_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Ein wahrer Riesendampfer",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir ein riesiges Schiff vor.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Es hieß Titanic.",
+          "img_index": 0
+        },
+        {
+          "id": "s003",
+          "text": "Die Titanic war damals das größte Schiff der Welt.",
+          "img_index": 0
+        },
+        {
+          "id": "s004",
+          "text": "Es hatte wunderschöne Zimmer.",
+          "img_index": 0
+        },
+        {
+          "id": "s005",
+          "text": "Sogar ein großes Schwimmbad war an Bord.",
+          "img_index": 0
+        },
+        {
+          "id": "s006",
+          "text": "Viele Menschen reisten glücklich mit.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Das große Unglück",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s007",
+          "text": "In einer dunklen Nacht geschah ein großes Unglück.",
+          "img_index": 1
+        },
+        {
+          "id": "s008",
+          "text": "Das Schiff stieß gegen einen riesigen Eisberg.",
+          "img_index": 1
+        },
+        {
+          "id": "s009",
+          "text": "Wasser lief schnell in das Schiff hinein.",
+          "img_index": 1
+        },
+        {
+          "id": "s010",
+          "text": "Die Menschen stiegen in kleine Rettungsboote.",
+          "img_index": 1
+        },
+        {
+          "id": "s011",
+          "text": "Ein anderes Schiff holte die Menschen ab.",
+          "img_index": 1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Die Titanic sank im kalten Meer. Viele Menschen starben dabei. Es gab zu wenige Rettungsboote."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Ein gerettetes Baby",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s012",
+          "text": "An Bord war auch ein ganz kleines Baby.",
+          "img_index": 2
+        },
+        {
+          "id": "s013",
+          "text": "Sie hieß Millvina.",
+          "img_index": 2
+        },
+        {
+          "id": "s014",
+          "text": "Ihre Mutter rettete Millvina in ein Boot.",
+          "img_index": 2
+        },
+        {
+          "id": "s015",
+          "text": "Das Baby kuschelte sich warm ein.",
+          "img_index": 2
+        },
+        {
+          "id": "s016",
+          "text": "Millvina kam sicher an Land.",
+          "img_index": 2
+        },
+        {
+          "id": "s017",
+          "text": "Später erzählte sie allen diese spannende Geschichte.",
+          "img_index": 2
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was war die Titanic?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein riesiges Dampfschiff"
+          },
+          {
+            "key": "B",
+            "text": "Ein fliegendes Luftschiff"
+          },
+          {
+            "key": "C",
+            "text": "Ein schnelles Unterseeboot"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Dagegen stieß das Schiff in der Nacht?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Gegen eine große Insel"
+          },
+          {
+            "key": "B",
+            "text": "Gegen einen Eisberg"
+          },
+          {
+            "key": "C",
+            "text": "Gegen ein anderes Schiff"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Wer wurde als kleines Baby aus dem Schiff gerettet?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein kleiner Hund"
+          },
+          {
+            "key": "B",
+            "text": "Ein Junge namens Robert"
+          },
+          {
+            "key": "C",
+            "text": "Ein Mädchen namens Millvina"
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Eisberg",
+      "Schiff",
+      "Rettungsboot"
+    ],
+    "discover": [
+      "Meer",
+      "Ozean",
+      "Nordatlantik"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Die Titanic war damals das größte Schiff der Welt.",
+      "source": "Titanic (Schiff)",
+      "passage": "Bei ihrer Fertigstellung im Frühjahr 1912 war sie das größte Schiff der Welt."
+    },
+    {
+      "claim": "Sogar ein großes Schwimmbad war an Bord.",
+      "source": "Titanic (Schiff)",
+      "passage": "auf dem F-Deck ein beheiztes Schwimmbad mit einer Beckengröße von 10 Meter mal 4,3 Metern, wie es damals kein größeres auf einem Schiff gab"
+    },
+    {
+      "claim": "Das Schiff stieß gegen einen riesigen Eisberg.",
+      "source": "Titanic (Schiff)",
+      "passage": "In der Nacht vom 14. auf den 15. April 1912 stieß sie im Nordatlantik mit einem Eisberg zusammen."
+    },
+    {
+      "claim": "Ein anderes Schiff holte die Menschen ab.",
+      "source": "Titanic (Schiff)",
+      "passage": "Diese Rettungsboote wiederum gelangten zur Carpathia, dem einzigen Schiff, das Überlebende aufgenommen und nach New York gebracht hat."
+    },
+    {
+      "claim": "An Bord war auch ein ganz kleines Baby.",
+      "source": "Millvina Dean",
+      "passage": "Als die Titanic am 15. April 1912 unterging, war Millvina Dean zehn Wochen alt und damit die jüngste Person auf dem Schiff."
+    },
+    {
+      "claim": "Sie hieß Millvina.",
+      "source": "Millvina Dean",
+      "passage": "Elizabeth Gladys „Millvina“ Dean (* 2. Februar 1912 in London; † 31. Mai 2009 in Ashurst, Hampshire) überlebte 1912 den Untergang des Passagierschiffs Titanic."
+    },
+    {
+      "claim": "Ihre Mutter rettete Millvina in ein Boot.",
+      "source": "Millvina Dean",
+      "passage": "Millvina Dean, ihre Mutter und ihr Bruder überlebten das Schiffsunglück nach der Kollision mit dem Eisberg, ihr Vater nicht."
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Titanic S1 — Lektorat\nZusammenfassung: 0 silent, 0 korrigiert, 0 zu prüfen.",
+    "n_silent": 0,
+    "n_korrigiert": 0,
+    "n_pruefen": 0,
+    "findings": []
+  }
+}

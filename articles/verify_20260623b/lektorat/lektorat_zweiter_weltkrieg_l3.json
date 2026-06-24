@@ -1,0 +1,493 @@
+{
+  "meta": {
+    "id": "zweiter_weltkrieg_l3",
+    "title": "Zweiter Weltkrieg",
+    "subtitle": "Der größte und schwerste Konflikt der Menschheitsgeschichte",
+    "emoji": "🌍",
+    "age_level": 3,
+    "pattern": "history_person",
+    "theme_color": "#4A5568",
+    "word_count": 479,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Zweiter_Weltkrieg",
+    "schema_version": "1.0",
+    "review_flag": true,
+    "category_top": "geschichte",
+    "category_sub": "neuzeit",
+    "generated_at": "2026-06-23T20:53:50.291411+00:00",
+    "grounding_companions": [
+      "Tagebuch der Anne Frank",
+      "Enigma (Maschine)",
+      "Weiße Rose",
+      "Operation Overlord"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM",
+    "review_reason": "20 Sätze außerhalb [25,100] für Stufe 3"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Bletchley_Park_Mansion.jpg",
+      "alt": "Außenansicht von Bletchley Park, einem historischen englischen Herrenhaus unter blauem Himmel",
+      "caption": "In Bletchley Park entschlüsselten britische Spezialisten geheime deutsche Funksprüche.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "DeFacto",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Bletchley_Park_Mansion.jpg",
+      "wikimedia_id": "File:Bletchley_Park_Mansion.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Bletchley_Park_Mansion.jpg/1920px-Bletchley_Park_Mansion.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/zweiter_weltkrieg/Bletchley_Park_Mansion_300.jpg",
+        "800": "bilder/zweiter_weltkrieg/Bletchley_Park_Mansion_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "AnneFrankHouseAmsterdam.jpg",
+      "alt": "Das Backsteingebäude des Anne-Frank-Hauses an einer Gracht in Amsterdam",
+      "caption": "Das Gebäude in Amsterdam, in dessen Hinterhaus sich Anne Frank zwei Jahre lang versteckte.",
+      "license": "Public domain",
+      "license_author": "",
+      "source_url": "https://commons.wikimedia.org/wiki/File:AnneFrankHouseAmsterdam.jpg",
+      "wikimedia_id": "File:AnneFrankHouseAmsterdam.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/6/61/AnneFrankHouseAmsterdam.jpg",
+      "is_hero": true,
+      "ab_stufe": 2,
+      "grenzfall": true,
+      "tiers": {
+        "300": "bilder/zweiter_weltkrieg/AnneFrankHouseAmsterdam_300.jpg",
+        "800": "bilder/zweiter_weltkrieg/AnneFrankHouseAmsterdam_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Bundesarchiv_Bild_101II-MW-4222-02A,_\"Enigma\"_auf_U-Boot_U-124.jpg",
+      "alt": "Ein Funker an einer Enigma-Verschlüsselungsmaschine auf einem U-Boot",
+      "caption": "Ein deutscher Funker bedient an Bord eines U-Bootes die Enigma-Maschine.",
+      "license": "CC BY-SA 3.0 de",
+      "license_author": "Dietrich",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Bundesarchiv_Bild_101II-MW-4222-02A%2C_%22Enigma%22_auf_U-Boot_U-124.jpg",
+      "wikimedia_id": "File:Bundesarchiv_Bild_101II-MW-4222-02A,_\"Enigma\"_auf_U-Boot_U-124.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/f/fc/Bundesarchiv_Bild_101II-MW-4222-02A%2C_%22Enigma%22_auf_U-Boot_U-124.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/zweiter_weltkrieg/Bundesarchiv_Bild_101II-MW-4222-02A,_\"Enigma\"_auf_U-Boot_U-124_300.jpg",
+        "800": "bilder/zweiter_weltkrieg/Bundesarchiv_Bild_101II-MW-4222-02A,_\"Enigma\"_auf_U-Boot_U-124_800.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "1945-05-01GerWW2BattlefrontAtlas.jpg",
+      "alt": "Historische Landkarte von Mitteleuropa mit den Frontverläufen im Mai 1945",
+      "caption": "Militärische Landkarte von Mitteleuropa mit den Frontverläufen kurz vor dem Kriegsende im Mai 1945.",
+      "license": "Public domain",
+      "license_author": "Army Map Service",
+      "source_url": "https://commons.wikimedia.org/wiki/File:1945-05-01GerWW2BattlefrontAtlas.jpg",
+      "wikimedia_id": "File:1945-05-01GerWW2BattlefrontAtlas.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/2/2f/1945-05-01GerWW2BattlefrontAtlas.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/zweiter_weltkrieg/1945-05-01GerWW2BattlefrontAtlas_300.jpg",
+        "800": "bilder/zweiter_weltkrieg/1945-05-01GerWW2BattlefrontAtlas_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Der größte Konflikt der Geschichte",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Ein kleines rot-weißes Tagebuch und eine Maschine voller geheimer Zahnräder zeigen, wie tief dieser weltweite Kampf das Leben der Menschen berührte.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Der Zweite Weltkrieg dauerte von 1939 bis 1945 und war der schlimmste und zerstörerischste Krieg, den es je gab.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Über 60 Staaten machten direkt oder indirekt mit, und Schätzungen zufolge verloren mehr als 65 Millionen Menschen ihr Leben.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Der Weg in die Katastrophe",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s004",
+          "text": "Die Nationalsozialisten unter Adolf Hitler übernahmen 1933 in Deutschland die Macht und lösten Schritt für Schritt die europäische Friedensordnung auf.",
+          "img_index": -1
+        },
+        {
+          "id": "s005",
+          "text": "Nach der schrittweisen Eingliederung von Nachbarländern schlossen Deutschland und die Sowjetunion im August 1939 überraschend einen Nichtangriffspakt.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "In einem geheimen Zusatzprotokoll teilten sie Polen und andere Gebiete heimlich unter sich auf.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Am 1. September 1939 begann der Krieg in Europa schließlich mit dem von Adolf Hitler befohlenen Überfall auf Polen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Geheime Codes und ein stummer Zeuge",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s008",
+          "text": "Um Funksprüche unlesbar zu machen, nutzte die deutsche Wehrmacht die Rotor-Chiffriermaschine namens Enigma.",
+          "img_index": 1
+        },
+        {
+          "id": "s009",
+          "text": "Britischen Codeknackern in Bletchley Park bei London gelang es jedoch, die Funksprüche nahezu kontinuierlich zu entziffern, was im Kampf gegen deutsche U-Boote entscheidend war.",
+          "img_index": 1
+        },
+        {
+          "id": "s010",
+          "text": "Einen ganz anderen, sehr persönlichen Blick auf den Krieg zeigt das weltberühmte Tagebuch der Anne Frank.",
+          "img_index": 0
+        },
+        {
+          "id": "s011",
+          "text": "Das jüdische Mädchen versteckte sich mit Familienangehörigen und Bekannten zwei Jahre lang in einem Amsterdamer Hinterhaus vor den Nationalsozialisten, um der Deportation und Ermordung zu entgehen.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Die Enigma besaß unvorstellbar viele Einstellmöglichkeiten für ihren Walzensatz aus drei Rotoren sowie das Steckerbrett. Das machte sie damals zu einer der sichersten Chiffriermaschinen der Welt, bevor sie geknackt wurde."
+        },
+        {
+          "type": "warnung",
+          "text": "In den besetzten Gebieten ermordeten die Nationalsozialisten systematisch über sechs Millionen Menschen jüdischer Abstammung. Dieser beispiellose Massenmord wird als Holocaust bezeichnet."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Angriffe an allen Fronten",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s012",
+          "text": "Zuerst feierte die deutsche Wehrmacht schnelle Siege, besiegte 1940 Frankreich und besetzte große Teile Europas.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Doch der Angriff auf die Sowjetunion im Juni 1941 entwickelte sich zu einem grausamen Vernichtungskrieg und blieb schließlich im eisigen Winter vor Moskau stecken.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Mit der Niederlage in der Schlacht von Stalingrad 1942/43 verlor Deutschland endgültig die Initiative.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Nachdem Japan im Dezember 1941 den US-Militärstützpunkt Pearl Harbor angriff, traten auch die USA aktiv in den Weltkrieg ein.",
+          "img_index": -1
+        },
+        {
+          "id": "s016",
+          "text": "Am 6. Juni 1944, dem sogenannten D-Day, landeten die Westalliierten bei der Operation Overlord mit der größten Landungsflotte des Krieges in der Normandie, um eine zweite Front aufzubauen.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Dachten alle Soldaten, der Überfall auf Polen wäre nur ein friedliches Manöver?",
+          "reveal_text": "Nein. Zwar rückten viele deutsche Soldaten anfangs mit Platzpatronen an die Grenze vor, um ein Manöver vorzutäuschen. Doch mit der Unklarheit war es vorbei, als sie kurz vor dem Angriff den Befehl erhielten, scharfe Munition zu laden.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Das Ende und die Folgen",
+      "section_role": "decline_end",
+      "sentences": [
+        {
+          "id": "s017",
+          "text": "Als sowjetische Soldaten Berlin eroberten und Hitler sich das Leben nahm, kapitulierte die Wehrmacht am 8. Mai 1945 bedingungslos.",
+          "img_index": 3
+        },
+        {
+          "id": "s018",
+          "text": "Im Pazifik endete der Krieg erst am 2. September 1945, nachdem die USA Atombomben auf Hiroshima und Nagasaki abwarfen und die Sowjetunion Japan angriff.",
+          "img_index": 3
+        },
+        {
+          "id": "s019",
+          "text": "Nach dem Krieg wurde Deutschland in vier Besatzungszonen aufgeteilt und verlor große Teile seines Gebiets.",
+          "img_index": 3
+        },
+        {
+          "id": "s020",
+          "text": "Als Lehre aus dem unermesslichen Leid gründeten die Sieger die Organisation der Vereinten Nationen, kurz UNO, um den Weltfrieden dauerhaft zu sichern.",
+          "img_index": 3
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Mit welchem Ereignis begann der Zweite Weltkrieg in Europa?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Mit dem Überfall auf Polen am 1. September 1939"
+          },
+          {
+            "key": "B",
+            "text": "Mit dem Angriff auf Pearl Harbor im Dezember 1941"
+          },
+          {
+            "key": "C",
+            "text": "Mit der Landung der Alliierten in der Normandie 1944"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Wie hieß die deutsche Verschlüsselungsmaschine, die von den Alliierten geknackt wurde?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Bletchley"
+          },
+          {
+            "key": "B",
+            "text": "Enigma"
+          },
+          {
+            "key": "C",
+            "text": "Overlord"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Wo landeten die Westalliierten am berühmten D-Day?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Auf der Insel Sizilien"
+          },
+          {
+            "key": "B",
+            "text": "An der Küste von Hiroshima"
+          },
+          {
+            "key": "C",
+            "text": "In der Normandie in Nordfrankreich"
+          }
+        ],
+        "correct_key": "C"
+      },
+      {
+        "id": "q4",
+        "text": "Welche weltweite Organisation wurde nach dem Krieg gegründet, um den Frieden zu sichern?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Die Vereinten Nationen (UNO)"
+          },
+          {
+            "key": "B",
+            "text": "Die Wehrmacht"
+          },
+          {
+            "key": "C",
+            "text": "Das Bündnis der Achsenmächte"
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Holocaust",
+      "Wehrmacht",
+      "Sowjetunion",
+      "Alliierte"
+    ],
+    "discover": [
+      "Anne Frank",
+      "Enigma",
+      "Operation Overlord"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Der Zweite Weltkrieg dauerte von 1939 bis 1945.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Als Zweiter Weltkrieg (1. September 1939 – 2. September 1945) wird der zweite global geführte Krieg sämtlicher Großmächte im 20. Jahrhundert bezeichnet."
+    },
+    {
+      "claim": "Über 60 Staaten machten direkt oder indirekt mit.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Über 60 Staaten waren direkt oder indirekt beteiligt, mehr als 110 Millionen Menschen trugen Waffen."
+    },
+    {
+      "claim": "Schätzungen zufolge verloren mehr als 65 Millionen Menschen ihr Leben.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Schätzungen zufolge wurden über 65 Millionen Menschen getötet."
+    },
+    {
+      "claim": "Die Nationalsozialisten unter Adolf Hitler übernahmen 1933 in Deutschland die Macht.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "NSDAP, die 1933 in Deutschland die Macht übernommen hatte."
+    },
+    {
+      "claim": "Deutschland und die Sowjetunion schlossen im August 1939 überraschend einen Nichtangriffspakt.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Am 23. August 1939 schloss Deutschland mit der Sowjetunion zur Absicherung des geplanten Überfalls auf Polen für viele überraschend den „Deutsch-sowjetischer Nichtangriffspakt“, später „Hitler-Stalin-Pakt“ genannt."
+    },
+    {
+      "claim": "Am 1. September 1939 begann der Krieg in Europa mit dem deutschen Überfall auf Polen.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "In Europa begann der Zweite Weltkrieg am 1. September 1939 mit dem von Adolf Hitler befohlenen Überfall auf Polen."
+    },
+    {
+      "claim": "Um Funksprüche unlesbar zu machen, nutzte die Wehrmacht die Enigma.",
+      "source": "Enigma (Maschine)",
+      "passage": "Im Zweiten Weltkrieg (1939–1945) wurden Enigma-Maschinen von den Achsenmächten eingesetzt, hauptsächlich von der Wehrmacht."
+    },
+    {
+      "claim": "Kryptoanalytikern in Bletchley Park gelang es, die Funksprüche fast durchlaufend zu entziffern.",
+      "source": "Enigma (Maschine)",
+      "passage": "Ende 1942 gelang es britischen Kryptoanalytikern in Bletchley Park bei London, den mit Hilfe der ENIGMA verschlüsselten Funkverkehr der deutschen U-Boote erneut zu brechen."
+    },
+    {
+      "claim": "Das jüdische Mädchen versteckte sich zwei Jahre lang in einem Amsterdamer Hinterhaus.",
+      "source": "Tagebuch der Anne Frank",
+      "passage": "Dort versteckte sie sich zwei Jahre lang mit Familienangehörigen und Bekannten vor den Nationalsozialisten, um der Deportation und Ermordung zu entgehen."
+    },
+    {
+      "claim": "Der Angriff auf die Sowjetunion im Juni 1941 war ein Vernichtungskrieg.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Der Krieg against die Sowjetunion wurde vom deutschen Heer, Waffen-SS und Luftwaffe als Vernichtungskrieg... die zweite Phase begann mit dem deutschen Überfall auf die Sowjetunion am 22. Juni 1941."
+    },
+    {
+      "claim": "Mit der Schlacht von Stalingrad 1942/43 verlor die Wehrmacht die Initiative.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Schlacht von Stalingrad 1942/43 verlor die Wehrmacht endgültig die Initiative und die Rote Armee setzte zum Gegenschlag an"
+    },
+    {
+      "claim": "Im Dezember 1941 griffen japanische Truppen Pearl Harbor an.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Der japanische Angriff auf Pearl Harbor Anfang Dezember 1941 eröffnete den Pazifikkrieg."
+    },
+    {
+      "claim": "Am 6. Juni 1944 landeten die Westalliierten bei der Operation Overlord.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Die dritte Phase folgte im Westen mit der Landung der Alliierten in der Normandie am 6. Juni 1944."
+    },
+    {
+      "claim": "Als Hitler sich am 30. April das Leben nahm, endete der Krieg bald darauf.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Nachdem Hitler am 30. April 1945 im Berliner Führerbunker Selbstmord begangen hatte, kapitulierten zwei Tage später die deutschen Truppen der Stadt. Am 8. Mai 1945 unterschrieb Generalfeldmarschall Keitel die bedingungslose Kapitulation"
+    },
+    {
+      "claim": "Im Pazifik endete der Krieg am 2. September 1945 nach den Atombombenabwürfen.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "die Atombombenabwürfe auf Hiroshima und Nagasaki führten zur Kapitulation Japans am 2. September 1945 und damit zum Kriegsende."
+    },
+    {
+      "claim": "In Jalta wurde Deutschland in vier Besatzungszonen aufgeteilt.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "In Jalta (Februar 1945) wurde Deutschland in vier Besatzungszonen aufgeteilt."
+    },
+    {
+      "claim": "Die Organisation der Vereinten Nationen (UNO) wurde gegründet.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Die Organisation der Vereinten Nationen (UNO) wurde gegründet, deren ständige Mitglieder im Sicherheitsrat die Hauptsiegermächte des Zweiten Weltkriegs wurden"
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Zweiter Weltkrieg S3 — Lektorat\n### SILENT (2 Korrekturen)\n- «… gelang es jedoch, die Funksprüche fast durchlaufend zu entziffern, was im Kampf gegen …» → «… gelang es jedoch, die Funksprüche nahezu kontinuierlich zu entziffern, was im Kampf gegen …» (WP: «Den Alliierten gelang es, die damit verschlüsselten Funksprüche nahezu kontinuierlich zu entziffern»)\n- «…s jüdische Mädchen versteckte sich zwei Jahre lang in einem Amsterdame…» → «…s jüdische Mädchen versteckte sich mit Familienangehörigen und Bekannten zwei Jahre lang in einem Amsterdame…» (WP: «Dort versteckte sie sich zwei Jahre lang mit Familienangehörigen und Bekannten vor den Nationalsozialisten, um der Deportation und Ermordung zu entgehen»)\n### KORRIGIERT (2 Korrekturen)\n- «…iele Einstellmöglichkeiten für ihre drei Rotoren.» → «…iele Einstellmöglichkeiten für ihren Walzensatz aus drei Rotoren sowie das Steckerbrett.» — WP: ««Der gesamte Schlüsselraum der Enigma I ergibt sich aus den folgenden vier Faktoren»: Walzenlage, Ringstellung, Walzenstellung und Steckerverbindungen.»\n- «…d mit der größten Landungsflotte der Geschichte in der Normandie, um eine zweite F…» → «…d mit der größten Landungsflotte des Krieges in der Normandie, um eine zweite F…» — WP: ««Für das Unternehmen wurde die größte Landungsflotte des Krieges zusammengezogen»»\nZusammenfassung: 2 silent, 2 korrigiert, 0 zu prüfen.",
+    "n_silent": 2,
+    "n_korrigiert": 2,
+    "n_pruefen": 0,
+    "findings": [
+      {
+        "verdikt": "SILENT",
+        "claim_original": "Britischen Codeknackern in Bletchley Park bei London gelang es jedoch, die Funksprüche fast durchlaufend zu entziffern, was im Kampf gegen deutsche U-Boote entscheidend war.",
+        "korrektur_neu": "Britischen Codeknackern in Bletchley Park bei London gelang es jedoch, die Funksprüche nahezu kontinuierlich zu entziffern, was im Kampf gegen deutsche U-Boote entscheidend war.",
+        "beleg": "«Den Alliierten gelang es, die damit verschlüsselten Funksprüche nahezu kontinuierlich zu entziffern»",
+        "problem": null,
+        "begruendung": null,
+        "review_decision": "auto",
+        "reviewed_at": "2026-06-24T11:25:31+00:00"
+      },
+      {
+        "verdikt": "SILENT",
+        "claim_original": "Das jüdische Mädchen versteckte sich zwei Jahre lang in einem Amsterdamer Hinterhaus vor den Nationalsozialisten, um der Deportation und Ermordung zu entgehen.",
+        "korrektur_neu": "Das jüdische Mädchen versteckte sich mit Familienangehörigen und Bekannten zwei Jahre lang in einem Amsterdamer Hinterhaus vor den Nationalsozialisten, um der Deportation und Ermordung zu entgehen.",
+        "beleg": "«Dort versteckte sie sich zwei Jahre lang mit Familienangehörigen und Bekannten vor den Nationalsozialisten, um der Deportation und Ermordung zu entgehen»",
+        "problem": null,
+        "begruendung": null,
+        "review_decision": "auto",
+        "reviewed_at": "2026-06-24T11:25:31+00:00"
+      },
+      {
+        "verdikt": "KORRIGIERT",
+        "claim_original": "Die Enigma besaß unvorstellbar viele Einstellmöglichkeiten für ihre drei Rotoren.",
+        "korrektur_neu": "Die Enigma besaß unvorstellbar viele Einstellmöglichkeiten für ihren Walzensatz aus drei Rotoren sowie das Steckerbrett.",
+        "beleg": "«Der gesamte Schlüsselraum der Enigma I ergibt sich aus den folgenden vier Faktoren»: Walzenlage, Ringstellung, Walzenstellung und Steckerverbindungen.",
+        "problem": null,
+        "begruendung": null,
+        "review_decision": "angenommen",
+        "reviewed_at": "2026-06-24T11:25:31+00:00"
+      },
+      {
+        "verdikt": "KORRIGIERT",
+        "claim_original": "Am 6. Juni 1944, dem sogenannten D-Day, landeten die Westalliierten bei der Operation Overlord mit der größten Landungsflotte der Geschichte in der Normandie, um eine zweite Front aufzubauen.",
+        "korrektur_neu": "Am 6. Juni 1944, dem sogenannten D-Day, landeten die Westalliierten bei der Operation Overlord mit der größten Landungsflotte des Krieges in der Normandie, um eine zweite Front aufzubauen.",
+        "beleg": "«Für das Unternehmen wurde die größte Landungsflotte des Krieges zusammengezogen»",
+        "problem": null,
+        "begruendung": null,
+        "review_decision": "angenommen",
+        "reviewed_at": "2026-06-24T11:25:31+00:00"
+      }
+    ]
+  }
+}

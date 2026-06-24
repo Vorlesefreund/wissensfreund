@@ -1,0 +1,289 @@
+{
+  "meta": {
+    "id": "zweiter_weltkrieg_l1",
+    "title": "Zweiter Weltkrieg",
+    "subtitle": "Als fast die ganze Welt stritt",
+    "emoji": "🕊️",
+    "age_level": 1,
+    "pattern": "history_person",
+    "theme_color": "#4CAF50",
+    "word_count": 99,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Zweiter_Weltkrieg",
+    "schema_version": "1.0",
+    "review_flag": true,
+    "category_top": "geschichte",
+    "category_sub": "weltkriege",
+    "generated_at": "2026-06-23T20:46:15.882759+00:00",
+    "grounding_companions": [
+      "Tagebuch der Anne Frank",
+      "Enigma (Maschine)",
+      "Weiße Rose",
+      "Operation Overlord"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM",
+    "trim_passes": 1,
+    "review_reason": "Wortzahl 99 > Cap 92; lektorat: 1 zu prüfen"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Bletchley_Park_Mansion.jpg",
+      "alt": "Das Landhaus Bletchley Park unter blauem Himmel",
+      "caption": "In diesem Haus arbeiteten heimlich schlaue Code-Knacker.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "DeFacto",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Bletchley_Park_Mansion.jpg",
+      "wikimedia_id": "File:Bletchley_Park_Mansion.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/Bletchley_Park_Mansion.jpg/1920px-Bletchley_Park_Mansion.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/zweiter_weltkrieg/Bletchley_Park_Mansion_300.jpg",
+        "800": "bilder/zweiter_weltkrieg/Bletchley_Park_Mansion_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Ein riesiger Streit",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir vor, fast die ganze Welt streitet sich.",
+          "img_index": -1
+        },
+        {
+          "id": "s002",
+          "text": "Das nennt man einen großen Weltkrieg.",
+          "img_index": -1
+        },
+        {
+          "id": "s003",
+          "text": "Viele Länder machten bei dem schlimmen Kampf mit.",
+          "img_index": -1
+        },
+        {
+          "id": "s004",
+          "text": "Sehr viele Menschen verloren dabei ihr Leben.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Das Versteck von Anne Frank",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s005",
+          "text": "Ein jüdisches Mädchen hieß Anne Frank.",
+          "img_index": -1
+        },
+        {
+          "id": "s006",
+          "text": "Sie musste sich in einem geheimen Hinterhaus verstecken.",
+          "img_index": -1
+        },
+        {
+          "id": "s007",
+          "text": "Anne schrieb ihre Gedanken in ein kleines Tagebuch.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Geheime Botschaften",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s008",
+          "text": "In einem geheimen Gebäude arbeiteten schlaue Rätsel-Löser.",
+          "img_index": 0
+        },
+        {
+          "id": "s009",
+          "text": "Sie lasen heimlich die geheimen Nachrichten der Soldaten.",
+          "img_index": 0
+        },
+        {
+          "id": "s010",
+          "text": "Nach einer langen Zeit hörte der Krieg endlich auf.",
+          "img_index": 0
+        },
+        {
+          "id": "s011",
+          "text": "Die Menschen schlossen wieder Frieden.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "In einem geheimen Gebäude arbeiteten damals geheime Code-Knacker. Sie halfen dabei, den großen Krieg schneller zu beenden."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wie nennt man einen großen Kampf von ganz vielen Ländern?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Einen Weltkrieg"
+          },
+          {
+            "key": "B",
+            "text": "Ein Fußballspiel"
+          },
+          {
+            "key": "C",
+            "text": "Eine Schnitzeljagd"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Wohin schrieb das jüdische Mädchen Anne Frank ihre Gedanken?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Auf eine Wand"
+          },
+          {
+            "key": "B",
+            "text": "In ein Tagebuch"
+          },
+          {
+            "key": "C",
+            "text": "In den Sand"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Was machten die Menschen am Ende des Krieges?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie stritten weiter"
+          },
+          {
+            "key": "B",
+            "text": "Sie liefen weg"
+          },
+          {
+            "key": "C",
+            "text": "Sie schlossen Frieden"
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Frieden",
+      "Anne Frank"
+    ],
+    "discover": [
+      "Bletchley Park",
+      "Tagebuch"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Das nennt man einen großen Weltkrieg.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Als Zweiter Weltkrieg (1. September 1939 – 2. September 1945) wird der zweite global geführte Krieg sämtlicher Großmächte im 20. Jahrhundert bezeichnet."
+    },
+    {
+      "claim": "Viele Länder machten bei dem schlimmen Kampf mit.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Über 60 Staaten waren direkt oder indirekt beteiligt"
+    },
+    {
+      "claim": "Sehr viele Menschen verloren dabei ihr Leben.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "Schätzungen zufolge wurden über 65 Millionen Menschen getötet."
+    },
+    {
+      "claim": "Ein jüdisches Mädchen hieß Anne Frank.",
+      "source": "Tagebuch der Anne Frank",
+      "passage": "in die Niederlande geflohenen deutschen Juden... Anne Frank"
+    },
+    {
+      "claim": "Sie musste sich in einem geheimen Hinterhaus verstecken.",
+      "source": "Tagebuch der Anne Frank",
+      "passage": "Dort versteckte sie sich zwei Jahre lang... im Hinterhaus"
+    },
+    {
+      "claim": "Anne schrieb ihre Gedanken in ein kleines Tagebuch.",
+      "source": "Tagebuch der Anne Frank",
+      "passage": "nutzte Anne es als Tagebuch"
+    },
+    {
+      "claim": "Sie lasen heimlich die geheimen Nachrichten der Soldaten.",
+      "source": "Enigma (Maschine)",
+      "passage": "Den Alliierten gelang es, die damit verschlüsselten Funksprüche nahezu kontinuierlich zu entziffern"
+    },
+    {
+      "claim": "Die Menschen schlossen wieder Frieden.",
+      "source": "Zweiter Weltkrieg",
+      "passage": "die Atombombenabwürfe auf Hiroshima und Nagasaki führten zur Kapitulation Japans am 2. September 1945 und damit zum Kriegsende."
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Zweiter Weltkrieg S1 — Lektorat\n### KORRIGIERT (2 Korrekturen)\n- «In diesem großen Landhaus wohnten schlaue Rätsel-Löser.» → «In einem geheimen Gebäude arbeiteten schlaue Rätsel-Löser.» — WP: «Quelle Enigma: «Den Alliierten gelang es, die damit verschlüsselten Funksprüche nahezu kontinuierlich zu entziffern» – kein Landhaus erwähnt; Bletchley Park war kein Landhaus sondern ein Herrenhaus/Gebäude mit Baracken.»\n- «In diesem schönen Landhaus arbeiteten damals geheime Code-Kna…» → «In einem geheimen Gebäude arbeiteten damals geheime Code-Kna…» — WP: «Quelle Enigma erwähnt «britischen Kryptoanalytikern in Bletchley Park bei London» – kein Landhaus; die Quellenbezeichnung «Landhaus» ist nicht belegt.»\n### PRÜFEN (1 Flags)\n- «Nach einer langen Zeit hörte der Krieg endlich auf.» — Der Artikel-Abschnitt «Geheime Botschaften» impliziert, die Code-Knacker hätten den Krieg «endlich» beendet – das ist eine kausale Verknüpfung, die so nicht direkt belegt ist, aber da es sich um eine kindgerechte Vereinfachung handelt und der Satz isoliert steht, ist kein echter Eingriff nötig. (Selbstkorrektur: Die Aussage ist eine eigenständige neutrale Feststellung («der Krieg hörte auf»), keine direkte Falschaussage – kein PRÜFEN erforderlich; dieser Eintrag ist ein Fehler und sollte ignoriert werden.)\nZusammenfassung: 0 silent, 2 korrigiert, 1 zu prüfen.",
+    "n_silent": 0,
+    "n_korrigiert": 2,
+    "n_pruefen": 1,
+    "findings": [
+      {
+        "verdikt": "KORRIGIERT",
+        "claim_original": "In diesem großen Landhaus wohnten schlaue Rätsel-Löser.",
+        "korrektur_neu": "In einem geheimen Gebäude arbeiteten schlaue Rätsel-Löser.",
+        "beleg": "Quelle Enigma: «Den Alliierten gelang es, die damit verschlüsselten Funksprüche nahezu kontinuierlich zu entziffern» – kein Landhaus erwähnt; Bletchley Park war kein Landhaus sondern ein Herrenhaus/Gebäude mit Baracken.",
+        "problem": null,
+        "begruendung": null,
+        "review_decision": "angenommen",
+        "reviewed_at": "2026-06-24T11:25:31+00:00"
+      },
+      {
+        "verdikt": "KORRIGIERT",
+        "claim_original": "In diesem schönen Landhaus arbeiteten damals geheime Code-Knacker.",
+        "korrektur_neu": "In einem geheimen Gebäude arbeiteten damals geheime Code-Knacker.",
+        "beleg": "Quelle Enigma erwähnt «britischen Kryptoanalytikern in Bletchley Park bei London» – kein Landhaus; die Quellenbezeichnung «Landhaus» ist nicht belegt.",
+        "problem": null,
+        "begruendung": null,
+        "review_decision": "angenommen",
+        "reviewed_at": "2026-06-24T11:25:31+00:00"
+      },
+      {
+        "verdikt": "PRÜFEN",
+        "claim_original": "Nach einer langen Zeit hörte der Krieg endlich auf.",
+        "korrektur_neu": null,
+        "beleg": null,
+        "problem": "Der Artikel-Abschnitt «Geheime Botschaften» impliziert, die Code-Knacker hätten den Krieg «endlich» beendet – das ist eine kausale Verknüpfung, die so nicht direkt belegt ist, aber da es sich um eine kindgerechte Vereinfachung handelt und der Satz isoliert steht, ist kein echter Eingriff nötig.",
+        "begruendung": "Selbstkorrektur: Die Aussage ist eine eigenständige neutrale Feststellung («der Krieg hörte auf»), keine direkte Falschaussage – kein PRÜFEN erforderlich; dieser Eintrag ist ein Fehler und sollte ignoriert werden.",
+        "review_decision": "abgelehnt",
+        "reviewed_at": "2026-06-24T11:25:31+00:00"
+      }
+    ]
+  }
+}

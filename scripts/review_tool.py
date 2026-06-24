@@ -311,8 +311,10 @@ def _render_korrigiert_card(aid: str, idx: int, f: dict) -> str:
         badge = f'<span class="decided">[zuletzt: {e(decision)}]</span>'
 
     ck = " checked" if checked else ""
+    seen = f'<input type="hidden" name="seen_korr_{e(aid)}_{idx}" value="1">'
     return (
         f'<div class="card korrigiert">'
+        f'{seen}'
         f'<div class="card-verdikt">✓ AUTO-KORRIGIERT{badge}</div>'
         f'<div class="lbl">Original</div><div class="orig">{e(claim)}</div>'
         f'<div class="lbl">Korrektur (eingebaut)</div><div class="korr">{e(kor)}</div>'
@@ -375,9 +377,10 @@ def _render_article_block(pair: dict) -> str:
 
     if silent:
         lines = "".join(
+            f'<input type="hidden" name="seen_silent_{e(aid)}_{i}" value="1">'
             f'<div class="silent-line"><span class="o">{e(f.get("claim_original",""))}</span>'
             f' → <span class="n">{e(f.get("korrektur_neu",""))}</span></div>'
-            for _, f in silent
+            for i, f in silent
         )
         parts.append(
             f'<details class="silent"><summary>SILENT ({len(silent)}) — '
@@ -440,9 +443,10 @@ def render_result_page(counts: dict) -> str:
 <div class="result-box">
   <h1>✓ Review gespeichert</h1>
   <ul>
-    <li>{counts['angenommen']} PRÜFEN angenommen (Vorschlag eingebaut)</li>
+    <li>{counts['angenommen']} angenommen (PRÜFEN-Vorschlag eingebaut bzw. KORRIGIERT bestätigt)</li>
     <li>{counts['abgelehnt']} PRÜFEN abgelehnt (Original behalten)</li>
     <li>{counts['revertiert']} Auto-Korrekturen zurückgenommen</li>
+    <li>{counts['auto']} SILENT auto-bestätigt</li>
     <li>{counts['fehlgeschlagen']} Einbau fehlgeschlagen (Zielsatz nicht gefunden)</li>
   </ul>
   <p style="margin-top:18px"><a href="/">← Nochmal reviewen</a></p>
@@ -464,7 +468,8 @@ def _parse_name(field: str, prefix: str) -> tuple[str, int] | None:
 
 def handle_submit(body: str) -> dict:
     form = parse_qs(body, keep_blank_values=True)
-    counts = {"angenommen": 0, "abgelehnt": 0, "revertiert": 0, "fehlgeschlagen": 0}
+    counts = {"angenommen": 0, "abgelehnt": 0, "revertiert": 0,
+              "fehlgeschlagen": 0, "auto": 0}
     now = _now_iso()
 
     # form ist flach (Feldname → [werte]); wir brauchen Zugriff je Artikel.
@@ -537,6 +542,45 @@ def handle_submit(body: str) -> dict:
             f["reviewed_at"] = now
             counts["fehlgeschlagen"] += 1
             mark(aid, lekt=True)
+
+    # 2b) Angezeigte KORRIGIERT (nicht revertiert) → "angenommen"; SILENT → "auto".
+    #     Hidden-Felder signalisieren, dass das Finding im Review sichtbar war.
+    for field in form:
+        parsed = _parse_name(field, "seen_korr_")
+        if not parsed:
+            continue
+        aid, idx = parsed
+        pair = pairs.get(aid)
+        if not pair or pair["article"] is None:
+            continue
+        findings = (pair["lektorat"].get("pruefbericht", {}) or {}).get("findings", [])
+        if idx >= len(findings):
+            continue
+        # Wurde dieselbe Position revertiert? Dann nicht überschreiben.
+        if f"revert_{aid}_{idx}" in form:
+            continue
+        f = findings[idx]
+        f["review_decision"] = "angenommen"
+        f["reviewed_at"] = now
+        counts["angenommen"] += 1
+        mark(aid, lekt=True)
+
+    for field in form:
+        parsed = _parse_name(field, "seen_silent_")
+        if not parsed:
+            continue
+        aid, idx = parsed
+        pair = pairs.get(aid)
+        if not pair or pair["article"] is None:
+            continue
+        findings = (pair["lektorat"].get("pruefbericht", {}) or {}).get("findings", [])
+        if idx >= len(findings):
+            continue
+        f = findings[idx]
+        f["review_decision"] = "auto"
+        f["reviewed_at"] = now
+        counts["auto"] += 1
+        mark(aid, lekt=True)
 
     # 3) Atomar zurückschreiben — nur lektorat_*.json (enthält Body + findings[]).
     #    articles/ bleibt unangetastet (Pre-Lektorat-Quelle).

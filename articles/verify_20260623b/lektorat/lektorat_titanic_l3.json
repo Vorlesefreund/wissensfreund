@@ -1,0 +1,519 @@
+{
+  "meta": {
+    "id": "titanic_l3",
+    "title": "Titanic",
+    "subtitle": "Der Untergang des unbesiegbaren Luxusschiffs",
+    "emoji": "🚢",
+    "age_level": 3,
+    "pattern": "tech_science",
+    "theme_color": "#1a365d",
+    "word_count": 492,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Titanic_(Schiff)",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "geschichte",
+    "category_sub": "schiffe",
+    "generated_at": "2026-06-23T20:46:15.876183+00:00",
+    "grounding_companions": [
+      "Robert Ballard (Unterwasserarchäologe)",
+      "Millvina Dean"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Attrappe_des_Titanic-Museums_in_Branson_Missouri_USA.jpg",
+      "alt": "Der Nachbau des Bugs der Titanic an einem Museum",
+      "caption": "Ein originalgetreuer Nachbau des berühmten Schiffbugs an einem Museum.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Roland Arhelger",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Attrappe_des_Titanic-Museums_in_Branson_Missouri_USA.jpg",
+      "wikimedia_id": "File:Attrappe_des_Titanic-Museums_in_Branson_Missouri_USA.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/3/3b/Attrappe_des_Titanic-Museums_in_Branson_Missouri_USA.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/titanic/Attrappe_des_Titanic-Museums_in_Branson_Missouri_USA_300.jpg",
+        "800": "bilder/titanic/Attrappe_des_Titanic-Museums_in_Branson_Missouri_USA_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Brochure_for_White_Star_Line’s_Two_Ships_“Olympic”_and_“Titanic”_WDL11257.pdf",
+      "alt": "Historische Broschüre der Schiffe Olympic und Titanic",
+      "caption": "Ein historisches Werbeplakat für die Schwesterschiffe Titanic und Olympic.",
+      "license": "Public domain",
+      "license_author": "White Star Line",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Brochure_for_White_Star_Line%E2%80%99s_Two_Ships_%E2%80%9COlympic%E2%80%9D_and_%E2%80%9CTitanic%E2%80%9D_WDL11257.pdf",
+      "wikimedia_id": "File:Brochure_for_White_Star_Line’s_Two_Ships_“Olympic”_and_“Titanic”_WDL11257.pdf",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Brochure_for_White_Star_Line%E2%80%99s_Two_Ships_%E2%80%9COlympic%E2%80%9D_and_%E2%80%9CTitanic%E2%80%9D_WDL11257.pdf/page1-1920px-Brochure_for_White_Star_Line%E2%80%99s_Two_Ships_%E2%80%9COlympic%E2%80%9D_and_%E2%80%9CTitanic%E2%80%9D_WDL11257.pdf.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/titanic/Brochure_for_White_Star_Line’s_Two_Ships_“Olympic”_and_“Titanic”_WDL11257_300.jpg",
+        "800": "bilder/titanic/Brochure_for_White_Star_Line’s_Two_Ships_“Olympic”_and_“Titanic”_WDL11257_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "05_staircase1.jpg",
+      "alt": "Das prachtvolle Treppenhaus mit einer Glaskuppel",
+      "caption": "Die berühmte große Treppe an Bord, die für puren Luxus stand.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "CMASSIECMASSIE",
+      "source_url": "https://commons.wikimedia.org/wiki/File:05_staircase1.jpg",
+      "wikimedia_id": "File:05_staircase1.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/05_staircase1.jpg/1920px-05_staircase1.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/titanic/05_staircase1_300.jpg",
+        "800": "bilder/titanic/05_staircase1_800.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Edward_J._Smith.jpg",
+      "alt": "Porträt von Kapitän Edward John Smith",
+      "caption": "Kapitän Edward John Smith befehligte die Titanic auf ihrer ersten Fahrt.",
+      "license": "Public domain",
+      "license_author": "New York Times",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Edward_J._Smith.jpg",
+      "wikimedia_id": "File:Edward_J._Smith.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/c/cd/Edward_J._Smith.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/titanic/Edward_J._Smith_300.jpg",
+        "800": "bilder/titanic/Edward_J._Smith_800.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Dr_Robert_Ballard_-_Titanic_Drawing_Office_-_Belfast_31st_Octobe_(24130072651).jpg",
+      "alt": "Robert Ballard im ehemaligen Zeichenbüro in Belfast",
+      "caption": "Der Unterwasserarchäologe Robert Ballard entdeckte das Wrack im Jahr 1985.",
+      "license": "CC BY 2.0",
+      "license_author": "Titanic Belfast",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Dr_Robert_Ballard_-_Titanic_Drawing_Office_-_Belfast_31st_Octobe_(24130072651).jpg",
+      "wikimedia_id": "File:Dr_Robert_Ballard_-_Titanic_Drawing_Office_-_Belfast_31st_Octobe_%2824130072651%29.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Dr_Robert_Ballard_-_Titanic_Drawing_Office_-_Belfast_31st_Octobe_%2824130072651%29.jpg/1920px-Dr_Robert_Ballard_-_Titanic_Drawing_Office_-_Belfast_31st_Octobe_%2824130072651%29.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/titanic/Dr_Robert_Ballard_-_Titanic_Drawing_Office_-_Belfast_31st_Octobe_(24130072651)_300.jpg",
+        "800": "bilder/titanic/Dr_Robert_Ballard_-_Titanic_Drawing_Office_-_Belfast_31st_Octobe_(24130072651)_800.jpg"
+      }
+    },
+    {
+      "index": 5,
+      "filename": "Millvina_Dean_and_her_brother,_Bertram.jpg",
+      "alt": "Millvina Dean als Baby mit ihrem älteren Bruder Bertram",
+      "caption": "Die kleine Millvina Dean als Baby im Sessel neben ihrem Bruder Bertram.",
+      "license": "Public domain",
+      "license_author": "Autor/-in unbekannt",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Millvina_Dean_and_her_brother,_Bertram.jpg",
+      "wikimedia_id": "File:Millvina_Dean_and_her_brother,_Bertram.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/e/e3/Millvina_Dean_and_her_brother%2C_Bertram.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/titanic/Millvina_Dean_and_her_brother,_Bertram_300.jpg",
+        "800": "bilder/titanic/Millvina_Dean_and_her_brother,_Bertram_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Ein Gigant der Meere",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir vor, du stehst vor einem Schiff, das über 53 Meter hoch und fast 270 Meter lang ist.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Im Frühjahr 1912 war die britische Titanic das größte Schiff der Welt.",
+          "img_index": 0
+        },
+        {
+          "id": "s003",
+          "text": "Sie war ein schwimmendes Luxushotel und galt als wahres Meisterwerk der Technik.",
+          "img_index": 0
+        },
+        {
+          "id": "s004",
+          "text": "Viele Menschen glaubten damals fest daran, dass dieses Schiff vollkommen unsinkbar sei.",
+          "img_index": 1
+        },
+        {
+          "id": "s005",
+          "text": "Am 10. April 1912 legte der Riesendampfer zu seiner berühmten Jungfernfahrt von Southampton nach New York ab.",
+          "img_index": 1
+        },
+        {
+          "id": "s006",
+          "text": "Doch diese erste Reise sollte auch seine letzte sein.",
+          "img_index": 1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Meisterwerk aus Stahl und Strom",
+      "section_role": "process_how",
+      "sentences": [
+        {
+          "id": "s007",
+          "text": "Der Bau der Titanic in Belfast war eine gefährliche Aufgabe für zeitweise 15.000 Arbeiter.",
+          "img_index": 2
+        },
+        {
+          "id": "s008",
+          "text": "Drei riesige Schiffsschrauben trieben den Dampfer an, und sein elektrisches Netz versorgte zehntausend Glühlampen.",
+          "img_index": 2
+        },
+        {
+          "id": "s009",
+          "text": "Für die Erste Klasse gab es jeden erdenklichen Luxus: ein beheiztes Schwimmbad, ein prächtiges großes Treppenhaus aus hellem Eichenholz unter einer ovalen Glaskuppel und sogar ein französisches Straßencafé.",
+          "img_index": 0
+        },
+        {
+          "id": "s010",
+          "text": "Die Passagiere der Dritten Klasse, meist arme Auswanderer auf dem Weg in ein neues Leben, reisten dagegen in einfacheren Kabinen in den tiefen Decks des Schiffes.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Die Titanic hatte für ihre Reise gewaltige Mengen an Lebensmitteln geladen. Allein 72,5 Tonnen Fleisch und Fisch waren an Bord! Das entspricht dem Gewicht von etwa 15 ausgewachsenen Elefanten. Zudem gab es 40 Tonnen Kartoffeln und fast 37.000 Flaschen mit Getränken."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Die fatale Nacht im Atlantik",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s011",
+          "text": "Am 14. April 1912 raste die Titanic mit 22,5 Knoten durch die eiskalte, mondlose Nacht – das war fast ihre Höchstgeschwindigkeit.",
+          "img_index": 3
+        },
+        {
+          "id": "s012",
+          "text": "Kapitän Edward John Smith hielt die zuvor erhaltenen Warnungen vor Eisbergen nicht für so wichtig.",
+          "img_index": 3
+        },
+        {
+          "id": "s013",
+          "text": "Doch um 23:39 Uhr meldete der Ausguck plötzlich einen Eisberg direkt voraus.",
+          "img_index": 3
+        },
+        {
+          "id": "s014",
+          "text": "Trotz eines schnellen Ausweichmanövers schrammte das Schiff seitlich am Eis entlang.",
+          "img_index": 0
+        },
+        {
+          "id": "s015",
+          "text": "Dabei entstanden unter Wasser Lecks auf einer Länge von 90 Metern, sodass sechs Abteilungen überflutet wurden.",
+          "img_index": 0
+        },
+        {
+          "id": "s016",
+          "text": "Da es nur Rettungsboote für gut die Hälfte der Menschen gab, versank die Titanic um 2:20 Uhr im Meer.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Von den über 2220 Menschen an Bord kamen 1514 ums Leben. Da das eiskalte Wasser nahe dem Gefrierpunkt lag, starben die meisten an Unterkühlung. Nach dem Unglück wurden die Sicherheitsregeln für immer verändert: Jedes Schiff muss seither für alle Menschen an Bord einen Platz im Rettungsboot bieten."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Die Entdeckung des Wracks",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s017",
+          "text": "Jahrzehntelang lag das Schiff unentdeckt in fast 3800 Metern Tiefe.",
+          "img_index": 4
+        },
+        {
+          "id": "s018",
+          "text": "Erst im September 1985 fand ein Team um den Forscher Robert Ballard das Wrack mithilfe eines Kamerasystems namens Argo.",
+          "img_index": 4
+        },
+        {
+          "id": "s019",
+          "text": "Die Entdeckung bewies endlich, dass das Schiff beim Sinken zerbrochen war.",
+          "img_index": 4
+        },
+        {
+          "id": "s020",
+          "text": "Spannend ist, dass Ballard die Suche im geheimen Auftrag der US-Navy durchführte.",
+          "img_index": 4
+        },
+        {
+          "id": "s021",
+          "text": "Er sollte eigentlich zwei gesunkene Atom-U-Boote untersuchen – die Suche nach der Titanic diente ihm als perfekte Tarnung.",
+          "img_index": 4
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec5",
+      "heading": "Die jüngste Überlebende",
+      "section_role": "curiosity",
+      "sentences": [
+        {
+          "id": "s022",
+          "text": "Das jüngste Baby an Bord der Titanic war die kleine Millvina Dean.",
+          "img_index": 5
+        },
+        {
+          "id": "s023",
+          "text": "Sie war gerade einmal zehn Wochen alt, als sie mit ihrer Mutter und ihrem Bruder gerettet wurde.",
+          "img_index": 5
+        },
+        {
+          "id": "s024",
+          "text": "Ihr Vater überlebte das Unglück leider nicht.",
+          "img_index": 5
+        },
+        {
+          "id": "s025",
+          "text": "Millvina wurde erst im hohen Alter weltberühmt.",
+          "img_index": 5
+        },
+        {
+          "id": "s026",
+          "text": "Als sie im Jahr 2009 mit 97 Jahren starb, war das genau 98 Jahre nach dem Stapellauf des Schiffes.",
+          "img_index": 5
+        },
+        {
+          "id": "s027",
+          "text": "Sogar die bekannten Schauspieler des berühmten Titanic-Films halfen ihr am Lebensende, ihr Pflegeheim zu bezahlen.",
+          "img_index": 5
+        }
+      ],
+      "boxes": [],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wann startete die Titanic zu ihrer Jungfernfahrt?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Am 10. April 1912"
+          },
+          {
+            "key": "B",
+            "text": "Am 1. September 1985"
+          },
+          {
+            "key": "C",
+            "text": "Am 31. Mai 1911"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Wer entdeckte das Wrack der Titanic im Jahr 1985?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Edward John Smith"
+          },
+          {
+            "key": "B",
+            "text": "Robert Ballard"
+          },
+          {
+            "key": "C",
+            "text": "Millvina Dean"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Welches besondere Detail gab es im prachtvollen Treppenhaus der Ersten Klasse?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Einen echten springenden Springbrunnen"
+          },
+          {
+            "key": "B",
+            "text": "Eine Rutsche statt Stufen"
+          },
+          {
+            "key": "C",
+            "text": "Eine ovale Glaskuppel an der Decke"
+          }
+        ],
+        "correct_key": "C"
+      },
+      {
+        "id": "q4",
+        "text": "Wie alt war die jüngste Überlebende Millvina Dean beim Untergang der Titanic?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Zehn Wochen"
+          },
+          {
+            "key": "B",
+            "text": "Acht Jahre"
+          },
+          {
+            "key": "C",
+            "text": "Sechs Monate"
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Eisberg",
+      "Schiff",
+      "Unterwasserarchäologie"
+    ],
+    "discover": [
+      "Atlantik",
+      "Sicherheit",
+      "U-Boot"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Im Frühjahr 1912 war die britische Titanic das größte Schiff der Welt.",
+      "source": "Titanic (Schiff)",
+      "passage": "Bei ihrer Fertigstellung im Frühjahr 1912 war sie das größte Schiff der Welt."
+    },
+    {
+      "claim": "Am 10. April 1912 legte der Riesendampfer zu seiner berühmten Jungfernfahrt von Southampton nach New York ab.",
+      "source": "Titanic (Schiff)",
+      "passage": "startete am 10. April 1912 zu ihrer Jungfernfahrt."
+    },
+    {
+      "claim": "Der Bau der Titanic in Belfast war eine gefährliche Aufgabe für zeitweise 15.000 Arbeiter.",
+      "source": "Titanic (Schiff)",
+      "passage": "In Spitzenzeiten arbeiteten circa 15.000 Arbeiter an beiden Schiffen."
+    },
+    {
+      "claim": "Drei riesige Schiffsschrauben trieben den Dampfer an, und sein elektrisches Netz versorgte zehntausend Glühlampen.",
+      "source": "Titanic (Schiff)",
+      "passage": "Die Titanic besaß drei Schiffsschrauben (Propeller) ... 10.000 Glühlampen beleuchteten das Schiff."
+    },
+    {
+      "claim": "Für die Erste Klasse gab es jeden erdenklichen Luxus: ein beheiztes Schwimmbad, ein prächtiges großes Treppenhaus aus hellem Eichenholz unter einer ovalen Glaskuppel und sogar ein französisches Straßencafé.",
+      "source": "Titanic (Schiff)",
+      "passage": "ein beheiztes Schwimmbad ... hellem Eichenholz ... ovale Glaskuppel ... Café Parisien ... Straßencafé"
+    },
+    {
+      "claim": "Allein 72,5 Tonnen Fleisch und Fisch waren an Bord! Zudem gab es 40 Tonnen Kartoffeln und fast 37.000 Flaschen mit Getränken.",
+      "source": "Titanic (Schiff)",
+      "passage": "72,5 Tonnen an Fleisch und Fisch, 40 Tonnen Kartoffeln ... knapp 37.000 Getränkeflaschen"
+    },
+    {
+      "claim": "Am 14. April 1912 raste die Titanic mit 22,5 Knoten durch die eiskalte, mondlose Nacht – das war fast ihre Höchstgeschwindigkeit.",
+      "source": "Titanic (Schiff)",
+      "passage": "Am Sonntag, den 14. April 1912, fuhr die Titanic mit 22,5 Knoten (41,7 km/h) durch die Nacht; das war beinahe ihre Höchstgeschwindigkeit."
+    },
+    {
+      "claim": "Kapitän Edward John Smith hielt die zuvor erhaltenen Warnungen vor Eisbergen nicht für so wichtig.",
+      "source": "Titanic (Schiff)",
+      "passage": "Kapitän Smith hielt die zuvor erhaltenen Eiswarnungen für nicht so wichtig"
+    },
+    {
+      "claim": "Doch um 23:39 Uhr meldete der Ausguck plötzlich einen Eisberg direkt voraus.",
+      "source": "Titanic (Schiff)",
+      "passage": "23:39 Uhr: Der Ausguck der Titanic meldet „Iceberg right ahead“"
+    },
+    {
+      "claim": "Dabei entstanden unter Wasser Lecks auf einer Länge von 90 Metern, sodass sechs Abteilungen überflutet wurden.",
+      "source": "Titanic (Schiff)",
+      "passage": "Lecks unter der Wasseroberfläche ... Länge von ca. 90 Metern. Es wurden 6 der 16 wasserdichten Abteilungen beschädigt."
+    },
+    {
+      "claim": "Von den über 2220 Menschen an Bord kamen 1514 ums Leben.",
+      "source": "Titanic (Schiff)",
+      "passage": "Von den über 2220 an Bord befindlichen Menschen kamen 1514 Personen ums Leben"
+    },
+    {
+      "claim": "Erst im September 1985 fand ein Team um den Forscher Robert Ballard das Wrack mithilfe eines Kamerasystems namens Argo.",
+      "source": "Robert Ballard (Unterwasserarchäologe)",
+      "passage": "So fand er am 1. September 1985 zusammen mit Jean-Louis Michel das Wrack der Titanic"
+    },
+    {
+      "claim": "Er sollte eigentlich zwei gesunkene Atom-U-Boote untersuchen – die Suche nach der Titanic diente ihm als perfekte Tarnung.",
+      "source": "Robert Ballard (Unterwasserarchäologe)",
+      "passage": "die Überreste der gesunkenen US-amerikanischen Atom-U-Boote Scorpion und Thresher mit einem Tauchroboter im Auftrag der US Navy inspizierte. ... Suche nach der Titanic als Deckmantel"
+    },
+    {
+      "claim": "Das jüngste Baby an Bord der Titanic war die kleine Millvina Dean.",
+      "source": "Millvina Dean",
+      "passage": "Als die Titanic am 15. April 1912 unterging, war Millvina Dean zehn Wochen alt und damit die jüngste Person auf dem Schiff."
+    },
+    {
+      "claim": "Als sie im Jahr 2009 mit 97 Jahren starb, war das genau 98 Jahre nach dem Stapellauf des Schiffes.",
+      "source": "Millvina Dean",
+      "passage": "Millvina Dean starb am 31. Mai 2009 im Alter von 97 Jahren, auf den Tag genau 98 Jahre nach dem Stapellauf der Titanic"
+    },
+    {
+      "claim": "Sogar die bekannten Schauspieler des berühmten Titanic-Films halfen ihr am Lebensende, ihr Pflegeheim zu bezahlen.",
+      "source": "Millvina Dean",
+      "passage": "die Schauspieler Leonardo DiCaprio und Kate Winslet sowie der Regisseur James Cameron zusammen etwa 30.000 Euro gespendet haben"
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Titanic S3 — Lektorat\n### SILENT (1 Korrekturen)\n- «Da es nur Rettungsboote für knapp die Hälfte der Menschen gab, versa…» → «Da es nur Rettungsboote für gut die Hälfte der Menschen gab, versa…» (WP: «Insgesamt war an Bord aller Rettungsmittel Platz für 1178 Menschen» bei über 2220 Menschen an Bord – das sind mehr als die Hälfte, nicht knapp die Hälfte.)\nZusammenfassung: 1 silent, 0 korrigiert, 0 zu prüfen.",
+    "n_silent": 1,
+    "n_korrigiert": 0,
+    "n_pruefen": 0,
+    "findings": [
+      {
+        "verdikt": "SILENT",
+        "claim_original": "Da es nur Rettungsboote für knapp die Hälfte der Menschen gab, versank die Titanic um 2:20 Uhr im Meer.",
+        "korrektur_neu": "Da es nur Rettungsboote für gut die Hälfte der Menschen gab, versank die Titanic um 2:20 Uhr im Meer.",
+        "beleg": "«Insgesamt war an Bord aller Rettungsmittel Platz für 1178 Menschen» bei über 2220 Menschen an Bord – das sind mehr als die Hälfte, nicht knapp die Hälfte.",
+        "problem": null,
+        "begruendung": null,
+        "review_decision": "auto",
+        "reviewed_at": "2026-06-24T11:25:31+00:00"
+      }
+    ]
+  }
+}
