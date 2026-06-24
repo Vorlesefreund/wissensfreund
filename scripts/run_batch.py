@@ -567,6 +567,7 @@ def stage1_sourcing(
 
         topic_meta:   dict[str, dict] = {}  # key → img-meta
         topic_vision: dict[str, dict] = {}  # key → vision-result
+        vision_failed: list[dict] = []      # Bilder ohne Vision-Verdict (→ vision_retry.py)
         for i, img in enumerate(to_check):
             if i > 0:
                 time.sleep(3.0)
@@ -586,7 +587,10 @@ def stage1_sourcing(
                 client, img_bytes, "image/jpeg", thema_vision, model=VISION_MODEL
             )
             if result is None:
-                log.warning("  Vision '%s': kein Ergebnis", key[:40])
+                vision_failed.append({**topic_meta[key],
+                                      "vision_fail_reason": "no_result_after_retries"})
+                log.warning("  Vision fehlgeschlagen (kein Ergebnis): %s",
+                            img.get("title") or img.get("filename", "?"))
                 continue
             topic_vision[key] = result
             if vusage:
@@ -647,7 +651,11 @@ def stage1_sourcing(
             "companion_texts":   companion_texts,
             "companions_failed": companions_failed,
             "images":            images,
+            "images_vision_failed": vision_failed,
         }
+        if vision_failed:
+            log.error("  %s: %d Bild(er) ohne Vision-Verdict — "
+                      "vision_retry.py ausführen vor Stage 2!", thema, len(vision_failed))
         _save_partial(out_dir, topics_data)
 
     # ── Phase B: Opus-Recheck-Nachlauf (cross-topic, über alle Partial-Topics) ─
@@ -1534,6 +1542,10 @@ def main() -> None:
         "--dry-run", action="store_true",
         help="Zeigt geplante Requests ohne API-Calls",
     )
+    parser.add_argument(
+        "--force-stage2", action="store_true", default=False,
+        help="Stage 2 trotz Vision-Fehlschlägen in Stage 1 erzwingen",
+    )
     args = parser.parse_args()
 
     global _RUN_ID
@@ -1623,6 +1635,20 @@ def main() -> None:
         log.info("STAGE 2: GENERIERUNG (%d Themen × %d Stufen)",
                  len(themen_raw), len(stufen))
         log.info("=" * 60)
+        # Gate: Stage 1 darf keine Vision-Fehlschläge offen lassen (sonst fehlen Bilder)
+        if not args.dry_run:
+            failed_vision = [
+                (t, len(v["images_vision_failed"]))
+                for t, v in topics_data.items()
+                if v.get("images_vision_failed")
+            ]
+            if failed_vision and not getattr(args, "force_stage2", False):
+                log.error("Stage 2 BLOCKIERT: Vision-Fehlschläge in Stage 1:")
+                for t, n in failed_vision:
+                    log.error("  %s: %d Bild(er) ohne Verdict", t, n)
+                log.error("Lösung: python scripts/vision_retry.py %s dann erneut starten.",
+                          out_dir)
+                sys.exit(2)
         articles = stage2_generierung(
             themen_raw, stufen, topics_data, out_dir, client, api_key,
             dry_run=args.dry_run,
