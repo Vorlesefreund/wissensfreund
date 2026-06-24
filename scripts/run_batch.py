@@ -865,9 +865,25 @@ def stage2_generierung(
     3. Gemini Batch einreichen + pollen
     4. Post-Processing (synchron): JSON-Parse, Wortzahl-Guard, Box-Guard, is_hero
     """
-    cp = _load_cp(out_dir, 2)
-    if cp:
-        return cp.get("articles", {})
+    # Resume-fest: ganze Stage NUR überspringen, wenn ALLE erwarteten Artikel
+    # (themen × stufen) bereits als JSON auf Platte liegen. Datei-Existenz ist die
+    # Wahrheitsquelle (nicht companions_failed wie Stage 1 — bewusste Asymmetrie).
+    # Sonst Fall-through: Disk-Vorscan + Pro-Artikel-Skip generieren nur das Fehlende.
+    cp = _load_cp_raw(out_dir, 2)
+    if cp is not None:
+        art_dir = out_dir / "articles"
+        expected_ids = [
+            f"{t.lower().replace(' ', '_').replace('/', '_')}_l{s}"
+            for t in themen for s in stufen
+        ]
+        missing = [a for a in expected_ids if not (art_dir / f"{a}.json").exists()]
+        if not missing:
+            log.info("Checkpoint Stage 2 (status=done, alle %d Artikel vorhanden) "
+                     "— Stage übersprungen", len(expected_ids))
+            return cp.get("articles", {})
+        log.warning("Checkpoint Stage 2 unvollständig (%d/%d Artikel fehlen: %s) — "
+                    "Resume: fehlende neu generieren, vorhandene überspringen",
+                    len(missing), len(expected_ids), ", ".join(missing))
 
     if not SYSTEM_PROMPT_PATH.exists():
         log.error("System-Prompt fehlt: %s", SYSTEM_PROMPT_PATH)
@@ -1005,6 +1021,11 @@ def stage2_generierung(
                      "JA" if cache_name else "NEIN (fallback)")
 
     if not gen_reqs:
+        if articles:
+            log.info("Stage 2: keine neuen Requests — alle %d Artikel bereits vorhanden",
+                     len(articles))
+            _save_cp(out_dir, 2, {"status": "done", "articles": articles})
+            return articles
         log.error("Stage 2: keine Requests — abgebrochen")
         return {}
 
@@ -1212,9 +1233,25 @@ def stage3_lektorat(
     """
     import anthropic
 
-    cp = _load_cp(out_dir, 3)
-    if cp:
-        return cp.get("lektorat_results", {})
+    # Resume-fest (analog Stage 2): ganze Stage NUR überspringen, wenn ALLE erwarteten
+    # Lektorate (themen × stufen) bereits auf Platte liegen. Sonst Fall-through —
+    # der Datei-Vorscan (unten) + Pro-Lektorat-Skip lektorieren nur das Fehlende.
+    cp = _load_cp_raw(out_dir, 3)
+    if cp is not None:
+        lekt_dir_chk = out_dir / "lektorat"
+        expected_ids = [
+            f"{t.lower().replace(' ', '_').replace('/', '_')}_l{s}"
+            for t in themen for s in stufen
+        ]
+        missing = [a for a in expected_ids
+                   if not (lekt_dir_chk / f"lektorat_{a}.json").exists()]
+        if not missing:
+            log.info("Checkpoint Stage 3 (status=done, alle %d Lektorate vorhanden) "
+                     "— Stage übersprungen", len(expected_ids))
+            return cp.get("lektorat_results", {})
+        log.warning("Checkpoint Stage 3 unvollständig (%d/%d Lektorate fehlen: %s) — "
+                    "Resume: fehlende neu lektorieren, vorhandene überspringen",
+                    len(missing), len(expected_ids), ", ".join(missing))
 
     if dry_run:
         total = len(articles)
@@ -1229,6 +1266,19 @@ def stage3_lektorat(
     lektorat_dir = out_dir / "lektorat"
     lektorat_dir.mkdir(exist_ok=True)
     pending_path = out_dir / "pending_batches.json"
+
+    # Datei-Vorscan (Spiegel von Stage 2 Teil A): bereits lektorierte Artikel
+    # vormerken, damit der finale Checkpoint vollständig bleibt und bei reinem
+    # Resume nicht auf den aktuellen Batch zusammenschrumpft (Titanic/WW2 würden
+    # sonst aus lektorat_results fallen, obwohl ihre Dateien auf Platte liegen).
+    lektorat_results: dict[str, str] = {}
+    for _t in themen:
+        _slug = _t.lower().replace(" ", "_").replace("/", "_")
+        for _s in stufen:
+            _aid = f"{_slug}_l{_s}"
+            _lp  = lektorat_dir / f"lektorat_{_aid}.json"
+            if _lp.exists():
+                lektorat_results[_aid] = str(_lp)
 
     # ── Step 1: Requests aufbauen (themenweise geordnet) ─────────────────────
     log.info("\n=== Stage 3 / Step 1: Lektorat-Requests aufbauen ===")
@@ -1279,9 +1329,10 @@ def stage3_lektorat(
             log.info("  [%s] OK", article_id)
 
     if not ordered_requests:
-        log.info("Stage 3: keine offenen Artikel — Stage übersprungen")
-        _save_cp(out_dir, 3, {"status": "done", "lektorat_results": {}})
-        return {}
+        log.info("Stage 3: keine offenen Artikel — %d bereits lektoriert übernommen",
+                 len(lektorat_results))
+        _save_cp(out_dir, 3, {"status": "done", "lektorat_results": lektorat_results})
+        return lektorat_results
 
     # ── Step 2: Anthropic-Batch aufbauen ─────────────────────────────────────
     log.info("\n=== Stage 3 / Step 2: Batch aufbauen (%d Requests) ===",
@@ -1345,7 +1396,8 @@ def stage3_lektorat(
     art_by_id:   dict[str, dict] = {r[0]: r[3] for r in ordered_requests}
     thema_by_id: dict[str, str]  = {r[0]: r[4] for r in ordered_requests}
 
-    lektorat_results: dict[str, str] = {}
+    # lektorat_results ist bereits per Datei-Vorscan vorbefüllt (s.o.) — die
+    # Batch-Ergebnisse unten ergänzen nur die NEU lektorierten Artikel.
     total_in = total_out = total_cache_create = total_cache_read = 0
 
     for result in anth_client.messages.batches.results(batch_id):
