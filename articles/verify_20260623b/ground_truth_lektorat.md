@@ -68,14 +68,12 @@ Verdikt: FALSE NEGATIVE — Ursache Typ 3 (s. Diagnose unten)
 ### A6 · vulkan_l3 · wow-Box (Surtsey-Perlen)
 Claim: „Forscher machten ein Experiment und warfen 10 Millionen winzige Plastikperlen ins Wasser
 bei der Nachbarinsel Heimaey. Tatsächlich schwamm etwa ein Prozent davon bis an Surtseys Strände."
-Status: Kein source_passage-Eintrag vorhanden; ob der Inhalt im vollen Surtsey-Snapshot steht,
-ist nicht verifiziert (Claude Chat hatte keinen Zugriff auf den vollen Primärtext).
-[OFFEN: Claude Code soll im Re-Lauf prüfen, ob das Perlen-Experiment im Surtsey-Volltext des
-Snapshots vorkommt. Liegt es dort → B-Kandidat (gedeckt, GT-Korrektur nötig). Liegt es nicht
-dort → echter FN-Kandidat.]
-Erwartetes Lektorat-Verhalten: PRÜFEN (spezifische Zahlen + Eigenname ohne verifizierten Beleg)
-Lektorat-Ist: KEIN FINDING
-Vorläufiges Verdikt: FALSE NEGATIVE (vorbehaltlich Volltext-Prüfung durch Claude Code)
+Status: Im Surtsey-Volltext des Snapshots gefunden (Volltext-Prüfung durch Claude Code, 2026-06-24):
+„Um diese Erkenntnis zu untermauern, wurde ein Experiment mit 10 Millionen Plastikperlen
+durchgeführt. Von den bei Heimaey ins Meer gestreuten Perlen kam tatsächlich etwa 1 Prozent an den
+Ufern von Surtsey an." → Claim ist quellengedeckt.
+Lektorat-Ist: KEIN FINDING ✓
+Verdikt: TRUE NEGATIVE (kein Recall-Miss; Typ-1-Diagnose hier nicht anwendbar)
 
 ---
 
@@ -152,19 +150,60 @@ Verdikt: GRENZFALL akzeptiert
 
 ---
 
-## BASELINE-MESSUNG (pre-Commit 0a39bf8)
+## SEKTION D — NEUE FINDINGS AUS RE-RUN (2026-06-24, temp=0 + neue Eingriffsgrenze)
 
-| Kategorie | Fälle | Anzahl |
-|---|---|---|
-| True Positives | A1, A2, A3 | 3 |
-| False Negatives | A4, A5, A6* | 3 |
-| True Negatives | B1, B3, B4, B5, B6, B7, B8 | 7 |
-| False Positives | B2 | 1 |
+### D1 · vulkan_l2 · SILENT „Insekten/Wind"
+Lektorat notierte Detail-Auslassung zur Insekten-Ankunft (Transportweg), markierte SILENT.
+Quelle: Surtsey-Volltext benennt verschiedene Transportwege; Omission kein Widerspruch.
+Verdikt: TRUE NEGATIVE ✓
 
-Recall = 3 / (3+3) = **50 %** (Ziel: ≥ 70 %)
-FPR    = 1 / (1+7) = **12,5 %** (Ziel: ≤ 15 %)
+### D2 · vulkan_l3 · SILENT „Plinius jung / aus der Ferne"
+Lektorat akzeptierte „beobachtete die Katastrophe" trotz Distanz (~30 km, Misenum).
+Plinius der Jüngere war ca. 17–18 Jahre alt — „jung" korrekt. Beobachtung von fern = zulässige
+Vereinfachung für S3.
+Verdikt: TRUE NEGATIVE ✓
 
-*A6 vorbehaltlich Volltext-Prüfung (s. oben).
+### D3 · vulkan_l3 · PRÜFEN „Surtsey-Entstehung (Tephra vor Lava)"
+Claim s031: „Eine unterseeische Erdspalte spie Lava, die im Wasser abkühlte."
+Wikipedia Surtsey: „aus Tephra und Laven die heutige Insel aufbaute."
+Artikel setzt Lava gleich alleiniger Materie — Tephra fehlt. Kein direkter Widerspruch,
+aber relevante Vereinfachung für S3. PRÜFEN korrekt.
+Verdikt: GRENZFALL, Lektorat-Verhalten akzeptabel (analog C1)
+
+### D4 · vulkan_l3 · C1 im Re-Run SILENT (war: PRÜFEN)
+Kurz-nach-Mitternacht / Pompeji+Herculaneum: neue Eingriffsgrenze schützt zeitliche Kompression.
+Verdikt: Verhalten jetzt GT-konform ✓
+
+---
+
+## BASELINE-MESSUNG
+
+### Stand 1: pre-Commit 0a39bf8 (alte Regeln)
+| Kategorie        | Fälle              | Anzahl |
+|------------------|--------------------|--------|
+| True Positives   | A1, A2, A3         | 3      |
+| False Negatives  | A4, A5, A6*        | 3      |
+| True Negatives   | B1, B3, B4, B5, B6, B7, B8 | 7 |
+| False Positives  | B2                 | 1      |
+
+Recall = 3 / 6 = 50 % | FPR = 1 / 8 = 12,5 %
+*A6 war vorläufig FN, wurde durch Volltext-Prüfung aufgelöst (s. oben).
+
+### Stand 2: post-Commit 0a39bf8 (temp=0 + neue Eingriffsgrenze) — Re-Run 2026-06-24
+| Kategorie        | Fälle                                          | Anzahl |
+|------------------|------------------------------------------------|--------|
+| True Positives   | A1, A2, A3                                     | 3      |
+| False Negatives  | A4, A5                                         | 2      |
+| True Negatives   | B1–B8, A6 (aufgelöst), D1, D2                  | 11     |
+| False Positives  | —                                               | 0      |
+| Grenzfälle       | C1 (jetzt SILENT ✓), D3 (PRÜFEN ✓)            | 2      |
+
+Recall = 3 / 5 = 60 % | FPR = 0 / 11 = 0 %
+
+Interpretation: 10 Prozentpunkte Recall-Gewinn stammen aus A6-Reklassifikation (nicht aus
+Regeländerungen). FPR: 12,5 % → 0 % (Eingriffsgrenze wirkt wie spezifiziert). Recall-Ziel
+70 % mit aktuellem Ansatz nicht erreichbar — A4/A5 sind strukturelle Misses (Typ 2/3),
+nicht parameterlösbar.
 
 ---
 
@@ -203,9 +242,10 @@ Es erfordert eine claim-weise Prüfarchitektur:
 
 ---
 
-## OFFENE VERIFIKATION
+## STATUS
 
-- A6: Volltext-Prüfung ob „Perlen-Experiment" (Heimaey, 10 Millionen, 1 %) im Surtsey-Wikipedia-
-  Snapshot (stage1_checkpoint.json) vorkommt → falls ja: A6 wird B-Kandidat, GT korrigieren.
-- Re-Lauf mit Commit 0a39bf8 (temp=0 + neue Eingriffsgrenze): B2 erwartet als TRUE NEGATIVE;
-  A4/A5 weiterhin als FALSE NEGATIVE erwartet (strukturelle Ursache, nicht durch Parameter behebbar).
+GT_v1 abgeschlossen. Alle offenen Punkte geschlossen (2026-06-24):
+- A6 durch Volltext-Prüfung aufgelöst → TRUE NEGATIVE
+- Re-Run bestätigt: B2 TRUE NEGATIVE (neue Eingriffsgrenze wirkt)
+- A4/A5 weiterhin FALSE NEGATIVE — strukturelle Ursachen bestätigt
+Nächster Schritt: claim-weise Prüfarchitektur (Typ-2/Typ-3-Fixes) — Spezifikation in DIAGNOSE.
