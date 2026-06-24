@@ -64,3 +64,6 @@ dumpstate-*.zip
 articles/**/_review.html
 cost_log.json
 cost_log.json.bak
+
+# Lektorat Re-Run Outputs (Test-Artefakte)
+articles/*/lektorat_rerun/
