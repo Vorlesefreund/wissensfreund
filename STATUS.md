@@ -1,16 +1,34 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-23T21:16:54Z -->
+<!-- updated: 2026-06-24T06:16:50Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
-> **OFFEN — Verifikationslauf steht aus (Gemini-503).** Lauf verify_20260623b am 2026-06-23 ~21:10 abgebrochen.
-> Der Kompass-Sync-Fix (f6135be) funktioniert korrekt (kein Batch-Queue-Hang). ABER: externer Gemini-503-Sturm
-> auf gemini-3.5-flash degradierte den Lauf — Vulkan bekam 0 Companion-Vorschläge (Sync-Retry 6× von 503ern
-> erschöpft → leer), A–G-Verifikation damit wertlos. Code ist NICHT schuld. **Neustart, sobald die API stabil
-> ist** (`python scripts/run_batch.py --themen "Vulkan" "Titanic" "Zweiter Weltkrieg" --stufen 1 2 3
-> --output-dir articles/verify_20260623b --run-id verify_20260623b`). Zu verifizieren bleiben: Edit-1–5
-> (Box-Qualität, Primärinhalt, Bildnutzung) + Vision-Companion-Kontext (177ca72) + Diagramm-Freigabe.
+> **OFFEN — finaler Vulkan-Resume (Stage 2+3) steht aus.** Stage-1-Resume in verify_20260623b am 2026-06-24
+> erfolgreich verifiziert: alle 5 Resilienz-Punkte eingetreten, Vulkan jetzt companions_failed=False mit
+> Vesuv/Pompeji/Surtsey/Geysir/Lava (stage1_checkpoint.json). ABER: Stage 2+3 übersprangen sich pauschal
+> (status=done) → Vulkan-Artikel fehlen noch (nur 6 Artikel: Titanic+WW2). Die identische Checkpoint-Resume-
+> Lücke in Stage 2+3 ist nun geschlossen (Commit 0b447b6). **Nächster Schritt: Resume erneut fahren** —
+> Stage 2+3 ziehen die 3 fehlenden Vulkan-Artikel, Titanic/WW2 bleiben per Datei-Existenz unberührt
+> (`python scripts/run_batch.py --themen "Vulkan" "Titanic" "Zweiter Weltkrieg" --stufen 1 2 3
+> --output-dir articles/verify_20260623b --run-id verify_20260623b`), danach A–G-Analyse Vulkan. Zu
+> verifizieren bleiben: Edit-1–5 (Box-Qualität, Primärinhalt, Bildnutzung) + Vision-Companion-Kontext
+> (177ca72) + Diagramm-Freigabe. Hinweis: gemini-3.5-flash zeigt noch intermittierende 503 (Flash-Check
+> fiel sauber per Fallback ab) — Kompass/Vision/Opus liefen 200 OK.
 
 ---
+
+## Abgeschlossen (2026-06-24)
+
+**Checkpoint-Resume-Lücke in Stage 2+3 geschlossen** (Commit 0b447b6, feature/stage23-resume-fix → main FF) —
+systemischer Fix, alle drei Stages konsistent resume-fähig. Diagnose über den Vulkan-Resume: Stage 1 reparierte
+Vulkan (companions_failed→False), aber Stage 2+3 übersprangen sich pauschal (status=done) ohne Pro-Artikel-
+Prüfung → die in Stage 1 reparierten Topics erreichten die Folgestages nie (Vulkan-Artikel nie generiert/
+lektoriert). Fix in run_batch.py: Stage-2/3-Full-Skip auf `_load_cp_raw` + Vollständigkeitsprüfung umgebaut
+(alle themen×stufen-Dateien vorhanden → skip; sonst Fall-through). Stage 2: vorhandener Disk-Vorscan +
+Pro-Artikel-Skip selektieren das Fehlende; Empty-Batch-Pfad returnt vorgeladene `articles` statt `{}`. Stage 3:
+NEU Datei-Vorscan befüllt `lektorat_results` aus existierenden `lektorat_*.json` VOR dem Batch-Bau (sonst fielen
+saubere Topics aus dem Checkpoint), alte `={}`-Re-Init entfernt, Empty-Pfad returnt Vorgeladenes. Wahrheitsquelle
+bewusst Datei-Existenz (robuster als companions_failed-Filter; Asymmetrie zu Stage 1 gewollt). py_compile OK.
+**Macht den finalen Vulkan-Resume (Stage 2+3 ziehen die 3 fehlenden Artikel) jetzt möglich** — steht als Nächstes an.
 
 ## Abgeschlossen (2026-06-23)
 
