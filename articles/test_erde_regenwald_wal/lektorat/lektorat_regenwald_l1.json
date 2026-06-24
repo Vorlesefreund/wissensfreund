@@ -1,0 +1,449 @@
+{
+  "meta": {
+    "id": "regenwald_l1",
+    "title": "Regenwald",
+    "subtitle": "Ein nasser und grüner Urwald voller Wunder",
+    "emoji": "🌳",
+    "age_level": 1,
+    "pattern": "place_geography",
+    "theme_color": "#2E7D32",
+    "word_count": 261,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Regenwald",
+    "schema_version": "1.0",
+    "review_flag": true,
+    "category_top": "erde",
+    "category_sub": "lebensraeume",
+    "generated_at": "2026-06-24T12:57:55.584621+00:00",
+    "grounding_companions": [
+      "Amazonas-Regenwald",
+      "Blattschneiderameise",
+      "Baumsteigerfrösche",
+      "Feigen",
+      "Faultiere"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM",
+    "trim_passes": 1,
+    "review_reason": "Wortzahl 261 > Cap 234; 32 Sätze außerhalb [8,30] für Stufe 1"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Atta_cephalotes-pjt.jpg",
+      "alt": "Mehrere Blattschneiderameisen auf einem Ast, eine trägt ein großes Blatt",
+      "caption": "Eine fleißige Ameise trägt ihr schweres Blatt.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Pjt56",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Atta_cephalotes-pjt.jpg",
+      "wikimedia_id": "File:Atta_cephalotes-pjt.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Atta_cephalotes-pjt.jpg/1920px-Atta_cephalotes-pjt.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Atta_cephalotes-pjt_300.jpg",
+        "800": "bilder/regenwald/Atta_cephalotes-pjt_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Bradypus.jpg",
+      "alt": "Ein schlafendes Faultier hängt friedlich an einem Ast im Regenwald",
+      "caption": "Das Faultier hält sich beim Schlafen gut fest.",
+      "license": "Public domain",
+      "license_author": "Stefan Laube (Tauchgurke)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Bradypus.jpg",
+      "wikimedia_id": "File:Bradypus.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/18/Bradypus.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Bradypus_300.jpg",
+        "800": "bilder/regenwald/Bradypus_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Dendrobates.auratus.7040.jpg",
+      "alt": "Ein gelb-schwarz gemusterter Baumsteigerfrosch auf einem feuchten Ast",
+      "caption": "Achtung! Der Frosch zeigt seine bunten Warnfarben.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Unknown",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Dendrobates.auratus.7040.jpg",
+      "wikimedia_id": "File:Dendrobates.auratus.7040.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Dendrobates.auratus.7040.jpg/1920px-Dendrobates.auratus.7040.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Dendrobates.auratus.7040_300.jpg",
+        "800": "bilder/regenwald/Dendrobates.auratus.7040_800.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Amazon_CIAT_(3).jpg",
+      "alt": "Luftaufnahme eines Flusses, der sich durch den dichten Regenwald schlängelt",
+      "caption": "Ein riesiger Fluss fließt mitten durch den grünen Wald.",
+      "license": "CC BY-SA 2.0",
+      "license_author": "Neil Palmer/CIAT",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Amazon_CIAT_(3).jpg",
+      "wikimedia_id": "File:Amazon_CIAT_(3).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Amazon_CIAT_%283%29.jpg/1920px-Amazon_CIAT_%283%29.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Amazon_CIAT_(3)_300.jpg",
+        "800": "bilder/regenwald/Amazon_CIAT_(3)_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Ein nasser Traum",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir einen riesigen Wald vor.",
+          "img_index": 3
+        },
+        {
+          "id": "s002",
+          "text": "Dort ist es immer warm und feucht.",
+          "img_index": 3
+        },
+        {
+          "id": "s003",
+          "text": "Fast jeden Tag fällt warmer Regen vom Himmel.",
+          "img_index": 3
+        },
+        {
+          "id": "s004",
+          "text": "Deshalb heißt dieser Wald auch Regenwald.",
+          "img_index": 3
+        },
+        {
+          "id": "s005",
+          "text": "Das Wasser hilft den Pflanzen beim Wachsen.",
+          "img_index": 3
+        },
+        {
+          "id": "s006",
+          "text": "Ein riesiger Fluss schlängelt sich durch das Grün.",
+          "img_index": 3
+        },
+        {
+          "id": "s007",
+          "text": "Er heißt Amazonas und ist sehr breit.",
+          "img_index": 3
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Die Riesen im Wald",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s008",
+          "text": "Die Bäume sind hoch wie Kirchtürme.",
+          "img_index": -1
+        },
+        {
+          "id": "s009",
+          "text": "Ihre Blätter bilden ein riesiges, grünes Dach.",
+          "img_index": -1
+        },
+        {
+          "id": "s010",
+          "text": "Am Boden ist es deshalb ziemlich dunkel.",
+          "img_index": -1
+        },
+        {
+          "id": "s011",
+          "text": "Überall klettern dicke Lianen an den Stämmen empor.",
+          "img_index": -1
+        },
+        {
+          "id": "s012",
+          "text": "Hier wachsen auch wilde Feigen.",
+          "img_index": -1
+        },
+        {
+          "id": "s013",
+          "text": "Manche Feigen wachsen sogar auf anderen Bäumen.",
+          "img_index": -1
+        },
+        {
+          "id": "s014",
+          "text": "Ihre langen Wurzeln kriechen bis zur Erde.",
+          "img_index": -1
+        },
+        {
+          "id": "s015",
+          "text": "Am Ende umschließen sie den Wirtsbaum ganz.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Wer krabbelt und klettert da?",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s016",
+          "text": "Im Regenwald leben unzählige bunte Tiere.",
+          "img_index": 1
+        },
+        {
+          "id": "s017",
+          "text": "Ein kleiner Baumsteiger-Frosch sitzt auf einem Blatt.",
+          "img_index": 1
+        },
+        {
+          "id": "s018",
+          "text": "Seine gelben und schwarzen Streifen leuchten hell.",
+          "img_index": 1
+        },
+        {
+          "id": "s019",
+          "text": "Diese Farben sagen: Achtung, ich bin giftig!",
+          "img_index": 1
+        },
+        {
+          "id": "s020",
+          "text": "Hoch oben im Baum hängt ein Faultier.",
+          "img_index": 1
+        },
+        {
+          "id": "s021",
+          "text": "Es klammert sich mit starken Krallen fest.",
+          "img_index": 1
+        },
+        {
+          "id": "s022",
+          "text": "Das Tier schläft fast den ganzen Tag.",
+          "img_index": 1
+        },
+        {
+          "id": "s023",
+          "text": "In seinem Fell wachsen winzige, grüne Algen.",
+          "img_index": 1
+        },
+        {
+          "id": "s024",
+          "text": "Dadurch sieht es aus wie ein Ast.",
+          "img_index": 1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Der Wald ist in Gefahr! Menschen schneiden immer mehr Bäume ab. Wenn der Regenwald verschwindet, verlieren viele Tiere ihr Zuhause."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Fleißige Blattschneider",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s025",
+          "text": "Am Boden marschiert eine Reihe kleiner Ameisen.",
+          "img_index": 0
+        },
+        {
+          "id": "s026",
+          "text": "Jede trägt ein großes, grünes Blatt-Stück.",
+          "img_index": 0
+        },
+        {
+          "id": "s027",
+          "text": "Die Ameisen fressen diese Blätter aber nicht.",
+          "img_index": 0
+        },
+        {
+          "id": "s028",
+          "text": "Sie bauen damit unter der Erde Gärten.",
+          "img_index": 0
+        },
+        {
+          "id": "s029",
+          "text": "Auf den Blättern züchten sie einen Pilz.",
+          "img_index": 0
+        },
+        {
+          "id": "s030",
+          "text": "Diesen Pilz essen die Ameisen sehr gern.",
+          "img_index": 0
+        },
+        {
+          "id": "s031",
+          "text": "Auch Menschen leben schon sehr lange hier.",
+          "img_index": 0
+        },
+        {
+          "id": "s032",
+          "text": "Sie beschützen den Wald und seine Natur.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Ameisen schaffen Unglaubliches! Eine einzige Ameisen-Gruppe kann an einem Tag so viele Blätter abschneiden, wie eine große Kuh frisst."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wie heißt der riesige Fluss im Regenwald?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Amazonas"
+          },
+          {
+            "key": "B",
+            "text": "Rhein"
+          },
+          {
+            "key": "C",
+            "text": "Nil"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Was wächst im Fell des Faultiers, damit es grün aussieht?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Blumen"
+          },
+          {
+            "key": "B",
+            "text": "Algen"
+          },
+          {
+            "key": "C",
+            "text": "Moos"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Was machen die Ameisen mit den Blättern?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie essen die Blätter auf."
+          },
+          {
+            "key": "B",
+            "text": "Sie bauen daraus Boote."
+          },
+          {
+            "key": "C",
+            "text": "Sie züchten darauf einen Pilz."
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Urwald",
+      "Amazonas",
+      "Tropen"
+    ],
+    "discover": [
+      "Ameisen",
+      "Faultiere",
+      "Frösche"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Stell dir einen riesigen Wald vor. Dort ist es immer warm und feucht. Fast jeden Tag fällt warmer Regen vom Himmel. Deshalb heißt dieser Wald auch Regenwald.",
+      "source": "Regenwald",
+      "passage": "Als Regenwald bezeichnet man Wälder, die durch ganzjährig fallende, große Niederschlagsmengen gekennzeichnet sind."
+    },
+    {
+      "claim": "Ein riesiger Fluss schlängelt sich durch das Grün. Er heißt Amazonas und ist sehr breit.",
+      "source": "Amazonas-Regenwald",
+      "passage": "Der Amazonas ist ein großer südamerikanischer Fluss... Er ist der Fluss mit dem größten Zuflussgebiet der Welt... ein großer Teil davon Tropischer Wald."
+    },
+    {
+      "claim": "Die Bäume sind hoch wie Kirchtürme. Ihre Blätter bilden ein riesiges, grünes Dach.",
+      "source": "Amazonas-Regenwald",
+      "passage": "Der amazonische Wald besitzt von oben betrachtet das Erscheinungsbild eines „Meeres von Baumkronen“. Sie befinden sich etwa 30 Meter oberhalb des Bodens. An einigen Stellen wird die „Oberfläche“ von bis zu doppelt so hohen „Urwaldriesen“ überragt."
+    },
+    {
+      "claim": "Manche Feigen wachsen sogar auf anderen Bäumen. Ihre langen Wurzeln kriechen bis zur Erde. Am Ende umschließen sie den Wirtsbaum ganz.",
+      "source": "Feigen",
+      "passage": "Einige Ficus-Arten sind Würgefeigen... Doch deren Luftwurzeln wachsen zum Boden hinab. Erreichen die Wurzeln den Boden, beginnen die Feigen ein schnelleres Wachstum... Sie umschließen allmählich ihren Trag- oder Wirtsbaum, der schließlich abstirbt"
+    },
+    {
+      "claim": "Ein kleiner Baumsteiger-Frosch sitzt auf einem Blatt. Seine gelben und schwarzen Streifen leuchten hell. Diese Farben sagen: Achtung, ich bin giftig!",
+      "source": "Baumsteigerfrösche",
+      "passage": "Die oft sehr kleinen (etwa 12 bis 50 mm) und farbenfrohen Frösche... Mit ihrer auffälligen Körperfärbung signalisieren Pfeilgiftfrösche ihre Ungenießbarkeit."
+    },
+    {
+      "claim": "Hoch oben im Baum hängt ein Faultier. Es klammert sich mit starken Krallen fest. Das Tier schläft fast den ganzen Tag.",
+      "source": "Faultiere",
+      "passage": "Bekannt sind die Faultiere vor allem durch ihre – mit dem Rücken nach unten – im Geäst hängende Lebensweise... Die Tiere sind, abhängig von der Jahreszeit, bis zu 20 Stunden am Tag inaktiv, die sie schlafend oder ruhend verbringen."
+    },
+    {
+      "claim": "In seinem Fell wachsen winzige, grüne Algen. Dadurch sieht es aus wie ein Ast.",
+      "source": "Faultiere",
+      "passage": "In den Haaren siedeln Algen, die den Tieren zwischen den Blättern als grün-changierende Färbung zugutekommen... Die höhere Konzentration von Algen im Fell verstärkt weiterhin den Tarneffekt der Tiere."
+    },
+    {
+      "claim": "Am Boden marschiert eine Reihe kleiner Ameisen. Jede trägt ein großes, grünes Blatt-Stück.",
+      "source": "Blattschneiderameise",
+      "passage": "Als Blattschneiderameisen bezeichnet man verschiedene Ameisenarten, die mit ihren Mundwerkzeugen Pflanzenblätter in kleine Stückchen zerteilen, die sie in ihren Bau transportieren."
+    },
+    {
+      "claim": "Die Ameisen fressen diese Blätter aber nicht. Sie bauen damit unter der Erde Gärten. Auf den Blättern züchten sie einen Pilz. Diesen Pilz essen die Ameisen sehr gern.",
+      "source": "Blattschneiderameise",
+      "passage": "Sie fressen nicht selbst die Blätter, sondern zerkauen sie und verwenden sie als Substrat, um darauf einen speziellen Pilz... wachsen zu lassen, von dem sie sich ernähren."
+    },
+    {
+      "claim": "Auch Menschen leben schon sehr lange hier. Sie beschützen den Wald und seine Natur.",
+      "source": "Amazonas-Regenwald",
+      "passage": "Archäologische Untersuchungen... legen nahe, dass Menschen seit mindestens 11.200 Jahren in der Amazonasregion leben... Viele Ethnien haben eine enge spirituelle Beziehung zum Wald und gehen dementsprechend umsichtig mit den Ressourcen um."
+    },
+    {
+      "claim": "Eine einzige Ameisen-Gruppe kann an einem Tag so viele Blätter abschneiden, wie eine große Kuh frisst.",
+      "source": "Blattschneiderameise",
+      "passage": "denn eine Kolonie kann pro Tag so viel Vegetation schneiden, wie eine ausgewachsene Kuh frisst."
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Regenwald S1 — Lektorat\nZusammenfassung: 0 silent, 0 korrigiert, 0 zu prüfen.",
+    "n_silent": 0,
+    "n_korrigiert": 0,
+    "n_pruefen": 0,
+    "findings": []
+  }
+}

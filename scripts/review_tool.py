@@ -27,11 +27,25 @@ import argparse
 import html
 import json
 import os
+import re
 import sys
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs
+
+
+def _strip_box_prefix(s):
+    """Entfernt BOX[type]: Präfix aus Lektorat-Claims.
+
+    Lektorat-Findings tragen im claim_original/korrektur_* oft ein
+    'BOX[fakt]: '-Präfix, das im Artikel-Body (boxes[].text) nicht vorkommt.
+    Ohne Strip findet _replace_in_article den Zielsatz nicht (einbau_fehlgeschlagen).
+    """
+    if s is None:
+        return s
+    return re.sub(r'^BOX\[[^\]]*\]:\s*', '', s)
+
 
 # ── Pfade (werden in main() gesetzt) ─────────────────────────────────────────
 RUN_DIR:  Path
@@ -503,8 +517,9 @@ def handle_submit(body: str) -> dict:
             counts["abgelehnt"] += 1
             mark(aid, lekt=True)
         elif choice in ("annehmen_vorschlag", "annehmen_alt"):
-            target = _alt_of(f) if choice == "annehmen_alt" else _vorschlag_of(f)
-            claim  = f.get("claim_original", "")
+            target = _strip_box_prefix(
+                _alt_of(f) if choice == "annehmen_alt" else _vorschlag_of(f))
+            claim  = _strip_box_prefix(f.get("claim_original", ""))
             if target and _replace_in_article(pair["article"], claim, target):
                 f["review_decision"] = "angenommen"
                 f["review_variant"] = "alt" if choice == "annehmen_alt" else "vorschlag"
@@ -530,8 +545,8 @@ def handle_submit(body: str) -> dict:
         if idx >= len(findings):
             continue
         f = findings[idx]
-        kor   = f.get("korrektur_neu", "")
-        claim = f.get("claim_original", "")
+        kor   = _strip_box_prefix(f.get("korrektur_neu", ""))
+        claim = _strip_box_prefix(f.get("claim_original", ""))
         if kor and claim and _replace_in_article(pair["article"], kor, claim):
             f["review_decision"] = "revertiert"
             f["reviewed_at"] = now

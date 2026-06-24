@@ -1,0 +1,414 @@
+{
+  "meta": {
+    "id": "wal_l1",
+    "title": "Wal",
+    "subtitle": "Warum der Wal kein Fisch ist",
+    "emoji": "🐋",
+    "age_level": 1,
+    "pattern": "living_being",
+    "theme_color": "#2196F3",
+    "word_count": 235,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Wale",
+    "schema_version": "1.0",
+    "review_flag": true,
+    "category_top": "tiere",
+    "category_sub": "saugetiere",
+    "generated_at": "2026-06-24T13:03:59.034293+00:00",
+    "grounding_companions": [
+      "Pelorus Jack",
+      "Mocha Dick",
+      "Blauwal"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM",
+    "review_reason": "31 Sätze außerhalb [8,30] für Stufe 1"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Cetacea.jpg",
+      "alt": "Zeichnung von verschiedenen Walen",
+      "caption": "Es gibt viele verschiedene Wal-Arten auf der Erde.",
+      "license": "Public domain",
+      "license_author": "Hines, Bob",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Cetacea.jpg",
+      "wikimedia_id": "File:Cetacea.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/9/9a/Cetacea.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wal/Cetacea_300.jpg",
+        "800": "bilder/wal/Cetacea_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "alt": "Ein großer Blauwal pustet eine Fontäne an der Oberfläche",
+      "caption": "Ein Blauwal holt Luft an der Wasseroberfläche.",
+      "license": "Public domain",
+      "license_author": "NOAA Photo Library",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "wikimedia_id": "File:Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg/1920px-Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wal/Anim1754_-_Flickr_-_NOAA_Photo_Library_300.jpg",
+        "800": "bilder/wal/Anim1754_-_Flickr_-_NOAA_Photo_Library_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Humpback_whale_(Megaptera_novaeangliae)_calf_Moorea_2.jpg",
+      "alt": "Ein Buckelwal-Baby schwimmt im blauen Wasser",
+      "caption": "Dieses junge Wal-Baby schwimmt dicht bei seiner Mutter.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Charles J. Sharp",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Humpback_whale_(Megaptera_novaeangliae)_calf_Moorea_2.jpg",
+      "wikimedia_id": "File:Humpback_whale_(Megaptera_novaeangliae)_calf_Moorea_2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Humpback_whale_%28Megaptera_novaeangliae%29_calf_Moorea_2.jpg/1920px-Humpback_whale_%28Megaptera_novaeangliae%29_calf_Moorea_2.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wal/Humpback_whale_(Megaptera_novaeangliae)_calf_Moorea_2_300.jpg",
+        "800": "bilder/wal/Humpback_whale_(Megaptera_novaeangliae)_calf_Moorea_2_800.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Anim1749_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "alt": "Zwei Delfine springen fröhlich aus dem Wasser",
+      "caption": "Delfine sind kleine, flinke Wale, die gerne springen.",
+      "license": "Public domain",
+      "license_author": "Credit: NOAA NMFS.",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Anim1749_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "wikimedia_id": "File:Anim1749_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Anim1749_-_Flickr_-_NOAA_Photo_Library.jpg/1920px-Anim1749_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wal/Anim1749_-_Flickr_-_NOAA_Photo_Library_300.jpg",
+        "800": "bilder/wal/Anim1749_-_Flickr_-_NOAA_Photo_Library_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Wer schwimmt da im Meer?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir ein riesiges Tier im Meer vor.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Es schwimmt so flink wie ein Fisch.",
+          "img_index": 0
+        },
+        {
+          "id": "s003",
+          "text": "Doch es ist gar kein Fisch!",
+          "img_index": 0
+        },
+        {
+          "id": "s004",
+          "text": "Es ist ein Wal.",
+          "img_index": 0
+        },
+        {
+          "id": "s005",
+          "text": "Wale sind Säugetiere, genau wie wir Menschen.",
+          "img_index": 0
+        },
+        {
+          "id": "s006",
+          "text": "Sie können nicht unter Wasser atmen.",
+          "img_index": 0
+        },
+        {
+          "id": "s007",
+          "text": "Wale müssen Luft holen.",
+          "img_index": 0
+        },
+        {
+          "id": "s008",
+          "text": "Dafür tauchen sie kurz an die Oberfläche.",
+          "img_index": 0
+        },
+        {
+          "id": "s009",
+          "text": "Sie atmen tief ein.",
+          "img_index": 0
+        },
+        {
+          "id": "s010",
+          "text": "Dann tauchen sie wieder in das tiefe Meer.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Die Riesen der Meere",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s011",
+          "text": "Zum Atmen nutzen Wale ihr Blasloch.",
+          "img_index": 1
+        },
+        {
+          "id": "s012",
+          "text": "Es liegt ganz oben auf ihrem Kopf.",
+          "img_index": 1
+        },
+        {
+          "id": "s013",
+          "text": "Der Blauwal ist das allergrößte Tier der Erde.",
+          "img_index": 1
+        },
+        {
+          "id": "s014",
+          "text": "Er ist so lang wie drei große Busse.",
+          "img_index": 1
+        },
+        {
+          "id": "s015",
+          "text": "Wenn er ausatmet, pustet er eine Wolke hoch.",
+          "img_index": 1
+        },
+        {
+          "id": "s016",
+          "text": "Diese Wolke fliegt sehr weit in die Luft.",
+          "img_index": 1
+        },
+        {
+          "id": "s017",
+          "text": "Wale halten ihren Körper immer warm.",
+          "img_index": 1
+        },
+        {
+          "id": "s018",
+          "text": "Dabei hilft ihnen eine dicke Speckschicht.",
+          "img_index": 1
+        },
+        {
+          "id": "s019",
+          "text": "Fische können das nicht tun.",
+          "img_index": 1
+        },
+        {
+          "id": "s020",
+          "text": "Fische haben auch eine senkrechte Schwanzflosse.",
+          "img_index": 1
+        },
+        {
+          "id": "s021",
+          "text": "Die Schwanzflosse vom Wal steht aber waagerecht.",
+          "img_index": 1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "🌟 Ein Blauwal ist riesig! Allein sein Herz wiegt so viel wie ein kleines Auto."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Babys und schlaue Helfer",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s022",
+          "text": "Wal-Mütter gebären lebendige Babys.",
+          "img_index": 2
+        },
+        {
+          "id": "s023",
+          "text": "So ein Baby heißt Kalb.",
+          "img_index": 2
+        },
+        {
+          "id": "s024",
+          "text": "Das Kalb trinkt fette Milch bei der Mutter.",
+          "img_index": 2
+        },
+        {
+          "id": "s025",
+          "text": "Die Mutter spritzt die Milch aktiv ins Maul.",
+          "img_index": 2
+        },
+        {
+          "id": "s026",
+          "text": "Manche Wale singen sogar Lieder unter Wasser.",
+          "img_index": 2
+        },
+        {
+          "id": "s027",
+          "text": "Andere Wale hören diese Lieder viele Kilometer weit.",
+          "img_index": 2
+        },
+        {
+          "id": "s028",
+          "text": "Auch Delfine gehören zu den Walen.",
+          "img_index": 2
+        },
+        {
+          "id": "s029",
+          "text": "Ein berühmter Delfin hieß Pelorus Jack.",
+          "img_index": 2
+        },
+        {
+          "id": "s030",
+          "text": "Er schwamm oft vor Schiffen her.",
+          "img_index": 2
+        },
+        {
+          "id": "s031",
+          "text": "Er zeigte ihnen den sicheren Weg durch die gefährliche Meerenge.",
+          "img_index": 2
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "⚠️ Große Schiffe machen viel Lärm im Meer. Der laute Krach stört die Wale beim Rufen und Hören."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Was sind Wale in Wirklichkeit?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Krebse"
+          },
+          {
+            "key": "B",
+            "text": "Fische"
+          },
+          {
+            "key": "C",
+            "text": "Säugetiere"
+          }
+        ],
+        "correct_key": "C"
+      },
+      {
+        "id": "q2",
+        "text": "Wo liegt das Blasloch zum Atmen beim Wal?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Am Bauch"
+          },
+          {
+            "key": "B",
+            "text": "Auf dem Kopf"
+          },
+          {
+            "key": "C",
+            "text": "Am Schwanz"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Welches Tier ist das größte Tier auf unserer Erde?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Der Blauwal"
+          },
+          {
+            "key": "B",
+            "text": "Die Giraffe"
+          },
+          {
+            "key": "C",
+            "text": "Der Löwe"
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Delfin",
+      "Blauwal",
+      "Säugetier"
+    ],
+    "discover": [
+      "Meer",
+      "Fisch",
+      "Pelorus Jack"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Wale sind Säugetiere, genau wie wir Menschen.",
+      "source": "Wale",
+      "passage": "da Wale keine Fische sind, sondern aquatische (wasserlebende) Säugetiere (Meeressäuger)."
+    },
+    {
+      "claim": "Der Blauwal ist das allergrößte Tier der Erde.",
+      "source": "Blauwal",
+      "passage": "Mit einer Körperlänge von bis zu 33 Metern und einer Körpermasse von bis zu 200 Tonnen ist der Blauwal eines der größten und schwersten bekannten Tiere der Erdgeschichte."
+    },
+    {
+      "claim": "Allein sein Herz wiegt so viel wie ein kleines Auto.",
+      "source": "Blauwal",
+      "passage": "Das Herz des Blauwals wiegt im Durchschnitt etwa 600 Kilogramm bis eine Tonne"
+    },
+    {
+      "claim": "Das Kalb trinkt fette Milch bei der Mutter.",
+      "source": "Wale",
+      "passage": "Wale gebären vollentwickelte Kälber und säugen sie mit extrem fettreicher Muttermilch"
+    },
+    {
+      "claim": "Er hieß Pelorus Jack. Er wies Schiffen den Weg durch gefährliche Wellen.",
+      "source": "Pelorus Jack",
+      "passage": "es schien, als leite er die Schiffe durch die gefährliche Straße"
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Wal S1 — Lektorat\n### KORRIGIERT (1 Korrekturen)\n- «…eigte ihnen den sicheren Weg durch Wellen.» → «…eigte ihnen den sicheren Weg durch die gefährliche Meerenge.» — WP: ««Diese Strecke war aufgrund von Untiefen, tückischen Strömungen, wilden Wasserwirbeln und Unterwasserfelsen gefährlich für die Schifffahrt»»\nZusammenfassung: 0 silent, 1 korrigiert, 0 zu prüfen.",
+    "n_silent": 0,
+    "n_korrigiert": 1,
+    "n_pruefen": 0,
+    "findings": [
+      {
+        "verdikt": "KORRIGIERT",
+        "claim_original": "Er zeigte ihnen den sicheren Weg durch Wellen.",
+        "korrektur_neu": "Er zeigte ihnen den sicheren Weg durch die gefährliche Meerenge.",
+        "korrektur_alt": null,
+        "beleg": "«Diese Strecke war aufgrund von Untiefen, tückischen Strömungen, wilden Wasserwirbeln und Unterwasserfelsen gefährlich für die Schifffahrt»",
+        "problem": null,
+        "begruendung": null,
+        "review_decision": "angenommen",
+        "reviewed_at": "2026-06-24T14:01:25+00:00"
+      }
+    ]
+  }
+}
