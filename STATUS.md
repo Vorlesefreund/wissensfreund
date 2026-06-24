@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T14:07:11Z -->
+<!-- updated: 2026-06-24T14:44:16Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -13,9 +13,10 @@
 >   Precision-Fix via Prompt-Tuning gescheitert (Rollback nach Stand 4). Precision-Lösung
 >   erfordert claim-weise Architektur — deferred. FPs sind Stil-Tausche/Additionen,
 >   keine Faktenfehler; mit Baustein 2 im Review handhabbar.
-> - **[NÄCHSTER SCHRITT] Erde-Retry** — `--themen Erde --stage 1` wenn Gemini stabil,
->   dann vision_retry.py + Stage 2+3. Danach: weitere Leuchtturm-Themen (Sonne, Mond,
->   Flugzeug, Eisenbahn, Dinosaurier).
+> - **[NÄCHSTER SCHRITT] Erde-Retry** — `--themen Erde --stage 1` wenn Gemini stabil
+>   (503-Welle abgewartet). Circuit Breaker wirkt bei Multi-Themen-Läufen.
+> - **Nächste Leuchtturm-Themen** (Sonne, Mond, Flugzeug, Eisenbahn, Dinosaurier) —
+>   staged: --stage 1 → vision_retry.py → --stage 2 → --stage 3.
 > - **Staged-Lauf-Workflow** jetzt Standard — nie wieder Voll-Lauf wenn Vision-Retry
 >   nötig ist (dokumentiert in CLAUDE_CHAT_NOTIZEN.md).
 > - **vulkan_l3 review_flag** (685 > 682 W) — 3 Wörter kürzen bei redaktioneller
@@ -26,6 +27,12 @@
 ---
 
 ## Abgeschlossen (2026-06-24)
+
+**Circuit Breaker Stage-1-Kompass** — run_batch.py: CB_THRESHOLD=3 / CB_WAIT_MIN=15.
+Nach 3 aufeinanderfolgenden API-Ausfällen (companions_raw==[] AND usage=={}) pausiert
+Stage 1 automatisch 15 Min und macht danach weiter. Kein Abbruch — companions_failed-Topics
+bleiben für Resume markiert. Echte 0-Companions (usage gefüllt) lösen Breaker nicht aus
+und resetten ihn. Wirkt erst bei ≥3 Topics im Lauf (Solo-Lauf: kein Effekt).
 
 **Produktionslauf erw_20260624** (Regenwald + Wal, 6/9 Artikel) — Commit 6130b7e.
 Erde ausgefallen: Kompass-503-Erschöpfung (6 Versuche), nicht Logikfehler — Retry ausstehend.
