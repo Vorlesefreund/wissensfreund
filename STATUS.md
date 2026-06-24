@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T07:39:48Z -->
+<!-- updated: 2026-06-24T08:46:53Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -8,21 +8,34 @@
 > 2026-06-24 lief selektiv: Stage 1 komplett übersprungen, Stage 2/3 nur die 3 fehlenden Vulkan-Artikel/-Lektorate
 > neu, Titanic+WW2 per Datei-Existenz unberührt (Zeitstempel unverändert). Alle 9 Artikel + 9 Lektorate vorhanden.
 >
-> **OFFENE Punkte (keine Blocker):**
-> - **Baustein 2: HTML-Review-Tool mit Ankreuz-Logik + Rücklauf in Artikel-JSON** — noch zu bauen (konsumiert die
->   neuen PRÜFEN-Vorschläge aus Baustein 1).
-> - **Test der PRÜFEN-Vorschläge an echten Daten ausstehend:** geänderten Lektorat über die 9 Verify-Artikel laufen
->   lassen (bes. vulkan_l3) — entstehen brauchbare Vorschläge, greift die Zurückschneide-Maxime? (Claude Chat gibt
->   separat OK.)
-> - vulkan_l3 `review_flag` (685 > 682 W) — bei redaktioneller Durchsicht 3 Wörter zu kürzen, unkritisch.
-> - vulkan_l3 PRÜFEN-Finding (Mitternachts-Kollaps „verschütteten Pompeji UND Herculaneum"): Quelltext-Prüfung gegen
->   den Generierungs-Snapshot ERLEDIGT — Befund: (a) Mitternacht + (b) Herculaneum belegt, (c) gemeinsame Zuordnung
->   beider Städte zum selben Kollaps NICHT gedeckt (Snapshot: erster Strom → Herculaneum, Pompeji separat). Korrektur-
->   Entscheidung offen; ein erneuter Lektorat-Lauf (Baustein 1) würde hier nun einen konkreten Vorschlag liefern.
+> **OFFENE Punkte nach Priorität:**
+> - **[NÄCHSTE SESSION, kritischer Pfad] Lektorat-Vollständigkeit (Recall):** claim-weise Prüfarchitektur statt
+>   holistischem Freidurchgang — die Testläufe zeigten, dass jeder Lauf nur eine Teilmenge der echten Grenzfälle
+>   findet. ERST nach Ground-Truth-Messung angehen.
+> - **[Voraussetzung Recall-Umbau] Ground Truth** (zweiseitig: echte Faktfehler + zulässige Vereinfachungen, die NICHT
+>   geflaggt werden dürfen) — von Claude Chat zu erstellen; misst Recall UND False-Positive-Rate der Eingriffsgrenze.
+> - **Baustein 2: HTML-Review-Tool** mit Ankreuz-Logik + Rücklauf in Artikel-JSON — erst nach verlässlichem Lektorat.
+> - vulkan_l3 `review_flag` (685 > 682 W) — bei redaktioneller Durchsicht 3 Wörter kürzen, unkritisch.
+> - vulkan_l3 Mitternachts-/Pompeji-Herculaneum-Stelle: Snapshot-Befund liegt vor (gemeinsame Zuordnung nicht gedeckt);
+>   Korrektur-Entscheidung offen — ein Lektorat-Lauf mit der neuen Regel würde einen Vorschlag liefern.
+> - **Hygiene (unkritisch):** untracked Test-Ordner `verify_pruefen_test{,2,3a,3b}` + Probe-Skripte aufräumen/gitignoren.
 
 ---
 
 ## Abgeschlossen (2026-06-24)
+
+**Lektorat reproduzierbar (temp=0) + Eingriffsgrenze geschärft** (Commit 0a39bf8, feature/lektorat-temp0-eingriffsgrenze
+→ main FF). (1) **Reproduzierbarkeit:** Lektorat lief ohne gesetzte Temperatur → Anthropic-Default 1.0 →
+nicht-deterministische Faktenprüfung (empirisch belegt: gleicher Artikel, vulkan_l3, kippte zwischen Läufen,
+KORRIGIERT↔SILENT). `temperature=0` an allen 4 Aufrufstellen (run_batch Stage-3-Batch, lektorat_common
+run_lektorat_sync + run_lektorat_batch, run_lektorat_catchtest). (2) **Eingriffsgrenze geschärft** (LEKTORAT_SYSTEM):
+Z.55-Widerspruch aufgelöst (von „direkt/nicht impliziert" → „sinngemäße Deckung genügt"); neue EINGRIFFSGRENZE-Kernregel
+(Eingriff NUR bei Widerspruch zur Quelle ODER ungedecktem Zusatz); „Unvollständigkeit ≠ Fehler"-Schutz mit Beispielen
+(Landhaus/Erdspalte/drei Rotoren) — schließt die Lücke, durch die das Modell quellengetreue Verkürzungen als
+„einseitig" flaggte; Grenzwert-Ausnahme (falsche Obergrenze „bis zu 20 km" bei Quelle 30 km = Widerspruch → korrigieren),
+scharf vom erlaubten Weglassen abgegrenzt. py_compile + verify_project_facts 14/14 PASS (regex_absent hält).
+**Diagnose-Befund dahinter:** Reproduzierbarkeit (temp) und Vollständigkeit (Recall) sind UNABHÄNGIG — temp=0 fixiert nur,
+macht nicht vollständiger; Recall braucht den claim-weisen Prompt-Umbau (s. OFFEN).
 
 **Lektorat PRÜFEN liefert jetzt Korrekturvorschläge** (Commit 616c19f, feature/lektorat-pruefen-vorschlag → main FF)
 — Baustein 1 von 2 des Review-Workflows. Bisher gab PRÜFEN nur Problem+Begründung aus („Artikel NICHT ändern") →
