@@ -1558,6 +1558,10 @@ def stage4_tts(
                 quiz=True,
                 run_id=_RUN_ID,
             )
+            # Präfix "lektorat_" aus WAV-Namen entfernen → article_id als Schlüssel
+            for wav in list(audio_dir.glob(f"lektorat_{article_id}_*.wav")):
+                clean = audio_dir / wav.name.replace("lektorat_", "", 1)
+                wav.rename(clean)
             wav_count = (1 if result.get("article_wav") else 0) + len(result.get("quiz_wavs", []))
             errs = result.get("errors", [])
             if errs and not result.get("article_wav"):

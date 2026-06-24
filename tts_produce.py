@@ -294,6 +294,12 @@ def produce_article(json_path, out_dir, quiz: bool = False,
     Vertont einen Artikel: eine Artikel-WAV (immer) + optional Quiz-Clips.
     Rückgabe: dict mit erzeugten Dateien, Längen, Stimmung und etwaigen Fehlern.
     """
+    # UTF-8-sichere Ausgabe (Windows-Konsole = cp1252 → … / ü / — crashen sonst).
+    # Einmalig: nach dem Wrap ist encoding bereits utf-8, Folgeaufrufe überspringen.
+    import io
+    if hasattr(sys.stdout, "buffer") and (getattr(sys.stdout, "encoding", "") or "").lower() != "utf-8":
+        sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+
     json_path = Path(json_path)
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)

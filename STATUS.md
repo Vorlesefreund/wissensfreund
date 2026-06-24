@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T18:14:13Z -->
+<!-- updated: 2026-06-24T18:36:25Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -36,12 +36,12 @@
 >   Artikel-Pausen 1×~5.6 s + 4×~2.5 s exakt wie gesetzt.
 > - **Stage-4-Wiring FERTIG** — `stage4_tts()` in run_batch.py ruft `tts_produce.produce_article(quiz=True,
 >   run_id=_RUN_ID)` je Artikel, Output → `out_dir/audio/`. Quelle: **Lektorat bevorzugt** (korrigierter
->   Text), Fallback articles/. Echter Lauf Vulkan l1–l3: 3 OK / 0 Fehler, 48 WAVs. **ACHTUNG Naming:**
->   WAVs erben den `lektorat_`-Präfix aus json_path.stem → `lektorat_vulkan_l1_artikel.wav` statt
->   `vulkan_l1_*`. Audio korrekt, aber Dateischlüssel ≠ article_id — vor R2/App fixen (Präfix strippen).
->   HINWEIS: Lauf braucht `PYTHONIOENCODING=utf-8` (produce_article druckt Unicode, bleibt unverändert).
-> - **Mini-Produktionslauf (5×3=15 Artikel)** — OFFEN: **lektorat_-Präfix im Audio-Naming**, **Audio→R2-
->   Verdrahtung** (Bucket trägt heute nur JSON), restliche Themen vertonen.
+>   Text), Fallback articles/. **Naming-Fix:** stage4_tts strippt den `lektorat_`-Präfix → WAVs heißen
+>   `vulkan_l1_artikel.wav` (== article_id). **Encoding-Fix:** produce_article wrappt stdout auf UTF-8
+>   (io.TextIOWrapper) → Lauf braucht KEIN `PYTHONIOENCODING` mehr. Verifiziert: Vulkan l1–l3 ohne
+>   Env-Var, 3 OK / 0 Fehler, 48 WAVs mit sauberen Namen.
+> - **Mini-Produktionslauf (5×3=15 Artikel)** — OFFEN: **Audio→R2-Verdrahtung** (Bucket trägt heute nur
+>   JSON), restliche Themen vertonen (Dino/Elefant/Hund/Spartacus/WW2 via Stage 4).
 
 ---
 
