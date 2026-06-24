@@ -126,6 +126,10 @@ POLL_SECS_ANTHROPIC  = 30
 GEMINI_TIMEOUT_H     = 48.0
 ANTHROPIC_TIMEOUT_H  = 24.0
 
+# Circuit Breaker — Stage 1 Kompass
+CB_THRESHOLD = 3          # aufeinanderfolgende API-Ausfälle bis zur Pause
+CB_WAIT_MIN  = 15         # Wartezeit in Minuten
+
 DONE_STATES    = {
     "JOB_STATE_SUCCEEDED", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED",
     "JOB_STATE_PARTIALLY_SUCCEEDED", "JOB_STATE_EXPIRED",
@@ -505,6 +509,7 @@ def stage1_sourcing(
     log.info("\n=== Stage 1 / Phase A: Pro-Topic-Verarbeitung (%d Themen) ===", len(wp_data))
     topics_data: dict[str, dict] = dict(done_topics)
     failed_topics: list[str] = []
+    cb_consecutive_failures = 0   # Circuit-Breaker-Zähler
 
     for thema, data in wp_data.items():
         if thema in done_topics:
@@ -518,12 +523,29 @@ def stage1_sourcing(
         if usage:
             cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe="S0",
                                schritt="kompass", modell=GEN_MODEL, **usage)
+        api_exhausted     = (not companions_raw) and (not usage)
         companions_failed = not companions_raw
         if companions_failed:
             failed_topics.append(thema)
             log.warning("  Kompass '%s': 0 Companions — Topic in failed_topics", thema)
         else:
             log.info("  Kompass '%s': %d Vorschläge", thema, len(companions_raw))
+
+        # — Circuit Breaker —
+        if api_exhausted:
+            cb_consecutive_failures += 1
+            log.warning("  Circuit Breaker: %d/%d aufeinanderfolgende API-Ausfälle",
+                        cb_consecutive_failures, CB_THRESHOLD)
+            if cb_consecutive_failures >= CB_THRESHOLD:
+                log.error(
+                    "Circuit Breaker AUSGELÖST: %d aufeinanderfolgende Kompass-Ausfälle "
+                    "— warte %d Minuten, dann weiter (nächste Topics könnten profitieren).",
+                    cb_consecutive_failures, CB_WAIT_MIN)
+                time.sleep(CB_WAIT_MIN * 60)
+                cb_consecutive_failures = 0
+                log.info("Circuit Breaker: Pause beendet, weiter mit nächstem Topic.")
+        else:
+            cb_consecutive_failures = 0   # Reset bei jedem erfolgreichen Call
 
         # — Companion-Validate + Fetch —
         companion_cap = COMPANION_CAP.get(data["appeal"], 5)
