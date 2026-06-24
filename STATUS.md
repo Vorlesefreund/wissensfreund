@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T14:44:16Z -->
+<!-- updated: 2026-06-24T15:33:09Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -23,6 +23,11 @@
 >   Durchsicht. Unkritisch.
 > - **Hygiene:** untracked Test-Ordner verify_pruefen_test{,2,3a,3b} + Probe-Skripte
 >   aufräumen/gitignoren (unkritisch).
+> - **TTS-Parameter festgelegt** (Stimme Iapetus, Modell gemini-3.1-flash-tts-preview,
+>   Scene-Instructions S1–S3, tts_compose.py) → in CLAUDE_CHAT_NOTIZEN.md dokumentiert.
+> - **Mini-Produktionslauf (5×3=15 Artikel)** — Bestandsaufnahme gemacht: Generierung +
+>   Bilder + R2-Upload lauffähig; OFFEN für den Lauf: **Quiz-Vertonung**, **TTS-Orchestrator
+>   tts_produce.py** (Stage-4-Stub), **Audio→R2-Verdrahtung** (Bucket trägt heute nur JSON).
 
 ---
 

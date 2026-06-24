@@ -75,3 +75,40 @@ Related Terms werden dann vom Modell weggelassen — das ist dokumentiertes Verh
   Kompass findet für manche Top-Lemmata keine Companions (503 oder thematisch isoliert).
   Retry bei stabiler API — falls erneut 0 Companions: Einzelfall-Entscheidung
   (Stage 2 ohne Companions via --force-stage2, oder Thema zurückstellen).
+
+---
+
+## TTS — Festgelegte Parameter (Stand 15.06.2026)
+
+Im Chat-Thread festgelegt, hier nachgetragen (war nie in der Projektdoku).
+
+**Stimme:** Iapetus
+
+**TTS-Modell:** `gemini-3.1-flash-tts-preview` (verifiziert lauffähig — liefert
+rohes PCM `audio/L16;rate=24000`, muss in WAV-Container gewrappt werden).
+
+**Tagging-Modell:** `gemini-3.5-flash` (503-anfällig; stabile Fallback-Option:
+`gemini-2.5-flash-lite`).
+
+**Kompositions-Skript:** `tts_compose.py` (committed af78549). JSON-nativ
+(sections/sentences/boxes), erzeugt ProfessorPhrasen, vertont `stimmt_das`
+mit Absatzpause (Frage → Pause → Antwort). Quiz wird bewusst ausgelassen —
+interaktive Komponente = separater Schritt.
+
+**Scene-Instructions** (ruhiger Professor-Charakter, final gewählt von Andreas):
+
+**S1 (4–6 Jahre):**
+> Read aloud as a good-natured professor sharing something with a young
+> child, as if sitting together quietly. Calm, warm, a little slower than
+> normal. Friendly but understated — let the wonder come from the words,
+> not loud emphasis.
+
+**S2 (7–9 Jahre):**
+> Read aloud as a relaxed, good-natured professor sharing a story with a
+> child. Conversational and unhurried, as if chatting at the kitchen table.
+> Understated, warm, natural — no dramatic emphasis.
+
+**S3 (10–12 Jahre):**
+> Read aloud as a calm, knowledgeable professor explaining something to an
+> older child. Conversational and even, quietly engaged. Natural pace,
+> minimal emphasis — clear and grounded, never dramatic.
