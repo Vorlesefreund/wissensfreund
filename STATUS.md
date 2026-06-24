@@ -1,22 +1,34 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T06:16:50Z -->
+<!-- updated: 2026-06-24T06:53:41Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
-> **OFFEN — finaler Vulkan-Resume (Stage 2+3) steht aus.** Stage-1-Resume in verify_20260623b am 2026-06-24
-> erfolgreich verifiziert: alle 5 Resilienz-Punkte eingetreten, Vulkan jetzt companions_failed=False mit
-> Vesuv/Pompeji/Surtsey/Geysir/Lava (stage1_checkpoint.json). ABER: Stage 2+3 übersprangen sich pauschal
-> (status=done) → Vulkan-Artikel fehlen noch (nur 6 Artikel: Titanic+WW2). Die identische Checkpoint-Resume-
-> Lücke in Stage 2+3 ist nun geschlossen (Commit 0b447b6). **Nächster Schritt: Resume erneut fahren** —
-> Stage 2+3 ziehen die 3 fehlenden Vulkan-Artikel, Titanic/WW2 bleiben per Datei-Existenz unberührt
-> (`python scripts/run_batch.py --themen "Vulkan" "Titanic" "Zweiter Weltkrieg" --stufen 1 2 3
-> --output-dir articles/verify_20260623b --run-id verify_20260623b`), danach A–G-Analyse Vulkan. Zu
-> verifizieren bleiben: Edit-1–5 (Box-Qualität, Primärinhalt, Bildnutzung) + Vision-Companion-Kontext
-> (177ca72) + Diagramm-Freigabe. Hinweis: gemini-3.5-flash zeigt noch intermittierende 503 (Flash-Check
-> fiel sauber per Fallback ab) — Kompass/Vision/Opus liefen 200 OK.
+> **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
+> (Degradation + Resume unter 503). Vulkan-Verifikation grün: 9-Artikel-A–G-Vergleich vollständig (verify_20260623b),
+> Companion-Fix (Vesuv/Pompeji) + Bildausnutzung + Box-Konkretheit sichtbar wirksam. Der finale Resume am
+> 2026-06-24 lief selektiv: Stage 1 komplett übersprungen, Stage 2/3 nur die 3 fehlenden Vulkan-Artikel/-Lektorate
+> neu, Titanic+WW2 per Datei-Existenz unberührt (Zeitstempel unverändert). Alle 9 Artikel + 9 Lektorate vorhanden.
+>
+> **Zwei kleine OFFENE Punkte (keine Blocker):**
+> - vulkan_l3 `review_flag` (685 > 682 W) — bei redaktioneller Durchsicht 3 Wörter zu kürzen, unkritisch.
+> - vulkan_l3 PRÜFEN-Finding (Mitternachts-Säulenkollaps „verschütteten Pompeji UND Herculaneum" — mögliche
+>   zeitliche Zusammenziehung) — Quelltext-Prüfung gegen den Generierungs-Snapshot ausstehend; Claude Chat
+>   entscheidet anhand des Befunds über eine evtl. Korrektur.
 
 ---
 
 ## Abgeschlossen (2026-06-24)
+
+**Stage-1/2/3-Resilienz-Thema geschlossen + Vulkan-Verifikation grün.** Finaler Resume in verify_20260623b
+selektiv gelaufen: Stage 1 kompletter Skip (alle Topics sauber), Stage 2 „unvollständig (3/9 fehlen:
+vulkan_l1–l3) → fehlende neu, vorhandene überspringen", Stage 3 analog; Titanic+WW2 per Datei-Existenz
+unberührt (Zeitstempel unverändert, Log „bereits vorhanden"/„bereits lektoriert — übersprungen"). Alle 9
+Artikel + 9 Lektorate vorhanden, beide Checkpoints vollständig. Damit sind alle drei Stages konsistent
+resume-fähig und unter realer 503-Degradation verifiziert (Flash-Check + l3-Trim fielen sauber per Fallback ab,
+kein Abbruch). A–G-Analyse Vulkan grün: Grounding lückenlos belegt (source_passages), Primärinhalt ≥50 %,
+Box-Konkretheit (WOW Tamu-Massiv/Surtsey-Perlen, Warnung pyroklastische Ströme), Bildausnutzung deutlich ↑
+(l3 8/12 inkl. freigegebenem Vesuv-Historiengemälde), Stufenstaffelung 210/346/685 W sauber, Lektorat treffsicher
+(l1 0, l2 3 KORR, l3 3 SIL/1 KORR/1 PRÜFEN). Companion-Fix (Vesuv/Pompeji erstmals präsent) + v4-Edits + Vision/
+Diagramm-Fixes sichtbar wirksam. Zwei kleine offene Punkte oben im Banner.
 
 **Checkpoint-Resume-Lücke in Stage 2+3 geschlossen** (Commit 0b447b6, feature/stage23-resume-fix → main FF) —
 systemischer Fix, alle drei Stages konsistent resume-fähig. Diagnose über den Vulkan-Resume: Stage 1 reparierte
