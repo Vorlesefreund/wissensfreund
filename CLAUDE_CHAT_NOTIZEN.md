@@ -28,3 +28,20 @@ Related Terms werden dann im Artikel weggelassen (generate_articles.py überspri
 
 **Kein Blocker:** Erste Pipeline-Läufe laufen ohne diese Felder durch.
 Related Terms werden dann vom Modell weggelassen — das ist dokumentiertes Verhalten in v3.7.
+
+---
+
+## Review-Tool (review_tool.py) — Workflow-Hinweise (2026-06-24)
+
+- Starten: python scripts/review_tool.py <RUN_DIR> [--port 8091]
+- RUN_DIR erwartet: <RUN_DIR>/lektorat/lektorat_*.json (Body + pruefbericht)
+- Pre-Lektorat-Artikel (articles/*.json) werden NICHT angefasst
+- Submit via Browser: automatisch korrekt (seen_-Hidden-Felder werden mitgesendet)
+- Submit via curl/Skript: ERST GET /, alle seen_korr_*/seen_silent_*-Felder aus dem
+  HTML extrahieren und beim POST mitsenden — sonst bleiben KORRIGIERT/SILENT auf OFFEN
+- review_decision-Werte: "angenommen" (KORRIGIERT ohne Revert) · "abgelehnt" (PRÜFEN
+  oder KORRIGIERT mit Revert) · "auto" (SILENT) · "einbau_fehlgeschlagen" (Treffer-Miss)
+- Idempotent: Re-Run überschreibt review_decision + reviewed_at, Body-Korrekturen
+  werden erneut angewendet (bei unverändertem Body: replace findet claim_original)
+- Pompeji/Herculaneum-Entscheidung (vulkan_l3 PRÜFEN[4]): abgelehnt — zeitliche
+  Kompression ist zulässige Vereinfachung für S3, kein Widerspruch zur Quelle
