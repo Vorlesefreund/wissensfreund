@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T11:04:50Z -->
+<!-- updated: 2026-06-24T11:07:46Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -13,9 +13,9 @@
 >   Precision-Fix via Prompt-Tuning gescheitert (Rollback nach Stand 4). Precision-Lösung
 >   erfordert claim-weise Architektur — deferred. FPs sind Stil-Tausche/Additionen,
 >   keine Faktenfehler; mit Baustein 2 im Review handhabbar.
-> - **[NÄCHSTER SCHRITT] Review-Tool einsetzen** — review_tool.py auf
->   verify_20260623b laufen lassen (9 Artikel reviewen), danach Pompeji/Herculaneum-
->   Entscheidung in vulkan_l3 treffen. Dann: Lektorat + Review auf neue Themen skalieren.
+> - **[NÄCHSTER SCHRITT] Review verify_20260623b** — review_tool.py auf 9 Artikel anwenden;
+>   Pompeji/Herculaneum-Entscheidung in vulkan_l3 treffen. Dann Lektorat+Review auf neue
+>   Themen skalieren.
 > - **vulkan_l3 review_flag** (685 > 682 W) — 3 Wörter kürzen bei redaktioneller Durchsicht.
 > - **Hygiene:** untracked Test-Ordner verify_pruefen_test{,2,3a,3b} + Probe-Skripte
 >   aufräumen/gitignoren (unkritisch).
