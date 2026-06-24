@@ -45,21 +45,15 @@ from lektorat_common import (          # noqa: E402
     annotate_article_lektorat_v2,
 )
 
-# ── Pfade ─────────────────────────────────────────────────────────────────────
-REPO       = SCRIPT_DIR.parent
-BASE       = REPO / "articles" / "verify_20260623b"
-CHECKPOINT = BASE / "stage1_checkpoint.json"
-ART_DIR    = BASE / "articles"
-OUT_DIR    = BASE / "lektorat_rerun"
+# ── Lauf-Verzeichnis ──────────────────────────────────────────────────────────
+REPO    = SCRIPT_DIR.parent
+# Default: verify_20260623b; per CLI überschreibbar:  python rerun… <RUN_DIR>
+RUN_DIR = sys.argv[1] if len(sys.argv) > 1 else "articles/verify_20260623b"
 
-# article_id -> (Topic-Key im Checkpoint, Artikel-Dateiname)
-TARGETS = [
-    ("vulkan_l1",            "Vulkan",            "vulkan_l1.json"),
-    ("vulkan_l2",            "Vulkan",            "vulkan_l2.json"),
-    ("vulkan_l3",            "Vulkan",            "vulkan_l3.json"),
-    ("titanic_l2",           "Titanic",           "titanic_l2.json"),
-    ("zweiter_weltkrieg_l2", "Zweiter Weltkrieg", "zweiter_weltkrieg_l2.json"),
-]
+
+def _slug(topic_key: str) -> str:
+    """Topic-Key → Datei-Slug (identisch zur run_batch.py-Logik)."""
+    return topic_key.lower().replace(" ", "_").replace("/", "_")
 
 
 def main() -> int:
@@ -68,28 +62,46 @@ def main() -> int:
         print("FEHLER: ANTHROPIC_API_KEY fehlt in der Umgebung.", file=sys.stderr)
         return 2
 
-    if not CHECKPOINT.exists():
-        print(f"FEHLER: Snapshot fehlt: {CHECKPOINT}", file=sys.stderr)
+    base       = (REPO / RUN_DIR).resolve()
+    checkpoint = base / "stage1_checkpoint.json"
+    art_dir    = base / "articles"
+    out_dir    = base / "lektorat_rerun"
+
+    print(f"RUN_DIR: {base}")
+    if not checkpoint.exists():
+        print(f"FEHLER: Snapshot fehlt: {checkpoint}", file=sys.stderr)
+        return 2
+    if not art_dir.is_dir():
+        print(f"FEHLER: Artikel-Ordner fehlt: {art_dir}", file=sys.stderr)
         return 2
 
-    cp = json.loads(CHECKPOINT.read_text(encoding="utf-8"))
+    cp = json.loads(checkpoint.read_text(encoding="utf-8"))
     topics = cp.get("topics", {})
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    # ── Targets generisch aus Checkpoint × vorhandenen Artikel-JSONs ableiten ────
+    # Für jedes Topic den Slug bilden und alle <slug>_l<n>.json im Artikel-Ordner
+    # einsammeln. So ist das Skript für jeden Lauf-Ordner einsetzbar.
+    targets: list[tuple[str, str, Path]] = []   # (aid, topic_key, art_path)
+    for topic_key in topics:
+        slug = _slug(topic_key)
+        for art_path in sorted(art_dir.glob(f"{slug}_l*.json")):
+            targets.append((art_path.stem, topic_key, art_path))
+
+    if not targets:
+        print("Keine passenden Artikel-JSONs zu Checkpoint-Topics gefunden.",
+              file=sys.stderr)
+        return 1
 
     # ── parts_by_id bauen (1 Lektorat-Call je Artikel) ──────────────────────────
     parts_by_id: dict[str, tuple[str, str]] = {}
     meta_by_id:  dict[str, dict] = {}   # aid -> {thema, stufe, art, art_path}
 
-    for aid, topic_key, fname in TARGETS:
+    for aid, topic_key, art_path in targets:
         data = topics.get(topic_key)
         if not data:
             print(f"  [{aid}] Topic '{topic_key}' fehlt im Snapshot — übersprungen")
-            continue
-
-        art_path = ART_DIR / fname
-        if not art_path.exists():
-            print(f"  [{aid}] Artikel-Datei fehlt: {art_path} — übersprungen")
             continue
 
         art = json.loads(art_path.read_text(encoding="utf-8"))
@@ -107,6 +119,7 @@ def main() -> int:
         stufe = str(art.get("meta", {}).get("age_level", aid.rsplit("_l", 1)[-1]))
         meta_by_id[aid] = {
             "thema": topic_key, "stufe": stufe, "art": art, "art_path": art_path,
+            "out_dir": out_dir,
             "n_companions": len([c for c in companions if comp_texts.get(c)]),
             "primary_chars": len(primary_text),
         }
@@ -129,7 +142,7 @@ def main() -> int:
         annotate_article_lektorat_v2(art, lekt, thema=m["thema"], stufe=m["stufe"])
         pb = art.get("pruefbericht", {})
 
-        out_path = OUT_DIR / f"{aid}_lektorat_rerun.json"
+        out_path = m["out_dir"] / f"{aid}_lektorat_rerun.json"
         out_path.write_text(
             json.dumps(art, ensure_ascii=False, indent=2), encoding="utf-8"
         )
