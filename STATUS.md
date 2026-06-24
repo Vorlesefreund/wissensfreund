@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T19:18:54Z -->
+<!-- updated: 2026-06-24T19:31:14Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -46,8 +46,8 @@
 >   run_all — explizit). Verifiziert: Vulkan-Upload → 18 Artikel-JSON + **48 WAVs in r2/audio/** (sauberes
 >   Naming). ⚠️ Indizes werden aus --articles-dir neu gebaut → global.json zeigt nur die hochgeladene Menge
 >   (Bucket noch nicht live, App auf klexikon.zim — unkritisch; bei Voll-Katalog-Upload beachten).
-> - **Mini-Produktionslauf (5×3=15 Artikel)** — OFFEN: restliche Themen vertonen (Dino/Elefant/Hund/
->   Spartacus/WW2 via Stage 4) + per Stage 5 hochladen.
+> - **TTS-Pipeline end-to-end FERTIG** (Stage 1→2→3→4→5). Entscheidung: **nur Vulkan als TTS-Pilot**
+>   (l1–l3, 48 WAVs in R2) — keine weiteren Themen vertonen/hochladen vor dem echten Produktionslauf.
 
 ---
 
@@ -433,7 +433,7 @@ Fehlbezüge ("dankbare Denkmäler", "Wärmestrahlung"). 5. Roter Faden / Wesentl
 
 ## Weiter offen (unverändert)
 
-age_floor-Gate Stage 2 · Stage 4 TTS (tts_produce.py fehlt) · Bildbaustelle · Stage-3-Idempotenz
+age_floor-Gate Stage 2 · Bildbaustelle · Stage-3-Idempotenz
 · Box-Sentiment-Feinschliff · Quiz/stimmt_das schema mismatch (Flutter)
 
 ---
