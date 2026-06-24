@@ -244,8 +244,27 @@ Es erfordert eine claim-weise Prüfarchitektur:
 
 ## STATUS
 
-GT_v1 abgeschlossen. Alle offenen Punkte geschlossen (2026-06-24):
-- A6 durch Volltext-Prüfung aufgelöst → TRUE NEGATIVE
-- Re-Run bestätigt: B2 TRUE NEGATIVE (neue Eingriffsgrenze wirkt)
-- A4/A5 weiterhin FALSE NEGATIVE — strukturelle Ursachen bestätigt
-Nächster Schritt: claim-weise Prüfarchitektur (Typ-2/Typ-3-Fixes) — Spezifikation in DIAGNOSE.
+GT_v1 abgeschlossen (2026-06-24). Alle GT-Fälle geschlossen.
+
+### Stand 3: + Detailattribut- und Starke-Quantoren-Regel (2026-06-24)
+
+Neue Regeln in LEKTORAT_SYSTEM (scripts/lektorat_common.py):
+- DETAILATTRIBUTE IN VERBUND-SÄTZEN: Ortsangaben/Modalattribute = faktische Sachaussagen,
+  müssen im Volltext nachweisbar sein → ungedeckt = KORRIGIERT
+- STARKE QUANTOREN: völlig/gänzlich/immer/nie etc. → aktive Gegenbeleg-Suche im Volltext
+  ALLER Quellen → Einschränkung gefunden = KORRIGIERT
+
+| Kategorie        | Fälle                                    | Anzahl |
+|------------------|------------------------------------------|--------|
+| True Positives   | A1, A2, A3, A4, A5                       | 5      |
+| False Negatives  | —                                        | 0      |
+| True Negatives   | B1–B8, A6, D1, D2                        | 11     |
+| False Positives  | —                                        | 0      |
+| Grenzfälle       | C1, D3                                   | 2      |
+| Bonus-TP*        | vulkan_l3 „bis zu 20 km" → 30 km         | 1      |
+
+Recall = 5/5 = 100 % | FPR = 0/11 = 0 %
+*Bonus-TP: nicht in GT, aber echter Treffer (falsche Obergrenze, EINGRIFFSGRENZE-Fall).
+
+Nächster Schritt: Lektorat-Regeln auf weiteren Themen validieren (Overfitting-Check
+— GT basiert auf 3 Themen / 5 Artikel).
