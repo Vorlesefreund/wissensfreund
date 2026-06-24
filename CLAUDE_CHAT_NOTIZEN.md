@@ -45,3 +45,33 @@ Related Terms werden dann vom Modell weggelassen — das ist dokumentiertes Verh
   werden erneut angewendet (bei unverändertem Body: replace findet claim_original)
 - Pompeji/Herculaneum-Entscheidung (vulkan_l3 PRÜFEN[4]): abgelehnt — zeitliche
   Kompression ist zulässige Vereinfachung für S3, kein Widerspruch zur Quelle
+
+---
+
+## Pipeline-Workflow-Hinweise (2026-06-24)
+
+### Staged-Lauf (empfohlen für Produktionsläufe):
+  python scripts/run_batch.py --themen X Y Z --stufen 1 2 3 \
+    --output-dir articles/<run> --stage 1
+  python scripts/vision_retry.py articles/<run>   # falls Exit 1: erneut ausführen
+  python scripts/run_batch.py --themen X Y Z --stufen 1 2 3 \
+    --output-dir articles/<run> --stage 2
+  python scripts/run_batch.py --themen X Y Z --stufen 1 2 3 \
+    --output-dir articles/<run> --stage 3
+
+### NICHT: Voll-Lauf (--stage 0 / kein --stage) wenn Vision-Retry nötig ist
+  Alle Stages laufen inline im selben Prozess — externer Kill nach Stage 1 nicht möglich.
+  Voll-Lauf nur wenn 503-Lage stabil und Vision-Ausfälle akzeptabel.
+
+### Server-Stop in Git-Bash (pkill nicht verfügbar):
+  PowerShell: Get-NetTCPConnection -LocalPort 8093 | Stop-Process
+  Oder: netstat -ano | findstr :8093  dann  taskkill /PID <pid> /F
+
+### Vision-Retry-Gate:
+  Bei images_vision_failed > 0 blockiert Stage 2 (sys.exit(2)).
+  Bypass nur mit --force-stage2 (bewusste Entscheidung dokumentieren).
+
+### Erde/Solitär-Lemmata:
+  Kompass findet für manche Top-Lemmata keine Companions (503 oder thematisch isoliert).
+  Retry bei stabiler API — falls erneut 0 Companions: Einzelfall-Entscheidung
+  (Stage 2 ohne Companions via --force-stage2, oder Thema zurückstellen).

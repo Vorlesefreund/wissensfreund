@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T11:32:51Z -->
+<!-- updated: 2026-06-24T14:07:11Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -13,10 +13,11 @@
 >   Precision-Fix via Prompt-Tuning gescheitert (Rollback nach Stand 4). Precision-Lösung
 >   erfordert claim-weise Architektur — deferred. FPs sind Stil-Tausche/Additionen,
 >   keine Faktenfehler; mit Baustein 2 im Review handhabbar.
-> - **[NÄCHSTER SCHRITT] Lektorat + Review auf neue Themen skalieren** — nächster
->   Generierungs-Lauf (z.B. test_v323f oder erste Bulk-Themen), dann review_tool.py
->   darauf anwenden. Review-Workflow jetzt vollständig: Lektorat → review_tool.py
->   (Browser) → lektorat_*.json mit review_decision.
+> - **[NÄCHSTER SCHRITT] Erde-Retry** — `--themen Erde --stage 1` wenn Gemini stabil,
+>   dann vision_retry.py + Stage 2+3. Danach: weitere Leuchtturm-Themen (Sonne, Mond,
+>   Flugzeug, Eisenbahn, Dinosaurier).
+> - **Staged-Lauf-Workflow** jetzt Standard — nie wieder Voll-Lauf wenn Vision-Retry
+>   nötig ist (dokumentiert in CLAUDE_CHAT_NOTIZEN.md).
 > - **vulkan_l3 review_flag** (685 > 682 W) — 3 Wörter kürzen bei redaktioneller
 >   Durchsicht. Unkritisch.
 > - **Hygiene:** untracked Test-Ordner verify_pruefen_test{,2,3a,3b} + Probe-Skripte
@@ -25,6 +26,12 @@
 ---
 
 ## Abgeschlossen (2026-06-24)
+
+**Produktionslauf erw_20260624** (Regenwald + Wal, 6/9 Artikel) — Commit 6130b7e.
+Erde ausgefallen: Kompass-503-Erschöpfung (6 Versuche), nicht Logikfehler — Retry ausstehend.
+18 Bilder ohne Vision-Verdict (503-Welle): Vision-Retry-Fix greift ab nächstem Lauf.
+Review vollständig: 8/8 Findings (3 KORR angenommen, 4 SILENT auto, 1 PRÜFEN angenommen).
+BOX-Präfix-Bug in review_tool.py behoben. Staged-Lauf-Workflow dokumentiert.
 
 **Review verify_20260623b abgeschlossen** (Commit a1db022) — review_tool.py auf 9 Artikel
 angewendet. 16/16 Findings reviewed: 8 KORRIGIERT angenommen, 2 PRÜFEN abgelehnt
