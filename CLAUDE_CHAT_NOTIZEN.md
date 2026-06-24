@@ -95,6 +95,10 @@ rohes PCM `audio/L16;rate=24000`, muss in WAV-Container gewrappt werden).
 mit Absatzpause (Frage → Pause → Antwort). Quiz wird bewusst ausgelassen —
 interaktive Komponente = separater Schritt.
 
+**Segment-TTS** (pro Abschnitt eigene Scene-Instruction + WAV-Concatenation)
+geprüft und abgelehnt — zu viele API-Calls, zu teuer. Nur Inline-Tags
+([excited]/[thoughtful]/[serious]) für Box-Typen.
+
 **Scene-Instructions** (ruhiger Professor-Charakter, final gewählt von Andreas):
 
 **S1 (4–6 Jahre):**
