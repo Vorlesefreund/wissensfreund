@@ -1346,8 +1346,9 @@ def stage3_lektorat(
         batch_reqs.append({
             "custom_id": nid,
             "params": {
-                "model":      LEKTORAT_MODEL,
-                "max_tokens": 16000,
+                "model":       LEKTORAT_MODEL,
+                "max_tokens":  16000,
+                "temperature": 0,  # Reproduzierbarkeit: gleicher Artikel → gleiches Lektorat
                 "system": [
                     {"type": "text", "text": LEKTORAT_SYSTEM,
                      "cache_control": {"type": "ephemeral"}},

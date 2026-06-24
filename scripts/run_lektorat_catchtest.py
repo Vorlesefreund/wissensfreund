@@ -233,6 +233,7 @@ def call_claude(model_id: str, user_msg: str) -> str:
     resp = client.messages.create(
         model=model_id,
         max_tokens=8000,
+        temperature=0,  # Reproduzierbarkeit: gleicher Artikel → gleiches Lektorat
         system=LEKTORAT_SYSTEM,
         messages=[{"role": "user", "content": user_msg}],
     )

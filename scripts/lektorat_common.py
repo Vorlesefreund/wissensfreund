@@ -52,7 +52,13 @@ LEKTORAT_SYSTEM = (
     "══════════════════════════════════════════════════\n"
     "GROUNDING-REGEL\n"
     "══════════════════════════════════════════════════\n"
-    "  · Der genaue Sachverhalt muss DIREKT in der Quelle stehen — nicht impliziert.\n"
+    "  EINGRIFFSGRENZE (Kernregel): Greife NUR ein, wenn eine Aussage entweder\n"
+    "  (a) der Quelle faktisch WIDERSPRICHT oder (b) etwas Ungedecktes HINZUFÜGT.\n"
+    "  Sonst kein Eingriff — auch nicht, wenn die Aussage vage, vereinfacht oder\n"
+    "  unvollständig ist.\n\n"
+    "  · Der Sachverhalt darf der Quelle nicht widersprechen und nichts Ungedecktes\n"
+    "    hinzufügen — sinngemäße Deckung genügt; wörtliche Übereinstimmung ist nicht\n"
+    "    erforderlich.\n"
     "  · SINNGEMÄSSE BELEGE zählen: «fliehen» wird durch «verlassen gefährdetes Gebiet»\n"
     "    gedeckt — sinngemäße Übereinstimmung zählt als BELEGT. Nicht flaggen wenn die\n"
     "    Quelle dasselbe mit anderen Worten sagt.\n"
@@ -65,11 +71,24 @@ LEKTORAT_SYSTEM = (
     "  · NICHT flaggen: Illustrative Vergleiche belegter Größen («so groß wie ein Haus»);\n"
     "    mildes Sprachkolorit («stolz», «wunderschön»); register-gerechte Vereinfachungen.\n"
     "  · NUR flaggen: (a) neue unbelegte Sachaussage, (b) Zahl/Superlativ den die\n"
-    "    Quelle nicht stützt oder widerspricht.\n"
+    "    Quelle nicht stützt oder widerspricht. Dazu zählt eine falsche GRENZE:\n"
+    "    «bis zu 20 km», wenn die Quelle 30 km als Maximum nennt, behauptet eine\n"
+    "    falsche Obergrenze — das ist ein Widerspruch zur Quelle und WIRD korrigiert.\n"
+    "    (Abgrenzung: etwas WEGLASSEN ist erlaubt; eine falsche Grenze BEHAUPTEN ist\n"
+    "    ein Widerspruch.)\n"
     "  · ABGELEITETE VERGLEICHE: «60 Tonnen – so viel wie zehn große Elefanten» ist\n"
     "    ein illustrativer Vergleich für eine belegte Maßangabe (60 Tonnen). Selbst\n"
     "    wenn «zehn Elefanten» nicht wortgleich in der Quelle steht: KEIN Eingriff.\n"
-    "    Solche Vergleiche sind Veranschaulichungen, keine eigenständigen Faktenaussagen.\n\n"
+    "    Solche Vergleiche sind Veranschaulichungen, keine eigenständigen Faktenaussagen.\n"
+    "  · UNVOLLSTÄNDIGKEIT IST KEIN FEHLER. Ein Kinderartikel darf und soll weglassen.\n"
+    "    Eine quellengetreue, vereinfachte Formulierung, die einen Aspekt der Quelle nicht\n"
+    "    erwähnt, ist KEIN Korrekturgrund — solange sie dem Erwähnten nicht widerspricht.\n"
+    "    NICHT flaggen (Beispiele):\n"
+    "      - «Bletchley Park war ein schönes Landhaus» — verschweigt die Code-Knacker-\n"
+    "        Funktion, ist aber nicht falsch.\n"
+    "      - «unterseeische Erdspalte» — die Quelle stützt «Spalte»; dass es auch ein\n"
+    "        Vulkan war, fehlt, aber nichts ist falsch.\n"
+    "      - «drei Rotoren» als vereinfachte Beschreibung der Enigma — verkürzt, nicht falsch.\n\n"
 
     "══════════════════════════════════════════════════\n"
     "DREI KORREKTURSTUFEN\n"
@@ -917,6 +936,7 @@ def run_lektorat_sync(
             msg = client.messages.create(
                 model=LEKTORAT_MODEL,
                 max_tokens=16000,
+                temperature=0,  # Reproduzierbarkeit: gleicher Artikel → gleiches Lektorat
                 system=[
                     {"type": "text", "text": LEKTORAT_SYSTEM,
                      "cache_control": {"type": "ephemeral"}},
@@ -979,8 +999,9 @@ def run_lektorat_batch(
         batch_requests.append({
             "custom_id": aid,
             "params": {
-                "model":      LEKTORAT_MODEL,
-                "max_tokens": 16000,
+                "model":       LEKTORAT_MODEL,
+                "max_tokens":  16000,
+                "temperature": 0,  # Reproduzierbarkeit: gleicher Artikel → gleiches Lektorat
                 "system": [
                     {"type": "text", "text": LEKTORAT_SYSTEM,
                      "cache_control": {"type": "ephemeral"}},
