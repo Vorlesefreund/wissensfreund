@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T15:33:09Z -->
+<!-- updated: 2026-06-24T16:06:13Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -25,9 +25,13 @@
 >   aufräumen/gitignoren (unkritisch).
 > - **TTS-Parameter festgelegt** (Stimme Iapetus, Modell gemini-3.1-flash-tts-preview,
 >   Scene-Instructions S1–S3, tts_compose.py) → in CLAUDE_CHAT_NOTIZEN.md dokumentiert.
-> - **Mini-Produktionslauf (5×3=15 Artikel)** — Bestandsaufnahme gemacht: Generierung +
->   Bilder + R2-Upload lauffähig; OFFEN für den Lauf: **Quiz-Vertonung**, **TTS-Orchestrator
->   tts_produce.py** (Stage-4-Stub), **Audio→R2-Verdrahtung** (Bucket trägt heute nur JSON).
+> - **TTS-Orchestrator gebaut: `tts_produce.py`** (Root, Standalone). Artikel-Audio (1 WAV via
+>   tts_compose.compose, Iapetus, gemini-3.1-flash-tts-preview) + Quiz-Audio (--quiz: intro/qN/
+>   richtig_N/falsch_N/abschluss als Einzelclips). cost_tracker je Datei (schritt='tts',
+>   tts_audio_sec). Verifiziert: Vulkan l1/l2/l3 → 36 valide WAVs (24kHz/16bit/mono), 48 cost-Einträge.
+>   `produce_article(json_path, out_dir, quiz=False)` importierbar → Stage-4-Wiring in run_batch.py OFFEN.
+> - **Mini-Produktionslauf (5×3=15 Artikel)** — OFFEN: **Stage-4-Wiring** (stage4_tts → tts_produce
+>   importieren), **Audio→R2-Verdrahtung** (Bucket trägt heute nur JSON), restliche Themen vertonen.
 
 ---
 
