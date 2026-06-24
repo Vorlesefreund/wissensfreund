@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T10:25:28Z -->
+<!-- updated: 2026-06-24T11:04:50Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -13,16 +13,23 @@
 >   Precision-Fix via Prompt-Tuning gescheitert (Rollback nach Stand 4). Precision-Lösung
 >   erfordert claim-weise Architektur — deferred. FPs sind Stil-Tausche/Additionen,
 >   keine Faktenfehler; mit Baustein 2 im Review handhabbar.
-> - **[NÄCHSTER SCHRITT] Baustein 2: HTML-Review-Tool** — Ankreuz-Logik +
->   Rücklauf in Artikel-JSON. Entblockt durch GT-Arbeit.
-> - vulkan_l3 `review_flag` (685 > 682 W) — bei redaktioneller Durchsicht 3 Wörter kürzen, unkritisch.
-> - vulkan_l3 Mitternachts-/Pompeji-Herculaneum-Stelle: Snapshot-Befund liegt vor (gemeinsame Zuordnung nicht gedeckt);
->   Korrektur-Entscheidung offen — ein Lektorat-Lauf mit der neuen Regel würde einen Vorschlag liefern.
-> - **Hygiene (unkritisch):** untracked Test-Ordner `verify_pruefen_test{,2,3a,3b}` + Probe-Skripte aufräumen/gitignoren.
+> - **[NÄCHSTER SCHRITT] Review-Tool einsetzen** — review_tool.py auf
+>   verify_20260623b laufen lassen (9 Artikel reviewen), danach Pompeji/Herculaneum-
+>   Entscheidung in vulkan_l3 treffen. Dann: Lektorat + Review auf neue Themen skalieren.
+> - **vulkan_l3 review_flag** (685 > 682 W) — 3 Wörter kürzen bei redaktioneller Durchsicht.
+> - **Hygiene:** untracked Test-Ordner verify_pruefen_test{,2,3a,3b} + Probe-Skripte
+>   aufräumen/gitignoren (unkritisch).
 
 ---
 
 ## Abgeschlossen (2026-06-24)
+
+**Baustein 2: HTML-Review-Tool** (Commit 4f3b2d2) — review_tool.py, Python stdlib,
+kein Flask. GET / zeigt interaktive Review-Seite (PRÜFEN mit Radio-Buttons annehmen/ablehnen,
+KORRIGIERT mit Revert-Checkbox, SILENT eingeklappt). POST /submit schreibt Entscheidungen
+in lektorat_*.json (review_decision + reviewed_at), Lektorat-Body wird in-place aktualisiert,
+Pre-Lektorat-Artikel bleiben unangetastet. Atomare Writes, konservative Defaults, idempotenter
+Re-Run. Option A: lektorat_*.json als Edit-Ziel (enthält korrigierten Body + pruefbericht).
 
 **Lektorat reproduzierbar (temp=0) + Eingriffsgrenze geschärft** (Commit 0a39bf8, feature/lektorat-temp0-eingriffsgrenze
 → main FF). (1) **Reproduzierbarkeit:** Lektorat lief ohne gesetzte Temperatur → Anthropic-Default 1.0 →
