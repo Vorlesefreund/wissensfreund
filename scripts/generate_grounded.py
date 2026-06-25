@@ -358,6 +358,8 @@ NUTZE DEIN WISSEN ueber das Thema: Schlage auch Begleitartikel vor, die in der E
 Auswahlkriterien:
 - Vertiefen das Thema fuer ein Kind: konkret, anschaulich, lebendig.
 - Greifbare Anker ausdruecklich erwuenscht: benannte Beispiele, historische Faelle, beruehmte Einzelobjekte, Personen oder Ereignisse, die dem Kind ein Bild geben. MEHRERE Anker sind erlaubt - keine Obergrenze ausser den 5 Slots insgesamt. Anker muessen das Thema VERTIEFEN, nicht davon wegfuehren.
+- Greifbar vor abstrakt: Bevorzuge konkrete, anfassbare Anker (ein benanntes Objekt, ein Ort, eine Person, ein einzelnes Ereignis) gegenueber abstrakten Grossbegriffen oder Sammelthemen. Fuer "Industrialisierung" ist die "Spinnmaschine" oder "Kinderarbeit" ein besserer Anker als "Britische Industrielle Revolution"; fuer "Zweiter Weltkrieg" ist "Anne Frank" oder "U-Boot" greifbarer als "Holocaust" als Schlagwort. Das Kind soll sich unter dem Anker sofort etwas VORSTELLEN koennen.
+- Naehe zum Kind im deutschsprachigen Raum: Wo mehrere gleichwertige Anker moeglich sind, waehle den, der einem Kind hier am ehesten begegnet oder greifbar ist (z.B. ein im deutschsprachigen Raum bekanntes Beispiel). Das ist KEINE Beschraenkung auf deutsche Themen - bei einem amerikanischen Thema gehoeren amerikanische Anker dazu. Es geht um Greifbarkeit, nicht um Herkunft.
 - Auch solche, mit denen sich laendlaeufige Vorstellungen aufgreifen und richtigstellen lassen.
 - Fokuserhaltend: beim Thema bleiben, nicht zu Eltern-/Nachbarthemen abdriften.
 - Lieber weniger als ungeeignete auffuellen (kein Mindestwert).
