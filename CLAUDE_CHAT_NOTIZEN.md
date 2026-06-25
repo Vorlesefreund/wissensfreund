@@ -78,6 +78,26 @@ Related Terms werden dann vom Modell weggelassen — das ist dokumentiertes Verh
 
 ---
 
+## Checkpoint-Sicherheits-Regeln (2026-06-25)
+
+### KRITISCH: Single-Thema-Retry IMMER in eigenem output-dir:
+  # FALSCH — überschreibt Checkpoint anderer Themen:
+  python scripts/run_batch.py --themen Erde --output-dir articles/test_xyz --stage 1
+
+  # RICHTIG — eigenes Dir für jeden Retry:
+  python scripts/run_batch.py --themen Erde --output-dir articles/retry_erde_20260625 --stage 1
+
+### Checkpoint darf erst gelöscht/überschrieben werden wenn:
+  - Alle Artikel des Laufs: reviewed (review_tool.py abgeschlossen)
+  - Alle Artikel: docx approved durch Andreas
+  - Erst dann: output-dir archivieren oder löschen
+
+### Offener Architektur-Fix (TODO):
+  stage1_checkpoint.json Merge-Logik: bei Resume nur neue Topics hinzufügen,
+  bestehende Topics nicht überschreiben. Noch nicht implementiert.
+
+---
+
 ## TTS — Festgelegte Parameter (Stand 15.06.2026)
 
 Im Chat-Thread festgelegt, hier nachgetragen (war nie in der Projektdoku).
