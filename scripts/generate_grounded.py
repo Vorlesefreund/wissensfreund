@@ -54,6 +54,7 @@ from generate_articles import (          # noqa: E402
     _repair_article_quotes,
     validate_article,
     _resolve_bks,
+    _wp_get,
     _flash_check_doppelbedeutung,
     WIKIPEDIA_API,
     USER_AGENT,
@@ -596,12 +597,12 @@ def _companion_target_ok(
         return False, "kein Zielvorschlag (child_lemma leer)"
     if title.strip().lower() == orig_bks.strip().lower():
         return False, "Ziel = Ausgangs-BKS"
+    _params = {
+        "action": "query", "format": "json", "redirects": "1",
+        "titles": title, "prop": "info|pageprops",
+    }
     try:
-        resp = session.get(WIKIPEDIA_API, params={
-            "action": "query", "format": "json", "redirects": "1",
-            "titles": title, "prop": "info|pageprops",
-        }, timeout=30)
-        resp.raise_for_status()
+        resp = _wp_get(session, _params)
         pages = resp.json().get("query", {}).get("pages", {})
     except Exception as e:
         return False, f"Ziel-Prüfung API-Fehler: {e}"
@@ -642,8 +643,7 @@ def validate_and_resolve_companions(
         "prop": "info|pageprops",   # pageprops → BKS-Erkennung (disambiguation)
     }
     try:
-        resp = session.get(WIKIPEDIA_API, params=params, timeout=30)
-        resp.raise_for_status()
+        resp = _wp_get(session, params)
         query = resp.json().get("query", {})
     except Exception as e:
         log.error("  Companion-Validierung API-Fehler: %s", e)
