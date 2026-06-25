@@ -1,0 +1,426 @@
+{
+  "meta": {
+    "id": "erde_l2",
+    "title": "Erde",
+    "subtitle": "Der lebendige, blaue Planet im All",
+    "emoji": "🌍",
+    "age_level": 2,
+    "pattern": "place_geography",
+    "theme_color": "#2196F3",
+    "word_count": 389,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Erde",
+    "schema_version": "1.0",
+    "review_flag": true,
+    "category_top": "weltall",
+    "category_sub": "planeten",
+    "generated_at": "2026-06-25T09:00:51.723751+00:00",
+    "grounding_companions": [
+      "Vulkan",
+      "Wasserkreislauf",
+      "Regenbogen",
+      "Dinosaurier",
+      "Mond"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "BlueMarble-2001-2002.jpg",
+      "alt": "Zwei Ansichten der Erde aus dem Weltall",
+      "caption": "Unsere blaue Erde aus dem Weltall gesehen.",
+      "license": "Public domain",
+      "license_author": "Reto Stöckli",
+      "source_url": "https://commons.wikimedia.org/wiki/File:BlueMarble-2001-2002.jpg",
+      "wikimedia_id": "File:BlueMarble-2001-2002.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/BlueMarble-2001-2002.jpg/1920px-BlueMarble-2001-2002.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/BlueMarble-2001-2002_300.jpg",
+        "800": "bilder/erde/BlueMarble-2001-2002_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Wasserkreislauf.png",
+      "alt": "Schematische Darstellung des Wasserkreislaufs",
+      "caption": "Der Weg des Wassers: vom Meer in die Wolken und als Regen zurück.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Wasserkreislauf.png",
+      "wikimedia_id": "File:Wasserkreislauf.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/18/Wasserkreislauf.png",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Wasserkreislauf_300.jpg",
+        "800": "bilder/erde/Wasserkreislauf_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Caumasee_Rainbow.jpg",
+      "alt": "Regenbogen über einem Waldsee",
+      "caption": "Ein wunderschöner Regenbogen spannt sich über die Natur.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Mukitil",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Caumasee_Rainbow.jpg",
+      "wikimedia_id": "File:Caumasee_Rainbow.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Caumasee_Rainbow.jpg/1920px-Caumasee_Rainbow.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Caumasee_Rainbow_300.jpg",
+        "800": "bilder/erde/Caumasee_Rainbow_800.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "070127_tanuki-fuji.jpg",
+      "alt": "Der Vulkan Mount Fuji in Japan",
+      "caption": "Der berühmte Berg Fuji in Japan ist ein schlafender Vulkan.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "名古屋太郎",
+      "source_url": "https://commons.wikimedia.org/wiki/File:070127_tanuki-fuji.jpg",
+      "wikimedia_id": "File:070127_tanuki-fuji.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/c/ca/070127_tanuki-fuji.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/070127_tanuki-fuji_300.jpg",
+        "800": "bilder/erde/070127_tanuki-fuji_800.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "alt": "Riesiges Dinosaurierskelett im Museum",
+      "caption": "Im Museum kann man sehen, wie riesig einige Dinosaurier waren.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Raimond Spekking",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Berlin_-_Museum_f%C3%BCr_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "wikimedia_id": "File:Berlin_-_Museum_f%C3%BCr_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Berlin_-_Museum_f%C3%BCr_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai_300.jpg",
+        "800": "bilder/erde/Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai_800.jpg"
+      }
+    },
+    {
+      "index": 5,
+      "filename": "Aldrin_Apollo_11.jpg",
+      "alt": "Astronaut auf dem Mond",
+      "caption": "Ein Astronaut steht auf dem staubigen Boden unseres Mondes.",
+      "license": "Public domain",
+      "license_author": "Neil A. Armstrong",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Aldrin_Apollo_11.jpg",
+      "wikimedia_id": "File:Aldrin_Apollo_11.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Aldrin_Apollo_11.jpg/1920px-Aldrin_Apollo_11.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Aldrin_Apollo_11_300.jpg",
+        "800": "bilder/erde/Aldrin_Apollo_11_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Die blaue Murmel im All",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir vor, du fliegst in einem Raumschiff durch das kalte, dunkle Weltall.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Plötzlich siehst du eine wunderschöne, leuchtend blaue Kugel: unsere Erde!",
+          "img_index": 0
+        },
+        {
+          "id": "s003",
+          "text": "Sie ist der einzige bekannte Planet, auf dem es flüssiges Wasser und echtes Leben gibt.",
+          "img_index": 0
+        },
+        {
+          "id": "s004",
+          "text": "Zwei Drittel der Erde sind von tiefen, blauen Ozeanen bedeckt.",
+          "img_index": 0
+        },
+        {
+          "id": "s005",
+          "text": "Ein Drittel besteht aus festem Land mit Bergen, Wäldern und Städten.",
+          "img_index": 0
+        },
+        {
+          "id": "s006",
+          "text": "Die Gashülle um die Erde, die Atmosphäre, schützt uns wie eine unsichtbare Decke.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Spiegelt der Himmel einfach nur das blaue Meer?",
+          "reveal_text": "Nein! Die Luft umhüllt die Erde. Wenn das Sonnenlicht auf diese Luft trifft, wird das blaue Licht viel stärker abgelenkt als das rote Licht. Deshalb sieht der Himmel tagsüber für uns blau aus.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Feuer und Wasser in Bewegung",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s007",
+          "text": "Auf der Erde wird es nie langweilig, denn Wasser und Hitze halten sie in Bewegung.",
+          "img_index": 1
+        },
+        {
+          "id": "s008",
+          "text": "Die Sonne erwärmt das Wasser der Meere, sodass es als unsichtbarer Dampf aufsteigt.",
+          "img_index": 1
+        },
+        {
+          "id": "s009",
+          "text": "In der Höhe kühlt es ab, bildet Wolken und regnet schließlich wieder herab.",
+          "img_index": 1
+        },
+        {
+          "id": "s010",
+          "text": "Diesen ewigen Weg nennt man Wasserkreislauf.",
+          "img_index": 1
+        },
+        {
+          "id": "s011",
+          "text": "Wenn die Sonne während eines Schauers durch die Wolken bricht, entsteht oft ein bunter Regenbogen.",
+          "img_index": 3
+        },
+        {
+          "id": "s012",
+          "text": "Aber auch tief unter unseren Füßen ist es unruhig.",
+          "img_index": 3
+        },
+        {
+          "id": "s013",
+          "text": "Dort schmilzt Gestein zu heißem, flüssigem Magma.",
+          "img_index": 3
+        },
+        {
+          "id": "s014",
+          "text": "Wenn der Druck zu groß wird, bricht das Magma als Lava aus Vulkanen hervor.",
+          "img_index": 3
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Ein Zuhause für Riesen und Menschen",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s015",
+          "text": "Seit Milliarden von Jahren teilen sich die unterschiedlichsten Lebewesen unseren Heimatplaneten.",
+          "img_index": 0
+        },
+        {
+          "id": "s016",
+          "text": "Vor langer Zeit herrschten die Dinosaurier über das Land.",
+          "img_index": 0
+        },
+        {
+          "id": "s017",
+          "text": "Einige von ihnen waren so riesig wie ein ganzes Haus, andere klein wie Hühner.",
+          "img_index": 0
+        },
+        {
+          "id": "s018",
+          "text": "Heute leben wir Menschen auf der Erde.",
+          "img_index": 4
+        },
+        {
+          "id": "s019",
+          "text": "Weil wir immer mehr Energie verbrauchen und Fabriken bauen, verändern wir die Natur sehr stark.",
+          "img_index": 4
+        },
+        {
+          "id": "s020",
+          "text": "Durch Abgase wird es auf der Erde wärmer, was Forschenden große Sorgen bereitet.",
+          "img_index": 4
+        },
+        {
+          "id": "s021",
+          "text": "Deshalb müssen wir gut auf unsere blaue Heimat aufpassen.",
+          "img_index": 4
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec4",
+      "heading": "Die Geburt der Erde und ihr treuer Begleiter",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s022",
+          "text": "Unsere Erde entstand vor gigantischen viereinhalb Milliarden Jahren aus einer wirbelnden Wolke aus Staub.",
+          "img_index": 5
+        },
+        {
+          "id": "s023",
+          "text": "Schon bald bekam sie einen treuen Begleiter: den Mond.",
+          "img_index": 5
+        },
+        {
+          "id": "s024",
+          "text": "Wissenschaftler glauben, dass ein riesiger Brocken mit der jungen Erde zusammenstieß.",
+          "img_index": 5
+        },
+        {
+          "id": "s025",
+          "text": "Dabei flog viel Material ins All und ballte sich zum Mond zusammen.",
+          "img_index": 5
+        },
+        {
+          "id": "s026",
+          "text": "Seine Schwerkraft zieht das Wasser unserer Meere an.",
+          "img_index": 5
+        },
+        {
+          "id": "s027",
+          "text": "Dadurch entstehen an den Küsten der Erde Ebbe und Flut, die wir Gezeiten nennen.",
+          "img_index": 5
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Der Mond ist ein echter Lebensretter! Mit seiner Schwerkraft hält er die Erdachse stabil. Ohne den Mond würde unsere Erde im All wild hin und her taumeln wie ein kaputter Kreisel. Es gäbe dann kein gleichmäßiges Wetter mehr!"
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Warum wird die Erde auch der „Blaue Planet“ genannt?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Weil der Erdboden aus blauem Staub besteht."
+          },
+          {
+            "key": "B",
+            "text": "Weil zwei Drittel der Oberfläche mit blauem Wasser bedeckt sind."
+          },
+          {
+            "key": "C",
+            "text": "Weil alle Pflanzen auf der Erde blau blühen."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Wie kommt das flüssige Gestein bei einem Vulkan an die Oberfläche?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Als heiße Lava, wenn der Druck im Erdinneren zu groß wird."
+          },
+          {
+            "key": "B",
+            "text": "Es wird vom Wind aus den Bergen gepustet."
+          },
+          {
+            "key": "C",
+            "text": "Es regnet aus den Wolken herab."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Was bewirkt die Schwerkraft des Mondes auf der Erde?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie lässt Vulkane ausbrechen."
+          },
+          {
+            "key": "B",
+            "text": "Sie sorgt für die Entstehung von Regenbögen."
+          },
+          {
+            "key": "C",
+            "text": "Sie zieht das Meerwasser an und erzeugt Ebbe und Flut."
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "sonnensystem",
+      "atmosphaer",
+      "ozean",
+      "kontinent"
+    ],
+    "discover": [
+      "vulkan",
+      "wasserkreislauf",
+      "regenbogen",
+      "dinosaurier",
+      "mond"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Sie ist der einzige bekannte Planet, auf dem es flüssiges Wasser und echtes Leben gibt.",
+      "source": "Erde",
+      "passage": "Die Erde ist der einzige Planet im Sonnensystem, auf dessen Oberfläche flüssiges Wasser existiert. Bisher konnte auf keinem anderen Planeten unseres Sonnensystems Leben entdeckt werden."
+    },
+    {
+      "claim": "Zwei Drittel der Erde sind von tiefen, blauen Ozeanen bedeckt.",
+      "source": "Erde",
+      "passage": "Die Erdoberfläche bilden zu etwa zwei Dritteln Ozeane, zu etwa einem Drittel Kontinente."
+    },
+    {
+      "claim": "Wenn der Druck zu groß wird, bricht das Magma als Lava aus Vulkanen hervor.",
+      "source": "Vulkan",
+      "passage": "Wenn der Druck zu groß wird, steigt das Magma über Spalten und Klüfte der Lithosphäre auf. Magma, das an die Erdoberfläche gelangt, wird als Lava bezeichnet."
+    },
+    {
+      "claim": "Dabei flog viel Material ins All und ballte sich zum Mond zusammen.",
+      "source": "Mond",
+      "passage": "Dabei wurde viel Materie, vorwiegend aus der Erdkruste und dem Mantel des einschlagenden Körpers, in eine Erdumlaufbahn geschleudert, ballte sich dort zusammen und formte schließlich den Mond."
+    },
+    {
+      "claim": "Dadurch entstehen an den Küsten der Erde Ebbe und Flut, die wir Gezeiten nennen.",
+      "source": "Erde",
+      "passage": "Auf der Erde verursacht die Gravitation von Mond und Sonne die Gezeiten von Ebbe und Flut der Meere."
+    }
+  ]
+}

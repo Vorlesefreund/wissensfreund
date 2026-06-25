@@ -1,0 +1,689 @@
+{
+  "meta": {
+    "id": "erde_l3",
+    "title": "Erde",
+    "subtitle": "Der Blaue Planet voller Leben",
+    "emoji": "🌍",
+    "age_level": 3,
+    "pattern": "place_geography",
+    "theme_color": "#2196F3",
+    "word_count": 839,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Erde",
+    "schema_version": "1.0",
+    "review_flag": true,
+    "category_top": "weltall",
+    "category_sub": "planeten",
+    "generated_at": "2026-06-25T09:03:41.666438+00:00",
+    "grounding_companions": [
+      "Vulkan",
+      "Wasserkreislauf",
+      "Regenbogen",
+      "Dinosaurier",
+      "Mond"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM",
+    "trim_passes": 1,
+    "review_reason": "Wortzahl 839 > Cap 682; lektorat: 1 zu prüfen"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "BlueMarble-2001-2002.jpg",
+      "alt": "Zwei Ansichten der Erde aus dem Weltall mit Kontinenten und Wolken",
+      "caption": "Unsere Erde aus dem Weltall betrachtet: Wegen der riesigen Wassermassen leuchtet sie tiefblau.",
+      "license": "Public domain",
+      "license_author": "Reto Stöckli (NASA)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:BlueMarble-2001-2002.jpg",
+      "wikimedia_id": "File:BlueMarble-2001-2002.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/BlueMarble-2001-2002.jpg/1920px-BlueMarble-2001-2002.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/BlueMarble-2001-2002_300.jpg",
+        "800": "bilder/erde/BlueMarble-2001-2002_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Explosion_near_summit_of_West_Mata_submarine_volcano.png",
+      "alt": "Ein aktiver Vulkan unter Wasser speit glühende Lava",
+      "caption": "Wenn Magma die Erdkruste durchbricht, entsteht ein Vulkan. Unter Wasser ist dieses Schauspiel besonders spektakulär.",
+      "license": "Public domain",
+      "license_author": "NOAA/National Science Foundation",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Explosion_near_summit_of_West_Mata_submarine_volcano.png",
+      "wikimedia_id": "File:Explosion_near_summit_of_West_Mata_submarine_volcano.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/f/f0/Explosion_near_summit_of_West_Mata_submarine_volcano.png",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Explosion_near_summit_of_West_Mata_submarine_volcano_300.jpg",
+        "800": "bilder/erde/Explosion_near_summit_of_West_Mata_submarine_volcano_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Watercyclegerman.jpg",
+      "alt": "Ein Diagramm, das den Wasserkreislauf mit Verdunstung und Niederschlag zeigt",
+      "caption": "Der Wasserkreislauf: Die Wärme der Sonne treibt das Wasser an, sodass es unaufhörlich zwischen Himmel und Erde wandert.",
+      "license": "Public domain",
+      "license_author": "USGS Georgia Water Science Center",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Watercyclegerman.jpg",
+      "wikimedia_id": "File:Watercyclegerman.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Watercyclegerman.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Watercyclegerman_300.jpg",
+        "800": "bilder/erde/Watercyclegerman_800.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Caumasee_Rainbow.jpg",
+      "alt": "Ein farbenprächtiger Regenbogen über einem See inmitten von Bergen",
+      "caption": "Ein Regenbogen entsteht, wenn das weiße Sonnenlicht von unzähligen Regentropfen gebrochen und reflektiert wird.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Mukitil",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Caumasee_Rainbow.jpg",
+      "wikimedia_id": "File:Caumasee_Rainbow.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Caumasee_Rainbow.jpg/1920px-Caumasee_Rainbow.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Caumasee_Rainbow_300.jpg",
+        "800": "bilder/erde/Caumasee_Rainbow_800.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Circular_rainbow.jpg",
+      "alt": "Ein runder, kreisförmiger Regenbogen am bewölkten Himmel aus der Luft fotografiert",
+      "caption": "Aus dem Flugzeug betrachtet zeigt sich das wahre Gesicht des Regenbogens: Er ist in Wirklichkeit ein geschlossener Kreis.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Steve Kaufman",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Circular_rainbow.jpg",
+      "wikimedia_id": "File:Circular_rainbow.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/3/38/Circular_rainbow.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Circular_rainbow_300.jpg",
+        "800": "bilder/erde/Circular_rainbow_800.jpg"
+      }
+    },
+    {
+      "index": 5,
+      "filename": "9119_-_Milano,_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall'Orto_22-Apr-2007.jpg",
+      "alt": "Ein versteinertes Skelett eines kleinen Dinosauriers im hellen Gestein",
+      "caption": "Fossilien wie dieses versteinerte Skelett verraten uns, wie die Lebewesen der Urzeit aussahen und wie sie lebten.",
+      "license": "CC BY-SA 2.5 it",
+      "license_author": "Giovanni Dall'Orto",
+      "source_url": "https://commons.wikimedia.org/wiki/File:9119_-_Milano,_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall'Orto_22-Apr-2007.jpg",
+      "wikimedia_id": "File:9119_-_Milano,_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall'Orto_22-Apr-2007.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/9119_-_Milano%2C_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall%27Orto_22-Apr-2007.jpg/1920px-9119_-_Milano%2C_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall%27Orto_22-Apr-2007.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/9119_-_Milano,_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall'Orto_22-Apr-2007_300.jpg",
+        "800": "bilder/erde/9119_-_Milano,_Museo_storia_naturale_-_Scipionyx_samniticus_-_Foto_Giovanni_Dall'Orto_22-Apr-2007_800.jpg"
+      }
+    },
+    {
+      "index": 6,
+      "filename": "Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "alt": "Besucher betrachten ein riesiges Skelett eines Brachiosaurus in einem Museum",
+      "caption": "Ein gewaltiger Brachiosaurus im Museum. Seine aufrechte Haltung erleichterte das Tragen dieses riesigen Gewichts.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Raimond Spekking",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Berlin_-_Museum_f%C3%BCr_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "wikimedia_id": "File:Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Berlin_-_Museum_f%C3%BCr_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai_300.jpg",
+        "800": "bilder/erde/Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai_800.jpg"
+      }
+    },
+    {
+      "index": 7,
+      "filename": "Aldrin_Apollo_11.jpg",
+      "alt": "Ein Astronaut im weißen Raumanzug steht auf der staubigen Mondoberfläche",
+      "caption": "Astronaut Buzz Aldrin auf dem Mond. Die Schwerkraft unseres Begleiters beeinflusst das Leben auf der Erde jeden Tag.",
+      "license": "Public domain",
+      "license_author": "Neil A. Armstrong",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Aldrin_Apollo_11.jpg",
+      "wikimedia_id": "File:Aldrin_Apollo_11.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Aldrin_Apollo_11.jpg/1920px-Aldrin_Apollo_11.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Aldrin_Apollo_11_300.jpg",
+        "800": "bilder/erde/Aldrin_Apollo_11_800.jpg"
+      }
+    },
+    {
+      "index": 8,
+      "filename": "AxialTiltObliquity.png",
+      "alt": "Grafik zur Neigung der Erdrotationsachse gegenüber der Umlaufbahn",
+      "caption": "Die Neigung der Erdachse um gut 23 Grad sorgt dafür, dass die Sonne die Halbkugeln im Jahresverlauf unterschiedlich stark erwärmt.",
+      "license": "CC BY 3.0",
+      "license_author": "Dna-webmaster",
+      "source_url": "https://commons.wikimedia.org/wiki/File:AxialTiltObliquity.png",
+      "wikimedia_id": "File:AxialTiltObliquity.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/6/61/AxialTiltObliquity.png",
+      "is_hero": false,
+      "ab_stufe": 3,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/AxialTiltObliquity_300.jpg",
+        "800": "bilder/erde/AxialTiltObliquity_800.jpg"
+      }
+    },
+    {
+      "index": 9,
+      "filename": "Klimazonen_solar_und_thermisch.png",
+      "alt": "Weltkarte mit farblich markierten Klimazonen von den Polen bis zum Äquator",
+      "caption": "Die Klimazonen der Erde spiegeln wider, wie viel wärmende Sonnenstrahlung die Regionen je nach Breitengrad erreicht.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Fährtenleser",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Klimazonen_solar_und_thermisch.png",
+      "wikimedia_id": "File:Klimazonen_solar_und_thermisch.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7c/Klimazonen_solar_und_thermisch.png/1920px-Klimazonen_solar_und_thermisch.png",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Klimazonen_solar_und_thermisch_300.jpg",
+        "800": "bilder/erde/Klimazonen_solar_und_thermisch_800.jpg"
+      }
+    },
+    {
+      "index": 10,
+      "filename": "Earth's_City_Lights_by_DMSP,_1994-1995_(large).jpg",
+      "alt": "Weltkarte bei Nacht mit deutlich leuchtenden Ballungsräumen und Städten",
+      "caption": "Die Lichter der Städte bei Nacht verdeutlichen den immensen Einfluss der menschlichen Zivilisation auf den Planeten.",
+      "license": "Public domain",
+      "license_author": "Data: Marc Imhoff/NASA GSFC, Christopher Elvidge (NOAA)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Earth%27s_City_Lights_by_DMSP,_1994-1995_(large).jpg",
+      "wikimedia_id": "File:Earth's_City_Lights_by_DMSP,_1994-1995_(large).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/Earth%27s_City_Lights_by_DMSP%2C_1994-1995_%28large%29.jpg/1920px-Earth%27s_City_Lights_by_DMSP%2C_1994-1995_%28large%29.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Earth's_City_Lights_by_DMSP,_1994-1995_(large)_300.jpg",
+        "800": "bilder/erde/Earth's_City_Lights_by_DMSP,_1994-1995_(large)_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "heading": "Der Blaue Himmelskörper im All",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Wenn du unsere Heimat aus der unendlichen Ferne des Weltalls betrachten könntest, würdest du vor allem ein tiefes, leuchtendes Blau sehen.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Die Erde wird deshalb auch als der „Blaue Planet“ bezeichnet.",
+          "img_index": 0
+        },
+        {
+          "id": "s003",
+          "text": "Sie ist der dichteste, fünftgrößte und der Sonne drittnächste Planet in unserem Sonnensystem.",
+          "img_index": 0
+        },
+        {
+          "id": "s004",
+          "text": "Mit einem Durchmesser von mehr als 12.700 Kilometern und einem stolzen Alter von etwa 4,54 Milliarden Jahren bietet sie ideale Bedingungen für eine absolut einzigartige Eigenschaft: Sie ist der einzige bekannte Himmelskörper, auf dem eine Biosphäre mit echtem Leben existiert.",
+          "img_index": 0
+        },
+        {
+          "id": "s005",
+          "text": "Ihre schützende Gashülle, die Atmosphäre, hält die Wärme zurück, während gigantische Ozeane rund zwei Drittel der gesamten Oberfläche bedecken.",
+          "img_index": 0
+        },
+        {
+          "id": "s006",
+          "text": "Für uns Menschen ist diese Welt nicht nur ein Wohnort, sondern eine heilige Ganzheit und unsere gemeinsame Lebensgrundlage.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "appearance_equipment",
+      "heading": "Heißes Gestein und rauchende Riesen",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s007",
+          "text": "Unter der scheinbar so festen Erdkruste verbirgt sich im Inneren eine gewaltige und unruhige Dynamik.",
+          "img_index": 1
+        },
+        {
+          "id": "s008",
+          "text": "Die Erde setzt sich massenanteilig vor allem aus den Elementen Eisen, Sauerstoff, Silizium und Magnesium zusammen.",
+          "img_index": 1
+        },
+        {
+          "id": "s009",
+          "text": "Ihre Struktur besteht nach wissenschaftlichen Messungen aus drei großen Schalen: dem Erdkern im Zentrum, dem mächtigen Erdmantel und der dünnen Erdkruste an der Oberfläche.",
+          "img_index": 1
+        },
+        {
+          "id": "s010",
+          "text": "Die Kruste und der allererste Teil des Mantels bilden zusammen die feste Lithosphäre, die wie ein riesiges Puzzle aus tektonischen Platten aufgebaut ist.",
+          "img_index": 1
+        },
+        {
+          "id": "s011",
+          "text": "Diese Platten driften langsam auf dem zähflüssigen Gestein des oberen Erdmantels umher.",
+          "img_index": 1
+        },
+        {
+          "id": "s012",
+          "text": "Wenn der Druck im Untergrund zu groß wird, steigt flüssiges Magma über Spalten nach oben und sammelt sich in großen Herden.",
+          "img_index": 1
+        },
+        {
+          "id": "s013",
+          "text": "Sobald dieses heiße Gestein an der Oberfläche austritt, nennen Fachleute es Lava – ein Vulkan ist geboren.",
+          "img_index": 1
+        },
+        {
+          "id": "s014",
+          "text": "Die chemische Zusammensetzung des Magmas bestimmt den Charakter des Ausbruchs: Enthält das Magma viel Siliziumdioxid, ist die Eruption extrem explosiv und gefährlich.",
+          "img_index": 1
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Wenn man die Unebenheiten der Erdoberfläche im globalen Maßstab betrachtet, sind sie winzig: Der riesige Mount Everest entspräche einer Erhebung von gerade einmal 0,15 Millimetern auf einem Globus von der Größe eines Fußballs – er wäre damit so dünn wie ein einzelnes Haar!"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "behavior_life",
+      "heading": "Das ewige Fließen und der Tanz der Farben",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s015",
+          "text": "Das flüssige Wasser macht die Erde zu einer dynamischen Ozeanwelt, in der das kostbare Nass unaufhörlich zirkuliert.",
+          "img_index": 2
+        },
+        {
+          "id": "s016",
+          "text": "In diesem globalen Wasserkreislauf geht kein einziger Tropfen verloren, das Wasser ändert lediglich seinen Zustand.",
+          "img_index": 2
+        },
+        {
+          "id": "s017",
+          "text": "Die Sonnenenergie erwärmt die Meeresoberfläche, wodurch Wasser verdunstet und als unsichtbare Luftfeuchtigkeit aufsteigt.",
+          "img_index": 2
+        },
+        {
+          "id": "s018",
+          "text": "In der kalten Höhe kondensiert das Wasser wieder und bildet sichtbare Wolken.",
+          "img_index": 2
+        },
+        {
+          "id": "s019",
+          "text": "Schließlich fällt es als Niederschlag in Form von Regen, Schnee oder Hagel herab, versickert im Boden und fließt über Flüsse zurück in die Ozeane.",
+          "img_index": 3
+        },
+        {
+          "id": "s020",
+          "text": "Trifft das weiße Sonnenlicht während eines solchen Schauers auf die fallenden, kugelrunden Regentropfen, entsteht ein farbenprächtiger Regenbogen.",
+          "img_index": 3
+        },
+        {
+          "id": "s021",
+          "text": "Das Licht dringt in die Tropfen ein, wird gebrochen, an der hinteren Tropfenwand gespiegelt und tritt wieder aus.",
+          "img_index": 3
+        },
+        {
+          "id": "s022",
+          "text": "Da kurzwelliges blaues Licht beim Übergang in das Wasser viel stärker abgelenkt wird als langwelliges rotes Licht, fächern sich die Spektralfarben sauber auf.",
+          "img_index": 3
+        },
+        {
+          "id": "s023",
+          "text": "So sehen wir die bunten Bänder am Himmel immer unter einem ganz bestimmten Winkel von rund 42 Grad.",
+          "img_index": 3
+        }
+      ],
+      "boxes": [
+        {
+          "type": "stimmt_das",
+          "text": "Ist die blaue Farbe beim Regenbogen immer ganz außen am Rand zu sehen?",
+          "reveal_text": "Nein! Da blaues Licht in den Regentropfen viel stärker abgelenkt wird als das rote Licht, liegt die blaue Farbe immer an der inneren, spitzeren Seite des Bogens. Das rote Licht bildet dagegen den äußeren Rand des farbigen Bandes.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "historical_context",
+      "heading": "Die Urzeit und das Reich der Dinosaurier",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s024",
+          "text": "Die junge Erde entstand aus einem rotierenden Nebel und wurde in ihrer Frühzeit intensiv von zahllosen Asteroiden bombardiert.",
+          "img_index": 5
+        },
+        {
+          "id": "s025",
+          "text": "Durch diese Einschläge und radioaktive Prozesse schmolz sie größtenteils auf, bevor sie sich abkühlte und eine stabile Gesteinskruste bildete.",
+          "img_index": 5
+        },
+        {
+          "id": "s026",
+          "text": "Vor etwa 235 Millionen Jahren begann im Erdmittelalter die Ära der Dinosaurier, die die festländischen Ökosysteme über Jahrmillionen hinweg beherrschten.",
+          "img_index": 5
+        },
+        {
+          "id": "s027",
+          "text": "Entgegen alten Vorstellungen waren diese Reptilien keine trägen, sondern aktive Tiere mit einem erstaunlich schnellen Stoffwechsel.",
+          "img_index": 6
+        },
+        {
+          "id": "s028",
+          "text": "Ein wesentlicher Vorteil war ihre Anatomie: Ihre Beine standen senkrecht unter dem Körper, was ihnen eine aufrechte Haltung verlieh, das Atmen im Laufen erleichterte und den spektakulären Gigantismus einiger Arten unterstützte.",
+          "img_index": 6
+        },
+        {
+          "id": "s029",
+          "text": "So erreichte der pflanzenfressende Brachiosaurus ein geschätztes Gewicht von bis zu 60 Tonnen.",
+          "img_index": 6
+        },
+        {
+          "id": "s030",
+          "text": "Obwohl vor 66 Millionen Jahren ein Massenaussterben die Ära der Riesenechsen abrupt beendete, überlebte eine spezielle Linie der fleischfressenden Theropoden bis heute: unsere modernen Vögel.",
+          "img_index": 6
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "today_legacy",
+      "heading": "Himmlische Kräfte und der menschliche Fußabdruck",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s031",
+          "text": "Die Erde reist nicht mutterseelenallein durch die dunklen Weiten des Universums.",
+          "img_index": 10
+        },
+        {
+          "id": "s032",
+          "text": "Ihr treuer Begleiter ist der Mond, der vermutlich durch einen gigantischen Zusammenstoß der Ur-Erde mit dem marsgroßen Planeten Theia geformt wurde.",
+          "img_index": 10
+        },
+        {
+          "id": "s033",
+          "text": "Der Mond sorgt durch seine Schwerkraft für Ebbe und Flut in den Weltmeeren und bremst dabei die Erdrotation.",
+          "img_index": 10
+        },
+        {
+          "id": "s034",
+          "text": "Vor allem stabilisiert er die Neigung der Erdachse von etwa 23 Grad.",
+          "img_index": 10
+        },
+        {
+          "id": "s035",
+          "text": "Ohne diesen himmlischen Anker würde die Erdachse extrem taumeln und chaotische Lebensbedingungen verursachen.",
+          "img_index": 7
+        },
+        {
+          "id": "s036",
+          "text": "Dank des Mondes haben wir stabile, wiederkehrende Jahreszeiten, die unser Klima und die Vegetationszonen prägen.",
+          "img_index": 7
+        },
+        {
+          "id": "s037",
+          "text": "Heute jedoch greift der Mensch aktiv in die empfindlichen Systeme der Erde ein.",
+          "img_index": 7
+        },
+        {
+          "id": "s038",
+          "text": "Durch die Verbrennung fossiler Energieträger jagen wir den Kohlendioxid-Gehalt der Atmosphäre rasant in die Höhe.",
+          "img_index": 7
+        },
+        {
+          "id": "s039",
+          "text": "Dieser vom Menschen gemachte Treibhauseffekt führt zu einer globalen Erwärmung, die das Klima, die Meere und die biologische Vielfalt unseres Heimatplaneten ernsthaft gefährdet.",
+          "img_index": 7
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Mehr als 15.000 Wissenschaftler aus 184 Ländern sprachen eine eindringliche Warnung an die Menschheit aus Das Überschreiten der planetaren Belastungsgrenzen gefährdet unsere eigene Lebensgrundlage dauerhaft."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Welcher Planet in unserem Sonnensystem ist die Erde von der Sonne aus gezählt?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Der erste Planet"
+          },
+          {
+            "key": "B",
+            "text": "Der dritte Planet"
+          },
+          {
+            "key": "C",
+            "text": "Der fünfte Planet"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Welcher Bestandteil im Magma bestimmt, wie explosiv ein Vulkanausbruch verläuft?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Der Anteil an Siliziumdioxid"
+          },
+          {
+            "key": "B",
+            "text": "Der Gehalt an gasförmigem Helium"
+          },
+          {
+            "key": "C",
+            "text": "Die Menge an flüssigem Eisen"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Welche biologische Gruppe stellt die überlebenden Nachfahren der fleischfressenden Theropoden dar?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Die heutigen Krokodile"
+          },
+          {
+            "key": "B",
+            "text": "Die modernen Vögel"
+          },
+          {
+            "key": "C",
+            "text": "Die Landschildkröten"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q4",
+        "text": "Wie stabilisiert der Mond das Klima und die Jahreszeiten auf der Erde?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Er reflektiert zusätzliches Licht auf die Pole"
+          },
+          {
+            "key": "B",
+            "text": "Er stabilisiert die Neigung der Erdrotationsachse"
+          },
+          {
+            "key": "C",
+            "text": "Er kühlt die Erdatmosphäre durch seine Gezeiten ab"
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Atmosphäre",
+      "Plattentektonik",
+      "Erdkruste",
+      "Umlaufbahn"
+    ],
+    "discover": [
+      "Treibhauseffekt",
+      "Magma",
+      "Libration",
+      "Fossilien"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Die Erde ist der dichteste, fünftgrößte und der Sonne drittnächste Planet in unserem Sonnensystem.",
+      "source": "Erde",
+      "passage": "Die Erde ist der dichteste, fünftgrößte und der Sonne drittnächste Planet des Sonnensystems."
+    },
+    {
+      "claim": "Die Erde wird deshalb auch als der „Blaue Planet“ bezeichnet.",
+      "source": "Erde",
+      "passage": "Da sie vom All aus betrachtet vorwiegend blau erscheint, wird die Erde auch Blauer Planet genannt."
+    },
+    {
+      "claim": "Die Struktur besteht nach wissenschaftlichen Messungen aus drei großen Schalen: dem Erdkern im Zentrum, dem mächtigen Erdmantel und der dünnen Erdkruste an der Oberfläche.",
+      "source": "Erde",
+      "passage": "Die Erde besteht nach seismischen Messungen aus drei Schalen: Dem Erdkern, dem Erdmantel und der Erdkruste."
+    },
+    {
+      "claim": "Sobald dieses heiße Gestein an der Oberfläche austritt, nennen Fachleute es Lava – ein Vulkan ist geboren.",
+      "source": "Vulkan",
+      "passage": "Magma, das an die Erdoberfläche gelangt, wird als Lava bezeichnet."
+    },
+    {
+      "claim": "Enthält das Magma viel Siliziumdioxid, ist die Eruption extrem explosiv und gefährlich.",
+      "source": "Vulkan",
+      "passage": "Je mehr SiO2 das Magma enthält, desto explosiver ist der damit verbundene Vulkanismus."
+    },
+    {
+      "claim": "In diesem globalen Wasserkreislauf geht kein einzige Tropfen verloren, das Wasser ändert lediglich seinen Zustand.",
+      "source": "Wasserkreislauf",
+      "passage": "Im Wasserkreislauf geht kein Wasser verloren, es ändert nur seinen Zustand."
+    },
+    {
+      "claim": "Da kurzwelliges blaues Licht beim Übergang in das Wasser viel stärker abgelenkt wird als langwelliges rotes Licht, fächern sich die Spektralfarben sauber auf.",
+      "source": "Regenbogen",
+      "passage": "Sowohl beim Eintritt in als auch beim Austritt aus einem Regentropfen wird das Sonnenlicht gebrochen, die kurzwelligen (blauen) stärker als die langwelligen (roten) Anteile des Sonnenlichts."
+    },
+    {
+      "claim": "Vor etwa 235 Millionen Jahren begann im Erdmittelalter die Ära der Dinosaurier, die die festländischen Ökosysteme über Jahrmillionen hinweg beherrschten.",
+      "source": "Dinosaurier",
+      "passage": "Die Dinosaurier... sind eine Gruppe der Landwirbeltiere, die im Erdmittelalter von der Oberen Trias vor rund 235 Millionen Jahren bis zur Kreide-Paläogen-Grenze vor etwa 66 Millionen Jahren die festländischen Ökosysteme dominierte."
+    },
+    {
+      "claim": "Ein wesentlicher Vorteil war ihre Anatomie: Ihre Beine standen senkrecht unter dem Körper, was ihnen eine aufrechte Haltung verlieh, das Atmen im Laufen erleichterte und den spektakulären Gigantismus einiger Arten unterstützte.",
+      "source": "Dinosaurier",
+      "passage": "Bei den Dinosauriern standen die Beine senkrecht unter dem Körper, ähnlich wie bei den meisten Säugetieren... Durch ihre aufrechte Haltung konnten Dinosaurier beim Bewegen leichter atmen... Außerdem hat die gerade Stellung der Beine eventuell die Evolution des Gigantismus unterstützt..."
+    },
+    {
+      "claim": "Obwohl vor 66 Millionen Jahren ein Massenaussterben die Ära der Riesenechsen abrupt beendete, überlebte eine spezielle Linie der fleischfressenden Theropoden bis heute: unsere modernen Vögel.",
+      "source": "Dinosaurier",
+      "passage": "Vögel gingen aus kleinen theropoden Dinosauriern hervor. Somit sind nicht alle Dinosaurier während des Massenaussterbens am Ende des Erdmittelalters ausgestorben, sondern mit den Vögeln überlebte bis heute eine spezielle Entwicklungslinie..."
+    },
+    {
+      "claim": "Ihr treuer Begleiter ist der Mond, der vermutlich durch einen gigantischen Zusammenstoß der Ur-Erde mit dem marsgroßen Planeten Theia geformt wurde.",
+      "source": "Mond",
+      "passage": "Wissenschaftliche Überlegungen legen die Annahme nahe, dass der Mond durch einen Zusammenstoß der Proto-Erde mit dem marsgroßen Protoplaneten Theia entstand."
+    },
+    {
+      "claim": "Vor allem stabilisiert er die Neigung der Erdachse von etwa 23 Grad.",
+      "source": "Erde",
+      "passage": "Der Mond stabilisiert zugleich die Erdachsenneigung, die ohne ihn durch die Anziehungskraft der Planeten bis zu einer Schräglage von 85° taumeln würde."
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Erde S3 — Lektorat\n### SILENT (3 Korrekturen)\n- «…d radioaktive Prozesse schmolz sie völlig auf, bevor sie sich abkühlte und e…» → «…d radioaktive Prozesse schmolz sie größtenteils auf, bevor sie sich abkühlte und e…» (WP: «bis sie größtenteils aufgeschmolzen war»)\n- «Der Mond bremst durch seine Schwerkraft die Erdrotation und sorgt für Ebbe und Flut in den Weltmeeren.» → «Der Mond sorgt durch seine Schwerkraft für Ebbe und Flut in den Weltmeeren und bremst dabei die Erdrotation.» (WP: «Auf der Erde verursacht die Gravitation von Mond und Sonne die Gezeiten von Ebbe und Flut der Meere. […] Die Gezeiten verursachen die Gezeitenreibung, welche die Erdrotation bremst»)\n- «…ehr als 15.000 Wissenschaftler aus aller Welt sprachen eine eindringliche Warnun…» → «…ehr als 15.000 Wissenschaftler aus 184 Ländern sprachen eine eindringliche Warnun…» (WP: «15 372 Wissenschaftler aus 184 Ländern am 13. November 2017 eine ‹zweite Warnung an die Menschheit›»)\n### PRÜFEN (1 Flags)\n- «Trifft das weiße Sonnenlicht während eines solchen Schauers auf die fallenden, kugelrunden Regentropfen, entsteht ein farbenprächtiger Regenbogen.» — Die Quelle beschreibt Regentropfen als «in guter Näherung kugelförmig» – «kugelrund» ist also eine Vereinfachung, die sachlich vertretbar ist. Zugleich betont die Quelle, dass Abweichungen von der Kugelform die Erscheinung des Regenbogens beeinflussen (Tropfenform-Abschnitt). Das Attribut ist nicht falsch, aber leicht irreführend. → Vorschlag: «Trifft das weiße Sonnenlicht während eines solchen Schauers auf die fallenden Regentropfen, entsteht ein farbenprächtiger Regenbogen.» (Die Quelle stützt «kugelförmig» als Näherung, nennt aber Formabweichungen als relevanten Faktor – kein eindeutiger Widerspruch, aber auch keine vollständige Deckung; echter Zweifelsfall.)\nZusammenfassung: 3 silent, 0 korrigiert, 1 zu prüfen.",
+    "n_silent": 3,
+    "n_korrigiert": 0,
+    "n_pruefen": 1,
+    "findings": [
+      {
+        "verdikt": "SILENT",
+        "claim_original": "Durch diese Einschläge und radioaktive Prozesse schmolz sie völlig auf, bevor sie sich abkühlte und eine stabile Gesteinskruste bildete.",
+        "korrektur_neu": "Durch diese Einschläge und radioaktive Prozesse schmolz sie größtenteils auf, bevor sie sich abkühlte und eine stabile Gesteinskruste bildete.",
+        "korrektur_alt": null,
+        "beleg": "«bis sie größtenteils aufgeschmolzen war»",
+        "problem": null,
+        "begruendung": null
+      },
+      {
+        "verdikt": "SILENT",
+        "claim_original": "Der Mond bremst durch seine Schwerkraft die Erdrotation und sorgt für Ebbe und Flut in den Weltmeeren.",
+        "korrektur_neu": "Der Mond sorgt durch seine Schwerkraft für Ebbe und Flut in den Weltmeeren und bremst dabei die Erdrotation.",
+        "korrektur_alt": null,
+        "beleg": "«Auf der Erde verursacht die Gravitation von Mond und Sonne die Gezeiten von Ebbe und Flut der Meere. […] Die Gezeiten verursachen die Gezeitenreibung, welche die Erdrotation bremst»",
+        "problem": null,
+        "begruendung": null
+      },
+      {
+        "verdikt": "SILENT",
+        "claim_original": "Mehr als 15.000 Wissenschaftler aus aller Welt sprachen eine eindringliche Warnung an die Menschheit aus",
+        "korrektur_neu": "Mehr als 15.000 Wissenschaftler aus 184 Ländern sprachen eine eindringliche Warnung an die Menschheit aus",
+        "korrektur_alt": null,
+        "beleg": "«15 372 Wissenschaftler aus 184 Ländern am 13. November 2017 eine ‹zweite Warnung an die Menschheit›»",
+        "problem": null,
+        "begruendung": null
+      },
+      {
+        "verdikt": "PRÜFEN",
+        "claim_original": "Trifft das weiße Sonnenlicht während eines solchen Schauers auf die fallenden, kugelrunden Regentropfen, entsteht ein farbenprächtiger Regenbogen.",
+        "korrektur_neu": "Trifft das weiße Sonnenlicht während eines solchen Schauers auf die fallenden Regentropfen, entsteht ein farbenprächtiger Regenbogen.",
+        "korrektur_alt": null,
+        "beleg": null,
+        "problem": "Die Quelle beschreibt Regentropfen als «in guter Näherung kugelförmig» – «kugelrund» ist also eine Vereinfachung, die sachlich vertretbar ist. Zugleich betont die Quelle, dass Abweichungen von der Kugelform die Erscheinung des Regenbogens beeinflussen (Tropfenform-Abschnitt). Das Attribut ist nicht falsch, aber leicht irreführend.",
+        "begruendung": "Die Quelle stützt «kugelförmig» als Näherung, nennt aber Formabweichungen als relevanten Faktor – kein eindeutiger Widerspruch, aber auch keine vollständige Deckung; echter Zweifelsfall."
+      }
+    ]
+  }
+}

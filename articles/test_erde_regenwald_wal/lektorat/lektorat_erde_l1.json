@@ -1,0 +1,378 @@
+{
+  "meta": {
+    "id": "erde_l1",
+    "title": "Erde",
+    "subtitle": "Der blaue Planet im weiten Weltall",
+    "emoji": "🌍",
+    "age_level": 1,
+    "pattern": "place_geography",
+    "theme_color": "#2196F3",
+    "word_count": 200,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Erde",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "weltall",
+    "category_sub": "planeten",
+    "generated_at": "2026-06-25T09:00:51.715676+00:00",
+    "grounding_companions": [
+      "Vulkan",
+      "Wasserkreislauf",
+      "Regenbogen",
+      "Dinosaurier",
+      "Mond"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "BlueMarble-2001-2002.jpg",
+      "alt": "Zwei Ansichten der blauen Erde aus dem Weltall",
+      "caption": "Unsere Erde leuchtet wunderschön blau im dunklen Weltall.",
+      "license": "Public domain",
+      "license_author": "Reto Stöckli",
+      "source_url": "https://commons.wikimedia.org/wiki/File:BlueMarble-2001-2002.jpg",
+      "wikimedia_id": "File:BlueMarble-2001-2002.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/BlueMarble-2001-2002.jpg/1920px-BlueMarble-2001-2002.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/BlueMarble-2001-2002_300.jpg",
+        "800": "bilder/erde/BlueMarble-2001-2002_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Wasserkreislauf.png",
+      "alt": "Schema des Wasserkreislaufs mit Wolken und Regen",
+      "caption": "Das Wasser reist in einem ewigen Kreislauf um unsere Erde.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Unknown",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Wasserkreislauf.png",
+      "wikimedia_id": "File:Wasserkreislauf.png",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/18/Wasserkreislauf.png",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Wasserkreislauf_300.jpg",
+        "800": "bilder/erde/Wasserkreislauf_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Caumasee_Rainbow.jpg",
+      "alt": "Ein bunter Regenbogen über einem ruhigen See und Bergen",
+      "caption": "Wenn Sonne und Regen sich treffen, zaubern sie bunte Farben.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Mukitil",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Caumasee_Rainbow.jpg",
+      "wikimedia_id": "File:Caumasee_Rainbow.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/05/Caumasee_Rainbow.jpg/1920px-Caumasee_Rainbow.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Caumasee_Rainbow_300.jpg",
+        "800": "bilder/erde/Caumasee_Rainbow_800.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "alt": "Ein riesiges Dinosaurierskelett in einer Museumshalle",
+      "caption": "Im Museum können wir heute die versteinerten Knochen bestaunen.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Raimond Spekking",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Berlin_-_Museum_f%C3%BCr_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "wikimedia_id": "File:Berlin_-_Museum_f%C3%BCr_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/a/ab/Berlin_-_Museum_f%C3%BCr_Naturkunde_-_Brachiosaurus_brancai.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai_300.jpg",
+        "800": "bilder/erde/Berlin_-_Museum_für_Naturkunde_-_Brachiosaurus_brancai_800.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Aldrin_Apollo_11.jpg",
+      "alt": "Ein Astronaut in weißem Anzug steht auf dem grauen Mond",
+      "caption": "Astronauten sind schon auf dem staubigen Mond gelaufen.",
+      "license": "Public domain",
+      "license_author": "Neil A. Armstrong",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Aldrin_Apollo_11.jpg",
+      "wikimedia_id": "File:Aldrin_Apollo_11.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/9/9c/Aldrin_Apollo_11.jpg/1920px-Aldrin_Apollo_11.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/erde/Aldrin_Apollo_11_300.jpg",
+        "800": "bilder/erde/Aldrin_Apollo_11_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "sec1",
+      "heading": "Unser fliegendes Zuhause",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir ein riesiges, blaues Raumschiff vor.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Dieses Raumschiff ist unsere wunderschöne Erde.",
+          "img_index": 0
+        },
+        {
+          "id": "s003",
+          "text": "Wir alle reisen gemeinsam auf ihr durch das Weltall.",
+          "img_index": 0
+        },
+        {
+          "id": "s004",
+          "text": "Aus dem Weltraum sieht die Erde herrlich blau aus.",
+          "img_index": 0
+        },
+        {
+          "id": "s005",
+          "text": "Darum nennen Forscher sie auch den Blauen Planeten.",
+          "img_index": 0
+        },
+        {
+          "id": "s006",
+          "text": "Auf der Erde gibt es kostbare Luft zum Atmen.",
+          "img_index": 0
+        },
+        {
+          "id": "s007",
+          "text": "Nur hier können Pflanzen, Tiere und wir Menschen leben.",
+          "img_index": 0
+        },
+        {
+          "id": "s008",
+          "text": "Sie ist unser einziges Zuhause im riesigen Weltraum.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec2",
+      "heading": "Das weite Wasser und bunte Bogen",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s009",
+          "text": "Riesige Meere bedecken den größten Teil der Erde.",
+          "img_index": 1
+        },
+        {
+          "id": "s010",
+          "text": "Das Wasser reist in einem ewigen, tollen Kreislauf.",
+          "img_index": 1
+        },
+        {
+          "id": "s011",
+          "text": "Die helle Sonne erwärmt das Wasser im großen Meer.",
+          "img_index": 1
+        },
+        {
+          "id": "s012",
+          "text": "Es steigt als feiner, unsichtbarer Dampf nach oben.",
+          "img_index": 1
+        },
+        {
+          "id": "s013",
+          "text": "Daraus entstehen weiße Wolken am weiten Himmel.",
+          "img_index": 1
+        },
+        {
+          "id": "s014",
+          "text": "Das Wasser fällt als Regen wieder zur Erde zurück.",
+          "img_index": 1
+        },
+        {
+          "id": "s015",
+          "text": "Scheint dabei die Sonne, zaubert sie einen bunten Regenbogen.",
+          "img_index": 1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "sec3",
+      "heading": "Alte Riesen und ein treuer Begleiter",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s016",
+          "text": "Unsere alte Erde hat schon sehr viel erlebt.",
+          "img_index": 3
+        },
+        {
+          "id": "s017",
+          "text": "Früher stapften hier unglaublich riesige Dinosaurier durch die Wälder.",
+          "img_index": 3
+        },
+        {
+          "id": "s018",
+          "text": "Heute können Kinder ihre versteinerten Knochen im Museum bestaunen.",
+          "img_index": 3
+        },
+        {
+          "id": "s019",
+          "text": "Die Erde fliegt aber niemals ganz allein im All.",
+          "img_index": 3
+        },
+        {
+          "id": "s020",
+          "text": "Der helle Mond begleitet sie jede Nacht im Kreis.",
+          "img_index": 3
+        },
+        {
+          "id": "s021",
+          "text": "Er zieht das Wasser an und macht Ebbe und Flut.",
+          "img_index": 3
+        },
+        {
+          "id": "s022",
+          "text": "So hilft der treue Mond dem Leben auf der Erde.",
+          "img_index": 3
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Der Mond ist der einzige Ort im Weltall, den Menschen bisher besucht haben."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wie nennen Forscher unsere Erde auch?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Den Grünen Hügel"
+          },
+          {
+            "key": "B",
+            "text": "Den Blauen Planeten"
+          },
+          {
+            "key": "C",
+            "text": "Den Roten Riesen"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q2",
+        "text": "Was zaubert die Sonne zusammen mit dem Regen am Himmel?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Einen bunten Regenbogen"
+          },
+          {
+            "key": "B",
+            "text": "Eine weiße Wolke"
+          },
+          {
+            "key": "C",
+            "text": "Einen kleinen Schneemann"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q3",
+        "text": "Wer begleitet die Erde jede Nacht im Weltall?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Die feurige Sonne"
+          },
+          {
+            "key": "B",
+            "text": "Ein fliegender Dinosaurier"
+          },
+          {
+            "key": "C",
+            "text": "Der helle Mond"
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Weltall",
+      "Planet",
+      "Ozean",
+      "Atmosphäre"
+    ],
+    "discover": [
+      "Mondlandung",
+      "Fossilien",
+      "Sonnensystem",
+      "Wolken"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Darum nennen Forscher sie auch den Blauen Planeten.",
+      "source": "Erde",
+      "passage": "Da sie vom All aus betrachtet vorwiegend blau erscheint, wird die Erde auch Blauer Planet genannt."
+    },
+    {
+      "claim": "Das Wasser reist in einem ewigen, tollen Kreislauf.",
+      "source": "Wasserkreislauf",
+      "passage": "Im Wasserkreislauf geht kein Wasser verloren, es ändert nur seinen Zustand."
+    },
+    {
+      "claim": "Scheint dabei die Sonne, zaubert sie einen bunten Regenbogen.",
+      "source": "Regenbogen",
+      "passage": "Der Regenbogen ist ein atmosphärisch-optisches Phänomen, das als kreisbogenförmiges farbiges Lichtband in einem von der Sonne beschienenen Regenschauer erscheint."
+    },
+    {
+      "claim": "Früher stapften hier unglaublich riesige Dinosaurier durch die Wälder.",
+      "source": "Dinosaurier",
+      "passage": "Die Dinosaurier (Dinosauria... sind eine Gruppe der Landwirbeltiere, die im Erdmittelalter... die festländischen Ökosysteme dominierte."
+    },
+    {
+      "claim": "Er zieht das Wasser an und macht Ebbe und Flut.",
+      "source": "Mond",
+      "passage": "Auf der Erde verursacht die Gravitation von Mond und Sonne die Gezeiten von Ebbe und Flut der Meere."
+    },
+    {
+      "claim": "Der Mond ist der einzige Ort im Weltall, den Menschen bisher besucht haben.",
+      "source": "Mond",
+      "passage": "und auch der bisher einzige, den Menschen betreten haben"
+    }
+  ],
+  "pruefbericht": {
+    "text": "## Erde S1 — Lektorat\nZusammenfassung: 0 silent, 0 korrigiert, 0 zu prüfen.",
+    "n_silent": 0,
+    "n_korrigiert": 0,
+    "n_pruefen": 0,
+    "findings": []
+  }
+}
