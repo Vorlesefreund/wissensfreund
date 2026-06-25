@@ -4,1001 +4,1617 @@
     "stufe": "l1",
     "artikel_id": "blauwal_l1",
     "run_dir": "generalize_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 182,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T09:22:09.602024+00:00"
+    "generated_at": "2026-06-18T09:22:09.602024+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Blauwal",
     "stufe": "l1",
     "artikel_id": "blauwal_l1",
     "run_dir": "test_v324",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 220,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-20T13:32:08.498383+00:00"
+    "generated_at": "2026-06-20T13:32:08.498383+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Blauwal",
     "stufe": "l2",
     "artikel_id": "blauwal_l2",
     "run_dir": "generalize_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 270,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T09:22:09.605011+00:00"
+    "generated_at": "2026-06-18T09:22:09.605011+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Blauwal",
     "stufe": "l2",
     "artikel_id": "blauwal_l2",
     "run_dir": "test_v324",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 384,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-20T13:32:08.502517+00:00"
+    "generated_at": "2026-06-20T13:32:08.502517+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Blauwal",
     "stufe": "l3",
     "artikel_id": "blauwal_l3",
     "run_dir": "generalize_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 466,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T09:22:09.608166+00:00"
+    "generated_at": "2026-06-18T09:22:09.608166+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Blauwal",
     "stufe": "l3",
     "artikel_id": "blauwal_l3",
     "run_dir": "test_v324",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 589,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-20T13:32:08.506829+00:00"
+    "generated_at": "2026-06-20T13:32:08.506829+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Demokratie",
     "stufe": "l1",
     "artikel_id": "demokratie_l1",
     "run_dir": "test_v323f",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 55,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-19T08:04:26.695004+00:00"
+    "generated_at": "2026-06-19T08:04:26.695004+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Demokratie",
     "stufe": "l1",
     "artikel_id": "demokratie_l1",
     "run_dir": "test_v324",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 62,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-20T13:32:08.510591+00:00"
+    "generated_at": "2026-06-20T13:32:08.510591+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Demokratie",
     "stufe": "l2",
     "artikel_id": "demokratie_l2",
     "run_dir": "test_v323f",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 233,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-19T08:10:41.599605+00:00"
+    "generated_at": "2026-06-19T08:10:41.599605+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Demokratie",
     "stufe": "l2",
     "artikel_id": "demokratie_l2",
     "run_dir": "test_v324",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 235,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-20T13:32:08.514889+00:00"
+    "generated_at": "2026-06-20T13:32:08.514889+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Demokratie",
     "stufe": "l3",
     "artikel_id": "demokratie_l3",
     "run_dir": "test_v323f",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 473,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-19T08:10:41.603525+00:00"
+    "generated_at": "2026-06-19T08:10:41.603525+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Demokratie",
     "stufe": "l3",
     "artikel_id": "demokratie_l3",
     "run_dir": "test_v324",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 529,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-20T13:32:08.519145+00:00"
+    "generated_at": "2026-06-20T13:32:08.519145+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Dinosaurier",
     "stufe": "l1",
     "artikel_id": "dinosaurier_l1",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 204,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:51:53.620020+00:00"
+    "generated_at": "2026-06-17T11:51:53.620020+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Dinosaurier",
     "stufe": "l1",
     "artikel_id": "dinosaurier_l1",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 203,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:28:05.865850+00:00"
+    "generated_at": "2026-06-17T20:28:05.865850+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Dinosaurier",
     "stufe": "l2",
     "artikel_id": "dinosaurier_l2",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 332,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:51:53.622847+00:00"
+    "generated_at": "2026-06-17T11:51:53.622847+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Dinosaurier",
     "stufe": "l2",
     "artikel_id": "dinosaurier_l2",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 348,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:28:05.868607+00:00"
+    "generated_at": "2026-06-17T20:28:05.868607+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Dinosaurier",
     "stufe": "l3",
     "artikel_id": "dinosaurier_l3",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 494,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:51:53.625737+00:00"
+    "generated_at": "2026-06-17T11:51:53.625737+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Dinosaurier",
     "stufe": "l3",
     "artikel_id": "dinosaurier_l3",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 571,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:28:05.871455+00:00"
+    "generated_at": "2026-06-17T20:28:05.871455+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Elefant",
     "stufe": "l1",
     "artikel_id": "elefant_l1",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 215,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:51:53.604054+00:00"
+    "generated_at": "2026-06-17T11:51:53.604054+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Elefant",
     "stufe": "l1",
     "artikel_id": "elefant_l1",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 257,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:13:37.225469+00:00"
+    "generated_at": "2026-06-17T20:13:37.225469+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Elefant",
     "stufe": "l2",
     "artikel_id": "elefant_l2",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 360,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:51:53.606651+00:00"
+    "generated_at": "2026-06-17T11:51:53.606651+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Elefant",
     "stufe": "l2",
     "artikel_id": "elefant_l2",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 354,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:13:37.228319+00:00"
+    "generated_at": "2026-06-17T20:13:37.228319+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Elefant",
     "stufe": "l3",
     "artikel_id": "elefant_l3",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 592,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:51:53.609253+00:00"
+    "generated_at": "2026-06-17T11:51:53.609253+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Elefant",
     "stufe": "l3",
     "artikel_id": "elefant_l3",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 699,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:13:37.231278+00:00"
+    "generated_at": "2026-06-17T20:13:37.231278+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Erde",
     "stufe": "l1",
     "artikel_id": "erde_l1",
     "run_dir": "test_erde_regenwald_wal",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 200,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-25T09:00:51.715676+00:00"
+    "generated_at": "2026-06-25T09:00:51.715676+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Erde",
     "stufe": "l2",
     "artikel_id": "erde_l2",
     "run_dir": "test_erde_regenwald_wal",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 389,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-25T09:00:51.723751+00:00"
+    "generated_at": "2026-06-25T09:00:51.723751+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 1,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Erde",
     "stufe": "l3",
     "artikel_id": "erde_l3",
     "run_dir": "test_erde_regenwald_wal",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 839,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-25T09:03:41.666438+00:00"
+    "generated_at": "2026-06-25T09:03:41.666438+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 4,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Hund",
     "stufe": "l1",
     "artikel_id": "hund_l1",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 226,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:51:53.611701+00:00"
+    "generated_at": "2026-06-17T11:51:53.611701+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Hund",
     "stufe": "l1",
     "artikel_id": "hund_l1",
     "run_dir": "mini_s2_v3",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 226,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T18:18:47.402419+00:00"
+    "generated_at": "2026-06-17T18:18:47.402419+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Hund",
     "stufe": "l1",
     "artikel_id": "hund_l1",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 217,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:16:48.265673+00:00"
+    "generated_at": "2026-06-17T20:16:48.265673+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Hund",
     "stufe": "l2",
     "artikel_id": "hund_l2",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 395,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:51:53.614446+00:00"
+    "generated_at": "2026-06-17T11:51:53.614446+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Hund",
     "stufe": "l2",
     "artikel_id": "hund_l2",
     "run_dir": "mini_s2_v3",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 397,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T18:18:47.405725+00:00"
+    "generated_at": "2026-06-17T18:18:47.405725+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Hund",
     "stufe": "l2",
     "artikel_id": "hund_l2",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 406,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:21:00.901339+00:00"
+    "generated_at": "2026-06-17T20:21:00.901339+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Hund",
     "stufe": "l3",
     "artikel_id": "hund_l3",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 552,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:51:53.617433+00:00"
+    "generated_at": "2026-06-17T11:51:53.617433+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Hund",
     "stufe": "l3",
     "artikel_id": "hund_l3",
     "run_dir": "mini_s2_v3",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 675,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T18:18:47.408836+00:00"
+    "generated_at": "2026-06-17T18:18:47.408836+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Hund",
     "stufe": "l3",
     "artikel_id": "hund_l3",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 690,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:21:00.904554+00:00"
+    "generated_at": "2026-06-17T20:21:00.904554+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Pest",
     "stufe": "l1",
     "artikel_id": "pest_l1",
     "run_dir": "generalize_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 166,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T09:22:09.611051+00:00"
+    "generated_at": "2026-06-18T09:22:09.611051+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Pest",
     "stufe": "l2",
     "artikel_id": "pest_l2",
     "run_dir": "generalize_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 318,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T09:22:09.613983+00:00"
+    "generated_at": "2026-06-18T09:22:09.613983+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Pest",
     "stufe": "l3",
     "artikel_id": "pest_l3",
     "run_dir": "generalize_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 433,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T09:25:55.835915+00:00"
+    "generated_at": "2026-06-18T09:25:55.835915+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Photosynthese",
     "stufe": "l1",
     "artikel_id": "photosynthese_l1",
     "run_dir": "generalize_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 182,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T09:18:59.749276+00:00"
+    "generated_at": "2026-06-18T09:18:59.749276+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Photosynthese",
     "stufe": "l2",
     "artikel_id": "photosynthese_l2",
     "run_dir": "generalize_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 269,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T09:18:59.752157+00:00"
+    "generated_at": "2026-06-18T09:18:59.752157+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Photosynthese",
     "stufe": "l3",
     "artikel_id": "photosynthese_l3",
     "run_dir": "generalize_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 546,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T09:18:59.755584+00:00"
+    "generated_at": "2026-06-18T09:18:59.755584+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Regenwald",
     "stufe": "l1",
     "artikel_id": "regenwald_l1",
     "run_dir": "test_erde_regenwald_wal",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 261,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T12:57:55.584621+00:00"
+    "generated_at": "2026-06-24T12:57:55.584621+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Regenwald",
     "stufe": "l2",
     "artikel_id": "regenwald_l2",
     "run_dir": "test_erde_regenwald_wal",
-    "stadium": "reviewed",
+    "stadium": "lektorat_reviewed",
     "review_complete": true,
     "word_count": 419,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T13:03:59.020189+00:00"
+    "generated_at": "2026-06-24T13:03:59.020189+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 1,
+      "findings_reviewed": 1,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Regenwald",
     "stufe": "l3",
     "artikel_id": "regenwald_l3",
     "run_dir": "test_erde_regenwald_wal",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 680,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T13:03:59.027177+00:00"
+    "generated_at": "2026-06-24T13:03:59.027177+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Ritter",
     "stufe": "l1",
     "artikel_id": "ritter_l1",
     "run_dir": "fp_measurement",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 232,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-22T15:33:34.973026+00:00"
+    "generated_at": "2026-06-22T15:33:34.973026+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Ritter",
     "stufe": "l2",
     "artikel_id": "ritter_l2",
     "run_dir": "fp_measurement",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 330,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-22T15:33:34.978253+00:00"
+    "generated_at": "2026-06-22T15:33:34.978253+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 5,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Ritter",
     "stufe": "l3",
     "artikel_id": "ritter_l3",
     "run_dir": "fp_measurement",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 561,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-22T15:34:21.728988+00:00"
+    "generated_at": "2026-06-22T15:34:21.728988+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 1,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Sklaverei",
     "stufe": "l1",
     "artikel_id": "sklaverei_l1",
     "run_dir": "test_v323f",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 47,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-19T08:10:41.607147+00:00"
+    "generated_at": "2026-06-19T08:10:41.607147+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Sklaverei",
     "stufe": "l1",
     "artikel_id": "sklaverei_l1",
     "run_dir": "test_v324",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 62,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-20T13:32:08.485535+00:00"
+    "generated_at": "2026-06-20T13:32:08.485535+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Sklaverei",
     "stufe": "l2",
     "artikel_id": "sklaverei_l2",
     "run_dir": "test_v323f",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 228,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-19T08:10:41.610659+00:00"
+    "generated_at": "2026-06-19T08:10:41.610659+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Sklaverei",
     "stufe": "l2",
     "artikel_id": "sklaverei_l2",
     "run_dir": "test_v324",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 206,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-20T13:32:08.489538+00:00"
+    "generated_at": "2026-06-20T13:32:08.489538+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Sklaverei",
     "stufe": "l3",
     "artikel_id": "sklaverei_l3",
     "run_dir": "test_v323f",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 492,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-19T08:15:59.693301+00:00"
+    "generated_at": "2026-06-19T08:15:59.693301+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Sklaverei",
     "stufe": "l3",
     "artikel_id": "sklaverei_l3",
     "run_dir": "test_v324",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 556,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-20T13:32:08.493625+00:00"
+    "generated_at": "2026-06-20T13:32:08.493625+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Spartacus",
     "stufe": "l1",
     "artikel_id": "spartacus_l1",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 175,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:52:36.113660+00:00"
+    "generated_at": "2026-06-17T11:52:36.113660+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Spartacus",
     "stufe": "l1",
     "artikel_id": "spartacus_l1",
     "run_dir": "mini_s2_v3",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 198,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T18:15:40.064559+00:00"
+    "generated_at": "2026-06-17T18:15:40.064559+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Spartacus",
     "stufe": "l1",
     "artikel_id": "spartacus_l1",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 182,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:28:05.881979+00:00"
+    "generated_at": "2026-06-17T20:28:05.881979+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Spartacus",
     "stufe": "l1",
     "artikel_id": "spartacus_l1",
     "run_dir": "mini_s2_v3e",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 171,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T05:35:32.071773+00:00"
+    "generated_at": "2026-06-18T05:35:32.071773+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Spartacus",
     "stufe": "l2",
     "artikel_id": "spartacus_l2",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 270,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:52:36.115875+00:00"
+    "generated_at": "2026-06-17T11:52:36.115875+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Spartacus",
     "stufe": "l2",
     "artikel_id": "spartacus_l2",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 285,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:28:05.884487+00:00"
+    "generated_at": "2026-06-17T20:28:05.884487+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Spartacus",
     "stufe": "l2",
     "artikel_id": "spartacus_l2",
     "run_dir": "mini_s2_v3e",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 277,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T05:35:32.074431+00:00"
+    "generated_at": "2026-06-18T05:35:32.074431+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Spartacus",
     "stufe": "l3",
     "artikel_id": "spartacus_l3",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 440,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:52:36.118262+00:00"
+    "generated_at": "2026-06-17T11:52:36.118262+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Spartacus",
     "stufe": "l3",
     "artikel_id": "spartacus_l3",
     "run_dir": "mini_s2_v3",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 443,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T18:18:47.399637+00:00"
+    "generated_at": "2026-06-17T18:18:47.399637+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Spartacus",
     "stufe": "l3",
     "artikel_id": "spartacus_l3",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 443,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:28:05.887135+00:00"
+    "generated_at": "2026-06-17T20:28:05.887135+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Spartacus",
     "stufe": "l3",
     "artikel_id": "spartacus_l3",
     "run_dir": "mini_s2_v3e",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 446,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T05:35:32.077327+00:00"
+    "generated_at": "2026-06-18T05:35:32.077327+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Titanic",
     "stufe": "l1",
     "artikel_id": "titanic_l1",
     "run_dir": "fp_measurement",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 94,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-22T15:31:54.846022+00:00"
+    "generated_at": "2026-06-22T15:31:54.846022+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 2,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Titanic",
     "stufe": "l1",
     "artikel_id": "titanic_l1",
     "run_dir": "verify_20260623",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 95,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T10:14:19.968962+00:00"
+    "generated_at": "2026-06-23T10:14:19.968962+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 1,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Titanic",
     "stufe": "l1",
     "artikel_id": "titanic_l1",
     "run_dir": "verify_20260623b",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 120,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T20:46:15.863695+00:00"
+    "generated_at": "2026-06-23T20:46:15.863695+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Titanic",
     "stufe": "l1",
     "artikel_id": "titanic_l1",
     "run_dir": "verify_pruefen_test",
-    "stadium": "lektoriert",
+    "stadium": "nur_lektorat",
     "review_complete": false,
     "word_count": 120,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T20:46:15.863695+00:00"
+    "generated_at": "2026-06-23T20:46:15.863695+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 1,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Titanic",
     "stufe": "l2",
     "artikel_id": "titanic_l2",
     "run_dir": "fp_measurement",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 304,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-22T15:32:26.650725+00:00"
+    "generated_at": "2026-06-22T15:32:26.650725+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 3,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Titanic",
     "stufe": "l2",
     "artikel_id": "titanic_l2",
     "run_dir": "verify_20260623",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 338,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T10:15:03.626039+00:00"
+    "generated_at": "2026-06-23T10:15:03.626039+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 1,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Titanic",
     "stufe": "l2",
     "artikel_id": "titanic_l2",
     "run_dir": "verify_20260623b",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 277,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T20:46:15.869773+00:00"
+    "generated_at": "2026-06-23T20:46:15.869773+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Titanic",
     "stufe": "l2",
     "artikel_id": "titanic_l2",
     "run_dir": "verify_pruefen_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "nur_lektorat",
+    "review_complete": false,
     "word_count": 277,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T20:46:15.869773+00:00"
+    "generated_at": "2026-06-23T20:46:15.869773+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Titanic",
     "stufe": "l3",
     "artikel_id": "titanic_l3",
     "run_dir": "fp_measurement",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 512,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-22T15:32:26.655776+00:00"
+    "generated_at": "2026-06-22T15:32:26.655776+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 3,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Titanic",
     "stufe": "l3",
     "artikel_id": "titanic_l3",
     "run_dir": "verify_20260623",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 557,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T10:19:36.445611+00:00"
+    "generated_at": "2026-06-23T10:19:36.445611+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 6,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Titanic",
     "stufe": "l3",
     "artikel_id": "titanic_l3",
     "run_dir": "verify_20260623b",
-    "stadium": "reviewed",
+    "stadium": "lektorat_reviewed",
     "review_complete": true,
     "word_count": 492,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T20:46:15.876183+00:00"
+    "generated_at": "2026-06-23T20:46:15.876183+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 1,
+      "findings_reviewed": 1,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Titanic",
     "stufe": "l3",
     "artikel_id": "titanic_l3",
     "run_dir": "verify_pruefen_test",
-    "stadium": "lektoriert",
+    "stadium": "nur_lektorat",
     "review_complete": false,
     "word_count": 492,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T20:46:15.876183+00:00"
+    "generated_at": "2026-06-23T20:46:15.876183+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 2,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
@@ -1006,77 +1622,125 @@
     "artikel_id": "vulkan_l1",
     "run_dir": "batch_output",
     "stadium": "vertont",
-    "review_complete": true,
+    "review_complete": false,
     "word_count": 174,
     "review_flag": false,
     "tts_wav": "articles/batch_output/audio/vulkan_l1_artikel.wav",
     "auf_app": false,
-    "generated_at": "2026-06-17T11:51:53.628047+00:00"
+    "generated_at": "2026-06-17T11:51:53.628047+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": "articles/batch_output/audio/vulkan_l1_artikel.wav",
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l1",
     "artikel_id": "vulkan_l1",
     "run_dir": "fp_measurement",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 184,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-22T15:32:26.660626+00:00"
+    "generated_at": "2026-06-22T15:32:26.660626+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l1",
     "artikel_id": "vulkan_l1",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 179,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:28:05.873963+00:00"
+    "generated_at": "2026-06-17T20:28:05.873963+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l1",
     "artikel_id": "vulkan_l1",
     "run_dir": "verify_20260623",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 217,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T10:14:19.952224+00:00"
+    "generated_at": "2026-06-23T10:14:19.952224+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 2,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l1",
     "artikel_id": "vulkan_l1",
     "run_dir": "verify_20260623b",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 210,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T06:21:45.328326+00:00"
+    "generated_at": "2026-06-24T06:21:45.328326+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l1",
     "artikel_id": "vulkan_l1",
     "run_dir": "verify_pruefen_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "nur_lektorat",
+    "review_complete": false,
     "word_count": 210,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T06:21:45.328326+00:00"
+    "generated_at": "2026-06-24T06:21:45.328326+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
@@ -1084,77 +1748,125 @@
     "artikel_id": "vulkan_l2",
     "run_dir": "batch_output",
     "stadium": "vertont",
-    "review_complete": true,
+    "review_complete": false,
     "word_count": 398,
     "review_flag": true,
     "tts_wav": "articles/batch_output/audio/vulkan_l2_artikel.wav",
     "auf_app": false,
-    "generated_at": "2026-06-17T11:51:53.630654+00:00"
+    "generated_at": "2026-06-17T11:51:53.630654+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": "articles/batch_output/audio/vulkan_l2_artikel.wav",
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l2",
     "artikel_id": "vulkan_l2",
     "run_dir": "fp_measurement",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 311,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-22T15:32:50.520563+00:00"
+    "generated_at": "2026-06-22T15:32:50.520563+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 2,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l2",
     "artikel_id": "vulkan_l2",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 368,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:28:05.876679+00:00"
+    "generated_at": "2026-06-17T20:28:05.876679+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l2",
     "artikel_id": "vulkan_l2",
     "run_dir": "verify_20260623",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 386,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T10:14:19.957877+00:00"
+    "generated_at": "2026-06-23T10:14:19.957877+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 3,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l2",
     "artikel_id": "vulkan_l2",
     "run_dir": "verify_20260623b",
-    "stadium": "reviewed",
+    "stadium": "lektorat_reviewed",
     "review_complete": true,
     "word_count": 346,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T06:21:45.334579+00:00"
+    "generated_at": "2026-06-24T06:21:45.334579+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 3,
+      "findings_reviewed": 3,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l2",
     "artikel_id": "vulkan_l2",
     "run_dir": "verify_pruefen_test",
-    "stadium": "lektoriert",
+    "stadium": "nur_lektorat",
     "review_complete": false,
     "word_count": 346,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T06:21:45.334579+00:00"
+    "generated_at": "2026-06-24T06:21:45.334579+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 5,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
@@ -1162,466 +1874,754 @@
     "artikel_id": "vulkan_l3",
     "run_dir": "batch_output",
     "stadium": "vertont",
-    "review_complete": true,
+    "review_complete": false,
     "word_count": 520,
     "review_flag": false,
     "tts_wav": "articles/batch_output/audio/vulkan_l3_artikel.wav",
     "auf_app": false,
-    "generated_at": "2026-06-17T11:51:53.633478+00:00"
+    "generated_at": "2026-06-17T11:51:53.633478+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": "articles/batch_output/audio/vulkan_l3_artikel.wav",
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l3",
     "artikel_id": "vulkan_l3",
     "run_dir": "fp_measurement",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 451,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-22T15:32:50.525975+00:00"
+    "generated_at": "2026-06-22T15:32:50.525975+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 5,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l3",
     "artikel_id": "vulkan_l3",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 610,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:28:05.879527+00:00"
+    "generated_at": "2026-06-17T20:28:05.879527+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l3",
     "artikel_id": "vulkan_l3",
     "run_dir": "verify_20260623",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 628,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T10:14:19.963555+00:00"
+    "generated_at": "2026-06-23T10:14:19.963555+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 5,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l3",
     "artikel_id": "vulkan_l3",
     "run_dir": "verify_20260623b",
-    "stadium": "reviewed",
+    "stadium": "lektorat_reviewed",
     "review_complete": true,
     "word_count": 685,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T06:21:45.341290+00:00"
+    "generated_at": "2026-06-24T06:21:45.341290+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 5,
+      "findings_reviewed": 5,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l3",
     "artikel_id": "vulkan_l3",
     "run_dir": "verify_pruefen_test",
-    "stadium": "lektoriert",
+    "stadium": "nur_lektorat",
     "review_complete": false,
     "word_count": 685,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T06:21:45.341290+00:00"
+    "generated_at": "2026-06-24T06:21:45.341290+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 4,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l3",
     "artikel_id": "vulkan_l3",
     "run_dir": "verify_pruefen_test2",
-    "stadium": "lektoriert",
+    "stadium": "nur_lektorat",
     "review_complete": false,
     "word_count": 685,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T06:21:45.341290+00:00"
+    "generated_at": "2026-06-24T06:21:45.341290+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 4,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l3",
     "artikel_id": "vulkan_l3",
     "run_dir": "verify_pruefen_test3a",
-    "stadium": "lektoriert",
+    "stadium": "nur_lektorat",
     "review_complete": false,
     "word_count": 685,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T06:21:45.341290+00:00"
+    "generated_at": "2026-06-24T06:21:45.341290+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 5,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Vulkan",
     "stufe": "l3",
     "artikel_id": "vulkan_l3",
     "run_dir": "verify_pruefen_test3b",
-    "stadium": "lektoriert",
+    "stadium": "nur_lektorat",
     "review_complete": false,
     "word_count": 685,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T06:21:45.341290+00:00"
+    "generated_at": "2026-06-24T06:21:45.341290+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 5,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Wal",
     "stufe": "l1",
     "artikel_id": "wal_l1",
     "run_dir": "test_erde_regenwald_wal",
-    "stadium": "reviewed",
+    "stadium": "lektorat_reviewed",
     "review_complete": true,
     "word_count": 235,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T13:03:59.034293+00:00"
+    "generated_at": "2026-06-24T13:03:59.034293+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 1,
+      "findings_reviewed": 1,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Wal",
     "stufe": "l2",
     "artikel_id": "wal_l2",
     "run_dir": "test_erde_regenwald_wal",
-    "stadium": "reviewed",
+    "stadium": "lektorat_reviewed",
     "review_complete": true,
     "word_count": 363,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T13:03:59.040428+00:00"
+    "generated_at": "2026-06-24T13:03:59.040428+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 2,
+      "findings_reviewed": 2,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Wal",
     "stufe": "l3",
     "artikel_id": "wal_l3",
     "run_dir": "test_erde_regenwald_wal",
-    "stadium": "reviewed",
+    "stadium": "lektorat_reviewed",
     "review_complete": true,
     "word_count": 556,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-24T13:03:59.047043+00:00"
+    "generated_at": "2026-06-24T13:03:59.047043+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 4,
+      "findings_reviewed": 4,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Wikinger",
     "stufe": "l1",
     "artikel_id": "wikinger_l1",
     "run_dir": "generalize_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 181,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T09:15:33.939389+00:00"
+    "generated_at": "2026-06-18T09:15:33.939389+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Wikinger",
     "stufe": "l2",
     "artikel_id": "wikinger_l2",
     "run_dir": "generalize_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 292,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T09:15:33.942583+00:00"
+    "generated_at": "2026-06-18T09:15:33.942583+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Wikinger",
     "stufe": "l3",
     "artikel_id": "wikinger_l3",
     "run_dir": "generalize_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 567,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-18T09:15:33.945584+00:00"
+    "generated_at": "2026-06-18T09:15:33.945584+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zugvögel",
     "stufe": "l1",
     "artikel_id": "zugvögel_l1",
     "run_dir": "test_v323f",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 193,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-19T07:59:40.454814+00:00"
+    "generated_at": "2026-06-19T07:59:40.454814+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zugvögel",
     "stufe": "l2",
     "artikel_id": "zugvögel_l2",
     "run_dir": "test_v323f",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 296,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-19T08:04:26.686815+00:00"
+    "generated_at": "2026-06-19T08:04:26.686815+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zugvögel",
     "stufe": "l3",
     "artikel_id": "zugvögel_l3",
     "run_dir": "test_v323f",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 533,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-19T08:04:26.690853+00:00"
+    "generated_at": "2026-06-19T08:04:26.690853+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l1",
     "artikel_id": "zweiter_weltkrieg_l1",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 172,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:52:36.120363+00:00"
+    "generated_at": "2026-06-17T11:52:36.120363+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l1",
     "artikel_id": "zweiter_weltkrieg_l1",
     "run_dir": "mini_s2_v3",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 193,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T18:18:47.411264+00:00"
+    "generated_at": "2026-06-17T18:18:47.411264+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l1",
     "artikel_id": "zweiter_weltkrieg_l1",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 185,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:28:05.889597+00:00"
+    "generated_at": "2026-06-17T20:28:05.889597+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l1",
     "artikel_id": "zweiter_weltkrieg_l1",
     "run_dir": "verify_20260623",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 89,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T10:19:36.450679+00:00"
+    "generated_at": "2026-06-23T10:19:36.450679+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l1",
     "artikel_id": "zweiter_weltkrieg_l1",
     "run_dir": "verify_20260623b",
-    "stadium": "reviewed",
+    "stadium": "lektorat_reviewed",
     "review_complete": true,
     "word_count": 99,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T20:46:15.882759+00:00"
+    "generated_at": "2026-06-23T20:46:15.882759+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 3,
+      "findings_reviewed": 3,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l1",
     "artikel_id": "zweiter_weltkrieg_l1",
     "run_dir": "verify_pruefen_test",
-    "stadium": "lektoriert",
+    "stadium": "nur_lektorat",
     "review_complete": false,
     "word_count": 99,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T20:46:15.882759+00:00"
+    "generated_at": "2026-06-23T20:46:15.882759+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 2,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l2",
     "artikel_id": "zweiter_weltkrieg_l2",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 288,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:52:36.122458+00:00"
+    "generated_at": "2026-06-17T11:52:36.122458+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l2",
     "artikel_id": "zweiter_weltkrieg_l2",
     "run_dir": "mini_s2_v3",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 297,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T18:21:31.880706+00:00"
+    "generated_at": "2026-06-17T18:21:31.880706+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l2",
     "artikel_id": "zweiter_weltkrieg_l2",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 278,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:28:05.892059+00:00"
+    "generated_at": "2026-06-17T20:28:05.892059+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l2",
     "artikel_id": "zweiter_weltkrieg_l2",
     "run_dir": "verify_20260623",
-    "stadium": "lektoriert",
+    "stadium": "produziert",
     "review_complete": false,
     "word_count": 84,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T10:19:36.455692+00:00"
+    "generated_at": "2026-06-23T10:19:36.455692+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 2,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l2",
     "artikel_id": "zweiter_weltkrieg_l2",
     "run_dir": "verify_20260623b",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 87,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T20:51:03.856921+00:00"
+    "generated_at": "2026-06-23T20:51:03.856921+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l2",
     "artikel_id": "zweiter_weltkrieg_l2",
     "run_dir": "verify_pruefen_test",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "nur_lektorat",
+    "review_complete": false,
     "word_count": 87,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T20:51:03.856921+00:00"
+    "generated_at": "2026-06-23T20:51:03.856921+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l3",
     "artikel_id": "zweiter_weltkrieg_l3",
     "run_dir": "batch_output",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 423,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T11:52:36.124960+00:00"
+    "generated_at": "2026-06-17T11:52:36.124960+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l3",
     "artikel_id": "zweiter_weltkrieg_l3",
     "run_dir": "mini_s2_v3",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 382,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T18:21:31.883278+00:00"
+    "generated_at": "2026-06-17T18:21:31.883278+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l3",
     "artikel_id": "zweiter_weltkrieg_l3",
     "run_dir": "mini_s2_v3d",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 465,
     "review_flag": false,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-17T20:28:05.894716+00:00"
+    "generated_at": "2026-06-17T20:28:05.894716+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l3",
     "artikel_id": "zweiter_weltkrieg_l3",
     "run_dir": "verify_20260623",
-    "stadium": "reviewed",
-    "review_complete": true,
+    "stadium": "produziert",
+    "review_complete": false,
     "word_count": 405,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T10:22:30.712496+00:00"
+    "generated_at": "2026-06-23T10:22:30.712496+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 0,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l3",
     "artikel_id": "zweiter_weltkrieg_l3",
     "run_dir": "verify_20260623b",
-    "stadium": "reviewed",
+    "stadium": "lektorat_reviewed",
     "review_complete": true,
     "word_count": 479,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T20:53:50.291411+00:00"
+    "generated_at": "2026-06-23T20:53:50.291411+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 4,
+      "findings_reviewed": 4,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   },
   {
     "thema": "Zweiter Weltkrieg",
     "stufe": "l3",
     "artikel_id": "zweiter_weltkrieg_l3",
     "run_dir": "verify_pruefen_test",
-    "stadium": "lektoriert",
+    "stadium": "nur_lektorat",
     "review_complete": false,
     "word_count": 479,
     "review_flag": true,
     "tts_wav": null,
     "auf_app": false,
-    "generated_at": "2026-06-23T20:53:50.291411+00:00"
+    "generated_at": "2026-06-23T20:53:50.291411+00:00",
+    "stadium_details": {
+      "hat_lektorat": true,
+      "findings_total": 6,
+      "findings_reviewed": 0,
+      "editorial_approved": false,
+      "tts_wav": null,
+      "auf_app": false
+    }
   }
 ]

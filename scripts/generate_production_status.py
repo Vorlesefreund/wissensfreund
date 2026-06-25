@@ -51,17 +51,65 @@ def _thema_from(meta: dict, aid: str) -> str:
 
 
 def _find_wav(run_dir: Path, aid: str) -> str | None:
+    """WAV nur unter exaktem Produktions-Namen <aid>_artikel.wav (run_dir oder R2-Pfad)."""
     for base in (run_dir / "audio", ROOT / "audio"):
-        if base.is_dir():
-            hits = sorted(base.glob(f"{aid}*.wav"))
-            if hits:
-                return str(hits[0].relative_to(ROOT)).replace("\\", "/")
+        cand = base / f"{aid}_artikel.wav"
+        if cand.is_file():
+            return str(cand.relative_to(ROOT)).replace("\\", "/")
     return None
 
 
-def _review_complete(lekt: dict) -> bool:
-    findings = (lekt.get("pruefbericht", {}) or {}).get("findings", []) or []
-    return all(f.get("review_decision") not in _NA for f in findings)
+def _id_in_marker(data, aid: str) -> bool:
+    """Flexibel: Liste mit aid · Dict {aid: truthy} · Dict mit 'approved'/'ids'-Liste."""
+    if data is None:
+        return False
+    if isinstance(data, list):
+        return aid in data
+    if isinstance(data, dict):
+        if aid in data:
+            return bool(data[aid])
+        for key in ("approved", "ids", "articles", "on_app"):
+            v = data.get(key)
+            if isinstance(v, list) and aid in v:
+                return True
+            if isinstance(v, dict) and bool(v.get(aid)):
+                return True
+    return False
+
+
+def _editorial_approved(run_dir: Path, aid: str, _cache: dict) -> bool:
+    key = run_dir / "editorial_approved.json"
+    if key not in _cache:
+        _cache[key] = _load(key)
+    return _id_in_marker(_cache[key], aid)
+
+
+def _on_app(run_dir: Path, aid: str, _cache: dict) -> bool:
+    key = run_dir / "on_app.json"
+    if key not in _cache:
+        _cache[key] = _load(key)
+    return _id_in_marker(_cache[key], aid)
+
+
+def _review_counts(lekt: dict | None) -> tuple[int, int, bool]:
+    """(findings_total, findings_reviewed, is_reviewed) gemäß Stadium-2-Regel.
+
+    findings>0  → reviewed wenn ALLE ein review_decision != OFFEN haben.
+    findings==0 → reviewed NUR wenn pruefbericht/meta.reviewed_at gesetzt ODER
+                  explizites Flag lektorat_reviewed:true. Leere findings[] allein
+                  reichen NICHT.
+    """
+    if not lekt:
+        return 0, 0, False
+    pb = lekt.get("pruefbericht", {}) or {}
+    findings = pb.get("findings", []) or []
+    total = len(findings)
+    reviewed = sum(1 for f in findings if f.get("review_decision") not in _NA)
+    if total > 0:
+        return total, reviewed, reviewed == total
+    reviewed_at = pb.get("reviewed_at") or (lekt.get("meta", {}) or {}).get("reviewed_at")
+    explicit = bool(lekt.get("lektorat_reviewed") or pb.get("lektorat_reviewed"))
+    return 0, 0, bool(reviewed_at) or explicit
 
 
 def build() -> list[dict]:
@@ -69,6 +117,7 @@ def build() -> list[dict]:
     if not ARTICLES.is_dir():
         return entries
 
+    marker_cache: dict = {}
     for run_dir in sorted(p for p in ARTICLES.iterdir() if p.is_dir()):
         art_dir = run_dir / "articles"
         lekt_dir = run_dir / "lektorat"
@@ -89,19 +138,28 @@ def build() -> list[dict]:
             src  = lekt or art or {}
             meta = src.get("meta", {})
 
-            review_complete = bool(lekt) and _review_complete(lekt)
+            hat_lektorat = bool(lekt)
+            both = bool(art) and bool(lekt)
+            f_total, f_reviewed, is_reviewed = _review_counts(lekt)
             wav = _find_wav(run_dir, aid)
+            ed_approved = _editorial_approved(run_dir, aid, marker_cache)
+            on_app = _on_app(run_dir, aid, marker_cache)
 
-            # Stadium (höchstes erreichtes)
-            stadium = "produziert" if art else None
-            if lekt:
-                stadium = "lektoriert"
-            if lekt and review_complete:
-                stadium = "reviewed"
+            # Stadium (höchstes erreichtes; jedes setzt das vorherige voraus)
+            if both:
+                stadium = "produziert"
+            elif art:
+                stadium = "nur_artikel"      # ohne Lektorat: noch nicht Stadium 1
+            else:
+                stadium = "nur_lektorat"     # Edge: Lektorat ohne Artikel-JSON
+            if both and is_reviewed:
+                stadium = "lektorat_reviewed"
+            if ed_approved:
+                stadium = "editorial_review"
             if wav:
                 stadium = "vertont"
-            if stadium is None:
-                stadium = "lektoriert" if lekt else "produziert"
+            if on_app:
+                stadium = "auf_app"
 
             entries.append({
                 "thema":            _thema_from(meta, aid),
@@ -109,12 +167,20 @@ def build() -> list[dict]:
                 "artikel_id":       meta.get("id", aid),
                 "run_dir":          run_dir.name,
                 "stadium":          stadium,
-                "review_complete":  review_complete,
+                "review_complete":  is_reviewed,
                 "word_count":       meta.get("word_count"),
                 "review_flag":      meta.get("review_flag", False),
                 "tts_wav":          wav,
-                "auf_app":          False,
+                "auf_app":          on_app,
                 "generated_at":     meta.get("generated_at"),
+                "stadium_details": {
+                    "hat_lektorat":       hat_lektorat,
+                    "findings_total":     f_total,
+                    "findings_reviewed":  f_reviewed,
+                    "editorial_approved": ed_approved,
+                    "tts_wav":            wav,
+                    "auf_app":            on_app,
+                },
             })
 
     entries.sort(key=lambda e: (e["thema"].lower(), e["stufe"]))
@@ -126,12 +192,15 @@ def main() -> int:
     out = ROOT / "production_status.json"
     out.write_text(json.dumps(entries, ensure_ascii=False, indent=2), encoding="utf-8")
 
+    DURCH = ("lektorat_reviewed", "editorial_review", "vertont", "auf_app")
     total = len(entries)
-    reviewed = sum(1 for e in entries if e["stadium"] in ("reviewed", "vertont", "auf_app"))
+    reviewed = sum(1 for e in entries if e["stadium"] in DURCH)
+    editorial = sum(1 for e in entries if e["stadium"] in ("editorial_review", "vertont", "auf_app"))
     vertont = sum(1 for e in entries if e["stadium"] in ("vertont", "auf_app"))
     flags = sum(1 for e in entries if e["review_flag"])
     print(f"production_status.json geschrieben: {out}")
-    print(f"  {total} Artikel total | {reviewed} reviewed (oder weiter) | {vertont} vertont | {flags} review_flag")
+    print(f"  {total} Artikel total | {reviewed} lektorat_reviewed (oder weiter) | "
+          f"{editorial} editorial_review+ | {vertont} vertont | {flags} review_flag")
     # Stadium-Verteilung
     from collections import Counter
     dist = Counter(e["stadium"] for e in entries)
