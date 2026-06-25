@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-25T09:15:03Z -->
+<!-- updated: 2026-06-25T11:09:03Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -50,10 +50,29 @@
 >   (Bucket noch nicht live, App auf klexikon.zim — unkritisch; bei Voll-Katalog-Upload beachten).
 > - **TTS-Pipeline end-to-end FERTIG** (Stage 1→2→3→4→5). Entscheidung: **nur Vulkan als TTS-Pilot**
 >   (l1–l3, 48 WAVs in R2) — keine weiteren Themen vertonen/hochladen vor dem echten Produktionslauf.
+> - **Produktions-Übersicht:** `python scripts/generate_production_status.py` → production_status.json
+>   (Stadium je Thema+Stufe). Stand 2026-06-25: 125 Artikel, 97 reviewed, 3 vertont, 54 review_flag.
+>   Word-Review je Lauf: `python scripts/generate_review_docx.py <run_dir>` (*.docx ist gitignored).
 
 ---
 
 ## Abgeschlossen (2026-06-25)
+
+**Produktions-Übersicht `generate_production_status.py` + production_status.json** (Commit folgt).
+Scannt alle articles/<run_dir>/articles/ + /lektorat/, baut je Thema+Stufe ein Stadium
+(produziert < lektoriert < reviewed < vertont < auf_app) mit review_complete/word_count/
+review_flag/tts_wav/generated_at. Output JSON-Array (Repo-Root), sortiert nach Thema/Stufe,
+plus stdout-Summary + Stadium-Verteilung. Erstlauf: 125 Artikel total, 97 reviewed, 3 vertont,
+54 review_flag; Verteilung lektoriert 25 / reviewed 97 / vertont 3. „reviewed" gilt auch
+vacuously bei 0 Findings (alle Findings entschieden → True) — bewusst nach Spec.
+
+**Word-Review-Generator versioniert** — `scripts/generate_review_docx.py` (python-docx) erstmals
+getrackt: durchgehend 2-spaltiges A4-Review (Text links, Kommentarspalte rechts), Tracked-Changes
+(KORR: rot durchgestrichen + grün), PRÜFEN mit Quelle/Beleg, Inline-Bilder + Hero, Quiz mit
+markierter richtiger Antwort. Aufruf je Lauf: `python scripts/generate_review_docx.py <run_dir>`.
+
+**.gitignore: Word-Dokumente** (Commit 0f0ee2c) — `*.docx` + Word-Lock-Dateien (`~$*.docx`,
+`~$*.xlsx`) ignoriert. Review-Docs sind regenerierbare Artefakte, gehören nicht ins Repo.
 
 **erw_20260624 komplett (9/9)** — Erde via Kompass-Fallback durchgebracht (Commit b29f44e).
 erde_l3 review_flag (839 > 682 W, Trim-503-Ausfall — nachtrimmen wenn 3.5-flash stabil).
