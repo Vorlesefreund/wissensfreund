@@ -78,6 +78,8 @@ from lektorat_common import (            # noqa: E402
 )
 
 GEMINI_MODEL       = "gemini-3.5-flash"
+KOMPASS_MODEL         = "gemini-3.5-flash"   # Primär
+KOMPASS_MODEL_FALLBACK = "gemini-2.5-flash"  # bei 503-Erschöpfung
 OUT_DIR            = ROOT / "articles" / "test_grounded"
 CATALOG_PATH       = ROOT / "catalog_full.json"
 
@@ -472,6 +474,7 @@ def select_companions_raw(
     )
 
     max_attempts = 6
+    exhausted_503 = False
     for attempt in range(1, max_attempts + 1):
         try:
             response = client.models.generate_content(
@@ -502,13 +505,44 @@ def select_companions_raw(
             return [], {}
         except Exception as e:
             err = str(e)
-            if attempt < max_attempts and ("503" in err or "unavailable" in err.lower()):
+            is_503 = ("503" in err or "unavailable" in err.lower())
+            if attempt < max_attempts and is_503:
                 wait = min(60 * (2 ** (attempt - 1)), 300)
                 log.warning("  Phase 1 503 (V%d/%d) -- warte %ds ...", attempt, max_attempts, wait)
                 time.sleep(wait)
+            elif is_503:
+                log.error("  Phase 1 Fehler: %s", e)
+                exhausted_503 = True   # alle Versuche mit 503 erschöpft → Fallback unten
+                break
             else:
                 log.error("  Phase 1 Fehler: %s", e)
                 return [], {}
+
+    # Fallback auf alternatives Modell — nur bei 503-Erschöpfung des Primärmodells
+    if exhausted_503 and model == KOMPASS_MODEL and model != KOMPASS_MODEL_FALLBACK:
+        log.warning("  Kompass 503-Erschöpfung auf %s — Fallback auf %s",
+                    model, KOMPASS_MODEL_FALLBACK)
+        try:
+            fb_thinking = _make_thinking_config(KOMPASS_MODEL_FALLBACK, budget_for_2_5=1024)
+            response = client.models.generate_content(
+                model=KOMPASS_MODEL_FALLBACK,
+                contents=prompt,
+                config=types.GenerateContentConfig(
+                    system_instruction=COMPANION_SYSTEM_PROMPT,
+                    temperature=0.3,
+                    thinking_config=fb_thinking,
+                    response_mime_type="application/json",
+                    response_schema=companions_schema,
+                ),
+            )
+            data = json.loads((response.text or "").strip())
+            usage = {}  # kein Usage-Tracking für Fallback
+            log.warning("  Kompass Fallback erfolgreich: %d Companions",
+                        len(data.get("companions", [])))
+            return [str(c) for c in data.get("companions", [])][:10], usage
+        except Exception as fe:
+            log.error("  Kompass Fallback auch gescheitert: %s", fe)
+            return [], {}
     return [], {}
 
 
