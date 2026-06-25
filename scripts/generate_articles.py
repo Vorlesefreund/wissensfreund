@@ -786,19 +786,28 @@ def call_claude_api(
 # JSON-Validierung
 # ─────────────────────────────────────────────
 
-def parse_article_json(raw: str) -> dict:
+def _repair_article_quotes(text: str) -> str:
+    """Typografie-erhaltender Fix für deutsche Anführungszeichen im JSON.
+
+    Modelle (v.a. Claude) schreiben das schließende deutsche Anführungszeichen oft
+    als ASCII-" (U+0022) statt typografisch " (U+201D) — z.B. „Walfisch" mit ASCII-
+    Schluss. Dieses ASCII-" beendet im JSON-String vorzeitig die Zeichenkette.
+
+    Fix: ein ASCII-" das auf ein öffnendes „ (U+201E) + Text folgt UND NICHT von
+    JSON-Struktur (: , } ] Zeilenumbruch) gefolgt wird, ist ein irrtümlich
+    gesetztes Schlusszeichen → wird zu " (U+201D). Struktur-Quotes bleiben
+    unangetastet (Lookahead), korrekte „…"-Paare bleiben unverändert
+    (Klasse schließt " aus). Verändert NICHTS an sauberem JSON.
     """
-    Extrahiert und parst JSON aus der Modell-Antwort.
-    Robust gegen: <planung>-Prefix, Markdown-Fences, Trailing-Content nach }.
-    """
-    if not raw:
-        raise ValueError("Leere API-Antwort")
-    # <planung>-Block entfernen (Backend-Filter)
-    cleaned = re.sub(r"<planung>.*?</planung>", "", raw, flags=re.DOTALL)
-    # Markdown-Fences entfernen
-    cleaned = re.sub(r"^```json\s*", "", cleaned.strip())
-    cleaned = re.sub(r"```\s*$", "", cleaned).strip()
-    # Erstes vollständiges JSON-Objekt extrahieren (ignoriert Trailing-Content)
+    return re.sub(
+        r'(„[^„“”]*?)"(?!\s*[:,}\]\n])',
+        lambda m: m.group(1) + "”",
+        text,
+    )
+
+
+def _extract_first_json_object(cleaned: str) -> dict:
+    """Extrahiert das erste balancierte {…}-Objekt und parst es (quote-aware Scan)."""
     start = cleaned.find("{")
     if start == -1:
         raise ValueError("Kein JSON-Objekt gefunden (kein '{' in Antwort)")
@@ -827,13 +836,45 @@ def parse_article_json(raw: str) -> dict:
                 break
     if end == -1:
         raise ValueError("Unvollständiges JSON-Objekt (kein balanciertes '}')")
-    article = json.loads(cleaned[start:end + 1])
-    # Fehlende/null img_index normalisieren → -1
-    for sec in article.get("sections", []):
-        for s in sec.get("sentences", []):
-            if s.get("img_index") is None:
-                s["img_index"] = -1
-    return article
+    return json.loads(cleaned[start:end + 1])
+
+
+def parse_article_json(raw: str) -> dict:
+    """
+    Extrahiert und parst JSON aus der Modell-Antwort.
+    Robust gegen: <planung>-Prefix, Markdown-Fences, Trailing-Content nach }.
+    Zwei-Versuch: erst unverändert (sauberes Gemini-JSON → kein Verhaltenswechsel),
+    dann mit _repair_article_quotes als Fallback (Claude „…"-ASCII-Schluss-Defekt).
+    Der Repair greift VOR der Brace-Extraktion, weil ein verirrtes ASCII-" sonst
+    schon den quote-aware Scanner desynchronisiert.
+    """
+    if not raw:
+        raise ValueError("Leere API-Antwort")
+    # <planung>-Block entfernen (Backend-Filter)
+    cleaned = re.sub(r"<planung>.*?</planung>", "", raw, flags=re.DOTALL)
+    # Markdown-Fences entfernen
+    cleaned = re.sub(r"^```json\s*", "", cleaned.strip())
+    cleaned = re.sub(r"```\s*$", "", cleaned).strip()
+
+    candidates = [cleaned]
+    repaired = _repair_article_quotes(cleaned)
+    if repaired != cleaned:
+        candidates.append(repaired)
+
+    last_err: Exception | None = None
+    for candidate in candidates:
+        try:
+            article = _extract_first_json_object(candidate)
+        except (ValueError, json.JSONDecodeError) as e:
+            last_err = e
+            continue
+        # Fehlende/null img_index normalisieren → -1
+        for sec in article.get("sections", []):
+            for s in sec.get("sentences", []):
+                if s.get("img_index") is None:
+                    s["img_index"] = -1
+        return article
+    raise last_err if last_err else ValueError("JSON-Parse fehlgeschlagen")
 
 
 def validate_article(article: dict, job: dict, word_floor: int | None = None) -> list[str]:
