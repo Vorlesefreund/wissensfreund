@@ -926,6 +926,20 @@ def stage2_generierung(
     articles_dir = out_dir / "articles"
     articles_dir.mkdir(exist_ok=True)
 
+    # Provider-Schalter (Weg B): generator-Stufe gemini ODER anthropic.
+    gen_cfg      = stage_models.get_stage_config("generator")
+    gen_provider = gen_cfg["provider"]
+    gen_model    = gen_cfg["model"]
+    # Im anthropic-Pfad gibt das Modell den Artikel über das emit-Tool aus → der
+    # v4-<planung>-Block entfällt (Planung wandert ins thinking). Hinweis NUR lokal
+    # anhängen, die Prompt-Datei bleibt unangetastet (Gemini-Pfad nutzt system_prompt pur).
+    system_prompt_emit = system_prompt + (
+        "\n\n## AUSGABE-MODUS (tool-use)\n"
+        "Gib den Artikel AUSSCHLIESSLICH über das Tool `emit` aus (rufe es IMMER auf). "
+        "Kein Freitext, kein <planung>-Block — die Planung gehört in den Denkprozess. "
+        "Das emit-Tool-Input ist das vollständige Artikel-JSON."
+    )
+
     if dry_run:
         n = sum(1 for t in themen if t in topics_data)
         total = n * len(stufen)
@@ -936,35 +950,38 @@ def stage2_generierung(
         print(f"  Post-Processing: Wortzahl-Guard + Box-Guard (synchron)")
         return {}
 
-    # ── Step 1: Context-Caches je Thema ─────────────────────────────────────
-    log.info("\n=== Stage 2 / Step 1: Context-Caches (%d Themen) ===", len(themen))
+    # ── Step 1: Context-Caches je Thema (nur Gemini-Pfad) ───────────────────
+    # Anthropic nutzt Prompt-Caching (cache_control: ephemeral) direkt im Request,
+    # nicht das Gemini-Cache-Objekt → Step 1 entfällt dort.
     caches: dict[str, str | None] = {}
-
-    for thema in themen:
-        data = topics_data.get(thema)
-        if not data:
-            log.warning("  '%s' fehlt in topics_data — kein Cache", thema)
-            caches[thema] = None
-            continue
-        if data.get("companions_failed"):
-            caches[thema] = None
-            continue
-        slug = thema.lower().replace(" ", "_").replace("/", "_")
-        dummy_job = _stage2_job(thema, data, slug, stufe=1)
-        stable, _ = _split_grounded_user_message(
-            dummy_job,
-            data["primary_text"],
-            data.get("companion_texts", {}),
-            data.get("valid_companions", []),
-            data.get("images", []),
-        )
-        caches[thema] = try_create_gemini_cache(client, GEN_MODEL, system_prompt, stable,
-                                                   ttl="3600s")
+    if gen_provider == "gemini":
+        log.info("\n=== Stage 2 / Step 1: Context-Caches (%d Themen) ===", len(themen))
+        for thema in themen:
+            data = topics_data.get(thema)
+            if not data:
+                log.warning("  '%s' fehlt in topics_data — kein Cache", thema)
+                caches[thema] = None
+                continue
+            if data.get("companions_failed"):
+                caches[thema] = None
+                continue
+            slug = thema.lower().replace(" ", "_").replace("/", "_")
+            dummy_job = _stage2_job(thema, data, slug, stufe=1)
+            stable, _ = _split_grounded_user_message(
+                dummy_job,
+                data["primary_text"],
+                data.get("companion_texts", {}),
+                data.get("valid_companions", []),
+                data.get("images", []),
+            )
+            caches[thema] = try_create_gemini_cache(client, GEN_MODEL, system_prompt, stable,
+                                                       ttl="3600s")
 
     # ── Step 2: InlinedRequests aufbauen ────────────────────────────────────
     log.info("\n=== Stage 2 / Step 2: Requests aufbauen ===")
-    gen_reqs:  list[types.InlinedRequest] = []
-    req_meta:  dict[str, dict]            = {}  # article_id → Metadaten für Post-Processing
+    gen_reqs:       list[types.InlinedRequest] = []   # Gemini-Pfad
+    anthropic_reqs: list[dict]                 = []   # Anthropic-Pfad (Message-Batches)
+    req_meta:  dict[str, dict]                 = {}   # article_id → Metadaten für Post-Processing
 
     # Bereits gespeicherte Artikel vormerken → Batch überspringt sie
     articles: dict[str, str] = {}
@@ -987,10 +1004,8 @@ def stage2_generierung(
         slug       = thema.lower().replace(" ", "_").replace("/", "_")
         images_all = data.get("images", [])
         appeal     = data.get("appeal", "medium")
-        # cached_content in InlinedRequest ist inkompatibel mit Gemini Batch API
-        # → immer Fallback (volles System-Prompt + volles Message im Request)
-        cache_name = None
-
+        # Gemini Batch: cached_content in InlinedRequest inkompatibel → voller Prompt
+        # je Request. Anthropic: Prompt-Caching via cache_control direkt im Request.
         age_floor = int(data.get("age_floor") or 1)
 
         for stufe in stufen:
@@ -1005,26 +1020,47 @@ def stage2_generierung(
             images_stufe  = select_images_for_stufe(images_all, stufe, appeal)
             job           = _stage2_job(thema, data, slug, stufe)
 
-            if cache_name:
-                variable = _gen2_variable_suffix(job, wmax)
-                contents = types.Content(
-                    role="user",
-                    parts=[types.Part.from_text(text=variable)],
-                )
-                cfg = types.GenerateContentConfig(
-                    cached_content=cache_name,
-                    temperature=1.0,
-                    thinking_config=thinking_cfg,
-                    max_output_tokens=32768,
-                )
+            stable, _ = _split_grounded_user_message(
+                job, data["primary_text"],
+                data.get("companion_texts", {}),
+                data.get("valid_companions", []),
+                images_all,
+            )
+            variable = _gen2_variable_suffix(job, wmax)
+
+            req_meta[article_id] = {
+                "thema":        thema,
+                "stufe":        stufe,
+                "job":          job,
+                "images_stufe": images_stufe,
+                "wmin":         wmin,
+                "wmax":         wmax,
+            }
+
+            if gen_provider == "anthropic":
+                anthropic_reqs.append({
+                    "custom_id": article_id,
+                    "params": {
+                        "model":       gen_model,
+                        "max_tokens":  32768,
+                        "thinking":    {"type": "enabled", "budget_tokens": 8192},
+                        "tools": [{
+                            "name": "emit",
+                            "description": "Gib den vollständigen Artikel als JSON-Objekt aus.",
+                            "input_schema": stage_models.ARTICLE_SCHEMA,
+                        }],
+                        "tool_choice": {"type": "auto"},   # forced + thinking inkompatibel
+                        "system": [{"type": "text", "text": system_prompt_emit,
+                                    "cache_control": {"type": "ephemeral"}}],
+                        "messages": [{"role": "user", "content": [
+                            {"type": "text", "text": stable,
+                             "cache_control": {"type": "ephemeral"}},
+                            {"type": "text", "text": variable},
+                        ]}],
+                    },
+                })
             else:
-                stable, _ = _split_grounded_user_message(
-                    job, data["primary_text"],
-                    data.get("companion_texts", {}),
-                    data.get("valid_companions", []),
-                    images_all,
-                )
-                full_msg = stable + "\n" + _gen2_variable_suffix(job, wmax)
+                full_msg = stable + "\n" + variable
                 contents = types.Content(
                     role="user",
                     parts=[types.Part.from_text(text=full_msg)],
@@ -1035,25 +1071,15 @@ def stage2_generierung(
                     thinking_config=thinking_cfg,
                     max_output_tokens=32768,
                 )
+                gen_reqs.append(types.InlinedRequest(
+                    contents=contents,
+                    config=cfg,
+                    metadata={"key": article_id},
+                ))
+            log.info("  %s: S%d | %d Bilder | Wmax=%d | Provider=%s",
+                     article_id, stufe, len(images_stufe), wmax, gen_provider)
 
-            req_meta[article_id] = {
-                "thema":        thema,
-                "stufe":        stufe,
-                "job":          job,
-                "images_stufe": images_stufe,
-                "wmin":         wmin,
-                "wmax":         wmax,
-            }
-            gen_reqs.append(types.InlinedRequest(
-                contents=contents,
-                config=cfg,
-                metadata={"key": article_id},
-            ))
-            log.info("  %s: S%d | %d Bilder | Wmax=%d | Cache=%s",
-                     article_id, stufe, len(images_stufe), wmax,
-                     "JA" if cache_name else "NEIN (fallback)")
-
-    if not gen_reqs:
+    if not gen_reqs and not anthropic_reqs:
         if articles:
             log.info("Stage 2: keine neuen Requests — alle %d Artikel bereits vorhanden",
                      len(articles))
@@ -1062,27 +1088,83 @@ def stage2_generierung(
         log.error("Stage 2: keine Requests — abgebrochen")
         return {}
 
-    # ── Step 3: Batch einreichen + pollen ───────────────────────────────────
-    log.info("\n=== Stage 2 / Step 3: Generierungs-Batch (%d Requests) ===", len(gen_reqs))
-    gen_batch = client.batches.create(model=GEN_MODEL, src=gen_reqs)
-    log.info("Batch eingereicht: %s", gen_batch.name)
-    gen_batch = poll_gemini_batch(client, gen_batch.name)
-    state = _state_str(gen_batch)
-    if state not in SUCCESS_STATES:
-        log.error("Generierungs-Batch fehlgeschlagen: %s — Artikel fehlen", state)
-        return {}
+    # ── Step 3 / PHASE A: Roh-Artikel sammeln (provider-abhängig) ───────────
+    # raw_articles[article_id] = (payload, usage)
+    #   payload: str  → Gemini-Rohtext (in Phase B via _parse_gen2_response geparst)
+    #   payload: dict → Anthropic emit-Output (bereits destringified)
+    raw_articles: dict[str, tuple] = {}
 
-    # ── Step 4: Post-Processing (synchron, lokal) ────────────────────────────
-    log.info("\n=== Stage 2 / Step 4: Post-Processing ===")
+    if gen_provider == "anthropic":
+        import anthropic
+        log.info("\n=== Stage 2 / Step 3: Sonnet-Generierungs-Batch (%d Requests) ===",
+                 len(anthropic_reqs))
+        aclient = anthropic.Anthropic(api_key=api_key)
+        abatch  = aclient.messages.batches.create(requests=anthropic_reqs)
+        log.info("Anthropic-Batch eingereicht: %s", abatch.id)
+        while abatch.processing_status == "in_progress":
+            time.sleep(15)
+            abatch = aclient.messages.batches.retrieve(abatch.id)
+            c = abatch.request_counts
+            log.info("  Batch %s … %s (✓%d ✗%d ⌛%d)", abatch.id[:20],
+                     abatch.processing_status, c.succeeded, c.errored, c.processing)
+        for result in aclient.messages.batches.results(abatch.id):
+            aid = result.custom_id
+            if result.result.type != "succeeded":
+                log.error("  [%s] Anthropic-Batch: %s — Artikel fehlt", aid, result.result.type)
+                continue
+            msg = result.result.message
+            art = next((b.input for b in msg.content
+                        if b.type == "tool_use" and b.name == "emit"), None)
+            if art is None:
+                # tool_choice=auto → emit evtl. ausgelassen → Freitext-Fallback
+                text = "".join(b.text for b in msg.content if b.type == "text")
+                try:
+                    art, _sp = _parse_gen2_response(text)
+                except Exception as e:
+                    log.error("  [%s] kein emit-Block + Freitext-Parse: %s", aid, e)
+                    err_dir = out_dir / "_errors"
+                    err_dir.mkdir(exist_ok=True)
+                    (err_dir / f"{aid}_raw.txt").write_text(text or "", encoding="utf-8")
+                    continue
+            else:
+                art = generate_grounded._destringify_article(art)
+            u = msg.usage
+            usage = {
+                "input_tok":    u.input_tokens,
+                "output_tok":   u.output_tokens,
+                "cached_tok":   getattr(u, "cache_read_input_tokens", 0),
+                "thoughts_tok": 0,
+            }
+            raw_articles[aid] = (art, usage)
+    else:
+        log.info("\n=== Stage 2 / Step 3: Gemini-Generierungs-Batch (%d Requests) ===",
+                 len(gen_reqs))
+        gen_batch = client.batches.create(model=GEN_MODEL, src=gen_reqs)
+        log.info("Batch eingereicht: %s", gen_batch.name)
+        gen_batch = poll_gemini_batch(client, gen_batch.name)
+        state = _state_str(gen_batch)
+        if state not in SUCCESS_STATES:
+            log.error("Generierungs-Batch fehlgeschlagen: %s — Artikel fehlen", state)
+            return {}
+        for resp in _get_inlined_responses(gen_batch):
+            meta_resp = getattr(resp, "metadata", {}) or {}
+            aid = meta_resp.get("key", "")
+            if not aid or aid not in req_meta:
+                log.warning("  Unbekannte Response-Key: '%s'", aid)
+                continue
+            raw   = _extract_text(getattr(resp, "response", None))
+            usage = _extract_usage(getattr(resp, "response", None))
+            if not raw:
+                log.error("  [%s] Leere Batch-Antwort", aid)
+                continue
+            raw_articles[aid] = (raw, usage)
+
+    # ── Step 4 / PHASE B: Post-Processing (provider-NEUTRAL) ────────────────
+    log.info("\n=== Stage 2 / Step 4: Post-Processing (%d Roh-Artikel) ===", len(raw_articles))
     # articles wurde in Step 2 vorinitialisiert (bereits gespeicherte Artikel)
+    _gen_model_label = gen_model if gen_provider == "anthropic" else GEN_MODEL
 
-    for resp in _get_inlined_responses(gen_batch):
-        meta_resp  = getattr(resp, "metadata", {}) or {}
-        article_id = meta_resp.get("key", "")
-        if not article_id or article_id not in req_meta:
-            log.warning("  Unbekannte Response-Key: '%s'", article_id)
-            continue
-
+    for article_id, (payload, usage) in raw_articles.items():
         m         = req_meta[article_id]
         thema     = m["thema"]
         stufe     = m["stufe"]
@@ -1092,25 +1174,23 @@ def stage2_generierung(
         wmax      = m["wmax"]
         data      = topics_data[thema]
 
-        raw   = _extract_text(getattr(resp, "response", None))
-        usage = _extract_usage(getattr(resp, "response", None))
         if usage:
             cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe=f"S{stufe}",
-                               schritt="article_gen", modell=GEN_MODEL, **usage)
+                               schritt="article_gen", modell=_gen_model_label, **usage)
 
-        if not raw:
-            log.error("  [%s] Leere Batch-Antwort", article_id)
-            continue
-
-        # JSON-Parse (Wrapper oder plain)
-        try:
-            article, source_passages = _parse_gen2_response(raw)
-        except Exception as e:
-            log.error("  [%s] JSON-Parse: %s", article_id, e)
-            err_dir = out_dir / "_errors"
-            err_dir.mkdir(exist_ok=True)
-            (err_dir / f"{article_id}_raw.txt").write_text(raw or "", encoding="utf-8")
-            continue
+        # payload: str (Gemini) → parsen; dict (Anthropic emit) → direkt nutzen
+        if isinstance(payload, str):
+            try:
+                article, source_passages = _parse_gen2_response(payload)
+            except Exception as e:
+                log.error("  [%s] JSON-Parse: %s", article_id, e)
+                err_dir = out_dir / "_errors"
+                err_dir.mkdir(exist_ok=True)
+                (err_dir / f"{article_id}_raw.txt").write_text(payload or "", encoding="utf-8")
+                continue
+        else:
+            article         = payload
+            source_passages = article.get("source_passages", []) or []
 
         # Metadaten
         article.setdefault("meta", {})
@@ -1119,9 +1199,9 @@ def stage2_generierung(
         article["meta"]["generated_at"]         = datetime.now(timezone.utc).isoformat()
         article["meta"]["grounding_companions"] = data.get("valid_companions", [])
         _prompt_version = SYSTEM_PROMPT_PATH.stem.split("_v")[-1].split("_")[0]
-        article["meta"]["generation_method"]    = f"{GEN_MODEL}/batch/v{_prompt_version}"
+        article["meta"]["generation_method"]    = f"{_gen_model_label}/batch/v{_prompt_version}"
         article["meta"]["generation_temperature"] = 1.0
-        article["meta"]["generation_thinking"]    = "MEDIUM"
+        article["meta"]["generation_thinking"]    = "8192" if gen_provider == "anthropic" else "MEDIUM"
 
         # Wortzahl-Guard
         word_count = count_article_words(article)
