@@ -380,10 +380,30 @@ ausschließlich valides JSON. Kein Markdown, keine Kommentare außerhalb des `<p
   für S2/S3 ausdrücklich erwünscht — sie erklären, was Fotos nicht zeigen können. Wähle sie bevorzugt für
   Abschnitte, die einen Mechanismus oder Aufbau erklären („Wie entsteht ein Vulkan", „Wie funktioniert die
   Enigma").
-- **Bildnutzung maximieren:** Nutze möglichst viele Bilder aus dem bereitgestellten Pool — der Pool wurde
-  sorgfältig kuratiert, jedes Bild ist kindgerecht und thematisch relevant. Ziel: alle Sections mit einem Bild
-  versorgen, überzählige Bilder zusätzlich einsetzen (max. 2 pro Section bei S2/S3 ab ≥4 Sätzen). NICHT
-  akzeptabel: Einen Pompeji-Abschnitt ohne Pompeji-Bild lassen, wenn ein Pompeji-Bild im Pool liegt.
+- **BILDNUTZUNG — LEITPRINZIP:** Der Default ist VERWENDEN, nicht WEGLASSEN.
+  Gehe für jedes angebotene Bild davon aus, dass es in den Artikel gehört.
+  img_index: -1 ist eine bewusste Ausnahme, die du begründen können musst.
+
+  Gültige Gründe für img_index: -1:
+    • Das Bild ist inhaltlich nahezu identisch zu einem bereits vergebenen Bild
+      (gleicher Gegenstand, gleiche Perspektive — max. 2–3 ähnliche Motive verwenden)
+    • Das Bild passt zu keinem Abschnitt des Artikels (offensichtlicher Mismatch)
+    • Du hast bereits 15 Bilder vergeben (Obergrenze)
+
+  Nicht gültige Gründe für img_index: -1:
+    • „Passt nicht perfekt" — perfekter Treffer ist nicht nötig
+    • „Andere Bilder sind besser" — vergib zuerst alle guten, dann die weniger guten
+    • „Kein Platz" — verteile auf mehrere Sätze in der Section
+
+  Ziel: mindestens 80 % der angebotenen Bilder verwenden.
+  Wenn Pool 10 Bilder hat → mindestens 8 vergeben.
+  Wenn Pool 15 Bilder hat → alle 15 (Obergrenze erreicht).
+  Wenn Pool 20 Bilder hat → 15 verwenden (Obergrenze), 5 mit -1 (Duplikate/Mismatch zuerst).
+
+  Verteilungs-Hierarchie (unverändert):
+    1. Jede Section bekommt mindestens einen img_index ≠ -1.
+    2. Überzählige Bilder: als zweite Bilder in Sections mit ≥4 Sätzen (nur S2/S3).
+    3. Companion-Bilder thematisch zum Companion-Abschnitt.
 - **Thematisches Matching:** Ordne Bilder INHALTLICH zu Sätzen zu — lies die Bildbeschreibungen und wähle das
   Bild, das zum Satzinhalt passt. Bilder aus Companion-Artikeln (z. B. eine Enigma-Maschine, ein
   Anne-Frank-Porträt) sind für den Abschnitt über diesen Companion gedacht. Bild und Satz sollen dieselbe
