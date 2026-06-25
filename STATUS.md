@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-25T11:49:48Z -->
+<!-- updated: 2026-06-25T13:42:57Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -9,6 +9,9 @@
 > neu, Titanic+WW2 per Datei-Existenz unberührt (Zeitstempel unverändert). Alle 9 Artikel + 9 Lektorate vorhanden.
 >
 > **OFFENE Punkte nach Priorität:**
+> - **gemini-3.5-flash down** seit ~30h (503). Loop gestoppt.
+>   Nächster Versuch: manuell starten wenn 3.5-flash wieder stabil.
+>   Fallback-Optionen getestet — keiner produktionsreif für Stage 2.
 > - **Lektorat: Stand 3 = bester Stand** (Recall 100 %, Precision 53 % auf GT_v1+v2).
 >   Precision-Fix via Prompt-Tuning gescheitert (Rollback nach Stand 4). Precision-Lösung
 >   erfordert claim-weise Architektur — deferred. FPs sind Stil-Tausche/Additionen,
@@ -64,6 +67,13 @@
 ---
 
 ## Abgeschlossen (2026-06-25)
+
+**Modell-Vergleichstest** (test_25flash + test_31flashlite):
+- gemini-2.5-flash: 44 % JSON-Fehlerrate im Batch (nicht produktionsreif für Stage 2)
+- gemini-3.1-flash-lite: 9/9 JSON sauber, aber Artikel zu kurz + zu wenig Bilder
+  (2-6 statt 6-14; Wortunterschreitung in 7/9 Artikeln)
+- Fazit: kein Fallback-Modell produktionsreif; gemini-3.5-flash bleibt Zielmodell
+- Werkzeug: --gen-model Override in run_batch.py (Commit 7dd21ac).
 
 **Review-Round-Trip-Workflow** (Commit 6831344) — process_review_docx.py +
 watch_review_folders.py. Kommentare aus rechter Docx-Spalte (w:w=1701)
