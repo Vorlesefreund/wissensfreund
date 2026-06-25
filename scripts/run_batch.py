@@ -888,6 +888,7 @@ def stage2_generierung(
     out_dir: Path,
     client: genai.Client,
     api_key: str,
+    anthropic_key: str = None,
     dry_run: bool = False,
 ) -> dict:
     """
@@ -1096,9 +1097,12 @@ def stage2_generierung(
 
     if gen_provider == "anthropic":
         import anthropic
+        if not anthropic_key:
+            log.error("Generator-Provider=anthropic, aber ANTHROPIC_API_KEY fehlt — Abbruch.")
+            return {}
         log.info("\n=== Stage 2 / Step 3: Sonnet-Generierungs-Batch (%d Requests) ===",
                  len(anthropic_reqs))
-        aclient = anthropic.Anthropic(api_key=api_key)
+        aclient = anthropic.Anthropic(api_key=anthropic_key)
         # Batch-Create gegen transiente 5xx/429 absichern (502 Bad Gateway beobachtet)
         abatch = None
         for _att in range(1, 5):
@@ -1859,7 +1863,7 @@ def main() -> None:
                           out_dir)
                 sys.exit(2)
         articles = stage2_generierung(
-            themen_raw, stufen, topics_data, out_dir, client, api_key,
+            themen_raw, stufen, topics_data, out_dir, client, api_key, anthropic_key,
             dry_run=args.dry_run,
         )
         if args.stage == 2:
