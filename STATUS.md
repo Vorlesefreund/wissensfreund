@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-25T05:51:24Z -->
+<!-- updated: 2026-06-25T09:15:03Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -13,11 +13,12 @@
 >   Precision-Fix via Prompt-Tuning gescheitert (Rollback nach Stand 4). Precision-Lösung
 >   erfordert claim-weise Architektur — deferred. FPs sind Stil-Tausche/Additionen,
 >   keine Faktenfehler; mit Baustein 2 im Review handhabbar.
-> - **Erde zurückgestellt** — gemini-3.5-flash komplett down (503, ~24h).
->   Kein Workaround (2.5-flash wäre unkalibriert). Retry wenn 3.5-flash stabil.
+> - **erde_l3 nachtrimmen** — 839 > 682 W, wenn gemini-3.5-flash stabil.
+> - **Review erw_20260624 Erde** — erde_l2 (1 KORR) + erde_l3 (3 SILENT + 1 PRÜFEN)
+>   via review_tool.py.
 > - **TTS-Stimme entschieden** (separater Chat) — einsatzbereit.
-> - **[NÄCHSTER SCHRITT hier] Weitere Leuchtturm-Themen** wenn gemini-3.5-flash
->   wieder stabil: Sonne, Mond, Flugzeug, Eisenbahn, Dinosaurier (staged).
+> - **[NÄCHSTER SCHRITT] Leuchtturm-Themen** — Sonne, Mond, Flugzeug, Eisenbahn,
+>   Dinosaurier (staged wenn 3.5-flash stabil).
 > - **Staged-Lauf-Workflow** jetzt Standard — nie wieder Voll-Lauf wenn Vision-Retry
 >   nötig ist (dokumentiert in CLAUDE_CHAT_NOTIZEN.md).
 > - **vulkan_l3 review_flag** (685 > 682 W) — 3 Wörter kürzen bei redaktioneller
@@ -51,6 +52,12 @@
 >   (l1–l3, 48 WAVs in R2) — keine weiteren Themen vertonen/hochladen vor dem echten Produktionslauf.
 
 ---
+
+## Abgeschlossen (2026-06-25)
+
+**erw_20260624 komplett (9/9)** — Erde via Kompass-Fallback durchgebracht (Commit b29f44e).
+erde_l3 review_flag (839 > 682 W, Trim-503-Ausfall — nachtrimmen wenn 3.5-flash stabil).
+Regenwald/Wal/Erde Artikel + Lektorate auf main.
 
 ## Abgeschlossen (2026-06-24)
 
