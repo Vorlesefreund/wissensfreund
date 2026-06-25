@@ -126,6 +126,12 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 | 22.06.2026 | **Kompass-Anker übernommen** (+2 Kriterien in `COMPANION_PROMPT_TMPL`: höchstens ein konkreter, kindgerechter, belegbarer Anker je Thema; drastische Tod-/Gewalt-/Katastrophe-Anker meiden). **Eignungs-geprüft** (companion-only, 5 Themen × 2 Läufe): Anker-Leitplanke hält auf heiklen Themen — Zweiter Weltkrieg → Enigma/Luftschutzbunker/Kindertransport statt Tod/Gewalt; Titanic → Robert Ballard/Olympic, „Wrack der Titanic" verworfen; unkritische Themen erhalten sinnvolle Anker (Saturn V, Sphinx/Cheops, Megachile pluto). |
 | 22.06.2026 | **Lektorat-Box-Apply-Bug behoben** (Marker-Strip + Granularitäts-Guard Option A in `_apply_auto_correction`; aufgedeckt durch die E2E-Validierung, Titanic-S3-wow-Box). Interne `BOX[...]:`-Render-Marker werden aus claim/korrektur gestrippt (kein Leak in `box["text"]`); Ganzbox-Korrekturen ersetzen die Box als Ganzes, Ein-Satz-Korrekturen nur den Satz. **Fail-safe:** mehrdeutiger Mehr-Satz-Match → PRÜFEN statt Spleiß. Plus Display-Strip vor `_diff_excerpt` (kein Label-Fragment im Prüfbericht). |
 | 22.06.2026 | **findings[] + Abnehmer-Umstellung abgeschlossen:** strukturiertes findings[] im V2-pruefbericht (fec90f5); Shape-A-Abnehmer auf Shape B umgestellt (20bec3f). FP/FN-Messung jetzt technisch möglich. |
+| 25.06.2026 | **Weg B — Grundsatzentscheidung:** Generierungs-Pipeline von Gemini auf Claude umgestellt (Anlass: gemini-3.5-flash ~30 h unzuverlässig/503, kein produktionsreifer Gemini-Fallback). Provider-Routing zentral über `stage_models.py`. **TTS bleibt Gemini** (keine gleichwertige Anthropic-Alternative). |
+| 25.06.2026 | **Weg B — Lemma + Kompass auf Haiku 4.5** via `stage_models`-Routing (forced tool-use). In Praxis bewiesen: Stage 1 läuft ohne gemini-3.5-flash, Erde bekommt Companions. |
+| 25.06.2026 | **Weg B — Generator auf Sonnet 4.6 gewählt** (Stil-Vorsprung im Test; Haiku zu kurz/abstrakt, gemini-2.5-flash 44 % JSON-Defekte). Hinweis: `stage_models["generator"]=Sonnet` bleibt **uncommitted** bis der Sonnet-Generator-Testlauf gelingt (derzeit durch Anthropic-Batch-502 blockiert). |
+| 25.06.2026 | **Weg B — Trim + Box-Repair auf Sonnet** (Modell-Eignungsbefund: Haiku kürzt nicht — reduziert die Wortzahl bei Overshoot kaum). |
+| 25.06.2026 | **Weg B — Quote-Repair typografie-erhaltend** in `parse_article_json` (transport-agnostisch; behebt den ASCII-Schluss-Anführungszeichen-Defekt `„…"`, der das JSON-Parsing brach). |
+| 25.06.2026 | **Weg B — Companion-Robustheit:** Such-Fallback via `resolve_lemma` (Verlustrate 35 %→~0), 429-Härtung des WP-Lookups via `_wp_get`, kulturelle Verortung im Kompass-Prompt (greifbar vor abstrakt, Nähe zum Kind im deutschsprachigen Raum — Wirkung noch unverifiziert wegen WP-Rate-Limit). |
 
 ### gemini-3.1-flash-lite (getestet 2026-06-25, abgelehnt)
 - JSON-Zuverlässigkeit: 9/9 ✅ (besser als 2.5-flash)
@@ -155,7 +161,7 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 - **~~Generator-Prompt-Konsolidierung / A-B (v3.24 vs v4)~~ → ERLEDIGT (22.06.):** v4 als Produktion übernommen, S1-Untergrenze 75→88 (Kap. 9). Daraus neu offen:
   - **~~Kompass-Companion-Erweiterung~~ → ERLEDIGT (22.06.):** Anker-Kriterien in `COMPANION_PROMPT_TMPL` übernommen + eignungs-geprüft (Kap. 9). Aktiv in Produktion.
   - **BKS-Über-Verwerfung (nice-to-have, kein Blocker — Priorität gesenkt):** Der BKS-Plausibilitäts-Guard verwirft teils zu viel („Knappe"/„Rüstung" bei Ritter, „Sonnenbarke des Cheops"/„Kufu-Schiff" bei Cheops). Folge: dünneres Grounding/teils nur 2 Companions. **Aber:** die E2E-Validierung zeigt, dass Ritter auch mit dünnem Grounding gut wird → keine Dringlichkeit; bei Gelegenheit bessere BKS-Auflösung/Alternativ-Kandidaten.
-  - **Spätere Verfeinerung:** Companion-Auswahl **stufen-/sensibel-bewusst** machen (Lesestufe S1/S2/S3 und `sensibel`-Flag fließen bisher nicht in den Kompass ein — z. B. bei sensiblen Themen die Anker-Kriterien noch konservativer, bei S1 einfachere Anker).
+  - **Spätere Verfeinerung (PRÄZISIERT 25.06., Priorität gesenkt):** Die Companion-Auswahl ist **stufen-blind** (Kompass sieht nur thema+lead, 1× pro Thema, kein S1/S2/S3, kein `sensibel`-Flag). **Das ist KEIN Defekt:** Die Auswahl liefert nur Quellmaterial; die Stufen-Differenzierung macht der **Generator** (kennt `AGE_LEVEL`). Eine explizite Stufen-Steuerung (z. B. „Holocaust erst ab S3") wäre daher eher eine **Generator-Prompt-Sache**, nicht Sache des Kompass. Nur falls je explizit nötig umzusetzen.
 - **~~Lektorat-Box-Apply-Bug~~ → ERLEDIGT (22.06.):** Marker-Strip + Granularitäts-Guard Option A in `_apply_auto_correction` (Kap. 9); fail-safe (mehrdeutig → PRÜFEN).
 - **~~E2E-Validierung (v4 + Kompass + Lektorat kombiniert)~~ → ERLEDIGT (22.06., Meilenstein):** voller Pfad auf 4 Themen × S1/S2/S3 + Lektorat sauber durchgelaufen; **S1-Floor-88 verhält sich korrekt** (Elektron S1: word_target 62–88, Modell schreibt kürzer statt aufzublähen).
 - **~~Quell-Snapshot-Konsistenz (Lektorat)~~ → ERLEDIGT (22.06.):** Diagnose sauber (gleicher Phase-1-Snapshot, kein Re-Fetch); jetzt CI-geguardet (`regex_absent` in `verify_project_facts.py`, Kap. 5).
@@ -169,13 +175,30 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 - **Batch-Pfad-Temperatur** bestätigen.
 - **Source-Cache vor Bulk-Run** (spart Re-Fetches, hält Lektorat auf dem Generator-Snapshot).
 - **Gemini-Cache-Hygiene** (per-Topic-Löschung nach 3 Stufen, TTL ~15 min).
-- **Aufräumen:** Audit-/Probe-Skripte, Spare-Clone, `scrape_out`, ZIM-Zweig einfrieren; Modell-Konstanten zentralisieren.
+- **Aufräumen:** Audit-/Probe-Skripte, Spare-Clone, `scrape_out`, ZIM-Zweig einfrieren; ~~Modell-Konstanten zentralisieren~~ → **teil-erledigt (25.06.):** zentrales Provider/Modell-Routing in `stage_models.py` (`STAGE_MODELS` + `get_stage_config`); Alt-Konstanten (`GEMINI_MODEL`, `VISION_MODEL`, `LEKTORAT_MODEL`) bleiben als Default/Fallback bestehen — vollständige Ablösung offen.
 - **PRÜFEN → konkrete Vorschläge:** Lektorat soll bei PRÜFEN-Flags fertige Korrektur-Optionen (A/B) liefern, nicht nur flaggen (Beleg: Zugvögel S3 PRÜFEN ohne Vorschlag).
 - **Lektorat-Backstops für die neuen Generator-Regeln (zweite Schicht):** R52 (Quantoren-/Geltungsbereich-Inflation — korrektheitsrelevant, höchste Priorität), R50 (STIMMT_DAS-Leckage — sicher auto-korrigierbar), R49 (Schlüsselbegriff-Konsistenz — sicher auto-korrigierbar).
 - **R48 ↔ Companion-Auswahl:** Kompass soll für zentrale Fachbegriffe den definierenden Companion mitliefern, damit eine belegte Erklärung möglich ist (sonst Begriff vereinfachen/vermeiden).
 - **Box-Platzierung (R51):** Code/Schema-Untersuchung — werden Boxen mechanisch ans Abschnittsende gerendert, oder steuert das Modell die Position? Ggf. Positions-/Ankerfeld pro Box.
-- **Anführungszeichen-Normalisierung:** deterministischer Post-Process (Regex) auf Hausnorm („…"), statt LLM-Lektorat.
+- **~~Anführungszeichen-Normalisierung~~ → ERLEDIGT (25.06.):** deterministischer, typografie-erhaltender Regex-Post-Process `_repair_article_quotes` in `parse_article_json` (abb7505) — behebt den ASCII-Schluss-Defekt `„…"` transport-agnostisch (Freitext + stringifizierte Tool-Use-Felder). (Im Generator-Parser statt als separater Lektorat-Schritt.)
 - **Lektorat-Regression verifizieren:** Sklaverei S3 „Harriet Greens Mutter" widerspricht der zitierten Quelle (Harriet Green IST die Mutter) — gegen Volltext prüfen; konkrete Evidenz für die Fehlerquoten-Messung.
 - **~~generation_method-Versionsstring nachziehen~~ → ERLEDIGT (22.06.):** Beide Pfade leiten den Versionsstring jetzt aus `SYSTEM_PROMPT_PATH.stem` ab (Sync ohnehin; Batch-Hardcode `v3.23b` in `run_batch.py:1051` ersetzt) → stempeln `…/v4`.
 - **verify-Check gegen hartcodierte Versionsstempel erwägen** (damit diese Drift nicht wiederkehrt): ein `verify_project_facts.py`-Check, der sicherstellt, dass `generation_method` aus dem Prompt-Pfad abgeleitet und nicht erneut hartcodiert wird.
 - **Optional-Polish:** ZWK-Beispiel und Edit-2-Beispiel („das Land war einmal geteilt") als konkrete Szene schärfen (demonstrieren noch die alte „eindampfen"-Idee).
+
+### Weg B — Provider-Neutralität (Gemini → Claude)
+
+Architektur-Strang (begonnen 25.06.2026). Ziel: die Generierungs-Pipeline unabhängig
+von gemini-3.5-flash betreiben (Anlass: ~30 h 503-Unzuverlässigkeit, kein produktionsreifer
+Gemini-Fallback). TTS bleibt bewusst Gemini.
+
+- **Was steht (committet):**
+  - `stage_models.py` — zentrale Provider/Modell-Konfig (`STAGE_MODELS` + `get_stage_config` + `ARTICLE_SCHEMA`).
+  - `claude_client.py` — Anthropic-Aufruf mit forced tool-use + auto+thinking-Pfad + Streaming (große max_tokens).
+  - Lemma + Kompass = Haiku 4.5; Trim + Box-Repair = Sonnet 4.6; Generator-**Zweig** in `stage2_generierung` (Anthropic Message-Batches) inkl. Batch-Create-Retry, `_destringify_article`, Quote-Repair.
+  - Companion-Such-Fallback via `resolve_lemma` (Verlustrate 35 %→~0), 429-Härtung via `_wp_get`, kulturelle Verortung im Kompass-Prompt.
+- **OFFEN:**
+  1. **Sonnet-Generator-Testlauf blockiert** durch Anthropic-Batch-502-Infrastörung; `stage_models["generator"]=Sonnet` bleibt lokal **uncommitted** bis der Lauf gelingt.
+  2. **Companion-Verortung unverifiziert** (Haiku-vs-Themen-Vergleich durch WP-Rate-Limit blockiert).
+  3. **Trim-Schärfe** bei großem Overshoot (>200 W) noch zu zahm — an echten Produktions-Wortzahlen messen.
+  4. **Vision-Migration auf Haiku offen:** sensibles Gegentest-Material (WW2/Titanic/Gladiator) ist gesourct, der Vergleich aber noch nicht final ausgewertet (Bildauswahl von Andreas als unzureichend bewertet) — sinnvoll erst nach Verifikation der Companion-Fixes.

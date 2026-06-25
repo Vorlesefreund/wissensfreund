@@ -12,8 +12,23 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 
 CHECKS = [
-  {"desc":"Produktions-Generator-Modell","sev":"FAIL","type":"const",
-   "file":"scripts/generate_grounded.py","const":"GEMINI_MODEL","expect":"gemini-3.5-flash"},
+  {"desc":"GEMINI_MODEL-Konstante (nur noch Default/Fallback, NICHT aktives Kompass/Lemma-Modell)","sev":"FAIL","type":"const",
+   "file":"scripts/generate_grounded.py","const":"GEMINI_MODEL","expect":"gemini-3.5-flash",
+   "note":"Weg B: aktives Lemma/Kompass-Routing laeuft ueber stage_models.py (Haiku); diese Konstante bleibt nur als Default/Fallback bestehen."},
+  # Weg-B-Routing (stage_models.py) — committete Werte CI-schuetzen.
+  # generate_grounded:GEMINI_MODEL ist nur noch Default/Fallback, nicht das aktive Modell.
+  {"desc":"Weg B: Lemma-Routing auf Anthropic (stage_models)","sev":"FAIL","type":"regex",
+   "file":"scripts/stage_models.py",
+   "pattern":r'"lemma":\s*\{\s*"provider":\s*"anthropic"'},
+  {"desc":"Weg B: Kompass-Routing auf Anthropic (stage_models)","sev":"FAIL","type":"regex",
+   "file":"scripts/stage_models.py",
+   "pattern":r'"kompass":\s*\{\s*"provider":\s*"anthropic"'},
+  {"desc":"Weg B: Trim-Modell = Sonnet (stage_models)","sev":"FAIL","type":"regex",
+   "file":"scripts/stage_models.py",
+   "pattern":r'"trim":\s*\{\s*"provider":\s*"anthropic",\s*"model":\s*"claude-sonnet-4-6"'},
+  {"desc":"Weg B: Box-Repair-Modell = Sonnet (stage_models)","sev":"FAIL","type":"regex",
+   "file":"scripts/stage_models.py",
+   "pattern":r'"box_repair":\s*\{\s*"provider":\s*"anthropic",\s*"model":\s*"claude-sonnet-4-6"'},
   {"desc":"Generator Thinking-Stufe MEDIUM","sev":"FAIL","type":"contains",
    "file":"scripts/generate_grounded.py","needle":"ThinkingLevel.MEDIUM"},
   {"desc":"run_batch.py erbt GEMINI_MODEL (kein eigener Owner)","sev":"FAIL","type":"contains",
@@ -99,6 +114,11 @@ def run_check(c):
                        if str(r["eignung"]).strip().lower() == "exclude"}
             if ex_json == ex_xlsx: return "PASS", f"{len(ex_json)} Excludes deckungsgleich"
             return "FAIL", f"JSON {len(ex_json)} vs XLSX {len(ex_xlsx)} — build_eignung_exclude.py neu laufen"
+        if t == "regex":
+            txt = read(c["file"])
+            if txt is None: return "FAIL", f"{c['file']} fehlt"
+            return ("PASS", "Pattern gefunden") if re.search(c["pattern"], txt) else \
+                   ("FAIL", f"Pattern nicht gefunden: {c['pattern']}")
         if t == "regex_absent":
             # Verbotene Aufruf-/Import-Muster duerfen NICHT vorkommen. Robust gegen
             # Falschtreffer: zuerst Docstrings (''' / """) und #-Kommentare entfernen,

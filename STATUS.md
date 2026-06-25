@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-25T18:08:18Z -->
+<!-- updated: 2026-06-25T21:20:52Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -9,14 +9,18 @@
 > neu, Titanic+WW2 per Datei-Existenz unberührt (Zeitstempel unverändert). Alle 9 Artikel + 9 Lektorate vorhanden.
 >
 > **OFFENE Punkte nach Priorität:**
-> - **Weg B Schritt 2b (NÄCHSTER SCHRITT):** Stage-2-Generator-Batch auf Sonnet
->   (provider-Zweig in stage2_generierung, Anthropic Message-Batches-API).
->   Quote-Repair + Destringify + Trim/Box (Sonnet) stehen bereit.
+> - **Sonnet-Generator-Testlauf (Schritt 2b) BLOCKIERT** durch Anthropic-Batch-502-Störung.
+>   stage_models["generator"] lokal auf Sonnet (uncommitted), Relaunch sobald Infra stabil.
+>   Kommando: python scripts/run_batch.py --themen Erde Regenwald Wal --stufen 1 2 3
+>   --output-dir articles/wegb_stage1_20260625 --run-id wegb_stage1_20260625 --stage 2
+> - **Companion-Verortung (Commit 3d4430a) WIRKUNG UNVERIFIZIERT** — Haiku-vs-Themen-Vergleich
+>   blockiert durch WP-Rate-Limit, nachholen sobald Limit abgeklungen.
+> - **Companion-Auswahl ist stufen-blind (diagnostiziert): KEIN Defekt** — Auswahl liefert
+>   nur Quellmaterial, Stufen-Differenzierung macht der Generator (kennt AGE_LEVEL).
+>   "Holocaust ab S3" wäre ggf. Generator-Prompt-Sache, nicht Kompass.
 > - **Trim-Schärfe (offen, nicht dringend):** bei Overshoot >200W zu zahm
 >   (2 Pässe je ~27W). Auf echten Produktions-Wortzahlen messen ob Nachschärfung
 >   nötig — NICHT auf 904W-Extremfall (Sonnet-Freitext-Test) tunen.
-> - **Vision sensibler Gegentest (offen):** Haiku-Vision auf Wal positiv, aber
->   sensibles Thema (Jugendschutz-Grenzfälle) noch ungetestet vor Vision-Umstellung.
 > - **gemini-3.5-flash down** (~30h 503). Fallback-Optionen getestet:
 >   - gemini-2.5-flash: 44% JSON-Fehler → abgelehnt
 >   - gemini-3.1-flash-lite: 9/9 JSON ok, aber −34–50% Wortzahl,
@@ -84,6 +88,13 @@
 - Schritt 2c ✅ Trim + Box-Repair provider-fähig (Sonnet), ARTICLE_SCHEMA zentral
 - claude_client.py: forced tool-use (thinking_budget=0) + auto+thinking-Pfad + Streaming
 - Anthropic Batch + tool-use + thinking verifiziert (test_sonnet_batch: emit-Block kommt, große Felder werden stringifiziert → _destringify_article löst das)
+- Schritt 2b ✅ Stage-2-Generator-Batch provider-fähig (Sonnet-Zweig, 3ce6991)
+- Batch-Create-Retry-Härtung Anthropic-Zweig (b75de83)
+- Companion-Such-Fallback via resolve_lemma — Verlustrate 35%→~0 (d9d8775)
+- 429-Härtung Companion-Lookup + _companion_target_ok via _wp_get (bae2f8e)
+- Companion-Kompass kulturelle Verortung + greifbar-vor-abstrakt (3d4430a, unverifiziert)
+- Vision sensibler Gegentest: WW2/Titanic/Gladiator gesourct, Kontaktbogen-Docx erstellt
+  (Bildauswahl von Andreas als unzureichend bewertet → Companion-Fixes oben adressieren die Ursache)
 
 **Modell-Vergleichstest** (test_25flash + test_31flashlite):
 - gemini-2.5-flash: 44 % JSON-Fehlerrate im Batch (nicht produktionsreif für Stage 2)
