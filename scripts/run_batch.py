@@ -70,6 +70,7 @@ from generate_articles import (  # noqa: E402
     validate_article,
     USER_AGENT,
 )
+import generate_grounded  # noqa: E402  (Modul-Objekt für Live-Usage-Globals _last_trim_usage/_last_box_usage)
 from generate_grounded import (  # noqa: E402
     select_companions_raw,
     COMPANION_CAP,
@@ -1134,10 +1135,11 @@ def stage2_generierung(
             log.warning("  [%s] Zu lang (%d > %d) — Trim %d/2", article_id, word_count, cap, trims)
             try:
                 trimmed, trimmed_wc = _trim_article_to_cap(article, wmax, GEN_MODEL, thinking_cfg)
-                u = getattr(gemini_client, "_last_usage", {})
+                u = dict(generate_grounded._last_trim_usage)
+                _m = u.pop("model", GEN_MODEL)
                 if u:
                     cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe=f"S{stufe}",
-                                       schritt="trim", modell=GEN_MODEL, **u)
+                                       schritt="trim", modell=_m, **u)
                 trimmed_boxes = sum(len(s.get("boxes", [])) for s in trimmed.get("sections", []))
                 if trimmed_boxes == 0 and orig_box_count > 0:
                     log.error("  [%s] Trim %d hat ALLE Boxen entfernt — Trim-Ergebnis verworfen,"
@@ -1178,10 +1180,11 @@ def stage2_generierung(
             log.warning("  [%s] %s — Box-Repair", article_id, box_issue)
             try:
                 repaired = _box_repair_pass(article, GEN_MODEL, thinking_cfg)
-                u = getattr(gemini_client, "_last_usage", {})
+                u = dict(generate_grounded._last_box_usage)
+                _m = u.pop("model", GEN_MODEL)
                 if u:
                     cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe=f"S{stufe}",
-                                       schritt="box_repair", modell=GEN_MODEL, **u)
+                                       schritt="box_repair", modell=_m, **u)
                 if _box_lint(repaired) is None:
                     article = repaired
                     article["meta"]["box_repaired"] = True

@@ -38,13 +38,16 @@ def _get_client():
 def call_claude_json(system_prompt, user_message, json_schema, *,
                      model=None, max_tokens=4096, thinking_budget=0,
                      image_bytes=None, image_media_type="image/jpeg",
-                     call_name="", max_attempts=4):
+                     call_name="", max_attempts=4, stream=False):
     """Anbieter-neutraler JSON-Call via forced tool-use. Gibt das validierte dict zurück.
 
     json_schema: JSON-Schema-Dict (input_schema des emit-Tools).
     thinking_budget>0: extended thinking aktiv. Da forced tool_choice NICHT mit
       thinking kombinierbar ist, wird dann tool_choice={"type":"auto"} genutzt und
       der tool_use-Block aus der Antwort gefischt (das emit-Tool ist das einzige).
+    stream=True: nutzt messages.stream() statt messages.create(). Nötig bei großem
+      max_tokens (>~8k), weil das SDK nicht-streamende Requests, die >10 Min dauern
+      könnten, mit ValueError ablehnt. Für Echo-lastige Pässe (Trim/Box-Repair).
     """
     global _last_usage
     client = _get_client()
@@ -88,11 +91,20 @@ def call_claude_json(system_prompt, user_message, json_schema, *,
     last_err = None
     for attempt in range(1, max_attempts + 1):
         try:
-            resp = client.messages.create(**kwargs)
+            if stream:
+                with client.messages.stream(**kwargs) as s:
+                    resp = s.get_final_message()
+            else:
+                resp = client.messages.create(**kwargs)
             _last_usage = {
                 "input_tokens":  resp.usage.input_tokens,
                 "output_tokens": resp.usage.output_tokens,
             }
+            if getattr(resp, "stop_reason", None) == "max_tokens":
+                raise ValueError(
+                    f"Antwort am max_tokens-Cap abgeschnitten ({call_name}, "
+                    f"max_tokens={kwargs['max_tokens']})"
+                )
             for block in resp.content:
                 if block.type == "tool_use" and block.name == "emit":
                     return block.input

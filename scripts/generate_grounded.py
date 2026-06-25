@@ -51,6 +51,7 @@ from generate_articles import (          # noqa: E402
     fetch_wikipedia_text,
     resolve_lemma,
     parse_article_json,
+    _repair_article_quotes,
     validate_article,
     _resolve_bks,
     _flash_check_doppelbedeutung,
@@ -1156,19 +1157,94 @@ TRIM_SYSTEM_PROMPT = (
 )
 
 
+# Normalisierte Usage des letzten Trim-/Box-Repair-Passes (cost_tracker-Schlüssel
+# input_tok/output_tok/cached_tok/thoughts_tok + verwendetes Modell). Wird von beiden
+# Provider-Pfaden gesetzt, damit run_batch die Kosten provider-unabhängig auslesen kann.
+_last_trim_usage: dict = {}
+_last_box_usage: dict = {}
+
+
+def _loads_tolerant(s: str):
+    """Parst ein als String serialisiertes JSON-Feld robust.
+
+    1. Quote-Repair (deutscher „…"-ASCII-Schluss) + json.loads
+    2. roher String (falls Repair etwas verschlimmbessert)
+    3. raw_decode: erstes vollständiges Value, ignoriert Trailing-Müll
+       (deckt seltene „Extra data"-Artefakte des Modells ab).
+    """
+    repaired = _repair_article_quotes(s)
+    for cand in (repaired, s):
+        try:
+            return json.loads(cand)
+        except json.JSONDecodeError:
+            pass
+    obj, _ = json.JSONDecoder().raw_decode(repaired.lstrip())
+    return obj
+
+
+def _destringify_article(d: dict) -> dict:
+    """Repariert tool-use-Felder, die als JSON-STRING statt strukturiert ankommen.
+
+    Anthropic (Batch UND teils Sync) serialisiert große, textlastige Felder
+    (sections/source_passages/images/quiz/related_terms) gelegentlich als String.
+    Diese tragen denselben „…"-ASCII-Schluss-Defekt → tolerantes Parsen.
+    Felder, die bereits strukturiert sind, bleiben unangetastet.
+    """
+    for key in ("sections", "source_passages", "images", "quiz", "related_terms"):
+        val = d.get(key)
+        if isinstance(val, str):
+            d[key] = _loads_tolerant(val)
+    return d
+
+
 def _trim_article_to_cap(article: dict, wmax: int, model: str, thinking_config) -> tuple[dict, int]:
-    """Kürzt einen zu langen Artikel per Modell-Lektorat auf ≤ wmax. Rückgabe: (article, word_count)."""
-    import json as _json
+    """Kürzt einen zu langen Artikel per Modell-Lektorat auf ≤ wmax. Rückgabe: (article, word_count).
+
+    Provider aus stage_models["trim"]: gemini → call_gemini (unverändert);
+    anthropic → call_claude_json (forced tool-use, dict direkt, kein parse_article_json).
+    """
+    global _last_trim_usage
+    from stage_models import get_stage_config, ARTICLE_SCHEMA
+    cfg        = get_stage_config("trim")
+    provider   = cfg["provider"]
+    trim_model = cfg["model"]
+
     trim_msg = (
         f"WORT-OBERGRENZE: {wmax}\n"
         f"Der folgende Artikel hat zu viele Wörter. Kürze ihn auf höchstens {wmax} Wörter.\n\n"
-        f"ARTIKEL_JSON:\n{_json.dumps(article, ensure_ascii=False)}"
+        f"ARTIKEL_JSON:\n{json.dumps(article, ensure_ascii=False)}"
     )
-    raw = gemini_client.call_gemini(
-        TRIM_SYSTEM_PROMPT, trim_msg, model=model, thinking_config=thinking_config,
-        response_mime_type="application/json",
-    )
-    trimmed = parse_article_json(raw)
+
+    if provider == "anthropic":
+        import claude_client
+        trimmed = claude_client.call_claude_json(
+            system_prompt=TRIM_SYSTEM_PROMPT,
+            user_message=trim_msg,
+            json_schema=ARTICLE_SCHEMA,
+            model=trim_model,
+            max_tokens=32000,       # Trim echot den ganzen Artikel → großer Cap nötig
+            thinking_budget=4096,   # → tool_choice=auto-Pfad
+            call_name="trim",
+            stream=True,            # großer max_tokens → Streaming-Pflicht (SDK)
+        )
+        trimmed = _destringify_article(trimmed)
+        u = claude_client.get_last_usage()
+        _last_trim_usage = {
+            "input_tok":    u.get("input_tokens", 0),
+            "output_tok":   u.get("output_tokens", 0),
+            "cached_tok":   0,
+            "thoughts_tok": 0,
+            "model":        trim_model,
+        }
+    else:
+        raw = gemini_client.call_gemini(
+            TRIM_SYSTEM_PROMPT, trim_msg, model=model, thinking_config=thinking_config,
+            response_mime_type="application/json",
+        )
+        trimmed = parse_article_json(raw)
+        u = getattr(gemini_client, "_last_usage", {}) or {}
+        _last_trim_usage = {**u, "model": model}
+
     trimmed.setdefault("meta", {}).update(article.get("meta", {}))
     return trimmed, count_article_words(trimmed)
 
@@ -1215,18 +1291,53 @@ def _box_signature(article: dict):
 
 
 def _box_repair_pass(article: dict, model: str, thinking_config) -> dict:
-    """Modell ordnet vorhandene Boxen den passenden Abschnitten zu (Inhalt unverändert)."""
-    import json as _json
+    """Modell ordnet vorhandene Boxen den passenden Abschnitten zu (Inhalt unverändert).
+
+    Provider aus stage_models["box_repair"]: gemini → call_gemini (unverändert);
+    anthropic → call_claude_json (forced tool-use, dict direkt).
+    """
+    global _last_box_usage
+    from stage_models import get_stage_config, ARTICLE_SCHEMA
+    cfg       = get_stage_config("box_repair")
+    provider  = cfg["provider"]
+    box_model = cfg["model"]
+
     msg = (
         "Die Callout-Boxen sind schlecht verteilt. Ordne sie den passenden Abschnitten zu — "
         "nur Platzierung, Inhalt/Sätze/Reihenfolge wortgleich.\n\n"
-        f"ARTIKEL_JSON:\n{_json.dumps(article, ensure_ascii=False)}"
+        f"ARTIKEL_JSON:\n{json.dumps(article, ensure_ascii=False)}"
     )
-    raw = gemini_client.call_gemini(
-        BOX_REPAIR_SYSTEM_PROMPT, msg, model=model, thinking_config=thinking_config,
-        response_mime_type="application/json",
-    )
-    repaired = parse_article_json(raw)
+
+    if provider == "anthropic":
+        import claude_client
+        repaired = claude_client.call_claude_json(
+            system_prompt=BOX_REPAIR_SYSTEM_PROMPT,
+            user_message=msg,
+            json_schema=ARTICLE_SCHEMA,
+            model=box_model,
+            max_tokens=32000,       # Box-Repair echot den ganzen Artikel → großer Cap nötig
+            thinking_budget=4096,   # → tool_choice=auto-Pfad
+            call_name="box_repair",
+            stream=True,            # großer max_tokens → Streaming-Pflicht (SDK)
+        )
+        repaired = _destringify_article(repaired)
+        u = claude_client.get_last_usage()
+        _last_box_usage = {
+            "input_tok":    u.get("input_tokens", 0),
+            "output_tok":   u.get("output_tokens", 0),
+            "cached_tok":   0,
+            "thoughts_tok": 0,
+            "model":        box_model,
+        }
+    else:
+        raw = gemini_client.call_gemini(
+            BOX_REPAIR_SYSTEM_PROMPT, msg, model=model, thinking_config=thinking_config,
+            response_mime_type="application/json",
+        )
+        repaired = parse_article_json(raw)
+        u = getattr(gemini_client, "_last_usage", {}) or {}
+        _last_box_usage = {**u, "model": model}
+
     repaired.setdefault("meta", {}).update(article.get("meta", {}))
     return repaired
 
