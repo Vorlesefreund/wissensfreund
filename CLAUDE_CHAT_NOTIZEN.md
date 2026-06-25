@@ -4,6 +4,14 @@
 
 ---
 
+## ⚠ KRITISCHE KORREKTUR (2026-06-25)
+- Aktiver Generator-Prompt: wissensfreund_generator_prompt_v4_production.md
+  (NICHT v3.23 — der ist historisch/inaktiv)
+- PROJEKTDOKUMENT.md und verify_project_facts.py sind bereits korrekt verdrahtet.
+- Memory wurde korrigiert.
+
+---
+
 ## Offen: Related Terms (WIKIPEDIA_LINKS + ARTICLE_INDEX)
 
 **Priorität:** nicht-blockierend — Pipeline kann ohne diese Felder laufen;
