@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-25T13:42:57Z -->
+<!-- updated: 2026-06-25T14:03:26Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -9,9 +9,11 @@
 > neu, Titanic+WW2 per Datei-Existenz unberührt (Zeitstempel unverändert). Alle 9 Artikel + 9 Lektorate vorhanden.
 >
 > **OFFENE Punkte nach Priorität:**
-> - **gemini-3.5-flash down** seit ~30h (503). Loop gestoppt.
->   Nächster Versuch: manuell starten wenn 3.5-flash wieder stabil.
->   Fallback-Optionen getestet — keiner produktionsreif für Stage 2.
+> - **gemini-3.5-flash down** (~30h 503). Fallback-Optionen getestet:
+>   - gemini-2.5-flash: 44% JSON-Fehler → abgelehnt
+>   - gemini-3.1-flash-lite: 9/9 JSON ok, aber −34–50% Wortzahl,
+>     2–6 Bilder statt 10–15, Stil schlechter → abgelehnt
+>   Produktion pausiert bis 3.5-flash stabil. Nächster Check: manuell.
 > - **Lektorat: Stand 3 = bester Stand** (Recall 100 %, Precision 53 % auf GT_v1+v2).
 >   Precision-Fix via Prompt-Tuning gescheitert (Rollback nach Stand 4). Precision-Lösung
 >   erfordert claim-weise Architektur — deferred. FPs sind Stil-Tausche/Additionen,

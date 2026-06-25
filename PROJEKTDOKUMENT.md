@@ -127,6 +127,17 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 | 22.06.2026 | **Lektorat-Box-Apply-Bug behoben** (Marker-Strip + Granularitäts-Guard Option A in `_apply_auto_correction`; aufgedeckt durch die E2E-Validierung, Titanic-S3-wow-Box). Interne `BOX[...]:`-Render-Marker werden aus claim/korrektur gestrippt (kein Leak in `box["text"]`); Ganzbox-Korrekturen ersetzen die Box als Ganzes, Ein-Satz-Korrekturen nur den Satz. **Fail-safe:** mehrdeutiger Mehr-Satz-Match → PRÜFEN statt Spleiß. Plus Display-Strip vor `_diff_excerpt` (kein Label-Fragment im Prüfbericht). |
 | 22.06.2026 | **findings[] + Abnehmer-Umstellung abgeschlossen:** strukturiertes findings[] im V2-pruefbericht (fec90f5); Shape-A-Abnehmer auf Shape B umgestellt (20bec3f). FP/FN-Messung jetzt technisch möglich. |
 
+### gemini-3.1-flash-lite (getestet 2026-06-25, abgelehnt)
+- JSON-Zuverlässigkeit: 9/9 ✅ (besser als 2.5-flash)
+- Wortzahlen: 34–50 % unter Ziel (wal_l3: 325 statt 650 W)
+- Bildnutzung: 2–6 Bilder/Artikel trotz 21–27 kuratierter Bilder im Pool
+- Stil: nachweislich schlechter als gemini-3.5-flash (Product-Owner-Urteil)
+- Entscheidung: ABGELEHNT als Stage-2-Ersatz
+- Grund: Qualitätsrückgang bei Länge, Bildnutzung und Stil nicht
+  durch Prompt-Optimierung behebbar (struktureller Fähigkeitsunterschied)
+- Konsequenz: Produktion wartet auf Rückkehr von gemini-3.5-flash;
+  kein weiterer Optimierungsaufwand für 3.1-flash-lite
+
 ---
 
 ## 10. Bekannte offene Punkte (KNOWN_OPEN)
