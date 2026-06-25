@@ -1145,7 +1145,17 @@ def stage2_generierung(
                     (err_dir / f"{aid}_raw.txt").write_text(text or "", encoding="utf-8")
                     continue
             else:
-                art = generate_grounded._destringify_article(art)
+                try:
+                    art = generate_grounded._destringify_article(art)
+                except Exception as e:
+                    log.error("  [%s] Destringify/Parse: %s", aid, str(e)[:100])
+                    err_dir = out_dir / "_errors"
+                    err_dir.mkdir(exist_ok=True)
+                    # Roh-emit-Input sichern (Inspektion + späterer Re-Parse, kein Batch-Verlust)
+                    (err_dir / f"{aid}_raw.json").write_text(
+                        json.dumps(art, ensure_ascii=False, indent=2, default=str),
+                        encoding="utf-8")
+                    continue
             u = msg.usage
             usage = {
                 "input_tok":    u.input_tokens,
