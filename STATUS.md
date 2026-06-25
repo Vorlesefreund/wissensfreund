@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-25T14:03:26Z -->
+<!-- updated: 2026-06-25T18:08:18Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -9,6 +9,14 @@
 > neu, Titanic+WW2 per Datei-Existenz unberührt (Zeitstempel unverändert). Alle 9 Artikel + 9 Lektorate vorhanden.
 >
 > **OFFENE Punkte nach Priorität:**
+> - **Weg B Schritt 2b (NÄCHSTER SCHRITT):** Stage-2-Generator-Batch auf Sonnet
+>   (provider-Zweig in stage2_generierung, Anthropic Message-Batches-API).
+>   Quote-Repair + Destringify + Trim/Box (Sonnet) stehen bereit.
+> - **Trim-Schärfe (offen, nicht dringend):** bei Overshoot >200W zu zahm
+>   (2 Pässe je ~27W). Auf echten Produktions-Wortzahlen messen ob Nachschärfung
+>   nötig — NICHT auf 904W-Extremfall (Sonnet-Freitext-Test) tunen.
+> - **Vision sensibler Gegentest (offen):** Haiku-Vision auf Wal positiv, aber
+>   sensibles Thema (Jugendschutz-Grenzfälle) noch ungetestet vor Vision-Umstellung.
 > - **gemini-3.5-flash down** (~30h 503). Fallback-Optionen getestet:
 >   - gemini-2.5-flash: 44% JSON-Fehler → abgelehnt
 >   - gemini-3.1-flash-lite: 9/9 JSON ok, aber −34–50% Wortzahl,
@@ -69,6 +77,13 @@
 ---
 
 ## Abgeschlossen (2026-06-25)
+
+**Weg B (Gemini → Claude) Fortschritt:**
+- Schritt 1 ✅ Lemma + Kompass auf Haiku 4.5 (committed, in Praxis bewiesen: Stage 1 ohne 3.5-flash, Erde bekommt Companions)
+- Quote-Repair ✅ typografie-erhaltend in parse_article_json (transport-agnostisch)
+- Schritt 2c ✅ Trim + Box-Repair provider-fähig (Sonnet), ARTICLE_SCHEMA zentral
+- claude_client.py: forced tool-use (thinking_budget=0) + auto+thinking-Pfad + Streaming
+- Anthropic Batch + tool-use + thinking verifiziert (test_sonnet_batch: emit-Block kommt, große Felder werden stringifiziert → _destringify_article löst das)
 
 **Modell-Vergleichstest** (test_25flash + test_31flashlite):
 - gemini-2.5-flash: 44 % JSON-Fehlerrate im Batch (nicht produktionsreif für Stage 2)
