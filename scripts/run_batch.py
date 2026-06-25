@@ -1099,7 +1099,21 @@ def stage2_generierung(
         log.info("\n=== Stage 2 / Step 3: Sonnet-Generierungs-Batch (%d Requests) ===",
                  len(anthropic_reqs))
         aclient = anthropic.Anthropic(api_key=api_key)
-        abatch  = aclient.messages.batches.create(requests=anthropic_reqs)
+        # Batch-Create gegen transiente 5xx/429 absichern (502 Bad Gateway beobachtet)
+        abatch = None
+        for _att in range(1, 5):
+            try:
+                abatch = aclient.messages.batches.create(requests=anthropic_reqs)
+                break
+            except (anthropic.APIStatusError, anthropic.APIConnectionError) as e:
+                _code = getattr(e, "status_code", None)
+                if _att < 4 and (_code is None or _code in (429, 500, 502, 503, 529)):
+                    _wait = min(10 * 2 ** (_att - 1), 80)
+                    log.warning("  Batch-Create %s (Versuch %d/4) — warte %ds",
+                                type(e).__name__, _att, _wait)
+                    time.sleep(_wait)
+                else:
+                    raise
         log.info("Anthropic-Batch eingereicht: %s", abatch.id)
         while abatch.processing_status == "in_progress":
             time.sleep(15)
