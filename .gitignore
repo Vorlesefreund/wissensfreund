@@ -67,3 +67,8 @@ cost_log.json.bak
 
 # Lektorat Re-Run Outputs (Test-Artefakte)
 articles/*/lektorat_rerun/
+
+# Word-Dokumente (Review-Output, reproduzierbar — nicht tracken)
+*.docx
+~$*.docx
+~$*.xlsx
