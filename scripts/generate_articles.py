@@ -793,14 +793,19 @@ def _repair_article_quotes(text: str) -> str:
     als ASCII-" (U+0022) statt typografisch " (U+201D) — z.B. „Walfisch" mit ASCII-
     Schluss. Dieses ASCII-" beendet im JSON-String vorzeitig die Zeichenkette.
 
-    Fix: ein ASCII-" das auf ein öffnendes „ (U+201E) + Text folgt UND NICHT von
-    JSON-Struktur (: , } ] Zeilenumbruch) gefolgt wird, ist ein irrtümlich
-    gesetztes Schlusszeichen → wird zu " (U+201D). Struktur-Quotes bleiben
-    unangetastet (Lookahead), korrekte „…"-Paare bleiben unverändert
-    (Klasse schließt " aus). Verändert NICHTS an sauberem JSON.
+    Fix: ein ASCII-" das auf ein öffnendes „ (U+201E) + Text folgt, ist der
+    irrtümlich gesetzte deutsche Schluss → wird zu " (U+201D). Ausgenommen bleiben
+    nur echte Struktur-Quotes: ein " gefolgt von  , "  (nächster JSON-Eintrag/Key)
+    oder von  } ]  (Container-Ende) — das deckt den seltenen Fall ab, in dem ein „
+    im Wert unverschlossen bleibt und das " der strukturelle Wert-Abschluss ist.
+    PROSA-Folgezeichen (Leerzeichen, . ? ! sowie Doppelpunkt/Komma OHNE folgendes
+    Quote) lösen die Reparatur korrekt aus. Die Inhaltsklasse schließt curly- UND
+    ASCII-" aus, damit der lazy-Match nie über ein Quote hinwegspringt (sonst würde
+    ein geschütztes Struktur-" übersprungen und das nächste fälschlich ersetzt).
+    Verändert NICHTS an sauberem JSON. Gegen 9 echte Sonnet-Artikel verifiziert.
     """
     return re.sub(
-        r'(„[^„“”]*?)"(?!\s*[:,}\]\n])',
+        r'(„[^„“”"]*?)"(?!\s*,\s*"|\s*[}\]])',
         lambda m: m.group(1) + "”",
         text,
     )
