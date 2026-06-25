@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-25T11:09:03Z -->
+<!-- updated: 2026-06-25T11:49:48Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -50,6 +50,13 @@
 >   (Bucket noch nicht live, App auf klexikon.zim — unkritisch; bei Voll-Katalog-Upload beachten).
 > - **TTS-Pipeline end-to-end FERTIG** (Stage 1→2→3→4→5). Entscheidung: **nur Vulkan als TTS-Pilot**
 >   (l1–l3, 48 WAVs in R2) — keine weiteren Themen vertonen/hochladen vor dem echten Produktionslauf.
+> - **Review-Workflow (Standard ab jetzt):**
+>   1. Claude Code → Docx auf Desktop
+>   2. Andreas prüft in Word, tippt Kommentare in rechte Spalte
+>   3. Speichern in wissensfreund_approved/ oder wissensfreund_changes/
+>   4. watch_review_folders.py erkennt Datei automatisch (oder manuell:
+>      python scripts/process_review_docx.py <pfad> --run-dir <dir>)
+>   5. Approved → editorial_approved.json → TTS → App
 > - **Produktions-Übersicht:** `python scripts/generate_production_status.py` → production_status.json
 >   (Stadium je Thema+Stufe). Stand 2026-06-25: 125 Artikel, 97 reviewed, 3 vertont, 54 review_flag.
 >   Word-Review je Lauf: `python scripts/generate_review_docx.py <run_dir>` (*.docx ist gitignored).
@@ -57,6 +64,12 @@
 ---
 
 ## Abgeschlossen (2026-06-25)
+
+**Review-Round-Trip-Workflow** (Commit 6831344) — process_review_docx.py +
+watch_review_folders.py. Kommentare aus rechter Docx-Spalte (w:w=1701)
+auslesen, Satz-Zuordnung via exact/substring/fuzzy, Änderungen in
+lektorat_*.json schreiben, neues Docx regenerieren. Approved-Ordner →
+editorial_approved.json setzen. E2E-Test bestanden.
 
 **Produktions-Übersicht `generate_production_status.py` + production_status.json** (Commit folgt).
 Scannt alle articles/<run_dir>/articles/ + /lektorat/, baut je Thema+Stufe ein Stadium
