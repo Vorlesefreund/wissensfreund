@@ -334,6 +334,15 @@ COMPANION_SYSTEM_PROMPT = (
     'Format: {"companions": ["Lemma1","Lemma2",...]}'
 )
 
+# JSON-Schema für forced tool-use (anthropic-Pfad) — Äquivalent zu companions_schema (Gemini)
+_KOMPASS_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "companions": {"type": "array", "items": {"type": "string"}},
+    },
+    "required": ["companions"],
+}
+
 COMPANION_PROMPT_TMPL = """\
 THEMA: {thema}
 
@@ -456,9 +465,37 @@ def select_companions_raw(
     primary_text: str,
     model: str = GEMINI_MODEL,
 ) -> tuple[list[str], dict]:
-    """Kompass: Gemini schlägt Begleitartikel frei vor. Gibt (companions, usage_dict) zurück."""
+    """Kompass: Modell schlägt Begleitartikel frei vor. Gibt (companions, usage_dict) zurück.
+
+    Provider/Modell aus stage_models["kompass"]. anthropic → forced tool-use (claude_client),
+    gemini → response_schema + 503-Fallback (unverändert). Prompts bleiben wortgleich.
+    """
     lead = primary_text[:1500]
     prompt = COMPANION_PROMPT_TMPL.format(thema=thema, lead=lead)
+
+    from stage_models import get_stage_config
+    cfg = get_stage_config("kompass")
+    if cfg["provider"] == "anthropic":
+        from claude_client import call_claude_json, get_last_usage
+        log.info("  Phase 1 Kompass-Auswahl (Provider=anthropic, Modell=%s, forced tool-use)",
+                 cfg["model"])
+        try:
+            data = call_claude_json(
+                system_prompt=COMPANION_SYSTEM_PROMPT,
+                user_message=prompt,
+                json_schema=_KOMPASS_SCHEMA,
+                model=cfg["model"],
+                call_name="kompass",
+            )
+            lu = get_last_usage()
+            usage = {"input_tok": lu.get("input_tokens", 0), "output_tok": lu.get("output_tokens", 0),
+                     "cached_tok": 0, "thoughts_tok": 0}
+            return [str(c) for c in data.get("companions", [])][:10], usage
+        except Exception as e:
+            log.error("  Kompass (anthropic) Fehler: %s", e)
+            return [], {}
+
+    # ── Gemini-Pfad (unverändert) ───────────────────────────────────────────────
     thinking = _make_thinking_config(model, budget_for_2_5=1024)
     log.info("  Phase 1 Kompass-Auswahl (Modell=%s, structured_output=JSON)", model)
 

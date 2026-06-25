@@ -62,6 +62,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import cost_tracker  # noqa: E402
+import stage_models  # noqa: E402
 from generate_articles import (  # noqa: E402
     fetch_wikipedia_text,
     resolve_lemma,
@@ -521,8 +522,9 @@ def stage1_sourcing(
             client, thema, data["primary_text"], model=GEN_MODEL
         )
         if usage:
+            _kompass_model = stage_models.get_stage_config("kompass")["model"]
             cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe="S0",
-                               schritt="kompass", modell=GEN_MODEL, **usage)
+                               schritt="kompass", modell=_kompass_model, **usage)
         api_exhausted     = (not companions_raw) and (not usage)
         companions_failed = not companions_raw
         if companions_failed:

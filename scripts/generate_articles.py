@@ -273,6 +273,19 @@ def _fetch_article_intro(session: requests.Session, title: str) -> str:
 
 _FLASH_DOPPELBEDEUTUNG_MODEL = "gemini-3.5-flash"
 
+# JSON-Schema für forced tool-use (anthropic-Pfad) — identische Felder wie der Gemini-Output
+_LEMMA_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "verdict":     {"type": "string", "enum": ["a", "b", "c"]},
+        "reasoning":   {"type": "string"},
+        "child_topic": {"type": "string"},
+        "child_lemma": {"type": "string"},
+        "main_hint":   {"type": "string"},
+    },
+    "required": ["verdict"],
+}
+
 
 def _flash_check_doppelbedeutung(
     session: requests.Session,
@@ -289,13 +302,14 @@ def _flash_check_doppelbedeutung(
       main_hint:   str | None   — für b: 2–5-Wort-Beschreibung der Hauptbedeutung
     """
     _fallback = {"verdict": "a", "child_topic": None, "child_lemma": None, "main_hint": None}
+
+    import sys as _sys
+    _sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     try:
-        import sys as _sys
-        _sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-        from gemini_client import call_gemini
-        from google.genai import types as gtypes
-    except ImportError:
-        log.warning("  gemini_client nicht verfügbar — Doppelbedeutungscheck übersprungen")
+        from stage_models import get_stage_config
+        cfg = get_stage_config("lemma")
+    except Exception as exc:
+        log.warning("  stage_models nicht verfügbar (%s) — fallback verdict=a", exc)
         return _fallback
 
     intro = _fetch_article_intro(session, resolved_title)
@@ -308,22 +322,35 @@ def _flash_check_doppelbedeutung(
         f'Antworte als JSON: {{"verdict":"a"|"b"|"c","reasoning":"...",'
         f'"child_topic":null|"...","child_lemma":null|"...","main_hint":null|"..."}}'
     )
+
     try:
-        # gemini-3.5-flash verwendet ThinkingLevel, nicht thinking_budget
-        try:
-            thinking_cfg = gtypes.ThinkingConfig(
-                thinking_level=gtypes.ThinkingLevel.NONE
+        if cfg["provider"] == "anthropic":
+            from claude_client import call_claude_json
+            data = call_claude_json(
+                system_prompt=_FLASH_DOPPELBEDEUTUNG_SYSTEM,
+                user_message=user_msg,
+                json_schema=_LEMMA_SCHEMA,
+                model=cfg["model"],
+                call_name="lemma",
             )
-        except AttributeError:
-            thinking_cfg = gtypes.ThinkingConfig(thinking_budget=0)
-        raw = call_gemini(
-            system_prompt=_FLASH_DOPPELBEDEUTUNG_SYSTEM,
-            user_message=user_msg,
-            model=_FLASH_DOPPELBEDEUTUNG_MODEL,
-            thinking_config=thinking_cfg,
-            response_mime_type="application/json",
-        )
-        data = json.loads(raw)
+        else:
+            from gemini_client import call_gemini
+            from google.genai import types as gtypes
+            # gemini-3.5-flash verwendet ThinkingLevel, nicht thinking_budget
+            try:
+                thinking_cfg = gtypes.ThinkingConfig(
+                    thinking_level=gtypes.ThinkingLevel.NONE
+                )
+            except AttributeError:
+                thinking_cfg = gtypes.ThinkingConfig(thinking_budget=0)
+            raw = call_gemini(
+                system_prompt=_FLASH_DOPPELBEDEUTUNG_SYSTEM,
+                user_message=user_msg,
+                model=_FLASH_DOPPELBEDEUTUNG_MODEL,   # honoriert --gen-model-Override
+                thinking_config=thinking_cfg,
+                response_mime_type="application/json",
+            )
+            data = json.loads(raw)
         return {
             "verdict":     data.get("verdict", "a"),
             "child_topic": data.get("child_topic"),
