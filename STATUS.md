@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-24T19:36:47Z -->
+<!-- updated: 2026-06-25T05:51:24Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
@@ -13,10 +13,11 @@
 >   Precision-Fix via Prompt-Tuning gescheitert (Rollback nach Stand 4). Precision-Lösung
 >   erfordert claim-weise Architektur — deferred. FPs sind Stil-Tausche/Additionen,
 >   keine Faktenfehler; mit Baustein 2 im Review handhabbar.
-> - **[NÄCHSTER SCHRITT] Erde-Retry** — `--themen Erde --stage 1` wenn Gemini stabil
->   (503-Welle abgewartet). Circuit Breaker wirkt bei Multi-Themen-Läufen.
-> - **Nächste Leuchtturm-Themen** (Sonne, Mond, Flugzeug, Eisenbahn, Dinosaurier) —
->   staged: --stage 1 → vision_retry.py → --stage 2 → --stage 3.
+> - **Erde zurückgestellt** — gemini-3.5-flash komplett down (503, ~24h).
+>   Kein Workaround (2.5-flash wäre unkalibriert). Retry wenn 3.5-flash stabil.
+> - **TTS-Stimme entschieden** (separater Chat) — einsatzbereit.
+> - **[NÄCHSTER SCHRITT hier] Weitere Leuchtturm-Themen** wenn gemini-3.5-flash
+>   wieder stabil: Sonne, Mond, Flugzeug, Eisenbahn, Dinosaurier (staged).
 > - **Staged-Lauf-Workflow** jetzt Standard — nie wieder Voll-Lauf wenn Vision-Retry
 >   nötig ist (dokumentiert in CLAUDE_CHAT_NOTIZEN.md).
 > - **vulkan_l3 review_flag** (685 > 682 W) — 3 Wörter kürzen bei redaktioneller
@@ -52,6 +53,10 @@
 ---
 
 ## Abgeschlossen (2026-06-24)
+
+**TTS-Diagnose + Vergleich** — gemini-2.5-flash-preview-tts + gemini-3.1-flash-tts-preview
+beide verfügbar und stabil. PCM→WAV-Fix dokumentiert. Stimme in separatem Chat
+abschließend gewählt und getestet.
 
 **Circuit Breaker Stage-1-Kompass** — run_batch.py: CB_THRESHOLD=3 / CB_WAIT_MIN=15.
 Nach 3 aufeinanderfolgenden API-Ausfällen (companions_raw==[] AND usage=={}) pausiert
