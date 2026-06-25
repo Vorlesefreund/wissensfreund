@@ -1638,10 +1638,28 @@ def main() -> None:
         "--force-stage2", action="store_true", default=False,
         help="Stage 2 trotz Vision-Fehlschlägen in Stage 1 erzwingen",
     )
+    parser.add_argument(
+        "--gen-model",
+        default=None,
+        help="Generator-Modell überschreiben (z.B. gemini-2.5-flash). "
+             "Nur für Tests — Produktion nutzt GEMINI_MODEL aus generate_grounded.py.",
+    )
     args = parser.parse_args()
 
-    global _RUN_ID
+    global _RUN_ID, GEN_MODEL
     _RUN_ID = args.run_id or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    if args.gen_model:
+        import generate_grounded as _gg
+        import generate_articles as _ga
+        _gg.GEMINI_MODEL = args.gen_model
+        _gg.KOMPASS_MODEL = args.gen_model
+        # KOMPASS_MODEL_FALLBACK bleibt auf gemini-2.5-flash (sinnvoll)
+        # Lemma-/BKS-Doppelbedeutungs-Check (eigene Modul-Konstante in generate_articles)
+        _ga._FLASH_DOPPELBEDEUTUNG_MODEL = args.gen_model
+        # GEN_MODEL ist ein Modul-Alias → hier neu binden
+        GEN_MODEL = args.gen_model
+        log.warning("⚠ gen-model Override: %s (Lemma+Kompass+Gen, nur für Tests!)", args.gen_model)
 
     out_dir = (
         Path(args.output_dir).resolve() if args.output_dir
