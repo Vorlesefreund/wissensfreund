@@ -694,8 +694,25 @@ def validate_and_resolve_companions(
         resolved = follow(comp)
 
         if resolved not in existing:
-            _reject(comp, resolved, "nicht gefunden")
-            continue
+            # Such-Fallback: Companion nicht direkt/per Redirect auflösbar (Haiku liefert
+            # oft beschreibende statt exakter Lemmata). resolve_lemma versucht zusätzlich
+            # die WP-Suche (list=search) und rettet so Treffer wie
+            # 'Menschliches Gehirn' → 'Gehirn'. Guard: _companion_target_ok (existiert,
+            # keine BKS). Keine Flash-Plausibilisierung — semantische Drift akzeptiert.
+            _r   = resolve_lemma(session, comp)
+            _neu = _r.get("resolved_title")
+            if _neu and _r.get("source") in ("direct", "redirect", "search"):
+                _ok, _grund = _companion_target_ok(session, _neu, comp)
+                if not _ok:
+                    _reject(comp, _neu, f"Such-Fallback verworfen: {_grund}")
+                    continue
+                log.info("  Companion gerettet: '%s' -> '%s' (%s)",
+                         comp, _neu, _r.get("source"))
+                resolved = _neu
+                # KEIN continue: gerettetes Lemma läuft durch primary/dup-Checks unten
+            else:
+                _reject(comp, resolved, "nicht gefunden (auch Suche erfolglos)")
+                continue
 
         # ── BKS-Companion: plausibilisieren statt größenbasiert auflösen ──────────
         bks_note = None
