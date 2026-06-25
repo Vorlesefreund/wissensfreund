@@ -1,0 +1,663 @@
+{
+  "meta": {
+    "id": "wal_l3",
+    "title": "Wal",
+    "subtitle": "Wie die Säugetiere der Meere leben, jagen und das Klima schützen",
+    "emoji": "🐋",
+    "age_level": 3,
+    "pattern": "living_being",
+    "theme_color": "#1A5F7A",
+    "word_count": 556,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Wale",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "tiere",
+    "category_sub": "saeugetiere",
+    "generated_at": "2026-06-24T13:03:59.047043+00:00",
+    "grounding_companions": [
+      "Pelorus Jack",
+      "Mocha Dick",
+      "Blauwal"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Cetacea.jpg",
+      "alt": "Das Bild zeigt acht verschiedene Walarten als Schwarz-Weiß-Illustrationen, darunter einen Grönlandwal, einen Schwertwal, einen Narwal, einen Pottwal und verschiedene Bartenwale.",
+      "caption": "Acht verschiedene Wal- und Delfinarten im Größenvergleich",
+      "license": "Public domain",
+      "license_author": "Hines, Bob",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Cetacea.jpg",
+      "wikimedia_id": "File:Cetacea.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/9/9a/Cetacea.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wal/Cetacea_300.jpg",
+        "800": "bilder/wal/Cetacea_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "alt": "Ein Blauwal schwimmt an der Wasseroberfläche und bläst Wasser aus seinem Blasloch. Man sieht den langen, schlanken Körper des Wals und seine Schwanzflosse.",
+      "caption": "Ein riesiger Blauwal bläst beim Auftauchen Atemluft in die Höhe",
+      "license": "Public domain",
+      "license_author": "NOAA Photo Library",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "wikimedia_id": "File:Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/1/1c/Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg/1920px-Anim1754_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wal/Anim1754_-_Flickr_-_NOAA_Photo_Library_300.jpg",
+        "800": "bilder/wal/Anim1754_-_Flickr_-_NOAA_Photo_Library_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "BlueWhaleSkeleton.jpg",
+      "alt": "Ein großes, weißes Walskelett ist im Freien aufgestellt und wird von mehreren Stützen gehalten. Im Hintergrund sind Gebäude und ein blauer Himmel zu sehen.",
+      "caption": "Das riesige, knöcherne Skelett eines Blauwals",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Bronwen Lea",
+      "source_url": "https://commons.wikimedia.org/wiki/File:BlueWhaleSkeleton.jpg",
+      "wikimedia_id": "File:BlueWhaleSkeleton.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/14/BlueWhaleSkeleton.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wal/BlueWhaleSkeleton_300.jpg",
+        "800": "bilder/wal/BlueWhaleSkeleton_800.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Humpback_whale_(Megaptera_novaeangliae)_calf_Moorea_2.jpg",
+      "alt": "Ein Buckelwal schwimmt unter der Wasseroberfläche, wobei sein Kopf und ein Teil seines Rückens aus dem Wasser ragen. Das Wasser ist tiefblau und die Oberfläche spiegelt das Licht wider.",
+      "caption": "Ein junger Buckelwal gleitet dicht unter der Wasseroberfläche",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Charles J. Sharp",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Humpback_whale_(Megaptera_novaeangliae)_calf_Moorea_2.jpg",
+      "wikimedia_id": "File:Humpback_whale_(Megaptera_novaeangliae)_calf_Moorea_2.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Humpback_whale_%28Megaptera_novaeangliae%29_calf_Moorea_2.jpg/1920px-Humpback_whale_%28Megaptera_novaeangliae%29_calf_Moorea_2.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wal/Humpback_whale_(Megaptera_novaeangliae)_calf_Moorea_2_300.jpg",
+        "800": "bilder/wal/Humpback_whale_(Megaptera_novaeangliae)_calf_Moorea_2_800.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Blue_Whale_001_body_bw.jpg",
+      "alt": "Ein Blauwal ist von oben im dunklen Wasser zu sehen. Sein langer, schlanker Körper und die Schwanzflosse sind gut erkennbar.",
+      "caption": "Aus der Luft ist die stromlinienförmige Gestalt des Blauwals gut sichtbar",
+      "license": "Public domain",
+      "license_author": "NOAA Fisheries",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Blue_Whale_001_body_bw.jpg",
+      "wikimedia_id": "File:Blue_Whale_001_body_bw.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Blue_Whale_001_body_bw.jpg/1920px-Blue_Whale_001_body_bw.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wal/Blue_Whale_001_body_bw_300.jpg",
+        "800": "bilder/wal/Blue_Whale_001_body_bw_800.jpg"
+      }
+    },
+    {
+      "index": 5,
+      "filename": "Anim1749_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "alt": "Zwei Delfine springen aus dem blauen Meer, wobei Wasser um sie herum spritzt. Ihre Körper sind dunkelgrau und glänzen im Sonnenlicht.",
+      "caption": "Zahnwale in Aktion: Zwei verspielte Delfine springen aus den Wellen",
+      "license": "Public domain",
+      "license_author": "NOAA NMFS",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Anim1749_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "wikimedia_id": "File:Anim1749_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Anim1749_-_Flickr_-_NOAA_Photo_Library.jpg/1920px-Anim1749_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wal/Anim1749_-_Flickr_-_NOAA_Photo_Library_300.jpg",
+        "800": "bilder/wal/Anim1749_-_Flickr_-_NOAA_Photo_Library_800.jpg"
+      }
+    },
+    {
+      "index": 6,
+      "filename": "0b4a8510_by_vitaly_sokol-dbw8sol.jpg",
+      "alt": "Mehrere Pottwale schwimmen unter der Wasseroberfläche. Man sieht ihre massigen Körper und die Wasseroberfläche mit Lichtreflexen.",
+      "caption": "Eine Gruppe von Pottwalen schwebt gemeinsam im tiefen Ozean",
+      "license": "CC BY 4.0",
+      "license_author": "Will Falcon",
+      "source_url": "https://commons.wikimedia.org/wiki/File:0b4a8510_by_vitaly_sokol-dbw8sol.jpg",
+      "wikimedia_id": "File:0b4a8510_by_vitaly_sokol-dbw8sol.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/b/b3/0b4a8510_by_vitaly_sokol-dbw8sol.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wal/0b4a8510_by_vitaly_sokol-dbw8sol_300.jpg",
+        "800": "bilder/wal/0b4a8510_by_vitaly_sokol-dbw8sol_800.jpg"
+      }
+    },
+    {
+      "index": 7,
+      "filename": "Dorudon_BW.jpg",
+      "alt": "Eine Illustration eines prähistorischen Wals, der unter Wasser schwimmt und Luftblasen ausstößt. Das Tier hat einen langen Körper mit Flossen und einem Maul voller Zähne.",
+      "caption": "Dorudon war ein urzeitlicher Urwal mit spitzen Raubzähnen",
+      "license": "CC BY 3.0",
+      "license_author": "Nobu Tamura",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Dorudon_BW.jpg",
+      "wikimedia_id": "File:Dorudon_BW.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/8/81/Dorudon_BW.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wal/Dorudon_BW_300.jpg",
+        "800": "bilder/wal/Dorudon_BW_800.jpg"
+      }
+    },
+    {
+      "index": 8,
+      "filename": "Aratere.jpg",
+      "alt": "Ein großes, weißes Fährschiff mit blauem Rumpf und dem Schriftzug 'interislander' fährt auf dem Wasser. Im Hintergrund sind grüne, bewaldete Hügel zu sehen.",
+      "caption": "Diese neuseeländische Fähre trägt den berühmten Delfin in ihrem Firmenlogo",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Burll662",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Aratere.jpg",
+      "wikimedia_id": "File:Aratere.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/2/2b/Aratere.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/wal/Aratere_300.jpg",
+        "800": "bilder/wal/Aratere_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "heading": "Die sanften Riesen der Ozeane",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Wale sehen aus wie riesige Fische, doch sie sind hochentwickelte Säugetiere.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Sie besitzen keine Kiemen, sondern müssen an der Oberfläche Luft in ihre Lungen saugen.",
+          "img_index": 0
+        },
+        {
+          "id": "s003",
+          "text": "Zudem bringen sie lebendige Kälber zur Welt, säugen sie mit fettreicher Muttermilch und sind warmblütig.",
+          "img_index": 0
+        },
+        {
+          "id": "s004",
+          "text": "Forscher teilen die rund 90 Walarten in zwei große Gruppen: die zahnlosen Bartenwale und die räuberischen Zahnwale, zu denen auch Delfine gehören.",
+          "img_index": 0
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "appearance_equipment",
+      "heading": "Perfekt geformt für das nasse Element",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s005",
+          "text": "Ihr Körper ist extrem stromlinienförmig, damit sie mit möglichst wenig Widerstand durch das Wasser gleiten können.",
+          "img_index": 1
+        },
+        {
+          "id": "s006",
+          "text": "Ihre Vorderbeine haben sich zu paddelförmigen Brustflossen entwickelt, den Flippern, während die Hinterbeine völlig fehlen.",
+          "img_index": 1
+        },
+        {
+          "id": "s007",
+          "text": "Sie treiben sich mit ihrer mächtigen, waagerechten Schwanzflosse voran, die man Fluke nennt.",
+          "img_index": 4
+        },
+        {
+          "id": "s008",
+          "text": "Eine dicke Speckschicht unter der Haut, der Blubber, schützt sie vor der Kälte.",
+          "img_index": 4
+        },
+        {
+          "id": "s009",
+          "text": "Ein ausgewachsener Blauwal kann eine Länge von über 33 Metern erreichen und bis zu 200 Tonnen wiegen.",
+          "img_index": 4
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Ein Blauwal besitzt ein riesiges Herz, das bis zu einer Tonne wiegen kann – so viel wie ein kleiner Kleinwagen! Es pumpt in jeder Minute bis zu 5000 Liter Blut durch seinen Körper."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "body_functions",
+      "heading": "Atemkünstler und Tiefseetaucher",
+      "section_role": "body_functions",
+      "sentences": [
+        {
+          "id": "s010",
+          "text": "Beim Luftholen tauschen Wale bis zu 90 Prozent des Lungenvolumens aus – ein Mensch schafft nur etwa 15 Prozent.",
+          "img_index": 3
+        },
+        {
+          "id": "s011",
+          "text": "Ihr Blut und ihre Muskeln können extrem viel Sauerstoff speichern.",
+          "img_index": 3
+        },
+        {
+          "id": "s012",
+          "text": "Das ist lebenswichtig, denn ab einer Tiefe von 100 Metern drückt der enorme Wasserdruck ihre Lungen fast völlig zusammen.",
+          "img_index": 3
+        },
+        {
+          "id": "s013",
+          "text": "Um Energie zu sparen, senken sie unter Wasser ihren Herzschlag drastisch ab.",
+          "img_index": 3
+        },
+        {
+          "id": "s014",
+          "text": "Der Pottwal kann so bis zu 90 Minuten tauchen und jagt in bis zu 3000 Metern Tiefe.",
+          "img_index": 3
+        },
+        {
+          "id": "s015",
+          "text": "Ein hungriger Blauwal filtert dabei täglich bis zu vier Tonnen winzige Krillkrebse aus dem Meer.",
+          "img_index": 3
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "predators_ecosystem",
+      "heading": "Walstürze und Nahrungskreisläufe",
+      "section_role": "predators_ecosystem",
+      "sentences": [
+        {
+          "id": "s016",
+          "text": "Sogar nach ihrem Tod erfüllen die Meeresgiganten eine lebenswichtige Aufgabe im Ozean.",
+          "img_index": 6
+        },
+        {
+          "id": "s017",
+          "text": "Sinkt ein toter Wal auf den dunklen Tiefseeboden, spricht man von einem „Walsturz“.",
+          "img_index": 6
+        },
+        {
+          "id": "s018",
+          "text": "Dieser Kadaver liefert jahrzehntelang Nahrung für hunderte Arten.",
+          "img_index": 6
+        },
+        {
+          "id": "s019",
+          "text": "Forscher filmten vor Kalifornien einen Walsturz, der etwa 400 unterschiedlichen Tierarten als Futterquelle diente, darunter Oktopusse, Krebse und Fische.",
+          "img_index": 6
+        },
+        {
+          "id": "s020",
+          "text": "Aber auch lebendige Wale helfen dem Klima: Ihr Kot enthält wertvolles Eisen und Stickstoff, was das Wachstum von Phytoplankton anregt, welches CO2 aus der Luft filtert und bindet.",
+          "img_index": 6
+        }
+      ],
+      "boxes": [
+        {
+          "type": "fakt",
+          "text": "Auf den Knochen versunkener Wale leben spezialisierte rote Würmer der Gattung Osedax. Sie besitzen keine Augen oder Beine, können aber mit einer speziellen Säure die fettreichen Walknochen auflösen und fressen."
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "historical_context",
+      "heading": "Die lange Reise vom Land ins Meer",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s021",
+          "text": "Die Vorfahren der Wale lebten vor über 50 Millionen Jahren als Vierbeiner an Land.",
+          "img_index": 2
+        },
+        {
+          "id": "s022",
+          "text": "Sie entwickelten sich im frühen Eozän aus frühen Paarhufern und sind eng mit den heutigen Flusspferden verwandt.",
+          "img_index": 2
+        },
+        {
+          "id": "s023",
+          "text": "Fossile Funde wie das doppelt gerollte Sprungbein früher Wale beweisen diese Verwandtschaft eindeutig.",
+          "img_index": 7
+        },
+        {
+          "id": "s024",
+          "text": "Urzeitliche Übergangsformen wie der wolfsgroße Pakicetus oder der Ambulocetus besaßen noch funktionierende Beine.",
+          "img_index": 7
+        },
+        {
+          "id": "s025",
+          "text": "Über Jahrmillionen bildeten sich ihre Gliedmaßen zurück, die Nasenlöcher wanderten auf den Kopf und die Haut verlor ihre Haare.",
+          "img_index": 7
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "human_animal",
+      "heading": "Schiffsbegleiter, Legenden und Gefahren",
+      "section_role": "human_animal",
+      "sentences": [
+        {
+          "id": "s026",
+          "text": "Jahrhundertelang jagte der Mensch die Wale wegen ihres Trans und ihrer Knochen, wodurch viele Arten fast ausstarben.",
+          "img_index": 5
+        },
+        {
+          "id": "s027",
+          "text": "Erst seit dem Jahr 1985 schützt ein weltweites Verbot die großen Arten vor dem kommerziellen Walfang.",
+          "img_index": 5
+        },
+        {
+          "id": "s028",
+          "text": "Dennoch drohen ihnen heute Gefahren durch Plastikmüll, Kollisionen mit Schiffen und den tödlichen Beifang in Fischernetzen.",
+          "img_index": 5
+        },
+        {
+          "id": "s029",
+          "text": "Manche Wale wurden weltberühmt.",
+          "img_index": 8
+        },
+        {
+          "id": "s030",
+          "text": "Der weiße Pottwal „Mocha Dick“ inspirierte Herman Melville zu seinem Roman Moby-Dick.",
+          "img_index": 8
+        },
+        {
+          "id": "s031",
+          "text": "Der neuseeländische Rundkopfdelfin „Pelorus Jack“ geleitete ab 1888 Schiffe sicher durch tückische Gewässer.",
+          "img_index": 8
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Militär-Sonare und Sprengungen im Meer erzeugen extremen Lärm. Dieser erschreckt die Wale so sehr, dass sie panisch auftauchen. Dabei bilden sich tödliche Gasblasen in ihrem Blut, was zu schweren Tauchunfällen führt."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wie unterscheidet sich die Schwanzflosse (Fluke) der Wale von der eines Fisches?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie steht waagerecht statt senkrecht am Körper."
+          },
+          {
+            "key": "B",
+            "text": "Sie besteht vollständig aus harten Knochenteilen."
+          },
+          {
+            "key": "C",
+            "text": "Sie schlägt beim Schwimmen von links nach rechts."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Was passiert mit der Lunge eines Wals, wenn er tiefer als 100 Meter taucht?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie dehnt sich um das Doppelte aus, um Sauerstoff zu sparen."
+          },
+          {
+            "key": "B",
+            "text": "Sie wird durch den hohen Wasserdruck fast völlig zusammengedrückt."
+          },
+          {
+            "key": "C",
+            "text": "Sie füllt sich vollständig mit Meerwasser zum Atmen."
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Welcher berühmte Wal inspirierte Herman Melville zu seinem Abenteuerroman?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein prähistorischer Urzeitwal namens Pakicetus."
+          },
+          {
+            "key": "B",
+            "text": "Ein treuer neuseeländischer Delfin namens Pelorus Jack."
+          },
+          {
+            "key": "C",
+            "text": "Ein aggressiver weißer Pottwal namens Mocha Dick."
+          }
+        ],
+        "correct_key": "C"
+      },
+      {
+        "id": "q4",
+        "text": "Was ist ein sogenannter „Walsturz“?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Ein Walkadaver, der auf den Meeresgrund der Tiefsee abgesunken ist."
+          },
+          {
+            "key": "B",
+            "text": "Ein panisches Auftauchen durch laute Schiffssonare im Meer."
+          },
+          {
+            "key": "C",
+            "text": "Der Sprung eines Wals, bei dem er laut klatschend im Wasser landet."
+          }
+        ],
+        "correct_key": "A"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "säugetiere",
+      "blauwal",
+      "pottwal",
+      "evolution",
+      "meeressäuger"
+    ],
+    "discover": [
+      "delfine",
+      "moby-dick",
+      "tiefsee",
+      "fischerei"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Wale sehen aus wie riesige Fische, doch sie sind hochentwickelte Säugetiere.",
+      "source": "Wale",
+      "passage": "da Wale keine Fische sind, sondern aquatische (wasserlebende) Säugetiere (Meeressäuger)."
+    },
+    {
+      "claim": "Sie besitzen keine Kiemen, sondern müssen an der Oberfläche Luft in ihre Lungen saugen.",
+      "source": "Wale",
+      "passage": "Wale sind Luftatmer und besitzen Lungen."
+    },
+    {
+      "claim": "Zudem bringen sie lebendige Kälber zur Welt, säugen sie mit fettreicher Muttermilch und sind warmblütig.",
+      "source": "Wale",
+      "passage": "Wale gebären vollentwickelte Kälber und säugen sie mit extrem fettreicher Muttermilch ... Wale gehören zu den gleichwarmen Tieren"
+    },
+    {
+      "claim": "Forscher teilen die rund 90 Walarten in zwei große Gruppen: die zahnlosen Bartenwale und die räuberischen Zahnwale, zu denen auch Delfine gehören.",
+      "source": "Wale",
+      "passage": "Die Wale (Cetacea...) bilden eine Ordnung der Säugetiere mit etwa 90 Arten ... Es werden zwei Unterordnungen unterschieden: die Bartenwale ... sowie die räuberisch lebenden Zahnwale (Odontoceti), zu denen auch die Familie der Delfine (Delphinidae) gehört."
+    },
+    {
+      "claim": "Ihr Körper ist extrem stromlinienförmig, damit sie mit möglichst wenig Widerstand durch das Wasser gleiten können.",
+      "source": "Wale",
+      "passage": "So besitzen sie eine stromlinienförmige Gestalt ... Speckschicht ... verleiht den Walen eine glatte, stromlinienförmige Körperform."
+    },
+    {
+      "claim": "Ihre Vorderbeine haben sich zu paddelförmigen Brustflossen entwickelt, den Flippern, während die Hinterbeine völlig fehlen.",
+      "source": "Wale",
+      "passage": "Ihre Vorderextremitäten sind zu Flossen (Flipper) umgestaltet ... Die Hinterbeine fehlen den Walen vollständig"
+    },
+    {
+      "claim": "Sie treiben sich mit ihrer mächtigen, waagerechten Schwanzflosse voran, die man Fluke nennt.",
+      "source": "Wale",
+      "passage": "Der Schwanz endet in einer großen Schwanzflosse, die Fluke heißt ... Sie ermöglicht durch vertikales Schlagen die Fortbewegung."
+    },
+    {
+      "claim": "Eine dicke Speckschicht unter der Haut, der Blubber, schützt sie vor der Kälte.",
+      "source": "Wale",
+      "passage": "Der Körper ist von einer dicken Speckschicht, dem sogenannten Blubber, eingehüllt. Dieser dient der Wärmeisolation"
+    },
+    {
+      "claim": "Ein ausgewachsener Blauwal kann eine Länge von über 33 Metern erreichen und bis zu 200 Tonnen wiegen.",
+      "source": "Wale",
+      "passage": "Der Blauwal (Balaenoptera musculus) ist mit einer Körperlänge von bis zu 33 Metern und einem Gewicht von bis zu 200 Tonnen das größte bekannte Tier der Erdgeschichte."
+    },
+    {
+      "claim": "Beim Luftholen tauschen Wale bis zu 90 Prozent des Lungenvolumens aus – ein Mensch schafft nur etwa 15 Prozent.",
+      "source": "Wale",
+      "passage": "Bei jedem Atemzug kann un Wal bis zu 90 Prozent des gesamten Luftvolumens der Lunge austauschen, bei einem Landsäugetier liegt dieser Wert etwa bei 15 Prozent."
+    },
+    {
+      "claim": "Ihr Blut und ihre Muskeln können extrem viel Sauerstoff speichern.",
+      "source": "Wale",
+      "passage": "Der Sauerstoff wird außer im Blut und der Lunge in verschiedenen Geweben der Wale gespeichert, vor allem in der Muskulatur"
+    },
+    {
+      "claim": "Das ist lebenswichtig, denn ab einer Tiefe von 100 Metern drückt der enorme Wasserdruck ihre Lungen fast völlig zusammen.",
+      "source": "Wale",
+      "passage": "da ab einer Tauchtiefe von etwa 100 Metern das Lungengewebe durch den Wasserdruck nahezu vollständig komprimiert wird."
+    },
+    {
+      "claim": "Um Energie zu sparen, senken sie unter Wasser ihren Herzschlag drastisch ab.",
+      "source": "Wale",
+      "passage": "Beim Tauchvorgang wird der Sauerstoffverbrauch durch Absenkung der Herztätigkeit und der Blutzirkulation massiv gesenkt"
+    },
+    {
+      "claim": "Der Pottwal kann so bis zu 90 Minuten tauchen und jagt in bis zu 3000 Metern Tiefe.",
+      "source": "Wale",
+      "passage": "Pottwale zwischen 60 und 90 Minuten und ... Pottwale tauchen bis zu 3000 Meter tief."
+    },
+    {
+      "claim": "Ein hungriger Blauwal filtert dabei täglich bis zu vier Tonnen winzige Krillkrebse aus dem Meer.",
+      "source": "Blauwal",
+      "passage": "Ein erwachsenes Tier kann bis zu 4 Tonnen Krill bestehend aus 40 Millionen Einzeltieren an einem Tag zu sich nehmen."
+    },
+    {
+      "claim": "Sogar nach ihrem Tod erfüllen die Meeresgiganten eine lebenswichtige Aufgabe im Ozean.",
+      "source": "Wale",
+      "passage": "stellen sogenannte Walstürze – Walkadaver, die auf den Ozeanboden abgesunken sind – wichtige abgeschlossene Ökosysteme auf dem Meeresgrund der Tiefsee dar."
+    },
+    {
+      "claim": "Sinkt ein toter Wal auf den dunklen Tiefseeboden, spricht man von einem „Walsturz“.",
+      "source": "Wale",
+      "passage": "sogenannte Walstürze – Walkadaver, die auf den Ozeanboden abgesunken sind"
+    },
+    {
+      "claim": "Dieser Kadaver liefert jahrzehntelang Nahrung für hunderte Arten.",
+      "source": "Wale",
+      "passage": "Die verwesende Karkasse eines Walsturzes kann jahrzehntelang von unterschiedlichen Tiefseebewohnern als Nahrungsquelle genutzt werden."
+    },
+    {
+      "claim": "Forscher filmten vor Kalifornien einen Walsturz, der etwa 400 unterschiedlichen Tierarten als Futterquelle diente, darunter Oktopusse, Krebse und Fische.",
+      "source": "Wale",
+      "passage": "Im Jahr 2019 gelang es Forschern der Nautilusexpedition vor der Küste Kaliforniens den Walsturz eines Bartenwals zu filmen, der etwa 400 unterschiedlichen Arten als Nahrung diente. An dem relativ frischen Kadaver ... wurden unter anderem Aalmuttern, Tintenfische, Krabben und Grenadierfische gefilmt."
+    },
+    {
+      "claim": "Aber auch lebendige Wale helfen dem Klima: Ihr Kot enthält wertvolles Eisen und Stickstoff, was das Wachstum von Phytoplankton anregt, welches CO2 aus der Luft filtert und bindet.",
+      "source": "Wale",
+      "passage": "Wale scheiden mit ihrem Kot wichtige Nährstoffe aus, von denen Pflanzen (insbesondere Kleinstlebenwesen wie das Phytoplankton) profitieren, die klimaschädliches CO2 aus der Atmosphäre filtern und binden ... Walkot treibt an der Meeresoberfläche und enthält unter anderem Nährstoffe wie Eisen und Stickstoff"
+    },
+    {
+      "claim": "Die Vorfahren der Wale lebten vor über 50 Millionen Jahren als Vierbeiner an Land.",
+      "source": "Wale",
+      "passage": "Den Übergang zum Wasserleben vollzog diese Säugergruppe vor etwa 50 Millionen Jahren ... Archaeoceten, der sich gut an Land fortbewegen konnte"
+    },
+    {
+      "claim": "Sie entwickelten sich im frühen Eozän aus frühen Paarhufern und sind eng mit den heutigen Flusspferden verwandt.",
+      "source": "Wale",
+      "passage": "Die Entwicklungslinie der Wale begann also im frühen Eozän, vor mehr als 50 Millionen Jahren, mit frühen Paarhufern ... demnach sind die Flusspferde die nächsten lebenden Verwandten (Schwestergruppe) der Wale"
+    },
+    {
+      "claim": "Fossile Funde wie das doppelt gerollte Sprungbein früher Wale beweisen diese Verwandtschaft eindeutig.",
+      "source": "Wale",
+      "passage": "Das auffälligste gemeinsame Merkmal von Walen und Paarhufern betrifft das Sprungbein (Astragalus) ... doppelte Gelenkrollen"
+    },
+    {
+      "claim": "Urzeitliche Übergangsformen wie der wolfsgroße Pakicetus oder der Ambulocetus besaßen noch funktionierende Beine.",
+      "source": "Wale",
+      "passage": "Einer der ältesten Vertreter der frühen Wale ... war Pakicetus ... wolfsgroße Tier ... besaß (noch) funktionstüchtige Beine ... Ambulocetus ('laufender Wal') ... Gliedmaßen dieses Archaeoceten waren an das Schwimmen angepasst, sollten aber auch eine Fortbewegung an Land noch ermöglichen"
+    },
+    {
+      "claim": "Über Jahrmillionen bildeten sich ihre Gliedmaßen zurück, die Nasenlöcher wanderten auf den Kopf und die Haut verlor ihre Haare.",
+      "source": "Wale",
+      "passage": "Die Rückbildung der Hinterbeine ... Die Vorderbeine wandelten sich zu Flossen um ... die Nasenlöcher wanderten von der Kopfspitze nahe der Mundöffnung nach oben ... Hinterbeine fehlen den Walen vollständig ... wie die Ohren und auch die Haare"
+    },
+    {
+      "claim": "Jahrhundertelang jagte der Mensch die Wale wegen ihres Trans und ihrer Knochen, wodurch many Arten fast ausstarben.",
+      "source": "Wale",
+      "passage": "Walfang ... verendbare Waltran und die Kieferknochen ... Bei einigen Großwalarten wurden die Populationen bis an den Rand der Ausrottung ausgebeutet."
+    },
+    {
+      "claim": "Erst seit dem Jahr 1985 schützt ein weltweites Verbot die großen Arten vor dem kommerziellen Walfang.",
+      "source": "Wale",
+      "passage": "Das Töten von Walen zu kommerziellen Zwecken wurde durch diese Organisation 1985 weltweit bis zum Jahr 2005 verboten."
+    },
+    {
+      "claim": "Dennoch drohen ihnen heute Gefahren durch Plastikmüll, Kollisionen mit Schiffen und den tödlichen Beifang in Fischernetzen.",
+      "source": "Wale",
+      "passage": "Plastikmüll ... Kollisionen mit Schiffen oder Tod als Beifang"
+    },
+    {
+      "claim": "Der weiße Pottwal „Mocha Dick“ inspirierte Herman Melville zu seinem Roman Moby-Dick.",
+      "source": "Mocha Dick",
+      "passage": "Herman Melville inspirierten die Geschichten, die um Mocha Dick unter Walfängern kursierten, zu seinem Roman Moby-Dick."
+    },
+    {
+      "claim": "Der neuseeländische Rundkopfdelfin „Pelorus Jack“ geleitete ab 1888 Schiffe sicher durch tückische Gewässer.",
+      "source": "Pelorus Jack",
+      "passage": "Pelorus Jack war ein Rundkopfdelfin ... erste Sichtung des Pelorus Jack erfolgte um 1888 ... als leite er die Schiffe durch die gefährliche Straße"
+    }
+  ]
+}

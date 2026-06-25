@@ -1,0 +1,618 @@
+{
+  "meta": {
+    "id": "regenwald_l3",
+    "title": "Regenwald",
+    "subtitle": "Das grüne Herz unserer Erde",
+    "emoji": "🌳",
+    "age_level": 3,
+    "pattern": "place_geography",
+    "theme_color": "#1E4620",
+    "word_count": 680,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Regenwald",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "natur",
+    "category_sub": "lebensraeume",
+    "generated_at": "2026-06-24T13:03:59.027177+00:00",
+    "grounding_companions": [
+      "Amazonas-Regenwald",
+      "Blattschneiderameise",
+      "Baumsteigerfrösche",
+      "Feigen",
+      "Faultiere"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Amazon_CIAT_(3).jpg",
+      "alt": "Luftaufnahme eines Flusses, der sich durch den dichten Amazonas-Regenwald schlängelt",
+      "caption": "Wie ein grünes Meer: Der dichte Amazonas-Regenwald aus der Vogelperspektive.",
+      "license": "CC BY-SA 2.0",
+      "license_author": "Neil Palmer/CIAT",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Amazon_CIAT_(3).jpg",
+      "wikimedia_id": "File:Amazon_CIAT_(3).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Amazon_CIAT_%283%29.jpg/1920px-Amazon_CIAT_%283%29.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Amazon_CIAT_(3)_300.jpg",
+        "800": "bilder/regenwald/Amazon_CIAT_(3)_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Hoh_National_Rainforest.jpg",
+      "alt": "Dichter Wald im Hoh-Nationalpark mit moosbewachsenen Bäumen und Farnen",
+      "caption": "Es gibt auch Regenwälder in kühleren Regionen, in denen viel Moos an den Bäumen wächst.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Malonecr7",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Hoh_National_Rainforest.jpg",
+      "wikimedia_id": "File:Hoh_National_Rainforest.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Hoh_National_Rainforest.jpg/1920px-Hoh_National_Rainforest.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Hoh_National_Rainforest_300.jpg",
+        "800": "bilder/regenwald/Hoh_National_Rainforest_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Burmese_Banyan_(Ficus_kurzii)_6.jpg",
+      "alt": "Dichte, herabhängende Luftwurzeln eines Feigenbaums im Regenwald",
+      "caption": "Die dichten Luftwurzeln der Würgefeige umschließen nach und nach ihren Wirtsbaum.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Mokkie",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Burmese_Banyan_(Ficus_kurzii)_6.jpg",
+      "wikimedia_id": "File:Burmese_Banyan_(Ficus_kurzii)_6.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Burmese_Banyan_%28Ficus_kurzii%29_6.jpg/1920px-Burmese_Banyan_%28Ficus_kurzii%29_6.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Burmese_Banyan_(Ficus_kurzii)_6_300.jpg",
+        "800": "bilder/regenwald/Burmese_Banyan_(Ficus_kurzii)_6_800.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Atta_cephalotes-pjt.jpg",
+      "alt": "Eine Blattschneiderameise trägt ein großes grünes Blattstück auf einem Ast",
+      "caption": "Schwerstarbeit: Blattschneiderameisen transportieren riesige Blätter wie grüne Segel.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Pjt56",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Atta_cephalotes-pjt.jpg",
+      "wikimedia_id": "File:Atta_cephalotes-pjt.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Atta_cephalotes-pjt.jpg/1920px-Atta_cephalotes-pjt.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Atta_cephalotes-pjt_300.jpg",
+        "800": "bilder/regenwald/Atta_cephalotes-pjt_800.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Dendrobates_tinctorius_var_azureus_B300981_11.jpg",
+      "alt": "Ein leuchtend blauer Baumsteigerfrosch mit schwarzen Flecken sitzt auf einem Ast",
+      "caption": "Schillernde Gefahr: Die leuchtenden Farben des Baumsteigerfrosches warnen Feinde vor seinem Gift.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Nomo michael hoefner",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Dendrobates_tinctorius_var_azureus_B300981_11.jpg",
+      "wikimedia_id": "File:Dendrobates_tinctorius_var_azureus_B300981_11.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/17/Dendrobates_tinctorius_var_azureus_B300981_11.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Dendrobates_tinctorius_var_azureus_B300981_11_300.jpg",
+        "800": "bilder/regenwald/Dendrobates_tinctorius_var_azureus_B300981_11_800.jpg"
+      }
+    },
+    {
+      "index": 5,
+      "filename": "Bradypus.jpg",
+      "alt": "Ein dreizehiges Faultier klammert sich schlafend an einen Ast im dichten Regenwald",
+      "caption": "Gemütlich: Faultiere verbringen fast ihr ganzes Leben hoch oben in den Baumkronen.",
+      "license": "Public domain",
+      "license_author": "Stefan Laube (Tauchgurke)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Bradypus.jpg",
+      "wikimedia_id": "File:Bradypus.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/18/Bradypus.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Bradypus_300.jpg",
+        "800": "bilder/regenwald/Bradypus_800.jpg"
+      }
+    },
+    {
+      "index": 6,
+      "filename": "Amazon.A2002182.1405.1km.jpg",
+      "alt": "Satellitenbild des Amazonasbeckens mit sichtbaren Waldrodungen und Bränden",
+      "caption": "Aus dem Weltall sichtbar: Große abgeholzte Gebiete durchschneiden den dichten grünen Wald.",
+      "license": "Public domain",
+      "license_author": "NASA",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Amazon.A2002182.1405.1km.jpg",
+      "wikimedia_id": "File:Amazon.A2002182.1405.1km.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/3/3a/Amazon.A2002182.1405.1km.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Amazon.A2002182.1405.1km_300.jpg",
+        "800": "bilder/regenwald/Amazon.A2002182.1405.1km_800.jpg"
+      }
+    },
+    {
+      "index": 7,
+      "filename": "09_09_2021_Visita_à_Usina_Hidrelétrica_Belo_Monte_(51443381900).jpg",
+      "alt": "Das Belo-Monte-Wasserkraftwerk staut einen Fluss im Regenwald auf",
+      "caption": "Für die Energiegewinnung wurden gewaltige Staudämme mitten im Regenwald errichtet.",
+      "license": "CC BY 2.0",
+      "license_author": "Vice-Presidência da República from Brasil",
+      "source_url": "https://commons.wikimedia.org/wiki/File:09_09_2021_Visita_%C3%A0_Usina_Hidrel%C3%A9trica_Belo_Monte_(51443381900).jpg",
+      "wikimedia_id": "File:09_09_2021_Visita_%C3%A0_Usina_Hidrel%C3%A9trica_Belo_Monte_(51443381900).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/09_09_2021_Visita_%C3%A0_Usina_Hidrel%C3%A9trica_Belo_Monte_%2851443381900%29.jpg/1920px-09_09_2021_Visita_%C3%A0_Usina_Hidrel%C3%A9trica_Belo_Monte_%2851443381900%29.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/09_09_2021_Visita_à_Usina_Hidrelétrica_Belo_Monte_(51443381900)_300.jpg",
+        "800": "bilder/regenwald/09_09_2021_Visita_à_Usina_Hidrelétrica_Belo_Monte_(51443381900)_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "heading": "Was ist ein Regenwald?",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir ein riesiges, grünes Kronenmeer vor, auf das fast jeden Tag gewaltige Mengen Wasser prasseln.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Das ist der Regenwald.",
+          "img_index": 0
+        },
+        {
+          "id": "s003",
+          "text": "Fachleute unterscheiden vor allem den tropischen Regenwald mit über 1800 Millimeter Regen im Jahr und den gemäßigten Regenwald.",
+          "img_index": 0
+        },
+        {
+          "id": "s004",
+          "text": "Letzterer liegt in kühleren Gebieten und erhält mindestens 1000 Millimeter Niederschlag, oft auch als Schnee.",
+          "img_index": 0
+        },
+        {
+          "id": "s005",
+          "text": "Der größte tropische Wald der Erde befindet sich im südamerikanischen Amazonasbecken.",
+          "img_index": 1
+        },
+        {
+          "id": "s006",
+          "text": "Dieses riesige Gebiet umfasst sechs Millionen Quadratkilometer und erstreckt sich über neun Länder.",
+          "img_index": 1
+        },
+        {
+          "id": "s007",
+          "text": "Brasilien besitzt mit 60 Prozent den weitaus größten Teil dieser grünen Wildnis.",
+          "img_index": 1
+        },
+        {
+          "id": "s008",
+          "text": "Mitten durch diesen Dschungel fließt der mächtige Amazonas, der wasserreichste und vermutlich längste Fluss unserer Erde.",
+          "img_index": 1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "appearance_equipment",
+      "heading": "Die Stockwerke des Dschungels",
+      "section_role": "appearance_equipment",
+      "sentences": [
+        {
+          "id": "s009",
+          "text": "Der tropische Regenwald ist wie ein Hochhaus in verschiedene Schichten aufgeteilt.",
+          "img_index": 2
+        },
+        {
+          "id": "s010",
+          "text": "Ganz oben, in etwa 30 Metern Höhe, bilden die Baumkronen ein fast geschlossenes Dach.",
+          "img_index": 2
+        },
+        {
+          "id": "s011",
+          "text": "Dazwischen ragen riesige Urwaldriesen hervor, die doppelt so hoch werden können.",
+          "img_index": 2
+        },
+        {
+          "id": "s012",
+          "text": "In diesem dichten Gewirr leben die faszinierenden Würgefeigen.",
+          "img_index": 2
+        },
+        {
+          "id": "s013",
+          "text": "Ihre Samen werden von Vögeln gefressen und landen mit deren Kot auf den Ästen hoher Bäume.",
+          "img_index": 2
+        },
+        {
+          "id": "s014",
+          "text": "Dort keimen sie als Aufsitzerpflanzen und lassen lange Luftwurzeln hinab zum Waldboden wachsen.",
+          "img_index": 2
+        },
+        {
+          "id": "s015",
+          "text": "Sobald die Wurzeln die Erde erreichen, wächst die Feige rasant und umschließt ihren Wirtsbaum völlig.",
+          "img_index": 2
+        },
+        {
+          "id": "s016",
+          "text": "Dieser stirbt schließlich ab, verrottet im Inneren und hinterlässt eine hohle, selbstständig stehende Würgefeige.",
+          "img_index": 2
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "behavior_life",
+      "heading": "Tierische Spezialisten und alte Kulturen",
+      "section_role": "behavior_life",
+      "sentences": [
+        {
+          "id": "s017",
+          "text": "Der Dschungel beherbergt Millionen Tierarten, die erstaunliche Strategien entwickelt haben.",
+          "img_index": 3
+        },
+        {
+          "id": "s018",
+          "text": "Winzige Blattschneiderameisen arbeiten in perfekten Kolonnen als Pilzgärtner.",
+          "img_index": 3
+        },
+        {
+          "id": "s019",
+          "text": "Sie fressen die Blätter nicht selbst, sondern zerkauen sie zu einem Brei.",
+          "img_index": 3
+        },
+        {
+          "id": "s020",
+          "text": "Darauf züchten sie in ihren riesigen, unterirdischen Bauten einen speziellen Pilz, der ihnen als Nahrung dient.",
+          "img_index": 3
+        },
+        {
+          "id": "s021",
+          "text": "Ebenso farbenfroh wie gefährlich sind die winzigen Baumsteigerfrösche.",
+          "img_index": 3
+        },
+        {
+          "id": "s022",
+          "text": "Sie nehmen Gifte über ihre Nahrung auf, indem sie giftige Milben und Ameisen verspeisen.",
+          "img_index": 3
+        },
+        {
+          "id": "s023",
+          "text": "Ihre grellen Signalfarben warnen hungrige Fressfeinde im Wald vor dem hochwirksamen Hautgift.",
+          "img_index": 5
+        },
+        {
+          "id": "s024",
+          "text": "Ganz gemächlich lassen es dagegen die Faultiere angehen.",
+          "img_index": 5
+        },
+        {
+          "id": "s025",
+          "text": "Weil sie sich fast nur von zähen, nährstoffarmen Blättern ernähren, müssen sie extrem viel Energie sparen.",
+          "img_index": 5
+        },
+        {
+          "id": "s026",
+          "text": "In ihrem feuchten Fell wachsen sogar grüne Algen, die den hängenden Tieren eine perfekte Tarnung im Geäst bieten.",
+          "img_index": 5
+        },
+        {
+          "id": "s027",
+          "text": "Doch der Wald war nie unberührte Wildnis: Menschen leben hier seit mindestens 11200 Jahren.",
+          "img_index": 5
+        },
+        {
+          "id": "s028",
+          "text": "Durch künstlich verbesserte, extrem fruchtbare Böden, die sogenannte Terra preta, konnten früher Millionen Menschen im Regenwald Landwirtschaft betreiben.",
+          "img_index": 5
+        },
+        {
+          "id": "s029",
+          "text": "Forschende entdeckten im bolivianischen Dschungel sogar Reste großer, alter Siedlungen mit Straßen und Plätzen.",
+          "img_index": 5
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Winzige Gift-Kraftpakete: Manche Baumsteigerfrösche gehören zu den giftigsten Tieren der Welt! Schon eine winzige Giftmenge von zwei Millionstel Gramm pro Kilogramm Körpergewicht kann für eine Maus tödlich sein. Das Gift blockiert das Nervensystem und führt schnell zu einer Atemlähmung."
+        },
+        {
+          "type": "stimmt_das",
+          "text": "Sind Faultiere einfach nur extrem faul?",
+          "reveal_text": "Nein, ihre Langsamkeit ist eine geniale Überlebensstrategie! Da sie fast nur Blätter fressen, liefert ihre Nahrung kaum Energie. Um Kraft zu sparen, bewegen sie sich im Zeitlupentempo und schlafen bis zu 20 Stunden am Tag. Ihre Muskeln arbeiten etwa drei- bis sechsmal langsamer als die einer Hauskatze.",
+          "reveal_mode": "auto"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "historical_context",
+      "heading": "Die Entstehung und die Zerstörung heute",
+      "section_role": "historical_context",
+      "sentences": [
+        {
+          "id": "s030",
+          "text": "Der Amazonas-Regenwald bildete sich vermutlich vor rund 40 Millionen Jahren im Eozän.",
+          "img_index": 6
+        },
+        {
+          "id": "s031",
+          "text": "Damals sorgte der wachsende Atlantische Ozean für ein feuchtwarmes Klima in Südamerika.",
+          "img_index": 6
+        },
+        {
+          "id": "s032",
+          "text": "Heute ist dieser uralte Lebensraum jedoch in akuter Gefahr.",
+          "img_index": 6
+        },
+        {
+          "id": "s033",
+          "text": "Für gigantische Rinderweiden und riesige Sojafelder werden unvorstellbar große Waldgebiete gerodet und niedergebrannt.",
+          "img_index": 6
+        },
+        {
+          "id": "s034",
+          "text": "Auch die internationale Metallindustrie hinterlässt tiefe Spuren im Dschungel.",
+          "img_index": 7
+        },
+        {
+          "id": "s035",
+          "text": "Um wertvolles Bauxit für die Aluminiumherstellung abzubauen, wird der Wald rücksichtslos abgeholzt.",
+          "img_index": 7
+        },
+        {
+          "id": "s036",
+          "text": "Zusätzlich fluten gewaltige Staudämme, wie das Belo-Monte-Wasserkraftwerk, riesige Flächen, um den extremen Energiebedarf der Fabriken zu decken.",
+          "img_index": 7
+        },
+        {
+          "id": "s037",
+          "text": "Allein im Zeitraum von August 2017 bis Juli 2018 wurde eine Waldfläche vernichtet, die größer ist als eine Million Fußballfelder.",
+          "img_index": 7
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "today_legacy",
+      "heading": "Der gefährliche Kipppunkt",
+      "section_role": "today_legacy",
+      "sentences": [
+        {
+          "id": "s038",
+          "text": "Die gigantische Abholzung hat verheerende Folgen für das gesamte Weltklima.",
+          "img_index": 6
+        },
+        {
+          "id": "s039",
+          "text": "Bisher galten die tropischen Wälder als wichtige Speicher für das Treibhausgas Kohlenstoffdioxid.",
+          "img_index": 6
+        },
+        {
+          "id": "s040",
+          "text": "Durch die Erwärmung und die ständigen Brände stößt das Amazonasbecken heute jedoch netto mehr Treibhausgase aus, als es schluckt.",
+          "img_index": 6
+        },
+        {
+          "id": "s041",
+          "text": "Wissenschaftler warnen eindringlich vor dem Erreichen des sogenannten Kipppunktes.",
+          "img_index": 6
+        },
+        {
+          "id": "s042",
+          "text": "Wird dieser überschritten, verwandelt sich das feuchte Ökosystem unaufhaltsam in eine trockene Savanne.",
+          "img_index": 6
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "Wenn der Wald kippt: Ein gesunder Regenwald erzeugt etwa die Hälfte seiner Niederschläge selbst, indem das Wasser über den Bäumen verdunstet. Wenn jedoch 20 bis 25 Prozent des Waldes zerstört sind, bleibt der Regen aus. Der Boden trocknet aus und der restliche Urwald stirbt unaufhaltsam ab."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wie viel Regen fällt jährlich mindestens im tropischen Regenwald?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Über 1800 Millimeter"
+          },
+          {
+            "key": "B",
+            "text": "Über 500 Millimeter"
+          },
+          {
+            "key": "C",
+            "text": "Über 5000 Millimeter"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Was machen die Blattschneiderameisen mit den abgeschnittenen Blättern?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie fressen die Blätter direkt im Wald auf."
+          },
+          {
+            "key": "B",
+            "text": "Sie bauen daraus wasserdichte Nester in den Baumkronen."
+          },
+          {
+            "key": "C",
+            "text": "Sie zerkauen sie zu Brei, um darauf einen Futterpilz zu züchten."
+          }
+        ],
+        "correct_key": "C"
+      },
+      {
+        "id": "q3",
+        "text": "Woher bekommen die bunten Baumsteigerfrösche ihr starkes Gift?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Sie nehmen es durch das Verspeisen giftiger Beutetiere auf."
+          },
+          {
+            "key": "B",
+            "text": "Sie stellen das Gift mithilfe von Algen in ihrem Fell her."
+          },
+          {
+            "key": "C",
+            "text": "Sie nehmen das Gift direkt aus den Wurzeln von Würgefeigen auf."
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q4",
+        "text": "Bei wie viel Prozent Zerstörung liegt der gefürchtete Kipppunkt des Amazonas-Regenwaldes?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Bei etwa 5 bis 10 Prozent"
+          },
+          {
+            "key": "B",
+            "text": "Bei etwa 20 bis 25 Prozent"
+          },
+          {
+            "key": "C",
+            "text": "Bei genau 50 Prozent"
+          }
+        ],
+        "correct_key": "B"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Amazonas",
+      "Klimazone",
+      "Ökosystem",
+      "Biodiversität"
+    ],
+    "discover": [
+      "Terra preta",
+      "Symbiose",
+      "Würgefeige",
+      "Kippelement"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Fachleute unterscheiden vor allem den tropischen Regenwald mit über 1800 Millimeter Regen im Jahr und den gemäßigten Regenwald.",
+      "source": "Regenwald",
+      "passage": "Tropischer Regenwald [...] – mit meist mehr als 1800 mm Jahresniederschlag [...] Gemäßigter Regenwald – mit meist über 1000 mm Jahresniederschlag"
+    },
+    {
+      "claim": "Der größte tropische Wald der Erde befindet sich im südamerikanischen Amazonasbecken.",
+      "source": "Regenwald",
+      "passage": "Die größte zusammenhängende Fläche – zugleich mehr als die Hälfte der Gesamtfläche aller tropischen Regenwälder – befindet sich im Bereich des Amazonasbeckens."
+    },
+    {
+      "claim": "Dieses riesige Gebiet umfasst sechs Millionen Quadratkilometer und erstreckt sich über neun Länder.",
+      "source": "Amazonas-Regenwald",
+      "passage": "Der Amazonas-Regenwald bedeckt nahezu das gesamte Amazonasbecken in Südamerika, welches sechs Millionen Quadratkilometer in neun Ländern umfasst."
+    },
+    {
+      "claim": "Brasilien besitzt mit 60 Prozent den weitaus größten Teil dieser grünen Wildnis.",
+      "source": "Amazonas-Regenwald",
+      "passage": "Der weitaus größte Teil des Waldes (etwa 60 Prozent) befindet sich in Brasilien."
+    },
+    {
+      "claim": "Ihre Samen werden von Vögeln gefressen und landen mit deren Kot auf den Ästen hoher Bäume.",
+      "source": "Feigen",
+      "passage": "Die Samen werden von Vögeln gefressen und passieren unbeschädigt den Verdauungstrakt. Wenn sie im Kot der Vögel auf den Ast eines Baumes ausgeschieden werden und dort dank der mistelähnlich schleimigen Samenhülle kleben bleiben, keimen die Samen auf dem Ast."
+    },
+    {
+      "claim": "Die Wurzeln schließen den Tragbaum allmählich wie ein dichtes Netz ein.",
+      "source": "Feigen",
+      "passage": "Sie umschließen allmählich ihren Trag- oder Wirtsbaum, der schließlich abstirbt, wodurch sich im Inneren der Würgefeige ein Hohlraum bildet. Die Würgefeige profitiert zusätzlich von den bei der Zersetzung des abgestorbenen Tragbaumes freiwerdenden Nährstoffen."
+    },
+    {
+      "claim": "Sie fressen die Blätter nicht selbst, sondern zerkauen sie zu einem Brei.",
+      "source": "Blattschneiderameisen",
+      "passage": "Sie fressen nicht selbst die Blätter, sondern zerkauen sie und verwenden sie als Substrat, um darauf einen speziellen Pilz aus der Gattung der Egerlingsschirmlinge (Leucoagaricus) wachsen zu lassen, von dem sie sich ernähren."
+    },
+    {
+      "claim": "Sie nehmen Gifte über ihre Nahrung auf, indem sie giftige Milben und Ameisen verspeisen.",
+      "source": "Baumsteigerfrösche",
+      "passage": "Die Frösche nehmen ihr Gift durch Verspeisen von giftigen Beutetieren auf und sequestrieren es in ihrem Körper. [...] Stoffe für die Giftproduktion werden zum Beispiel durch Ameisen, Käfer und Milben in den Körper der Frösche aufgenommen."
+    },
+    {
+      "claim": "Weil sie sich fast nur von zähen, nährstoffarmen Blättern ernähren, müssen sie extrem viel Energie sparen.",
+      "source": "Faultiere",
+      "passage": "Die beiden letztgenannten Eigenschaften werden durch einen extrem niedrigen Stoffwechsel hervorgerufen, der aus der energiearmen Blattnahrung resultiert."
+    },
+    {
+      "claim": "In ihrem feuchten Fell wachsen sogar grüne Algen, die den hängenden Tieren eine perfekte Tarnung im Geäst bieten.",
+      "source": "Faultiere",
+      "passage": "In den Haaren siedeln Algen, die den Tieren zwischen den Blättern als grün-changierende Färbung zugutekommen"
+    },
+    {
+      "claim": "Durch künstlich verbesserte, extrem fruchtbare Böden, die sogenannte Terra preta, konnten früher Millionen Menschen im Regenwald Landwirtschaft betreiben.",
+      "source": "Amazonas-Regenwald",
+      "passage": "wonach der Amazonasregenwald keine unberührte Wildnis sei, sondern seit mindestens 11.000 Jahren durch die Anlage von Waldgärten sowie durch künstlich mit Nährstoffen angereicherte Böden (Terra preta) vom Menschen geformt wurde."
+    },
+    {
+      "claim": "Forschende entdeckten im bolivianischen Dschungel sogar Reste großer, alter Siedlungen mit Straßen und Plätzen.",
+      "source": "Amazonas-Regenwald",
+      "passage": "Mithilfe der Lidar-Technologie gelang es im bolivianischen Amazonastiefland insgesamt 26 Siedlungen der Casarabe-Kultur zu vermessen. [...] Zu den Funden gehörten Überreste von Straßen, Brücken und großen Plätzen."
+    },
+    {
+      "claim": "Allein im Zeitraum von August 2017 bis Juli 2018 wurde eine Waldfläche vernichtet, die größer ist als eine Million Fußballfelder.",
+      "source": "Amazonas-Regenwald",
+      "passage": "durch Raubbau Im Zeitraum von August 2017 bis Juli 2018 um eine Waldfläche von ca. 7900 km² verkleinert, was der Fläche von mehr als einer Million Fußballfeldern entspricht."
+    },
+    {
+      "claim": "Durch die Erwärmung und die ständigen Brände stößt das Amazonasbecken heute jedoch netto mehr Treibhausgase aus, als es schluckt.",
+      "source": "Amazonas-Regenwald",
+      "passage": "deuten darauf hin, dass – bezüglich der globalen Erwärmung – das Amazonasbecken, einschließlich dem Amazonas-Regenwald, gegenwärtig mehr Treibhausgase ausstößt als es absorbiert."
+    },
+    {
+      "claim": "Wissenschaftler warnen eindringlich vor dem Erreichen des sogenannten Kipppunktes.",
+      "source": "Amazonas-Regenwald",
+      "passage": "Der Kipppunkt wird aktuell bei 20–25 % zerstörter Regenwaldfläche angesetzt"
+    }
+  ]
+}

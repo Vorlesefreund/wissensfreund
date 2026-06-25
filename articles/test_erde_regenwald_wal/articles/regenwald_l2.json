@@ -1,0 +1,544 @@
+{
+  "meta": {
+    "id": "regenwald_l2",
+    "title": "Regenwald",
+    "subtitle": "Wie Pflanzen und Tiere im Regenwald zusammenhalten",
+    "emoji": "🌳",
+    "age_level": 2,
+    "pattern": "place_geography",
+    "theme_color": "#2E7D32",
+    "word_count": 419,
+    "source_wikipedia_url": "https://de.wikipedia.org/wiki/Regenwald",
+    "schema_version": "1.0",
+    "review_flag": false,
+    "category_top": "natur",
+    "category_sub": "lebensraeume",
+    "generated_at": "2026-06-24T13:03:59.020189+00:00",
+    "grounding_companions": [
+      "Amazonas-Regenwald",
+      "Blattschneiderameise",
+      "Baumsteigerfrösche",
+      "Feigen",
+      "Faultiere"
+    ],
+    "generation_method": "gemini-3.5-flash/batch/v4",
+    "generation_temperature": 1.0,
+    "generation_thinking": "MEDIUM"
+  },
+  "images": [
+    {
+      "index": 0,
+      "filename": "Amazon_CIAT_(2).jpg",
+      "alt": "Ein breiter Fluss schlängelt sich durch den dichten, grünen Regenwald",
+      "caption": "Ein riesiger Fluss schlängelt sich durch den dichten, grünen Regenwald.",
+      "license": "CC BY-SA 2.0",
+      "license_author": "Neil Palmer/CIAT",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Amazon_CIAT_(2).jpg",
+      "wikimedia_id": "File:Amazon_CIAT_(2).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/7/73/Amazon_CIAT_%282%29.jpg/1920px-Amazon_CIAT_%282%29.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Amazon_CIAT_(2)_300.jpg",
+        "800": "bilder/regenwald/Amazon_CIAT_(2)_800.jpg"
+      }
+    },
+    {
+      "index": 1,
+      "filename": "Hoh_National_Rainforest.jpg",
+      "alt": "Dichter Wald, in dem die Bäume und der Boden dick mit grünem Moos bewachsen sind",
+      "caption": "Es gibt auch kühlere Regenwälder, in denen viel Moos wächst.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Malonecr7",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Hoh_National_Rainforest.jpg",
+      "wikimedia_id": "File:Hoh_National_Rainforest.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/0/06/Hoh_National_Rainforest.jpg/1920px-Hoh_National_Rainforest.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Hoh_National_Rainforest_300.jpg",
+        "800": "bilder/regenwald/Hoh_National_Rainforest_800.jpg"
+      }
+    },
+    {
+      "index": 2,
+      "filename": "Burmese_Banyan_(Ficus_kurzii)_6.jpg",
+      "alt": "Zahlreiche Luftwurzeln eines Feigenbaums hängen wie dicke Seile herab",
+      "caption": "Die Luftwurzeln der Feigen hängen wie dicke Seile herab.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Mokkie",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Burmese_Banyan_(Ficus_kurzii)_6.jpg",
+      "wikimedia_id": "File:Burmese_Banyan_(Ficus_kurzii)_6.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6c/Burmese_Banyan_%28Ficus_kurzii%29_6.jpg/1920px-Burmese_Banyan_%28Ficus_kurzii%29_6.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Burmese_Banyan_(Ficus_kurzii)_6_300.jpg",
+        "800": "bilder/regenwald/Burmese_Banyan_(Ficus_kurzii)_6_800.jpg"
+      }
+    },
+    {
+      "index": 3,
+      "filename": "Bradypus.jpg",
+      "alt": "Ein Faultier klammert sich schlafend an einen Ast im dichten Laub",
+      "caption": "Faultiere verschlafen fast den ganzen Tag hoch oben in den Ästen.",
+      "license": "Public domain",
+      "license_author": "Stefan Laube (Tauchgurke)",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Bradypus.jpg",
+      "wikimedia_id": "File:Bradypus.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/1/18/Bradypus.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Bradypus_300.jpg",
+        "800": "bilder/regenwald/Bradypus_800.jpg"
+      }
+    },
+    {
+      "index": 4,
+      "filename": "Atta_cephalotes-pjt.jpg",
+      "alt": "Blattschneiderameisen tragen ein großes, grünes Blatt über einen Ast",
+      "caption": "Wie kleine Segelschiffe tragen die Ameisen ihre Blätter nach Hause.",
+      "license": "CC BY-SA 4.0",
+      "license_author": "Pjt56",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Atta_cephalotes-pjt.jpg",
+      "wikimedia_id": "File:Atta_cephalotes-pjt.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Atta_cephalotes-pjt.jpg/1920px-Atta_cephalotes-pjt.jpg",
+      "is_hero": true,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Atta_cephalotes-pjt_300.jpg",
+        "800": "bilder/regenwald/Atta_cephalotes-pjt_800.jpg"
+      }
+    },
+    {
+      "index": 5,
+      "filename": "Dendrobates.auratus.7040.jpg",
+      "alt": "Ein schwarz-gelb gemusterter Baumsteigerfrosch sitzt auf einem feuchten Ast",
+      "caption": "Die leuchtenden Muster der Frösche warnen hungrige Feinde.",
+      "license": "CC BY-SA 3.0",
+      "license_author": "Selbst fotografiert",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Dendrobates.auratus.7040.jpg",
+      "wikimedia_id": "File:Dendrobates.auratus.7040.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/3/3c/Dendrobates.auratus.7040.jpg/1920px-Dendrobates.auratus.7040.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Dendrobates.auratus.7040_300.jpg",
+        "800": "bilder/regenwald/Dendrobates.auratus.7040_800.jpg"
+      }
+    },
+    {
+      "index": 6,
+      "filename": "Amazon_CIAT_(3).jpg",
+      "alt": "Luftaufnahme eines grünen Kronendachs, durch das sich ein schmaler Fluss windet",
+      "caption": "Von oben sieht der Dschungel aus wie ein riesiges, grünes Meer.",
+      "license": "CC BY-SA 2.0",
+      "license_author": "Neil Palmer/CIAT",
+      "source_url": "https://commons.wikimedia.org/wiki/File:Amazon_CIAT_(3).jpg",
+      "wikimedia_id": "File:Amazon_CIAT_(3).jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Amazon_CIAT_%283%29.jpg/1920px-Amazon_CIAT_%283%29.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/Amazon_CIAT_(3)_300.jpg",
+        "800": "bilder/regenwald/Amazon_CIAT_(3)_800.jpg"
+      }
+    },
+    {
+      "index": 7,
+      "filename": "09_09_2021_Visita_à_Usina_Hidrelétrica_Belo_Monte_(51443381900).jpg",
+      "alt": "Eine riesige Betonstaumauer staut einen Fluss im waldreichen Gebiet auf",
+      "caption": "Große Bauwerke wie Staudämme nehmen den Tieren ihren Lebensraum.",
+      "license": "CC BY 2.0",
+      "license_author": "Vice-Presidência da República from Brasil",
+      "source_url": "https://commons.wikimedia.org/wiki/File:09_09_2021_Visita_%C3%A0_Usina_Hidrel%C3%A9trica_Belo_Monte_%2851443381900%29.jpg",
+      "wikimedia_id": "File:09_09_2021_Visita_%C3%A0_Usina_Hidrel%C3%A9trica_Belo_Monte_%2851443381900%29.jpg",
+      "thumb_url": "https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/09_09_2021_Visita_%C3%A0_Usina_Hidrel%C3%A9trica_Belo_Monte_%2851443381900%29.jpg/1920px-09_09_2021_Visita_%C3%A0_Usina_Hidrel%C3%A9trica_Belo_Monte_%2851443381900%29.jpg",
+      "is_hero": false,
+      "ab_stufe": 1,
+      "grenzfall": false,
+      "tiers": {
+        "300": "bilder/regenwald/09_09_2021_Visita_à_Usina_Hidrelétrica_Belo_Monte_(51443381900)_300.jpg",
+        "800": "bilder/regenwald/09_09_2021_Visita_à_Usina_Hidrelétrica_Belo_Monte_(51443381900)_800.jpg"
+      }
+    }
+  ],
+  "sections": [
+    {
+      "id": "intro",
+      "heading": "Willkommen im nassen Paradies",
+      "section_role": "intro",
+      "sentences": [
+        {
+          "id": "s001",
+          "text": "Stell dir einen Ort vor, an dem es fast jeden Tag kräftig regnet.",
+          "img_index": 0
+        },
+        {
+          "id": "s002",
+          "text": "Das ist der Regenwald.",
+          "img_index": 0
+        },
+        {
+          "id": "s003",
+          "text": "Es gibt ihn in heißen Gebieten am Äquator, aber auch in kühleren Zonen.",
+          "img_index": 1
+        },
+        {
+          "id": "s004",
+          "text": "Hier fällt das ganze Jahr über unglaublich viel Wasser vom Himmel.",
+          "img_index": 1
+        },
+        {
+          "id": "s005",
+          "text": "Dieses feuchte Klima sorgt dafür, dass hier unzählige Pflanzen und Tiere leben.",
+          "img_index": 1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "appearance_equipment",
+      "heading": "Das riesige grüne Stockwerkbett",
+      "sentences": [
+        {
+          "id": "s006",
+          "text": "Von oben betrachtet sieht der Regenwald wie ein grünes Meer aus Baumkronen aus.",
+          "img_index": 3
+        },
+        {
+          "id": "s007",
+          "text": "Diese Kronen bilden ein dichtes Dach in ungefähr 30 Metern Höhe.",
+          "img_index": 3
+        },
+        {
+          "id": "s008",
+          "text": "Einige Bäume ragen doppelt so hoch wie die anderen heraus.",
+          "img_index": 3
+        },
+        {
+          "id": "s009",
+          "text": "Vielleicht kennst du Feigen als leckeres Obst.",
+          "img_index": 3
+        },
+        {
+          "id": "s010",
+          "text": "Hier im Wald leben manche Arten ganz besonders: als Würgefeigen.",
+          "img_index": 3
+        },
+        {
+          "id": "s011",
+          "text": "Ihre Samen keimen weit oben auf anderen Bäumen.",
+          "img_index": 3
+        },
+        {
+          "id": "s012",
+          "text": "Sie lassen Luftwurzeln zum Boden wachsen und umschließen den Wirtsbaum, bis er abstirbt.",
+          "img_index": 4
+        },
+        {
+          "id": "s013",
+          "text": "Hoch oben hangeln sich Faultiere extrem langsam durch die Äste.",
+          "img_index": 4
+        },
+        {
+          "id": "s014",
+          "text": "Sie fressen Blätter und haben sogar winzige Algen im Fell, die sie grün färben.",
+          "img_index": 4
+        },
+        {
+          "id": "s015",
+          "text": "Am Boden schneiden fleißige Blattschneiderameisen Blätter in Stücke.",
+          "img_index": 4
+        },
+        {
+          "id": "s016",
+          "text": "Sie tragen sie in ihren Bau, um einen Pilz als Nahrung zu züchten.",
+          "img_index": 4
+        },
+        {
+          "id": "s017",
+          "text": "Dazwischen hüpfen bunte Baumsteigerfrösche.",
+          "img_index": 4
+        },
+        {
+          "id": "s018",
+          "text": "Sie warnen Feinde mit grellen Farben und tragen ihre Kaulquappen zum Schutz in wassergefüllte Blätter.",
+          "img_index": 4
+        }
+      ],
+      "boxes": [
+        {
+          "type": "wow",
+          "text": "Eine einzige Kolonie von Blattschneiderameisen kann an jedem Tag so viele Blätter abschneiden, wie eine ganze, ausgewachsene Kuh frisst!"
+        }
+      ],
+      "table": null
+    },
+    {
+      "id": "behavior_life",
+      "heading": "Die Heime der Waldmenschen",
+      "sentences": [
+        {
+          "id": "s019",
+          "text": "Menschen leben schon seit über 11.000 Jahren im Amazonas-Regenwald.",
+          "img_index": -1
+        },
+        {
+          "id": "s020",
+          "text": "Heute wohnen dort noch viele indigene Völker, also die ursprünglichen Bewohner.",
+          "img_index": -1
+        },
+        {
+          "id": "s021",
+          "text": "Sie nutzen den Wald vorsichtig und pflanzen Bananen oder Maniok an.",
+          "img_index": -1
+        },
+        {
+          "id": "s022",
+          "text": "Maniok ist eine Pflanze mit nahrhaften Wurzeln.",
+          "img_index": -1
+        },
+        {
+          "id": "s023",
+          "text": "Früher bauten die Menschen sogar große Straßen, Plätze und künstliche Gärten.",
+          "img_index": -1
+        },
+        {
+          "id": "s024",
+          "text": "Sie machten den Boden mit Nährstoffen fruchtbar.",
+          "img_index": -1
+        },
+        {
+          "id": "s025",
+          "text": "Diese schwarze Erde heißt Terra preta.",
+          "img_index": -1
+        },
+        {
+          "id": "s026",
+          "text": "Es gibt dort sogar rund 100 Völker ohne Kontakt zur Außenwelt.",
+          "img_index": -1
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "historical_context",
+      "heading": "Wie der Urwald entstand",
+      "sentences": [
+        {
+          "id": "s027",
+          "text": "Als die Dinosaurier ausstarben, wurde das Klima auf der Erde feuchter.",
+          "img_index": 6
+        },
+        {
+          "id": "s028",
+          "text": "Vor rund 40 Millionen Jahren bildete sich dann der riesige Amazonas-Regenwald.",
+          "img_index": 6
+        },
+        {
+          "id": "s029",
+          "text": "Der Atlantische Ozean war damals so groß geworden, dass er feuchtwarme Luft über das Land blies.",
+          "img_index": 6
+        },
+        {
+          "id": "s030",
+          "text": "So entstand das perfekte Wetter für die dichten Urwälder.",
+          "img_index": 6
+        }
+      ],
+      "boxes": [],
+      "table": null
+    },
+    {
+      "id": "today_legacy",
+      "heading": "Ein grüner Schatz in großer Gefahr",
+      "sentences": [
+        {
+          "id": "s031",
+          "text": "Der Regenwald ist sehr wichtig für das Wetter auf unserer ganzen Erde.",
+          "img_index": 7
+        },
+        {
+          "id": "s032",
+          "text": "Doch die grüne Lunge ist in Gefahr.",
+          "img_index": 7
+        },
+        {
+          "id": "s033",
+          "text": "Riesige Flächen werden abgeholzt, um Weideplätze für Rinder oder Sojafelder zu schaffen.",
+          "img_index": 7
+        },
+        {
+          "id": "s034",
+          "text": "Auch Staudämme und Fabriken für Aluminium zerstören die Natur.",
+          "img_index": 7
+        },
+        {
+          "id": "s035",
+          "text": "Fast ein Fünftel des Amazonas-Waldes wurde bereits vernichtet.",
+          "img_index": 7
+        },
+        {
+          "id": "s036",
+          "text": "Verschwindet zu viel Wald, könnte sich der grüne Dschungel in eine trockene Savanne verwandeln.",
+          "img_index": 7
+        }
+      ],
+      "boxes": [
+        {
+          "type": "warnung",
+          "text": "In nur einem einzigen Jahr ging im Amazonasgebiet so viel Wald verloren, wie auf eine Million Fußballfelder passt! Wenn Bäume brennen, geben sie gefährliches Kohlendioxid in die Luft ab."
+        }
+      ],
+      "table": null
+    }
+  ],
+  "quiz": {
+    "questions": [
+      {
+        "id": "q1",
+        "text": "Wo keimen die Samen der Würgefeigen am liebsten?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Weit oben auf den Ästen anderer Bäume"
+          },
+          {
+            "key": "B",
+            "text": "Tief unter der Erde im dunklen Dschungelboden"
+          },
+          {
+            "key": "C",
+            "text": "Mitten im Flusswasser des Amazonas"
+          }
+        ],
+        "correct_key": "A"
+      },
+      {
+        "id": "q2",
+        "text": "Was züchten die Blattschneiderameisen in ihrem unterirdischen Bau?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Kleine bunte Baumsteigerfrösche"
+          },
+          {
+            "key": "B",
+            "text": "Einen speziellen Pilz, den sie fressen"
+          },
+          {
+            "key": "C",
+            "text": "Süße grüne Feigenfrüchte"
+          }
+        ],
+        "correct_key": "B"
+      },
+      {
+        "id": "q3",
+        "text": "Wie alt ist der Amazonas-Regenwald ungefähr?",
+        "options": [
+          {
+            "key": "A",
+            "text": "Etwa zehntausend Jahre"
+          },
+          {
+            "key": "B",
+            "text": "Ungefähr eine Million Jahre"
+          },
+          {
+            "key": "C",
+            "text": "Rund 40 Millionen Jahre"
+          }
+        ],
+        "correct_key": "C"
+      }
+    ]
+  },
+  "related_terms": {
+    "core": [
+      "Dschungel",
+      "Amazonas",
+      "Urwald",
+      "Klima"
+    ],
+    "discover": [
+      "Ameisen",
+      "Feigen",
+      "Faultiere",
+      "Pfeilgiftfrosch"
+    ]
+  },
+  "source_passages": [
+    {
+      "claim": "Stell dir einen Ort vor, an dem es fast jeden Tag kräftig regnet.",
+      "source": "Regenwald",
+      "passage": "Als Regenwald bezeichnet man Wälder, die durch ganzjährig fallende, große Niederschlagsmengen gekennzeichnet sind."
+    },
+    {
+      "claim": "Diese Kronen bilden ein dichtes Dach in ungefähr 30 Metern Höhe.",
+      "source": "Amazonas-Regenwald",
+      "passage": "Der amazonische Wald besitzt von oben betrachtet das Erscheinungsbild eines „Meeres von Baumkronen“. Sie befinden sich etwa 30 Meter oberhalb des Bodens."
+    },
+    {
+      "claim": "Einige Bäume ragen doppelt so hoch wie die anderen heraus.",
+      "source": "Amazonas-Regenwald",
+      "passage": "An einigen Stellen wird die „Oberfläche“ von bis zu doppelt so hohen „Urwaldriesen“ überragt."
+    },
+    {
+      "claim": "Sie lassen Luftwurzeln zum Boden wachsen und umschließen den Wirtsbaum, bis er abstirbt.",
+      "source": "Feigen",
+      "passage": "Sie umschließen allmählich ihren Trag- oder Wirtsbaum, der schließlich abstirbt, wodurch sich im Inneren der Würgefeige ein Hohlraum bildet."
+    },
+    {
+      "claim": "Sie fressen Blätter und haben sogar winzige Algen im Fell, die sie grün färben.",
+      "source": "Faultiere",
+      "passage": "In den Haaren siedeln Algen, die den Tieren zwischen den Blättern als grün-changierende Färbung zugutekommen – ein Effekt, der vor allem in der Regenzeit deutlich zu Tage tritt."
+    },
+    {
+      "claim": "Sie tragen sie in ihren Bau, um einen Pilz als Nahrung zu züchten.",
+      "source": "Blattschneiderameise",
+      "passage": "Sie fressen nicht selbst die Blätter, sondern zerkauen sie und verwenden sie als Substrat, um darauf einen speziellen Pilz aus der Gattung der Egerlingsschirmlinge (Leucoagaricus) wachsen zu lassen, von dem sie sich ernähren."
+    },
+    {
+      "claim": "Sie warnen Feinde mit grellen Farben und tragen ihre Kaulquappen zum Schutz in wassergefüllte Blätter.",
+      "source": "Baumsteigerfrösche",
+      "passage": "Mit ihrer auffälligen Körperfärbung signalisieren Pfeilgiftfrösche ihre Ungenießbarkeit... Jungtiere klettern tagsüber auf den Rücken und werden auch tageweise auf dem Männchen in kleinste Wasseransammlungen auf Pflanzen (Phytotelmata), etwa mit Wasser gefüllte Blattachseln, überführt."
+    },
+    {
+      "claim": "Menschen leben schon seit über 11.000 Jahren im Amazonas-Regenwald.",
+      "source": "Amazonas-Regenwald",
+      "passage": "Archäologische Untersuchungen in der Höhle von Pedra Pintada legen nahe, dass Menschen seit mindestens 11.200 Jahren in der Amazonasregion leben."
+    },
+    {
+      "claim": "Diese schwarze Erde heißt Terra preta.",
+      "source": "Amazonas-Regenwald",
+      "passage": "der Amazonasregenwald... wurde durch die Anlage von Waldgärten sowie durch künstlich mit Nährstoffen angereicherte Böden (Terra preta) vom Menschen geformt wurde."
+    },
+    {
+      "claim": "Vor rund 40 Millionen Jahren bildete sich dann der riesige Amazonas-Regenwald.",
+      "source": "Amazonas-Regenwald",
+      "passage": "Der Amazonas-Regenwald bildete sich vermutlich während des mittleren Eozäns (Bartonium) vor rund 40 Millionen Jahren."
+    },
+    {
+      "claim": "Riesige Flächen werden abgeholzt, um Weideplätze für Rinder oder Sojafelder zu schaffen.",
+      "source": "Amazonas-Regenwald",
+      "passage": "70 % der vorher entwaldeten und 91 % der seit 1970 entwaldeten Böden Amazoniens werden als Viehweiden verwendet. Außerdem ist Brasilien nach den Vereinigten Staaten der zweitgrößte Produzent von Soja."
+    },
+    {
+      "claim": "Fast ein Fünftel des Amazonas-Waldes wurde bereits vernichtet.",
+      "source": "Amazonas-Regenwald",
+      "passage": "Insgesamt wurden bereits rund 20 Prozent des Amazonasregenwaldes entwaldet und nur ein Drittel ist noch in einem intakten Zustand."
+    }
+  ]
+}
