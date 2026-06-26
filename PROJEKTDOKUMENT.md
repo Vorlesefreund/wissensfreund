@@ -238,3 +238,21 @@ Gemini-Fallback). TTS blieb bewusst Gemini.
   2. ~~Companion-Verortung unverifiziert~~ → Companion-Prompt auf die sachliche Vor-Weg-B-Fassung (a10a6db) zurückgesetzt; Verortungs-/Faszinations-Varianten verworfen.
   3. ~~Trim-Schärfe bei Anthropic-Overshoot~~ → gegenstandslos (Trim wieder Gemini).
   4. ~~Vision-Migration auf Haiku~~ → nicht weiterverfolgt; Vision bleibt gemini-2.5-flash, Opus-Recheck (pre-Weg-B) bleibt.
+
+### Companion-Auswahl: Faszinations-Kriterien + Vielfalt (offen, 26.06.2026)
+
+**Stand: providerunabhängige Verbesserung, auf Branch `companion-faszination-vielfalt-2026-06` gesichert (lokal + GitHub), auf main bewusst NOCH NICHT gemergt — Merge aufgeschoben, bis die Companion-Auswahl im Folge-Chat überdacht ist.** Betrifft die Companion-Auswahl (Kompass), NICHT die verworfene Sonnet-Generierung — läuft auf dem eingefrorenen Gemini-3.5-flash-Kompass.
+
+**(a) Faszinations-Companion-Kriterien — bewährt, uncommitted.**
+Zwei Steuer-Bullets in `COMPANION_PROMPT_TMPL` (`generate_grounded.py`), eingehängt als erste Auswahlkriterien:
+- „Faszinations-Test" (Staunen/Drama/Bewegung/Geheimnis vor ordnenden Oberbegriffen; Beispiel Erde: Vulkan/Dinosaurier/Regenbogen statt Sonnensystem/Kontinente/Erdatmosphäre)
+- „Dynamisch vor statisch" (Vorgang/Ereignis vor Eigenschaft/Kategorie)
+
+Beleg: 9 Stage-1-Läufe (Vulkan/Wal/Dinosaurier je 3×) → KONSTANT lebendige Companions, 0 trockene Großbegriffe. Restvarianz nur zwischen lebendigen Optionen. Gegenstück: der reine a10a6db-Prompt (aktuell COMMITTETER Einfrier-Stand) ist schwach steuernd und würfelt (Erde mal Vulkan/Wasserkreislauf, mal Pangaea/Erdkern).
+
+⚠️ **STAND:** Die Bullets sind auf dem Branch gesichert (nicht verlustgefährdet). main ist bewusst OHNE diese Bullets eingefroren. Reaktivierung: entweder den Branch nach main mergen (erzeugt erwartbaren Merge-Konflikt in diesem Kapitel, bewusst auflösen) ODER die Companion-Auswahl im Folge-Chat neu konzipieren und den Branch ggf. verwerfen. Product-Owner-Entscheidung zum Mergen steht aus. (Beim Mergen zusätzlich nötig: verify-Check-Anpassung, da Companion-Prompt nicht mehr byte-identisch a10a6db.)
+
+**(b) Vielfalt der Blickwinkel — getestet, beide Kriterien erfüllt (26.06.).**
+Beobachtung (Product Owner): Companion-Wahl teils einseitig — Dino lieferte je 3 Dino-Arten (Tyrannosaurus/Argentinosaurus/Archaeopteryx), Wal 4 Arten; der volle Erde-Lauf (Teil B) nur 4 statt 5 Companions, mit Pangaea im Graubereich. Lebendig ja, aber nicht bunt/breit genug.
+Lösungsansatz: drittes Steuer-Bullet „Vielfalt der Blickwinkel (lebendig bleibt Vorrang)" — wähle verschiedene Blickwinkel-Typen (Art/Ereignis/Schauplatz/Phänomen/Person/Erforschung/Größen-Lebensraum-Bezug), nicht mehrfach dieselbe Sorte; NIE lebendigen Anker durch trockenen Großbegriff ersetzen, nur um Vielfalt zu erhöhen; 5 Plätze ausschöpfen wo lebendige Anker existieren.
+Test (Dino/Vulkan/Wal/Erde je 3× = 12 Stage-1-Läufe, alle sauber, kein 503/Bug). Prüfkriterium zweigeteilt — beide erfüllt: (1) **Vielfalt gestiegen** (deutlich bei Erde: 4→5 Slots, Pangaea verschwunden, breite Typen [Marianengraben/Chicxulub/Meteorit]; deutlich bei Wal: 4 Arten → 3 Arten + benanntes Einzeltier „Keiko (Orca)" + Phänomen „Walgesang"; leicht bei Vulkan [neu Person/Mythos „Vulcanus", Größen-Bezug]; neutral bei Dino — nirgends gesunken). (2) **Lebendigkeit gehalten** (0 klar trockene Companions über 59, ein einziger Graubereich: „Erdkern"). Damit Commit-Gate (Vielfalt ↑ UND Lebendigkeit gehalten) erfüllt → auf diesem Branch gesichert.
