@@ -238,3 +238,17 @@ Gemini-Fallback). TTS blieb bewusst Gemini.
   2. ~~Companion-Verortung unverifiziert~~ → Companion-Prompt auf die sachliche Vor-Weg-B-Fassung (a10a6db) zurückgesetzt; Verortungs-/Faszinations-Varianten verworfen.
   3. ~~Trim-Schärfe bei Anthropic-Overshoot~~ → gegenstandslos (Trim wieder Gemini).
   4. ~~Vision-Migration auf Haiku~~ → nicht weiterverfolgt; Vision bleibt gemini-2.5-flash, Opus-Recheck (pre-Weg-B) bleibt.
+
+### Artikelqualität hängt primär an Companion-Auswahl, nicht am Generator (Befund 26.06.2026)
+
+Diagnose-Anlass: Ein voller Erde-Lauf (gemini-3.5-flash/v4, Companions Vulkan/Polarlicht/Erdbeben/Pangaea) war inhaltlich deutlich schwächer als ein früherer guter Erde-Lauf (25.06., Companions Vulkan/Wasserkreislauf/Regenbogen/Dinosaurier/Mond): schmälere Themen, unpassender Schwerpunkt auf der fernen Zukunft der Sonne (düster/kindfern).
+
+**Sauberer Vergleich (verifiziert):** Beide Läufe identisch in Modell (gemini-3.5-flash), Prompt (v4), Temperatur (1.0), Thinking (MEDIUM), Primärquelle (WP „Erde"). EINZIGER Unterschied = die Companions. → Qualitätsunterschied ist auf Companions + Sampling zurückführbar, NICHT auf Prompt-Drift oder Generator-Defekt.
+
+**Mechanismus (belegt über `source_passages`-Verteilung):** Guter Lauf stützte sich auf 4 Erde-Passagen + reichlich Companion-Stoff (Dino 3×, Vulkan 2×, Wasserkreislauf, Regenbogen, Mond). Schwacher Lauf stützte sich 17× auf den Primärartikel Erde, weil lebendige Companions fehlten — und griff für die Schluss-Sektion zum dramatischsten Primärtext-Block (Sonnen-Apokalypse, sauber grounded, aber kindfern).
+
+**Schlussfolgerung:** Der Companion-Hebel (Faszinations + Vielfalt, Branch `companion-faszination-vielfalt-2026-06`) adressiert die WURZEL — gute Companions hätten die Schluss-Sektion mit lebendigem Stoff gefüllt und den Sonnen-Schwerpunkt vermieden.
+
+**NÄCHSTER SCHRITT (offen):** Mehrere (2–3) volle Erde-Läufe MIT den verbesserten Companions generieren und lesen. Prüffrage: Liefert Flash mit guten Companions KONSTANT den lebendigen, breit gestreuten Artikel — oder bleibt trotz guter Companions zu viel Lauf-zu-Lauf-Varianz (Temperatur 1.0 ist hoch)? Erst das zeigt, ob der eingefrorene Stand produktionstauglich ist. Falls zu viel Varianz: Hebel Temperatur senken oder Mehrfach-Generierung-mit-Auswahl erwägen.
+
+**SEKUNDÄRER, COMPANION-UNABHÄNGIGER PUNKT (optional, prompt-steuerbar):** v4 sagt nichts gegen düster-ferne Zukunfts-Schwerpunkte in Kinderartikeln. Eine Generator-Prompt-Regel („kein apokalyptischer Fern-Zukunfts-Fokus für Kinder") könnte als zusätzliche Absicherung erwogen werden — Wurzel bleibt aber die Companion-Auswahl, nicht ein v4-Defekt.

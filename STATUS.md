@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-26T13:07:05Z -->
+<!-- updated: 2026-06-26T21:53:49Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **WEG B VERWORFEN + RÜCKBAU ABGESCHLOSSEN (26.06.2026)** — Generierung zurück auf
@@ -20,6 +20,14 @@
 > **PROJEKT PAUSIERT (26.06.2026):** Generierung eingefroren auf Gemini Flash + v4.
 > Reaktivierung sobald Gemini-503 behoben. Details: PROJEKTDOKUMENT
 > „Eingefrorener Stand & Reaktivierung". (Weg-B-Punkte entfernt — Strang verworfen.)
+>
+> **COMPANION-VERBESSERUNG (26.06.2026, auf Branch, NICHT auf main):** Faszinations- +
+> Vielfalts-Kriterien für die Companion-Auswahl auf Branch
+> `companion-faszination-vielfalt-2026-06` gesichert (9+12 Stage-1-Läufe, Gate erfüllt).
+> Merge nach main bewusst aufgeschoben — Companion-Auswahl + Generator-Prompting werden
+> im Folge-Chat neu überdacht. Befund dazu: PROJEKTDOKUMENT Kap. 10 „Artikelqualität
+> hängt primär an Companion-Auswahl". Offener nächster Schritt: 2–3 volle Erde-Läufe
+> mit den Branch-Companions zur Varianz-Prüfung.
 >
 > **OFFENE Punkte nach Priorität:**
 > - **Companion-Auswahl ist stufen-blind (diagnostiziert): KEIN Defekt** — Auswahl liefert
