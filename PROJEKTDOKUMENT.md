@@ -132,6 +132,7 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 | 25.06.2026 | **Weg B — Trim + Box-Repair auf Sonnet** (Modell-Eignungsbefund: Haiku kürzt nicht — reduziert die Wortzahl bei Overshoot kaum). |
 | 25.06.2026 | **Weg B — Quote-Repair typografie-erhaltend** in `parse_article_json` (transport-agnostisch; behebt den ASCII-Schluss-Anführungszeichen-Defekt `„…"`, der das JSON-Parsing brach). |
 | 25.06.2026 | **Weg B — Companion-Robustheit:** Such-Fallback via `resolve_lemma` (Verlustrate 35 %→~0), 429-Härtung des WP-Lookups via `_wp_get`, kulturelle Verortung im Kompass-Prompt (greifbar vor abstrakt, Nähe zum Kind im deutschsprachigen Raum — Wirkung noch unverifiziert wegen WP-Rate-Limit). |
+| 26.06.2026 | **Weg B (Gemini→Claude für Generierung) VERWORFEN.** Sonnet 4.6 als Generator stilistisch nicht ausreichend: faktentreu, aber nicht kindgerecht-flüssig erzählend (Product-Owner-Urteil). Getestet an Erde S1/S2/S3 über `sonnet_v1` (pro-narrativ), `sonnet_v2` (Erzählbogen+Brücken), `sonnet_v3` (Bogen vor Fakten-Quote) und `gemini_v1` (Geminis eigener Prompt auf Sonnet). Zwei externe Stilgutachten (Gemini 3.1 Pro) + Claude-Code-Prompt-Analyse: konvergierender Befund = Sonnets gewissenhaft-sachliches Temperament erreicht Flashs Erzählfluss per Prompt nur teilweise; formale Fehler (Moderatorenfragen, Klammer-Prozente) behebbar, aber Kern-Erzählfluss bleibt zurück. Flash bleibt das überlegene Erzähl- UND Companion-Auswahl-Modell. **Konsequenz:** Pipeline-Generierung eingefroren auf Vor-Weg-B (Gemini Flash + v4). Reaktivierung sobald Gemini Flash wieder zuverlässig (503 behoben). Details: Abschnitt „Eingefrorener Stand & Reaktivierung (26.06.2026)". |
 
 ### gemini-3.1-flash-lite (getestet 2026-06-25, abgelehnt)
 - JSON-Zuverlässigkeit: 9/9 ✅ (besser als 2.5-flash)
@@ -143,6 +144,37 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
   durch Prompt-Optimierung behebbar (struktureller Fähigkeitsunterschied)
 - Konsequenz: Produktion wartet auf Rückkehr von gemini-3.5-flash;
   kein weiterer Optimierungsaufwand für 3.1-flash-lite
+
+---
+
+## Eingefrorener Stand & Reaktivierung (26.06.2026)
+
+> Für ein künftiges Ich / eine neue Chat-Instanz: das hier ist der maßgebliche Zustand.
+
+**STATUS:** Die Generierung läuft wieder auf **gemini-3.5-flash + `wissensfreund_generator_prompt_v4_production.md`** (= Vor-Weg-B-Stand). Auf diesem Stand ist das Projekt **produktionsbereit**, aber bewusst **pausiert**, weil gemini-3.5-flash zeitweise unzuverlässig ist (503 / Service-Erschöpfung). Es ist KEIN Code-Defekt offen — es ist ein Warten auf die Modell-Verfügbarkeit.
+
+**WAS WEG B WAR:** Versuch, die Generierung von Gemini auf Claude zu migrieren (Motiv: die 503-Ausfälle). Verworfen, weil Sonnet 4.6 als Generator stilistisch nicht kindgerecht genug erzählt (faktentreu, aber faktenlastig statt flüssig). Begründung im Detail: Entscheidungs-Log 26.06.2026.
+
+**WAS BLEIBT (providerunabhängige Härtungen — NICHT zurückgebaut, verbessern auch den Flash-Betrieb):**
+- typografie-erhaltender Quote-Repair `_repair_article_quotes` / `parse_article_json` (`abb7505`, geschärft `c8e49a5`)
+- PHASE-A per-Artikel-Fehlerbehandlung — ein defekter Artikel killt nicht den Batch (`75cbfd1`)
+- Companion-Such-Fallback via `resolve_lemma`, Verlustrate 35 %→~0 (`d9d8775`)
+- Wikipedia-429-Härtung `_wp_get` + `_companion_target_ok` (`bae2f8e`)
+- verify `regex`-Dispatch (`b1f83d8`)
+
+**WAS DORMANT IM REPO LIEGT (ungenutzt, solange keine Stage außer `vision_recheck`/`lektorat` auf anthropic steht):**
+- `scripts/claude_client.py` — anbieter-neutraler JSON-Wrapper (forced tool-use). Wird vom **Opus-Vision-Recheck** weiter gebraucht (der ist **pre-Weg-B** und providerunabhängig — bleibt).
+- `scripts/test_sonnet_batch.py` — Weg-B-Test.
+- `scripts/stage_models.py` — bleibt als zentraler Provider/Modell-Single-Point; alle Generierungs-Stufen stehen auf `gemini` (nur `vision_recheck`=Opus, `lektorat`=Sonnet, beide pre-Weg-B). Der Mechanismus, eine Stufe wieder auf `anthropic` zu schalten, bleibt erhalten.
+
+**WAS ARCHIVIERT IST:** `archiv/weg_b_2026-06/` — `sonnet_v1`/`v2`/`v3` + `gemini_v1` Generator-Prompts, `refetch_sonnet_batch.py`, plus `README.md` mit dem vollständigen Befund. Aufbewahrt für einen etwaigen künftigen Anlauf mit einem stärkeren Modell.
+
+**REAKTIVIERUNGS-CHECKLISTE (wenn Gemini Flash wieder zuverlässig ist):**
+1. Gemini-503-Lage prüfen — kleiner Testlauf über einige Themen.
+2. Die Generierung läuft **bereits** auf Gemini — **kein Umschalten nötig**, nur die Verfügbarkeit verifizieren, dann Produktion fortsetzen.
+3. Optional: `stage_models.py` erlaubt jederzeit ein erneutes Provider-Experiment (Mechanismus bleibt) — die verify-Checks „Generierung eingefroren: … = Gemini" schützen bis dahin vor unbeabsichtigtem Drift.
+
+**REAKTIVIERUNG EINES CLAUDE-GENERATOR-VERSUCHS (falls je ein stärkeres Sonnet-Nachfolgemodell verfügbar ist):** `archiv/weg_b_2026-06/` enthält die ausgereiften Prompt-Iterationen **und** den Befund, woran Sonnet 4.6 scheiterte (Erzählfluss-Temperament, nicht formale Regeln). Dort ansetzen, nicht bei Null.
 
 ---
 
@@ -186,19 +218,23 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 - **verify-Check gegen hartcodierte Versionsstempel erwägen** (damit diese Drift nicht wiederkehrt): ein `verify_project_facts.py`-Check, der sicherstellt, dass `generation_method` aus dem Prompt-Pfad abgeleitet und nicht erneut hartcodiert wird.
 - **Optional-Polish:** ZWK-Beispiel und Edit-2-Beispiel („das Land war einmal geteilt") als konkrete Szene schärfen (demonstrieren noch die alte „eindampfen"-Idee).
 
-### Weg B — Provider-Neutralität (Gemini → Claude)
+### Weg B — Provider-Neutralität (Gemini → Claude) — ❌ VERWORFEN/ABGESCHLOSSEN (26.06.2026)
 
-Architektur-Strang (begonnen 25.06.2026). Ziel: die Generierungs-Pipeline unabhängig
+> **Strang abgeschlossen und verworfen** (Sonnet-Generator stilistisch unzureichend — siehe
+> Entscheidungs-Log 26.06.2026 + Abschnitt „Eingefrorener Stand & Reaktivierung"). Generierung
+> ist auf Vor-Weg-B (Gemini Flash + v4) zurückgebaut. Historie erhalten, NICHT gelöscht.
+> Die früheren OFFEN-Punkte dieses Strangs sind damit **obsolet durch Rückbau**.
+
+Architektur-Strang (begonnen 25.06.2026, verworfen 26.06.2026). Ziel war: die Generierungs-Pipeline unabhängig
 von gemini-3.5-flash betreiben (Anlass: ~30 h 503-Unzuverlässigkeit, kein produktionsreifer
-Gemini-Fallback). TTS bleibt bewusst Gemini.
+Gemini-Fallback). TTS blieb bewusst Gemini.
 
-- **Was steht (committet):**
-  - `stage_models.py` — zentrale Provider/Modell-Konfig (`STAGE_MODELS` + `get_stage_config` + `ARTICLE_SCHEMA`).
-  - `claude_client.py` — Anthropic-Aufruf mit forced tool-use + auto+thinking-Pfad + Streaming (große max_tokens).
-  - Lemma + Kompass = Haiku 4.5; Trim + Box-Repair = Sonnet 4.6; Generator-**Zweig** in `stage2_generierung` (Anthropic Message-Batches) inkl. Batch-Create-Retry, `_destringify_article`, Quote-Repair.
-  - Companion-Such-Fallback via `resolve_lemma` (Verlustrate 35 %→~0), 429-Härtung via `_wp_get`, kulturelle Verortung im Kompass-Prompt.
-- **OFFEN:**
-  1. **Sonnet-Generator-Testlauf blockiert** durch Anthropic-Batch-502-Infrastörung; `stage_models["generator"]=Sonnet` bleibt lokal **uncommitted** bis der Lauf gelingt.
-  2. **Companion-Verortung unverifiziert** (Haiku-vs-Themen-Vergleich durch WP-Rate-Limit blockiert).
-  3. **Trim-Schärfe** bei großem Overshoot (>200 W) noch zu zahm — an echten Produktions-Wortzahlen messen.
-  4. **Vision-Migration auf Haiku offen:** sensibles Gegentest-Material (WW2/Titanic/Gladiator) ist gesourct, der Vergleich aber noch nicht final ausgewertet (Bildauswahl von Andreas als unzureichend bewertet) — sinnvoll erst nach Verifikation der Companion-Fixes.
+- **Was gebaut wurde (committet, providerunabhängige Teile BLEIBEN aktiv):**
+  - `stage_models.py` — zentrale Provider/Modell-Konfig (`STAGE_MODELS` + `get_stage_config` + `ARTICLE_SCHEMA`). **Bleibt** (Stufen jetzt auf Gemini).
+  - `claude_client.py` — Anthropic-Aufruf mit forced tool-use. **Bleibt dormant** (Opus-Vision-Recheck nutzt es weiter).
+  - Quote-Repair, PHASE-A-Fehlerbehandlung, Companion-Such-Fallback, 429-Härtung — **bleiben** (providerunabhängig).
+- **Obsolet durch Rückbau (waren OFFEN, jetzt gegenstandslos):**
+  1. ~~Sonnet-Generator-Testlauf~~ → durchgeführt (Erde S1/S2/S3 über v1/v2/v3 + gemini_v1); Ergebnis = Verwerfung.
+  2. ~~Companion-Verortung unverifiziert~~ → Companion-Prompt auf die sachliche Vor-Weg-B-Fassung (a10a6db) zurückgesetzt; Verortungs-/Faszinations-Varianten verworfen.
+  3. ~~Trim-Schärfe bei Anthropic-Overshoot~~ → gegenstandslos (Trim wieder Gemini).
+  4. ~~Vision-Migration auf Haiku~~ → nicht weiterverfolgt; Vision bleibt gemini-2.5-flash, Opus-Recheck (pre-Weg-B) bleibt.

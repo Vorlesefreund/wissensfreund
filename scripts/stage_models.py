@@ -9,13 +9,13 @@ fallback: optionaler Modellname (gleicher Provider) bei Erschöpfung — None = 
 """
 
 STAGE_MODELS = {
-    "lemma":          {"provider": "anthropic", "model": "claude-haiku-4-5",  "fallback": None},
-    "kompass":        {"provider": "anthropic", "model": "claude-haiku-4-5",  "fallback": None},
+    "lemma":          {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": None},
+    "kompass":        {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": "gemini-2.5-flash"},
     "vision":         {"provider": "gemini",    "model": "gemini-2.5-flash",  "fallback": None},
     "vision_recheck": {"provider": "anthropic", "model": "claude-opus-4-8",   "fallback": None},
-    "generator":      {"provider": "anthropic", "model": "claude-sonnet-4-6", "fallback": None},
-    "trim":           {"provider": "anthropic", "model": "claude-sonnet-4-6", "fallback": None},
-    "box_repair":     {"provider": "anthropic", "model": "claude-sonnet-4-6", "fallback": None},
+    "generator":      {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": None},
+    "trim":           {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": None},
+    "box_repair":     {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": None},
     "lektorat":       {"provider": "anthropic", "model": "claude-sonnet-4-6", "fallback": None},
 }
 

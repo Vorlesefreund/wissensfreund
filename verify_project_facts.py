@@ -12,23 +12,26 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 
 CHECKS = [
-  {"desc":"GEMINI_MODEL-Konstante (nur noch Default/Fallback, NICHT aktives Kompass/Lemma-Modell)","sev":"FAIL","type":"const",
-   "file":"scripts/generate_grounded.py","const":"GEMINI_MODEL","expect":"gemini-3.5-flash",
-   "note":"Weg B: aktives Lemma/Kompass-Routing laeuft ueber stage_models.py (Haiku); diese Konstante bleibt nur als Default/Fallback bestehen."},
-  # Weg-B-Routing (stage_models.py) — committete Werte CI-schuetzen.
-  # generate_grounded:GEMINI_MODEL ist nur noch Default/Fallback, nicht das aktive Modell.
-  {"desc":"Weg B: Lemma-Routing auf Anthropic (stage_models)","sev":"FAIL","type":"regex",
+  {"desc":"GEMINI_MODEL = aktives Generierungs-Modell (Einfrier-Stand Gemini Flash)","sev":"FAIL","type":"const",
+   "file":"scripts/generate_grounded.py","const":"GEMINI_MODEL","expect":"gemini-3.5-flash"},
+  # Einfrier-Stand-Routing (stage_models.py) — Weg B verworfen 26.06.2026,
+  # Generierung zurueck auf Gemini Flash + v4. Diese Checks schuetzen den
+  # eingefrorenen Vor-Weg-B-Stand vor Drift (bis Gemini Flash wieder zuverlaessig).
+  {"desc":"Generierung eingefroren: Lemma-Routing = Gemini (bis Flash zuverlässig)","sev":"FAIL","type":"regex",
    "file":"scripts/stage_models.py",
-   "pattern":r'"lemma":\s*\{\s*"provider":\s*"anthropic"'},
-  {"desc":"Weg B: Kompass-Routing auf Anthropic (stage_models)","sev":"FAIL","type":"regex",
+   "pattern":r'"lemma":\s*\{\s*"provider":\s*"gemini"'},
+  {"desc":"Generierung eingefroren: Kompass-Routing = Gemini (bis Flash zuverlässig)","sev":"FAIL","type":"regex",
    "file":"scripts/stage_models.py",
-   "pattern":r'"kompass":\s*\{\s*"provider":\s*"anthropic"'},
-  {"desc":"Weg B: Trim-Modell = Sonnet (stage_models)","sev":"FAIL","type":"regex",
+   "pattern":r'"kompass":\s*\{\s*"provider":\s*"gemini"'},
+  {"desc":"Generierung eingefroren: Generator-Routing = Gemini (bis Flash zuverlässig)","sev":"FAIL","type":"regex",
    "file":"scripts/stage_models.py",
-   "pattern":r'"trim":\s*\{\s*"provider":\s*"anthropic",\s*"model":\s*"claude-sonnet-4-6"'},
-  {"desc":"Weg B: Box-Repair-Modell = Sonnet (stage_models)","sev":"FAIL","type":"regex",
+   "pattern":r'"generator":\s*\{\s*"provider":\s*"gemini",\s*"model":\s*"gemini-3.5-flash"'},
+  {"desc":"Generierung eingefroren: Trim = Gemini (bis Flash zuverlässig)","sev":"FAIL","type":"regex",
    "file":"scripts/stage_models.py",
-   "pattern":r'"box_repair":\s*\{\s*"provider":\s*"anthropic",\s*"model":\s*"claude-sonnet-4-6"'},
+   "pattern":r'"trim":\s*\{\s*"provider":\s*"gemini"'},
+  {"desc":"Generierung eingefroren: Box-Repair = Gemini (bis Flash zuverlässig)","sev":"FAIL","type":"regex",
+   "file":"scripts/stage_models.py",
+   "pattern":r'"box_repair":\s*\{\s*"provider":\s*"gemini"'},
   {"desc":"Generator Thinking-Stufe MEDIUM","sev":"FAIL","type":"contains",
    "file":"scripts/generate_grounded.py","needle":"ThinkingLevel.MEDIUM"},
   {"desc":"run_batch.py erbt GEMINI_MODEL (kein eigener Owner)","sev":"FAIL","type":"contains",

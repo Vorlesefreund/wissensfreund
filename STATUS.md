@@ -1,20 +1,27 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-25T21:20:52Z -->
+<!-- updated: 2026-06-26T13:07:05Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
+> **WEG B VERWORFEN + RÜCKBAU ABGESCHLOSSEN (26.06.2026)** — Generierung zurück auf
+> Gemini-3.5-flash + v4_production (Sonnet-Generator stilistisch nicht kindgerecht genug,
+> an Erde S1/S2/S3 über sonnet_v1/v2/v3 + gemini_v1 getestet). `stage_models` alle
+> Generierungs-Stufen auf gemini; Companion-Prompt auf sachliche a10a6db-Fassung; run_batch
+> lädt fix v4. Providerunabhängige Härtungen behalten (Quote-Repair, PHASE-A-Fehlerbehandlung,
+> Companion-Fallback, 429-Härtung, verify). Weg-B-Prompts → `archiv/weg_b_2026-06/`;
+> claude_client.py + test_sonnet_batch.py dormant im Repo. verify: 0 Hart-FAIL (5 Einfrier-Checks).
+> Details: PROJEKTDOKUMENT „Eingefrorener Stand & Reaktivierung".
+>
 > **Stage-1/2/3-Resilienz-Thema GESCHLOSSEN** — alle drei Stages konsistent resume-fähig, real verifiziert
 > (Degradation + Resume unter 503). Vulkan-Verifikation grün: 9-Artikel-A–G-Vergleich vollständig (verify_20260623b),
 > Companion-Fix (Vesuv/Pompeji) + Bildausnutzung + Box-Konkretheit sichtbar wirksam. Der finale Resume am
 > 2026-06-24 lief selektiv: Stage 1 komplett übersprungen, Stage 2/3 nur die 3 fehlenden Vulkan-Artikel/-Lektorate
 > neu, Titanic+WW2 per Datei-Existenz unberührt (Zeitstempel unverändert). Alle 9 Artikel + 9 Lektorate vorhanden.
 >
+> **PROJEKT PAUSIERT (26.06.2026):** Generierung eingefroren auf Gemini Flash + v4.
+> Reaktivierung sobald Gemini-503 behoben. Details: PROJEKTDOKUMENT
+> „Eingefrorener Stand & Reaktivierung". (Weg-B-Punkte entfernt — Strang verworfen.)
+>
 > **OFFENE Punkte nach Priorität:**
-> - **Sonnet-Generator-Testlauf (Schritt 2b) BLOCKIERT** durch Anthropic-Batch-502-Störung.
->   stage_models["generator"] lokal auf Sonnet (uncommitted), Relaunch sobald Infra stabil.
->   Kommando: python scripts/run_batch.py --themen Erde Regenwald Wal --stufen 1 2 3
->   --output-dir articles/wegb_stage1_20260625 --run-id wegb_stage1_20260625 --stage 2
-> - **Companion-Verortung (Commit 3d4430a) WIRKUNG UNVERIFIZIERT** — Haiku-vs-Themen-Vergleich
->   blockiert durch WP-Rate-Limit, nachholen sobald Limit abgeklungen.
 > - **Companion-Auswahl ist stufen-blind (diagnostiziert): KEIN Defekt** — Auswahl liefert
 >   nur Quellmaterial, Stufen-Differenzierung macht der Generator (kennt AGE_LEVEL).
 >   "Holocaust ab S3" wäre ggf. Generator-Prompt-Sache, nicht Kompass.
