@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-27T13:56:58Z -->
+<!-- updated: 2026-06-27T16:20:50Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **WEG B VERWORFEN + RÜCKBAU ABGESCHLOSSEN (26.06.2026)** — Generierung zurück auf
@@ -31,25 +31,27 @@
 > - Vielfalt der Blickwinkel mit Selbst-Probe-Frage
 > - Zwei neue Kriterien: Kulturelle Ankerpunkte (Moby Dick, Mythen) + Wie sieht es dort aus?
 >   (Klimazonen, Biotope)
-> - Harte Ausschlussgründe (Pangaea, Blue Marble, etc.)
-> - Companion-Limit: 3 (für Testlauf; soll später dynamisch 3–5 nach Appeal werden)
-> - 9+12 Stage-1-Läufe auf A/B/C/D/E getestet; E ist Sieger
+> - Harte Ausschlussgründe (Pangaea, Blue Marble etc.)
+> - Companion-Limit: 3 (Testlauf; soll dynamisch 3–5 nach Appeal werden)
+> - 9+12 Stage-1-Läufe auf A/B/C/D/E getestet; E Sieger
 >
 > Generator-Prompt v4 (Branch-Stand):
-> - NARRATIVER FLUSS vereinfacht: Tiefe vor Breite
+> - NARRATIVER FLUSS: Tiefe vor Breite
 > - Wortziel durch Erzähltiefe, nicht neue Fakten
-> - MIKRO-FLUSS: Bindewörter und Bezüge (mit Vorher-Nachher-Beispiel)
-> - S1: im Durchschnitt <12 Wörter, Bindewörter ausdrücklich erwünscht
+> - MIKRO-FLUSS: Bindewörter + Vorher-Nachher-Beispiel
+> - S1: Ø <12 Wörter, Bindewörter erwünscht
 > - S2/S3: Konjunktionen, Lese-Sog, Überleitungen
 > - JSON-Mindset: Denke in Absätzen, gib in Sätzen aus
 > - Docx-Caption-Fix: beschreibung + Originaltitel + Lizenz
 >
 > Testlauf-Stand:
-> - v1-Testlauf (vor Wortziel-Regel): gut, aber zu kurz
-> - v2-Testlauf (mit Wortziel-Regel): schlechter — Faktenflut statt Narration; Wortziel-Regel angepasst
-> - v3-Testlauf: durch Gemini-503 abgebrochen, ausständig
-> - Nächster Schritt: v3-Lauf wenn Flash stabil, dann dynamisches Companion-Limit implementieren,
->   dann Merge-Entscheidung
+> - v1 (vor Wortziel-Regel): gut, zu kurz
+> - v2 (mit Wortziel-Regel): Faktenflut; Regel angepasst
+> - v3: Gemini-503-Dauerschleife + Cache-403-Crash-Bug; Bug gefixt; v3-Lauf ausstehend bis Flash stabil
+> - Nächster Schritt: v3-Lauf, dann dynamisches Companion-Limit (3–5 nach Appeal), dann Merge
+>
+> Bugfix auf Branch:
+> - None-Guard nach Retry-Erschöpfung (Cache-403-Crash)
 >
 > **OFFENE Punkte nach Priorität:**
 > - **Companion-Auswahl ist stufen-blind (diagnostiziert): KEIN Defekt** — Auswahl liefert
