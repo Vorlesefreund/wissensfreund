@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-27T16:20:50Z -->
+<!-- updated: 2026-06-27T17:26:31Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **WEG B VERWORFEN + RÜCKBAU ABGESCHLOSSEN (26.06.2026)** — Generierung zurück auf
@@ -43,11 +43,14 @@
 > - S2/S3: Konjunktionen, Lese-Sog, Überleitungen
 > - JSON-Mindset: Denke in Absätzen, gib in Sätzen aus
 > - Docx-Caption-Fix: beschreibung + Originaltitel + Lizenz
+> - Selektion + narrativer Fluss geschärft (committet+gepusht 376de8a): ERZÄHLFADEN-Feld
+>   in PLANUNG, "Selektion vor Vollständigkeit", Brückenpflicht ohne Ausnahme, Box-Anker =
+>   unmittelbar umgebender Fließtext (sonst streichen)
 >
 > Testlauf-Stand:
 > - v1 (vor Wortziel-Regel): gut, zu kurz
 > - v2 (mit Wortziel-Regel): Faktenflut; Regel angepasst
-> - v3: Gemini-503-Dauerschleife + Cache-403-Crash-Bug; Bug gefixt; v3-Lauf ausstehend bis Flash stabil
+> - v3/v3b: Gemini-503-Zähschleife, abgebrochen (Crash-Guard hielt); v3-Lauf weiter ausstehend bis Flash stabil
 > - Nächster Schritt: v3-Lauf, dann dynamisches Companion-Limit (3–5 nach Appeal), dann Merge
 >
 > Bugfix auf Branch:
