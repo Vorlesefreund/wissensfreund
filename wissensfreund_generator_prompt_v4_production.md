@@ -175,8 +175,25 @@ fünf andeuten.
 - Ton: direkt und warm wie ein gutes Kinderbuch — Überraschung,
   Tempo, lebendige Bilder. Kein Lehrbuch, keine Komödie.
 
+MIKRO-FLUSS: BINDEWÖRTER UND BEZÜGE
+
+Schreibe nicht stakkatoartig. Verbinde Sätze logisch und
+zeitlich, auch in Stufe 1. Vermeide, Sätze immer wieder
+mit demselben Pronomen (Er, Sie, Es, Das) zu beginnen.
+Nutze: deshalb, danach, plötzlich, dort, dabei, so, weil,
+trotzdem, dadurch, denn.
+
+FALSCH: Ein Vulkan ist ein Berg. Er ist sehr heiß. Tief in
+der Erde schmilzt Stein. Der Stein wird flüssig. Er will
+nach oben.
+
+RICHTIG: Ein Vulkan sieht aus wie ein riesiger Berg. Tief
+in seinem Inneren ist es jedoch so heiß, dass sogar Steine
+schmelzen. Dieser flüssige Steinbrodel will danach
+unbedingt nach oben entweichen.
+
 **Die drei Stufen:**
-- **S1 (4–6):** max. 10 Wörter/Satz, eine Idee/Satz, kein Passiv. KEINE Jahreszahlen, keine Fach-/Rechen-/
+- **S1 (4–6):** im Durchschnitt unter 12 Wörter/Satz, kein Satz über 15 Wörter, eine klare Hauptidee/Satz, kein Passiv. Bindewörter (und, aber, weil, deshalb, dort, danach) zählen mit und sind ausdrücklich erwünscht — sie erzeugen Fluss statt Stakkato. Nutze aktive Bezüge zwischen Sätzen. KEINE Jahreszahlen, keine Fach-/Rechen-/
   Präzisionszahlen (kein „3,05 m" → „höher als eine normale Zimmerdecke"); kleine zählbare Alltagszahlen sind
   erlaubt und besser als Vages („9 Nachbarländer"). Einfachste Alltagswörter, direkte Ansprache, Staunen.
   **Szenen-Strategie:** destilliere den EINEN Kern und erzähle ihn als durchgehende konkrete Szene aus der
@@ -184,8 +201,8 @@ fünf andeuten.
   per Handzeichen ab, jede Hand zählt gleich). Schweres Thema → ein echtes Gefühl/eine Erfahrung des Kindes
   (nicht selbst bestimmen dürfen; etwas ist zutiefst unfair), ehrlich, ohne Angst zu machen, ohne zu
   verniedlichen. Lieber eine Sache klar als viele oberflächlich.
-- **S2 (7–9):** max. 18 Wörter/Satz. Jeden Fachbegriff sofort erklären. Kausalität erklären. Heikles knapp.
-- **S3 (10–12):** fachlich korrekt, aber kein Lehrbuchton. Auch hier Fachbegriffe erklären — Länge ist keine
+- **S2 (7–9):** max. 18 Wörter/Satz. Abwechslungsreiche Satzanfänge. Kausalität durch Konjunktionen (weil, da, sodass) fließend einbauen. Jeden Fachbegriff sofort erklären. Kausalität erklären. Heikles knapp.
+- **S3 (10–12):** fachlich korrekt, aber kein Lehrbuchton. Lese-Sog durch Überleitungen am Absatzende erzeugen. Auch hier Fachbegriffe erklären — Länge ist keine
   Ausrede. Kontroversen erwünscht, sachlich. Direkte Ansprache dezent.
 
 ---
@@ -399,6 +416,10 @@ ausschließlich valides JSON. Kein Markdown, keine Kommentare außerhalb des `<p
 ```
 
 **Pflichtregeln für JSON:**
+- Denke in Absätzen, gib in Sätzen aus: Generiere den Fließtext eines Abschnitts mental als zusammenhängenden
+  Absatz mit Bindewörtern und Übergängen. Zerschneide diesen organischen Text erst beim Befüllen des Arrays in
+  einzelne `sentences[]`-Objekte. Das JSON-Format ist Ausgabestruktur, kein Denkmodell — lass dich davon nicht zu
+  roboterhaftem Stakkato verleiten.
 - `meta.schema_version` IMMER `"1.0"` (String). `meta.generated_at` weglassen (Backend setzt es).
 - `meta.id` Format: `<thema_slug>_l<level>` — z. B. `biene_l1`, `motor_l3`.
 - `sentences[].id` global fortlaufend über ALLE Abschnitte: `s001`, `s002` …
