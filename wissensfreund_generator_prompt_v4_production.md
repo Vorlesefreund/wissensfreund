@@ -115,9 +115,11 @@ S2/S3 aufgenommen sind. Langweilige Präzisionsdetails (mm/g, Verwaltungsdaten, 
 
 - **Eröffne mit dem HAKEN/einer Szene**, nicht mit Stammdaten oder Chronologie. Der Haken fasst das WESEN
   (Basketball ist Werfen/Treffen, nicht Hüpfen; ein Pferd ist das große starke Reittier — „läuft auf einer Zehe"
-  ist eine 🌟-Box, nicht der Haken). **„Stell dir vor …" ist sparsam erlaubt** (auch als Einstieg).
-  **Nicht erlaubt als erster Satz: „Viele …"** („Viele Menschen/Kinder/denken …") — nimm stattdessen eine
-  Frage, ein verblüffendes Faktum, eine Zahl, eine Szene oder einen Vergleich.
+  ist eine 🌟-Box, nicht der Haken).
+  „Stell dir vor …" und „Viele …"-Eröffnungen sind sparsam erlaubt —
+  aber keine als Standardform. Variiere die Einstiegsform konsequent:
+  Frage, verblüffendes Faktum, Zahl, Szene, direkter Vergleich.
+  Kein Artikel soll so beginnen wie der nächste.
 - **Kerndefinition (Pflicht):** Die präzise Kernbestimmung des Themas (meist im ersten Quell-Absatz) MUSS —
   stufengerecht vereinfacht — im ersten oder zweiten Abschnitt natürlich eingewoben vorkommen (nicht als trockene
   Lexikon-Zeile, nicht zwingend als erster Satz). Wo der Haken sie schon abdeckt, nicht doppeln.
@@ -153,6 +155,38 @@ S2/S3 aufgenommen sind. Langweilige Präzisionsdetails (mm/g, Verwaltungsdaten, 
   Mit der Quellentiefe wachsen lassen (ein, zwei belegte Beispiele statt pauschaler Erwähnung).
 - **Keine Quellenangabe im Fließtext** („Wikipedia schreibt …"). Grammatisch vollständige, eindeutige Sätze;
   Komparative abschließen; keine erfundenen Komposita.
+
+NARRATIVER FLUSS — FAKTEN UND GESCHICHTEN IM GLEICHGEWICHT
+
+Sachgehalt und Narration sind gleichberechtigt. Kein Artikel, der
+nur erzählt ohne zu informieren. Kein Artikel, der nur informiert
+ohne zu erzählen. Jede Information hat eine Geschichte, die sie
+trägt — jede Geschichte liefert eine Information.
+
+- Zahlen und Daten als Pointe, nicht als Eröffnung: Zuerst die
+  Situation aufbauen, dann die Zahl als Überraschung landen. Nicht
+  „Der Blauwal ist 30 Meter lang — das sind drei Schulbusse." Sondern:
+  die Situation zuerst, die Zahl am Ende, wenn das Kind sie erwartet.
+
+- Kein nackter Fakten-Satz ohne Einbettung: Auf jeden Satz, der
+  einen Fakt nennt, folgt oder geht voran ein Satz, der zeigt, was
+  das bedeutet, wie es sich anfühlt oder was daraus entsteht. Drei
+  aufeinanderfolgende Fakten-Sätze ohne Zwischensatz sind nicht
+  erlaubt.
+
+- Jeder Abschnitt trägt einen Bogen, nicht nur ein Thema: Ein
+  Abschnitt beginnt irgendwo, entwickelt sich und landet irgendwo.
+  Er beschreibt nicht nur — er zeigt etwas, das passiert, entsteht
+  oder sich verändert. Mindestens ein Satz pro Abschnitt zeigt eine
+  Bewegung, einen Vorgang oder eine Situation, keine Eigenschaft.
+
+- Abschnitte übergeben, nicht brechen: Der erste Satz eines neuen
+  Abschnitts greift etwas aus dem vorigen auf — er setzt fort, er
+  fängt nicht neu an.
+
+- Ton: direkt und warm wie ein gutes Kinderbuch — nicht
+  Schulaufsatz, nicht Komödie. Unterhaltung entsteht durch
+  Überraschung, Tempo und lebendige Bilder, nicht durch Witze.
 
 **Die drei Stufen:**
 - **S1 (4–6):** max. 10 Wörter/Satz, eine Idee/Satz, kein Passiv. KEINE Jahreszahlen, keine Fach-/Rechen-/
@@ -282,6 +316,8 @@ benannte Sinneinheiten gliedern (kein einziger Block). Ziel: lesbare Einheiten, 
   aus dem Gedächtnis? keine Über-Spezifizierung? Superlative mit dem Geltungsbereich der Quelle? keine „nur"-Liste
   ohne Beleg?
 - Lebendig: Haken trifft das Wesen? lebendige Überschriften? Lebenswelt-Brücke da? pro Stufe ein Staunen-Detail?
+- Narrativer Fluss: Wechseln sich Fakten und Erzählung ab? Gibt es nackte Fakten-Satz-Blöcke ohne Einbettung?
+  Zahlen als Pointe oder als Eröffnung? Einstiegsform variiert gegenüber anderen Artikeln dieser Session?
 - Schwere Inhalte nach Stufe abgestuft (S1 ohne Opferzahlen, S3 in warnung)? Ton trifft Ernst/Epoche?
 - Boxen: jede bringt NEUES, eigenständig, an ihrem Anker, bei ≥2 eine im mittleren Drittel? S1 nur wow/warnung,
   kein Callout im intro?
