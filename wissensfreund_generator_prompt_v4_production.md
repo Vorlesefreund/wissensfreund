@@ -97,6 +97,7 @@ KINDERWELT_ANKER: [tragender Anknüpfungspunkt aus der Quelle — Jungtiere, Kin
 HAKEN: [Einstieg, der das WESEN des Themas fasst — kein beliebiges Kuriosum, keine bloße Definition.
   Bei Themen mit starkem landläufigem Bild wirksam: vom vertrauten Bild ausgehen und die größere Wahrheit
   enthüllen, z.B. „Kennst du das Bild von X? Dahinter steckt aber …". Das vertraute Bild DARF benannt werden.]
+ERZÄHLFADEN: [Welche 3–4 Fakten aus FAKTEN_S2/S3 ergeben zusammen eine Geschichte? Was bleibt bewusst draußen — und warum?]
 BOX_PLAN_S1: [Typ · Position · Stichwort — max. 1–2 Boxen]
 BOX_PLAN_S2: [Typ · Position · Stichwort — max. 1–2 Boxen]
 BOX_PLAN_S3: [Typ · Position · Stichwort — max. 2–3 Boxen]
@@ -163,15 +164,18 @@ mit echtem Bogen sind besser als sechs Abschnitte als
 Stichwortliste — lieber ein Thema vollständig erzählen als
 fünf andeuten.
 
-- Tiefer statt breiter: Hat ein Abschnitt noch Wortbudget?
-  Nicht ein neues Thema beginnen — den vorhandenen Fakt durch
-  Kontext, Bild oder Konsequenz entwickeln. Was sieht das Kind?
+- Selektion vor Vollständigkeit — Tiefe vor Breite: Wähle den
+  ERZÄHLFADEN und halte ihn durch; Fakten, die nicht in die
+  Geschichte passen, dürfen bewusst wegbleiben. Hat ein Abschnitt
+  noch Wortbudget, kein neues Thema beginnen — den vorhandenen Fakt
+  durch Kontext, Bild oder Konsequenz entwickeln: Was sieht das Kind?
   Was passiert dann? Warum ist das so?
 - Kein Satz, der nur eine Information überträgt: Jeder Fakt
   braucht einen Satz, der zeigt, was er bedeutet oder was
   daraus folgt.
-- Abschnitte übergeben, nicht brechen: Der erste Satz des
-  nächsten Abschnitts greift etwas aus dem vorigen auf.
+- Abschnitte übergeben, nicht brechen: Der erste Satz jedes
+  neuen Abschnitts greift etwas aus dem vorigen auf — kein
+  unvermittelter Themensprung, keine Ausnahme.
 - Ton: direkt und warm wie ein gutes Kinderbuch — Überraschung,
   Tempo, lebendige Bilder. Kein Lehrbuch, keine Komödie.
 
@@ -258,8 +262,9 @@ Nie beschönigen, aber alters-dosieren. Dieselbe Tatsache je Stufe in anderer Ti
   Fließtext, auch in anderen Worten? Dann Box streichen oder mit echtem Zusatzfakt neu füllen. Gilt auch für
   Sätze: jeder Satz trägt eine nicht-triviale Aussage (keine Tautologien
   „Flugzeuge flogen durch die Luft", keine Leerformeln „bewegt sich flink in alle Richtungen").
-- **Platzierung:** Jede Box steht bei dem Abschnitt, den sie ergänzt (an ihrem inhaltlichen Anker), und greift
-  nur auf, was bis dorthin eingeführt ist. **Eine einzelne Box** kommt an ihren Anker, NICHT automatisch ans
+- **Platzierung:** Jede Box steht bei dem Abschnitt, den sie direkt ergänzt — ihr Thema muss im unmittelbar
+  umgebenden Fließtext vorkommen. Eine Box zu einem Thema, das im Artikel sonst nicht behandelt wird, wird
+  gestrichen. **Eine einzelne Box** kommt an ihren Anker, NICHT automatisch ans
   Ende. **Bei zwei oder mehr Boxen** gehört mindestens eine ins mittlere Drittel — nie mehrere am Stück vor dem
   Quiz bündeln.
 - **stimmt_das:** ein echter, verbreiteter Irrglaube (kein gerade erklärtes Detail in Frageform, keine
@@ -326,8 +331,9 @@ benannte Sinneinheiten gliedern (kein einziger Block). Ziel: lesbare Einheiten, 
   aus dem Gedächtnis? keine Über-Spezifizierung? Superlative mit dem Geltungsbereich der Quelle? keine „nur"-Liste
   ohne Beleg?
 - Lebendig: Haken trifft das Wesen? lebendige Überschriften? Lebenswelt-Brücke da? pro Stufe ein Staunen-Detail?
-- Narrativer Fluss: Tiefe vor Breite — gibt es Abschnitte, die ein Thema nur andeuten statt entwickeln? Jeden Fakt-Satz
-  auf Einbettung prüfen. Abschnitte übergeben statt brechen? Einstiegsform variiert?
+- Narrativer Fluss: ERZÄHLFADEN durchgehalten — keine Fakten außerhalb des gewählten Fadens? Jeder Abschnittswechsel
+  mit inhaltlicher Brücke, kein Themensprung? Gibt es Abschnitte, die ein Thema nur andeuten statt entwickeln?
+  Einstiegsform variiert?
 - Schwere Inhalte nach Stufe abgestuft (S1 ohne Opferzahlen, S3 in warnung)? Ton trifft Ernst/Epoche?
 - Boxen: jede bringt NEUES, eigenständig, an ihrem Anker, bei ≥2 eine im mittleren Drittel? S1 nur wow/warnung,
   kein Callout im intro?
