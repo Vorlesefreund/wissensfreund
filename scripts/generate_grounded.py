@@ -1499,6 +1499,19 @@ def generate_one_level(
                 )
                 return None, report
 
+    if article is None:
+        # Alle Retries erschöpft (inkl. Cache-403-Sonderfall nach 503-Sturm,
+        # der die for-Schleife per `continue` ohne Last-Attempt-Schutz verlässt)
+        # → Stufe überspringen statt mit AttributeError den ganzen Batch killen
+        log.error(
+            "  Phase 2 [%s]: article is None nach Retry-Erschöpfung — Stufe übersprungen",
+            article_id,
+        )
+        report["errors"].append(
+            "Phase 2 alle Retries erschöpft (Cache-403/503) — Stufe übersprungen"
+        )
+        return None, report
+
     article.setdefault("meta", {})["id"]           = article_id
     article["meta"]["title"]                        = thema
     article["meta"]["generated_at"]                 = datetime.now(timezone.utc).isoformat()
