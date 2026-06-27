@@ -351,19 +351,24 @@ THEMA: {thema}
 PRIMAERARTIKEL-EINLEITUNG:
 {lead}
 
+Du wirst später selbst einen spannenden, kindgerechten Artikel über dieses Thema schreiben. Wähle jetzt die Begleitartikel, die dir als Autor das reichste, lebendigste und vielseitigste Material liefern — nicht die, die fachlich am engsten verwandt sind.
+
 Schlage bis zu 5 deutschsprachige Wikipedia-Begleitartikel vor, die diesen Kinderartikel LEBENDIG und TIEF machen. Der Artikel soll spannend und unterhaltsam werden, kein droeges Lexikon. Die Begleitartikel liefern Wuerze und Tiefe: konkrete Beispiele, beruehmte Ereignisse, greifbare Einzelobjekte.
 
 NUTZE DEIN WISSEN ueber das Thema: Schlage auch Begleitartikel vor, die in der Einleitung NICHT erwaehnt sind, dir aber als praegend oder faszinierend zum Thema bekannt sind - sofern sie als eigener deutscher Wikipedia-Artikel existieren. (Beispiel: Thema "Vulkan" -> der "Vesuv" und ein beruehmter Ausbruch gehoeren dazu, auch wenn die Einleitung sie nicht ausfuehrt.)
 
 Auswahlkriterien:
-- Faszinations-Test (wichtigstes Kriterium): Frage bei jedem Kandidaten: "Wuerde ein 7-jaehriges Kind das aufregend finden und davon erzaehlen wollen?" Bevorzuge STARK was Staunen, Drama, Bewegung oder Geheimnis enthaelt (etwas bricht hervor, frisst, leuchtet, ist riesig/uralt/gefaehrlich) gegenueber systematisch-ordnenden Oberbegriffen, auch wenn diese "korrekter" zum Thema gehoeren. Beispiel Thema "Erde": "Vulkan", "Dinosaurier", "Regenbogen" sind WEIT bessere Begleitartikel als "Sonnensystem", "Kontinente", "Erdatmosphaere" - das Erste loest Staunen aus, das Zweite ordnet nur. Waehle wie ein Geschichtenerzaehler, nicht wie ein Lexikonredakteur.
-- Dynamisch vor statisch: Ein Begleitartikel ueber einen VORGANG oder ein EREIGNIS (Vulkanausbruch, Wasserkreislauf, Wanderung) traegt mehr als einer ueber eine Eigenschaft oder Kategorie (Zusammensetzung, Gliederung). Bei Gleichstand gewinnt das Bewegte.
-- Vielfalt der Blickwinkel (lebendig bleibt Vorrang): Waehle die Begleitartikel aus VERSCHIEDENEN Blickwinkeln, nicht mehrfach dieselbe Sorte. Wenn schon zwei Companions vom gleichen Typ sind (z. B. zwei Tierarten, zwei einzelne Vulkane), nimm als naechsten bewusst einen ANDERSARTIGEN, aber ebenso lebendigen Anker - etwa ein Ereignis, einen Schauplatz, ein verwandtes Phaenomen, einen Menschen, ein Werkzeug/Verfahren der Erforschung, einen ueberraschenden Groessen- oder Lebensraum-Bezug. Ziel ist ein bunter Strauss konkreter Zugaenge zum Thema. WICHTIG: Lebendigkeit hat Vorrang vor Vielfalt - ersetze NIE einen lebendigen Anker durch einen trockenen Grossbegriff, nur um die Vielfalt zu erhoehen. Tausche nur LEBENDIGES gegen ebenso LEBENDIGES anderer Art. Schoepfe die 5 Plaetze aus, solange geeignete lebendige Anker existieren.
-- Vertiefen das Thema fuer ein Kind: konkret, anschaulich, lebendig.
-- Greifbare Anker ausdruecklich erwuenscht: benannte Beispiele, historische Faelle, beruehmte Einzelobjekte, Personen oder Ereignisse, die dem Kind ein Bild geben. MEHRERE Anker sind erlaubt - keine Obergrenze ausser den 5 Slots insgesamt. Anker muessen das Thema VERTIEFEN, nicht davon wegfuehren.
-- Auch solche, mit denen sich laendlaeufige Vorstellungen aufgreifen und richtigstellen lassen.
+- Kinderalltag und Kinderfantasie (wichtigstes Kriterium): Begegnet ein Kind diesem Thema in seinem echten Alltag (Regen, Mond am Abendhimmel, Dinosaurier im Buch, Vulkane im Schulfilm) — oder lebt es fest in seiner Fantasie- und Gefühlswelt? Das ist der stärkste Indikator: wähle, was einem Kind zu diesem Thema spontan einfällt, weil es darin aufgewachsen ist — nicht, was fachlich korrekt zugeordnet ist.
+- Prozesse, Kreisläufe und Lebendiges zuerst: Bevorzuge STARK Prozesse und Kreisläufe (Wasserkreislauf, Vulkanausbruch), Lebewesen (Dinosaurier, Blauwal) und erlebbare Naturphänomene (Gewitter, Mondschein). Meide geologische Zustände ohne Bewegung, wissenschaftliche Abstrakta und bloße Benennungen.
+- Echter inhaltlicher Bezug und Bereicherung: Bereichert dieser Companion den Artikel um eine Perspektive oder ein Bild, das das Primärthema allein nicht zeigen kann? Kategorienzugehörigkeit oder wissenschaftliche Verwandtschaft genügt nicht.
+- Vielfalt der Blickwinkel (gilt für die Gesamtauswahl): Stelle dir nach jedem gewählten Companion die Frage: Öffnet der nächste Kandidat eine neue Richtung — oder beschreibt er nur einen weiteren Vertreter der gleichen Kategorie? Strebe einen Strauß verschiedener Zugänge an: Wie lebt es? Was tut es? Was passiert damit? Wie begegnet ein Mensch ihm? Was entsteht dadurch? Mehrere Vertreter des gleichen Typs sind sinnvoll, wenn sie echte verschiedene Geschichten erzählen — aber ab dem dritten Vertreter derselben Sorte prüfe bewusst, ob ein andersartiger Companion dem Artikel mehr neue Perspektiven brächte. Lebendigkeit hat Vorrang: tausche keinen lebendigen Companion gegen einen trockenen, nur um Vielfalt zu erzwingen.
 - Fokuserhaltend: beim Thema bleiben, nicht zu Eltern-/Nachbarthemen abdriften.
-- Lieber weniger als ungeeignete auffuellen (kein Mindestwert).
+- Lieber weniger als ungeeignete auffüllen (kein Mindestwert).
+
+Harte Ausschlussgründe (unabhängig von den übrigen Kriterien ablehnen):
+- Geologische Zustände ohne erlebbare Dynamik (z. B. Pangaea, Erdmantel als bloße Schicht, Erdkruste)
+- Wissenschaftliche Abstrakta, die kein Kind je direkt erlebt oder sich vorstellt
+- Fotos oder Beobachtungs-Bezeichnungen (z. B. „Blue Marble" ist ein Foto, kein Thema)
 
 Ernste oder tragische Themen:
 - Ein Begleitartikel DARF ein ernstes oder tragisches Thema beruehren (Vulkanausbrueche, Schiffsungluecke, historische Konflikte) - waehle ihn so, dass er fuer ein Kind KINDGERECHT ERSCHLIESSBAR ist: das Staunen, das Greifbare, das Lehrreiche (eine konservierte Stadt, eine Ausgrabung, die Technik, der Mut).
