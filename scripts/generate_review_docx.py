@@ -127,6 +127,16 @@ def _run(p, text, size=11, bold=False, italic=False, color=None, strike=False):
     return r
 
 
+def _run_multiline(p, text, size=11, bold=False, italic=False, color=None):
+    """Wie _run, aber rendert \\n als echte Zeilenumbrueche (add_break) im selben Paragraphen."""
+    lines = text.split("\n")
+    for i, line in enumerate(lines):
+        r = _run(p, line, size=size, bold=bold, italic=italic, color=color)
+        if i < len(lines) - 1:
+            r.add_break()
+    return p
+
+
 def cell_text(cell, text, size=10, bold=False, italic=False, color=None):
     _run(cell.paragraphs[0], text, size=size, bold=bold, italic=italic, color=color)
 
@@ -152,12 +162,28 @@ def _two_col_row(tbl):
 
 # ── Bild in Zelle ─────────────────────────────────────────────────────────────
 def _img_caption_text(im) -> str:
+    # Beschreibung: caption (Generator) oder beschreibung (Vision-Fallback)
+    txt = im.get("caption") or im.get("beschreibung") or ""
+
+    # Originaltitel: wikimedia_id ohne "File:"-Präfix, sonst filename
+    wid = im.get("wikimedia_id", "") or ""
+    if wid.startswith("File:"):
+        wid = wid[5:]
+    originaltitel = wid or im.get("filename", "")
+
+    # Lizenz
     lic = im.get("license", "")
-    aut = im.get("license_author", "")
-    txt = im.get("caption") or ""
-    if lic:
-        txt += f"  ({lic}{' — ' + aut if aut else ''})"
-    return txt
+    aut = (im.get("license_author") or "").split("\n")[0].strip()
+    lic_str = f"({lic}{' — ' + aut if aut else ''})" if lic else ""
+
+    parts = []
+    if txt:
+        parts.append(txt)
+    if originaltitel:
+        parts.append(f"Originaltitel: {originaltitel}")
+    if lic_str:
+        parts.append(lic_str)
+    return "\n".join(parts)
 
 
 def render_image_cell(cell, im, width_cm=6.0) -> str:
@@ -173,7 +199,7 @@ def render_image_cell(cell, im, width_cm=6.0) -> str:
         _run(p, f"[Bild-Fehler: {im.get('filename','?')} — {e}]", 9, italic=True, color=GRAY)
         _warnings.append(f"Bild-Insert-Fehler {im.get('filename')}: {e}")
         return "fail"
-    _run(cell.add_paragraph(), _img_caption_text(im), 9, italic=True, color=GRAY)
+    _run_multiline(cell.add_paragraph(), _img_caption_text(im), 9, italic=True, color=GRAY)
     return origin
 
 
@@ -192,7 +218,7 @@ def render_image_fullwidth(doc, im, width_cm=14.0) -> str:
         return "fail"
     cap = doc.add_paragraph()
     cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    _run(cap, _img_caption_text(im), 9, italic=True, color=GRAY)
+    _run_multiline(cap, _img_caption_text(im), 9, italic=True, color=GRAY)
     return origin
 
 

@@ -188,6 +188,14 @@ trägt — jede Geschichte liefert eine Information.
   Schulaufsatz, nicht Komödie. Unterhaltung entsteht durch
   Überraschung, Tempo und lebendige Bilder, nicht durch Witze.
 
+- S3 ist keine Ausnahme: Fachliche Korrektheit in S3 ist
+  Pflicht — aber kein Freifahrtschein für Fakten-Aufzählung.
+  Auch S3 baut Abschnitte mit Bogen, bettet Fakten in
+  Zusammenhänge ein und entwickelt Szenen. Mehr als zwei
+  aufeinanderfolgende Fakten-Sätze ohne einbettenden Satz
+  sind in jeder Stufe ein Zeichen für einen unfertigen
+  Abschnitt — nicht für einen fachlichen.
+
 **Die drei Stufen:**
 - **S1 (4–6):** max. 10 Wörter/Satz, eine Idee/Satz, kein Passiv. KEINE Jahreszahlen, keine Fach-/Rechen-/
   Präzisionszahlen (kein „3,05 m" → „höher als eine normale Zimmerdecke"); kleine zählbare Alltagszahlen sind
@@ -250,7 +258,9 @@ Nie beschönigen, aber alters-dosieren. Dieselbe Tatsache je Stufe in anderer Ti
 
 - **Mehrwert (Pflicht):** Jede Box trägt etwas, das der Fließtext derselben Stufe NICHT schon sagt — eine neue
   Zahl, ein Beispiel, eine Richtigstellung, ein Staunen-Detail. Eine Box, die nur den Absatz daneben wiederholt,
-  gehört gestrichen. Gilt auch für Sätze: jeder Satz trägt eine nicht-triviale Aussage (keine Tautologien
+  gehört gestrichen. Vor dem Setzen einer Box: Lese den umliegenden Abschnitt. Steht die Information bereits im
+  Fließtext, auch in anderen Worten? Dann Box streichen oder mit echtem Zusatzfakt neu füllen. Gilt auch für
+  Sätze: jeder Satz trägt eine nicht-triviale Aussage (keine Tautologien
   „Flugzeuge flogen durch die Luft", keine Leerformeln „bewegt sich flink in alle Richtungen").
 - **Platzierung:** Jede Box steht bei dem Abschnitt, den sie ergänzt (an ihrem inhaltlichen Anker), und greift
   nur auf, was bis dorthin eingeführt ist. **Eine einzelne Box** kommt an ihren Anker, NICHT automatisch ans
@@ -277,6 +287,9 @@ Testet Verständnis, kein Auswendiglernen.
 **Maßgeblich ist das injizierte Feld `WORTZIEL`** (Spanne min–max, aus Stufe × Appeal × Ergiebigkeit berechnet).
 Plane VOR dem Schreiben darauf hin. Erreiche mindestens die Untergrenze; bei reichen Quellen Richtung Obergrenze.
 **Mehrlänge nur aus belegtem Quellinhalt — kein Auffüllen mit Leerem.** Harte Obergrenze nie überschreiten.
+Liegst du bei reicher Quelle deutlich unter der Mitte des Wortfensters: nicht mit neuen Fakten auffüllen, sondern
+bestehende Fakten durch Einbettung, Szene und Bogen entwickeln. Ein Artikel, der bei reicher Quelle nahe der
+Untergrenze bleibt, ist kein knappes Stück — er ist ein unausgeschöpftes.
 Ist eine Quelle wirklich erschöpft, lieber am unteren Rand der Spanne bleiben als mit Leerformeln strecken.
 
 Richtwerte (entsprechen der Pipeline-Berechnung):
