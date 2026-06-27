@@ -353,7 +353,7 @@ PRIMAERARTIKEL-EINLEITUNG:
 
 Du wirst später selbst einen spannenden, kindgerechten Artikel über dieses Thema schreiben. Wähle jetzt die Begleitartikel, die dir als Autor das reichste, lebendigste und vielseitigste Material liefern — nicht die, die fachlich am engsten verwandt sind.
 
-Schlage bis zu 5 deutschsprachige Wikipedia-Begleitartikel vor, die diesen Kinderartikel LEBENDIG und TIEF machen. Der Artikel soll spannend und unterhaltsam werden, kein droeges Lexikon. Die Begleitartikel liefern Wuerze und Tiefe: konkrete Beispiele, beruehmte Ereignisse, greifbare Einzelobjekte.
+Schlage bis zu 3 deutschsprachige Wikipedia-Begleitartikel vor, die diesen Kinderartikel LEBENDIG und TIEF machen. Der Artikel soll spannend und unterhaltsam werden, kein droeges Lexikon. Die Begleitartikel liefern Wuerze und Tiefe: konkrete Beispiele, beruehmte Ereignisse, greifbare Einzelobjekte.
 
 NUTZE DEIN WISSEN ueber das Thema: Schlage auch Begleitartikel vor, die in der Einleitung NICHT erwaehnt sind, dir aber als praegend oder faszinierend zum Thema bekannt sind - sofern sie als eigener deutscher Wikipedia-Artikel existieren. (Beispiel: Thema "Vulkan" -> der "Vesuv" und ein beruehmter Ausbruch gehoeren dazu, auch wenn die Einleitung sie nicht ausfuehrt.)
 

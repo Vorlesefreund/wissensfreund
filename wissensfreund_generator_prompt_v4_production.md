@@ -156,45 +156,24 @@ S2/S3 aufgenommen sind. Langweilige Präzisionsdetails (mm/g, Verwaltungsdaten, 
 - **Keine Quellenangabe im Fließtext** („Wikipedia schreibt …"). Grammatisch vollständige, eindeutige Sätze;
   Komparative abschließen; keine erfundenen Komposita.
 
-NARRATIVER FLUSS — FAKTEN UND GESCHICHTEN IM GLEICHGEWICHT
+NARRATIVER FLUSS — TIEFE VOR BREITE
 
-Sachgehalt und Narration sind gleichberechtigt. Kein Artikel, der
-nur erzählt ohne zu informieren. Kein Artikel, der nur informiert
-ohne zu erzählen. Jede Information hat eine Geschichte, die sie
-trägt — jede Geschichte liefert eine Information.
+Sachgehalt und Narration sind gleichberechtigt. Drei Abschnitte
+mit echtem Bogen sind besser als sechs Abschnitte als
+Stichwortliste — lieber ein Thema vollständig erzählen als
+fünf andeuten.
 
-- Zahlen und Daten als Pointe, nicht als Eröffnung: Zuerst die
-  Situation aufbauen, dann die Zahl als Überraschung landen. Nicht
-  „Der Blauwal ist 30 Meter lang — das sind drei Schulbusse." Sondern:
-  die Situation zuerst, die Zahl am Ende, wenn das Kind sie erwartet.
-
-- Kein nackter Fakten-Satz ohne Einbettung: Auf jeden Satz, der
-  einen Fakt nennt, folgt oder geht voran ein Satz, der zeigt, was
-  das bedeutet, wie es sich anfühlt oder was daraus entsteht. Drei
-  aufeinanderfolgende Fakten-Sätze ohne Zwischensatz sind nicht
-  erlaubt.
-
-- Jeder Abschnitt trägt einen Bogen, nicht nur ein Thema: Ein
-  Abschnitt beginnt irgendwo, entwickelt sich und landet irgendwo.
-  Er beschreibt nicht nur — er zeigt etwas, das passiert, entsteht
-  oder sich verändert. Mindestens ein Satz pro Abschnitt zeigt eine
-  Bewegung, einen Vorgang oder eine Situation, keine Eigenschaft.
-
-- Abschnitte übergeben, nicht brechen: Der erste Satz eines neuen
-  Abschnitts greift etwas aus dem vorigen auf — er setzt fort, er
-  fängt nicht neu an.
-
-- Ton: direkt und warm wie ein gutes Kinderbuch — nicht
-  Schulaufsatz, nicht Komödie. Unterhaltung entsteht durch
-  Überraschung, Tempo und lebendige Bilder, nicht durch Witze.
-
-- S3 ist keine Ausnahme: Fachliche Korrektheit in S3 ist
-  Pflicht — aber kein Freifahrtschein für Fakten-Aufzählung.
-  Auch S3 baut Abschnitte mit Bogen, bettet Fakten in
-  Zusammenhänge ein und entwickelt Szenen. Mehr als zwei
-  aufeinanderfolgende Fakten-Sätze ohne einbettenden Satz
-  sind in jeder Stufe ein Zeichen für einen unfertigen
-  Abschnitt — nicht für einen fachlichen.
+- Tiefer statt breiter: Hat ein Abschnitt noch Wortbudget?
+  Nicht ein neues Thema beginnen — den vorhandenen Fakt durch
+  Kontext, Bild oder Konsequenz entwickeln. Was sieht das Kind?
+  Was passiert dann? Warum ist das so?
+- Kein Satz, der nur eine Information überträgt: Jeder Fakt
+  braucht einen Satz, der zeigt, was er bedeutet oder was
+  daraus folgt.
+- Abschnitte übergeben, nicht brechen: Der erste Satz des
+  nächsten Abschnitts greift etwas aus dem vorigen auf.
+- Ton: direkt und warm wie ein gutes Kinderbuch — Überraschung,
+  Tempo, lebendige Bilder. Kein Lehrbuch, keine Komödie.
 
 **Die drei Stufen:**
 - **S1 (4–6):** max. 10 Wörter/Satz, eine Idee/Satz, kein Passiv. KEINE Jahreszahlen, keine Fach-/Rechen-/
@@ -287,9 +266,10 @@ Testet Verständnis, kein Auswendiglernen.
 **Maßgeblich ist das injizierte Feld `WORTZIEL`** (Spanne min–max, aus Stufe × Appeal × Ergiebigkeit berechnet).
 Plane VOR dem Schreiben darauf hin. Erreiche mindestens die Untergrenze; bei reichen Quellen Richtung Obergrenze.
 **Mehrlänge nur aus belegtem Quellinhalt — kein Auffüllen mit Leerem.** Harte Obergrenze nie überschreiten.
-Liegst du bei reicher Quelle deutlich unter der Mitte des Wortfensters: nicht mit neuen Fakten auffüllen, sondern
-bestehende Fakten durch Einbettung, Szene und Bogen entwickeln. Ein Artikel, der bei reicher Quelle nahe der
-Untergrenze bleibt, ist kein knappes Stück — er ist ein unausgeschöpftes.
+Liegst du bei reicher Quelle deutlich unter der Mitte des Wortfensters: Wortbudget durch Erzähltiefe ausschöpfen —
+nicht durch neue Fakten. Ein Fakt, der in einem Satz steht, kann in drei Sätzen als Szene erzählt werden: mit Kontext,
+Bild und Bedeutung, sofern die Quelle das trägt. Ein weiterer Abschnitt über ein neues Thema ist kein Ersatz für einen
+vollständig entwickelten Abschnitt.
 Ist eine Quelle wirklich erschöpft, lieber am unteren Rand der Spanne bleiben als mit Leerformeln strecken.
 
 Richtwerte (entsprechen der Pipeline-Berechnung):
@@ -329,8 +309,8 @@ benannte Sinneinheiten gliedern (kein einziger Block). Ziel: lesbare Einheiten, 
   aus dem Gedächtnis? keine Über-Spezifizierung? Superlative mit dem Geltungsbereich der Quelle? keine „nur"-Liste
   ohne Beleg?
 - Lebendig: Haken trifft das Wesen? lebendige Überschriften? Lebenswelt-Brücke da? pro Stufe ein Staunen-Detail?
-- Narrativer Fluss: Wechseln sich Fakten und Erzählung ab? Gibt es nackte Fakten-Satz-Blöcke ohne Einbettung?
-  Zahlen als Pointe oder als Eröffnung? Einstiegsform variiert gegenüber anderen Artikeln dieser Session?
+- Narrativer Fluss: Tiefe vor Breite — gibt es Abschnitte, die ein Thema nur andeuten statt entwickeln? Jeden Fakt-Satz
+  auf Einbettung prüfen. Abschnitte übergeben statt brechen? Einstiegsform variiert?
 - Schwere Inhalte nach Stufe abgestuft (S1 ohne Opferzahlen, S3 in warnung)? Ton trifft Ernst/Epoche?
 - Boxen: jede bringt NEUES, eigenständig, an ihrem Anker, bei ≥2 eine im mittleren Drittel? S1 nur wow/warnung,
   kein Callout im intro?
