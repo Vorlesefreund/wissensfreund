@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-26T21:53:49Z -->
+<!-- updated: 2026-06-27T13:56:58Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **WEG B VERWORFEN + RÜCKBAU ABGESCHLOSSEN (26.06.2026)** — Generierung zurück auf
@@ -21,13 +21,35 @@
 > Reaktivierung sobald Gemini-503 behoben. Details: PROJEKTDOKUMENT
 > „Eingefrorener Stand & Reaktivierung". (Weg-B-Punkte entfernt — Strang verworfen.)
 >
-> **COMPANION-VERBESSERUNG (26.06.2026, auf Branch, NICHT auf main):** Faszinations- +
-> Vielfalts-Kriterien für die Companion-Auswahl auf Branch
-> `companion-faszination-vielfalt-2026-06` gesichert (9+12 Stage-1-Läufe, Gate erfüllt).
-> Merge nach main bewusst aufgeschoben — Companion-Auswahl + Generator-Prompting werden
-> im Folge-Chat neu überdacht. Befund dazu: PROJEKTDOKUMENT Kap. 10 „Artikelqualität
-> hängt primär an Companion-Auswahl". Offener nächster Schritt: 2–3 volle Erde-Läufe
-> mit den Branch-Companions zur Varianz-Prüfung.
+> **COMPANION-VERBESSERUNG + GENERATOR-ÜBERARBEITUNG (27.06.2026, auf Branch, NICHT auf main):**
+> Branch companion-faszination-vielfalt-2026-06 enthält gegenüber main folgende Änderungen
+> (alle committet, kein Merge):
+>
+> Companion-Prompt (Variante E):
+> - Kinderalltag/Kinderfantasie als oberstes Kriterium
+> - Autorframing: Flash wählt als zukünftiger Autor
+> - Vielfalt der Blickwinkel mit Selbst-Probe-Frage
+> - Zwei neue Kriterien: Kulturelle Ankerpunkte (Moby Dick, Mythen) + Wie sieht es dort aus?
+>   (Klimazonen, Biotope)
+> - Harte Ausschlussgründe (Pangaea, Blue Marble, etc.)
+> - Companion-Limit: 3 (für Testlauf; soll später dynamisch 3–5 nach Appeal werden)
+> - 9+12 Stage-1-Läufe auf A/B/C/D/E getestet; E ist Sieger
+>
+> Generator-Prompt v4 (Branch-Stand):
+> - NARRATIVER FLUSS vereinfacht: Tiefe vor Breite
+> - Wortziel durch Erzähltiefe, nicht neue Fakten
+> - MIKRO-FLUSS: Bindewörter und Bezüge (mit Vorher-Nachher-Beispiel)
+> - S1: im Durchschnitt <12 Wörter, Bindewörter ausdrücklich erwünscht
+> - S2/S3: Konjunktionen, Lese-Sog, Überleitungen
+> - JSON-Mindset: Denke in Absätzen, gib in Sätzen aus
+> - Docx-Caption-Fix: beschreibung + Originaltitel + Lizenz
+>
+> Testlauf-Stand:
+> - v1-Testlauf (vor Wortziel-Regel): gut, aber zu kurz
+> - v2-Testlauf (mit Wortziel-Regel): schlechter — Faktenflut statt Narration; Wortziel-Regel angepasst
+> - v3-Testlauf: durch Gemini-503 abgebrochen, ausständig
+> - Nächster Schritt: v3-Lauf wenn Flash stabil, dann dynamisches Companion-Limit implementieren,
+>   dann Merge-Entscheidung
 >
 > **OFFENE Punkte nach Priorität:**
 > - **Companion-Auswahl ist stufen-blind (diagnostiziert): KEIN Defekt** — Auswahl liefert
