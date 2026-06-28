@@ -226,8 +226,10 @@ def add_header_block(doc, meta: dict) -> None:
     stufe = meta.get("age_level", "?")
     wc    = meta.get("word_count", "?")
     flag  = "✓" if meta.get("review_flag") else "—"
-    line = (f"{meta.get('emoji','')}  {meta.get('title', meta.get('id',''))}   |   "
-            f"Stufe: S{stufe}   |   Wörter: {wc}   |   review_flag: {flag}")
+    comps = meta.get("grounding_companions") or []
+    comp_str = ", ".join(comps) if comps else "—"
+    line = (f"{meta.get('emoji','')} {meta.get('title', meta.get('id',''))} │ "
+            f"Stufe: S{stufe} │ Wörter: {wc} │ Companions: {comp_str} │ review_flag: {flag}")
     tbl = doc.add_table(rows=1, cols=1)
     set_col_widths(tbl, [17.0])
     cell = tbl.cell(0, 0)
