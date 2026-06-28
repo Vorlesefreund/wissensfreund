@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-28T15:34:57Z -->
+<!-- updated: 2026-06-28T19:49:08Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **WEG B VERWORFEN + RÜCKBAU ABGESCHLOSSEN (26.06.2026)** — Generierung zurück auf
@@ -65,6 +65,8 @@
 >   - Wal (appeal high): 4 Comp (Moby-Dick/Walgesang/Free Willy/Walfang) — Companion-Test grün,
 >     ABER Artikelgenerierung an 503-Hänger (Request ohne Timeout) abgebrochen → Wal-Artikel+Docx ausstehend
 > - BEFUND: Appeal-Staffelung wirkt (high→4, low→3 statt fixem "bis zu 3"); kulturelle/vielfältige Anker
+> - Folgecommits (Branch): docx-Header zeigt jetzt Companions (09bce25); v5.2 erstmals committet
+>   (0b1427e) inkl. neuem Abschnitt "D. Artikelumfang" (high Appeal + ≥4 Comp → oberes Spannendrittel)
 > - Nächster Schritt: Wal-Lauf nachziehen wenn Flash stabil; Docx-Vergleich v4 vs v5.2 lesen; dann Merge-Entscheidung
 >
 > Bugfix auf Branch:
