@@ -347,36 +347,35 @@ _KOMPASS_SCHEMA = {
 
 COMPANION_PROMPT_TMPL = """\
 THEMA: {thema}
-
+APPEAL: {appeal} (low/medium/high)
 PRIMAERARTIKEL-EINLEITUNG:
 {lead}
 
-Du wirst später selbst einen spannenden, kindgerechten Artikel über dieses Thema schreiben. Wähle jetzt die Begleitartikel, die dir als Autor das reichste, lebendigste und vielseitigste Material liefern — nicht die, die fachlich am engsten verwandt sind.
+## 1. DEINE ROLLE UND DEIN ZIEL
+Du bist Chef-Rechercheur für das deutsche Kinderlexikon **Wissensfreund**. Deine Aufgabe ist es, Begleitartikel (Companions) aus der deutschen Wikipedia zu finden, die dem Hauptthema Tiefe, Anschaulichkeit und narrative Ankerpunkte für Kinder geben.
+Wähle Companions, die ECHTE neue Blickwinkel eröffnen, statt nur Unterthemen oder bloße Phänomene des Hauptthemas aufzuzählen. Ein starker Companion bereichert den Artikel um eine Perspektive, die das Primärthema allein nicht zeigen kann.
 
-Schlage bis zu 3 deutschsprachige Wikipedia-Begleitartikel vor, die diesen Kinderartikel LEBENDIG und TIEF machen. Der Artikel soll spannend und unterhaltsam werden, kein droeges Lexikon. Die Begleitartikel liefern Wuerze und Tiefe: konkrete Beispiele, beruehmte Ereignisse, greifbare Einzelobjekte.
+## 2. AUSWAHL-VORGABEN
 
-NUTZE DEIN WISSEN ueber das Thema: Schlage auch Begleitartikel vor, die in der Einleitung NICHT erwaehnt sind, dir aber als praegend oder faszinierend zum Thema bekannt sind - sofern sie als eigener deutscher Wikipedia-Artikel existieren. (Beispiel: Thema "Vulkan" -> der "Vesuv" und ein beruehmter Ausbruch gehoeren dazu, auch wenn die Einleitung sie nicht ausfuehrt.)
+**A. Menge & Qualität (Das APPEAL-Level entscheidet)**
+- **APPEAL low:** Wähle 2–3 Companions.
+- **APPEAL medium / high:** Wähle 3–5 Companions.
+- **Qualität vor Quantität:** Fülle niemals mit unpassenden Artikeln auf. Jeder Companion muss einen eigenen, starken Mehrwert bringen. Strebe Vielfalt an (nicht drei Vertreter derselben Kategorie).
 
-Auswahlkriterien:
-- Kinderalltag und Kinderfantasie (wichtigstes Kriterium): Begegnet ein Kind diesem Thema in seinem echten Alltag (Regen, Mond am Abendhimmel, Dinosaurier im Buch, Vulkane im Schulfilm) — oder lebt es fest in seiner Fantasie- und Gefühlswelt? Das ist der stärkste Indikator: wähle, was einem Kind zu diesem Thema spontan einfällt, weil es darin aufgewachsen ist — nicht, was fachlich korrekt zugeordnet ist.
-- Prozesse, Kreisläufe und Lebendiges zuerst: Bevorzuge STARK Prozesse und Kreisläufe (Wasserkreislauf, Vulkanausbruch), Lebewesen (Dinosaurier, Blauwal) und erlebbare Naturphänomene (Gewitter, Mondschein). Meide geologische Zustände ohne Bewegung, wissenschaftliche Abstrakta und bloße Benennungen.
-- Echter inhaltlicher Bezug und Bereicherung: Bereichert dieser Companion den Artikel um eine Perspektive oder ein Bild, das das Primärthema allein nicht zeigen kann? Kategorienzugehörigkeit oder wissenschaftliche Verwandtschaft genügt nicht.
-- Kulturelle Ankerpunkte und menschliche Geschichten: Gibt es ein berühmtes Buch, eine Sage, einen Mythos oder eine historische Geschichte, die Kinder mit diesem Thema verbinden — und dazu einen deutschen Wikipedia-Artikel? Solche Companions geben dem Thema ein menschliches Gesicht und sind oft die einprägsamsten (Beispiel: Moby Dick bei Wal, Nils Holgersson bei Zugvögel, Pompeji bei Vulkan).
-- Wie sieht es dort aus? (bei Orten, Planeten, Lebensräumen): Welche Landschaften, Klimazonen oder Biotope machen das Primärthema anschaulich und erfahrbar? Dschungel, Wüste, Korallenriff, Polareis sind für Kinder greifbare Bilder — auch wenn sie keine Prozesse oder Lebewesen sind.
-- Vielfalt der Blickwinkel (gilt für die Gesamtauswahl): Stelle dir nach jedem gewählten Companion die Frage: Öffnet der nächste Kandidat eine neue Richtung — oder beschreibt er nur einen weiteren Vertreter der gleichen Kategorie? Strebe einen Strauß verschiedener Zugänge an: Wie lebt es? Was tut es? Was passiert damit? Wie begegnet ein Mensch ihm? Was entsteht dadurch? Mehrere Vertreter des gleichen Typs sind sinnvoll, wenn sie echte verschiedene Geschichten erzählen — aber ab dem dritten Vertreter derselben Sorte prüfe bewusst, ob ein andersartiger Companion dem Artikel mehr neue Perspektiven brächte. Lebendigkeit hat Vorrang: tausche keinen lebendigen Companion gegen einen trockenen, nur um Vielfalt zu erzwingen.
-- Fokuserhaltend: beim Thema bleiben, nicht zu Eltern-/Nachbarthemen abdriften.
-- Lieber weniger als ungeeignete auffüllen (kein Mindestwert).
+**B. Die 3 Säulen eines guten Companions (Prioritäten)**
+1. **Kinderwelt & Fantasie:** Was kennen Kinder aus ihrem echten Alltag, aus Büchern oder Filmen? (Beispiele: Dinosaurier im Buch, Gewitter, Mondschein).
+2. **Dynamik & Leben:** Prozesse, Kreisläufe und Lebewesen schlagen statische Zustände. (Beispiele: Wasserkreislauf, Vulkanausbruch).
+3. **Kultur & Menschliches:** Gibt es ein berühmtes Buch, einen Mythos, eine Sage oder ein historisches Ereignis? (Beispiele: Moby Dick bei Wal, Pompeji bei Vulkan).
 
-Harte Ausschlussgründe (unabhängig von den übrigen Kriterien ablehnen):
-- Geologische Zustände ohne erlebbare Dynamik (z. B. Pangaea, Erdmantel als bloße Schicht, Erdkruste)
-- Wissenschaftliche Abstrakta, die kein Kind je direkt erlebt oder sich vorstellt
-- Fotos oder Beobachtungs-Bezeichnungen (z. B. „Blue Marble" ist ein Foto, kein Thema)
+**C. Harte Ausschlusskriterien (Was du NICHT wählst)**
+- **Statische Geologie & Zustände:** Keine starren Strukturen ohne erlebbare Dynamik (Erdmantel, Pangaea).
+- **Wissenschaftliche Abstrakta:** Keine abstrakten Theorien oder Kategorien, die ein Kind sich nicht bildlich vorstellen kann.
+- **Reine Bezeichnungen:** Fotos oder bloße Namen (z.B. "Blue Marble") sind keine echten Themen.
+- **Trauma ohne Sachkern:** Ernste Themen (Unglücke, Konflikte) sind erlaubt, aber nur, wenn sie einen kindgerechten, lehrreichen Kern haben (Mut, Technik, Ausgrabung) – niemals für reinen Schockwert.
 
-Ernste oder tragische Themen:
-- Ein Begleitartikel DARF ein ernstes oder tragisches Thema beruehren (Vulkanausbrueche, Schiffsungluecke, historische Konflikte) - waehle ihn so, dass er fuer ein Kind KINDGERECHT ERSCHLIESSBAR ist: das Staunen, das Greifbare, das Lehrreiche (eine konservierte Stadt, eine Ausgrabung, die Technik, der Mut).
-- Vermeide NUR Begleitartikel, deren einziger Gehalt grafische Gewalt, Leid oder Grauen ohne erschliessbaren Sachkern ist.
-
-Ausgabe NUR JSON: {{"companions": ["Lemma1","Lemma2",...]}}"""
+## 3. AUSGABE
+Generiere AUSSCHLIESSLICH ein valides JSON-Objekt mit den exakten deutschsprachigen Wikipedia-Lemmata. Kein Markdown, keine Erklärungen.
+{{"companions": ["Lemma1", "Lemma2", "Lemma3"]}}"""
 
 
 # ── Legacy-Funktionen (von batch_run.py importiert) ──────────────────────────
@@ -476,6 +475,7 @@ def select_companions_raw(
     thema: str,
     primary_text: str,
     model: str = GEMINI_MODEL,
+    appeal: str = "medium",
 ) -> tuple[list[str], dict]:
     """Kompass: Modell schlägt Begleitartikel frei vor. Gibt (companions, usage_dict) zurück.
 
@@ -483,7 +483,7 @@ def select_companions_raw(
     gemini → response_schema + 503-Fallback (unverändert). Prompts bleiben wortgleich.
     """
     lead = primary_text[:1500]
-    prompt = COMPANION_PROMPT_TMPL.format(thema=thema, lead=lead)
+    prompt = COMPANION_PROMPT_TMPL.format(thema=thema, lead=lead, appeal=appeal)
 
     from stage_models import get_stage_config
     cfg = get_stage_config("kompass")
@@ -1124,7 +1124,7 @@ def prepare_topic_sources(
         raise ValueError(f"Primaertext zu kurz: {len(primary_text)} Zeichen")
 
     # Kompass-Auswahl
-    raw_companions, kompass_usage = select_companions_raw(client, thema, primary_text, model)
+    raw_companions, kompass_usage = select_companions_raw(client, thema, primary_text, model, appeal=appeal)
     if kompass_usage:
         cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe="S0",
                             schritt="kompass", modell=model, **kompass_usage)
