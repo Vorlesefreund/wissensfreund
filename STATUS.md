@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-27T17:26:31Z -->
+<!-- updated: 2026-06-28T15:34:57Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **WEG B VERWORFEN + RÜCKBAU ABGESCHLOSSEN (26.06.2026)** — Generierung zurück auf
@@ -50,8 +50,22 @@
 > Testlauf-Stand:
 > - v1 (vor Wortziel-Regel): gut, zu kurz
 > - v2 (mit Wortziel-Regel): Faktenflut; Regel angepasst
-> - v3/v3b: Gemini-503-Zähschleife, abgebrochen (Crash-Guard hielt); v3-Lauf weiter ausstehend bis Flash stabil
-> - Nächster Schritt: v3-Lauf, dann dynamisches Companion-Limit (3–5 nach Appeal), dann Merge
+> - v3/v3b: Gemini-503-Zähschleife, abgebrochen (Crash-Guard hielt)
+> - Generator v5.2 (= v5.1-Stil + v4-Schemablock): läuft schema-konform durch Pipeline;
+>   Erde-Vergleichslauf grün (erde_v5_2_test.docx); planung als Text-Prefix (nicht 100% deterministisch),
+>   ERZÄHLFADEN befüllt. Datei: wissensfreund_generator_prompt_v5_2.md (lokal, nicht committet)
+>
+> Companion-Prompt v5.1 + appeal-Injektion (commit ec76efa, Branch):
+> - COMPANION_PROMPT_TMPL ersetzt: Appeal-gestufte Anzahl (low=2-3, medium/high=3-5),
+>   3-Säulen-Kriterien, härtere Ausschlussgründe; .format() bekommt appeal durchgereicht
+>   (select_companions_raw(appeal=...) ← prepare_topic_sources ← job["resolved_appeal"])
+> - Dreifach-Lauf (v5.2-Generator, neuer Kompass, mit Bildern+Lektorat):
+>   - Vulkan (appeal high): 4 Comp (Pompeji/Vulcanus/Geysir/Schwarzer Raucher), S1-3 im Ziel, Docx vulkan_v5_2
+>   - Zweiter Weltkrieg (appeal low): 3 Comp (Anne Frank/Enigma/Weiße Rose), S1-3 ok (wenig Bilder=sensibel-Filter), Docx wwii_v5_2
+>   - Wal (appeal high): 4 Comp (Moby-Dick/Walgesang/Free Willy/Walfang) — Companion-Test grün,
+>     ABER Artikelgenerierung an 503-Hänger (Request ohne Timeout) abgebrochen → Wal-Artikel+Docx ausstehend
+> - BEFUND: Appeal-Staffelung wirkt (high→4, low→3 statt fixem "bis zu 3"); kulturelle/vielfältige Anker
+> - Nächster Schritt: Wal-Lauf nachziehen wenn Flash stabil; Docx-Vergleich v4 vs v5.2 lesen; dann Merge-Entscheidung
 >
 > Bugfix auf Branch:
 > - None-Guard nach Retry-Erschöpfung (Cache-403-Crash)
