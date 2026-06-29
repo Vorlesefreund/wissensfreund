@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-28T19:49:08Z -->
+<!-- updated: 2026-06-29T07:13:05Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **WEG B VERWORFEN + RÜCKBAU ABGESCHLOSSEN (26.06.2026)** — Generierung zurück auf
@@ -62,11 +62,16 @@
 > - Dreifach-Lauf (v5.2-Generator, neuer Kompass, mit Bildern+Lektorat):
 >   - Vulkan (appeal high): 4 Comp (Pompeji/Vulcanus/Geysir/Schwarzer Raucher), S1-3 im Ziel, Docx vulkan_v5_2
 >   - Zweiter Weltkrieg (appeal low): 3 Comp (Anne Frank/Enigma/Weiße Rose), S1-3 ok (wenig Bilder=sensibel-Filter), Docx wwii_v5_2
->   - Wal (appeal high): 4 Comp (Moby-Dick/Walgesang/Free Willy/Walfang) — Companion-Test grün,
->     ABER Artikelgenerierung an 503-Hänger (Request ohne Timeout) abgebrochen → Wal-Artikel+Docx ausstehend
+>   - Wal (appeal high): Companion-Test grün. 29.06.-Nachzug: Kompass lieferte 4 Comp
+>     (Delfin/Moby Dick/Blauwal/Meeresschutz) erst über Fallback 3.5-flash→2.5-flash. ABER
+>     Phase-2-Generierung hat KEINEN Modell-Fallback → alle Stufen an 503 erschöpft/übersprungen
+>     (None-Guard griff sauber, kein Crash), 0 Artikel. Wal-Artikel+Docx zurückgestellt.
 > - BEFUND: Appeal-Staffelung wirkt (high→4, low→3 statt fixem "bis zu 3"); kulturelle/vielfältige Anker
 > - Folgecommits (Branch): docx-Header zeigt jetzt Companions (09bce25); v5.2 erstmals committet
 >   (0b1427e) inkl. neuem Abschnitt "D. Artikelumfang" (high Appeal + ≥4 Comp → oberes Spannendrittel)
+> - FALLBACK-ASYMMETRIE (29.06., dokumentiert): Kompass hat Modell-Fallback (3.5→2.5-flash),
+>   Phase-2-Generierung NICHT. ENTSCHEIDUNG: bewusst KEIN Generierungs-Fallback auf 2.5-flash
+>   (auch bei 503-Erschöpfung) — Läufe warten auf 3.5-flash-Stabilität (Entscheidungs-Log 29.06.).
 > - Nächster Schritt: Wal-Lauf nachziehen wenn Flash stabil; Docx-Vergleich v4 vs v5.2 lesen; dann Merge-Entscheidung
 >
 > Bugfix auf Branch:
