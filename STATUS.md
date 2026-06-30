@@ -1,6 +1,15 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-29T07:13:05Z -->
+<!-- updated: 2026-06-30T04:25:22Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
+
+> **v5.2 PRODUKTIV + BRANCH GEMERGT (30.06.2026)** — Branch `companion-faszination-vielfalt-2026-06`
+> nach main gemergt (Merge aba4122). Produktions-Generator-Prompt jetzt **v5.2** (v4 abgelöst;
+> `SYSTEM_PROMPT_PATH` in generate_grounded.py). Companion-Prompt v5.1-Stil mit Faszinations-/
+> Vielfalts-Kriterien + appeal-gestaffelter Anzahl. **appeal-Fix in run_batch.py:522 aktiv**
+> (`data["appeal"]` → select_companions_raw) — Batch-Kompass lief vorher immer mit Default "medium".
+> **Gemini-503-Welle vom 28.06. abgeklungen**, Generierung wieder lauffähig: Wal-Lauf 30.06.
+> (S1/S2/S3 + Bilder + Lektorat) 503-frei durchgelaufen, 4 Companions (Moby-Dick/Echoortung/
+> Walfang/Tiefsee), Docx wal_v5_2. Details: PROJEKTDOKUMENT Entscheidungs-Log 30.06.
 
 > **WEG B VERWORFEN + RÜCKBAU ABGESCHLOSSEN (26.06.2026)** — Generierung zurück auf
 > Gemini-3.5-flash + v4_production (Sonnet-Generator stilistisch nicht kindgerecht genug,
@@ -17,13 +26,13 @@
 > 2026-06-24 lief selektiv: Stage 1 komplett übersprungen, Stage 2/3 nur die 3 fehlenden Vulkan-Artikel/-Lektorate
 > neu, Titanic+WW2 per Datei-Existenz unberührt (Zeitstempel unverändert). Alle 9 Artikel + 9 Lektorate vorhanden.
 >
-> **PROJEKT PAUSIERT (26.06.2026):** Generierung eingefroren auf Gemini Flash + v4.
-> Reaktivierung sobald Gemini-503 behoben. Details: PROJEKTDOKUMENT
-> „Eingefrorener Stand & Reaktivierung". (Weg-B-Punkte entfernt — Strang verworfen.)
+> **~~PROJEKT PAUSIERT (26.06.2026)~~ → REAKTIVIERT (30.06.2026):** 503-Welle vom 28.06.
+> abgeklungen, Generierung wieder lauffähig. Produktion jetzt Gemini Flash + **v5.2** (nicht
+> mehr v4). Details: PROJEKTDOKUMENT Entscheidungs-Log 30.06. + „Eingefrorener Stand & Reaktivierung".
 >
-> **COMPANION-VERBESSERUNG + GENERATOR-ÜBERARBEITUNG (27.06.2026, auf Branch, NICHT auf main):**
-> Branch companion-faszination-vielfalt-2026-06 enthält gegenüber main folgende Änderungen
-> (alle committet, kein Merge):
+> **COMPANION-VERBESSERUNG + GENERATOR-ÜBERARBEITUNG (27.06.2026 — am 30.06. nach main gemergt):**
+> Branch companion-faszination-vielfalt-2026-06 brachte gegenüber main folgende Änderungen
+> (alle committet; Merge aba4122 am 30.06.):
 >
 > Companion-Prompt (Variante E):
 > - Kinderalltag/Kinderfantasie als oberstes Kriterium
@@ -53,7 +62,7 @@
 > - v3/v3b: Gemini-503-Zähschleife, abgebrochen (Crash-Guard hielt)
 > - Generator v5.2 (= v5.1-Stil + v4-Schemablock): läuft schema-konform durch Pipeline;
 >   Erde-Vergleichslauf grün (erde_v5_2_test.docx); planung als Text-Prefix (nicht 100% deterministisch),
->   ERZÄHLFADEN befüllt. Datei: wissensfreund_generator_prompt_v5_2.md (lokal, nicht committet)
+>   ERZÄHLFADEN befüllt. Datei: wissensfreund_generator_prompt_v5_2.md (lokal, nicht committet) [überholt 30.06.: committet + als Produktions-Prompt gemergt]
 >
 > Companion-Prompt v5.1 + appeal-Injektion (commit ec76efa, Branch):
 > - COMPANION_PROMPT_TMPL ersetzt: Appeal-gestufte Anzahl (low=2-3, medium/high=3-5),
@@ -72,7 +81,7 @@
 > - FALLBACK-ASYMMETRIE (29.06., dokumentiert): Kompass hat Modell-Fallback (3.5→2.5-flash),
 >   Phase-2-Generierung NICHT. ENTSCHEIDUNG: bewusst KEIN Generierungs-Fallback auf 2.5-flash
 >   (auch bei 503-Erschöpfung) — Läufe warten auf 3.5-flash-Stabilität (Entscheidungs-Log 29.06.).
-> - Nächster Schritt: Wal-Lauf nachziehen wenn Flash stabil; Docx-Vergleich v4 vs v5.2 lesen; dann Merge-Entscheidung
+> - Nächster Schritt: Wal-Lauf nachziehen wenn Flash stabil; Docx-Vergleich v4 vs v5.2 lesen; dann Merge-Entscheidung [erledigt 30.06.: gemergt]
 >
 > Bugfix auf Branch:
 > - None-Guard nach Retry-Erschöpfung (Cache-403-Crash)

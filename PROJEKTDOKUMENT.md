@@ -184,6 +184,8 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 
 ## 10. Bekannte offene Punkte (KNOWN_OPEN)
 
+- **(30.06.) S3-Wortziel zieht bei v5.2 nicht ganz ins obere Drittel** — Abschnitt-D-Regel (high Appeal + ≥4 Companions → oberes Drittel) greift bei S1/S2 sichtbar, aber Wal S3 landete bei 559 statt ≥585 W (mittleres Band, über Untergrenze). Über weitere Läufe beobachten; ggf. S3-Wortziel-Formulierung im Prompt nachschärfen.
+- **(30.06.) Wal-Companions wurden mit `appeal="medium"` selektiert** (Stage-1-Lauf vor dem run_batch:522-appeal-Fix). Ein appeal-korrekter Neulauf wäre der erste echte Beleg, dass die gestaffelte Companion-Auswahl im Batch-Pfad wirkt (bisher nur in `generate_grounded.py:1127` aktiv gewesen).
 - **CI-Migration:** `artikel_pipeline.yml` ist dispatch-only, ruft den Claude-Legacy-Generator (`generate_articles.py`) und würde mangels Prompt-Datei scheitern → auf `run_batch.py` migrieren; `generate_articles.py` stilllegen; YAML fixen/löschen.
 - **Lektorat-Fehlerquote messen** (False-Positive/Negative gegen Ground-Truth) vor dem Skalieren. Ziel: ≥ 50–70 % ohne Korrektur durch.
 - ~~**Strukturiertes, maschinenlesbares `findings[]` im V2-`pruefbericht`**~~ →
@@ -259,7 +261,7 @@ Diagnose-Anlass: Ein voller Erde-Lauf (gemini-3.5-flash/v4, Companions Vulkan/Po
 
 ### Companion-Auswahl: Faszinations-Kriterien + Vielfalt (offen, 26.06.2026)
 
-**Stand: providerunabhängige Verbesserung, auf Branch `companion-faszination-vielfalt-2026-06` gesichert (lokal + GitHub), auf main bewusst NOCH NICHT gemergt — Merge aufgeschoben, bis die Companion-Auswahl im Folge-Chat überdacht ist.** Betrifft die Companion-Auswahl (Kompass), NICHT die verworfene Sonnet-Generierung — läuft auf dem eingefrorenen Gemini-3.5-flash-Kompass.
+**Stand: in main gemergt am 30.06.2026 (Commit-Merge companion-faszination-vielfalt). Companion-Prompt auf v5.1-Stil mit appeal-gestaffelter Anzahl überarbeitet; aktiv in Produktion.** Betrifft die Companion-Auswahl (Kompass), NICHT die verworfene Sonnet-Generierung — läuft auf dem eingefrorenen Gemini-3.5-flash-Kompass.
 
 **(a) Faszinations-Companion-Kriterien — bewährt, uncommitted.**
 Zwei Steuer-Bullets in `COMPANION_PROMPT_TMPL` (`generate_grounded.py`), eingehängt als erste Auswahlkriterien:
