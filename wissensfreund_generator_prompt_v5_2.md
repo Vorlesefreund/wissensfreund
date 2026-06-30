@@ -18,7 +18,7 @@ APPEAL: S1 [niedrig/mittel/hoch] · S2 […] · S3 […]   (Sinnlich-Konkretes h
 HAKEN: [Dein lebendiger Einstieg: Was ist das WESEN des Themas?]
 KINDERWELT_ANKER: [Konkreter Lebensweltbezug für die Zielgruppe]
 FAKTEN_S[1/2/3]: [3-12 wichtigste Fakten aus der Quelle, altersgerecht]
-ERZÄHLFADEN: [Wie greifen die Fakten ineinander? Was ist die erzählerische Brücke, die eine reine Faktenaufzählung verhindert?]
+ERZÄHLFADEN: [Wie greifen die Fakten ineinander? Was ist die erzählerische Brücke, die eine reine Faktenaufzählung verhindert? Welchen Beitrag webt JEDER gewählte Companion in den Faden — ein Companion, der keinen Beitrag findet, war die falsche Wahl.]
 BOX_PLAN_S1: [Typ · Position · Stichwort — max. 1–2 Boxen]
 BOX_PLAN_S2: [Typ · Position · Stichwort — max. 1–2 Boxen]
 BOX_PLAN_S3: [Typ · Position · Stichwort — max. 2–3 Boxen]
@@ -49,9 +49,22 @@ MUSTER-Vorgaben:
 
 Der Erzählfaden (Tiefe vor Breite): Entwickle einen Fakt in drei Sätzen als kleine Szene, statt drei neue Fakten isoliert aneinanderzureihen. Absätze müssen ineinandergreifen.
 
+Companions ausschöpfen, Kern wahren: Jeder im QUELLEN_FOKUS gewählte Begleitartikel muss mit mindestens einem substanziellen, belegten Beitrag im Artikel vorkommen — ein ungenutzter Companion ist ein verschenkter Blickwinkel, gerade auf S3, wo Platz für Tiefe ist. Zugleich bleibt das Primärthema der Kern: Mindestens die Hälfte des Artikels behandelt das Hauptthema direkt (Definition, Mechanismus, Bedeutung). Companions reichern an, sie ersetzen den Kern nicht. Prüffrage: Versteht ein Kind nach dem Lesen das Hauptthema, auch ohne die Companions zu kennen?
+
 **D. Artikelumfang (WORTZIEL)**
 
 Das injizierte Feld WORTZIEL gibt die Spanne (min–max) vor. Plane VOR dem Schreiben darauf hin. Erreiche mindestens die Untergrenze; bei reichen Quellen aktiv Richtung Obergrenze — bei high Appeal und ≥4 Companions ist das obere Drittel der Spanne das Ziel, nicht die Untergrenze. Mehrlänge nur aus belegtem Quellinhalt, harte Obergrenze nie überschreiten.
+
+Wenn eine Stufe unter dem Zielband bleibt: Das ist fast nie ein Quell-Problem, sondern ungenutzte Tiefe. Vor dem Abschluss prüfen — welcher gewählte Companion ist noch nicht substanziell eingeflossen, welcher belegte Aspekt ist nur angerissen statt entwickelt? Dort vertiefen, nicht mit neuen Themen oder Leerformeln auffüllen.
+
+### SCHRITT 3: Selbst-Check vor Ausgabe
+
+Prüfe gedanklich, bevor du das JSON ausgibst:
+- Belegt: Jede Aussage aus den injizierten Quellen? Keine Zahlen/Namen aus dem Gedächtnis?
+- Erzählfaden: Durchgehender Bogen statt Fakten-Stakkato? Jeder Abschnittswechsel mit Brücke?
+- Companions ausgeschöpft: Trägt jeder gewählte Companion einen substanziellen Beitrag — und bleibt das Primärthema trotzdem der Kern (≥ Hälfte)?
+- Tiefe: Liegt eine Stufe unter dem Zielband? Dann ist ein Aspekt unterentwickelt — vertiefen, nicht auffüllen.
+- Boxen: Jede am unmittelbar umgebenden Fließtext verankert, jede mit echtem Mehrwert?
 
 <output_format>
 
