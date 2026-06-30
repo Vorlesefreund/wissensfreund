@@ -520,7 +520,8 @@ def stage1_sourcing(
 
         # — Kompass (sync) — companions_failed-Marker bei 0 Companions (Fix 1) —
         companions_raw, usage = select_companions_raw(
-            client, thema, data["primary_text"], model=GEN_MODEL
+            client, thema, data["primary_text"], model=GEN_MODEL,
+            appeal=data.get("appeal", "medium"),
         )
         if usage:
             _kompass_model = stage_models.get_stage_config("kompass")["model"]

@@ -97,6 +97,7 @@ KINDERWELT_ANKER: [tragender Anknüpfungspunkt aus der Quelle — Jungtiere, Kin
 HAKEN: [Einstieg, der das WESEN des Themas fasst — kein beliebiges Kuriosum, keine bloße Definition.
   Bei Themen mit starkem landläufigem Bild wirksam: vom vertrauten Bild ausgehen und die größere Wahrheit
   enthüllen, z.B. „Kennst du das Bild von X? Dahinter steckt aber …". Das vertraute Bild DARF benannt werden.]
+ERZÄHLFADEN: [Welche 3–4 Fakten aus FAKTEN_S2/S3 ergeben zusammen eine Geschichte? Was bleibt bewusst draußen — und warum?]
 BOX_PLAN_S1: [Typ · Position · Stichwort — max. 1–2 Boxen]
 BOX_PLAN_S2: [Typ · Position · Stichwort — max. 1–2 Boxen]
 BOX_PLAN_S3: [Typ · Position · Stichwort — max. 2–3 Boxen]
@@ -115,9 +116,11 @@ S2/S3 aufgenommen sind. Langweilige Präzisionsdetails (mm/g, Verwaltungsdaten, 
 
 - **Eröffne mit dem HAKEN/einer Szene**, nicht mit Stammdaten oder Chronologie. Der Haken fasst das WESEN
   (Basketball ist Werfen/Treffen, nicht Hüpfen; ein Pferd ist das große starke Reittier — „läuft auf einer Zehe"
-  ist eine 🌟-Box, nicht der Haken). **„Stell dir vor …" ist sparsam erlaubt** (auch als Einstieg).
-  **Nicht erlaubt als erster Satz: „Viele …"** („Viele Menschen/Kinder/denken …") — nimm stattdessen eine
-  Frage, ein verblüffendes Faktum, eine Zahl, eine Szene oder einen Vergleich.
+  ist eine 🌟-Box, nicht der Haken).
+  „Stell dir vor …" und „Viele …"-Eröffnungen sind sparsam erlaubt —
+  aber keine als Standardform. Variiere die Einstiegsform konsequent:
+  Frage, verblüffendes Faktum, Zahl, Szene, direkter Vergleich.
+  Kein Artikel soll so beginnen wie der nächste.
 - **Kerndefinition (Pflicht):** Die präzise Kernbestimmung des Themas (meist im ersten Quell-Absatz) MUSS —
   stufengerecht vereinfacht — im ersten oder zweiten Abschnitt natürlich eingewoben vorkommen (nicht als trockene
   Lexikon-Zeile, nicht zwingend als erster Satz). Wo der Haken sie schon abdeckt, nicht doppeln.
@@ -154,8 +157,47 @@ S2/S3 aufgenommen sind. Langweilige Präzisionsdetails (mm/g, Verwaltungsdaten, 
 - **Keine Quellenangabe im Fließtext** („Wikipedia schreibt …"). Grammatisch vollständige, eindeutige Sätze;
   Komparative abschließen; keine erfundenen Komposita.
 
+NARRATIVER FLUSS — TIEFE VOR BREITE
+
+Sachgehalt und Narration sind gleichberechtigt. Drei Abschnitte
+mit echtem Bogen sind besser als sechs Abschnitte als
+Stichwortliste — lieber ein Thema vollständig erzählen als
+fünf andeuten.
+
+- Selektion vor Vollständigkeit — Tiefe vor Breite: Wähle den
+  ERZÄHLFADEN und halte ihn durch; Fakten, die nicht in die
+  Geschichte passen, dürfen bewusst wegbleiben. Hat ein Abschnitt
+  noch Wortbudget, kein neues Thema beginnen — den vorhandenen Fakt
+  durch Kontext, Bild oder Konsequenz entwickeln: Was sieht das Kind?
+  Was passiert dann? Warum ist das so?
+- Kein Satz, der nur eine Information überträgt: Jeder Fakt
+  braucht einen Satz, der zeigt, was er bedeutet oder was
+  daraus folgt.
+- Abschnitte übergeben, nicht brechen: Der erste Satz jedes
+  neuen Abschnitts greift etwas aus dem vorigen auf — kein
+  unvermittelter Themensprung, keine Ausnahme.
+- Ton: direkt und warm wie ein gutes Kinderbuch — Überraschung,
+  Tempo, lebendige Bilder. Kein Lehrbuch, keine Komödie.
+
+MIKRO-FLUSS: BINDEWÖRTER UND BEZÜGE
+
+Schreibe nicht stakkatoartig. Verbinde Sätze logisch und
+zeitlich, auch in Stufe 1. Vermeide, Sätze immer wieder
+mit demselben Pronomen (Er, Sie, Es, Das) zu beginnen.
+Nutze: deshalb, danach, plötzlich, dort, dabei, so, weil,
+trotzdem, dadurch, denn.
+
+FALSCH: Ein Vulkan ist ein Berg. Er ist sehr heiß. Tief in
+der Erde schmilzt Stein. Der Stein wird flüssig. Er will
+nach oben.
+
+RICHTIG: Ein Vulkan sieht aus wie ein riesiger Berg. Tief
+in seinem Inneren ist es jedoch so heiß, dass sogar Steine
+schmelzen. Dieser flüssige Steinbrodel will danach
+unbedingt nach oben entweichen.
+
 **Die drei Stufen:**
-- **S1 (4–6):** max. 10 Wörter/Satz, eine Idee/Satz, kein Passiv. KEINE Jahreszahlen, keine Fach-/Rechen-/
+- **S1 (4–6):** im Durchschnitt unter 12 Wörter/Satz, kein Satz über 15 Wörter, eine klare Hauptidee/Satz, kein Passiv. Bindewörter (und, aber, weil, deshalb, dort, danach) zählen mit und sind ausdrücklich erwünscht — sie erzeugen Fluss statt Stakkato. Nutze aktive Bezüge zwischen Sätzen. KEINE Jahreszahlen, keine Fach-/Rechen-/
   Präzisionszahlen (kein „3,05 m" → „höher als eine normale Zimmerdecke"); kleine zählbare Alltagszahlen sind
   erlaubt und besser als Vages („9 Nachbarländer"). Einfachste Alltagswörter, direkte Ansprache, Staunen.
   **Szenen-Strategie:** destilliere den EINEN Kern und erzähle ihn als durchgehende konkrete Szene aus der
@@ -163,8 +205,8 @@ S2/S3 aufgenommen sind. Langweilige Präzisionsdetails (mm/g, Verwaltungsdaten, 
   per Handzeichen ab, jede Hand zählt gleich). Schweres Thema → ein echtes Gefühl/eine Erfahrung des Kindes
   (nicht selbst bestimmen dürfen; etwas ist zutiefst unfair), ehrlich, ohne Angst zu machen, ohne zu
   verniedlichen. Lieber eine Sache klar als viele oberflächlich.
-- **S2 (7–9):** max. 18 Wörter/Satz. Jeden Fachbegriff sofort erklären. Kausalität erklären. Heikles knapp.
-- **S3 (10–12):** fachlich korrekt, aber kein Lehrbuchton. Auch hier Fachbegriffe erklären — Länge ist keine
+- **S2 (7–9):** max. 18 Wörter/Satz. Abwechslungsreiche Satzanfänge. Kausalität durch Konjunktionen (weil, da, sodass) fließend einbauen. Jeden Fachbegriff sofort erklären. Kausalität erklären. Heikles knapp.
+- **S3 (10–12):** fachlich korrekt, aber kein Lehrbuchton. Lese-Sog durch Überleitungen am Absatzende erzeugen. Auch hier Fachbegriffe erklären — Länge ist keine
   Ausrede. Kontroversen erwünscht, sachlich. Direkte Ansprache dezent.
 
 ---
@@ -216,10 +258,13 @@ Nie beschönigen, aber alters-dosieren. Dieselbe Tatsache je Stufe in anderer Ti
 
 - **Mehrwert (Pflicht):** Jede Box trägt etwas, das der Fließtext derselben Stufe NICHT schon sagt — eine neue
   Zahl, ein Beispiel, eine Richtigstellung, ein Staunen-Detail. Eine Box, die nur den Absatz daneben wiederholt,
-  gehört gestrichen. Gilt auch für Sätze: jeder Satz trägt eine nicht-triviale Aussage (keine Tautologien
+  gehört gestrichen. Vor dem Setzen einer Box: Lese den umliegenden Abschnitt. Steht die Information bereits im
+  Fließtext, auch in anderen Worten? Dann Box streichen oder mit echtem Zusatzfakt neu füllen. Gilt auch für
+  Sätze: jeder Satz trägt eine nicht-triviale Aussage (keine Tautologien
   „Flugzeuge flogen durch die Luft", keine Leerformeln „bewegt sich flink in alle Richtungen").
-- **Platzierung:** Jede Box steht bei dem Abschnitt, den sie ergänzt (an ihrem inhaltlichen Anker), und greift
-  nur auf, was bis dorthin eingeführt ist. **Eine einzelne Box** kommt an ihren Anker, NICHT automatisch ans
+- **Platzierung:** Jede Box steht bei dem Abschnitt, den sie direkt ergänzt — ihr Thema muss im unmittelbar
+  umgebenden Fließtext vorkommen. Eine Box zu einem Thema, das im Artikel sonst nicht behandelt wird, wird
+  gestrichen. **Eine einzelne Box** kommt an ihren Anker, NICHT automatisch ans
   Ende. **Bei zwei oder mehr Boxen** gehört mindestens eine ins mittlere Drittel — nie mehrere am Stück vor dem
   Quiz bündeln.
 - **stimmt_das:** ein echter, verbreiteter Irrglaube (kein gerade erklärtes Detail in Frageform, keine
@@ -243,6 +288,10 @@ Testet Verständnis, kein Auswendiglernen.
 **Maßgeblich ist das injizierte Feld `WORTZIEL`** (Spanne min–max, aus Stufe × Appeal × Ergiebigkeit berechnet).
 Plane VOR dem Schreiben darauf hin. Erreiche mindestens die Untergrenze; bei reichen Quellen Richtung Obergrenze.
 **Mehrlänge nur aus belegtem Quellinhalt — kein Auffüllen mit Leerem.** Harte Obergrenze nie überschreiten.
+Liegst du bei reicher Quelle deutlich unter der Mitte des Wortfensters: Wortbudget durch Erzähltiefe ausschöpfen —
+nicht durch neue Fakten. Ein Fakt, der in einem Satz steht, kann in drei Sätzen als Szene erzählt werden: mit Kontext,
+Bild und Bedeutung, sofern die Quelle das trägt. Ein weiterer Abschnitt über ein neues Thema ist kein Ersatz für einen
+vollständig entwickelten Abschnitt.
 Ist eine Quelle wirklich erschöpft, lieber am unteren Rand der Spanne bleiben als mit Leerformeln strecken.
 
 Richtwerte (entsprechen der Pipeline-Berechnung):
@@ -282,6 +331,9 @@ benannte Sinneinheiten gliedern (kein einziger Block). Ziel: lesbare Einheiten, 
   aus dem Gedächtnis? keine Über-Spezifizierung? Superlative mit dem Geltungsbereich der Quelle? keine „nur"-Liste
   ohne Beleg?
 - Lebendig: Haken trifft das Wesen? lebendige Überschriften? Lebenswelt-Brücke da? pro Stufe ein Staunen-Detail?
+- Narrativer Fluss: ERZÄHLFADEN durchgehalten — keine Fakten außerhalb des gewählten Fadens? Jeder Abschnittswechsel
+  mit inhaltlicher Brücke, kein Themensprung? Gibt es Abschnitte, die ein Thema nur andeuten statt entwickeln?
+  Einstiegsform variiert?
 - Schwere Inhalte nach Stufe abgestuft (S1 ohne Opferzahlen, S3 in warnung)? Ton trifft Ernst/Epoche?
 - Boxen: jede bringt NEUES, eigenständig, an ihrem Anker, bei ≥2 eine im mittleren Drittel? S1 nur wow/warnung,
   kein Callout im intro?
@@ -370,6 +422,10 @@ ausschließlich valides JSON. Kein Markdown, keine Kommentare außerhalb des `<p
 ```
 
 **Pflichtregeln für JSON:**
+- Denke in Absätzen, gib in Sätzen aus: Generiere den Fließtext eines Abschnitts mental als zusammenhängenden
+  Absatz mit Bindewörtern und Übergängen. Zerschneide diesen organischen Text erst beim Befüllen des Arrays in
+  einzelne `sentences[]`-Objekte. Das JSON-Format ist Ausgabestruktur, kein Denkmodell — lass dich davon nicht zu
+  roboterhaftem Stakkato verleiten.
 - `meta.schema_version` IMMER `"1.0"` (String). `meta.generated_at` weglassen (Backend setzt es).
 - `meta.id` Format: `<thema_slug>_l<level>` — z. B. `biene_l1`, `motor_l3`.
 - `sentences[].id` global fortlaufend über ALLE Abschnitte: `s001`, `s002` …

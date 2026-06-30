@@ -86,7 +86,7 @@ OUT_DIR            = ROOT / "articles" / "test_grounded"
 CATALOG_PATH       = ROOT / "catalog_full.json"
 
 _RUN_ID: str = ""   # wird in main() gesetzt (--run-id)
-SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v4_production.md"
+SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v5_2.md"
 
 APPEAL_TARGET     = {"high": 15, "medium": 10, "low": 6}
 MAX_VISION_CHECKS = 40
@@ -347,26 +347,35 @@ _KOMPASS_SCHEMA = {
 
 COMPANION_PROMPT_TMPL = """\
 THEMA: {thema}
-
+APPEAL: {appeal} (low/medium/high)
 PRIMAERARTIKEL-EINLEITUNG:
 {lead}
 
-Schlage bis zu 5 deutschsprachige Wikipedia-Begleitartikel vor, die diesen Kinderartikel LEBENDIG und TIEF machen. Der Artikel soll spannend und unterhaltsam werden, kein droeges Lexikon. Die Begleitartikel liefern Wuerze und Tiefe: konkrete Beispiele, beruehmte Ereignisse, greifbare Einzelobjekte.
+## 1. DEINE ROLLE UND DEIN ZIEL
+Du bist Chef-Rechercheur für das deutsche Kinderlexikon **Wissensfreund**. Deine Aufgabe ist es, Begleitartikel (Companions) aus der deutschen Wikipedia zu finden, die dem Hauptthema Tiefe, Anschaulichkeit und narrative Ankerpunkte für Kinder geben.
+Wähle Companions, die ECHTE neue Blickwinkel eröffnen, statt nur Unterthemen oder bloße Phänomene des Hauptthemas aufzuzählen. Ein starker Companion bereichert den Artikel um eine Perspektive, die das Primärthema allein nicht zeigen kann.
 
-NUTZE DEIN WISSEN ueber das Thema: Schlage auch Begleitartikel vor, die in der Einleitung NICHT erwaehnt sind, dir aber als praegend oder faszinierend zum Thema bekannt sind - sofern sie als eigener deutscher Wikipedia-Artikel existieren. (Beispiel: Thema "Vulkan" -> der "Vesuv" und ein beruehmter Ausbruch gehoeren dazu, auch wenn die Einleitung sie nicht ausfuehrt.)
+## 2. AUSWAHL-VORGABEN
 
-Auswahlkriterien:
-- Vertiefen das Thema fuer ein Kind: konkret, anschaulich, lebendig.
-- Greifbare Anker ausdruecklich erwuenscht: benannte Beispiele, historische Faelle, beruehmte Einzelobjekte, Personen oder Ereignisse, die dem Kind ein Bild geben. MEHRERE Anker sind erlaubt - keine Obergrenze ausser den 5 Slots insgesamt. Anker muessen das Thema VERTIEFEN, nicht davon wegfuehren.
-- Auch solche, mit denen sich laendlaeufige Vorstellungen aufgreifen und richtigstellen lassen.
-- Fokuserhaltend: beim Thema bleiben, nicht zu Eltern-/Nachbarthemen abdriften.
-- Lieber weniger als ungeeignete auffuellen (kein Mindestwert).
+**A. Menge & Qualität (Das APPEAL-Level entscheidet)**
+- **APPEAL low:** Wähle 2–3 Companions.
+- **APPEAL medium / high:** Wähle 3–5 Companions.
+- **Qualität vor Quantität:** Fülle niemals mit unpassenden Artikeln auf. Jeder Companion muss einen eigenen, starken Mehrwert bringen. Strebe Vielfalt an (nicht drei Vertreter derselben Kategorie).
 
-Ernste oder tragische Themen:
-- Ein Begleitartikel DARF ein ernstes oder tragisches Thema beruehren (Vulkanausbrueche, Schiffsungluecke, historische Konflikte) - waehle ihn so, dass er fuer ein Kind KINDGERECHT ERSCHLIESSBAR ist: das Staunen, das Greifbare, das Lehrreiche (eine konservierte Stadt, eine Ausgrabung, die Technik, der Mut).
-- Vermeide NUR Begleitartikel, deren einziger Gehalt grafische Gewalt, Leid oder Grauen ohne erschliessbaren Sachkern ist.
+**B. Die 3 Säulen eines guten Companions (Prioritäten)**
+1. **Kinderwelt & Fantasie:** Was kennen Kinder aus ihrem echten Alltag, aus Büchern oder Filmen? (Beispiele: Dinosaurier im Buch, Gewitter, Mondschein).
+2. **Dynamik & Leben:** Prozesse, Kreisläufe und Lebewesen schlagen statische Zustände. (Beispiele: Wasserkreislauf, Vulkanausbruch).
+3. **Kultur & Menschliches:** Gibt es ein berühmtes Buch, einen Mythos, eine Sage oder ein historisches Ereignis? (Beispiele: Moby Dick bei Wal, Pompeji bei Vulkan).
 
-Ausgabe NUR JSON: {{"companions": ["Lemma1","Lemma2",...]}}"""
+**C. Harte Ausschlusskriterien (Was du NICHT wählst)**
+- **Statische Geologie & Zustände:** Keine starren Strukturen ohne erlebbare Dynamik (Erdmantel, Pangaea).
+- **Wissenschaftliche Abstrakta:** Keine abstrakten Theorien oder Kategorien, die ein Kind sich nicht bildlich vorstellen kann.
+- **Reine Bezeichnungen:** Fotos oder bloße Namen (z.B. "Blue Marble") sind keine echten Themen.
+- **Trauma ohne Sachkern:** Ernste Themen (Unglücke, Konflikte) sind erlaubt, aber nur, wenn sie einen kindgerechten, lehrreichen Kern haben (Mut, Technik, Ausgrabung) – niemals für reinen Schockwert.
+
+## 3. AUSGABE
+Generiere AUSSCHLIESSLICH ein valides JSON-Objekt mit den exakten deutschsprachigen Wikipedia-Lemmata. Kein Markdown, keine Erklärungen.
+{{"companions": ["Lemma1", "Lemma2", "Lemma3"]}}"""
 
 
 # ── Legacy-Funktionen (von batch_run.py importiert) ──────────────────────────
@@ -466,6 +475,7 @@ def select_companions_raw(
     thema: str,
     primary_text: str,
     model: str = GEMINI_MODEL,
+    appeal: str = "medium",
 ) -> tuple[list[str], dict]:
     """Kompass: Modell schlägt Begleitartikel frei vor. Gibt (companions, usage_dict) zurück.
 
@@ -473,7 +483,7 @@ def select_companions_raw(
     gemini → response_schema + 503-Fallback (unverändert). Prompts bleiben wortgleich.
     """
     lead = primary_text[:1500]
-    prompt = COMPANION_PROMPT_TMPL.format(thema=thema, lead=lead)
+    prompt = COMPANION_PROMPT_TMPL.format(thema=thema, lead=lead, appeal=appeal)
 
     from stage_models import get_stage_config
     cfg = get_stage_config("kompass")
@@ -1114,7 +1124,7 @@ def prepare_topic_sources(
         raise ValueError(f"Primaertext zu kurz: {len(primary_text)} Zeichen")
 
     # Kompass-Auswahl
-    raw_companions, kompass_usage = select_companions_raw(client, thema, primary_text, model)
+    raw_companions, kompass_usage = select_companions_raw(client, thema, primary_text, model, appeal=appeal)
     if kompass_usage:
         cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe="S0",
                             schritt="kompass", modell=model, **kompass_usage)
@@ -1488,6 +1498,19 @@ def generate_one_level(
                     f"Phase 2 alle {_GEN_MAX_ATTEMPTS} Versuche fehlgeschlagen: {e}"
                 )
                 return None, report
+
+    if article is None:
+        # Alle Retries erschöpft (inkl. Cache-403-Sonderfall nach 503-Sturm,
+        # der die for-Schleife per `continue` ohne Last-Attempt-Schutz verlässt)
+        # → Stufe überspringen statt mit AttributeError den ganzen Batch killen
+        log.error(
+            "  Phase 2 [%s]: article is None nach Retry-Erschöpfung — Stufe übersprungen",
+            article_id,
+        )
+        report["errors"].append(
+            "Phase 2 alle Retries erschöpft (Cache-403/503) — Stufe übersprungen"
+        )
+        return None, report
 
     article.setdefault("meta", {})["id"]           = article_id
     article["meta"]["title"]                        = thema
