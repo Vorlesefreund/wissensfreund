@@ -1234,16 +1234,17 @@ def stage2_generierung(
 
         # Wortzahl-Guard
         word_count = count_article_words(article)
-        cap        = round(wmax * 1.05)
-        log.info("  [%s] Wortzahl: %d (Ziel %d–%d, Cap %d)", article_id, word_count, wmin, wmax, cap)
+        trim_limit = round(wmax * 1.25)   # Trim-Schwelle UND Trim-Ziel; Erzählfluss vor Länge
+        log.info("  [%s] Wortzahl: %d (Ziel-Band %d–%d, Trim ab %d)",
+                 article_id, word_count, wmin, wmax, trim_limit)
 
         trims = 0
         orig_box_count = sum(len(s.get("boxes", [])) for s in article.get("sections", []))
-        while word_count > cap and trims < 2:
+        while word_count > trim_limit and trims < 2:
             trims += 1
-            log.warning("  [%s] Zu lang (%d > %d) — Trim %d/2", article_id, word_count, cap, trims)
+            log.warning("  [%s] Zu lang (%d > %d) — Trim %d/2", article_id, word_count, trim_limit, trims)
             try:
-                trimmed, trimmed_wc = _trim_article_to_cap(article, wmax, GEN_MODEL, thinking_cfg)
+                trimmed, trimmed_wc = _trim_article_to_cap(article, trim_limit, GEN_MODEL, thinking_cfg)
                 u = dict(generate_grounded._last_trim_usage)
                 _m = u.pop("model", GEN_MODEL)
                 if u:
@@ -1267,13 +1268,13 @@ def stage2_generierung(
                 break
         if trims:
             article["meta"]["trim_passes"] = trims
-        # Fix 2: review_flag wenn Artikel nach Trim immer noch über Cap liegt
-        if word_count > cap:
-            log.warning("  [%s] Über Cap (%d > %d) nach Trim — review_flag", article_id,
-                        word_count, cap)
+        # Fix 2: review_flag wenn Artikel nach Trim immer noch über dem Trim-Limit liegt
+        if word_count > trim_limit:
+            log.warning("  [%s] Über Trim-Limit (%d > %d) nach Trim — review_flag", article_id,
+                        word_count, trim_limit)
             article["meta"]["review_flag"] = True
             article["meta"]["review_reason"] = (
-                (article["meta"].get("review_reason", "") + f"; Wortzahl {word_count} > Cap {cap}")
+                (article["meta"].get("review_reason", "") + f"; Wortzahl {word_count} > Trim-Limit {trim_limit}")
                 .lstrip("; ")
             )
 

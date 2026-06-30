@@ -1224,8 +1224,8 @@ def _destringify_article(d: dict) -> dict:
     return d
 
 
-def _trim_article_to_cap(article: dict, wmax: int, model: str, thinking_config) -> tuple[dict, int]:
-    """Kürzt einen zu langen Artikel per Modell-Lektorat auf ≤ wmax. Rückgabe: (article, word_count).
+def _trim_article_to_cap(article: dict, word_limit: int, model: str, thinking_config) -> tuple[dict, int]:
+    """Kürzt einen zu langen Artikel per Modell-Lektorat auf ≤ word_limit. Rückgabe: (article, word_count).
 
     Provider aus stage_models["trim"]: gemini → call_gemini (unverändert);
     anthropic → call_claude_json (forced tool-use, dict direkt, kein parse_article_json).
@@ -1237,8 +1237,8 @@ def _trim_article_to_cap(article: dict, wmax: int, model: str, thinking_config) 
     trim_model = cfg["model"]
 
     trim_msg = (
-        f"WORT-OBERGRENZE: {wmax}\n"
-        f"Der folgende Artikel hat zu viele Wörter. Kürze ihn auf höchstens {wmax} Wörter.\n\n"
+        f"WORT-OBERGRENZE: {word_limit}\n"
+        f"Der folgende Artikel hat zu viele Wörter. Kürze ihn auf höchstens {word_limit} Wörter.\n\n"
         f"ARTIKEL_JSON:\n{json.dumps(article, ensure_ascii=False)}"
     )
 
