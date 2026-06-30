@@ -188,7 +188,7 @@ ausschließlich valides JSON. Kein Markdown, keine Kommentare außerhalb des `<p
   Bild, das zum Satzinhalt passt. Bilder aus Companion-Artikeln (z. B. eine Enigma-Maschine, ein
   Anne-Frank-Porträt) sind für den Abschnitt über diesen Companion gedacht. Bild und Satz sollen dieselbe
   Frage beantworten.
-- `boxes[]` darf leer sein `[]`; `stimmt_das` benötigt `reveal_text` + `"reveal_mode": "auto"`.
+- `boxes[]` darf leer sein `[]`. Der vollständige Inhalt einer Box steht IMMER im Feld `text` — auch bei `wow`, `fakt` und `warnung`. Das Feld `reveal_text` (+ `"reveal_mode": "auto"`) ist AUSSCHLIESSLICH für `stimmt_das` (die Auflösung der Frage); bei allen anderen Box-Typen gibt es kein `reveal_text`. Lege niemals den Body einer `wow`/`warnung`/`fakt`-Box ins `reveal_text` — er würde in der App weder angezeigt noch vorgelesen.
 - `quiz.questions`: genau 3 (S1+S2), 4–5 (S3); je genau 3 Optionen A/B/C.
 - `related_terms` immer vorhanden (Arrays dürfen leer sein).
 - `source_passages` immer vorhanden — je Fakten-Satz ein Eintrag mit wörtlichem Quellzitat. Einleitungs-/
