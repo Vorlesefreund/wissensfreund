@@ -86,7 +86,7 @@ OUT_DIR            = ROOT / "articles" / "test_grounded"
 CATALOG_PATH       = ROOT / "catalog_full.json"
 
 _RUN_ID: str = ""   # wird in main() gesetzt (--run-id)
-SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v4_production.md"
+SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v5_2.md"
 
 APPEAL_TARGET     = {"high": 15, "medium": 10, "low": 6}
 MAX_VISION_CHECKS = 40
