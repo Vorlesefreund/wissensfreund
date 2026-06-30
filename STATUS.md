@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-06-30T04:25:22Z -->
+<!-- updated: 2026-06-30T09:21:04Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **v5.2 PRODUKTIV + BRANCH GEMERGT (30.06.2026)** — Branch `companion-faszination-vielfalt-2026-06`
@@ -10,6 +10,22 @@
 > **Gemini-503-Welle vom 28.06. abgeklungen**, Generierung wieder lauffähig: Wal-Lauf 30.06.
 > (S1/S2/S3 + Bilder + Lektorat) 503-frei durchgelaufen, 4 Companions (Moby-Dick/Echoortung/
 > Walfang/Tiefsee), Docx wal_v5_2. Details: PROJEKTDOKUMENT Entscheidungs-Log 30.06.
+
+> **v5.2-FEINSCHLIFF — 3 FIXES COMMITTET, VALIDIERUNG AUSSTEHEND (30.06.2026):**
+> Drei Fixes auf main, code-verifiziert, aber noch NICHT empirisch validiert
+> (Gemini-Batch-Queue war degradiert — leere/kaputte Antworten):
+> - 3df8c2c: Companion-Ausschöpfung + Primärfokus (≥ Hälfte Kern) + Selbst-Check (SCHRITT 3, v5.2 hatte keinen)
+> - c17d559: Trim-Schwelle UND -Ziel auf wmax×1.25 (vorher: ab 1.05, Ziel wmax ohne Untergrenze
+>   → S3 fiel unter min, z.B. Vulkan 432<455). Erzählfluss vor Länge. Param wmax→word_limit.
+> - 9dc1842: Box-Schema-Klarstellung — Body IMMER in text, reveal_text nur stimmt_das
+>   (App+TTS verwerfen reveal_text bei wow/warnung; war 2/45 Boxen betroffen, keine Migration nötig).
+>
+> **NÄCHSTER SCHRITT (Validierungslauf v5.2c, in gesunder Queue-Phase):** Vulkan Stage-2-Resume
+> (l1+l3 regenerieren, l2 bleibt) + Wal + WWII frisch, je S1/S2/S3, Checkpoints erhalten.
+> Prüft 3 Dinge auf einmal: (1) Trim — bleiben S3 ungetrimmt im oberen Band? (2) Companion-
+> Ausschöpfung — greift sie jetzt auch bei Wal S3 (b-Lauf: nein, nur Primär+Moby-Dick)?
+> (3) Box-Fix — reveal_text-Missbrauch auf 0? Erwartung: Roh-Werte b-Lauf (Vulkan 747/Wal 738/
+> WWII 640) lägen unter neuer Schwelle (812/812/709) → Trim greift gar nicht mehr.
 
 > **WEG B VERWORFEN + RÜCKBAU ABGESCHLOSSEN (26.06.2026)** — Generierung zurück auf
 > Gemini-3.5-flash + v4_production (Sonnet-Generator stilistisch nicht kindgerecht genug,
