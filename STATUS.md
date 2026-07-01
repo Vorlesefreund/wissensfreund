@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-01T07:11:09Z -->
+<!-- updated: 2026-07-01T08:41:46Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **v5.2 PRODUKTIV + BRANCH GEMERGT (30.06.2026)** — Branch `companion-faszination-vielfalt-2026-06`
@@ -11,7 +11,7 @@
 > (S1/S2/S3 + Bilder + Lektorat) 503-frei durchgelaufen, 4 Companions (Moby-Dick/Echoortung/
 > Walfang/Tiefsee), Docx wal_v5_2. Details: PROJEKTDOKUMENT Entscheidungs-Log 30.06.
 
-> **v5.2-FEINSCHLIFF (01.07.2026): 3 FIXES VALIDIERT + 3 NEUE UNVALIDIERT.**
+> **v5.2-FEINSCHLIFF (01.07.2026): 3 FIXES VALIDIERT + 4 NEUE UNVALIDIERT.**
 > (a) **Validierungslauf v5.2c durchgelaufen** (Vulkan Stage-2-Resume l1+l3 + Wal + WWII frisch,
 > je S1/S2/S3, Queue gesund) — die ersten drei Fixes technisch bestätigt:
 > - 3df8c2c Companion-Ausschöpfung: greift jetzt auch bei Wal S3 (Blauwal/Schwertwal/Moby-Dick
@@ -21,14 +21,21 @@
 > - 9dc1842 Box-Schema: reveal_text-Missbrauch = 0 über alle 9 Artikel.
 > Docx vulkan/wal/wwii_v5_2c auf Desktop.
 >
-> (b) **DREI NEUE Fixes — NOCH NICHT VALIDIERT** (Commit 0c045c6, aus PO-Leseurteil der c-Docx:
-> S1 zu blumig, inhaltlich ungedeckte Ausschmückungen):
-> - Abschnitt A: Anti-Ausschmückung (alle Stufen) — Vergleiche färben, fügen aber keine Gefühle/
->   Motivationen/intensivierenden Verstärker über die Quelle hinzu ("singt für seine Familie", "viel größer als").
-> - S1-Matrix: Register-Drossel gegen stimmungsmalende Adjektive ("sanfte Riesen", "schlaue Töne").
-> - S3-Matrix: Drastik-Schranke — Tötungs-/Hinrichtungsmethoden benennen, nicht ausmalen.
-> Der nächste Lauf muss zeigen, ob sie greifen: S1 nüchterner, keine "viel größer"-Verstärker
-> schon vom Generator, keine drastischen S3-Methodendetails. Lektorat unverändert.
+> (b) **VIER NEUE Fixes — NOCH NICHT VALIDIERT** (aus PO-Leseurteil der c-Docx: S1 zu blumig,
+> ungedeckte Ausschmückungen; + Bild-Pipeline-Befunde):
+> - 0c045c6 Register-/Wahrheitstreue (drei Regeln): Abschnitt A Anti-Ausschmückung (alle Stufen) —
+>   keine erfundenen Gefühle/Motivationen/Verstärker ("singt für seine Familie", "viel größer als");
+>   S1-Matrix Register-Drossel ("sanfte Riesen", "schlaue Töne"); S3-Matrix Drastik-Schranke.
+> - 8bb6a53 Bildmenge abschnittsbezogen: 80%-Pool-Regel (geerbter v4-Widerspruch) raus; jetzt ein Bild/
+>   Abschnitt, zweites nur bei >5 Sätzen (alle Stufen), harte Obergrenze 15.
+> - 9752a97 Raster-Diagramme durchlassen: "diagram/schema/chart" aus _IMG_SKIP_LOWER raus — didaktische
+>   Grafiken erreichen jetzt den Vision-Filter statt am Dateinamen verworfen zu werden.
+> Der nächste (Sammel-)Lauf muss zeigen, ob sie greifen: S1 nüchterner, keine "viel größer"-Verstärker
+> schon vom Generator, ein Bild/Abschnitt statt Überfüllung, Diagramme im Artikel. Lektorat unverändert.
+>
+> **OFFENER PIPELINE-PUNKT — SVG (Fix B):** Didaktische Grafiken sind auf Wikipedia oft .svg; die werden
+> weiter beim Sammeln übersprungen (_IMG_SKIP_EXT). Fix B = Sammel-Logik + SVG→PNG-Rasterung (neue
+> Dependency). Aufwand/Nutzen erst nach dem Sammel-Lauf entscheiden. Details: PROJEKTDOKUMENT Roadmap.
 
 > **WEG B VERWORFEN + RÜCKBAU ABGESCHLOSSEN (26.06.2026)** — Generierung zurück auf
 > Gemini-3.5-flash + v4_production (Sonnet-Generator stilistisch nicht kindgerecht genug,
