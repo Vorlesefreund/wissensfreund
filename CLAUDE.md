@@ -50,6 +50,28 @@ Standardbranch: main. Branch nur für riskante Experimente, sofort nach Test zur
 Zeile 2: <!-- updated: 2026-06-01T00:00:00Z --> — bei JEDEM Schreiben aktualisieren.
 Bash: date -u +"%Y-%m-%dT%H:%M:%SZ"
 
+## Diff-/Text-Review über Datei (Terminal-Truncation vermeiden)
+
+Die Terminal-Ausgabe wird zu "(+N lines, ctrl+o to expand)" gekürzt, bevor
+sie Claude Chat (über Andreas' Copy-Paste) erreicht. Lange Diffs oder Texte
+kommen dadurch abgeschnitten an. Deshalb gilt:
+
+- Immer wenn Claude Chat einen vollständigen Diff oder einen langen Text
+  (Prompt-Block, Datei-Ausschnitt >~20 Zeilen, ganzer geänderter Abschnitt)
+  zur Prüfung sehen soll: NICHT in die Terminal-Antwort schreiben und NICHT
+  in sed/fold-Häppchen zerlegen, sondern in eine Datei schreiben:
+      git diff > /c/Users/Andreas/Desktop/_review_diff.txt
+  (bzw. git diff --staged, oder für Datei-Ausschnitte den Text direkt in
+  diese Datei schreiben). Danach den Pfad nennen bzw. present_files nutzen.
+- Andreas lädt diese eine Datei hoch; Claude Chat liest den ungekürzten
+  Inhalt und gibt frei. Eine Datei, ein Upload, kein Hin-und-Her.
+- Die Datei _review_diff.txt ist ein Wegwerf-Reviewartefakt: vor jedem neuen
+  Review überschreiben, nicht committen (liegt auf dem Desktop, außerhalb des
+  Repos — kein .gitignore nötig).
+- Kurze Bestätigungen (Commit-Hash, "nur Datei X gestaged", PASS/FAIL-Bilanz)
+  dürfen weiterhin direkt in die Terminal-Antwort — die Datei-Methode gilt nur
+  für lange Diffs/Texte, die sonst getrunct würden.
+
 ## TOKEN OPTIMIZATION RULES
 - Niemals ganzen Code ungefragt ausgeben — nur relevante Diffs/Zeilen
 - Aufgaben bündeln: Code + Tests + Error-Handling in einer Nachricht
