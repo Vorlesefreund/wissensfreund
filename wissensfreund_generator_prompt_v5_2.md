@@ -30,14 +30,15 @@ BOX_PLAN_S3: [Typ · Position · Stichwort — max. 2–3 Boxen]
 - Nur belegte Fakten: Verwende ausschließlich Namen, Daten und Ereignisse aus dem Input.
 - Einschränkungen: "Vermutlich" oder "unklar" aus der Quelle muss im Text bleiben.
 - Kein Framing: Beschreibe Fakten lebhaft (aktive Verben), aber bewerte sie nicht moralisch.
+- Anschaulich, nicht hinzudichtend: Vergleiche und Bilder machen belegte Fakten greifbar, fügen aber nichts hinzu, was nicht in der Quelle steht — keine erfundenen Gefühle, Motivationen oder Absichten ("singt für seine Familie"), keine ausgemalten Details ("wunderbare Dinge") und keine intensivierenden Verstärker, die über die Quelle hinausgehen ("viel größer als", wenn die Quelle das nicht deckt). Ein Vergleich färbt die Sprache; er verändert die Tatsache nicht.
 
 **B. Altersstufen-Matrix**
 
 | Stufe | Sätze & Sprache | Fokus & Mechanik | Umgang mit schweren Themen |
 |---|---|---|---|
-| S1 (4-6) | Max. 10 Wörter/Satz, kein Passiv. | Konkrete Szenen aus der Kinderwelt. Keine großen/abstrakten Zahlen. | Konkrete, ehrliche Erfahrung. Angstfrei, keine Opferzahlen. |
+| S1 (4-6) | Max. 10 Wörter/Satz, kein Passiv. Nüchtern und klar: Adjektive nur, wo sie eine belegte Eigenschaft schärfen ("der große Wal"); keine stimmungsmalenden Zusätze, die statt Klarheit eine ungedeckte Bedeutung eintragen ("sanfte Riesen", "schlaue Töne", "Lieder für die Familie"). | Konkrete Szenen aus der Kinderwelt. Keine großen/abstrakten Zahlen. | Konkrete, ehrliche Erfahrung. Angstfrei, keine Opferzahlen. |
 | S2 (7-9) | Max. 18 Wörter/Satz. Fachbegriffe klären. | Kausalität (Wie/Warum). Greifbare Vergleiche (Auto, Bus). | Sachlich und knapp. Keine expliziten Details. |
-| S3 (10-12) | Dynamische Satzlängen. Kein Schulbuch. | Kontroversen, Präzision, gesellschaftliche Bedeutung. | Explizit und sachlich (Opferzahlen, historische Einordnung). |
+| S3 (10-12) | Dynamische Satzlängen. Kein Schulbuch. | Kontroversen, Präzision, gesellschaftliche Bedeutung. | Explizit und sachlich (Opferzahlen, historische Einordnung) — aber nicht grafisch: Tötungs- oder Hinrichtungsmethoden werden benannt, nicht drastisch ausgemalt. Sachlich präzise, nicht reißerisch. |
 
 **C. Muster-Struktur & Narrativer Fluss**
 
