@@ -161,9 +161,7 @@ ausschließlich valides JSON. Kein Markdown, keine Kommentare außerhalb des `<p
   für S2/S3 ausdrücklich erwünscht — sie erklären, was Fotos nicht zeigen können. Wähle sie bevorzugt für
   Abschnitte, die einen Mechanismus oder Aufbau erklären („Wie entsteht ein Vulkan", „Wie funktioniert die
   Enigma").
-- **BILDNUTZUNG — LEITPRINZIP:** Der Default ist VERWENDEN, nicht WEGLASSEN.
-  Gehe für jedes angebotene Bild davon aus, dass es in den Artikel gehört.
-  img_index: -1 ist eine bewusste Ausnahme, die du begründen können musst.
+- **BILDNUTZUNG — LEITPRINZIP:** Die Bildmenge richtet sich nach der Textstruktur, nicht nach der Poolgröße. Jeder Abschnitt bekommt ein Bild, lange Abschnitte auch zwei (siehe Verteilungs-Regel). Nicht jedes angebotene Bild muss in den Fließtext — im Zweifel passt ein Bild zu einem Abschnitt, oder es wandert in den Pool (automatisch am Artikelende gesammelt). Ein Abschnitt bekommt nie ein unpassendes Bild, nur um es zu platzieren.
 
   Gültige Gründe für img_index: -1:
     • Das Bild ist inhaltlich nahezu identisch zu einem bereits vergebenen Bild
@@ -174,17 +172,12 @@ ausschließlich valides JSON. Kein Markdown, keine Kommentare außerhalb des `<p
   Nicht gültige Gründe für img_index: -1:
     • „Passt nicht perfekt" — perfekter Treffer ist nicht nötig
     • „Andere Bilder sind besser" — vergib zuerst alle guten, dann die weniger guten
-    • „Kein Platz" — verteile auf mehrere Sätze in der Section
 
-  Ziel: mindestens 80 % der angebotenen Bilder verwenden.
-  Wenn Pool 10 Bilder hat → mindestens 8 vergeben.
-  Wenn Pool 15 Bilder hat → alle 15 (Obergrenze erreicht).
-  Wenn Pool 20 Bilder hat → 15 verwenden (Obergrenze), 5 mit -1 (Duplikate/Mismatch zuerst).
-
-  Verteilungs-Hierarchie (unverändert):
-    1. Jede Section bekommt mindestens einen img_index ≠ -1.
-    2. Überzählige Bilder: als zweite Bilder in Sections mit ≥4 Sätzen (nur S2/S3).
-    3. Companion-Bilder thematisch zum Companion-Abschnitt.
+  Verteilungs-Regel (maßgeblich für die Bildmenge):
+    1. Jeder Abschnitt bekommt mindestens ein Bild (img_index ≠ -1), semantisch passend gewählt.
+    2. Ein zweites Bild nur in Abschnitten mit mehr als 5 Sätzen (gilt für alle Stufen) — damit der Artikel nicht unruhig wird.
+    3. Companion-Bilder gehören thematisch in den Abschnitt über den jeweiligen Companion.
+    4. Höchstens 15 Bilder pro Artikel (harte Obergrenze). Liefert der Pool mehr, bleiben die überzähligen bei -1 (zuerst Duplikate und Mismatches).
 - **Thematisches Matching:** Ordne Bilder INHALTLICH zu Sätzen zu — lies die Bildbeschreibungen und wähle das
   Bild, das zum Satzinhalt passt. Bilder aus Companion-Artikeln (z. B. eine Enigma-Maschine, ein
   Anne-Frank-Porträt) sind für den Abschnitt über diesen Companion gedacht. Bild und Satz sollen dieselbe
