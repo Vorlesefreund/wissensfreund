@@ -72,3 +72,6 @@ articles/*/lektorat_rerun/
 *.docx
 ~$*.docx
 ~$*.xlsx
+
+# Laufzeit-Status-Log (append-only, unbeaufsichtigter Batch-Betrieb) — nicht tracken
+run_status.jsonl

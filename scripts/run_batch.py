@@ -125,8 +125,11 @@ VISION_MODEL         = "gemini-2.5-flash"
 VISION_CHUNK_SIZE    = 500   # ungenutzt seit Sync-Umbau (war: max InlinedRequests/Batch)
 POLL_SECS_GEMINI     = 30
 POLL_SECS_ANTHROPIC  = 30
-GEMINI_TIMEOUT_H     = 48.0
-ANTHROPIC_TIMEOUT_H  = 24.0
+# Stall-Timeout für den Gemini-Generierungs-Batch (unbeaufsichtigter Betrieb):
+# nach GEMINI_BATCH_TIMEOUT_MIN Minuten wird der hängende Batch serverseitig
+# gecancelt und der Lauf mit TimeoutError beendet. Env-überschreibbar.
+GEMINI_BATCH_TIMEOUT_MIN = float(os.environ.get("GEMINI_BATCH_TIMEOUT_MIN", "30"))
+ANTHROPIC_TIMEOUT_H  = 24.0   # Lektorat (Phase B, entkoppelt) — bewusst unverändert
 
 # Circuit Breaker — Stage 1 Kompass
 CB_THRESHOLD = 3          # aufeinanderfolgende API-Ausfälle bis zur Pause
@@ -208,6 +211,45 @@ def _load_partial(out_dir: Path) -> dict:
         return {}
 
 
+# ── Run-Status (zentrale, append-only Statusdatei für unbeaufsichtigten Betrieb) ─
+RUN_STATUS_PATH = ROOT / "run_status.jsonl"
+
+def _run_status(thema: str, stufe, status: str, grund: str = "", detail: str = "") -> None:
+    """Hängt EINE JSON-Zeile an run_status.jsonl an (append-only, abbruch-robust).
+
+    status: "OK" | "FAILED". grund (nur bei FAILED, maschinenlesbare Kategorie):
+    timeout | retry_exhausted_503 | degraded_output | empty_output | other.
+    """
+    rec = {
+        "ts":     datetime.now(timezone.utc).isoformat(),
+        "run_id": _RUN_ID,
+        "thema":  thema,
+        "stage":  "stage2",
+        "stufe":  stufe,
+        "status": status,
+    }
+    if status == "FAILED":
+        rec["grund"]  = grund or "other"
+        rec["detail"] = detail[:300]
+    try:
+        with open(RUN_STATUS_PATH, "a", encoding="utf-8") as fh:
+            fh.write(json.dumps(rec, ensure_ascii=False) + "\n")
+    except OSError as e:
+        log.warning("run_status.jsonl nicht schreibbar (ignoriert): %s", e)
+
+
+def _thema_stufe_from_aid(aid: str, req_meta: dict) -> tuple[str, object]:
+    """article_id → (thema, stufe) via req_meta, mit Fallback aufs aid-Suffix."""
+    m = req_meta.get(aid, {})
+    if m:
+        return m.get("thema", aid), m.get("stufe", "")
+    # Fallback: '<slug>_l<n>'
+    if "_l" in aid:
+        base, _, lv = aid.rpartition("_l")
+        return base, (int(lv) if lv.isdigit() else lv)
+    return aid, ""
+
+
 # ── Poll-Helfer ───────────────────────────────────────────────────────────────
 
 def _state_str(batch_job) -> str:
@@ -254,10 +296,10 @@ def poll_gemini_batch(
     client: genai.Client,
     batch_name: str,
     poll_secs: int = POLL_SECS_GEMINI,
-    timeout_hours: float = GEMINI_TIMEOUT_H,
+    timeout_min: float = GEMINI_BATCH_TIMEOUT_MIN,
 ):
-    deadline = time.monotonic() + timeout_hours * 3600
-    log.info("Polling Gemini-Batch %s ...", batch_name[-30:])
+    deadline = time.monotonic() + timeout_min * 60
+    log.info("Polling Gemini-Batch %s ... (Timeout %.0f min)", batch_name[-30:], timeout_min)
     while True:
         job   = client.batches.get(name=batch_name)
         state = _state_str(job)
@@ -265,8 +307,17 @@ def poll_gemini_batch(
         if state in DONE_STATES:
             return job
         if time.monotonic() > deadline:
+            # Stall: hängenden Batch serverseitig canceln (keine weiterlaufenden Kosten),
+            # dann terminieren. Cancel-Fehler dürfen den Abbruch NICHT verhindern.
+            log.error("Gemini-Batch %s nach %.0f min nicht fertig — canceln + abbrechen",
+                      batch_name[-30:], timeout_min)
+            try:
+                client.batches.cancel(name=batch_name)
+                log.info("  Batch %s serverseitig gecancelt", batch_name[-30:])
+            except Exception as _ce:
+                log.warning("  Batch-Cancel fehlgeschlagen (ignoriert): %s", _ce)
             raise TimeoutError(
-                f"Gemini-Batch {batch_name} nach {timeout_hours}h nicht fertig"
+                f"Gemini-Batch {batch_name} nach {timeout_min}min nicht fertig (gecancelt)"
             )
         time.sleep(poll_secs)
 
@@ -1095,6 +1146,7 @@ def stage2_generierung(
     #   payload: str  → Gemini-Rohtext (in Phase B via _parse_gen2_response geparst)
     #   payload: dict → Anthropic emit-Output (bereits destringified)
     raw_articles: dict[str, tuple] = {}
+    _status_seen: set = set()   # article_ids mit bereits geschriebenem run_status (Doppel-Vermeidung)
 
     if gen_provider == "anthropic":
         import anthropic
@@ -1170,10 +1222,21 @@ def stage2_generierung(
                  len(gen_reqs))
         gen_batch = client.batches.create(model=GEN_MODEL, src=gen_reqs)
         log.info("Batch eingereicht: %s", gen_batch.name)
-        gen_batch = poll_gemini_batch(client, gen_batch.name)
+        try:
+            gen_batch = poll_gemini_batch(client, gen_batch.name)
+        except TimeoutError as _te:
+            # Stall: alle noch offenen Artikel dieses Batches als FAILED(timeout) vermerken,
+            # dann weiterreichen (Exit≠0 bleibt erhalten — sichtbarer Fehlerzustand).
+            for _aid in req_meta:
+                _th, _st = _thema_stufe_from_aid(_aid, req_meta)
+                _run_status(_th, _st, "FAILED", "timeout", str(_te))
+            raise
         state = _state_str(gen_batch)
         if state not in SUCCESS_STATES:
             log.error("Generierungs-Batch fehlgeschlagen: %s — Artikel fehlen", state)
+            for _aid in req_meta:
+                _th, _st = _thema_stufe_from_aid(_aid, req_meta)
+                _run_status(_th, _st, "FAILED", "other", f"batch_state:{state}")
             return {}
         for resp in _get_inlined_responses(gen_batch):
             meta_resp = getattr(resp, "metadata", {}) or {}
@@ -1185,6 +1248,9 @@ def stage2_generierung(
             usage = _extract_usage(getattr(resp, "response", None))
             if not raw:
                 log.error("  [%s] Leere Batch-Antwort", aid)
+                _th, _st = _thema_stufe_from_aid(aid, req_meta)
+                _run_status(_th, _st, "FAILED", "empty_output", "Leere Batch-Antwort")
+                _status_seen.add(aid)
                 continue
             raw_articles[aid] = (raw, usage)
 
@@ -1216,6 +1282,8 @@ def stage2_generierung(
                 err_dir = out_dir / "_errors"
                 err_dir.mkdir(exist_ok=True)
                 (err_dir / f"{article_id}_raw.txt").write_text(payload or "", encoding="utf-8")
+                _run_status(thema, stufe, "FAILED", "degraded_output", f"JSON-Parse: {e}")
+                _status_seen.add(article_id)
                 continue
         else:
             article         = payload
@@ -1339,6 +1407,7 @@ def stage2_generierung(
             encoding="utf-8",
         )
         articles[article_id] = str(out_path)
+        _run_status(thema, stufe, "OK")
         n_sects = len(article.get("sections", []))
         n_sents = sum(len(s.get("sentences", [])) for s in article.get("sections", []))
         n_boxes = sum(len(s.get("boxes", [])) for s in article.get("sections", []))
@@ -1349,6 +1418,21 @@ def stage2_generierung(
             article_id, word_count, n_sects, n_sents, n_boxes, n_quiz,
             len(article.get("images", [])), bool(source_passages),
         )
+
+    # Reconcile: neu angeforderte Artikel, die weder OK noch bereits FAILED gemeldet
+    # wurden (z.B. still aus der Batch-Antwort verschwunden) → als FAILED("other") melden.
+    _written = {a for a in req_meta if a in articles}
+    for _aid in req_meta:
+        if _aid not in _written and _aid not in _status_seen:
+            _th, _st = _thema_stufe_from_aid(_aid, req_meta)
+            _run_status(_th, _st, "FAILED", "other", "kein Ergebnis im Batch (missing)")
+    # Einzeilige Klartext-Zusammenfassung ins Log (ein Blick ins Log-Ende genügt).
+    _n_req  = len(req_meta)
+    _n_ok   = len(_written)
+    _n_fail = _n_req - _n_ok
+    log.info("RUN-ZUSAMMENFASSUNG Stage2 (Run %s): %d/%d Artikel OK, %d FAILED%s",
+             _RUN_ID, _n_ok, _n_req, _n_fail,
+             "" if _n_fail == 0 else " — siehe run_status.jsonl")
 
     _save_cp(out_dir, 2, {"status": "done", "articles": articles})
     return articles
