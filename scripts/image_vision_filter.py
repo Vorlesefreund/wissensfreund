@@ -72,7 +72,6 @@ _IMG_SKIP_LOWER = (
     "_logo.", "logo_of", "_icon.", "icon_of",
     "pictogram", "emblem_of", "coat_of_arms", "wappen",
     "flag_of", "flagge_", "national_flag",
-    "diagram", "schema", "chart",
 )
 _IMG_SKIP_EXT = (".webm", ".ogv", ".ogg", ".svg", ".gif")
 
