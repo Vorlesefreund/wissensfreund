@@ -23,7 +23,7 @@ dependencies:
   url_launcher: ^6.3.0
   local_auth: ^3.0.0
   archive: ^4.0.0
-  path_provider: ^2.1.0
+  path_provider: ^2.1.6
   connectivity_plus: ^7.0.0
   crypto: ^3.0.0
   convert: ^3.1.0
