@@ -132,7 +132,7 @@ def measure(rec: dict) -> None:
         state = _state_str(job)
         if state in DONE:
             if state in ("JOB_STATE_SUCCEEDED", "JOB_STATE_PARTIALLY_SUCCEEDED"):
-                rec.update(result="succeeded",
+                rec.update(result="succeeded", error_category="",
                            seconds_to_succeeded=round(time.monotonic() - t0, 1),
                            final_state=state)
             else:
