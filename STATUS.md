@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-01T10:25:21Z -->
+<!-- updated: 2026-07-02T10:46:46Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **v5.2 PRODUKTIV + BRANCH GEMERGT (30.06.2026)** — Branch `companion-faszination-vielfalt-2026-06`
@@ -36,6 +36,29 @@
 > **OFFENER PIPELINE-PUNKT — SVG (Fix B):** Didaktische Grafiken sind auf Wikipedia oft .svg; die werden
 > weiter beim Sammeln übersprungen (_IMG_SKIP_EXT). Fix B = Sammel-Logik + SVG→PNG-Rasterung (neue
 > Dependency). Aufwand/Nutzen erst nach dem Sammel-Lauf entscheiden. Details: PROJEKTDOKUMENT Roadmap.
+
+> **02.07.2026 — BATCH-HÄRTUNG + FLASH-MONITOR PRODUKTIV; VULKAN-v5.2d-LAUF UNGEPRÜFT.**
+> (a) **Unbeaufsichtigt-Härtung run_batch.py** (de2b5b1): Gemini-Batch-Stall-Timeout jetzt
+>   `GEMINI_BATCH_TIMEOUT_MIN` (Default 30, env-überschreibbar) statt 48h; bei Timeout Auto-Cancel
+>   (`client.batches.cancel`) VOR TimeoutError. Zentrale append-only **run_status.jsonl** (Repo-Root;
+>   ts/run_id/thema/stufe/status/grund/detail) an allen Degradationspunkten + Summary-Logzeile.
+>   Anthropic-Poll (Lektorat/Phase B) bewusst unberührt. Paketierung (B) aufgeschoben (Checkpoint-Umbau).
+> (b) **Flash-Verfügbarkeits-Monitor** (3a11719 + Fix bedd81c + .gitignore 689b6d8): `scripts/flash_monitor.py`
+>   misst tageszeitliche `gemini-3.5-flash`-Queue-Lage (4 Wegwerf-Requests an GEMINI_MODEL, 20-min-Timeout +
+>   Auto-Cancel, append **flash_monitor.jsonl**, garantiert genau 1 Zeile/Aufruf). Windows-Task
+>   `WissensfreundFlashMonitor` läuft **19×/Tag** (00:05–09:05, alle 30 min, „nur wenn angemeldet"; Wrapper
+>   `flash_monitor_run.bat` → `flash_monitor_task.log`, beide lokal/gitignored). Manuell + im Task-Kontext
+>   verifiziert (succeeded, Key aus .env). Auswertung nach einigen Tagen → 503-armes Frühfenster + realistische
+>   Timeout-/Paketgrößen.
+> (c) **Vulkan-v5.2d-Lauf durch, NICHT freigegeben** (`articles/vulkan_v5_2d/`, run_id 20260702T091952):
+>   Stage 2 **3/3 OK** (Batch ~11 min, kein Stall — 30-min-Timeout musste nicht greifen), Companions 4
+>   (Pompeji/Vulcanus/Geysir/Raucher), appeal high, **kein Trim** (S1 250 / S2 381 / S3 640).
+>   **Bildmenge-Fix 8bb6a53 eingehalten** (1–2 Bilder/Abschnitt via img_index, zweites nur bei >5 Sätzen).
+>   **Raster-Diagramm-Fix 9752a97 UNVALIDIERT** (Pool 28 = nur Fotos; Vulkan-Diagramme sind SVG → Fix B nötig).
+>   Lektorat 9 Findings, kein PRÜFEN/EINBAU_FEHLGESCHLAGEN. **DREI OFFENE LAYOUT-BEFUNDE (PO-Leseurteil,
+>   noch NICHT diagnostiziert): Box→Abschnitt-Fehlzuordnung, Box wiederholt Fließtext, falsche Bildzuordnung
+>   — aus Artikel-JSON zu diagnostizieren (nicht Docx).** Register/Drastik-Fix 0c045c6 am Text noch zu
+>   beurteilen. Wal/WWII-v5.2d stehen noch aus. Kein STATUS-/Katalog-Eingriff; Docx + S1/S2/S3-Txt auf Desktop.
 
 > **WEG B VERWORFEN + RÜCKBAU ABGESCHLOSSEN (26.06.2026)** — Generierung zurück auf
 > Gemini-3.5-flash + v4_production (Sonnet-Generator stilistisch nicht kindgerecht genug,
