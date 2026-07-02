@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-02T10:46:46Z -->
+<!-- updated: 2026-07-02T16:26:35Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **v5.2 PRODUKTIV + BRANCH GEMERGT (30.06.2026)** — Branch `companion-faszination-vielfalt-2026-06`
@@ -59,6 +59,14 @@
 >   noch NICHT diagnostiziert): Box→Abschnitt-Fehlzuordnung, Box wiederholt Fließtext, falsche Bildzuordnung
 >   — aus Artikel-JSON zu diagnostizieren (nicht Docx).** Register/Drastik-Fix 0c045c6 am Text noch zu
 >   beurteilen. Wal/WWII-v5.2d stehen noch aus. Kein STATUS-/Katalog-Eingriff; Docx + S1/S2/S3-Txt auf Desktop.
+> (d) **FIX 1 committet + verifiziert** (8b3740d): Der „Doppelsatz"-Befund war ein **Lektorat-Apply-Bug** in
+>   `_apply_auto_correction` (`lektorat_common.py`) — bei einem Mehr-Satz-`claim_original` wurde nur der Best-Match-
+>   Satz ersetzt, die weiteren vom Claim abgedeckten Original-Sätze blieben als Waisen stehen. Fix (sec-Zweig):
+>   neuer Helfer `_claim_covers_run` prüft einen zusammenhängenden Satz-Lauf ab Best-Match; bei sauberem Lauf wird
+>   der erste Satz durch den Korrektur-Block ersetzt und die Folge-Sätze entfernt, sonst kein Eingriff (→ flaggen).
+>   Ein-Satz-Claims + Box-Zweige unverändert (regressionsfrei). Am realen Pompeji-Fall verifiziert (9→8 Sätze,
+>   s027-Waise entfernt, alle anderen intakt). **Noch offen:** img_index-Fehlzuordnung + Box-Redundanz (Generator-
+>   Prompt), Photosynthese-Recall-Miss (Lektorat) — Diagnosen in `diagnose_fixes.txt` (lokal, ungetrackt).
 
 > **WEG B VERWORFEN + RÜCKBAU ABGESCHLOSSEN (26.06.2026)** — Generierung zurück auf
 > Gemini-3.5-flash + v4_production (Sonnet-Generator stilistisch nicht kindgerecht genug,
