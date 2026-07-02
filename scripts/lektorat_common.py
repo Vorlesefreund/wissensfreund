@@ -562,6 +562,22 @@ def _covers_whole_box(claim: str, box_text: str) -> bool:
     )
 
 
+def _claim_covers_run(
+    claim_parts: list[str], sents: list[dict], sj: int, thr: float = 0.4
+) -> bool:
+    """True, wenn die Claim-Teilsätze ab Position sj einen ZUSAMMEN-
+    HÄNGENDEN Lauf von Original-Sätzen der Reihe nach abdecken:
+    jeder Teilsatz Ck matcht sentences[sj+k] mit _jaccard >= thr,
+    innerhalb der Array-Grenzen. Sonst False (→ kein Eingriff)."""
+    n = len(claim_parts)
+    if n == 0 or sj + n > len(sents):
+        return False
+    return all(
+        _jaccard(claim_parts[k], sents[sj + k].get("text", "")) >= thr
+        for k in range(n)
+    )
+
+
 def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -> bool:
     """Ersetzt den Satz in article, der claim_text am besten trifft, mit korrektur_neu.
 
@@ -615,7 +631,21 @@ def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -
 
     if best_loc[0] == "sec":
         _, si, sj = best_loc
-        article["sections"][si]["sentences"][sj]["text"] = korrektur_neu
+        sents = article["sections"][si]["sentences"]
+        claim_parts = _split_sentences(claim_text) or [claim_text]
+        if len(claim_parts) <= 1:
+            # Ein-Satz-Claim: unverändertes Verhalten (nur Text ersetzen)
+            sents[sj]["text"] = korrektur_neu
+        elif _claim_covers_run(claim_parts, sents, sj):
+            # Mehr-Satz-Claim, sauberer zusammenhängender Lauf ab sj:
+            # ganzen Korrektur-Block in den ersten Satz, weitere abgedeckte
+            # Original-Sätze entfernen (verhindert Waisen-Dublette).
+            sents[sj]["text"] = korrektur_neu
+            del sents[sj + 1 : sj + len(claim_parts)]
+        else:
+            # Best-Match nicht der erste Teilsatz / Folgesätze passen nicht /
+            # Lauf überschritte das Array-Ende → kein Eingriff (→ flaggen).
+            return False
     elif best_loc[0] == "box_text":
         # Ursache B: Granularitäts-Guard. Ganzbox-Korrektur nie in einen Einzelsatz spleißen.
         _, si, bi, satz = best_loc
