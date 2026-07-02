@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-02T16:26:35Z -->
+<!-- updated: 2026-07-02T17:04:09Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **v5.2 PRODUKTIV + BRANCH GEMERGT (30.06.2026)** — Branch `companion-faszination-vielfalt-2026-06`
