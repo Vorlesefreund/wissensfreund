@@ -1,8 +1,8 @@
 # Wissensfreund — Projektdokument v21
 
-**Stand:** 22. Juni 2026 · ersetzt v20 (1. Juni 2026)
+**Stand:** 2. Juli 2026 · ersetzt v20 (1. Juni 2026)
 
-**Pipeline-Fakten zuletzt gegen Code geprüft:** 22.06.2026, via `verify_project_facts.py` (14/14 PASS · 2 KNOWN_OPEN · 0 FAIL)
+**Pipeline-Fakten zuletzt gegen Code geprüft:** 02.07.2026, via `verify_project_facts.py` (19/19 PASS · 2 KNOWN_OPEN · 0 FAIL)
 
 > **Wichtigste Änderung gegenüber v20:** Die Klexikon-/ZIM-Architektur als Inhaltsquelle ist entfallen — das Inhaltsmodell sind ausschließlich selbst generierte, Wikipedia-basierte Artikel. (Übergang: die ausgelieferte App liefert noch Klexikon-Inhalt, siehe Kap. 1/7.) Die alte Doku war an mehreren Stellen veraltet (u. a. „Claude generiert Artikel" — tatsächlich Gemini; feste Wortziele; 3-stufiger Bildfilter).
 
@@ -12,7 +12,7 @@
 - **[PO]** — Stand laut Product Owner (Andreas), nicht code-verifiziert.
 - **[? zu prüfen]** — aus v20 übernommen, wartet auf den Review-Durchgang des PO.
 
-> **Was die CI heute automatisch prüft (16 Fakten, 14 hart + 2 KNOWN_OPEN):** Produktions-Generator `gemini-3.5-flash`; Thinking-Stufe MEDIUM; `run_batch.py` erbt das Generator-Modell (kein eigener Owner); Lektorat `claude-sonnet-4-6`; Vision-Modell `gemini-2.5-flash`; Bild-Recheck Opus 4.8; aktiver Generator-Prompt verdrahtet (`wissensfreund_generator_prompt_v4_production.md`); Prompt-Datei existiert; S1-Wortziel-Untergrenze `ERG_BANDS[1]=(88,250)`; Exclude-Backstop verdrahtet; `catalog_review_master.xlsx` existiert; `ergiebigkeit_scores` deckt den Katalog (nicht der 134-Stub); `eignung_exclude.json` == XLSX-Excludes (reproduzierbar); Lektorat prüft den Phase-1-Snapshot (kein eigener Quell-Fetch im Lektorat-Pfad). **KNOWN_OPEN** (brechen den Build nicht): CI ruft `run_batch.py` / CI ruft *nicht* den Legacy-Claude-Generator. — Alles andere in den [✓ audit]-Abschnitten ist von Hand verifiziert, aber nicht in diesem Satz enthalten.
+> **Was die CI heute automatisch prüft (21 Fakten, 19 hart + 2 KNOWN_OPEN):** Produktions-Generator `gemini-3.5-flash`; Thinking-Stufe MEDIUM; `run_batch.py` erbt das Generator-Modell (kein eigener Owner); Lektorat `claude-sonnet-4-6`; Vision-Modell `gemini-2.5-flash`; Bild-Recheck Opus 4.8; aktiver Generator-Prompt verdrahtet (`wissensfreund_generator_prompt_v5_2.md`); Prompt-Datei existiert; S1-Wortziel-Untergrenze `ERG_BANDS[1]=(88,250)`; Exclude-Backstop verdrahtet; `catalog_review_master.xlsx` existiert; `ergiebigkeit_scores` deckt den Katalog (nicht der 134-Stub); `eignung_exclude.json` == XLSX-Excludes (reproduzierbar); Lektorat prüft den Phase-1-Snapshot (kein eigener Quell-Fetch im Lektorat-Pfad). **KNOWN_OPEN** (brechen den Build nicht): CI ruft `run_batch.py` / CI ruft *nicht* den Legacy-Claude-Generator. — Alles andere in den [✓ audit]-Abschnitten ist von Hand verifiziert, aber nicht in diesem Satz enthalten.
 
 ---
 
@@ -27,9 +27,9 @@ Wissensfreund ist ein deutschsprachiges, KI-gestütztes Kinderlexikon als Flutte
 *CI-geguardet: Modelle, Thinking-Stufe, `run_batch`-Vererbung, Prompt-Verdrahtung. Audit-Stand (18.06., nicht CI-geguardet): Lesestufen-Altersbänder, Wortziel-Formel, Eignungs-Rubrik-Details, Temperatur.*
 
 - **Inhaltsquelle:** deutsche Wikipedia (API). Kein Fremd-/Trainingswissen. Vor-Schritt holt den Artikel und injiziert ihn als `WIKIPEDIA_TEXT`.
-- **Generator:** `gemini-3.5-flash`, Thinking **MEDIUM** (`GEMINI_MODEL` in `generate_grounded.py`; `run_batch.py` importiert ihn als `GEN_MODEL` — kein eigener Model-Owner). Belegt durch den Lauf-Stempel `generation_method = "gemini-3.5-flash/batch/v4"`.
+- **Generator:** `gemini-3.5-flash`, Thinking **MEDIUM** (`GEMINI_MODEL` in `generate_grounded.py`; `run_batch.py` importiert ihn als `GEN_MODEL` — kein eigener Model-Owner). Belegt durch den Lauf-Stempel `generation_method = "gemini-3.5-flash/batch/v5.2"`.
 - **Lektorat:** separater Pass mit `claude-sonnet-4-6` (Sprache, Quiz-Fairness, Wikipedia-Grounding, Box-Regeln, Wortzahl-Caps). Tiers: SILENT (kleine Korrekturen), KORRIGIERT (größere klare Korrekturen direkt eingebaut), PRÜFEN (Ausnahmefall).
-- **Aktiver Prompt:** `wissensfreund_generator_prompt_v4_production.md` (v4.0 — Produktion; seit 22.06. übernommen, siehe Kap. 9). Die alte `…_v3.23_production.md` bleibt unreferenziert als Historie liegen.
+- **Aktiver Prompt:** `wissensfreund_generator_prompt_v5_2.md` (v5.2 — Produktion; seit 30.06. aktiv, siehe Entscheidungs-Log 30.06. / Kap. 9). Die älteren `…_v4_production.md` und `…_v3.23_production.md` bleiben unreferenziert als Historie liegen.
 - **Lesestufen:**
 
 | Stufe | Alter | Richtwort |
@@ -40,7 +40,7 @@ Wissensfreund ist ein deutschsprachiges, KI-gestütztes Kinderlexikon als Flutte
 
 - **Wortziele (Ergiebigkeit):** `target_S = round(Wlo + clamp((Erg−2)/6, 0, 1) × (Whi−Wlo))`; Bänder S1 [88, 250] / S2 [100, 400] / S3 [150, 650] (S1-Untergrenze 22.06. mit der v4-Adoption 75→88 angehoben; S2/S3 unverändert — Cap-Spielraum für die S1-Szene). **Obergrenzen sind harte Limits** (S3 max **650**, nicht 700). Verdrahtet über `wortziel_for` + `ergiebigkeit_scores.json` (4.375 Einträge). Bei dünner Quelle: kürzer schreiben statt aufblähen.
 - **Eignungs-Gate:** 12-Kategorien-Rubrik, Schalter `EIGNUNG_STRICT`, Loader `eignung_for()`, Exclude-Filter vor Phase 1, `age_floor`-Stufen-Skipping (Mechanismus vorhanden; per Entscheidung 20.06. NICHT genutzt, um wichtige abstrakte Themen aus S1 zu kippen — siehe Kap. 9).
-- **Temperatur:** Sync-Pfad 0.6 (`gemini_client.py`). *Batch-Pfad-Temperatur noch zu bestätigen — siehe offene Punkte.*
+- **Temperatur:** Sync-Pfad 0.6 (`gemini_client.py`); Batch-Pfad **1.0** (belegt `run_batch.py:1123` + `meta.generation_temperature`; Stand 02.07.).
 
 ---
 
@@ -157,7 +157,7 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
 
 > Für ein künftiges Ich / eine neue Chat-Instanz: das hier ist der maßgebliche Zustand.
 
-**STATUS:** Die Generierung läuft wieder auf **gemini-3.5-flash + `wissensfreund_generator_prompt_v4_production.md`** (= Vor-Weg-B-Stand). Auf diesem Stand ist das Projekt **produktionsbereit**, aber bewusst **pausiert**, weil gemini-3.5-flash zeitweise unzuverlässig ist (503 / Service-Erschöpfung). Es ist KEIN Code-Defekt offen — es ist ein Warten auf die Modell-Verfügbarkeit.
+**STATUS (Snapshot 26.06.; Prompt-Nennung 02.07. nachgezogen):** Die Generierung wurde nach dem Weg-B-Rückbau auf **gemini-3.5-flash** zurückgesetzt (damals `…v4_production.md`; **seit 30.06. `wissensfreund_generator_prompt_v5_2.md`** produktiv). Auf diesem Stand war das Projekt **produktionsbereit**, damals aber bewusst pausiert wegen zeitweiser gemini-3.5-flash-503. *(Reaktiviert am 30.06. — siehe STATUS.md / Entscheidungs-Log; der übrige Abschnitt bleibt als datierter 26.06.-Snapshot stehen.)* Es ist KEIN Code-Defekt offen — es ist ein Warten auf die Modell-Verfügbarkeit.
 
 **WAS WEG B WAR:** Versuch, die Generierung von Gemini auf Claude zu migrieren (Motiv: die 503-Ausfälle). Verworfen, weil Sonnet 4.6 als Generator stilistisch nicht kindgerecht genug erzählt (faktentreu, aber faktenlastig statt flüssig). Begründung im Detail: Entscheidungs-Log 26.06.2026.
 
@@ -219,7 +219,7 @@ Kernaussage der v20-Wettbewerbsanalyse: Keine App kombiniert animierten Erklär-
   - **Wachposten „lebendig ≠ ausschmücken":** v4 streut gelegentlich kleine **unbelegte** Tupfer ein (z. B. „Zahnräder" statt des belegten Sperrklinken-Mechanismus; „maßgeschneiderte Stahlplatten") — bei Lektorat/Feintuning beobachten, ggf. R45-Backstop im Lektorat schärfen.
   - **Ungetestet:** S1-Wortziel-Effekt (88) an **erg-schwachen** Themen (die vier A/B-Themen sind erg-stark, der Lever bewegt sie kaum); Lektorat×v4-Zusammenspiel (A/B war Roh-Output ohne Lektorat).
   - **Kosmetisch:** v4-Wortziel-Tabelle „Appeal" → „Ergiebigkeit" relabeln (Wortbudget hängt an Ergiebigkeit, nicht am Appeal).
-- **Batch-Pfad-Temperatur** bestätigen.
+- **~~Batch-Pfad-Temperatur bestätigen.~~ → ERLEDIGT (02.07.):** Batch-Pfad = 1.0 (`run_batch.py:1123` + `meta.generation_temperature`), Sync-Pfad 0.6. CI-geguardet ist die Temperatur weiterhin nicht.
 - **Source-Cache vor Bulk-Run** (spart Re-Fetches, hält Lektorat auf dem Generator-Snapshot).
 - **Gemini-Cache-Hygiene** (per-Topic-Löschung nach 3 Stufen, TTL ~15 min).
 - **Aufräumen:** Audit-/Probe-Skripte, Spare-Clone, `scrape_out`, ZIM-Zweig einfrieren; ~~Modell-Konstanten zentralisieren~~ → **teil-erledigt (25.06.):** zentrales Provider/Modell-Routing in `stage_models.py` (`STAGE_MODELS` + `get_stage_config`); Alt-Konstanten (`GEMINI_MODEL`, `VISION_MODEL`, `LEKTORAT_MODEL`) bleiben als Default/Fallback bestehen — vollständige Ablösung offen.
