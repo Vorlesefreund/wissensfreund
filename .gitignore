@@ -77,3 +77,5 @@ articles/*/lektorat_rerun/
 run_status.jsonl
 # Verfügbarkeits-Messungen flash_monitor.py (append-only, Laufzeit-Artefakt) — nicht tracken
 flash_monitor.jsonl
+# Task-Scheduler-Lauf-Log flash_monitor (append, Laufzeit-Artefakt) — nicht tracken
+flash_monitor_task.log
