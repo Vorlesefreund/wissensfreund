@@ -1,0 +1,25 @@
+# Zeilenende-Regel: alle Textdateien einheitlich behandeln.
+# Das beseitigt die "Fehlalarm"-Änderungen zwischen Windows und dem Online-Projekt.
+* text=auto
+
+# Skripte brauchen ein bestimmtes Zeilenende, damit sie funktionieren:
+*.sh  text eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Diese Dateitypen sind Bilder / Töne / Excel / Word usw.
+# Sie duerfen NIE als Text behandelt oder umgeschrieben werden:
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.wav  binary
+*.mp3  binary
+*.pdf  binary
+*.xlsx binary
+*.docx binary
+*.pptx binary
+*.ttf  binary
+*.otf  binary
+*.zip  binary
