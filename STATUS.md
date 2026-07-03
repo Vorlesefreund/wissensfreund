@@ -1,6 +1,11 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-02T17:04:09Z -->
+<!-- updated: 2026-07-03T10:12:36Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
+
+> **03.07.2026 — GIT-HYGIENE + COWORK-BEFUND.**
+> (a) `.gitattributes` neu (7e200b4): `* text=auto` + binary/eol-Regeln → CRLF-Phantom-Drift behoben (vorher ~550 Phantom-„Änderungen" → nur echte). CI-robust (verify nutzt splitlines).
+> (b) Aufräum-Commits (84ba5e7 + d771883): `wissensfreund_system_prompt_v3_7.md` gelöscht; zwei fehlgeschlagene Test-Artikel `test_5topics/_errors/{biene,dschungel}_l3.json` gelöscht; `articles/generalize_test/` untracked (32 Dateien, bleiben lokal) + `.gitignore`. Unangetastet: `test_5topics/` (Skript-Ziel `_images/`), die drei Katalog-XLSX.
+> (c) Cowork-Befund: Push aus Cowork geht (PAT in `.git/config`). ABER Datei-Edits + Commits aus Cowork sind unsicher — der Git-Index korrumpiert wiederholt (Reparatur `rm .git/index && git reset`) UND große Datei-Schreibvorgänge können abschneiden (STATUS.md wurde beim Cowork-Edit auf 639 statt 654 Zeilen verstümmelt, aus HEAD wiederhergestellt). ENTSCHEIDUNG: Datei-Änderungen/Commits laufen über Windows/Claude Code; Cowork = Lesen/Analyse/Planung + Push.
 
 > **v5.2 PRODUKTIV + BRANCH GEMERGT (30.06.2026)** — Branch `companion-faszination-vielfalt-2026-06`
 > nach main gemergt (Merge aba4122). Produktions-Generator-Prompt jetzt **v5.2** (v4 abgelöst;
