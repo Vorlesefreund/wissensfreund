@@ -65,7 +65,8 @@ Prüfe gedanklich, bevor du das JSON ausgibst:
 - Erzählfaden: Durchgehender Bogen statt Fakten-Stakkato? Jeder Abschnittswechsel mit Brücke?
 - Companions ausgeschöpft: Trägt jeder gewählte Companion einen substanziellen Beitrag — und bleibt das Primärthema trotzdem der Kern (≥ Hälfte)?
 - Tiefe: Liegt eine Stufe unter dem Zielband? Dann ist ein Aspekt unterentwickelt — vertiefen, nicht auffüllen.
-- Boxen: Jede am unmittelbar umgebenden Fließtext verankert, jede mit echtem Mehrwert?
+- Boxen: Jede am unmittelbar umgebenden Fließtext verankert — und jede mit echtem Mehrwert, also NICHT nur eine Umformulierung des Ankersatzes, sondern ein neuer belegter Fakt/eine Zahl/ein Aspekt, der im Fließtext fehlt?
+- Bild-Satz-Passung: Zeigt jedes vergebene Bild genau den Gegenstand seines Satzes — auch in Abschnitten, die mehrere verwandte Themen mischen (Geysir vs. Schwarzer Raucher, Erde vs. Mars/Io)? Kein vertauschtes oder nur entfernt verwandtes Motiv; im Zweifel img_index: -1.
 
 <output_format>
 
@@ -182,7 +183,9 @@ ausschließlich valides JSON. Kein Markdown, keine Kommentare außerhalb des `<p
   Bild, das zum Satzinhalt passt. Bilder aus Companion-Artikeln (z. B. eine Enigma-Maschine, ein
   Anne-Frank-Porträt) sind für den Abschnitt über diesen Companion gedacht. Bild und Satz sollen dieselbe
   Frage beantworten.
+- **Gemischte Abschnitte — Verwechslungsfalle:** Behandelt ein Abschnitt mehrere verwandte, aber verschiedene Gegenstände (z. B. Geysir UND Schwarzer Raucher, oder Vulkane auf der Erde UND auf Mars/Io), muss das Bild zum konkreten Gegenstand SEINES Satzes passen — nicht bloß zum Oberthema des Abschnitts. Prüfe pro Bild: Zeigt es genau das, wovon dieser Satz handelt? Ein Geysir-Foto gehört an einen Geysir-Satz, ein Schwarzer-Raucher-Foto an einen Schwarze-Raucher-Satz — nie vertauscht, auch wenn beide mit heißem Wasser zu tun haben. Zeigt kein Bild den konkreten Gegenstand des Satzes, ist img_index: -1 besser als ein verwandtes, aber falsches Motiv.
 - `boxes[]` darf leer sein `[]`. Der vollständige Inhalt einer Box steht IMMER im Feld `text` — auch bei `wow`, `fakt` und `warnung`. Das Feld `reveal_text` (+ `"reveal_mode": "auto"`) ist AUSSCHLIESSLICH für `stimmt_das` (die Auflösung der Frage); bei allen anderen Box-Typen gibt es kein `reveal_text`. Lege niemals den Body einer `wow`/`warnung`/`fakt`-Box ins `reveal_text` — er würde in der App weder angezeigt noch vorgelesen.
+- **Box-Anti-Redundanz:** Eine Box darf den umgebenden Fließtext nicht wiederholen oder mit anderen Worten nacherzählen. Sie muss etwas liefern, das im Fließtext NICHT schon steht — einen zusätzlichen belegten Fakt, eine konkrete Zahl, einen überraschenden Aspekt aus der Quelle. Steht der Kern der Box bereits im Ankersatz (Beispiel: Fließtext "Das Tamu-Massiv … ist der größte Einzelvulkan", Box sagt dasselbe noch einmal), dann entweder die Box mit echtem Zusatz füllen (eine Zahl/ein Detail, das der Fließtext nicht nennt) oder die Box streichen. Eine bloße Umformulierung des Ankersatzes ist keine gültige Box.
 - `quiz.questions`: genau 3 (S1+S2), 4–5 (S3); je genau 3 Optionen A/B/C.
 - `related_terms` immer vorhanden (Arrays dürfen leer sein).
 - `source_passages` immer vorhanden — je Fakten-Satz ein Eintrag mit wörtlichem Quellzitat. Einleitungs-/
