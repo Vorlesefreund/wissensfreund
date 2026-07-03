@@ -79,3 +79,6 @@ run_status.jsonl
 flash_monitor.jsonl
 # Task-Scheduler-Lauf-Log flash_monitor (append, Laufzeit-Artefakt) — nicht tracken
 flash_monitor_task.log
+
+# Test-Ordner generalize_test — lokal behalten, nicht tracken
+articles/generalize_test/
