@@ -884,9 +884,10 @@ def _limit_images_per_section(article: dict, images_stufe: list[dict]) -> None:
     """Begrenzt Bildwechsel pro Section (greift NACH der Generierung).
 
     S1 (age_level 1): genau EIN Bild pro Section.
-    S2/S3 (age_level 2/3): ein Bild bei <4 Sätzen; bis zu ZWEI ab >=4 Sätzen
-      (die vom Generator je Satz gesetzte Zuordnung auf die beiden Section-Bilder
-      bleibt erhalten; positionsbasierter Split nur als Fallback).
+    S2/S3 (age_level 2/3): ein Bild bei <=5 Sätzen; bis zu ZWEI erst bei mehr als
+      5 Sätzen (Prompt-Regel maßgeblich, Code = Backstop). Die vom Generator je
+      Satz gesetzte Zuordnung auf die beiden Section-Bilder bleibt erhalten;
+      positionsbasierter Split nur als Fallback.
     Bild-Wahl: häufigster img_index ("Mehrheit"); Tiebreaker = höhere Vision-
     relevanz aus dem Stage-1-Pool (fehlt → 0), dann kleinerer Index.
     Sätze mit img_index=-1 ERBEN das Section-Bild (kein Flackern). Bildlose
@@ -919,7 +920,7 @@ def _limit_images_per_section(article: dict, images_stufe: list[dict]) -> None:
         ranked = sorted(counts, key=lambda ix: (-counts[ix], -relevanz_of(ix), ix))
 
         n         = len(sents)
-        allow_two = age in (2, 3) and n >= 4 and len(ranked) >= 2
+        allow_two = age in (2, 3) and n > 5 and len(ranked) >= 2
 
         if not allow_two:
             chosen = ranked[0]
