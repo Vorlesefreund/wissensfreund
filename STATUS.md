@@ -1,11 +1,16 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-03T10:12:36Z -->
+<!-- updated: 2026-07-04T13:46:59Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **03.07.2026 — GIT-HYGIENE + COWORK-BEFUND.**
 > (a) `.gitattributes` neu (7e200b4): `* text=auto` + binary/eol-Regeln → CRLF-Phantom-Drift behoben (vorher ~550 Phantom-„Änderungen" → nur echte). CI-robust (verify nutzt splitlines).
 > (b) Aufräum-Commits (84ba5e7 + d771883): `wissensfreund_system_prompt_v3_7.md` gelöscht; zwei fehlgeschlagene Test-Artikel `test_5topics/_errors/{biene,dschungel}_l3.json` gelöscht; `articles/generalize_test/` untracked (32 Dateien, bleiben lokal) + `.gitignore`. Unangetastet: `test_5topics/` (Skript-Ziel `_images/`), die drei Katalog-XLSX.
 > (c) Cowork-Befund: Push aus Cowork geht (PAT in `.git/config`). ABER Datei-Edits + Commits aus Cowork sind unsicher — der Git-Index korrumpiert wiederholt (Reparatur `rm .git/index && git reset`) UND große Datei-Schreibvorgänge können abschneiden (STATUS.md wurde beim Cowork-Edit auf 639 statt 654 Zeilen verstümmelt, aus HEAD wiederhergestellt). ENTSCHEIDUNG: Datei-Änderungen/Commits laufen über Windows/Claude Code; Cowork = Lesen/Analyse/Planung + Push.
+
+> **03.07.2026 — GENERATOR-FIXES + VALIDIERUNGSLAUF (Wal/WWII v5.2e).**
+> Vier Commits: (1bdb2d3) Prompt v5.2 — Bild-Satz-Passung (gemischte Abschnitte) + Box-Anti-Redundanz + erweiterter Selbst-Check; (3acfa58) run_batch `_limit_images_per_section` behält die semantische img_index-Zuordnung in Zwei-Bild-Abschnitten (vorher positionsbasiert verdreht, reproduzierbar in wwii_l3); (51f3347) Zwei-Bild-Schranke `n > 5` an die Prompt-Regel angeglichen (vorher `n >= 4` — stille Prompt/Code-Drift). Beide Code-Fixes mit deterministischem Unit-Test grün.
+> Validierungslauf `wal_wwii_v5_2e_20260703` (run_id val_wal_wwii_20260703, Stages 1-3, 6/6 Artikel, kein 503): Box-Anti-Redundanz ✅, S1-Ton/Register ✅ (bestätigt am sensiblen WWII-Artikel mit Opus-Recheck), Bildmenge/Abschnitt ✅. Bild-Satz-Passung war ⚠️ → als Code-Bug diagnostiziert (3acfa58) und die Schwellen-Drift geschlossen (51f3347). Alle Fixes greifen ab dem nächsten Lauf.
+> **OFFEN — SVG-Diagramme (Fix B, einziger offener Prüfpunkt aus dem Lauf):** Raster-Diagramme erreichen den Pool ✅, aber didaktische SVG-Grafiken werden beim Sammeln weiter übersprungen (`_IMG_SKIP_EXT`). Braucht SVG→PNG-Rasterung (neue Dependency) + ein Test-Thema mit SVG-Diagrammen. Aufwand/Nutzen erst nach einem Sammel-Lauf entscheiden.
 
 > **v5.2 PRODUKTIV + BRANCH GEMERGT (30.06.2026)** — Branch `companion-faszination-vielfalt-2026-06`
 > nach main gemergt (Merge aba4122). Produktions-Generator-Prompt jetzt **v5.2** (v4 abgelöst;
