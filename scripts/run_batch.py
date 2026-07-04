@@ -885,7 +885,8 @@ def _limit_images_per_section(article: dict, images_stufe: list[dict]) -> None:
 
     S1 (age_level 1): genau EIN Bild pro Section.
     S2/S3 (age_level 2/3): ein Bild bei <4 Sätzen; bis zu ZWEI ab >=4 Sätzen
-      (erste floor(n/2) Sätze Bild A, Rest Bild B).
+      (die vom Generator je Satz gesetzte Zuordnung auf die beiden Section-Bilder
+      bleibt erhalten; positionsbasierter Split nur als Fallback).
     Bild-Wahl: häufigster img_index ("Mehrheit"); Tiebreaker = höhere Vision-
     relevanz aus dem Stage-1-Pool (fehlt → 0), dann kleinerer Index.
     Sätze mit img_index=-1 ERBEN das Section-Bild (kein Flackern). Bildlose
@@ -926,9 +927,24 @@ def _limit_images_per_section(article: dict, images_stufe: list[dict]) -> None:
                 s["img_index"] = chosen
         else:
             a, b = ranked[0], ranked[1]
-            half = n // 2  # floor(n/2) Sätze → Bild A, Rest → Bild B
-            for i, s in enumerate(sents):
-                s["img_index"] = a if i < half else b
+            allowed = {a, b}
+            # Semantische Generator-Zuordnung beibehalten statt positionsbasiert neu
+            # verteilen: Sätze, die schon auf eines der beiden Section-Bilder zeigen,
+            # bleiben; -1-/Fremdbild-Sätze erben per Forward-Fill das laufende Bild
+            # (führende -1 erben das dominante Bild a). Rückfall auf den alten
+            # Positions-Split nur, wenn KEIN Satz auf a/b zeigt (kaputte Zuordnung).
+            if any(s.get("img_index", -1) in allowed for s in sents):
+                last = a
+                for s in sents:
+                    ix = s.get("img_index", -1)
+                    if ix in allowed:
+                        last = ix
+                    else:
+                        s["img_index"] = last
+            else:
+                half = n // 2  # floor(n/2) Sätze → Bild A, Rest → Bild B
+                for i, s in enumerate(sents):
+                    s["img_index"] = a if i < half else b
 
 
 # ── Stage 2: GENERIERUNG ──────────────────────────────────────────────────────
