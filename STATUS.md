@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-05T14:28:55Z -->
+<!-- updated: 2026-07-05T19:38:24Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **05.07.2026 — THEMENGEBIETE-MEHRFACHZUORDNUNG + PRIMÄR-UMSCHICHTUNG (additiv).**
@@ -17,6 +17,18 @@
 > Reproduzierbarkeit: catalog_merge.py reproduzierte catalog_full.json VOR Ergänzung byte-identisch (kein Drift);
 > Diff danach NUR themengebiete/themengebiet/production_rank; verify_project_facts.py 0 Hart-FAIL.
 > Nicht committet: catalog_review.xlsx (regenerierbares Binär-Derivat).
+>
+> **05.07.2026 (Nachtrag) — MASTER-XLSX-REBUILD + 2 DUBLETTEN AUSGESCHLOSSEN.**
+> Master-XLSX freigegeben + neu gebaut (`scripts/build_master.py`) → Spalte `themengebiete` + Primär-
+> Umschichtungen jetzt sichtbar. Schutzprotokoll eingehalten: BACKUP/BACKUP2/BACKUP3 vor Build, wertgenaue
+> Verifikation gegen Backup — 16 Kommentare + Shakespeare/Terror erhalten, 0 unerwartete Diffs,
+> audit/kommentiert unangetastet (MD5 vor=nach). Zwei echte Dubletten am ROH-Layer ausgeschlossen
+> (catalog_manual.json, eignung:exclude): 'Elisabeth die Zweite'→'Königin Elisabeth II.',
+> 'Neuschwanstein Castle (Bayern)'→'Schloss Neuschwanstein'; tote Keys aus themengebiete_annotations.json
+> (4346→4344), catalog_full.json neu (4343 primary, 59 exclude). Bugfix cffb907: `load_existing_annotations`
+> las die Kommentar-Spalte nicht → build_master hätte alle manuellen Kommentare geleert (vor Ausführung
+> gefangen). Commits: cffb907 (Kommentar-Fix) + f4eae85 (Dubletten). Master-XLSX NICHT committet
+> (nicht-deterministisches Binär-Derivat); Backups liegen bis zu Andreas' Bestätigung.
 
 > **03.07.2026 — GIT-HYGIENE + COWORK-BEFUND.**
 > (a) `.gitattributes` neu (7e200b4): `* text=auto` + binary/eol-Regeln → CRLF-Phantom-Drift behoben (vorher ~550 Phantom-„Änderungen" → nur echte). CI-robust (verify nutzt splitlines).
