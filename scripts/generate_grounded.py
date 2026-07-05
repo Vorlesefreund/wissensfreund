@@ -1023,7 +1023,7 @@ def build_grounded_user_message(
         parts += [
             "",
             "Bildauswahl-Regeln:",
-            "- images[0] = Hero-Bild: das repraesentativste Foto des Themas",
+            "- images[0] = Hero-Bild: das repraesentativste Foto des HAUPTTHEMAS (nicht eines Companions). Nur wenn KEIN Bild das Hauptthema zeigt, das am besten passende andere Bild.",
             "- thumb_url in images[] = URL aus AVAILABLE_IMAGES (exakt uebernehmen)",
             "- img_index in sentences = 0-basierter Index in DEINEM images[]-Array",
             "- Kein Bild doppelt verwenden",
