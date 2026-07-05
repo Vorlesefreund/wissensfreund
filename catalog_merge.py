@@ -257,6 +257,7 @@ def load_existing_annotations(xlsx_path: pathlib.Path) -> dict[str, dict]:
                 continue
             result[str(thema_val).strip()] = {
                 "FREIGABE":    freigabe_val,
+                "Kommentar":   row[col["Kommentar"]]     if "Kommentar"     in col else None,
                 "eignung":     eignung_val,
                 "age_floor":   row[col["age_floor"]]     if "age_floor"     in col else None,
                 "framing_note":row[col["framing_note"]]  if "framing_note"  in col else None,
