@@ -1,6 +1,22 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-04T13:46:59Z -->
+<!-- updated: 2026-07-05T14:28:55Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
+
+> **05.07.2026 — THEMENGEBIETE-MEHRFACHZUORDNUNG + PRIMÄR-UMSCHICHTUNG (additiv).**
+> Jedes der 4346 Katalog-Themen hat jetzt eine Liste ALLER zutreffenden Themengebiete (aus den festen 20).
+> Klassifikation: `claude-sonnet-5` via Anthropic Message Batches (0 Fehler), strenger Prompt (Primär immer
+> enthalten, Zusatz nur bei Kernthema, max 3) + deterministische notiz-Hint-Harvestung (114 Hints, regelbasiert).
+> Verteilung #Gebiete: 1→3224 · 2→1084 · 3→38.
+> **Mechanismus (rebuild-fest, KEINE XLSX angefasst):** neue committbare Datei `themengebiete_annotations.json`
+> (key=thema: themengebiet-Override + themengebiete-Liste). `catalog_merge.py` wendet sie in `main()` VOR
+> `assign_ranks()` an (neue Funktion `apply_themengebiete_annotations`) → landet automatisch in catalog_full.json,
+> übersteht jeden Merge. Neue XLSX-Spalte `themengebiete` (Pipe-getrennt) in catalog_merge + build_master.
+> **build_master.py NUR editiert, NICHT ausgeführt** (schreibt die verbotene catalog_review_master.xlsx).
+> **419 Primär umgeschichtet** (Sonnet-Primär-Review `primaer_alternative`; altes Primär bleibt in der Liste;
+> 28× fehlendes Gebiet ergänzt, 0× getrimmt) → `production_rank` für 3758 Themen neu (Round-Robin nach Primär).
+> Reproduzierbarkeit: catalog_merge.py reproduzierte catalog_full.json VOR Ergänzung byte-identisch (kein Drift);
+> Diff danach NUR themengebiete/themengebiet/production_rank; verify_project_facts.py 0 Hart-FAIL.
+> Nicht committet: catalog_review.xlsx (regenerierbares Binär-Derivat).
 
 > **03.07.2026 — GIT-HYGIENE + COWORK-BEFUND.**
 > (a) `.gitattributes` neu (7e200b4): `* text=auto` + binary/eol-Regeln → CRLF-Phantom-Drift behoben (vorher ~550 Phantom-„Änderungen" → nur echte). CI-robust (verify nutzt splitlines).

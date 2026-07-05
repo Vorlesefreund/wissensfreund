@@ -41,7 +41,7 @@ COLS = [
     "erg_s1", "erg_s2", "erg_s3",
     "eignung", "age_floor", "kategorie_nr", "framing_note",
     "sensibel", "begruendung_eignung", "dublette_von", "notiz",
-    "FREIGABE", "Kommentar",
+    "FREIGABE", "Kommentar", "themengebiete",
 ]
 
 COL_WIDTHS = {
@@ -61,6 +61,7 @@ COL_WIDTHS = {
     "P": 25,  # notiz
     "Q": 15,  # FREIGABE
     "R": 35,  # Kommentar
+    "S": 34,  # themengebiete
 }
 
 
@@ -92,6 +93,8 @@ def main() -> None:
     master_ann = cm.load_existing_annotations(OUT)
     n = cm.apply_master_annotations(canonical, master_ann)
     print(f"   {n} Themen mit Override")
+    n_tg = cm.apply_themengebiete_annotations(canonical)
+    print(f"   {n_tg} Themen mit themengebiete-Liste (inkl. ggf. Primär-Umschichtung)")
 
     # 3. production_rank zuweisen (für Referenz, aber Sortierung im xlsx ist alpha)
     primary, reserve = cm.assign_ranks(canonical)
@@ -139,6 +142,9 @@ def main() -> None:
                 v = ann.get("FREIGABE", "")
             elif col == "Kommentar":
                 v = ann.get("Kommentar", "")
+            elif col == "themengebiete":
+                tg = item.get("themengebiete") or []
+                v = "|".join(tg) if tg else ""
             else:
                 v = item.get(col)
                 if isinstance(v, bool):
@@ -170,7 +176,7 @@ def main() -> None:
         ws.column_dimensions[col_letter].width = width
 
     ws.freeze_panes = "C2"   # themengebiet + thema sichtbar beim Scrollen
-    ws.auto_filter.ref = f"A1:R{len(all_sorted) + 1}"
+    ws.auto_filter.ref = f"A1:S{len(all_sorted) + 1}"
 
     # Statistik-Sheet
     ws2 = wb.create_sheet("Statistik")

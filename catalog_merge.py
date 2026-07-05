@@ -53,6 +53,9 @@ CATALOG_RAW_DIR = REPO_ROOT / "catalog_raw"
 OUT_JSON        = REPO_ROOT / "catalog_full.json"
 OUT_RESERVE     = REPO_ROOT / "catalog_reserve.json"
 OUT_XLSX        = REPO_ROOT / "catalog_review.xlsx"
+# Zusätzliche Gebiets-Zuordnung (key=thema): themengebiete-Liste + ggf. Primär-Override.
+# Eigener committbarer Annotations-Layer, unabhängig von der Master-XLSX.
+THEMENGEBIETE_ANN = REPO_ROOT / "themengebiete_annotations.json"
 
 # Spalten-Reihenfolge im Excel
 XLSX_COLS = [
@@ -61,6 +64,7 @@ XLSX_COLS = [
     "eignung", "age_floor", "kategorie_nr", "framing_note",
     "sensibel", "begruendung_eignung", "dublette_von", "notiz",
     "FREIGABE",   # ← manuell: leer lassen = Rater-Urteil übernehmen; "OK" / "EXCLUDE" / "AGE_FLOOR=2" usw.
+    "themengebiete",  # Pipe-getrennte Liste aller zutreffenden Gebiete (aus THEMENGEBIETE_ANN)
 ]
 
 
@@ -306,6 +310,9 @@ def export_xlsx(primary: list[dict], reserve: list[dict], duplicates: list[dict]
         for col_idx, col in enumerate(XLSX_COLS, 1):
             if col == "FREIGABE":
                 ws.cell(row=ri, column=col_idx, value=ann.get("FREIGABE", ""))
+            elif col == "themengebiete":
+                tg = item.get("themengebiete") or []
+                ws.cell(row=ri, column=col_idx, value="|".join(tg) if tg else "")
             else:
                 v = item.get(col)
                 ws.cell(row=ri, column=col_idx, value="TRUE" if v is True else ("" if v is False else v))
@@ -343,12 +350,13 @@ def export_xlsx(primary: list[dict], reserve: list[dict], duplicates: list[dict]
         "O": 20,  # dublette_von
         "P": 25,  # notiz
         "Q": 15,  # FREIGABE
+        "R": 34,  # themengebiete
     }
     for col_letter, width in col_widths.items():
         ws.column_dimensions[col_letter].width = width
 
     ws.freeze_panes = "B2"
-    ws.auto_filter.ref = f"A1:Q{len(all_for_review) + 1}"
+    ws.auto_filter.ref = f"A1:R{len(all_for_review) + 1}"
 
     # ── Sheet 2: Statistik ────────────────────────────────────────────────
     ws2 = wb.create_sheet("Statistik")
@@ -442,6 +450,31 @@ def apply_master_annotations(items: list[dict], annotations: dict[str, dict]) ->
     return count
 
 
+def apply_themengebiete_annotations(items: list[dict]) -> int:
+    """
+    Lädt themengebiete_annotations.json (key=thema, stripped) und schreibt je Thema:
+      - themengebiet  (Primär-Override; kann aus der Auto-Umschichtung stammen)
+      - themengebiete (Liste ALLER zutreffenden Gebiete, additiv)
+    Muss VOR assign_ranks() laufen, damit ein umgeschichtetes Primärgebiet auch die
+    Round-Robin-Reihenfolge (production_rank) bestimmt. Rein additiv/idempotent:
+    ohne Datei passiert nichts, das alte Primär bleibt in der themengebiete-Liste.
+    """
+    if not THEMENGEBIETE_ANN.exists():
+        return 0
+    ann = json.loads(THEMENGEBIETE_ANN.read_text(encoding="utf-8"))
+    count = 0
+    for item in items:
+        a = ann.get(item.get("thema", "").strip())
+        if not a:
+            continue
+        if a.get("themengebiet"):
+            item["themengebiet"] = a["themengebiet"]
+        if a.get("themengebiete"):
+            item["themengebiete"] = a["themengebiete"]
+        count += 1
+    return count
+
+
 def main() -> None:
     print("1. Lade …")
     all_items = load_all()
@@ -454,6 +487,10 @@ def main() -> None:
     master_ann = load_existing_annotations(OUT_XLSX)
     n_ann = apply_master_annotations(canonical, master_ann)
     print(f"  {n_ann} Themen mit Master-Override (eignung/age_floor/framing_note)")
+
+    print("2c. Themengebiete-Annotierungen anwenden …")
+    n_tg = apply_themengebiete_annotations(canonical)
+    print(f"  {n_tg} Themen mit themengebiete-Liste (inkl. ggf. Primär-Umschichtung)")
 
     print("3. Produktions-Reihenfolge …")
     primary, reserve = assign_ranks(canonical)
