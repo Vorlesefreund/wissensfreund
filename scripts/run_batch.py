@@ -962,14 +962,104 @@ def _stage2_pipeline_new(
 ) -> dict:
     """Stage 2 über die NEUE modulare Pass-Pipeline (Pass 1→2→6).
 
-    Phase 0: nur Gerüst — der Schalter existiert und routet nachweislich,
-    bevor ein neuer Pass gebaut wird. Die Pässe kommen in Phase 1.
+    Synchron pro Thema×Stufe (umgeht die Batch-Maschinerie). Resume via
+    Datei-Existenz + age_floor-Gate wie im alten Pfad. Schreibt app-valides
+    JSON im selben Format. Boxen/Bilder/Quiz sind MVP-Stubs (Phase 2/3).
     """
-    log.error(
-        "Pipeline 'new' ist noch nicht implementiert (Phase 1 folgt). "
-        "Für einen produktiven Lauf --pipeline old verwenden."
-    )
-    sys.exit(3)
+    import pipeline_new  # lazy: nur laden, wenn der neue Pfad wirklich läuft
+
+    articles_dir = out_dir / "articles"
+    articles_dir.mkdir(parents=True, exist_ok=True)
+
+    # Erwartete Artikel + Resume-Vorscan (Datei-Existenz = Wahrheitsquelle)
+    articles: dict[str, str] = {}
+    plan_jobs: list[dict] = []
+    for thema in themen:
+        data = topics_data.get(thema)
+        if not data:
+            log.warning("  '%s' fehlt in topics_data — übersprungen", thema)
+            continue
+        if data.get("companions_failed"):
+            log.warning("  '%s': companions_failed — Stage 2 (new) übersprungen", thema)
+            continue
+        slug = thema.lower().replace(" ", "_").replace("/", "_")
+        age_floor = int(data.get("age_floor") or 1)
+        for stufe in stufen:
+            aid = f"{slug}_l{stufe}"
+            op = articles_dir / f"{aid}.json"
+            if op.exists():
+                articles[aid] = str(op)
+                log.info("  %s: bereits vorhanden — übersprungen (Resume)", aid)
+                continue
+            if stufe < age_floor:
+                log.info("  age_floor-Gate: '%s' S%d < floor S%d — übersprungen",
+                         thema, stufe, age_floor)
+                continue
+            plan_jobs.append({"thema": thema, "data": data, "slug": slug, "stufe": stufe})
+
+    if dry_run:
+        print("\n=== DRY-RUN Stage 2 (Pipeline NEW) ===")
+        print(f"Neu zu generieren: {len(plan_jobs)} Artikel (synchron, Pass 1→2→6)")
+        for pj in plan_jobs:
+            print(f"  {pj['slug']}_l{pj['stufe']}  (Modell {pipeline_new.BASELINE_MODEL})")
+        print(f"Bereits vorhanden (Resume): {len(articles)}")
+        return articles
+
+    ok = flagged = failed = 0
+    for pj in plan_jobs:
+        thema, data, slug, stufe = pj["thema"], pj["data"], pj["slug"], pj["stufe"]
+        job = _stage2_job(thema, data, slug, stufe)
+        aid = job["article_id"]
+        log.info("\n--- [new] %s (S%d) ---", aid, stufe)
+        try:
+            article, report = pipeline_new.generate_article_new(
+                job,
+                data["primary_text"],
+                data.get("companion_texts", {}),
+                data.get("valid_companions", []),
+                model=pipeline_new.BASELINE_MODEL,
+                run_id=_RUN_ID,
+            )
+        except Exception as e:
+            log.error("  [new] %s: unerwarteter Fehler — übersprungen: %s", aid, e)
+            failed += 1
+            continue
+        if article is None:
+            log.error("  [new] %s: keine Ausgabe (%s) — übersprungen",
+                      aid, "; ".join(report.get("errors", [])) or "unbekannt")
+            failed += 1
+            continue
+
+        # App-Validität prüfen (schreiben trotzdem — Shadow-/Validierungslauf, geflaggt).
+        # word_floor=wmin wie im alten Pfad: wenige lange Sätze bei gesundem
+        # Wortbudget sind stilistisch, kein Stub-Signal.
+        try:
+            val_errors = validate_article(article, job, word_floor=report.get("wmin"))
+        except Exception as _ve:
+            val_errors = [f"validate_article exception: {_ve}"]
+        if val_errors:
+            for ve in val_errors:
+                log.warning("  [new] %s Validierung: %s", aid, ve)
+            article["meta"]["review_flag"] = True
+            article["meta"]["review_reason"] = (
+                article["meta"].get("review_reason", "") + "; "
+                + "; ".join(val_errors[:3])).lstrip("; ")
+            flagged += 1
+        else:
+            ok += 1
+
+        op = articles_dir / f"{aid}.json"
+        op.write_text(json.dumps(article, ensure_ascii=False, indent=2, default=str),
+                      encoding="utf-8")
+        articles[aid] = str(op)
+        log.info("  [new] %s gespeichert: %d Sätze, %d Belege, %d Wörter%s",
+                 aid, report.get("n_sentences", 0), report.get("n_source_passages", 0),
+                 report.get("word_count", 0), "  ⚠ Validierung" if val_errors else "")
+
+    log.info("\n=== Stage 2 (new) fertig: %d OK, %d geflaggt, %d fehlgeschlagen ===",
+             ok, flagged, failed)
+    _save_cp(out_dir, 2, {"status": "done", "articles": articles})
+    return articles
 
 
 def stage2_generierung(
