@@ -616,3 +616,49 @@ absolute Ausnahme, nicht die Regel. Eine PRÜFEN-Quote von 71% bedeutet, das Lek
 | PRÜFEN | Nur flaggen, kein Auto-Fix | Echte fundamentale Unsicherheit |
 
 Architektur + Großlauf-Strategie: → `scripts/WISSEN_PIPELINE_PRODUKTION.md`, Abschnitt Lektorat.
+
+---
+
+## Neuarchitektur Generator (modulare Pässe) — Phase 0 + 1 (ab 06.07.2026)
+
+Ziel: ein Monster-Prompt → mehrere kleine, fokussierte Pässe (ein Job pro Pass). Läuft
+**parallel** zum alten Monolithen; Umschaltung per Flag, alter Pfad bleibt Fallback bis
+end-to-end validiert. Specs: `gemini_neuarchitektur_generator.md`, `..._migrationsplan.md`.
+
+**Schalter (Phase 0):** `run_batch.py --pipeline old|new` (argparse `choices`), Env-Fallback
+`WF_PIPELINE`, Priorität **CLI > Env > 'old'**. Wird an `stage2_generierung(pipeline=)` gereicht;
+`new` routet ganz vorn in `_stage2_pipeline_new`, sonst 100 % alter Batch-Pfad. Default bleibt `old`.
+
+**MVP-Pässe (Phase 1, `scripts/pipeline_new.py`) — Reihenfolge 1→2→6, synchron pro Thema×Stufe:**
+- **Pass 1 PLAN** (`pass1_plan`, JSON via response_schema): Angle/Thema-Primat, 3–8 Kernfakten AUS
+  DER QUELLE, Companion-Rolle, Abschnitts-Skizze, + subtitle/emoji (für app-valide meta). Modell mittel.
+- **Pass 2 PROSA** (`pass2_prosa`, `text/plain`): reines Markdown (`## ` + Absätze), NICHTS sonst.
+  **Wortziel-Schleife im Code** (`WORDLOOP_MAX_ATTEMPTS=3`): zählt Wörter, bei Bandverletzung
+  gezieltes Retry-Feedback (zu lang→straffen / zu kurz→vertiefen). Nach dem letzten Versuch die
+  **bandnächste** Fassung + `review_flag` (kein harter Abbruch). **Kein späterer Pass trimmt** (State-
+  Monotonie). Baseline `gemini-3.5-flash`.
+- **Pass 6 ZUSAMMENBAU** (reiner Code + Minimal-KI nur für Belege):
+  - **Satz-Splitter** `sentence_spans`/`split_sentences_de`: eigener deterministischer, **offset-basierter**
+    dt. Splitter (kein spaCy/nltk — Py3.14/Windows/Offline/Reproduzierbarkeit). Abkürzungsliste `_ABBREV`
+    + Ordinalzahl-/Monats-Erkennung (`8. Mai`, `z. B.`, `1,9 Mio.`, `Dr.`). Absatzende = immer Satzende.
+  - **REJOIN-INVARIANTE** (`build_sections`, `RejoinError`): NUR auf Absatz-Ebene (Überschriften aus).
+    (1) Rohkachelung `"".join(slices)==Absatz` zeichengenau; (2) getrimmte Sätze ws-normalisiert ==
+    Absatz. Kleinste Abweichung → Artikel **verworfen** (nie mutiert geschrieben). IDs `sec1..`, `s001..`
+    lückenlos über den ganzen Artikel; `img_index=-1`.
+  - **source_passages** (`find_source_passages`, Minimal-KI als reine SUCHE): je Satz wörtliches
+    Quellzitat; **Substring-Verifikation** (ws-normalisiert) gegen den echten Quelltext → nicht
+    gefunden = verworfen. Prompt erlaubt explizit umformulierte Kindersätze (belegter *Fakt*, nicht
+    gleiche Wörter) — sonst liefert das Modell bei einfachen S1/S2-Sätzen 0 Belege.
+- **Stubs (MVP):** `boxes=[]`, `images=[]`, statischer Quiz-Stub (min. Fragen/Stufe), `review_flag=True`.
+  **JSON-Ausgabeschema unverändert** (validate_article grün, mit `word_floor=wmin`!).
+
+**Wiring:** `run_batch._stage2_pipeline_new` — synchron, Resume via Datei-Existenz, `age_floor`-Gate,
+gleiches Schreibformat (`json.dumps(..., ensure_ascii=False, indent=2, default=str)`), Checkpoint Stage 2.
+Sourcing (Stage 1: Primär/Companions/Bilder/Appeal) ist geteilt & unberührt — der neue Pfad nutzt keine Bilder.
+
+**Validierungs-Gotcha:** `validate_article` mit `word_floor=wmin` aufrufen — sonst flaggt es wenige lange
+Sätze bei gesundem Wortbudget fälschlich als „zu wenig Sätze" (S2-Fall). Wie im alten `generate_one_level`.
+
+**Roadmap:** Phase 2 = Box-Pass (Pass 3, gegroundet, fehlende Fakten, `[]` erlaubt; Generator macht dann
+keine Boxen mehr) · Phase 3 = Bild/Quiz herauslösen · Phase 4 = Lektorat A (Fakt) + B (Stil, PFLICHT-Re-
+Grounding) · Phase 5 = Default auf `new`. Modellwahl je Pass empirisch an echten Läufen.

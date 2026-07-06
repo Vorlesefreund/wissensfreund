@@ -1,7 +1,31 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-05T19:38:24Z -->
+<!-- updated: 2026-07-06T10:36:22Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
+> **06.07.2026 — NEUARCHITEKTUR GENERATOR: PHASE 0 + 1 (FUNDAMENT) VALIDIERT & COMMITTET.**
+> Modulare Pass-Pipeline neben dem alten Monolithen aufgebaut, Fallback-Garantie durchgehend gewahrt.
+> **Phase 0 (Commit d640407):** Schalter `--pipeline old|new` in run_batch.py (argparse choices,
+> Env-Fallback `WF_PIPELINE`, Priorität CLI>Env>'old'), an stage2_generierung(pipeline=) durchgereicht;
+> Routing-Branch vorn in stage2_generierung; alter Pfad zeichengenau unberührt. (eignung_exclude.json
+> 58→59 nachgezogen → verify grün.)
+> **Phase 1 (Commit 670bbdf):** neues Modul `scripts/pipeline_new.py` — Pass 1 (PLAN, JSON) →
+> Pass 2 (PROSA, reines Markdown, code-gesteuerte Wortziel-Schleife max 3 Versuche, bandnächste
+> Fassung+Flag statt Abbruch, gemini-3.5-flash) → Pass 6 (deterministischer dt. Satz-Splitter,
+> offset-basiert + Abkürzungsliste; HARTE Rejoin-Invariante NUR auf Absatz-Ebene, Überschriften aus;
+> source_passages via Minimal-KI mit Substring-Verifikation). Stubs: boxes=[], images=[], Quiz-Stub,
+> review_flag=True. run_batch `_stage2_pipeline_new` (synchron, Resume via Datei-Existenz, age_floor-Gate,
+> validate_article mit word_floor). **JSON-Ausgabeschema unverändert.**
+> **Validierung WWII S1/S2/S3 (articles/wwii_new_mvp, untracked):** über die echte
+> stage2_generierung(new), exit 0; alle Stufen im Wortband auf Anschlag 1; Rejoin-Invariante hielt
+> (keine Textmutation); JSON app-valide; Belege wörtlich+verifiziert (10/10/25). Schatten-Vergleich
+> vs. v5.2g: ebenbürtige Prosa, S2 besser gegroundet (10 vs 6), S3 worttreuer (428 im Band vs 620 über).
+> Register/Thema-Primat/nüchterne Ernst-Themen sitzen. Alter Pfad unberührt, verify 0 Hart-FAIL.
+> Desktop: `_wwii_shadow_alt_vs_neu.txt`.
+> **OFFEN — Phase 2 (Box-Pass, Pass 3):** gegroundete 1–2 Boxen aus im Text FEHLENDEN Fakten,
+> passendem Abschnitt zugeordnet, `[]` erlaubt; Generator erzeugt dann keine Boxen mehr im Prosa-Pass.
+> Danach Phase 3 (Bild/Quiz), Phase 4 (Lektorat A+B), Phase 5 (Umschalten). Details:
+> gemini_neuarchitektur_migrationsplan.md. Modellwahl Pass 2 später empirisch schärfen.
+>
 > **05.07.2026 — THEMENGEBIETE-MEHRFACHZUORDNUNG + PRIMÄR-UMSCHICHTUNG (additiv).**
 > Jedes der 4346 Katalog-Themen hat jetzt eine Liste ALLER zutreffenden Themengebiete (aus den festen 20).
 > Klassifikation: `claude-sonnet-5` via Anthropic Message Batches (0 Fehler), strenger Prompt (Primär immer
