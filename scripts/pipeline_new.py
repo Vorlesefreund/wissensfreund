@@ -783,9 +783,13 @@ PASS4_SYSTEM = (
     "Abschnitt wähle den Index des Bildes, das am besten zu SEINEM Inhalt passt "
     "(es zeigt genau das, wovon der Abschnitt handelt) — oder -1, wenn kein Bild "
     "wirklich passt (lieber -1 als ein verwandtes, aber falsches Motiv). Wähle ein "
-    "Hero-Bild, das das Hauptthema zeigt. Schreibe zu jedem verwendeten Bild eine "
-    "kurze, kindgerechte Bildunterschrift, die NUR beschreibt, was zu sehen ist. "
-    "Antworte NUR als JSON."
+    "Hero-Bild, das das Hauptthema zeigt. Schreibe zu JEDEM Bild (alle Indizes) "
+    "(a) alt = ein KURZER Bild-Titel (höchstens 6 Wörter, KEIN ganzer Satz, KEIN "
+    "englischer Originaltitel), der den EIGENNAMEN oder ORT nennt, sofern er aus dem "
+    "Originaltitel hervorgeht (z. B. 'Der Vulkan Teide auf Teneriffa', 'Der Fuji in "
+    "Japan', 'Ausbruch des Stromboli'); ist kein Name/Ort erkennbar, ein knapper "
+    "deutscher Sachtitel ('Fließende Lava'). (b) caption = eine kurze, kindgerechte "
+    "Bildunterschrift (ein Satz), die beschreibt, was zu sehen ist. Antworte NUR als JSON."
 )
 
 PASS4_SCHEMA = {
@@ -798,9 +802,39 @@ PASS4_SCHEMA = {
         "hero_index": {"type": "integer"},
         "captions": {"type": "array", "items": {"type": "object",
             "required": ["img_index", "caption"], "properties": {
-                "img_index": {"type": "integer"}, "caption": {"type": "string"}}}},
+                "img_index": {"type": "integer"}, "caption": {"type": "string"},
+                "alt": {"type": "string"}}}},
     },
 }
+
+
+_IMG_EXT_RE = re.compile(r"\.(jpe?g|png|gif|svg|tiff?|webp)$", re.I)
+
+
+def _clean_title(img: dict) -> str:
+    """Kurzer, lesbarer Name aus dem Commons-Originaltitel — Fallback für den
+    Alt-Text (wenn das LLM keinen liefert). Entfernt 'File:', Dateiendung,
+    führende/abschließende reine Datums-/Zähl-Tokens, Unterstriche → Leerzeichen."""
+    t = (img.get("wikimedia_id") or img.get("filename") or "").strip()
+    if t.lower().startswith("file:"):
+        t = t[5:]
+    t = _IMG_EXT_RE.sub("", t).replace("_", " ").strip()
+    t = re.sub(r"\s*\([^)]*\)", "", t)                 # Klammer-Zusätze weg
+    toks = [w for w in t.split() if not re.fullmatch(r"edit\d*", w, re.I)]
+    while toks and re.fullmatch(r"[\d.,\-]+", toks[-1]):   # trailing Zähl-/Datums-Token
+        toks.pop()
+    while toks and re.fullmatch(r"[\d.,\-]+", toks[0]):
+        toks.pop(0)
+    t = " ".join(toks).strip(" -,")
+    return t[:80] or (img.get("thema") or "Bild")
+
+
+def _short_alt(raw: str | None, img: dict, maxlen: int = 90) -> str:
+    """Kurzer Alt-Text: LLM-Vorschlag, wenn knapp genug; sonst Titel-Fallback."""
+    raw = (raw or "").strip().rstrip(".")
+    if raw and len(raw) <= maxlen and raw.count(".") == 0:
+        return raw
+    return _clean_title(img)
 
 
 def pass4_images(sections: list[dict], images_stufe: list[dict], thema: str,
@@ -816,11 +850,15 @@ def pass4_images(sections: list[dict], images_stufe: list[dict], thema: str,
         return []
 
     images_list = []
+    descs: list[str] = []       # Vision-Beschreibung — NUR intern für die Zuordnung
+    titles: list[str] = []      # Commons-Originaltitel — Namens-/Ort-Quelle fürs alt
     for i, img in enumerate(images_stufe):
+        descs.append((img.get("beschreibung") or img.get("alt") or "")[:220])
+        titles.append((img.get("wikimedia_id") or img.get("filename") or "").strip())
         images_list.append({
             "index": i,
             "filename": img.get("filename", ""),
-            "alt": (img.get("beschreibung") or img.get("alt") or "")[:220],
+            "alt": _clean_title(img),      # kurzer Default aus dem Titel; LLM verfeinert unten
             "caption": "",
             "license": img.get("license", ""),
             "license_author": img.get("license_author", ""),
@@ -832,13 +870,17 @@ def pass4_images(sections: list[dict], images_stufe: list[dict], thema: str,
     sec_list = "\n".join(
         f'{s["id"]} | {s["heading"]}: ' + " ".join(x["text"] for x in s["sentences"])
         for s in sections)
-    img_list = "\n".join(f'{im["index"]}: {im["alt"]}' for im in images_list)
+    img_list = "\n".join(
+        f'{i}: Originaltitel "{titles[i]}" — zu sehen: {descs[i]}'
+        for i in range(len(images_list)))
     body = (
         "ABSCHNITTE (section_id | Überschrift: Text):\n" + sec_list + "\n\n"
-        "BILDER (index: Beschreibung):\n" + img_list + "\n\n"
+        "BILDER (index: Originaltitel — zu sehen):\n" + img_list + "\n\n"
         "Gib JSON: zuordnung (je Abschnitt {section_id, img_index oder -1}), "
-        "hero_index (Bild des Hauptthemas), captions (je verwendetem Bild "
-        "{img_index, caption} — kurz, kindgerecht, nur was zu sehen ist)."
+        "hero_index (Bild des Hauptthemas), captions (für JEDES Bild, alle Indizes, "
+        "{img_index, caption, alt}). caption = kurze kindgerechte Bildunterschrift "
+        "(ein Satz). alt = kurzer deutscher Bild-Titel mit Eigenname/Ort aus dem "
+        "Originaltitel (max 6 Wörter, kein ganzer Satz, kein englischer Titel)."
     )
     thinking = _make_thinking_config(model, 2048)
     try:
@@ -853,9 +895,13 @@ def pass4_images(sections: list[dict], images_stufe: list[dict], thema: str,
         data = {}
 
     for c in data.get("captions", []):
+        if not isinstance(c, dict):
+            continue
         ix = c.get("img_index", -1)
-        if isinstance(ix, int) and 0 <= ix < len(images_list) and c.get("caption"):
-            images_list[ix]["caption"] = c["caption"].strip()
+        if isinstance(ix, int) and 0 <= ix < len(images_list):
+            if c.get("caption"):
+                images_list[ix]["caption"] = c["caption"].strip()
+            images_list[ix]["alt"] = _short_alt(c.get("alt"), images_stufe[ix])
     for im in images_list:
         if not im["caption"]:
             im["caption"] = im["alt"]
