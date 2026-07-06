@@ -950,6 +950,28 @@ def _limit_images_per_section(article: dict, images_stufe: list[dict]) -> None:
 
 # ── Stage 2: GENERIERUNG ──────────────────────────────────────────────────────
 
+def _stage2_pipeline_new(
+    themen: list[str],
+    stufen: list[int],
+    topics_data: dict,
+    out_dir: Path,
+    client: genai.Client,
+    api_key: str,
+    anthropic_key: str | None = None,
+    dry_run: bool = False,
+) -> dict:
+    """Stage 2 über die NEUE modulare Pass-Pipeline (Pass 1→2→6).
+
+    Phase 0: nur Gerüst — der Schalter existiert und routet nachweislich,
+    bevor ein neuer Pass gebaut wird. Die Pässe kommen in Phase 1.
+    """
+    log.error(
+        "Pipeline 'new' ist noch nicht implementiert (Phase 1 folgt). "
+        "Für einen produktiven Lauf --pipeline old verwenden."
+    )
+    sys.exit(3)
+
+
 def stage2_generierung(
     themen: list[str],
     stufen: list[int],
@@ -959,6 +981,7 @@ def stage2_generierung(
     api_key: str,
     anthropic_key: str = None,
     dry_run: bool = False,
+    pipeline: str = "old",
 ) -> dict:
     """
     Stage 2: Gemini Batch — Artikel-Generierung (Themen × Stufen).
@@ -968,6 +991,16 @@ def stage2_generierung(
     3. Gemini Batch einreichen + pollen
     4. Post-Processing (synchron): JSON-Parse, Wortzahl-Guard, Box-Guard, is_hero
     """
+    # ── Pipeline-Schalter ────────────────────────────────────────────────────
+    # Der neue modulare Pfad (Pass 1→2→6) läuft synchron pro Thema×Stufe und
+    # umgeht die Batch-Maschinerie komplett. Der alte Pfad darunter bleibt
+    # dadurch nachweislich unberührt (Fallback-Garantie).
+    if pipeline == "new":
+        return _stage2_pipeline_new(
+            themen, stufen, topics_data, out_dir, client, api_key,
+            anthropic_key, dry_run=dry_run,
+        )
+
     # Resume-fest: ganze Stage NUR überspringen, wenn ALLE erwarteten Artikel
     # (themen × stufen) bereits als JSON auf Platte liegen. Datei-Existenz ist die
     # Wahrheitsquelle (nicht companions_failed wie Stage 1 — bewusste Asymmetrie).
@@ -1860,10 +1893,26 @@ def main() -> None:
         help="Generator-Modell überschreiben (z.B. gemini-2.5-flash). "
              "Nur für Tests — Produktion nutzt GEMINI_MODEL aus generate_grounded.py.",
     )
+    parser.add_argument(
+        "--pipeline", default=None, choices=["old", "new"],
+        help="Generierungs-Pipeline: 'old' (Standard, bisheriges Verhalten) oder "
+             "'new' (modulare Pass-Struktur). Fallback über Env WF_PIPELINE, sonst 'old'.",
+    )
     args = parser.parse_args()
 
     global _RUN_ID, GEN_MODEL
     _RUN_ID = args.run_id or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
+
+    # Pipeline-Schalter (Phase 0): CLI > Env WF_PIPELINE > Default 'old'.
+    # 'old' hält das Verhalten 100 % identisch; 'new' spricht die modulare
+    # Pass-Struktur an (ab Phase 1). --pipeline wird von argparse (choices)
+    # validiert; den Env-Wert prüfen wir hier separat.
+    pipeline = args.pipeline or os.environ.get("WF_PIPELINE") or "old"
+    pipeline = pipeline.strip().lower()
+    if pipeline not in ("old", "new"):
+        parser.error(f"WF_PIPELINE muss 'old' oder 'new' sein (nicht '{pipeline}')")
+    if pipeline == "new":
+        log.warning("⚠ Pipeline: NEU (modulare Pässe) — alter Pfad unberührt")
 
     if args.gen_model:
         import generate_grounded as _gg
@@ -1910,9 +1959,9 @@ def main() -> None:
     stufen   = args.stufen
     run_all  = args.stage == 0
 
-    log.info("Run-ID: %s | Themen: %d | Stufen: %s | Stage: %s | dry-run: %s",
+    log.info("Run-ID: %s | Themen: %d | Stufen: %s | Stage: %s | Pipeline: %s | dry-run: %s",
              _RUN_ID, len(themen_raw), stufen,
-             args.stage if args.stage else "alle", args.dry_run)
+             args.stage if args.stage else "alle", pipeline, args.dry_run)
 
     client  = genai.Client(api_key=api_key)
     session = requests.Session()
@@ -1977,7 +2026,7 @@ def main() -> None:
                 sys.exit(2)
         articles = stage2_generierung(
             themen_raw, stufen, topics_data, out_dir, client, api_key, anthropic_key,
-            dry_run=args.dry_run,
+            dry_run=args.dry_run, pipeline=pipeline,
         )
         if args.stage == 2:
             return
