@@ -29,6 +29,7 @@ from generate_grounded import (
     wortziel_for,
     count_article_words,
     ergiebigkeit_for,
+    select_images_for_stufe,
     _make_thinking_config,
 )
 
@@ -450,6 +451,13 @@ def _norm_ws(s: str) -> str:
     return re.sub(r"\s+", " ", s).strip()
 
 
+def _skeleton(s: str) -> str:
+    """Nicht-Whitespace-Skelett: alle Whitespaces entfernt. Grundlage der
+    Rejoin-Gegenprobe — vergleicht reinen Inhalt, ignoriert Whitespace ZWISCHEN
+    Sätzen (das die App ohnehin selbst setzt), fängt aber jede Inhaltsänderung."""
+    return re.sub(r"\s+", "", s)
+
+
 class RejoinError(RuntimeError):
     """Rejoin-Invariante verletzt — der zerlegte Text weicht vom Original ab."""
 
@@ -477,10 +485,23 @@ def build_sections(markdown: str, fallback_heading: str) -> list[dict]:
                     f"({len(rebuilt)} vs {len(para)} Zeichen)")
             sent_texts = [para[a:b].strip() for a, b in spans]
             sent_texts = [t for t in sent_texts if t]
-            # 2) Unabhängige Gegenprobe: getrimmte Sätze rekonstruieren den Absatz
-            #    (Whitespace-normalisiert), fängt Strip-/Join-Fehler.
-            if _norm_ws(" ".join(sent_texts)) != _norm_ws(para):
-                raise RejoinError(f"Section {si}: Rejoin (getrimmt) != Absatz")
+            # 2) Unabhängige Gegenprobe: die gespeicherten (getrimmten) Sätze müssen
+            #    den kompletten NICHT-Whitespace-Inhalt des Absatzes zeichengenau und
+            #    in Reihenfolge erhalten. Whitespace ZWISCHEN Sätzen wird bewusst
+            #    ignoriert — geklebte Sätze ("Wort.Neuer Satz", fehlendes Leerzeichen
+            #    nach dem Punkt) sind korrekt getrennt und dürfen nicht als Verletzung
+            #    gelten (die App setzt die Leerzeichen beim Rendern selbst).
+            _rejoined = _skeleton("".join(sent_texts))
+            _orig = _skeleton(para)
+            if _rejoined != _orig:
+                # Erste Abweichung mit Kontext (repr → exakte Codepoints sichtbar).
+                d = next((x for x in range(min(len(_rejoined), len(_orig)))
+                          if _rejoined[x] != _orig[x]), min(len(_rejoined), len(_orig)))
+                raise RejoinError(
+                    f"Section {si}: Rejoin (Skelett) != Absatz @Pos {d} "
+                    f"(rejoined {len(_rejoined)} vs orig {len(_orig)} Zeichen) "
+                    f"| orig={_orig[max(0,d-25):d+25]!r} "
+                    f"| rejoin={_rejoined[max(0,d-25):d+25]!r}")
             for t in sent_texts:
                 sent_no += 1
                 out_sentences.append({"id": f"s{sent_no:03d}", "text": t,
@@ -752,16 +773,187 @@ def _quiz_stub(stufe: int) -> dict:
     return {"questions": questions}
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# PASS 4 — BILD (Zuordnung + Hero + Caption) und PASS 5 — QUIZ
+# ══════════════════════════════════════════════════════════════════════════════
+
+PASS4_SYSTEM = (
+    "Du ordnest einem fertigen Kinderlexikon-Artikel Bilder zu. Nutze "
+    "AUSSCHLIESSLICH die gelieferten Bilder (per Index) — erfinde keine. Zu jedem "
+    "Abschnitt wähle den Index des Bildes, das am besten zu SEINEM Inhalt passt "
+    "(es zeigt genau das, wovon der Abschnitt handelt) — oder -1, wenn kein Bild "
+    "wirklich passt (lieber -1 als ein verwandtes, aber falsches Motiv). Wähle ein "
+    "Hero-Bild, das das Hauptthema zeigt. Schreibe zu jedem verwendeten Bild eine "
+    "kurze, kindgerechte Bildunterschrift, die NUR beschreibt, was zu sehen ist. "
+    "Antworte NUR als JSON."
+)
+
+PASS4_SCHEMA = {
+    "type": "object",
+    "required": ["zuordnung", "hero_index", "captions"],
+    "properties": {
+        "zuordnung": {"type": "array", "items": {"type": "object",
+            "required": ["section_id", "img_index"], "properties": {
+                "section_id": {"type": "string"}, "img_index": {"type": "integer"}}}},
+        "hero_index": {"type": "integer"},
+        "captions": {"type": "array", "items": {"type": "object",
+            "required": ["img_index", "caption"], "properties": {
+                "img_index": {"type": "integer"}, "caption": {"type": "string"}}}},
+    },
+}
+
+
+def pass4_images(sections: list[dict], images_stufe: list[dict], thema: str,
+                stufe: int, model: str, run_id: str | None = None) -> list[dict]:
+    """Pass 4: baut article['images'] aus dem geprüften Pool (Code) + ordnet je
+    Abschnitt semantisch ein Bild zu (LLM) + kindgerechte Captions. Mutiert die
+    sentence-img_index in sections. Verteilung/Hero macht danach der Aufrufer via
+    _limit_images_per_section + _set_is_hero (wiederverwendet)."""
+    if not images_stufe:
+        for s in sections:
+            for x in s["sentences"]:
+                x["img_index"] = -1
+        return []
+
+    images_list = []
+    for i, img in enumerate(images_stufe):
+        images_list.append({
+            "index": i,
+            "filename": img.get("filename", ""),
+            "alt": (img.get("beschreibung") or img.get("alt") or "")[:220],
+            "caption": "",
+            "license": img.get("license", ""),
+            "license_author": img.get("license_author", ""),
+            "source_url": img.get("source_url", ""),
+            "wikimedia_id": img.get("wikimedia_id", ""),
+            "thumb_url": img.get("thumb_url", ""),
+        })
+
+    sec_list = "\n".join(
+        f'{s["id"]} | {s["heading"]}: ' + " ".join(x["text"] for x in s["sentences"])
+        for s in sections)
+    img_list = "\n".join(f'{im["index"]}: {im["alt"]}' for im in images_list)
+    body = (
+        "ABSCHNITTE (section_id | Überschrift: Text):\n" + sec_list + "\n\n"
+        "BILDER (index: Beschreibung):\n" + img_list + "\n\n"
+        "Gib JSON: zuordnung (je Abschnitt {section_id, img_index oder -1}), "
+        "hero_index (Bild des Hauptthemas), captions (je verwendetem Bild "
+        "{img_index, caption} — kurz, kindgerecht, nur was zu sehen ist)."
+    )
+    thinking = _make_thinking_config(model, 2048)
+    try:
+        raw = gemini_client.call_gemini(
+            PASS4_SYSTEM, body, model=model, thinking_config=thinking,
+            response_mime_type="application/json", response_schema=PASS4_SCHEMA,
+            call_name="pass4_images")
+        _track(run_id, thema, stufe, "pass4_images", model)
+        data = json.loads(raw)
+    except Exception as e:
+        log.warning("  Pass 4 Bild-Zuordnung fehlgeschlagen: %s — Bilder ohne Zuordnung", e)
+        data = {}
+
+    for c in data.get("captions", []):
+        ix = c.get("img_index", -1)
+        if isinstance(ix, int) and 0 <= ix < len(images_list) and c.get("caption"):
+            images_list[ix]["caption"] = c["caption"].strip()
+    for im in images_list:
+        if not im["caption"]:
+            im["caption"] = im["alt"]
+
+    zmap = {z.get("section_id"): z.get("img_index", -1)
+            for z in data.get("zuordnung", []) if isinstance(z, dict)}
+    for s in sections:
+        ix = zmap.get(s["id"], -1)
+        if not (isinstance(ix, int) and 0 <= ix < len(images_list)):
+            ix = -1
+        for x in s["sentences"]:
+            x["img_index"] = ix
+    return images_list
+
+
+PASS5_SYSTEM = (
+    "Du erstellst ein kurzes Quiz zu einem Kinderlexikon-Artikel. Alle Fragen und "
+    "alle Antwortoptionen kommen AUSSCHLIESSLICH aus dem Artikelinhalt — nichts "
+    "erfinden, kein Wissen von außen. Die falschen Optionen sind plausibel, aber "
+    "klar falsch. Kindgerecht und eindeutig. Antworte NUR als JSON."
+)
+
+PASS5_SCHEMA = {
+    "type": "object",
+    "required": ["fragen"],
+    "properties": {"fragen": {"type": "array", "items": {"type": "object",
+        "required": ["frage", "optionen", "richtige_nr"], "properties": {
+            "frage": {"type": "string"},
+            "optionen": {"type": "array", "items": {"type": "string"}},
+            "richtige_nr": {"type": "integer"}}}}},
+}
+
+QUIZ_TARGET = {1: 3, 2: 3, 3: 4}
+QUIZ_MAX = {1: 3, 2: 3, 3: 5}
+
+
+def pass5_quiz(sections: list[dict], thema: str, stufe: int, model: str,
+               run_id: str | None = None) -> dict:
+    """Pass 5: Quiz aus dem fertigen Artikel (nur Artikelinhalt). Fällt bei Fehler
+    auf den statischen Stub zurück, damit das JSON app-valide bleibt."""
+    target = QUIZ_TARGET.get(stufe, 3)
+    cap = QUIZ_MAX.get(stufe, 3)
+    article_txt = "\n".join(
+        f'## {s["heading"]}\n' + " ".join(x["text"] for x in s["sentences"])
+        for s in sections)
+    body = (
+        "ARTIKEL:\n" + article_txt + "\n\n"
+        f"Erstelle {target} Quizfragen NUR aus diesem Artikel. Je Frage: frage, "
+        "optionen (GENAU 3), richtige_nr (0, 1 oder 2 = Index der richtigen Option)."
+    )
+    thinking = _make_thinking_config(model, 2048)
+    try:
+        raw = gemini_client.call_gemini(
+            PASS5_SYSTEM, body, model=model, thinking_config=thinking,
+            response_mime_type="application/json", response_schema=PASS5_SCHEMA,
+            call_name="pass5_quiz")
+        _track(run_id, thema, stufe, "pass5_quiz", model)
+        fragen = json.loads(raw).get("fragen", [])
+    except Exception as e:
+        log.warning("  Pass 5 Quiz fehlgeschlagen: %s — statischer Stub", e)
+        return _quiz_stub(stufe)
+
+    questions = []
+    for q in fragen:
+        if not isinstance(q, dict):
+            continue
+        opts = q.get("optionen", [])
+        if not (isinstance(opts, list) and len(opts) == 3 and q.get("frage")):
+            continue
+        ri = q.get("richtige_nr", 0)
+        if not (isinstance(ri, int) and 0 <= ri < 3):
+            ri = 0
+        n = len(questions) + 1
+        questions.append({
+            "id": f"q{n}",
+            "text": str(q["frage"]).strip(),
+            "options": [{"key": k, "text": str(opts[j]).strip()}
+                        for j, k in enumerate("ABC")],
+            "correct_key": "ABC"[ri],
+        })
+        if len(questions) >= cap:
+            break
+    if len(questions) < QUIZ_TARGET.get(stufe, 3):
+        log.warning("  Pass 5: nur %d valide Fragen (Ziel %d) — ggf. review_flag",
+                    len(questions), target)
+    return {"questions": questions} if questions else _quiz_stub(stufe)
+
+
 def assemble_article(job: dict, plan: dict, sections: list[dict],
                      source_passages: list[dict], valid_companions: list[str],
                      word_count: int, stufe: int, model: str,
-                     pass2_info: dict) -> dict:
+                     pass2_info: dict, images: list[dict], quiz: dict) -> dict:
     """Pass 6 Zusammenbau: Sections + Belege + Stubs -> app-valides Artikel-JSON."""
     thema = job.get("thema", job.get("title", ""))
     primaer = job.get("primaer_wikipedia", thema)
     now = datetime.now(timezone.utc).isoformat()
 
-    review_reason = "MVP-Pipeline (new): Bild/Quiz sind Stubs (Phase 3)"
+    review_reason = "Neue Pipeline (new): Lektorat (Phase 4) ausstehend"
     if not pass2_info.get("in_band", True):
         review_reason += f"; Wortziel {pass2_info.get('band')} verfehlt ({word_count})"
 
@@ -784,14 +976,14 @@ def assemble_article(job: dict, plan: dict, sections: list[dict],
             "category_sub": job.get("category_sub", ""),
             "generated_at": now,
             "grounding_companions": valid_companions,
-            "generation_method": f"{model}/pipeline-new/pass1-2-3-6",
+            "generation_method": f"{model}/pipeline-new/pass1-2-3-4-5-6",
             "ergiebigkeit": ergiebigkeit_for(thema, stufe),
             "word_target": pass2_info.get("band", ""),
             "pipeline": "new",
         },
-        "images": [],
+        "images": images,
         "sections": sections,
-        "quiz": _quiz_stub(stufe),
+        "quiz": quiz,
         "related_terms": {"core": [], "discover": []},
         "source_passages": source_passages,
     }
@@ -807,7 +999,9 @@ def generate_article_new(job: dict, primary_text: str,
                          valid_companions: list[str],
                          model: str = BASELINE_MODEL,
                          run_id: str | None = None,
-                         cache: str | None = None) -> tuple[dict | None, dict]:
+                         cache: str | None = None,
+                         images: list[dict] | None = None,
+                         appeal: str = "medium") -> tuple[dict | None, dict]:
     """Orchestriert die neue Pipeline für eine Stufe. Liefert (article|None, report)
     analog zu generate_one_level. None = Stufe übersprungen (Fehler/Rejoin), geflaggt
     im report — es wird nie mutierter Text geschrieben."""
@@ -818,7 +1012,7 @@ def generate_article_new(job: dict, primary_text: str,
 
     report: dict = {"article_id": article_id, "thema": thema, "stufe": stufe,
                     "pipeline": "new", "wmin": wmin, "wmax": wmax, "errors": []}
-    log.info("  [new] %s: Pass 1→2→6 (Modell %s, Ziel %d–%d)",
+    log.info("  [new] %s: Pass 1→2→3→4→5→6 (Modell %s, Ziel %d–%d)",
              article_id, model, wmin, wmax)
 
     try:
@@ -847,10 +1041,28 @@ def generate_article_new(job: dict, primary_text: str,
             run_id=run_id, cache=cache)
         report["n_source_passages"] = len(source_passages)
 
+        # Pass 4: Bilder aus dem geprüften Pool zuordnen (setzt sentence-img_index).
+        images_stufe = select_images_for_stufe(images or [], stufe, appeal)
+        images_list = pass4_images(sections, images_stufe, thema, stufe, model, run_id=run_id)
+
+        # Pass 5: Quiz aus dem fertigen Artikel.
+        quiz = pass5_quiz(sections, thema, stufe, model, run_id=run_id)
+
         # Wortzahl inkl. Boxen (wie im alten Pfad: count_article_words zählt Boxen mit).
         wc = count_article_words({"sections": sections})
         article = assemble_article(job, plan, sections, source_passages,
-                                   valid_companions, wc, stufe, model, p2info)
+                                   valid_companions, wc, stufe, model, p2info,
+                                   images_list, quiz)
+
+        # Bild-Verteilung + Hero (deterministisch, aus dem alten Pfad wiederverwendet).
+        if images_list:
+            try:
+                import run_batch as _rb
+                _rb._set_is_hero(article, images_stufe, thema,
+                                 job.get("primaer_wikipedia", thema))
+                _rb._limit_images_per_section(article, images_stufe)
+            except Exception as e:
+                log.warning("  [new] %s: Bild-Postprocess übersprungen: %s", article_id, e)
 
         # Box-Verteilungs-Guard (deterministisch, aus dem alten Pfad wiederverwendet).
         try:
@@ -867,6 +1079,8 @@ def generate_article_new(job: dict, primary_text: str,
         report["n_sections"] = len(sections)
         report["n_sentences"] = sum(len(s["sentences"]) for s in sections)
         report["n_boxes"] = sum(len(s.get("boxes", [])) for s in sections)
+        report["n_images"] = len(images_list)
+        report["n_quiz"] = len(quiz.get("questions", []))
         return article, report
 
     except RejoinError as e:
