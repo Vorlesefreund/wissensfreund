@@ -357,10 +357,12 @@ def _img_key(thema: str, filename: str) -> str:
     return f"{safe_t}__{safe_fn}"
 
 
-def _opus_recheck(anthropic_key: str, kandidaten: list[dict], topics_data: dict) -> None:
-    """Cross-Topic Opus-Recheck-Batch über alle Kandidaten; aktualisiert images[] in
+def _opus_recheck(anthropic_key: str, kandidaten: list[dict], topics_data: dict,
+                  model: str = "claude-opus-4-8") -> None:
+    """Cross-Topic Recheck-Batch über alle Kandidaten; aktualisiert images[] in
     topics_data in place. Resume-fest: keys werden deterministisch neu berechnet,
-    Bild-Bytes aus .cache/downloads (graceful bei Cache-Miss)."""
+    Bild-Bytes aus .cache/downloads (graceful bei Cache-Miss). model: Anthropic-Modell
+    (via stage_models.image_recheck_model gesteuert)."""
     try:
         import anthropic as _anthropic
         anth = _anthropic.Anthropic(api_key=anthropic_key)
@@ -380,7 +382,7 @@ def _opus_recheck(anthropic_key: str, kandidaten: list[dict], topics_data: dict)
             opus_reqs.append({
                 "custom_id": custom_id,
                 "params": {
-                    "model":      "claude-opus-4-8",
+                    "model":      model,
                     "max_tokens": 256,
                     "system":     OPUS_RECHECK_SYSTEM,
                     "messages": [{
@@ -735,21 +737,24 @@ def stage1_sourcing(
                       "vision_retry.py ausführen vor Stage 2!", thema, len(vision_failed))
         _save_partial(out_dir, topics_data)
 
-    # ── Phase B: Opus-Recheck-Nachlauf (cross-topic, über alle Partial-Topics) ─
-    if anthropic_key:
+    # ── Phase B: Bild-Recheck-Nachlauf (cross-topic, über alle Partial-Topics) ─
+    # Nur wenn in stage_models aktiviert (provider 'anthropic'); sonst Gemini-Urteil.
+    _recheck_model = stage_models.image_recheck_model()
+    if anthropic_key and _recheck_model:
         opus_kandidaten: list[dict] = []
         for thema, entry in topics_data.items():
             imgs = entry.get("images", [])
             if entry.get("sensibel"):
                 pool = imgs  # bereits auf OPUS_CAP begrenzt (Phase A)
             else:
-                # Nicht-sensibel: nur grenzfall=true-Bilder → Opus, gecappt
+                # Nicht-sensibel: nur grenzfall=true-Bilder → Recheck, gecappt
                 pool = [e for e in imgs if e.get("grenzfall", False)][:OPUS_CAP]
             for e in pool:
                 opus_kandidaten.append({"thema": thema, "img": e})
         if opus_kandidaten:
-            log.info("\n=== Stage 1 / Phase B: Opus-Recheck (%d Bilder) ===", len(opus_kandidaten))
-            _opus_recheck(anthropic_key, opus_kandidaten, topics_data)
+            log.info("\n=== Stage 1 / Phase B: Bild-Recheck (%s, %d Bilder) ===",
+                     _recheck_model, len(opus_kandidaten))
+            _opus_recheck(anthropic_key, opus_kandidaten, topics_data, model=_recheck_model)
 
     # ── Pool-Übersicht je Thema (nach Opus) ───────────────────────────────────
     for thema, entry in topics_data.items():
@@ -1032,6 +1037,8 @@ def _stage2_pipeline_new(
                 model=pipeline_new.BASELINE_MODEL,
                 run_id=_RUN_ID,
                 cache=src_caches.get(thema),
+                images=data.get("images", []),
+                appeal=data.get("appeal", "medium"),
             )
         except Exception as e:
             log.error("  [new] %s: unerwarteter Fehler — übersprungen: %s", aid, e)
@@ -1065,8 +1072,10 @@ def _stage2_pipeline_new(
         op.write_text(json.dumps(article, ensure_ascii=False, indent=2, default=str),
                       encoding="utf-8")
         articles[aid] = str(op)
-        log.info("  [new] %s gespeichert: %d Sätze, %d Belege, %d Wörter%s",
-                 aid, report.get("n_sentences", 0), report.get("n_source_passages", 0),
+        log.info("  [new] %s gespeichert: %d Sätze, %d Boxen, %d Bilder, %d Quiz, %d Belege, %d Wörter%s",
+                 aid, report.get("n_sentences", 0), report.get("n_boxes", 0),
+                 report.get("n_images", 0), report.get("n_quiz", 0),
+                 report.get("n_source_passages", 0),
                  report.get("word_count", 0), "  ⚠ Validierung" if val_errors else "")
 
     # Quelltext-Caches best-effort löschen (sonst via TTL, unkritisch).
@@ -1601,6 +1610,77 @@ def stage2_generierung(
 
 # ── Stage 3: LEKTORAT ────────────────────────────────────────────────────────
 
+def _stage3_lektorat_new(
+    themen: list[str],
+    stufen: list[int],
+    topics_data: dict,
+    out_dir: Path,
+    dry_run: bool = False,
+) -> dict:
+    """Stage 3 über das NEUE Lektorat (Pass A Fakten + Pass B Stil, re-grounded).
+
+    Synchron pro Artikel; prüft gegen den Phase-1-Quelltext-Snapshot aus
+    topics_data. Schreibt review-kompatible lektorat_{aid}.json. Resume via
+    Datei-Existenz. Alter Lektorat-Pfad bleibt unberührt.
+    """
+    import json as _json
+    import lektorat_new
+
+    art_dir = out_dir / "articles"
+    lekt_dir = out_dir / "lektorat"
+    lekt_dir.mkdir(parents=True, exist_ok=True)
+    results: dict[str, str] = {}
+
+    jobs = []
+    for thema in themen:
+        data = topics_data.get(thema)
+        if not data:
+            continue
+        slug = thema.lower().replace(" ", "_").replace("/", "_")
+        for stufe in stufen:
+            aid = f"{slug}_l{stufe}"
+            src = art_dir / f"{aid}.json"
+            dst = lekt_dir / f"lektorat_{aid}.json"
+            if dst.exists():
+                results[aid] = str(dst)
+                continue
+            if src.exists():
+                jobs.append((thema, data, stufe, aid, src, dst))
+
+    if dry_run:
+        print(f"\n=== DRY-RUN Stage 3 (Lektorat NEW) ===")
+        print(f"Zu lektorieren: {len(jobs)} Artikel (Pass A→B, Modell {lektorat_new.LEKTORAT_MODEL})")
+        return results
+
+    ok = failed = 0
+    for thema, data, stufe, aid, src, dst in jobs:
+        log.info("\n--- [lektorat-new] %s (S%d) ---", aid, stufe)
+        try:
+            article = _json.loads(src.read_text(encoding="utf-8"))
+            article, stats = lektorat_new.run_lektorat_new(
+                article,
+                data.get("resolved_title", thema),
+                data["primary_text"],
+                data.get("companion_texts", {}),
+                stufe,
+            )
+            dst.write_text(_json.dumps(article, ensure_ascii=False, indent=2, default=str),
+                           encoding="utf-8")
+            results[aid] = str(dst)
+            ok += 1
+            log.info("  [lektorat-new] %s: A %d/%d, B %d angewandt/%d verworfen%s",
+                     aid, stats["a_applied"], stats["a_pruefen"],
+                     stats["b_applied"], stats["b_rejected"],
+                     "  ⚠ " + "; ".join(stats["errors"]) if stats["errors"] else "")
+        except Exception as e:
+            log.error("  [lektorat-new] %s: fehlgeschlagen — übersprungen: %s", aid, e)
+            failed += 1
+
+    log.info("\n=== Stage 3 (Lektorat new) fertig: %d OK, %d fehlgeschlagen ===", ok, failed)
+    _save_cp(out_dir, 3, {"status": "done", "lektorat_results": results})
+    return results
+
+
 def stage3_lektorat(
     themen: list[str],
     stufen: list[int],
@@ -1609,6 +1689,7 @@ def stage3_lektorat(
     out_dir: Path,
     anthropic_key: str,
     dry_run: bool = False,
+    pipeline: str = "old",
 ) -> dict:
     """
     Stage 3: Anthropic Message Batches — Faktenlektorat aller Artikel.
@@ -1621,6 +1702,12 @@ def stage3_lektorat(
 
     batch_id wird sofort in pending_batches.json gesichert (Pflicht).
     """
+    # ── Pipeline-Schalter ────────────────────────────────────────────────────
+    # Neuer Pfad: fokussiertes Zwei-Pass-Lektorat (A Fakten + B Stil, re-grounded),
+    # synchron. Alter Batch-Pfad darunter unberührt (Fallback-Garantie).
+    if pipeline == "new":
+        return _stage3_lektorat_new(themen, stufen, topics_data, out_dir, dry_run=dry_run)
+
     import anthropic
 
     # Resume-fest (analog Stage 2): ganze Stage NUR überspringen, wenn ALLE erwarteten
@@ -2152,7 +2239,7 @@ def main() -> None:
         log.info("=" * 60)
         stage3_lektorat(
             themen_raw, stufen, articles, topics_data, out_dir, anthropic_key,
-            dry_run=args.dry_run,
+            dry_run=args.dry_run, pipeline=pipeline,
         )
         if args.stage == 3:
             return

@@ -12,7 +12,11 @@ STAGE_MODELS = {
     "lemma":          {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": None},
     "kompass":        {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": "gemini-2.5-flash"},
     "vision":         {"provider": "gemini",    "model": "gemini-2.5-flash",  "fallback": None},
-    "vision_recheck": {"provider": "anthropic", "model": "claude-opus-4-8",   "fallback": None},
+    # Bild-Recheck sensibler Bilder: derzeit DEAKTIVIERT (Option A, Gemini-only).
+    # Bilder werden ohnehin manuell nachgeprüft. Zum Reaktivieren provider auf
+    # "anthropic" setzen; model = gewünschtes Recheck-Modell (z.B. claude-sonnet-4-6
+    # oder claude-opus-4-8). Steuert BEIDE Recheck-Pfade (Stage-1-Batch + build_image_pool).
+    "vision_recheck": {"provider": "none",      "model": "claude-opus-4-8",   "fallback": None},
     "generator":      {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": None},
     "trim":           {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": None},
     "box_repair":     {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": None},
@@ -25,6 +29,15 @@ def get_stage_config(stage):
     if stage not in STAGE_MODELS:
         raise KeyError(f"Unbekannte Stufe: {stage}")
     return dict(STAGE_MODELS[stage])
+
+
+def image_recheck_model():
+    """Modellname für den Bild-Recheck sensibler Bilder — oder None wenn deaktiviert
+    (vision_recheck.provider != 'anthropic'). Beide Recheck-Pfade (Stage-1-Batch in
+    run_batch._opus_recheck + build_image_pool in generate_grounded) fragen diese
+    Funktion: liefert sie None, wird der Recheck übersprungen (Gemini-Urteil bleibt)."""
+    cfg = STAGE_MODELS["vision_recheck"]
+    return cfg["model"] if cfg["provider"] == "anthropic" else None
 
 
 # Zentrales Artikel-JSON-Schema (input_schema für forced tool-use bei Anthropic).

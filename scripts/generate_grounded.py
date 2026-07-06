@@ -879,14 +879,17 @@ def build_image_pool(
 
     accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))
 
-    # ── Opus-Recheck: sensible Themen, NUR unsichere Bilder (confidence=niedrig) ─
+    # ── Bild-Recheck: sensible Themen, NUR unsichere Bilder (confidence=niedrig) ─
+    # Nur wenn in stage_models aktiviert (provider 'anthropic'); sonst Gemini-Urteil.
     opus_overrides = 0
     opus_blocked   = 0
-    if sensibel and anthropic_api_key and accepted:
+    from stage_models import image_recheck_model
+    _recheck_model = image_recheck_model()
+    if sensibel and anthropic_api_key and accepted and _recheck_model:
         opus_kandidaten = [img for img in accepted if img.get("confidence") == "niedrig"]
         stable          = [img for img in accepted if img.get("confidence") != "niedrig"]
-        log.info("    Sensibles Thema '%s': Opus-Recheck fuer %d unsichere Bilder (von %d akzeptierten)",
-                 thema, len(opus_kandidaten), len(accepted))
+        log.info("    Sensibles Thema '%s': Bild-Recheck (%s) fuer %d unsichere Bilder (von %d akzeptierten)",
+                 thema, _recheck_model, len(opus_kandidaten), len(accepted))
         rechked: list[dict] = list(stable)
         for img in opus_kandidaten:
             img_bytes = load_cached_image_bytes(img["thumb_url"])
@@ -895,11 +898,12 @@ def build_image_pool(
                             img["filename"][:45])
                 rechked.append(img)
                 continue
-            new_ab, new_desc, usage = opus_recheck(anthropic_api_key, img_bytes, thema)
+            new_ab, new_desc, usage = opus_recheck(anthropic_api_key, img_bytes, thema,
+                                                   model=_recheck_model)
             if usage:
                 cost_tracker.track(
                     run_id=_RUN_ID, thema=thema, stufe="S0",
-                    schritt="vision_recheck", modell="claude-opus-4-8",
+                    schritt="vision_recheck", modell=_recheck_model,
                     input_tok=usage.get("input_tok", 0),
                     output_tok=usage.get("output_tok", 0),
                 )

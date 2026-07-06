@@ -563,9 +563,12 @@ def opus_recheck(
     api_key: str,
     image_bytes: bytes,
     thema: str,
+    model: str = "claude-opus-4-8",
 ) -> tuple[int | None, str, dict]:
-    """Zweitprüfung mit claude-opus-4-8 (strenger Vision-Prompt).
+    """Zweitprüfung mit einem Anthropic-Vision-Modell (strenger Vision-Prompt).
 
+    model: Anthropic-Modellname (default claude-opus-4-8; via
+    stage_models.image_recheck_model gesteuert).
     Gibt (ab_stufe, beschreibung, usage_dict) zurück.
     ab_stufe=None bei Fehler (Gemini-Urteil beibehalten).
     """
@@ -579,7 +582,7 @@ def opus_recheck(
         client = anthropic.Anthropic(api_key=api_key)
         prompt = OPUS_RECHECK_PROMPT.format(thema=thema)
         response = client.messages.create(
-            model="claude-opus-4-8",
+            model=model,
             max_tokens=256,
             system=OPUS_RECHECK_SYSTEM,
             messages=[
