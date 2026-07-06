@@ -38,7 +38,8 @@ def _get_client():
 def call_claude_json(system_prompt, user_message, json_schema, *,
                      model=None, max_tokens=4096, thinking_budget=0,
                      image_bytes=None, image_media_type="image/jpeg",
-                     call_name="", max_attempts=4, stream=False):
+                     call_name="", max_attempts=4, stream=False,
+                     cached_prefix=None, temperature=None):
     """Anbieter-neutraler JSON-Call via forced tool-use. Gibt das validierte dict zurück.
 
     json_schema: JSON-Schema-Dict (input_schema des emit-Tools).
@@ -66,6 +67,11 @@ def call_claude_json(system_prompt, user_message, json_schema, *,
             "type": "image",
             "source": {"type": "base64", "media_type": image_media_type, "data": b64},
         })
+    # cached_prefix: großer, über mehrere Calls stabiler Block (z.B. Quelltext) →
+    # eigener cache_control-Block (Anthropic Prompt-Caching, 5-min TTL).
+    if cached_prefix:
+        content.append({"type": "text", "text": cached_prefix,
+                        "cache_control": {"type": "ephemeral"}})
     content.append({"type": "text", "text": user_message})
 
     kwargs = dict(
@@ -75,6 +81,8 @@ def call_claude_json(system_prompt, user_message, json_schema, *,
         tools=tools,
         messages=[{"role": "user", "content": content}],
     )
+    if temperature is not None:
+        kwargs["temperature"] = temperature
 
     if thinking_budget > 0:
         # thinking ist NICHT mit forced tool_choice kombinierbar → "auto"
