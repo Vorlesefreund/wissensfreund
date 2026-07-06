@@ -1005,6 +1005,18 @@ def _stage2_pipeline_new(
         print(f"Bereits vorhanden (Resume): {len(articles)}")
         return articles
 
+    # Quelltext-Cache je Thema (einmal), von allen Pässen aller Stufen geteilt
+    # → spart auf dem wiederholten Quelltext ~75 % Tokens + deutlich Laufzeit.
+    # Graceful: None (kleines Thema/Fehler) → voller Kontext je Pass.
+    src_caches: dict[str, str | None] = {}
+    for pj in plan_jobs:
+        th = pj["thema"]
+        if th not in src_caches:
+            d = pj["data"]
+            src_caches[th] = pipeline_new.create_source_cache(
+                client, pipeline_new.BASELINE_MODEL, th,
+                d["primary_text"], d.get("companion_texts", {}))
+
     ok = flagged = failed = 0
     for pj in plan_jobs:
         thema, data, slug, stufe = pj["thema"], pj["data"], pj["slug"], pj["stufe"]
@@ -1019,6 +1031,7 @@ def _stage2_pipeline_new(
                 data.get("valid_companions", []),
                 model=pipeline_new.BASELINE_MODEL,
                 run_id=_RUN_ID,
+                cache=src_caches.get(thema),
             )
         except Exception as e:
             log.error("  [new] %s: unerwarteter Fehler — übersprungen: %s", aid, e)
@@ -1056,7 +1069,15 @@ def _stage2_pipeline_new(
                  aid, report.get("n_sentences", 0), report.get("n_source_passages", 0),
                  report.get("word_count", 0), "  ⚠ Validierung" if val_errors else "")
 
-    log.info("\n=== Stage 2 (new) fertig: %d OK, %d geflaggt, %d fehlgeschlagen ===",
+    # Quelltext-Caches best-effort löschen (sonst via TTL, unkritisch).
+    for th, cn in src_caches.items():
+        if cn:
+            try:
+                client.caches.delete(name=cn)
+            except Exception:
+                pass
+
+    log.info("\n=== Stage 2 (new) fertig: %d OK, %d mit Validierungsfehler, %d fehlgeschlagen ===",
              ok, flagged, failed)
     _save_cp(out_dir, 2, {"status": "done", "articles": articles})
     return articles
