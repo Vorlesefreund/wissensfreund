@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-06T10:36:22Z -->
+<!-- updated: 2026-07-06T11:45:38Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **06.07.2026 — NEUARCHITEKTUR GENERATOR: PHASE 0 + 1 (FUNDAMENT) VALIDIERT & COMMITTET.**
@@ -21,10 +21,19 @@
 > vs. v5.2g: ebenbürtige Prosa, S2 besser gegroundet (10 vs 6), S3 worttreuer (428 im Band vs 620 über).
 > Register/Thema-Primat/nüchterne Ernst-Themen sitzen. Alter Pfad unberührt, verify 0 Hart-FAIL.
 > Desktop: `_wwii_shadow_alt_vs_neu.txt`.
-> **OFFEN — Phase 2 (Box-Pass, Pass 3):** gegroundete 1–2 Boxen aus im Text FEHLENDEN Fakten,
-> passendem Abschnitt zugeordnet, `[]` erlaubt; Generator erzeugt dann keine Boxen mehr im Prosa-Pass.
-> Danach Phase 3 (Bild/Quiz), Phase 4 (Lektorat A+B), Phase 5 (Umschalten). Details:
-> gemini_neuarchitektur_migrationsplan.md. Modellwahl Pass 2 später empirisch schärfen.
+> **Phase 2 (Commit 1c13143) — BOX-PASS (Pass 3) + QUELLTEXT-CACHE.** Boxen entkoppelt vom
+> Prosa-Pass: `pass3_boxes` erzeugt 1–2 (S3 bis 3) gegroundete Boxen aus im Artikel FEHLENDEN
+> Fakten, je einem Abschnitt zugeordnet (`[]` erlaubt). Deterministische Guards `_apply_boxes`:
+> Anker-Match, `stimmt_das`-Disziplin (reveal_text+auto), leichter Anti-Redundanz-Guard,
+> Budget-Cap; `_box_lint`-Verteilung → review_flag. **Cache (Nutzerwunsch):** `create_source_cache`
+> = ein Gemini-Cache je Thema, NUR Quelltext, OHNE System-Prompt → von allen Pässen geteilt +
+> Lektorat-fähig (stabiler `_source_block` als reuse-Kern; `_call_pass` faltet den System-Prompt
+> bei Cache in die User-Message). Validierung WWII S1/S2/S3 (gecacht): Boxen gegroundet/verankert/
+> nicht-redundant, validate OK, l2 box-lint-geflaggt; **Cache-Hit 99,7 %** der Input-Tokens,
+> Laufzeit ~5 min statt ~9–15. Alter Pfad unberührt, verify 0 Hart-FAIL. (articles/wwii_new_cache, untracked)
+> **OFFEN — Box-Länge:** Boxen sind noch zu wortreich (S3 ~59 W/Box vs. v5.2 knapper) → Längen-
+> Vorgabe im Pass-3-Prompt (in Arbeit). **Danach:** Phase 3 (Bild/Quiz), Phase 4 (Lektorat A+B,
+> nutzt den Quelltext-Cache), Phase 5 (Umschalten). Modellwahl Pass 2 später empirisch schärfen.
 >
 > **05.07.2026 — THEMENGEBIETE-MEHRFACHZUORDNUNG + PRIMÄR-UMSCHICHTUNG (additiv).**
 > Jedes der 4346 Katalog-Themen hat jetzt eine Liste ALLER zutreffenden Themengebiete (aus den festen 20).

@@ -659,6 +659,24 @@ Sourcing (Stage 1: Primär/Companions/Bilder/Appeal) ist geteilt & unberührt �
 **Validierungs-Gotcha:** `validate_article` mit `word_floor=wmin` aufrufen — sonst flaggt es wenige lange
 Sätze bei gesundem Wortbudget fälschlich als „zu wenig Sätze" (S2-Fall). Wie im alten `generate_one_level`.
 
-**Roadmap:** Phase 2 = Box-Pass (Pass 3, gegroundet, fehlende Fakten, `[]` erlaubt; Generator macht dann
-keine Boxen mehr) · Phase 3 = Bild/Quiz herauslösen · Phase 4 = Lektorat A (Fakt) + B (Stil, PFLICHT-Re-
-Grounding) · Phase 5 = Default auf `new`. Modellwahl je Pass empirisch an echten Läufen.
+**Pass 3 BOX (Phase 2, ab 06.07.2026):** `pass3_boxes` erzeugt bis Budget (S1/S2 2, S3 3) Boxen aus im
+Artikel FEHLENDEN Quell-Fakten, je einem `heading` zugeordnet; `[]` erlaubt. **Deterministische Guards**
+`_apply_boxes` (kein LLM): Anker-Match (kein Match → verworfen, nie erfundener Anker); `stimmt_das` braucht
+`reveal_text`+`reveal_mode='auto'`, andere Typen bekommen `reveal_*` entfernt; **leichter Anti-Redundanz-Guard**
+(`_is_redundant`: Wort-Containment ≥0.8 mit EINEM Satz → verworfen; Schwelle hoch → echte Zusatz-Fakten bleiben);
+Budget-Cap. Danach `_box_lint` (aus altem Pfad) → `review_flag` bei schlechter Verteilung. Prosa wird NIE
+angefasst (State-Monotonie); `word_count` inkl. Boxen nach dem Anhängen. **Offen:** Boxen tendieren zu
+wortreich → Längen-Vorgabe im Pass-3-Prompt.
+
+**QUELLTEXT-CACHE (Phase 2):** `create_source_cache` = ein Gemini-Context-Cache je Thema, hält NUR den
+`_source_block` (Primär+Companions), **ohne eingebackenen System-Prompt** (anders als der alte
+`try_create_gemini_cache`) → alle Pässe teilen ihn, ein späteres **Gemini-Lektorat** ebenso. `_call_pass`
+schaltet um: mit Cache wird die Quelle nicht mitgesendet und der Pass-System-Prompt in die User-Message
+gefaltet (call_gemini setzt bei `cached_content` kein `system_instruction`); ohne Cache Alt-Verhalten
+(Quelle im Body). Erstellung einmal je Thema in `_stage2_pipeline_new`, an alle Stufen gereicht, best-effort
+gelöscht (sonst TTL 1800s). Messung WWII: **Cache-Hit ~99,7 %** der Input-Tokens, Laufzeit grob halbiert.
+`cached_content` + `response_schema` sind kompatibel (getestet). Kleines Thema/Fehler → `None` → voller Kontext.
+Reuse-Kern ist der stabile `_source_block`: Anthropic-Lektorat nutzt denselben Block via `cache_control`.
+
+**Roadmap:** Phase 3 = Bild/Quiz herauslösen · Phase 4 = Lektorat A (Fakt) + B (Stil, PFLICHT-Re-Grounding),
+nutzt den Quelltext-Cache · Phase 5 = Default auf `new`. Modellwahl je Pass empirisch an echten Läufen.
