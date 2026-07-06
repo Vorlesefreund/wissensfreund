@@ -678,5 +678,41 @@ gelöscht (sonst TTL 1800s). Messung WWII: **Cache-Hit ~99,7 %** der Input-Token
 `cached_content` + `response_schema` sind kompatibel (getestet). Kleines Thema/Fehler → `None` → voller Kontext.
 Reuse-Kern ist der stabile `_source_block`: Anthropic-Lektorat nutzt denselben Block via `cache_control`.
 
-**Roadmap:** Phase 3 = Bild/Quiz herauslösen · Phase 4 = Lektorat A (Fakt) + B (Stil, PFLICHT-Re-Grounding),
-nutzt den Quelltext-Cache · Phase 5 = Default auf `new`. Modellwahl je Pass empirisch an echten Läufen.
+**Pass 4 BILD + Pass 5 QUIZ (Phase 3, ab 06.07.2026, Commit `81ec160`):** `pass4_images` baut
+`article["images"]` aus dem Stage-1-Pool + semantischer LLM-Zuordnung (section_id→img_index) + Captions +
+Hero-Wahl; danach `_rb._set_is_hero` + `_rb._limit_images_per_section` (wiederverwendet aus altem Pfad,
+behält die semantische img_index-Zuordnung). `pass5_quiz` erzeugt A/B/C-Quiz (Target/Cap je Stufe), Fallback
+`_quiz_stub`. Beide hängen nur an — Prosa unberührt.
+
+**REJOIN-GOTCHA + FIX (Phase 3, in `81ec160`) — WICHTIG:** Die zweite Gegenprobe in `build_sections`
+verwarf zuvor **korrekte** S3-Artikel als False-Positive. Trigger: das Modell lässt nach einem Satzpunkt das
+Leerzeichen weg (`…toll.Am Ende…`). Der Splitter trennt richtig, die Roh-Kachelung (`"".join(para[a:b])`) ist
+zeichengenau — aber die alte Gegenprobe `_norm_ws(" ".join(stripped)) == _norm_ws(para)` fügte beim `" ".join`
+ein **Phantom-Leerzeichen** ein (`toll. Am` ≠ `toll.Am`) → `RejoinError` → ganze Stufe verworfen. **Fix:** die
+Gegenprobe vergleicht das Whitespace-freie **Skelett** `_skeleton(s)=re.sub(r"\s+","",s)` (reiner Inhalt in
+Reihenfolge; Zwischensatz-Whitespace ist irrelevant, die App rendert es selbst). Roh-Kachelung bleibt der
+zeichengenaue Beweis, dass die Spans den Absatz lückenlos decken; jede echte Inhaltsänderung fliegt weiter auf.
+`RejoinError` nennt jetzt die erste Abweichung mit `repr`-Kontext (Diagnose bei künftigen Fällen). **Merke:** der
+Rejoin-Fehler ist nicht-deterministisch (hängt am konkreten Pass-2-Text) — nicht auf Reproduktion warten,
+Meldung liest man aus dem Log.
+
+**Neues LEKTORAT A/B (Phase 4, Commit `54998e6`, `scripts/lektorat_new.py`) — ersetzt das alte für `new`,
+kein Rückgriff:** Pass A = Fakten-Abgleich gegen den Quelltext-Snapshot der GENERIERUNGSzeit (SILENT/KORRIGIERT
+/PRÜFEN, entschlackt). Pass B = Stil, aber jede geänderte Aussage braucht einen im Quelltext verifizierbaren
+Beleg (`_beleg_in_source`), sonst wird die Korrektur **verworfen** (Re-Grounding-Pflicht). Ausgabe als
+review_tool-kompatibler `pruefbericht` (findings + summary auto_angewandt/vorschlag_offen/eskaliert). Nutzt
+`claude_client.call_claude_json` mit `cached_prefix=sources_block` (Anthropic-Prompt-Caching) + `temperature=0`
+(reproduzierbar) + `thinking_budget=0`. `_apply_corrections` ersetzt Satz per `satz_id` und hat `isinstance`-
+Guards (forced tool-use validiert Array-Items nicht tief). Wiring: `run_batch._stage3_lektorat_new`.
+Validiert Vulkan: B hielt Re-Grounding (2 verworfen bei l1), 0 eskaliert.
+
+**OPTION A — Bild-Recheck abschaltbar (Commit `6f1a066`):** `stage_models.vision_recheck.provider` steuert
+BEIDE Recheck-Pfade (Stage-1-Batch `run_batch._opus_recheck` + `generate_grounded.build_image_pool`). Default
+jetzt `"none"` → kein Anthropic-Recheck, Gemini-Altersurteil bleibt (Bilder werden manuell nachgeprüft). Helfer
+`stage_models.image_recheck_model()` liefert Modell **oder None**; beide Pfade skippen bei None. Modell ist
+Parameter (nicht mehr hartkodiert) → **Reaktivierung = ein Provider-Flip** auf `"anthropic"` + Modell (Sonnet
+oder Opus), keine Code-Änderung. Konservatives Hochstufen (`confidence=niedrig & S1→S2`) bleibt IMMER aktiv.
+`verify_project_facts` prüft den deaktivierten Zustand in `stage_models.py`.
+
+**Roadmap:** Phase 5 = Default auf `new` umschalten (Produktion) · größerer Themen-Lauf über `new` ·
+Modellwahl je Pass empirisch an echten Läufen schärfen.

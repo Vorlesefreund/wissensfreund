@@ -1,41 +1,32 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-06T11:50:03Z -->
+<!-- updated: 2026-07-06T18:58:21Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
-> **06.07.2026 — NEUARCHITEKTUR GENERATOR: PHASE 0 + 1 (FUNDAMENT) VALIDIERT & COMMITTET.**
-> Modulare Pass-Pipeline neben dem alten Monolithen aufgebaut, Fallback-Garantie durchgehend gewahrt.
-> **Phase 0 (Commit d640407):** Schalter `--pipeline old|new` in run_batch.py (argparse choices,
-> Env-Fallback `WF_PIPELINE`, Priorität CLI>Env>'old'), an stage2_generierung(pipeline=) durchgereicht;
-> Routing-Branch vorn in stage2_generierung; alter Pfad zeichengenau unberührt. (eignung_exclude.json
-> 58→59 nachgezogen → verify grün.)
-> **Phase 1 (Commit 670bbdf):** neues Modul `scripts/pipeline_new.py` — Pass 1 (PLAN, JSON) →
-> Pass 2 (PROSA, reines Markdown, code-gesteuerte Wortziel-Schleife max 3 Versuche, bandnächste
-> Fassung+Flag statt Abbruch, gemini-3.5-flash) → Pass 6 (deterministischer dt. Satz-Splitter,
-> offset-basiert + Abkürzungsliste; HARTE Rejoin-Invariante NUR auf Absatz-Ebene, Überschriften aus;
-> source_passages via Minimal-KI mit Substring-Verifikation). Stubs: boxes=[], images=[], Quiz-Stub,
-> review_flag=True. run_batch `_stage2_pipeline_new` (synchron, Resume via Datei-Existenz, age_floor-Gate,
-> validate_article mit word_floor). **JSON-Ausgabeschema unverändert.**
-> **Validierung WWII S1/S2/S3 (articles/wwii_new_mvp, untracked):** über die echte
-> stage2_generierung(new), exit 0; alle Stufen im Wortband auf Anschlag 1; Rejoin-Invariante hielt
-> (keine Textmutation); JSON app-valide; Belege wörtlich+verifiziert (10/10/25). Schatten-Vergleich
-> vs. v5.2g: ebenbürtige Prosa, S2 besser gegroundet (10 vs 6), S3 worttreuer (428 im Band vs 620 über).
-> Register/Thema-Primat/nüchterne Ernst-Themen sitzen. Alter Pfad unberührt, verify 0 Hart-FAIL.
-> Desktop: `_wwii_shadow_alt_vs_neu.txt`.
-> **Phase 2 (Commit 1c13143) — BOX-PASS (Pass 3) + QUELLTEXT-CACHE.** Boxen entkoppelt vom
-> Prosa-Pass: `pass3_boxes` erzeugt 1–2 (S3 bis 3) gegroundete Boxen aus im Artikel FEHLENDEN
-> Fakten, je einem Abschnitt zugeordnet (`[]` erlaubt). Deterministische Guards `_apply_boxes`:
-> Anker-Match, `stimmt_das`-Disziplin (reveal_text+auto), leichter Anti-Redundanz-Guard,
-> Budget-Cap; `_box_lint`-Verteilung → review_flag. **Cache (Nutzerwunsch):** `create_source_cache`
-> = ein Gemini-Cache je Thema, NUR Quelltext, OHNE System-Prompt → von allen Pässen geteilt +
-> Lektorat-fähig (stabiler `_source_block` als reuse-Kern; `_call_pass` faltet den System-Prompt
-> bei Cache in die User-Message). Validierung WWII S1/S2/S3 (gecacht): Boxen gegroundet/verankert/
-> nicht-redundant, validate OK, l2 box-lint-geflaggt; **Cache-Hit 99,7 %** der Input-Tokens,
-> Laufzeit ~5 min statt ~9–15. Alter Pfad unberührt, verify 0 Hart-FAIL. (articles/wwii_new_cache, untracked)
-> **Box-Länge erledigt (Commit s.u.):** stufenabhängige Längenschranke `BOX_MAXWORDS` (S1 18 / S2 28 /
-> S3 35 W) im Pass-3-Prompt. Validiert an WWII: Box-Wörter etwa halbiert (S1 25/23→12/20, S2 43/50→24/33,
-> S3 66/51/60→26/29/41). Soft-Vorgabe (Prompt), kein harter Code-Cap (kein Mutations-/Drop-Risiko).
-> **Danach:** Phase 3 (Bild/Quiz), Phase 4 (Lektorat A+B, nutzt den Quelltext-Cache), Phase 5
-> (Umschalten). Modellwahl Pass 2 später empirisch schärfen.
+> **06.07.2026 (Stand Abend) — NEUARCHITEKTUR GENERATOR: PHASE 0–4 KOMPLETT & COMMITTET, VULKAN S1/S2/S3 END-TO-END VALIDIERT.**
+> Die modulare Pass-Pipeline (Pass 1 Plan → 2 Prosa → 3 Box → 4 Bild → 5 Quiz → 6 Assembly + neues
+> Lektorat A/B) steht vollständig NEBEN dem alten Monolithen; Fallback-Garantie gewahrt, JSON-Schema
+> unverändert, alter Pfad unberührt, verify 0 Hart-FAIL.
+> **Committs heute:** Phase 0 `d640407` (Schalter `--pipeline old|new`, Env `WF_PIPELINE`) · Phase 1
+> `670bbdf` (Pass 1/2/6, dt. Satz-Splitter, Rejoin-Invariante, source_passages) · Phase 2 `1c13143`
+> (Box-Pass + Quelltext-Cache, ein Gemini-Cache/Thema nur Quelltext, Cache-Hit ~99,7 %) · Box-Länge
+> `BOX_MAXWORDS` · **Option A `6f1a066`** (Bild-Recheck via `stage_models.vision_recheck.provider`
+> abschaltbar → Default `"none"`, Gemini-only; Helfer `image_recheck_model()`; Modell durchgereicht;
+> Reaktivierung = Provider-Flip auf `"anthropic"` + Modell Sonnet/Opus; konservatives Hochstufen bleibt)
+> · **Phase 2+3 `81ec160`** (Pass 4 Bild-Zuordnung/Captions + Pass 5 Quiz + **Rejoin-Fix**, s.u.)
+> · **Phase 4 `54998e6`** (`lektorat_new.py` — 2-Pass-Lektorat: A Fakten gegen Generierungs-Snapshot,
+> B Stil mit PFLICHT-Re-Grounding; `claude_client` cached_prefix + temperature=0).
+> **REJOIN-FIX (in `81ec160`):** die „getrimmt"-Gegenprobe verwarf zuvor korrekte S3-Artikel als
+> False-Positive, wenn nach einem Satzpunkt das Leerzeichen fehlte (`toll.Am` → Phantom-Leerzeichen beim
+> `" ".join`). Gegenprobe vergleicht jetzt das Whitespace-freie **Skelett** (`_skeleton`); Roh-Kachelung
+> bleibt zeichengenauer Beweis; RejoinError zeigt die erste Abweichung mit repr-Kontext. Über 7 dt.
+> Edge-Cases getestet, Inhaltsverlust wird weiter gefangen.
+> **Vulkan-Validierung (articles/vulkan_new_demo, untracked):** S1 201 W / S2 385 W / S3 600 W, je
+> 2–3 Boxen (Längenvorgabe hält), 15 Bilder, 3–4 Quiz, 24/26/40 Belege; Lektorat A 0/2/6 · B 4/6/5
+> angewandt bei 2/0/0 verworfen (Re-Grounding hält), 0 eskaliert. Option A live bestätigt (kein
+> Anthropic-Recheck im Lauf). Review-Docx `vulkan_new_review_20260706.docx` auf dem Desktop.
+> **OFFEN:** Phase 5 (Produktions-Umschaltung auf `new`) · größerer Themen-Lauf über `new` ·
+> Modellwahl Pass 2 empirisch schärfen · nicht-committete Validierungsordner (wwii_new_*, vulkan_new_demo)
+> sind Wegwerf-Artefakte.
 >
 > **05.07.2026 — THEMENGEBIETE-MEHRFACHZUORDNUNG + PRIMÄR-UMSCHICHTUNG (additiv).**
 > Jedes der 4346 Katalog-Themen hat jetzt eine Liste ALLER zutreffenden Themengebiete (aus den festen 20).
