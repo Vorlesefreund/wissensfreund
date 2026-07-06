@@ -501,6 +501,8 @@ def build_sections(markdown: str, fallback_heading: str) -> list[dict]:
 
 # Box-Budget je Stufe (Obergrenze): S1/S2 bis 2, S3 bis 3.
 BOX_BUDGET_MAX = {1: 2, 2: 2, 3: 3}
+# Box-Länge je Stufe (Richtwert Wörter, im Prompt): knapp halten, kein Absatz.
+BOX_MAXWORDS = {1: 18, 2: 28, 3: 35}
 _BOX_TYPES = {"wow", "fakt", "warnung", "stimmt_das"}
 
 # Leichter Anti-Redundanz-Guard: Box nur bei STARKER Wort-Überlappung mit EINEM
@@ -565,6 +567,7 @@ def pass3_boxes(sections: list[dict], thema: str, stufe: int, primary_text: str,
     Gibt (roh_boxen, info) zurück — Verankerung/Guards macht _apply_boxes.
     """
     budget = BOX_BUDGET_MAX.get(stufe, 2)
+    maxw = BOX_MAXWORDS.get(stufe, 28)
     headings = [s["heading"] for s in sections]
     article_txt = "\n".join(
         f'## {s["heading"]}\n' + " ".join(x["text"] for x in s["sentences"])
@@ -573,6 +576,9 @@ def pass3_boxes(sections: list[dict], thema: str, stufe: int, primary_text: str,
     body = (
         f"LESESTUFE: {_level_register(stufe)}\n"
         f"BOX-BUDGET: bis zu {budget} Boxen (weniger oder 0 ist ok).\n"
+        f"BOX-LÄNGE: jede Box KNAPP — höchstens {maxw} Wörter, 1–2 kurze Sätze, ein "
+        f"prägnanter Zusatz-Fakt, kein Absatz. Bei stimmt_das gilt die Grenze für Frage "
+        f"UND Auflösung je einzeln.\n"
         f"ABSCHNITTE (heading exakt verwenden): {headings}\n\n"
         "FERTIGER ARTIKEL (Fließtext — Boxen müssen zusätzliche Fakten bringen, "
         "nichts hieraus wiederholen):\n" + article_txt + "\n\n"

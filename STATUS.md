@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-06T11:45:38Z -->
+<!-- updated: 2026-07-06T11:50:03Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
 > **06.07.2026 — NEUARCHITEKTUR GENERATOR: PHASE 0 + 1 (FUNDAMENT) VALIDIERT & COMMITTET.**
@@ -31,9 +31,11 @@
 > bei Cache in die User-Message). Validierung WWII S1/S2/S3 (gecacht): Boxen gegroundet/verankert/
 > nicht-redundant, validate OK, l2 box-lint-geflaggt; **Cache-Hit 99,7 %** der Input-Tokens,
 > Laufzeit ~5 min statt ~9–15. Alter Pfad unberührt, verify 0 Hart-FAIL. (articles/wwii_new_cache, untracked)
-> **OFFEN — Box-Länge:** Boxen sind noch zu wortreich (S3 ~59 W/Box vs. v5.2 knapper) → Längen-
-> Vorgabe im Pass-3-Prompt (in Arbeit). **Danach:** Phase 3 (Bild/Quiz), Phase 4 (Lektorat A+B,
-> nutzt den Quelltext-Cache), Phase 5 (Umschalten). Modellwahl Pass 2 später empirisch schärfen.
+> **Box-Länge erledigt (Commit s.u.):** stufenabhängige Längenschranke `BOX_MAXWORDS` (S1 18 / S2 28 /
+> S3 35 W) im Pass-3-Prompt. Validiert an WWII: Box-Wörter etwa halbiert (S1 25/23→12/20, S2 43/50→24/33,
+> S3 66/51/60→26/29/41). Soft-Vorgabe (Prompt), kein harter Code-Cap (kein Mutations-/Drop-Risiko).
+> **Danach:** Phase 3 (Bild/Quiz), Phase 4 (Lektorat A+B, nutzt den Quelltext-Cache), Phase 5
+> (Umschalten). Modellwahl Pass 2 später empirisch schärfen.
 >
 > **05.07.2026 — THEMENGEBIETE-MEHRFACHZUORDNUNG + PRIMÄR-UMSCHICHTUNG (additiv).**
 > Jedes der 4346 Katalog-Themen hat jetzt eine Liste ALLER zutreffenden Themengebiete (aus den festen 20).
