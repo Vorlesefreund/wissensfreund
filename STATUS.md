@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-07T09:05:50Z -->
+<!-- updated: 2026-07-07T14:01:57Z -->
 <!-- Ältere Banner-Historie → STATUS_ARCHIV.md · Wissen → WISSEN_*.md · Details → PROJEKTDOKUMENT.md -->
 
 **Wissensfreund:** Flutter-App für Kinder (3 Altersstufen: S1 4–6, S2 7–9, S3 10–12),
@@ -20,18 +20,27 @@ Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-P
   Review-XLSX + Audit-Snapshots nach `archiv/`. Commits `f1c8f8b` · `247aa49`.
 - **Neue Pipeline Phase 0–4** komplett+committet, Vulkan e2e validiert; **Feinschliff** (Bild-Alt-Texte,
   S1/S2-Ton, S3-Quiz) + **SVG-Diagramme (Fix B)**. `verify_project_facts` durchgehend 0 Hart-FAIL.
+- **Resilienz-Härtung (`cf1ffaf`):** Cache-Ablauf-Fallback in `pipeline_new._call_pass` (403 „CachedContent
+  not found" → voller Kontext statt Hart-Abbruch; behebt die Kaskade, die zuvor 17/18 Artikel killte) +
+  10-min Client-Timeout (Gemini-SDK hat keins → Server-Stall hing endlos) + breiteres `is_transient`-Retry
+  (Timeout/Deadline/Connection/overloaded) in gemini_client/run_batch/generate_grounded/image_vision_filter.
+- **Cache-TTL 30min → 6h (`c846e57`):** Caches werden vorab für alle Themen erzeugt → müssen ganze
+  Batch-Laufzeit überleben; Gemini akzeptiert 6h/12h (getestet).
 
 ## Gerade in Arbeit / Nächster Schritt
 
-- **Die 6 bereits generierten Artikel neu produzieren** (Dinosaurier/Elefant/Hund/Spartacus/Vulkan/
-  Zweiter Weltkrieg) auf der NEUEN Pipeline. Voraussetzung: Phase 5 (Pipeline-Default `new`) +
-  stabiles gemini-3.5-flash. KEIN Voll-Katalog-Lauf.
+- **Nachtlauf geplant: 2026-07-08 03:00 Berlin** (Scheduled Task `WF_NightlyRerun_20260708`, Frühfenster
+  laut 503-Monitor am ruhigsten). Die 6 Themen (Dinosaurier/Elefant/Hund/Spartacus/Vulkan/Zweiter Weltkrieg)
+  × 3 Stufen, `--pipeline new`, Stages 1–3 (Gen+Lektorat, kein TTS) → `articles/batch_new_20260708`,
+  Review-Docx → `Desktop\_review_batch_new_20260708.docx`, Log → `articles/batch_new_20260708/run.log`.
+  Wrapper: `_nightly_rerun_20260708.ps1` (Repo-Root, nicht committet; `PYTHONUTF8=1` gegen cp1252-Crash).
+- **Auswertung morgen früh:** Läuft alles sauber (18/18) → Phase 5 (Default `new`) freigeben.
 
 ## Offen nach Priorität
 
-1. **Phase 5:** `--pipeline`-Default auf `new` umstellen — nach breiterer Multi-Themen-Validierung.
-2. **Verifikation (gemini-3.5-flash-503-blockiert):** WWII-Ton (nüchtern?) + Einstiegs-Streuung über
-   mehrere Themen; SVG-Vision-Akzeptanz (Fix B) end-to-end.
+1. **Phase 5:** `--pipeline`-Default auf `new` umstellen — nach erfolgreicher Nachtlauf-Auswertung.
+2. **Verifikation:** WWII-Ton (nüchtern?) + Einstiegs-Streuung über mehrere Themen; SVG-Vision-Akzeptanz
+   (Fix B) end-to-end — kommt aus dem Nachtlauf.
 3. **Modellwahl Pass 2** empirisch schärfen.
 4. Nicht-committete Validierungsordner (`articles/wwii_new_*`, `vulkan_new_demo` …) sind Wegwerf.
 
