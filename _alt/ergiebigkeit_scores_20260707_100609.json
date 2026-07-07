@@ -1,8 +1,8 @@
 {
   "_meta": {
     "source": "catalog_full.json (+alt-rescue)",
-    "built": "2026-07-07T08:06:09.826488+00:00",
-    "count": 4385,
+    "built": "2026-07-07T07:44:19.374566+00:00",
+    "count": 4375,
     "note": "XLSX==catalog_full verifiziert (Audit 2026-06-18); Format aus Altdatei gespiegelt"
   },
   "scores": {
@@ -5541,10 +5541,10 @@
       "S2": 5,
       "S3": 6
     },
-    "namenstag": {
-      "S1": 4,
+    "hochzeit": {
+      "S1": 5,
       "S2": 5,
-      "S3": 6
+      "S3": 5
     },
     "rollenspiel": {
       "S1": 5,
@@ -5641,8 +5641,8 @@
       "S2": 5,
       "S3": 6
     },
-    "hochzeit": {
-      "S1": 5,
+    "krampus": {
+      "S1": 4,
       "S2": 5,
       "S3": 5
     },
@@ -5741,8 +5741,8 @@
       "S2": 5,
       "S3": 6
     },
-    "krampus": {
-      "S1": 4,
+    "weihnachtsmarkt": {
+      "S1": 6,
       "S2": 5,
       "S3": 5
     },
@@ -5841,8 +5841,8 @@
       "S2": 5,
       "S3": 6
     },
-    "weihnachtsmarkt": {
-      "S1": 6,
+    "muttertag": {
+      "S1": 5,
       "S2": 5,
       "S3": 5
     },
@@ -5941,7 +5941,7 @@
       "S2": 5,
       "S3": 6
     },
-    "muttertag": {
+    "erntedankfest": {
       "S1": 5,
       "S2": 5,
       "S3": 5
@@ -6041,7 +6041,7 @@
       "S2": 5,
       "S3": 6
     },
-    "erntedankfest": {
+    "engel": {
       "S1": 5,
       "S2": 5,
       "S3": 5
@@ -6141,7 +6141,7 @@
       "S2": 5,
       "S3": 6
     },
-    "engel": {
+    "heilige drei könige": {
       "S1": 5,
       "S2": 5,
       "S3": 5
@@ -6241,8 +6241,8 @@
       "S2": 5,
       "S3": 6
     },
-    "heilige drei könige": {
-      "S1": 5,
+    "pfingsten": {
+      "S1": 4,
       "S2": 5,
       "S3": 5
     },
@@ -6341,7 +6341,7 @@
       "S2": 5,
       "S3": 6
     },
-    "pfingsten": {
+    "valentinstag": {
       "S1": 4,
       "S2": 5,
       "S3": 5
@@ -6441,7 +6441,7 @@
       "S2": 5,
       "S3": 6
     },
-    "valentinstag": {
+    "taufe": {
       "S1": 4,
       "S2": 5,
       "S3": 5
@@ -6541,7 +6541,7 @@
       "S2": 5,
       "S3": 6
     },
-    "taufe": {
+    "zuckerfest": {
       "S1": 4,
       "S2": 5,
       "S3": 5
@@ -6641,7 +6641,7 @@
       "S2": 5,
       "S3": 6
     },
-    "zuckerfest": {
+    "mönch": {
       "S1": 4,
       "S2": 5,
       "S3": 5
@@ -6741,7 +6741,7 @@
       "S2": 5,
       "S3": 6
     },
-    "mönch": {
+    "feiertag": {
       "S1": 4,
       "S2": 5,
       "S3": 5
@@ -6841,7 +6841,7 @@
       "S2": 5,
       "S3": 6
     },
-    "feiertag": {
+    "walpurgisnacht": {
       "S1": 4,
       "S2": 5,
       "S3": 5
@@ -6941,8 +6941,8 @@
       "S2": 5,
       "S3": 6
     },
-    "walpurgisnacht": {
-      "S1": 4,
+    "jahrmarkt": {
+      "S1": 5,
       "S2": 5,
       "S3": 5
     },
@@ -7041,8 +7041,8 @@
       "S2": 5,
       "S3": 6
     },
-    "jahrmarkt": {
-      "S1": 5,
+    "nonne": {
+      "S1": 3,
       "S2": 5,
       "S3": 5
     },
@@ -7141,8 +7141,8 @@
       "S2": 5,
       "S3": 5
     },
-    "nonne": {
-      "S1": 3,
+    "aschermittwoch": {
+      "S1": 4,
       "S2": 5,
       "S3": 5
     },
@@ -7241,10 +7241,10 @@
       "S2": 5,
       "S3": 5
     },
-    "aschermittwoch": {
-      "S1": 4,
+    "adventskalender": {
+      "S1": 6,
       "S2": 5,
-      "S3": 5
+      "S3": 4
     },
     "tauziehen": {
       "S1": 6,
@@ -7341,7 +7341,7 @@
       "S2": 5,
       "S3": 5
     },
-    "adventskalender": {
+    "weihnachtsbaum": {
       "S1": 6,
       "S2": 5,
       "S3": 4
@@ -7441,7 +7441,7 @@
       "S2": 5,
       "S3": 5
     },
-    "weihnachtsbaum": {
+    "osterhase": {
       "S1": 6,
       "S2": 5,
       "S3": 4
@@ -7460,11 +7460,6 @@
       "S1": 6,
       "S2": 7,
       "S3": 7
-    },
-    "merkurtransit": {
-      "S1": null,
-      "S2": 3,
-      "S3": 5
     },
     "lego house / legoland": {
       "S1": 5,
@@ -7541,7 +7536,7 @@
       "S2": 5,
       "S3": 5
     },
-    "osterhase": {
+    "kirmes": {
       "S1": 6,
       "S2": 5,
       "S3": 4
@@ -7636,7 +7631,7 @@
       "S2": 5,
       "S3": 5
     },
-    "kirmes": {
+    "kostüm": {
       "S1": 6,
       "S2": 5,
       "S3": 4
@@ -7731,7 +7726,7 @@
       "S2": 5,
       "S3": 5
     },
-    "kostüm": {
+    "ostereier": {
       "S1": 6,
       "S2": 5,
       "S3": 4
@@ -7826,8 +7821,8 @@
       "S2": 5,
       "S3": 5
     },
-    "ostereier": {
-      "S1": 6,
+    "maibaum": {
+      "S1": 5,
       "S2": 5,
       "S3": 4
     },
@@ -7921,10 +7916,10 @@
       "S2": 5,
       "S3": 5
     },
-    "maibaum": {
-      "S1": 5,
-      "S2": 5,
-      "S3": 4
+    "mohammed": {
+      "S1": 2,
+      "S2": 4,
+      "S3": 6
     },
     "foul": {
       "S1": 4,
@@ -8016,8 +8011,8 @@
       "S2": 5,
       "S3": 5
     },
-    "mohammed": {
-      "S1": 2,
+    "buddha": {
+      "S1": 3,
       "S2": 4,
       "S3": 6
     },
@@ -8111,8 +8106,8 @@
       "S2": 5,
       "S3": 5
     },
-    "buddha": {
-      "S1": 3,
+    "koran": {
+      "S1": 2,
       "S2": 4,
       "S3": 6
     },
@@ -8206,7 +8201,7 @@
       "S2": 5,
       "S3": 5
     },
-    "koran": {
+    "kopftuch": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -8301,7 +8296,7 @@
       "S2": 5,
       "S3": 5
     },
-    "kopftuch": {
+    "märtyrer": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -8396,7 +8391,7 @@
       "S2": 5,
       "S3": 5
     },
-    "märtyrer": {
+    "seele": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -8491,7 +8486,7 @@
       "S2": 5,
       "S3": 5
     },
-    "seele": {
+    "barmitzvah/batmitzvah": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -8586,7 +8581,7 @@
       "S2": 5,
       "S3": 5
     },
-    "barmitzvah/batmitzvah": {
+    "dreifaltigkeit": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -8681,7 +8676,7 @@
       "S2": 5,
       "S3": 5
     },
-    "dreifaltigkeit": {
+    "johannes der täufer": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -8776,7 +8771,7 @@
       "S2": 5,
       "S3": 5
     },
-    "johannes der täufer": {
+    "messias": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -8871,7 +8866,7 @@
       "S2": 5,
       "S3": 5
     },
-    "messias": {
+    "opfer (religiöses ritual)": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -8966,10 +8961,10 @@
       "S2": 5,
       "S3": 5
     },
-    "opfer (religiöses ritual)": {
-      "S1": 2,
+    "aberglaube und zahlen": {
+      "S1": 3,
       "S2": 4,
-      "S3": 6
+      "S3": 5
     },
     "fechten": {
       "S1": 3,
@@ -9061,7 +9056,7 @@
       "S2": 5,
       "S3": 5
     },
-    "aberglaube und zahlen": {
+    "maria (mutter jesu)": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -9156,7 +9151,7 @@
       "S2": 5,
       "S3": 5
     },
-    "maria (mutter jesu)": {
+    "tempel": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -9251,7 +9246,7 @@
       "S2": 5,
       "S3": 5
     },
-    "tempel": {
+    "konfirmation": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -9346,7 +9341,7 @@
       "S2": 5,
       "S3": 5
     },
-    "konfirmation": {
+    "kommunion": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -9441,7 +9436,7 @@
       "S2": 5,
       "S3": 5
     },
-    "kommunion": {
+    "gebet": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -9536,7 +9531,7 @@
       "S2": 5,
       "S3": 5
     },
-    "gebet": {
+    "chanukka": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -9631,7 +9626,7 @@
       "S2": 5,
       "S3": 5
     },
-    "chanukka": {
+    "diwali": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -9726,7 +9721,7 @@
       "S2": 5,
       "S3": 5
     },
-    "diwali": {
+    "himmel (religion)": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -9821,7 +9816,7 @@
       "S2": 5,
       "S3": 5
     },
-    "himmel (religion)": {
+    "erster mai": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -9916,7 +9911,7 @@
       "S2": 5,
       "S3": 5
     },
-    "erster mai": {
+    "kreuz (christentum)": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -10011,7 +10006,7 @@
       "S2": 5,
       "S3": 5
     },
-    "kreuz (christentum)": {
+    "brauch": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -10106,7 +10101,7 @@
       "S2": 5,
       "S3": 5
     },
-    "brauch": {
+    "karfreitag": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -10201,7 +10196,7 @@
       "S2": 5,
       "S3": 5
     },
-    "karfreitag": {
+    "thanksgiving": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -10296,8 +10291,8 @@
       "S2": 5,
       "S3": 5
     },
-    "thanksgiving": {
-      "S1": 3,
+    "synagoge": {
+      "S1": 2,
       "S2": 4,
       "S3": 5
     },
@@ -10391,7 +10386,7 @@
       "S2": 5,
       "S3": 5
     },
-    "synagoge": {
+    "opferfest": {
       "S1": 2,
       "S2": 4,
       "S3": 5
@@ -10486,7 +10481,7 @@
       "S2": 5,
       "S3": 5
     },
-    "opferfest": {
+    "pessach": {
       "S1": 2,
       "S2": 4,
       "S3": 5
@@ -10581,7 +10576,7 @@
       "S2": 5,
       "S3": 5
     },
-    "pessach": {
+    "pilgerfahrt nach mekka": {
       "S1": 2,
       "S2": 4,
       "S3": 5
@@ -10676,7 +10671,7 @@
       "S2": 5,
       "S3": 5
     },
-    "pilgerfahrt nach mekka": {
+    "heilige (religion)": {
       "S1": 2,
       "S2": 4,
       "S3": 5
@@ -10771,8 +10766,8 @@
       "S2": 5,
       "S3": 5
     },
-    "heilige (religion)": {
-      "S1": 2,
+    "fasten": {
+      "S1": 3,
       "S2": 4,
       "S3": 5
     },
@@ -10866,8 +10861,8 @@
       "S2": 5,
       "S3": 5
     },
-    "fasten": {
-      "S1": 3,
+    "hiob": {
+      "S1": 2,
       "S2": 4,
       "S3": 5
     },
@@ -10961,8 +10956,8 @@
       "S2": 5,
       "S3": 5
     },
-    "hiob": {
-      "S1": 2,
+    "segen/segnung": {
+      "S1": 3,
       "S2": 4,
       "S3": 5
     },
@@ -11056,10 +11051,10 @@
       "S2": 5,
       "S3": 5
     },
-    "segen/segnung": {
-      "S1": 3,
+    "christkind": {
+      "S1": 5,
       "S2": 4,
-      "S3": 5
+      "S3": 4
     },
     "quizshow": {
       "S1": 4,
@@ -11151,8 +11146,8 @@
       "S2": 5,
       "S3": 5
     },
-    "christkind": {
-      "S1": 5,
+    "krippe (weihnachten)": {
+      "S1": 4,
       "S2": 4,
       "S3": 4
     },
@@ -11246,7 +11241,7 @@
       "S2": 5,
       "S3": 5
     },
-    "krippe (weihnachten)": {
+    "schützenfest": {
       "S1": 4,
       "S2": 4,
       "S3": 4
@@ -11341,7 +11336,7 @@
       "S2": 5,
       "S3": 5
     },
-    "schützenfest": {
+    "fest": {
       "S1": 4,
       "S2": 4,
       "S3": 4
@@ -11436,8 +11431,8 @@
       "S2": 5,
       "S3": 5
     },
-    "fest": {
-      "S1": 4,
+    "christi himmelfahrt": {
+      "S1": 3,
       "S2": 4,
       "S3": 4
     },
@@ -11526,10 +11521,10 @@
       "S2": 5,
       "S3": 5
     },
-    "christi himmelfahrt": {
-      "S1": 3,
+    "adventskranz": {
+      "S1": 5,
       "S2": 4,
-      "S3": 4
+      "S3": 3
     },
     "kickboxen": {
       "S1": null,
@@ -11556,10 +11551,10 @@
       "S2": 5,
       "S3": 6
     },
-    "leuchtende nachtwolken": {
-      "S1": 2,
+    "glätte und eisregen": {
+      "S1": 3,
       "S2": 4,
-      "S3": 6
+      "S3": 5
     },
     "limonade": {
       "S1": 4,
@@ -11616,7 +11611,7 @@
       "S2": 5,
       "S3": 5
     },
-    "adventskranz": {
+    "konfetti": {
       "S1": 5,
       "S2": 4,
       "S3": 3
@@ -11646,8 +11641,8 @@
       "S2": 5,
       "S3": 6
     },
-    "glätte und eisregen": {
-      "S1": 3,
+    "halo (lichteffekt)": {
+      "S1": 2,
       "S2": 4,
       "S3": 5
     },
@@ -11706,10 +11701,10 @@
       "S2": 5,
       "S3": 5
     },
-    "konfetti": {
-      "S1": 5,
-      "S2": 4,
-      "S3": 3
+    "tora": {
+      "S1": 2,
+      "S2": 3,
+      "S3": 5
     },
     "brettspiel": {
       "S1": 5,
@@ -11736,8 +11731,8 @@
       "S2": 5,
       "S3": 6
     },
-    "halo (lichteffekt)": {
-      "S1": 2,
+    "heißwasserquelle": {
+      "S1": 3,
       "S2": 4,
       "S3": 5
     },
@@ -11796,10 +11791,10 @@
       "S2": 5,
       "S3": 5
     },
-    "tora": {
+    "fronleichnam": {
       "S1": 2,
       "S2": 3,
-      "S3": 5
+      "S3": 4
     },
     "labyrinth": {
       "S1": 5,
@@ -11826,7 +11821,7 @@
       "S2": 5,
       "S3": 6
     },
-    "heißwasserquelle": {
+    "vulkangestein": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -11886,7 +11881,7 @@
       "S2": 5,
       "S3": 5
     },
-    "fronleichnam": {
+    "allerheiligen": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -11916,7 +11911,7 @@
       "S2": 5,
       "S3": 6
     },
-    "vulkangestein": {
+    "murgang": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -11951,10 +11946,10 @@
       "S2": 4,
       "S3": 5
     },
-    "darmflora": {
-      "S1": null,
+    "erfindung der impfung": {
+      "S1": 2,
       "S2": 4,
-      "S3": 7
+      "S3": 6
     },
     "nymphen": {
       "S1": 2,
@@ -11976,7 +11971,7 @@
       "S2": 5,
       "S3": 5
     },
-    "allerheiligen": {
+    "sabbat": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -12006,7 +12001,7 @@
       "S2": 5,
       "S3": 6
     },
-    "murgang": {
+    "erdspalte": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -12041,8 +12036,8 @@
       "S2": 4,
       "S3": 5
     },
-    "erfindung der impfung": {
-      "S1": 2,
+    "tetanus": {
+      "S1": null,
       "S2": 4,
       "S3": 6
     },
@@ -12061,7 +12056,7 @@
       "S2": 5,
       "S3": 5
     },
-    "sabbat": {
+    "kippa": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -12086,8 +12081,8 @@
       "S2": 5,
       "S3": 6
     },
-    "erdspalte": {
-      "S1": 3,
+    "luftfeuchtigkeit": {
+      "S1": 2,
       "S2": 4,
       "S3": 5
     },
@@ -12121,8 +12116,8 @@
       "S2": 4,
       "S3": 5
     },
-    "tetanus": {
-      "S1": null,
+    "antibiotikum": {
+      "S1": 2,
       "S2": 4,
       "S3": 6
     },
@@ -12141,10 +12136,10 @@
       "S2": 5,
       "S3": 5
     },
-    "kippa": {
-      "S1": 2,
-      "S2": 3,
-      "S3": 4
+    "christkindelsmarkt ... (entf.)": {
+      "S1": 1,
+      "S2": 1,
+      "S3": 1
     },
     "wandern": {
       "S1": 4,
@@ -12166,7 +12161,7 @@
       "S2": 5,
       "S3": 6
     },
-    "luftfeuchtigkeit": {
+    "passatwind": {
       "S1": 2,
       "S2": 4,
       "S3": 5
@@ -12201,8 +12196,8 @@
       "S2": 4,
       "S3": 5
     },
-    "antibiotikum": {
-      "S1": 2,
+    "alkohol": {
+      "S1": null,
       "S2": 4,
       "S3": 6
     },
@@ -12221,10 +12216,10 @@
       "S2": 5,
       "S3": 5
     },
-    "christkindelsmarkt ... (entf.)": {
-      "S1": 1,
-      "S2": 1,
-      "S3": 1
+    "beschneidung": {
+      "S1": null,
+      "S2": null,
+      "S3": 5
     },
     "akrobatik": {
       "S1": 4,
@@ -12246,10 +12241,10 @@
       "S2": 5,
       "S3": 6
     },
-    "passatwind": {
-      "S1": 2,
+    "eiszapfen": {
+      "S1": 4,
       "S2": 4,
-      "S3": 5
+      "S3": 4
     },
     "mandarine": {
       "S1": 5,
@@ -12281,7 +12276,7 @@
       "S2": 4,
       "S3": 5
     },
-    "alkohol": {
+    "rauchen": {
       "S1": null,
       "S2": 4,
       "S3": 6
@@ -12299,11 +12294,6 @@
     "wegerich": {
       "S1": 3,
       "S2": 5,
-      "S3": 5
-    },
-    "beschneidung": {
-      "S1": null,
-      "S2": null,
       "S3": 5
     },
     "schiedsrichter": {
@@ -12326,8 +12316,8 @@
       "S2": 5,
       "S3": 6
     },
-    "eiszapfen": {
-      "S1": 4,
+    "wetterhahn und windrichtung": {
+      "S1": 3,
       "S2": 4,
       "S3": 4
     },
@@ -12361,7 +12351,7 @@
       "S2": 4,
       "S3": 5
     },
-    "rauchen": {
+    "sucht": {
       "S1": null,
       "S2": 4,
       "S3": 6
@@ -12401,10 +12391,10 @@
       "S2": 5,
       "S3": 6
     },
-    "wetterhahn und windrichtung": {
-      "S1": 3,
-      "S2": 4,
-      "S3": 4
+    "el niño": {
+      "S1": 1,
+      "S2": 3,
+      "S3": 5
     },
     "bier": {
       "S1": null,
@@ -12436,8 +12426,8 @@
       "S2": 4,
       "S3": 5
     },
-    "sucht": {
-      "S1": null,
+    "nervensystem": {
+      "S1": 2,
       "S2": 4,
       "S3": 6
     },
@@ -12476,7 +12466,7 @@
       "S2": 5,
       "S3": 6
     },
-    "el niño": {
+    "inversionswetterlage": {
       "S1": 1,
       "S2": 3,
       "S3": 5
@@ -12511,7 +12501,7 @@
       "S2": 4,
       "S3": 5
     },
-    "nervensystem": {
+    "kalorie": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -12551,7 +12541,7 @@
       "S2": 5,
       "S3": 6
     },
-    "inversionswetterlage": {
+    "ionosphäre": {
       "S1": 1,
       "S2": 3,
       "S3": 5
@@ -12586,7 +12576,7 @@
       "S2": 4,
       "S3": 5
     },
-    "kalorie": {
+    "eiweiß (ernährung)": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -12626,11 +12616,6 @@
       "S2": 5,
       "S3": 6
     },
-    "ionosphäre": {
-      "S1": 1,
-      "S2": 3,
-      "S3": 5
-    },
     "zimt": {
       "S1": 4,
       "S2": 4,
@@ -12661,7 +12646,7 @@
       "S2": 4,
       "S3": 5
     },
-    "eiweiß (ernährung)": {
+    "kohlenhydrate": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -12731,7 +12716,7 @@
       "S2": 4,
       "S3": 5
     },
-    "kohlenhydrate": {
+    "stress": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -12801,7 +12786,7 @@
       "S2": 4,
       "S3": 5
     },
-    "stress": {
+    "psyche": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -12871,7 +12856,7 @@
       "S2": 4,
       "S3": 5
     },
-    "psyche": {
+    "blutdruck": {
       "S1": 2,
       "S2": 4,
       "S3": 6
@@ -12941,10 +12926,10 @@
       "S2": 4,
       "S3": 5
     },
-    "blutdruck": {
-      "S1": 2,
+    "husten": {
+      "S1": 4,
       "S2": 4,
-      "S3": 6
+      "S3": 5
     },
     "lichtung": {
       "S1": 3,
@@ -13011,8 +12996,8 @@
       "S2": 4,
       "S3": 5
     },
-    "husten": {
-      "S1": 4,
+    "leber": {
+      "S1": 3,
       "S2": 4,
       "S3": 5
     },
@@ -13076,7 +13061,7 @@
       "S2": 4,
       "S3": 5
     },
-    "leber": {
+    "niere": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -13141,7 +13126,7 @@
       "S2": 4,
       "S3": 5
     },
-    "niere": {
+    "geburt": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -13206,7 +13191,7 @@
       "S2": 4,
       "S3": 5
     },
-    "geburt": {
+    "altern": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -13271,7 +13256,7 @@
       "S2": 4,
       "S3": 5
     },
-    "altern": {
+    "windpocken": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -13336,7 +13321,7 @@
       "S2": 4,
       "S3": 5
     },
-    "windpocken": {
+    "medikament": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -13401,7 +13386,7 @@
       "S2": 4,
       "S3": 5
     },
-    "medikament": {
+    "gleichgewichtssinn": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -13466,7 +13451,7 @@
       "S2": 4,
       "S3": 5
     },
-    "gleichgewichtssinn": {
+    "kopfschmerz": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -13531,8 +13516,8 @@
       "S2": 4,
       "S3": 5
     },
-    "kopfschmerz": {
-      "S1": 3,
+    "krebs (krankheit)": {
+      "S1": null,
       "S2": 4,
       "S3": 5
     },
@@ -13596,7 +13581,7 @@
       "S2": 4,
       "S3": 5
     },
-    "krebs (krankheit)": {
+    "diabetes mellitus": {
       "S1": null,
       "S2": 4,
       "S3": 5
@@ -13661,8 +13646,8 @@
       "S2": 4,
       "S3": 5
     },
-    "diabetes mellitus": {
-      "S1": null,
+    "asthma": {
+      "S1": 4,
       "S2": 4,
       "S3": 5
     },
@@ -13726,8 +13711,8 @@
       "S2": 4,
       "S3": 5
     },
-    "asthma": {
-      "S1": 4,
+    "operation": {
+      "S1": null,
       "S2": 4,
       "S3": 5
     },
@@ -13791,7 +13776,7 @@
       "S2": 4,
       "S3": 5
     },
-    "operation": {
+    "übergewicht": {
       "S1": null,
       "S2": 4,
       "S3": 5
@@ -13856,7 +13841,7 @@
       "S2": 4,
       "S3": 5
     },
-    "übergewicht": {
+    "blutgruppe": {
       "S1": null,
       "S2": 4,
       "S3": 5
@@ -13921,7 +13906,7 @@
       "S2": 4,
       "S3": 5
     },
-    "blutgruppe": {
+    "blutspende": {
       "S1": null,
       "S2": 4,
       "S3": 5
@@ -13986,7 +13971,7 @@
       "S2": 4,
       "S3": 5
     },
-    "blutspende": {
+    "symptom": {
       "S1": null,
       "S2": 4,
       "S3": 5
@@ -14026,10 +14011,10 @@
       "S2": 4,
       "S3": 4
     },
-    "jugoslawien": {
-      "S1": 2,
-      "S2": 4,
-      "S3": 5
+    "nationalsozialismus": {
+      "S1": 1,
+      "S2": 3,
+      "S3": 8
     },
     "tod": {
       "S1": 2,
@@ -14051,8 +14036,8 @@
       "S2": 4,
       "S3": 5
     },
-    "symptom": {
-      "S1": null,
+    "speiseröhre": {
+      "S1": 3,
       "S2": 4,
       "S3": 5
     },
@@ -14091,10 +14076,10 @@
       "S2": 4,
       "S3": 4
     },
-    "nationalsozialismus": {
+    "französische revolution": {
       "S1": 1,
       "S2": 3,
-      "S3": 8
+      "S3": 7
     },
     "gericht": {
       "S1": 3,
@@ -14116,7 +14101,7 @@
       "S2": 4,
       "S3": 5
     },
-    "speiseröhre": {
+    "erbrechen": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -14156,7 +14141,7 @@
       "S2": 4,
       "S3": 4
     },
-    "französische revolution": {
+    "erster weltkrieg": {
       "S1": 1,
       "S2": 3,
       "S3": 7
@@ -14181,7 +14166,7 @@
       "S2": 4,
       "S3": 5
     },
-    "erbrechen": {
+    "durchfall": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -14221,7 +14206,7 @@
       "S2": 4,
       "S3": 4
     },
-    "erster weltkrieg": {
+    "kolonialismus": {
       "S1": 1,
       "S2": 3,
       "S3": 7
@@ -14246,7 +14231,7 @@
       "S2": 4,
       "S3": 5
     },
-    "durchfall": {
+    "mandelentzündung": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -14286,7 +14271,7 @@
       "S2": 4,
       "S3": 4
     },
-    "kolonialismus": {
+    "deutsche kolonien": {
       "S1": 1,
       "S2": 3,
       "S3": 7
@@ -14311,7 +14296,7 @@
       "S2": 4,
       "S3": 5
     },
-    "mandelentzündung": {
+    "wasser trinken": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -14351,7 +14336,7 @@
       "S2": 4,
       "S3": 4
     },
-    "deutsche kolonien": {
+    "faschismus": {
       "S1": 1,
       "S2": 3,
       "S3": 7
@@ -14376,7 +14361,7 @@
       "S2": 4,
       "S3": 5
     },
-    "wasser trinken": {
+    "fett (körper)": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -14416,7 +14401,7 @@
       "S2": 4,
       "S3": 4
     },
-    "faschismus": {
+    "imperialismus": {
       "S1": 1,
       "S2": 3,
       "S3": 7
@@ -14436,13 +14421,13 @@
       "S2": 4,
       "S3": 6
     },
-    "nauru": {
-      "S1": 2,
-      "S2": 4,
-      "S3": 5
-    },
-    "fett (körper)": {
+    "brandenburg": {
       "S1": 3,
+      "S2": 4,
+      "S3": 4
+    },
+    "pickel": {
+      "S1": 2,
       "S2": 4,
       "S3": 5
     },
@@ -14481,10 +14466,10 @@
       "S2": 4,
       "S3": 4
     },
-    "imperialismus": {
+    "hexenverfolgung": {
       "S1": 1,
       "S2": 3,
-      "S3": 7
+      "S3": 6
     },
     "fridays for future": {
       "S1": 2,
@@ -14501,12 +14486,12 @@
       "S2": 4,
       "S3": 6
     },
-    "brandenburg": {
+    "sachsen-anhalt": {
       "S1": 3,
       "S2": 4,
       "S3": 4
     },
-    "pickel": {
+    "milz": {
       "S1": 2,
       "S2": 4,
       "S3": 5
@@ -14546,7 +14531,7 @@
       "S2": 4,
       "S3": 4
     },
-    "hexenverfolgung": {
+    "dreißigjähriger krieg": {
       "S1": 1,
       "S2": 3,
       "S3": 6
@@ -14566,12 +14551,12 @@
       "S2": 4,
       "S3": 6
     },
-    "sachsen-anhalt": {
+    "mecklenburg-vorpommern": {
       "S1": 3,
       "S2": 4,
       "S3": 4
     },
-    "milz": {
+    "bauchspeicheldrüse": {
       "S1": 2,
       "S2": 4,
       "S3": 5
@@ -14611,7 +14596,7 @@
       "S2": 4,
       "S3": 4
     },
-    "dreißigjähriger krieg": {
+    "absolutismus": {
       "S1": 1,
       "S2": 3,
       "S3": 6
@@ -14621,22 +14606,22 @@
       "S2": 4,
       "S3": 6
     },
-    "ordinalzahl": {
-      "S1": null,
+    "gestern, heute und morgen": {
+      "S1": 4,
       "S2": 3,
-      "S3": 4
+      "S3": 3
     },
     "blues": {
       "S1": 2,
       "S2": 4,
       "S3": 6
     },
-    "mecklenburg-vorpommern": {
-      "S1": 3,
+    "jamaika": {
+      "S1": 2,
       "S2": 4,
       "S3": 4
     },
-    "bauchspeicheldrüse": {
+    "mumps": {
       "S1": 2,
       "S2": 4,
       "S3": 5
@@ -14676,8 +14661,8 @@
       "S2": 4,
       "S3": 4
     },
-    "absolutismus": {
-      "S1": 1,
+    "kalter krieg": {
+      "S1": null,
       "S2": 3,
       "S3": 6
     },
@@ -14686,22 +14671,22 @@
       "S2": 4,
       "S3": 6
     },
-    "präposition": {
-      "S1": null,
+    "größer und kleiner": {
+      "S1": 4,
       "S2": 3,
-      "S3": 4
+      "S3": 3
     },
     "heavy metal": {
       "S1": 2,
       "S2": 4,
       "S3": 6
     },
-    "jamaika": {
+    "bahamas": {
       "S1": 2,
       "S2": 4,
       "S3": 4
     },
-    "mumps": {
+    "sehnen": {
       "S1": 2,
       "S2": 4,
       "S3": 5
@@ -14741,7 +14726,7 @@
       "S2": 4,
       "S3": 4
     },
-    "kalter krieg": {
+    "apartheid": {
       "S1": null,
       "S2": 3,
       "S3": 6
@@ -14751,22 +14736,22 @@
       "S2": 4,
       "S3": 6
     },
-    "polyeder": {
-      "S1": null,
+    "höhe und tiefe (größen)": {
+      "S1": 3,
       "S2": 3,
-      "S3": 4
+      "S3": 3
     },
     "punk": {
       "S1": 2,
       "S2": 4,
       "S3": 6
     },
-    "bahamas": {
+    "irak": {
       "S1": 2,
-      "S2": 4,
-      "S3": 4
+      "S2": 3,
+      "S3": 5
     },
-    "sehnen": {
+    "becken (anatomie)": {
       "S1": 2,
       "S2": 4,
       "S3": 5
@@ -14806,7 +14791,7 @@
       "S2": 4,
       "S3": 4
     },
-    "apartheid": {
+    "bürgerrechtsbewegung": {
       "S1": null,
       "S2": 3,
       "S3": 6
@@ -14816,22 +14801,17 @@
       "S2": 4,
       "S3": 6
     },
-    "gestern, heute und morgen": {
-      "S1": 4,
-      "S2": 3,
-      "S3": 3
-    },
     "charlie brown": {
       "S1": 3,
       "S2": 4,
       "S3": 5
     },
-    "irak": {
-      "S1": 2,
+    "nordkorea": {
+      "S1": 1,
       "S2": 3,
       "S3": 5
     },
-    "becken (anatomie)": {
+    "zwerchfell": {
       "S1": 2,
       "S2": 4,
       "S3": 5
@@ -14871,8 +14851,8 @@
       "S2": 4,
       "S3": 4
     },
-    "bürgerrechtsbewegung": {
-      "S1": null,
+    "heiliges römisches reich": {
+      "S1": 1,
       "S2": 3,
       "S3": 6
     },
@@ -14881,23 +14861,18 @@
       "S2": 4,
       "S3": 6
     },
-    "größer und kleiner": {
-      "S1": 4,
-      "S2": 3,
-      "S3": 3
-    },
     "sänger": {
       "S1": 4,
       "S2": 4,
       "S3": 5
     },
-    "nordkorea": {
+    "afghanistan": {
       "S1": 1,
       "S2": 3,
       "S3": 5
     },
-    "zwerchfell": {
-      "S1": 2,
+    "fett": {
+      "S1": 3,
       "S2": 4,
       "S3": 5
     },
@@ -14936,7 +14911,7 @@
       "S2": 4,
       "S3": 4
     },
-    "heiliges römisches reich": {
+    "aufklärung (epoche)": {
       "S1": 1,
       "S2": 3,
       "S3": 6
@@ -14946,22 +14921,17 @@
       "S2": 4,
       "S3": 6
     },
-    "höhe und tiefe (größen)": {
-      "S1": 3,
-      "S2": 3,
-      "S3": 3
-    },
     "melodie": {
       "S1": 4,
       "S2": 4,
       "S3": 5
     },
-    "afghanistan": {
-      "S1": 1,
+    "honduras": {
+      "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "fett": {
+    "zahnfleisch": {
       "S1": 3,
       "S2": 4,
       "S3": 5
@@ -15001,7 +14971,7 @@
       "S2": 4,
       "S3": 4
     },
-    "aufklärung (epoche)": {
+    "neuzeit (epoche)": {
       "S1": 1,
       "S2": 3,
       "S3": 6
@@ -15016,15 +14986,15 @@
       "S2": 4,
       "S3": 5
     },
-    "honduras": {
+    "kongo": {
       "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "zahnfleisch": {
-      "S1": 3,
+    "gähnen": {
+      "S1": 4,
       "S2": 4,
-      "S3": 5
+      "S3": 4
     },
     "zellteilung": {
       "S1": 2,
@@ -15061,7 +15031,7 @@
       "S2": 4,
       "S3": 4
     },
-    "neuzeit (epoche)": {
+    "amerikanische revolution": {
       "S1": 1,
       "S2": 3,
       "S3": 6
@@ -15076,12 +15046,12 @@
       "S2": 4,
       "S3": 5
     },
-    "kongo": {
+    "sudan": {
       "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "gähnen": {
+    "gips": {
       "S1": 4,
       "S2": 4,
       "S3": 4
@@ -15121,7 +15091,7 @@
       "S2": 4,
       "S3": 4
     },
-    "amerikanische revolution": {
+    "amerikanischer bürgerkrieg": {
       "S1": 1,
       "S2": 3,
       "S3": 6
@@ -15136,12 +15106,12 @@
       "S2": 4,
       "S3": 5
     },
-    "sudan": {
+    "sambia": {
       "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "gips": {
+    "bauchnabel": {
       "S1": 4,
       "S2": 4,
       "S3": 4
@@ -15181,7 +15151,7 @@
       "S2": 4,
       "S3": 4
     },
-    "amerikanischer bürgerkrieg": {
+    "flucht und vertreibung": {
       "S1": 1,
       "S2": 3,
       "S3": 6
@@ -15196,13 +15166,13 @@
       "S2": 4,
       "S3": 5
     },
-    "sambia": {
+    "mosambik": {
       "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "bauchnabel": {
-      "S1": 4,
+    "atemzug": {
+      "S1": 3,
       "S2": 4,
       "S3": 4
     },
@@ -15241,7 +15211,7 @@
       "S2": 4,
       "S3": 4
     },
-    "flucht und vertreibung": {
+    "spanische eroberung amerikas (konquistadoren)": {
       "S1": 1,
       "S2": 3,
       "S3": 6
@@ -15256,12 +15226,12 @@
       "S2": 4,
       "S3": 5
     },
-    "mosambik": {
+    "angola": {
       "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "atemzug": {
+    "narbe": {
       "S1": 3,
       "S2": 4,
       "S3": 4
@@ -15301,7 +15271,7 @@
       "S2": 4,
       "S3": 4
     },
-    "spanische eroberung amerikas (konquistadoren)": {
+    "preußen": {
       "S1": 1,
       "S2": 3,
       "S3": 6
@@ -15316,12 +15286,12 @@
       "S2": 4,
       "S3": 5
     },
-    "angola": {
+    "elfenbeinküste": {
       "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "narbe": {
+    "hörgerät": {
       "S1": 3,
       "S2": 4,
       "S3": 4
@@ -15361,7 +15331,7 @@
       "S2": 4,
       "S3": 3
     },
-    "preußen": {
+    "deutsche ostgebiete": {
       "S1": 1,
       "S2": 3,
       "S3": 6
@@ -15376,12 +15346,12 @@
       "S2": 4,
       "S3": 5
     },
-    "elfenbeinküste": {
+    "libyen": {
       "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "hörgerät": {
+    "verband": {
       "S1": 3,
       "S2": 4,
       "S3": 4
@@ -15421,7 +15391,7 @@
       "S2": 4,
       "S3": 3
     },
-    "deutsche ostgebiete": {
+    "deutscher bund": {
       "S1": 1,
       "S2": 3,
       "S3": 6
@@ -15436,12 +15406,12 @@
       "S2": 4,
       "S3": 5
     },
-    "libyen": {
+    "libanon": {
       "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "verband": {
+    "spritze": {
       "S1": 3,
       "S2": 4,
       "S3": 4
@@ -15481,7 +15451,7 @@
       "S2": 4,
       "S3": 3
     },
-    "deutscher bund": {
+    "ku-klux-klan": {
       "S1": 1,
       "S2": 3,
       "S3": 6
@@ -15496,12 +15466,12 @@
       "S2": 4,
       "S3": 5
     },
-    "libanon": {
+    "syrien": {
       "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "spritze": {
+    "körpertemperatur": {
       "S1": 3,
       "S2": 4,
       "S3": 4
@@ -15541,7 +15511,7 @@
       "S2": 4,
       "S3": 3
     },
-    "ku-klux-klan": {
+    "wiener kongress": {
       "S1": 1,
       "S2": 3,
       "S3": 6
@@ -15556,12 +15526,12 @@
       "S2": 4,
       "S3": 5
     },
-    "syrien": {
+    "usbekistan": {
       "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "körpertemperatur": {
+    "schwindel": {
       "S1": 3,
       "S2": 4,
       "S3": 4
@@ -15601,8 +15571,8 @@
       "S2": 4,
       "S3": 3
     },
-    "wiener kongress": {
-      "S1": 1,
+    "nahostkonflikt": {
+      "S1": null,
       "S2": 3,
       "S3": 6
     },
@@ -15616,12 +15586,12 @@
       "S2": 4,
       "S3": 5
     },
-    "usbekistan": {
+    "georgien": {
       "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "schwindel": {
+    "speichel": {
       "S1": 3,
       "S2": 4,
       "S3": 4
@@ -15661,7 +15631,7 @@
       "S2": 4,
       "S3": 3
     },
-    "nahostkonflikt": {
+    "arabischer frühling": {
       "S1": null,
       "S2": 3,
       "S3": 6
@@ -15676,13 +15646,13 @@
       "S2": 4,
       "S3": 5
     },
-    "georgien": {
+    "taiwan": {
       "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "speichel": {
-      "S1": 3,
+    "krücke": {
+      "S1": 4,
       "S2": 4,
       "S3": 4
     },
@@ -15721,10 +15691,10 @@
       "S2": 4,
       "S3": 3
     },
-    "arabischer frühling": {
-      "S1": null,
+    "mohenjo-daro und indus-kultur": {
+      "S1": 1,
       "S2": 3,
-      "S3": 6
+      "S3": 5
     },
     "friedhof": {
       "S1": 2,
@@ -15736,12 +15706,12 @@
       "S2": 4,
       "S3": 5
     },
-    "taiwan": {
-      "S1": 2,
+    "palästina": {
+      "S1": null,
       "S2": 3,
       "S3": 5
     },
-    "krücke": {
+    "sommersprossen": {
       "S1": 4,
       "S2": 4,
       "S3": 4
@@ -15781,7 +15751,7 @@
       "S2": 4,
       "S3": 3
     },
-    "mohenjo-daro und indus-kultur": {
+    "großes indien (alte reiche)": {
       "S1": 1,
       "S2": 3,
       "S3": 5
@@ -15796,12 +15766,12 @@
       "S2": 4,
       "S3": 5
     },
-    "palästina": {
-      "S1": null,
+    "nordirland": {
+      "S1": 2,
       "S2": 3,
       "S3": 5
     },
-    "sommersprossen": {
+    "lippe": {
       "S1": 4,
       "S2": 4,
       "S3": 4
@@ -15841,7 +15811,7 @@
       "S2": 4,
       "S3": 3
     },
-    "großes indien (alte reiche)": {
+    "reich von benin und afrika": {
       "S1": 1,
       "S2": 3,
       "S3": 5
@@ -15856,12 +15826,12 @@
       "S2": 4,
       "S3": 5
     },
-    "nordirland": {
+    "estland": {
       "S1": 2,
       "S2": 3,
-      "S3": 5
+      "S3": 4
     },
-    "lippe": {
+    "bauchschmerzen": {
       "S1": 4,
       "S2": 4,
       "S3": 4
@@ -15901,7 +15871,7 @@
       "S2": 4,
       "S3": 3
     },
-    "reich von benin und afrika": {
+    "altes königreich kusch (nubien)": {
       "S1": 1,
       "S2": 3,
       "S3": 5
@@ -15916,12 +15886,12 @@
       "S2": 4,
       "S3": 5
     },
-    "estland": {
+    "lettland": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "bauchschmerzen": {
+    "müdigkeit": {
       "S1": 4,
       "S2": 4,
       "S3": 4
@@ -15961,7 +15931,7 @@
       "S2": 4,
       "S3": 3
     },
-    "altes königreich kusch (nubien)": {
+    "timbuktu und mali-reich": {
       "S1": 1,
       "S2": 3,
       "S3": 5
@@ -15976,12 +15946,12 @@
       "S2": 4,
       "S3": 5
     },
-    "lettland": {
+    "litauen": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "müdigkeit": {
+    "frieren": {
       "S1": 4,
       "S2": 4,
       "S3": 4
@@ -16021,7 +15991,7 @@
       "S2": 4,
       "S3": 3
     },
-    "timbuktu und mali-reich": {
+    "hundertjähriger krieg": {
       "S1": 1,
       "S2": 3,
       "S3": 5
@@ -16036,13 +16006,13 @@
       "S2": 4,
       "S3": 5
     },
-    "litauen": {
+    "malta": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "frieren": {
-      "S1": 4,
+    "blase (haut)": {
+      "S1": 3,
       "S2": 4,
       "S3": 4
     },
@@ -16081,8 +16051,8 @@
       "S2": 3,
       "S3": 4
     },
-    "hundertjähriger krieg": {
-      "S1": 1,
+    "sudetenland": {
+      "S1": null,
       "S2": 3,
       "S3": 5
     },
@@ -16096,12 +16066,12 @@
       "S2": 4,
       "S3": 5
     },
-    "malta": {
+    "zypern": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "blase (haut)": {
+    "muttermal": {
       "S1": 3,
       "S2": 4,
       "S3": 4
@@ -16141,8 +16111,8 @@
       "S2": 3,
       "S3": 4
     },
-    "sudetenland": {
-      "S1": null,
+    "elsaß-lothringen": {
+      "S1": 1,
       "S2": 3,
       "S3": 5
     },
@@ -16156,12 +16126,12 @@
       "S2": 4,
       "S3": 5
     },
-    "zypern": {
+    "bolivien": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "muttermal": {
+    "erröten": {
       "S1": 3,
       "S2": 4,
       "S3": 4
@@ -16201,10 +16171,10 @@
       "S2": 3,
       "S3": 4
     },
-    "elsaß-lothringen": {
+    "zweiter weltkrieg": {
       "S1": 1,
-      "S2": 3,
-      "S3": 5
+      "S2": 2,
+      "S3": 7
     },
     "müllhalde": {
       "S1": 3,
@@ -16216,15 +16186,15 @@
       "S2": 4,
       "S3": 5
     },
-    "bolivien": {
+    "philippinen": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "erröten": {
-      "S1": 3,
+    "händewaschen": {
+      "S1": 4,
       "S2": 4,
-      "S3": 4
+      "S3": 3
     },
     "reizbarkeit": {
       "S1": 3,
@@ -16261,10 +16231,10 @@
       "S2": 3,
       "S3": 3
     },
-    "zweiter weltkrieg": {
-      "S1": 1,
+    "weimarer republik": {
+      "S1": null,
       "S2": 2,
-      "S3": 7
+      "S3": 5
     },
     "eheschließung": {
       "S1": 3,
@@ -16276,12 +16246,12 @@
       "S2": 4,
       "S3": 5
     },
-    "philippinen": {
+    "malaysia": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "händewaschen": {
+    "augenbraue": {
       "S1": 4,
       "S2": 4,
       "S3": 3
@@ -16321,10 +16291,10 @@
       "S2": 3,
       "S3": 3
     },
-    "weimarer republik": {
+    "holocaust": {
       "S1": null,
-      "S2": 2,
-      "S3": 5
+      "S2": null,
+      "S3": 7
     },
     "jugendamt": {
       "S1": 2,
@@ -16336,12 +16306,12 @@
       "S2": 4,
       "S3": 4
     },
-    "malaysia": {
+    "bangladesch": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "augenbraue": {
+    "wimper": {
       "S1": 4,
       "S2": 4,
       "S3": 3
@@ -16381,7 +16351,7 @@
       "S2": 3,
       "S3": 3
     },
-    "holocaust": {
+    "holocaust-mahnmal": {
       "S1": null,
       "S2": null,
       "S3": 7
@@ -16396,12 +16366,12 @@
       "S2": 4,
       "S3": 4
     },
-    "bangladesch": {
+    "kasachstan": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "wimper": {
+    "ellenbogen": {
       "S1": 4,
       "S2": 4,
       "S3": 3
@@ -16441,10 +16411,10 @@
       "S2": 3,
       "S3": 3
     },
-    "holocaust-mahnmal": {
+    "hitlerjugend": {
       "S1": null,
       "S2": null,
-      "S3": 7
+      "S3": 6
     },
     "landtag": {
       "S1": 2,
@@ -16456,15 +16426,15 @@
       "S2": 4,
       "S3": 4
     },
-    "kasachstan": {
+    "sri lanka": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "ellenbogen": {
-      "S1": 4,
-      "S2": 4,
-      "S3": 3
+    "röteln": {
+      "S1": 2,
+      "S2": 3,
+      "S3": 5
     },
     "tonhöhe": {
       "S1": 3,
@@ -16501,10 +16471,10 @@
       "S2": 3,
       "S3": 3
     },
-    "hitlerjugend": {
+    "illuminati": {
       "S1": null,
       "S2": null,
-      "S3": 6
+      "S3": 5
     },
     "mediation": {
       "S1": 2,
@@ -16516,13 +16486,13 @@
       "S2": 4,
       "S3": 4
     },
-    "sri lanka": {
+    "ghana": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "röteln": {
-      "S1": 2,
+    "rachitis": {
+      "S1": null,
       "S2": 3,
       "S3": 5
     },
@@ -16561,11 +16531,6 @@
       "S2": 3,
       "S3": 3
     },
-    "illuminati": {
-      "S1": null,
-      "S2": null,
-      "S3": 5
-    },
     "patenschaften": {
       "S1": 3,
       "S2": 4,
@@ -16576,15 +16541,15 @@
       "S2": 4,
       "S3": 4
     },
-    "ghana": {
+    "algerien": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "rachitis": {
+    "verstopfung": {
       "S1": null,
       "S2": 3,
-      "S3": 5
+      "S3": 4
     },
     "lebensgemeinschaft": {
       "S1": 3,
@@ -16631,13 +16596,13 @@
       "S2": 4,
       "S3": 4
     },
-    "algerien": {
+    "senegal": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "verstopfung": {
-      "S1": null,
+    "keuchhusten": {
+      "S1": 2,
       "S2": 3,
       "S3": 4
     },
@@ -16686,15 +16651,15 @@
       "S2": 4,
       "S3": 4
     },
-    "senegal": {
+    "fidschi": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "keuchhusten": {
-      "S1": 2,
-      "S2": 3,
-      "S3": 4
+    "pubertät": {
+      "S1": null,
+      "S2": null,
+      "S3": 7
     },
     "löslichkeit": {
       "S1": 2,
@@ -16741,15 +16706,15 @@
       "S2": 4,
       "S3": 4
     },
-    "fidschi": {
+    "saarland": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "pubertät": {
+    "sexualität": {
       "S1": null,
       "S2": null,
-      "S3": 7
+      "S3": 6
     },
     "bewegungsenergie": {
       "S1": 2,
@@ -16796,15 +16761,15 @@
       "S2": 3,
       "S3": 6
     },
-    "saarland": {
+    "sansibar": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "sexualität": {
+    "verhütung": {
       "S1": null,
       "S2": null,
-      "S3": 6
+      "S3": 5
     },
     "funke": {
       "S1": 3,
@@ -16851,12 +16816,12 @@
       "S2": 3,
       "S3": 5
     },
-    "sansibar": {
+    "mauritius": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "verhütung": {
+    "menstruation": {
       "S1": null,
       "S2": null,
       "S3": 5
@@ -16906,12 +16871,12 @@
       "S2": 3,
       "S3": 5
     },
-    "mauritius": {
+    "ruanda": {
       "S1": 2,
       "S2": 3,
       "S3": 4
     },
-    "menstruation": {
+    "photorezeptor": {
       "S1": null,
       "S2": null,
       "S3": 5
@@ -16961,15 +16926,10 @@
       "S2": 3,
       "S3": 4
     },
-    "ruanda": {
+    "oman": {
       "S1": 2,
       "S2": 3,
       "S3": 4
-    },
-    "photorezeptor": {
-      "S1": null,
-      "S2": null,
-      "S3": 5
     },
     "elektromagnetische welle": {
       "S1": 1,
@@ -17016,7 +16976,7 @@
       "S2": 3,
       "S3": 3
     },
-    "oman": {
+    "kuwait": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17061,7 +17021,7 @@
       "S2": 4,
       "S3": 4
     },
-    "kuwait": {
+    "armenien": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17106,7 +17066,7 @@
       "S2": 4,
       "S3": 4
     },
-    "armenien": {
+    "aserbaidschan": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17146,7 +17106,7 @@
       "S2": 4,
       "S3": 4
     },
-    "aserbaidschan": {
+    "myanmar": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17186,7 +17146,7 @@
       "S2": 4,
       "S3": 4
     },
-    "myanmar": {
+    "laos": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17226,7 +17186,7 @@
       "S2": 4,
       "S3": 4
     },
-    "laos": {
+    "albanien": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17266,7 +17226,7 @@
       "S2": 4,
       "S3": 4
     },
-    "albanien": {
+    "bosnien und herzegowina": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17306,7 +17266,7 @@
       "S2": 3,
       "S3": 6
     },
-    "bosnien und herzegowina": {
+    "belarus": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17346,7 +17306,7 @@
       "S2": 3,
       "S3": 6
     },
-    "belarus": {
+    "andorra": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17386,7 +17346,7 @@
       "S2": 3,
       "S3": 6
     },
-    "andorra": {
+    "san marino": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17426,7 +17386,7 @@
       "S2": 3,
       "S3": 5
     },
-    "san marino": {
+    "samoa": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17466,7 +17426,7 @@
       "S2": 3,
       "S3": 5
     },
-    "samoa": {
+    "tonga": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17506,7 +17466,7 @@
       "S2": 3,
       "S3": 5
     },
-    "tonga": {
+    "tuvalu": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17546,7 +17506,7 @@
       "S2": 3,
       "S3": 5
     },
-    "tuvalu": {
+    "westafrika": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -17581,8 +17541,8 @@
       "S2": 3,
       "S3": 5
     },
-    "westafrika": {
-      "S1": 2,
+    "nordmazedonien": {
+      "S1": 1,
       "S2": 3,
       "S3": 4
     },
@@ -17616,7 +17576,7 @@
       "S2": 3,
       "S3": 5
     },
-    "nordmazedonien": {
+    "montenegro": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17651,7 +17611,7 @@
       "S2": 3,
       "S3": 5
     },
-    "montenegro": {
+    "moldau": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17681,7 +17641,7 @@
       "S2": 3,
       "S3": 3
     },
-    "moldawien": {
+    "kap verde": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17711,7 +17671,7 @@
       "S2": 3,
       "S3": 3
     },
-    "kap verde": {
+    "vanuatu": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17741,7 +17701,7 @@
       "S2": 2,
       "S3": 3
     },
-    "vanuatu": {
+    "turkmenistan": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17771,7 +17731,7 @@
       "S2": null,
       "S3": 5
     },
-    "turkmenistan": {
+    "kirgisistan": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17796,7 +17756,7 @@
       "S2": 4,
       "S3": 6
     },
-    "kirgisistan": {
+    "gabun": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17821,7 +17781,7 @@
       "S2": 4,
       "S3": 6
     },
-    "gabun": {
+    "lesotho": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17846,7 +17806,7 @@
       "S2": 4,
       "S3": 6
     },
-    "lesotho": {
+    "malawi": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17871,7 +17831,7 @@
       "S2": 4,
       "S3": 6
     },
-    "malawi": {
+    "benin": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17896,7 +17856,7 @@
       "S2": 4,
       "S3": 6
     },
-    "benin": {
+    "trinidad und tobago": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17921,7 +17881,7 @@
       "S2": 4,
       "S3": 6
     },
-    "trinidad und tobago": {
+    "barbados": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17946,7 +17906,7 @@
       "S2": 4,
       "S3": 6
     },
-    "barbados": {
+    "belize": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17971,7 +17931,7 @@
       "S2": 4,
       "S3": 6
     },
-    "belize": {
+    "el salvador": {
       "S1": 1,
       "S2": 3,
       "S3": 4
@@ -17996,8 +17956,8 @@
       "S2": 4,
       "S3": 5
     },
-    "el salvador": {
-      "S1": 1,
+    "jemen": {
+      "S1": null,
       "S2": 3,
       "S3": 4
     },
@@ -18021,7 +17981,7 @@
       "S2": 4,
       "S3": 5
     },
-    "jemen": {
+    "kosovo": {
       "S1": null,
       "S2": 3,
       "S3": 4
@@ -18046,7 +18006,7 @@
       "S2": 4,
       "S3": 5
     },
-    "kosovo": {
+    "somalia": {
       "S1": null,
       "S2": 3,
       "S3": 4
@@ -18071,8 +18031,8 @@
       "S2": 4,
       "S3": 5
     },
-    "somalia": {
-      "S1": null,
+    "neukaledonien": {
+      "S1": 2,
       "S2": 3,
       "S3": 4
     },
@@ -18096,7 +18056,7 @@
       "S2": 4,
       "S3": 5
     },
-    "neukaledonien": {
+    "provence": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -18121,7 +18081,7 @@
       "S2": 4,
       "S3": 5
     },
-    "provence": {
+    "zürich (kanton)": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -18146,7 +18106,7 @@
       "S2": 4,
       "S3": 5
     },
-    "zürich (kanton)": {
+    "tessin": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -18171,7 +18131,7 @@
       "S2": 4,
       "S3": 5
     },
-    "tessin": {
+    "bern (kanton)": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -18191,7 +18151,7 @@
       "S2": 4,
       "S3": 5
     },
-    "bern (kanton)": {
+    "steiermark": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -18211,7 +18171,7 @@
       "S2": 4,
       "S3": 5
     },
-    "steiermark": {
+    "salzburg (land)": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -18231,7 +18191,7 @@
       "S2": 4,
       "S3": 5
     },
-    "salzburg (land)": {
+    "martinique": {
       "S1": 2,
       "S2": 3,
       "S3": 4
@@ -18251,8 +18211,8 @@
       "S2": 4,
       "S3": 5
     },
-    "martinique": {
-      "S1": 2,
+    "randgebiet": {
+      "S1": 1,
       "S2": 3,
       "S3": 4
     },
@@ -18271,9 +18231,9 @@
       "S2": 4,
       "S3": 5
     },
-    "randgebiet": {
+    "tadschikistan": {
       "S1": 1,
-      "S2": 3,
+      "S2": 2,
       "S3": 4
     },
     "polizeiauto": {
@@ -18291,7 +18251,7 @@
       "S2": 4,
       "S3": 5
     },
-    "tadschikistan": {
+    "tschad": {
       "S1": 1,
       "S2": 2,
       "S3": 4
@@ -18311,7 +18271,7 @@
       "S2": 4,
       "S3": 5
     },
-    "tschad": {
+    "niger": {
       "S1": 1,
       "S2": 2,
       "S3": 4
@@ -18331,7 +18291,7 @@
       "S2": 4,
       "S3": 5
     },
-    "niger": {
+    "burkina faso": {
       "S1": 1,
       "S2": 2,
       "S3": 4
@@ -18351,7 +18311,7 @@
       "S2": 4,
       "S3": 5
     },
-    "burkina faso": {
+    "mauretanien": {
       "S1": 1,
       "S2": 2,
       "S3": 4
@@ -18371,7 +18331,7 @@
       "S2": 4,
       "S3": 5
     },
-    "mauretanien": {
+    "liberia": {
       "S1": 1,
       "S2": 2,
       "S3": 4
@@ -18391,7 +18351,7 @@
       "S2": 4,
       "S3": 5
     },
-    "liberia": {
+    "guyana": {
       "S1": 1,
       "S2": 2,
       "S3": 4
@@ -18411,10 +18371,10 @@
       "S2": 4,
       "S3": 5
     },
-    "guyana": {
+    "brunei": {
       "S1": 1,
       "S2": 2,
-      "S3": 4
+      "S3": 3
     },
     "gabelstapler": {
       "S1": 5,
@@ -18431,7 +18391,7 @@
       "S2": 4,
       "S3": 5
     },
-    "brunei": {
+    "komoren": {
       "S1": 1,
       "S2": 2,
       "S3": 3
@@ -18451,7 +18411,7 @@
       "S2": 4,
       "S3": 5
     },
-    "komoren": {
+    "bahrain": {
       "S1": 1,
       "S2": 2,
       "S3": 3
@@ -18471,7 +18431,7 @@
       "S2": 4,
       "S3": 5
     },
-    "bahrain": {
+    "eritrea": {
       "S1": 1,
       "S2": 2,
       "S3": 3
@@ -18491,7 +18451,7 @@
       "S2": 4,
       "S3": 5
     },
-    "eritrea": {
+    "eswatini": {
       "S1": 1,
       "S2": 2,
       "S3": 3
@@ -18511,7 +18471,7 @@
       "S2": 4,
       "S3": 5
     },
-    "eswatini": {
+    "guinea": {
       "S1": 1,
       "S2": 2,
       "S3": 3
@@ -18531,7 +18491,7 @@
       "S2": 4,
       "S3": 5
     },
-    "guinea": {
+    "togo": {
       "S1": 1,
       "S2": 2,
       "S3": 3
@@ -18551,7 +18511,7 @@
       "S2": 4,
       "S3": 5
     },
-    "togo": {
+    "sierra leone": {
       "S1": 1,
       "S2": 2,
       "S3": 3
@@ -18570,11 +18530,6 @@
       "S1": 2,
       "S2": 4,
       "S3": 5
-    },
-    "sierra leone": {
-      "S1": 1,
-      "S2": 2,
-      "S3": 3
     },
     "wärmepumpe": {
       "S1": 2,
@@ -21764,11 +21719,6 @@
     "stachelschwanzleguan": {
       "S1": null,
       "S2": null,
-      "S3": 4
-    },
-    "moldau": {
-      "S1": 1,
-      "S2": 3,
       "S3": 4
     },
     "neuschwanstein castle (bayern)": {
