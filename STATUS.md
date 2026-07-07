@@ -1,7 +1,28 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-06T18:58:21Z -->
+<!-- updated: 2026-07-07T06:41:38Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
+> **07.07.2026 — QUALITÄTS-FEINSCHLIFF (PO-Feedback an den Vulkan-Artikeln): BILD-ALT-TEXTE, S1/S2-TON, S3-QUIZ.**
+> Vier Commits, alle an der neuen Pipeline (`pipeline_new.py` / `lektorat_new.py`):
+> **Bild-Alt-Texte (`8d14472`):** waren die 220-Zeichen-Vision-Beschreibung (ganze Sätze) und ignorierten
+> Eigennamen/Ort. Pass 4 schreibt jetzt für JEDES Bild einen kurzen deutschen Titel (max ~6 W) mit Name/Ort
+> aus dem Commons-Originaltitel („Der Fuji in Japan", „Der Vulkan Teide auf Teneriffa"); Vision-Beschreibung
+> bleibt nur intern für die Zuordnung. Helfer `_clean_title` (Titel-Fallback) + `_short_alt` (Längenschranke).
+> Validiert: 45 Bilder, Alt Ø 28 / max 35 Zeichen (vorher bis 220). **PO: „so sehr gut."**
+> **S1/S2-Ton (`201f7c8`):** S1 (Alter 4–6, vorgelesen) verwoben+warm statt Stakkato; direkte Ansprache/
+> „Stell dir vor" sind EINE Option (nicht Default); Grounding hart (keine erfundenen Gefühle). S2 leicht
+> aufgepeppt (Lesefluss, sachlich). Einstieg: **bewusst KEINE harte Rotation** (würde Flashs Urteil kastrieren,
+> gute Eröffnungen ausschließen, ernste Themen in ein Szenenbild zwingen) — stattdessen freie Wahl + Anti-
+> Monokultur/Ton-Fit-Leitplanke in PASS2_SYSTEM. Lektorat Pass A+B: Stilmittel sind kein „ungedeckter Zusatz",
+> nicht wegkorrigieren/abflachen (Re-Grounding hielt im Test). Design-Lektion in Memory [[feedback-generator-prompt-tuning]].
+> **S3-Quiz (`28c8a49`):** war zu leicht (Distraktoren absurd/Kategorie-Fehler, per Hausverstand ausschließbar).
+> PASS5_SYSTEM verschärft (falsche Optionen im selben Themenfeld, aus echten Artikel-Begriffen, kein Tell) +
+> `_quiz_difficulty(stufe)` (S3 prüft Verständnis mit Beinah-Treffern). Validiert an Vulkan S3: Tremor vs.
+> Aufbeulen vs. Gasänderung, plausible Magma/Lava-Definitionen — man muss den Text verstanden haben.
+> **OFFEN (503-Welle blockiert):** Einstiegs-Streuung über mehrere Themen + nüchterner 2.-WK-Ton nur an Vulkan
+> bestätigt (n=1, „Stell dir vor" frei gewählt); Multi-Themen- + 2.-WK-Verifikation läuft/nachziehen sobald
+> gemini-3.5-flash stabil. Vulkan-Demo-Artikel (articles/vulkan_new_demo, untracked) mit neuen Alt-Texten aktualisiert.
+>
 > **06.07.2026 (Stand Abend) — NEUARCHITEKTUR GENERATOR: PHASE 0–4 KOMPLETT & COMMITTET, VULKAN S1/S2/S3 END-TO-END VALIDIERT.**
 > Die modulare Pass-Pipeline (Pass 1 Plan → 2 Prosa → 3 Box → 4 Bild → 5 Quiz → 6 Assembly + neues
 > Lektorat A/B) steht vollständig NEBEN dem alten Monolithen; Fallback-Garantie gewahrt, JSON-Schema

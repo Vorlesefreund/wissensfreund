@@ -714,5 +714,26 @@ Parameter (nicht mehr hartkodiert) → **Reaktivierung = ein Provider-Flip** auf
 oder Opus), keine Code-Änderung. Konservatives Hochstufen (`confidence=niedrig & S1→S2`) bleibt IMMER aktiv.
 `verify_project_facts` prüft den deaktivierten Zustand in `stage_models.py`.
 
+**QUALITÄTS-FEINSCHLIFF (07.07.2026, PO-Feedback an den Vulkan-Artikeln):**
+- **Bild-Alt-Texte (`8d14472`):** Alt ist NICHT mehr die 220-Zeichen-Vision-Beschreibung, sondern ein kurzer
+  deutscher Titel (max ~6 W) mit Eigenname/Ort aus dem Commons-Originaltitel (`wikimedia_id`/`filename`).
+  Pass 4 liefert `alt` für JEDES Bild; `_clean_title` = deterministischer Titel-Fallback (File:/Endung/Datum/
+  editN/Klammer raus), `_short_alt` = Längenschranke. Die Vision-`beschreibung` bleibt NUR intern für die
+  Bild→Abschnitt-Zuordnung (nicht im Output). Caption fällt auf den kurzen Alt zurück.
+- **S1/S2-Ton (`201f7c8`):** S1-Register (Alter 4–6, vorgelesen) = verwobene warme Erzählung mit Bindewörtern
+  statt Stakkato; direkte Ansprache/Frage/„Stell dir vor" sind EINE Option, kein Default. S2 leicht aufgepeppt
+  (Lesefluss, sachlich). Einstiegs-Vielfalt NICHT über harte Rotation (kastriert Flashs Urteil, erzwingt bei
+  ernsten Themen Szenenbilder) — sondern freie Wahl + Anti-Monokultur/Ton-Fit in PASS2_SYSTEM (ernst = nüchtern).
+  LEHRE: Über-Betonung eines Stilmittels im Register erzeugt Monokultur (mein „sprich das Kind an" → jeder
+  Artikel öffnete mit Frage). Siehe Memory feedback-generator-prompt-tuning.
+- **Lektorat schützt Stilmittel (`201f7c8`):** Pass A — Ansprache/Fragen/Vorlese-Rahmung/grounded Vergleiche
+  sind KEIN ungedeckter Zusatz (nicht melden/entfernen). Pass B — Stilmittel erhalten, nicht abflachen.
+- **S3-Quiz anspruchsvoller (`28c8a49`):** Distraktoren müssen im SELBEN Themenfeld liegen wie die richtige
+  Antwort, aus echten Artikel-Begriffen (Verwechslungen/Denkfehler), NICHT per Hausverstand/Kategorie
+  ausscheidbar; alle Optionen gleich knapp (kein Längen-Tell). `_quiz_difficulty(stufe)`: S3 prüft Verständnis
+  (warum/wie/Zusammenhang), S1/S2 gestaffelt. Grounding hart (kein Außenwissen). Gute S3-Distraktoren =
+  die ANDEREN echten Fakten aus dem Artikel (z. B. Tremor vs. Aufbeulen vs. Gasänderung).
+
 **Roadmap:** Phase 5 = Default auf `new` umschalten (Produktion) · größerer Themen-Lauf über `new` ·
-Modellwahl je Pass empirisch an echten Läufen schärfen.
+Modellwahl je Pass empirisch an echten Läufen schärfen · offene Verifikation: Einstiegs-Streuung + 2.-WK-Ton
+(503-Welle abwarten).
