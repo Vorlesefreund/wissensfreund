@@ -24,12 +24,13 @@ import re
 
 import claude_client
 import stage_models
-from generate_grounded import count_article_words
+from generate_grounded import count_article_words, COMPANION_CHAR_CAP
 
 log = logging.getLogger("lektorat_new")
 
 LEKTORAT_MODEL = stage_models.get_stage_config("lektorat")["model"]  # claude-sonnet-4-6
-COMPANION_CHAR_CAP = 12000
+# COMPANION_CHAR_CAP (kanonisch = 30_000) importiert — MUSS mit pipeline_new._source_block
+# übereinstimmen, sonst prüft das Lektorat gegen einen anderen Snapshot als die Generierung.
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -60,8 +61,10 @@ def _norm(s: str) -> str:
 
 
 def _beleg_in_source(beleg: str, source_norm: str) -> bool:
+    # >=5, damit auch kurze, spezifische Belege greifen ("30 km", "79 n"); kürzer
+    # wäre zu unspezifisch (Substring-Rauschen).
     b = _norm(beleg)
-    return len(b) >= 8 and b in source_norm
+    return len(b) >= 5 and b in source_norm
 
 
 def _sentence_index(article: dict) -> dict[str, dict]:
@@ -173,13 +176,13 @@ def pass_b_stil(article: dict, sources_block: str, stufe: int, model: str) -> di
 # ══════════════════════════════════════════════════════════════════════════════
 
 def _apply_corrections(article: dict, corrections: list[dict], source_norm: str,
-                       phase: str, require_beleg: bool) -> list[dict]:
+                       phase: str) -> list[dict]:
     """Wendet Korrekturen deterministisch an (Satz-Ersatz per satz_id).
 
-    require_beleg: bei Pass B PFLICHT — Beleg muss wörtlich in der Quelle stehen,
-    sonst wird die Änderung VERWORFEN (Re-Grounding). Bei Pass A wird ein fehlender
-    Beleg zum offenen Vorschlag herabgestuft (nicht angewandt).
-    Gibt Findings (review-kompatibel) zurück."""
+    Re-Grounding (beide Pässe gleich): der Beleg muss wörtlich in der Quelle stehen,
+    sonst wird die Änderung NICHT angewandt und als offener Vorschlag geflaggt — eine
+    Faktenkorrektur ohne verifizierbaren Beleg wird also bewusst nicht automatisch
+    geschrieben, sondern dem Review überlassen. Gibt Findings (review-kompatibel) zurück."""
     sidx = _sentence_index(article)
     findings: list[dict] = []
     for c in corrections or []:
@@ -258,7 +261,7 @@ def run_lektorat_new(article: dict, primary_title: str, primary_text: str,
     try:
         res_a = pass_a_fakten(article, sources_block, stufe, model)
         fa = _apply_corrections(article, res_a.get("corrections", []), source_norm,
-                                phase="A", require_beleg=False)
+                                phase="A")
         fp = _pruefen_findings(res_a.get("pruefen", []), article)
         findings.extend(fa)
         findings.extend(fp)
@@ -274,7 +277,7 @@ def run_lektorat_new(article: dict, primary_title: str, primary_text: str,
     try:
         res_b = pass_b_stil(article, sources_block, stufe, model)
         fb = _apply_corrections(article, res_b.get("corrections", []), source_norm,
-                                phase="B", require_beleg=True)
+                                phase="B")
         findings.extend(fb)
         stats["b_applied"] = sum(1 for f in fb if f["status"] == "auto_angewandt")
         stats["b_rejected"] = sum(1 for f in fb if f["status"] == "vorschlag_offen")

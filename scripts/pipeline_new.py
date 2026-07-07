@@ -31,6 +31,7 @@ from generate_grounded import (
     ergiebigkeit_for,
     select_images_for_stufe,
     _make_thinking_config,
+    COMPANION_CHAR_CAP,   # kanonisch (lektorat_common) = 30_000 — EIN Cap für alle Pässe
 )
 
 try:
@@ -57,7 +58,9 @@ def _source_block(thema: str, primary_text: str,
     parts = [f"### QUELLE — HAUPTTHEMA: {thema}\n{primary_text.strip()}"]
     for name, txt in companion_texts.items():
         if txt and txt.strip():
-            parts.append(f"### QUELLE — BEGLEITARTIKEL: {name}\n{txt.strip()}")
+            # Companions auf den kanonischen Cap begrenzen (Thema-Primat wahren +
+            # identischer Snapshot für Generierung, Beleg-Suche UND Lektorat).
+            parts.append(f"### QUELLE — BEGLEITARTIKEL: {name}\n{txt.strip()[:COMPANION_CHAR_CAP]}")
     return "\n\n".join(parts)
 
 
@@ -744,7 +747,7 @@ def find_source_passages(sections: list[dict], thema: str, stufe: int,
     # Verifikation: passage muss wörtlich (ws-normalisiert) im Quelltext stehen.
     haystacks = {thema: _norm_ws(primary_text)}
     for name, txt in companion_texts.items():
-        haystacks[name] = _norm_ws(txt)
+        haystacks[name] = _norm_ws(txt[:COMPANION_CHAR_CAP])   # gleicher Cap wie _source_block
     all_hay = _norm_ws(_source_block(thema, primary_text, companion_texts))
     by_id = {s["id"]: s["text"] for s in sentences}
 
