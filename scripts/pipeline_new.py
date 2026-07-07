@@ -63,10 +63,20 @@ def _source_block(thema: str, primary_text: str,
 
 def _level_register(stufe: int) -> str:
     return {
-        1: "Stufe 1 (ca. 6–7 Jahre): kurze, einfache Sätze. Alltagswörter. "
-           "Ein Gedanke pro Satz.",
+        1: "Stufe 1 (ca. 4–6 Jahre, wird meist vorgelesen): kurze, einfache Sätze "
+           "aus Alltagswörtern, aber zu einer warmen, lebendigen kleinen Erzählung "
+           "VERWOBEN — kein Stakkato aus zusammenhanglosen Sätzen. Verbinde die Sätze "
+           "mit einfachen Bindewörtern (und, dann, weil, so, deshalb, denn) und "
+           "variiere die Satzlänge, damit ein Lesefluss entsteht. Du DARFST das Kind "
+           "direkt ansprechen, eine kleine Frage stellen oder mit 'Stell dir vor …' "
+           "beginnen — das ist EINE Möglichkeit unter vielen, keine Pflicht und keine "
+           "Standard-Formel. Beschreibe konkret und bildhaft, was man sehen, hören oder "
+           "fühlen könnte — AUSSCHLIESSLICH aus belegten Fakten, ohne erfundene Gefühle, "
+           "Motive oder Verstärker. Höchstens ein neuer Gedanke pro Satz.",
         2: "Stufe 2 (ca. 8–9 Jahre): erste Fachbegriffe, aber sofort erklärt. "
-           "Etwas längere Sätze, klarer roter Faden.",
+           "Etwas längere Sätze mit klarem roten Faden und gutem Lesefluss — sachlich, "
+           "aber nicht trocken: ab und zu ein anschauliches Bild oder eine Überleitung, "
+           "die neugierig macht. Kein Schulbuchton.",
         3: "Stufe 3 (ca. 10–12 Jahre): flüssige, zusammenhängende Erzählung, "
            "kein Schulbuchton. Fachbegriffe erklären oder weglassen.",
     }.get(stufe, "Stufe 2: klar und kindgerecht.")
@@ -203,7 +213,9 @@ PASS2_SYSTEM = (
     "zähl nicht auf, keine dichten Zahlen-Ketten. Verwende AUSSCHLIESSLICH belegte "
     "Fakten aus dem Quelltext; erfinde keine Gefühle, Motive oder Verstärker. Bei "
     "ernsten Themen nüchtern bleiben, keine beschönigenden Wörter für Leid oder "
-    "Gewalt.\n\n"
+    "Gewalt. Wähle den Einstieg frei, aber passend zum Ton des Themas (ernst = "
+    "nüchtern, kein dramatisierendes Szenenbild), und variiere ihn — verfalle nicht "
+    "bei jedem Artikel in dieselbe Eröffnungsformel.\n\n"
     "FORMAT (streng): NUR Markdown mit `## Überschrift`-Zeilen und normalen "
     "Absätzen. KEIN JSON, keine Aufzählungszeichen, keine Boxen, keine Bilder, "
     "keine IDs. Beginne mit einer `## Überschrift`."
