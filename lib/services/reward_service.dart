@@ -99,6 +99,17 @@ class RewardService extends ChangeNotifier {
     return _apply(res.stars, cardEarned: res.cardEarned);
   }
 
+  /// Buys a shop item for [price] ⭐. Returns true on success and refreshes the
+  /// cached balance so the ⭐ badge updates immediately.
+  Future<bool> buyItem({required String itemId, required int price}) async {
+    final pid = _pid;
+    if (pid == null) return false;
+    final ok = await LicenseCacheDb.instance
+        .buyItem(profileId: pid, itemId: itemId, price: price);
+    if (ok) await _reload();
+    return ok;
+  }
+
   RewardAward _apply(Map<String, int> raw, {bool cardEarned = false}) {
     final grants = <RewardReason, int>{};
     raw.forEach((key, value) {

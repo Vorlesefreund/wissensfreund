@@ -22,6 +22,7 @@ import '../widgets/professor_widget.dart';
 import 'article_screen.dart';
 import 'card_album_screen.dart';
 import 'profile_management_screen.dart';
+import 'room_screen.dart';
 import 'trophy_screen.dart';
 import 'profile_selection_screen.dart';
 import 'wf_article_list_screen.dart';
@@ -389,6 +390,8 @@ class _HomeScreenState extends State<HomeScreen>
                                 _CardAlbumButton(),
                               if (provider.state == AppState.idle)
                                 _TrophyButton(),
+                              if (provider.state == AppState.idle)
+                                _RoomButton(),
                               const SizedBox(height: 16),
                             ],
                           ),
@@ -4048,6 +4051,31 @@ class _TrophyButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFFB8860B),
           side: const BorderSide(color: Color(0xFFB8860B)),
+        ),
+      ),
+    );
+  }
+}
+
+class _RoomButton extends StatelessWidget {
+  const _RoomButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: OutlinedButton.icon(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const RoomScreen()),
+          );
+        },
+        icon: const Text('🏠', style: TextStyle(fontSize: 16)),
+        label: const Text('Mein Zimmer'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF6A4BB8),
+          side: const BorderSide(color: Color(0xFF6A4BB8)),
         ),
       ),
     );

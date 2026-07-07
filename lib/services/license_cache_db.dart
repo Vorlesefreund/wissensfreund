@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import '../models/character_config.dart';
 import '../models/collected_card.dart';
 import '../models/trophy.dart';
 import 'profile_service.dart';
@@ -59,7 +60,7 @@ class LicenseCacheDb {
     final dbPath = join(await getDatabasesPath(), 'license_cache.db');
     return openDatabase(
       dbPath,
-      version: 10,
+      version: 11,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE license_cache (
@@ -122,6 +123,7 @@ class LicenseCacheDb {
         await _createProfileTables(db);
         await _createRewardTables(db);
         await _createCardTables(db);
+        await _createRoomTables(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -199,6 +201,9 @@ class LicenseCacheDb {
         }
         if (oldVersion < 10) {
           await _createCardTables(db);
+        }
+        if (oldVersion < 11) {
+          await _createRoomTables(db);
         }
       },
     );
@@ -609,6 +614,118 @@ class LicenseCacheDb {
         .toList();
   }
 
+  // ── Room / character / shop (v11) ─────────────────────────────────────────────
+
+  static Future<void> _createRoomTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS character_config (
+        profile_id INTEGER PRIMARY KEY,
+        base       TEXT NOT NULL DEFAULT 'boy1',
+        skin_tone  INTEGER NOT NULL DEFAULT 1,
+        hair_style INTEGER NOT NULL DEFAULT 0,
+        hair_color INTEGER NOT NULL DEFAULT 1,
+        eye_color  INTEGER NOT NULL DEFAULT 0,
+        freckles   INTEGER NOT NULL DEFAULT 0,
+        figure     INTEGER NOT NULL DEFAULT 1,
+        updated_at TEXT NOT NULL,
+        FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS owned_items (
+        profile_id INTEGER NOT NULL,
+        item_id    TEXT NOT NULL,
+        worn       INTEGER NOT NULL DEFAULT 0,
+        owned_at   TEXT NOT NULL,
+        PRIMARY KEY (profile_id, item_id),
+        FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+      )
+    ''');
+  }
+
+  Future<CharacterConfig?> getCharacter(int profileId) async {
+    final rows = await (await _database).query(
+      'character_config',
+      where: 'profile_id = ?',
+      whereArgs: [profileId],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : CharacterConfig.fromMap(rows.first);
+  }
+
+  Future<void> saveCharacter(int profileId, CharacterConfig config) async {
+    final nowIso = DateTime.now().toIso8601String();
+    await (await _database).insert(
+      'character_config',
+      config.toMap(profileId, nowIso),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
+  /// itemId → worn.
+  Future<Map<String, bool>> getOwnedItems(int profileId) async {
+    final rows = await (await _database).query(
+      'owned_items',
+      where: 'profile_id = ?',
+      whereArgs: [profileId],
+    );
+    return {
+      for (final r in rows)
+        (r['item_id'] as String): (r['worn'] as int? ?? 0) == 1,
+    };
+  }
+
+  /// Buys [itemId] for [price] ⭐ if affordable and not already owned.
+  /// Returns true on success. Decrements the wallet in the same transaction.
+  Future<bool> buyItem({
+    required int profileId,
+    required String itemId,
+    required int price,
+  }) async {
+    final db = await _database;
+    final nowIso = DateTime.now().toIso8601String();
+    var ok = false;
+    await db.transaction((txn) async {
+      final owned = await txn.query(
+        'owned_items',
+        where: 'profile_id = ? AND item_id = ?',
+        whereArgs: [profileId, itemId],
+        limit: 1,
+      );
+      if (owned.isNotEmpty) return; // already owned
+      final w = await txn.query(
+        'reward_wallet',
+        columns: ['stars'],
+        where: 'profile_id = ?',
+        whereArgs: [profileId],
+        limit: 1,
+      );
+      final stars = w.isEmpty ? 0 : (w.first['stars'] as int? ?? 0);
+      if (stars < price) return; // not enough ⭐
+      await txn.rawUpdate(
+        'UPDATE reward_wallet SET stars = stars - ?, updated_at = ? WHERE profile_id = ?',
+        [price, nowIso, profileId],
+      );
+      await txn.insert('owned_items', {
+        'profile_id': profileId,
+        'item_id': itemId,
+        'worn': 0,
+        'owned_at': nowIso,
+      });
+      ok = true;
+    });
+    return ok;
+  }
+
+  Future<void> setItemWorn(int profileId, String itemId, bool worn) async {
+    await (await _database).update(
+      'owned_items',
+      {'worn': worn ? 1 : 0},
+      where: 'profile_id = ? AND item_id = ?',
+      whereArgs: [profileId, itemId],
+    );
+  }
+
   // ── Reward reads ──────────────────────────────────────────────────────────────
 
   Future<int> getStars(int profileId) async {
@@ -930,6 +1047,8 @@ class LicenseCacheDb {
         'area_stats',
         'daily_activity',
         'collected_cards',
+        'character_config',
+        'owned_items',
       ]) {
         await txn.delete(table, where: 'profile_id = ?', whereArgs: [profileId]);
       }
