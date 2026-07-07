@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import '../models/collected_card.dart';
 import 'license_cache_db.dart';
 import 'profile_service.dart';
 
@@ -11,12 +12,14 @@ enum RewardReason { question, quizAllCorrect, newArea, dailyMilestone1, dailyMil
 /// Result of a single reward action: which reasons fired and how many ⭐ each.
 class RewardAward {
   final Map<RewardReason, int> grants;
-  const RewardAward(this.grants);
+  final bool cardEarned; // a new Sammelkarte was just collected
+
+  const RewardAward(this.grants, {this.cardEarned = false});
 
   static const RewardAward empty = RewardAward({});
 
   int get totalStars => grants.values.fold(0, (a, b) => a + b);
-  bool get isEmpty => totalStars == 0;
+  bool get isEmpty => totalStars == 0 && !cardEarned;
 }
 
 /// Central reward engine (Baustein 1: Quiz-Sterne-Ökonomie).
@@ -82,30 +85,32 @@ class RewardService extends ChangeNotifier {
     required String articleId,
     required String topicArea,
     required bool allCorrect,
+    CollectedCard? card,
   }) async {
     final pid = _pid;
     if (pid == null || articleId.isEmpty) return RewardAward.empty;
-    final raw = await LicenseCacheDb.instance.awardForQuizFinish(
+    final res = await LicenseCacheDb.instance.awardForQuizFinish(
       profileId: pid,
       articleId: articleId,
       topicArea: topicArea,
       allCorrect: allCorrect,
+      card: card,
     );
-    return _apply(raw);
+    return _apply(res.stars, cardEarned: res.cardEarned);
   }
 
-  RewardAward _apply(Map<String, int> raw) {
+  RewardAward _apply(Map<String, int> raw, {bool cardEarned = false}) {
     final grants = <RewardReason, int>{};
     raw.forEach((key, value) {
       final r = _reasonFromKey(key);
       if (r != null && value > 0) grants[r] = value;
     });
     final gained = grants.values.fold(0, (a, b) => a + b);
-    if (gained > 0) {
+    if (gained > 0 || cardEarned) {
       _stars += gained;
       notifyListeners();
     }
-    return RewardAward(grants);
+    return RewardAward(grants, cardEarned: cardEarned);
   }
 
   static RewardReason? _reasonFromKey(String key) => switch (key) {

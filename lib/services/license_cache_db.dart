@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
+import '../models/collected_card.dart';
 import 'profile_service.dart';
 import 'reward_rules.dart';
 
@@ -57,7 +58,7 @@ class LicenseCacheDb {
     final dbPath = join(await getDatabasesPath(), 'license_cache.db');
     return openDatabase(
       dbPath,
-      version: 9,
+      version: 10,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE license_cache (
@@ -119,6 +120,7 @@ class LicenseCacheDb {
         ''');
         await _createProfileTables(db);
         await _createRewardTables(db);
+        await _createCardTables(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -193,6 +195,9 @@ class LicenseCacheDb {
         }
         if (oldVersion < 9) {
           await _createRewardTables(db);
+        }
+        if (oldVersion < 10) {
+          await _createCardTables(db);
         }
       },
     );
@@ -539,6 +544,52 @@ class LicenseCacheDb {
     ''');
   }
 
+  // ── Card tables (v10) ─────────────────────────────────────────────────────────
+  //
+  // One row per (profile, topic). card_id is the topic base id ("biene"), so the
+  // same card is never earned twice across levels. Content is snapshotted at earn
+  // time so the album works offline.
+
+  static Future<void> _createCardTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS collected_cards (
+        profile_id  INTEGER NOT NULL,
+        card_id     TEXT NOT NULL,
+        article_id  TEXT NOT NULL,
+        title       TEXT NOT NULL,
+        emoji       TEXT NOT NULL DEFAULT '',
+        theme_color TEXT NOT NULL DEFAULT '#4caf50',
+        thumb_url   TEXT NOT NULL DEFAULT '',
+        fact        TEXT NOT NULL DEFAULT '',
+        earned_at   TEXT NOT NULL,
+        PRIMARY KEY (profile_id, card_id),
+        FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+      )
+    ''');
+  }
+
+  // ── Card reads ────────────────────────────────────────────────────────────────
+
+  Future<List<CollectedCard>> getCollectedCards(int profileId) async {
+    final rows = await (await _database).query(
+      'collected_cards',
+      where: 'profile_id = ?',
+      whereArgs: [profileId],
+      orderBy: 'earned_at DESC',
+    );
+    return rows.map(CollectedCard.fromMap).toList();
+  }
+
+  Future<Set<String>> getCollectedCardIds(int profileId) async {
+    final rows = await (await _database).query(
+      'collected_cards',
+      columns: ['card_id'],
+      where: 'profile_id = ?',
+      whereArgs: [profileId],
+    );
+    return rows.map((r) => r['card_id'] as String).toSet();
+  }
+
   // ── Reward reads ──────────────────────────────────────────────────────────────
 
   Future<int> getStars(int profileId) async {
@@ -631,16 +682,18 @@ class LicenseCacheDb {
 
   /// Grants the all-correct completion bonus (once per article) + daily
   /// milestones. [allCorrect] = every question right in this run.
-  Future<Map<String, int>> awardForQuizFinish({
+  Future<({Map<String, int> stars, bool cardEarned})> awardForQuizFinish({
     required int profileId,
     required String articleId,
     required String topicArea,
     required bool allCorrect,
+    CollectedCard? card,
   }) async {
     final db = await _database;
     final nowIso = DateTime.now().toIso8601String();
     final day = nowIso.substring(0, 10);
     final result = <String, int>{};
+    var cardEarned = false;
 
     await db.transaction((txn) async {
       final rows = await txn.query(
@@ -673,6 +726,20 @@ class LicenseCacheDb {
       // A "new all-correct pass" = first time this article is fully solved.
       final newAllCorrectPass = allCorrect && (firstCompletion || !prevAllCorrect);
       if (!newAllCorrectPass) return;
+
+      // Sammelkarte: one per topic (card_id = base id), snapshotted at earn time.
+      if (card != null && card.cardId.isNotEmpty) {
+        final existing = await txn.query(
+          'collected_cards',
+          where: 'profile_id = ? AND card_id = ?',
+          whereArgs: [profileId, card.cardId],
+          limit: 1,
+        );
+        if (existing.isEmpty) {
+          await txn.insert('collected_cards', card.toMap(profileId, nowIso));
+          cardEarned = true;
+        }
+      }
 
       if (topicArea.isNotEmpty) {
         await txn.rawInsert('''
@@ -732,7 +799,7 @@ class LicenseCacheDb {
       await _applyWallet(txn, profileId, result, nowIso);
     });
 
-    return result;
+    return (stars: result, cardEarned: cardEarned);
   }
 
   // ── Reward helpers ────────────────────────────────────────────────────────────
@@ -843,6 +910,7 @@ class LicenseCacheDb {
         'discovered_areas',
         'area_stats',
         'daily_activity',
+        'collected_cards',
       ]) {
         await txn.delete(table, where: 'profile_id = ?', whereArgs: [profileId]);
       }

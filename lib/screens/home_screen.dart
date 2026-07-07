@@ -20,6 +20,7 @@ import '../services/subscription_service.dart';
 import '../services/zim_update_service.dart';
 import '../widgets/professor_widget.dart';
 import 'article_screen.dart';
+import 'card_album_screen.dart';
 import 'profile_management_screen.dart';
 import 'profile_selection_screen.dart';
 import 'wf_article_list_screen.dart';
@@ -383,6 +384,8 @@ class _HomeScreenState extends State<HomeScreen>
                               //   _JsonTestButton(provider: provider),
                               if (provider.state == AppState.idle)
                                 _ArticleListButton(),
+                              if (provider.state == AppState.idle)
+                                _CardAlbumButton(),
                               const SizedBox(height: 16),
                             ],
                           ),
@@ -3992,6 +3995,31 @@ class _ArticleListButton extends StatelessWidget {
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFF2E7D32),
           side: const BorderSide(color: Color(0xFF2E7D32)),
+        ),
+      ),
+    );
+  }
+}
+
+class _CardAlbumButton extends StatelessWidget {
+  const _CardAlbumButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: OutlinedButton.icon(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const CardAlbumScreen()),
+          );
+        },
+        icon: const Text('🃏', style: TextStyle(fontSize: 16)),
+        label: const Text('Sammelkarten'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFFB8860B),
+          side: const BorderSide(color: Color(0xFFB8860B)),
         ),
       ),
     );

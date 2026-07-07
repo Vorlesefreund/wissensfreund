@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/collected_card.dart';
 import '../models/wf_article.dart';
 import '../providers/wissensfreund_provider.dart';
+import '../services/json_article_service.dart';
 import '../services/reward_service.dart';
 import '../utils/professor_phrases.dart';
 
@@ -20,6 +22,7 @@ class _QuizWidgetState extends State<QuizWidget> {
   int _correctCount = 0;
   bool _finished = false;
   int _sessionStars = 0; // ⭐ earned during this quiz run (for result screen)
+  CollectedCard? _earnedCard; // set when a new Sammelkarte drops (all correct)
 
   // Each question gets a stable "Weiter" phrase so it doesn't change on rebuild.
   late final List<String> _nextPhrases = List.generate(
@@ -63,6 +66,28 @@ class _QuizWidgetState extends State<QuizWidget> {
     setState(() => _sessionStars += award.totalStars);
   }
 
+  String _mainThumbUrl(WissensfreundProvider p) {
+    for (final img in p.articleImages) {
+      final url = img.thumbUrl ?? '';
+      if (url.isNotEmpty) return url;
+    }
+    return '';
+  }
+
+  String _extractFact(WissensfreundProvider p) {
+    for (final section in p.articleSections) {
+      for (final box in section.boxes) {
+        if (box.type == 'fakt' || box.type == 'wow') {
+          final headline = (box.headline ?? '').trim();
+          final text = box.text.trim();
+          if (text.isEmpty) return headline;
+          return headline.isEmpty ? text : '$headline\n$text';
+        }
+      }
+    }
+    return '';
+  }
+
   void _next() {
     final total = widget.quiz.questions.length;
     if (_questionIdx >= total - 1) {
@@ -70,13 +95,31 @@ class _QuizWidgetState extends State<QuizWidget> {
       _speakResult();
       final p = context.read<WissensfreundProvider>();
       if (p.articleId.isNotEmpty) {
+        final allCorrect = _correctCount == total;
+        final card = allCorrect
+            ? CollectedCard(
+                cardId: JsonArticleService.baseId(p.articleId),
+                articleId: p.articleId,
+                title: p.articleTitle,
+                emoji: p.articleEmoji,
+                themeColor: p.articleThemeColor,
+                thumbUrl: _mainThumbUrl(p),
+                fact: _extractFact(p),
+              )
+            : null;
         RewardService.instance
             .onQuizFinished(
               articleId: p.articleId,
               topicArea: p.articleCategoryTop,
-              allCorrect: _correctCount == total,
+              allCorrect: allCorrect,
+              card: card,
             )
-            .then(_addAward);
+            .then((award) {
+          _addAward(award);
+          if (mounted && award.cardEarned) {
+            setState(() => _earnedCard = card);
+          }
+        });
       }
     } else {
       setState(() {
@@ -166,6 +209,10 @@ class _QuizWidgetState extends State<QuizWidget> {
             ),
           ),
         ],
+        if (_earnedCard != null) ...[
+          const SizedBox(height: 16),
+          _CardRevealBanner(card: _earnedCard!),
+        ],
       ],
     );
   }
@@ -254,6 +301,90 @@ class _QuizWidgetState extends State<QuizWidget> {
           ),
       ],
     );
+  }
+}
+
+/// Celebratory "Neue Sammelkarte!" banner shown in the quiz result when a new
+/// collectible card drops. Emoji-based (instant, offline-safe); the full image
+/// lives in the album.
+class _CardRevealBanner extends StatelessWidget {
+  final CollectedCard card;
+  const _CardRevealBanner({required this.card});
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = _parseHexColor(card.themeColor);
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 450),
+      curve: Curves.elasticOut,
+      builder: (context, t, child) =>
+          Transform.scale(scale: 0.6 + 0.4 * t.clamp(0.0, 1.0), child: child),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [bg.withValues(alpha: 0.18), bg.withValues(alpha: 0.05)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: bg.withValues(alpha: 0.5), width: 1.5),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 54,
+              height: 54,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: bg.withValues(alpha: 0.6), width: 1.5),
+              ),
+              child: Text(
+                card.emoji.isNotEmpty ? card.emoji : '🃏',
+                style: const TextStyle(fontSize: 30),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '🃏 Neue Sammelkarte!',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF37474F),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    card.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF263238),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  static Color _parseHexColor(String hex) {
+    var h = hex.replaceAll('#', '').trim();
+    if (h.length == 6) h = 'FF$h';
+    final v = int.tryParse(h, radix: 16);
+    return v == null ? const Color(0xFF4CAF50) : Color(v);
   }
 }
 
