@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import 'profile_service.dart';
+import 'reward_rules.dart';
 
 class LicenseEntry {
   final String imageFilename;
@@ -56,7 +57,7 @@ class LicenseCacheDb {
     final dbPath = join(await getDatabasesPath(), 'license_cache.db');
     return openDatabase(
       dbPath,
-      version: 8,
+      version: 9,
       onCreate: (db, _) async {
         await db.execute('''
           CREATE TABLE license_cache (
@@ -117,6 +118,7 @@ class LicenseCacheDb {
           )
         ''');
         await _createProfileTables(db);
+        await _createRewardTables(db);
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -188,6 +190,9 @@ class LicenseCacheDb {
           } on DatabaseException catch (_) {
             // Column already present — created by _createProfileTables in v7 migration
           }
+        }
+        if (oldVersion < 9) {
+          await _createRewardTables(db);
         }
       },
     );
@@ -450,6 +455,331 @@ class LicenseCacheDb {
     ''');
   }
 
+  // ── Reward tables (v9) ────────────────────────────────────────────────────────
+  //
+  // All profile-scoped. Spendable ⭐ live in reward_wallet.stars; total_earned is
+  // lifetime (never decremented — for prestige/stats). reward_ledger is the
+  // append-only audit that drives the daily cap and milestone counting.
+
+  static Future<void> _createRewardTables(Database db) async {
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS reward_wallet (
+        profile_id   INTEGER PRIMARY KEY,
+        stars        INTEGER NOT NULL DEFAULT 0,
+        total_earned INTEGER NOT NULL DEFAULT 0,
+        updated_at   TEXT NOT NULL,
+        FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS reward_ledger (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        profile_id INTEGER NOT NULL,
+        day        TEXT NOT NULL,
+        amount     INTEGER NOT NULL,
+        reason     TEXT NOT NULL,
+        ref        TEXT,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX IF NOT EXISTS idx_ledger_profile_day ON reward_ledger(profile_id, day)',
+    );
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS quiz_answer_progress (
+        profile_id       INTEGER NOT NULL,
+        article_id       TEXT NOT NULL,
+        question_id      TEXT NOT NULL,
+        first_correct_at TEXT NOT NULL,
+        PRIMARY KEY (profile_id, article_id, question_id),
+        FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS quiz_completions (
+        profile_id   INTEGER NOT NULL,
+        article_id   TEXT NOT NULL,
+        topic_area   TEXT NOT NULL,
+        completed_at TEXT NOT NULL,
+        all_correct  INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (profile_id, article_id),
+        FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS discovered_areas (
+        profile_id    INTEGER NOT NULL,
+        topic_area    TEXT NOT NULL,
+        discovered_at TEXT NOT NULL,
+        PRIMARY KEY (profile_id, topic_area),
+        FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS area_stats (
+        profile_id        INTEGER NOT NULL,
+        topic_area        TEXT NOT NULL,
+        quizzes_passed    INTEGER NOT NULL DEFAULT 0,
+        questions_correct INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (profile_id, topic_area),
+        FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+      )
+    ''');
+    await db.execute('''
+      CREATE TABLE IF NOT EXISTS daily_activity (
+        profile_id         INTEGER NOT NULL,
+        day                TEXT NOT NULL,
+        quizzes_passed     INTEGER NOT NULL DEFAULT 0,
+        milestone1_awarded INTEGER NOT NULL DEFAULT 0,
+        milestone2_awarded INTEGER NOT NULL DEFAULT 0,
+        PRIMARY KEY (profile_id, day),
+        FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE
+      )
+    ''');
+  }
+
+  // ── Reward reads ──────────────────────────────────────────────────────────────
+
+  Future<int> getStars(int profileId) async {
+    final rows = await (await _database).query(
+      'reward_wallet',
+      columns: ['stars'],
+      where: 'profile_id = ?',
+      whereArgs: [profileId],
+      limit: 1,
+    );
+    if (rows.isEmpty) return 0;
+    return (rows.first['stars'] as int?) ?? 0;
+  }
+
+  // ── Reward writes (transactional) ─────────────────────────────────────────────
+
+  /// Grants ⭐ for a first-time-correct question + the "neues Themengebiet" bonus.
+  /// Returns a reason→stars map of what was actually granted (empty on re-take).
+  Future<Map<String, int>> awardForCorrectAnswer({
+    required int profileId,
+    required String articleId,
+    required String questionId,
+    required String topicArea,
+  }) async {
+    final db = await _database;
+    final nowIso = DateTime.now().toIso8601String();
+    final day = nowIso.substring(0, 10);
+    final result = <String, int>{};
+
+    await db.transaction((txn) async {
+      final existed = await txn.query(
+        'quiz_answer_progress',
+        where: 'profile_id = ? AND article_id = ? AND question_id = ?',
+        whereArgs: [profileId, articleId, questionId],
+        limit: 1,
+      );
+      if (existed.isNotEmpty) return; // already rewarded this question, ever
+
+      await txn.insert('quiz_answer_progress', {
+        'profile_id': profileId,
+        'article_id': articleId,
+        'question_id': questionId,
+        'first_correct_at': nowIso,
+      });
+
+      if (topicArea.isNotEmpty) {
+        await txn.rawInsert('''
+          INSERT INTO area_stats (profile_id, topic_area, questions_correct, quizzes_passed)
+          VALUES (?, ?, 1, 0)
+          ON CONFLICT(profile_id, topic_area) DO UPDATE SET questions_correct = questions_correct + 1
+        ''', [profileId, topicArea]);
+      }
+
+      var earned = await _earnedToday(txn, profileId, day);
+
+      final gQ = _grant(RewardRules.starsPerCorrectQuestion, earned);
+      if (gQ > 0) {
+        await _ledger(txn, profileId, day, gQ, 'question', articleId, nowIso);
+        earned += gQ;
+        result['question'] = gQ;
+      }
+
+      if (topicArea.isNotEmpty) {
+        final known = await txn.query(
+          'discovered_areas',
+          where: 'profile_id = ? AND topic_area = ?',
+          whereArgs: [profileId, topicArea],
+          limit: 1,
+        );
+        if (known.isEmpty) {
+          await txn.insert('discovered_areas', {
+            'profile_id': profileId,
+            'topic_area': topicArea,
+            'discovered_at': nowIso,
+          });
+          final gA = _grant(RewardRules.starsNewArea, earned);
+          if (gA > 0) {
+            await _ledger(txn, profileId, day, gA, 'new_area', topicArea, nowIso);
+            earned += gA;
+            result['new_area'] = gA;
+          }
+        }
+      }
+
+      await _applyWallet(txn, profileId, result, nowIso);
+    });
+
+    return result;
+  }
+
+  /// Grants the all-correct completion bonus (once per article) + daily
+  /// milestones. [allCorrect] = every question right in this run.
+  Future<Map<String, int>> awardForQuizFinish({
+    required int profileId,
+    required String articleId,
+    required String topicArea,
+    required bool allCorrect,
+  }) async {
+    final db = await _database;
+    final nowIso = DateTime.now().toIso8601String();
+    final day = nowIso.substring(0, 10);
+    final result = <String, int>{};
+
+    await db.transaction((txn) async {
+      final rows = await txn.query(
+        'quiz_completions',
+        where: 'profile_id = ? AND article_id = ?',
+        whereArgs: [profileId, articleId],
+        limit: 1,
+      );
+      final firstCompletion = rows.isEmpty;
+      final prevAllCorrect =
+          rows.isNotEmpty && (rows.first['all_correct'] as int? ?? 0) == 1;
+
+      if (firstCompletion) {
+        await txn.insert('quiz_completions', {
+          'profile_id': profileId,
+          'article_id': articleId,
+          'topic_area': topicArea,
+          'completed_at': nowIso,
+          'all_correct': allCorrect ? 1 : 0,
+        });
+      } else if (allCorrect && !prevAllCorrect) {
+        await txn.update(
+          'quiz_completions',
+          {'all_correct': 1, 'completed_at': nowIso},
+          where: 'profile_id = ? AND article_id = ?',
+          whereArgs: [profileId, articleId],
+        );
+      }
+
+      // A "new all-correct pass" = first time this article is fully solved.
+      final newAllCorrectPass = allCorrect && (firstCompletion || !prevAllCorrect);
+      if (!newAllCorrectPass) return;
+
+      if (topicArea.isNotEmpty) {
+        await txn.rawInsert('''
+          INSERT INTO area_stats (profile_id, topic_area, questions_correct, quizzes_passed)
+          VALUES (?, ?, 0, 1)
+          ON CONFLICT(profile_id, topic_area) DO UPDATE SET quizzes_passed = quizzes_passed + 1
+        ''', [profileId, topicArea]);
+      }
+
+      var earned = await _earnedToday(txn, profileId, day);
+
+      final gB = _grant(RewardRules.starsQuizAllCorrectBonus, earned);
+      if (gB > 0) {
+        await _ledger(txn, profileId, day, gB, 'quiz_complete', articleId, nowIso);
+        earned += gB;
+        result['quiz_complete'] = gB;
+      }
+
+      // Daily milestones: count all-correct passes today.
+      await txn.rawInsert('''
+        INSERT INTO daily_activity (profile_id, day, quizzes_passed, milestone1_awarded, milestone2_awarded)
+        VALUES (?, ?, 1, 0, 0)
+        ON CONFLICT(profile_id, day) DO UPDATE SET quizzes_passed = quizzes_passed + 1
+      ''', [profileId, day]);
+
+      final act = (await txn.query(
+        'daily_activity',
+        where: 'profile_id = ? AND day = ?',
+        whereArgs: [profileId, day],
+        limit: 1,
+      )).first;
+      final passed = act['quizzes_passed'] as int? ?? 0;
+      final m1done = (act['milestone1_awarded'] as int? ?? 0) == 1;
+      final m2done = (act['milestone2_awarded'] as int? ?? 0) == 1;
+
+      if (!m1done && passed >= RewardRules.dailyMilestone1Count) {
+        await txn.update('daily_activity', {'milestone1_awarded': 1},
+            where: 'profile_id = ? AND day = ?', whereArgs: [profileId, day]);
+        final g = _grant(RewardRules.starsDailyMilestone1, earned);
+        if (g > 0) {
+          await _ledger(txn, profileId, day, g, 'daily_5', null, nowIso);
+          earned += g;
+          result['daily_5'] = g;
+        }
+      }
+      if (!m2done && passed >= RewardRules.dailyMilestone2Count) {
+        await txn.update('daily_activity', {'milestone2_awarded': 1},
+            where: 'profile_id = ? AND day = ?', whereArgs: [profileId, day]);
+        final g = _grant(RewardRules.starsDailyMilestone2, earned);
+        if (g > 0) {
+          await _ledger(txn, profileId, day, g, 'daily_10', null, nowIso);
+          earned += g;
+          result['daily_10'] = g;
+        }
+      }
+
+      await _applyWallet(txn, profileId, result, nowIso);
+    });
+
+    return result;
+  }
+
+  // ── Reward helpers ────────────────────────────────────────────────────────────
+
+  /// Caps a grant against the remaining daily allowance ([RewardRules.dailyCapStars]).
+  static int _grant(int want, int earnedSoFar) {
+    final cap = RewardRules.dailyCapStars;
+    if (cap == null) return want;
+    final remaining = cap - earnedSoFar;
+    if (remaining <= 0) return 0;
+    return want < remaining ? want : remaining;
+  }
+
+  Future<int> _earnedToday(DatabaseExecutor txn, int profileId, String day) async {
+    final r = await txn.rawQuery(
+      'SELECT COALESCE(SUM(amount), 0) AS s FROM reward_ledger WHERE profile_id = ? AND day = ?',
+      [profileId, day],
+    );
+    return (r.first['s'] as int?) ?? 0;
+  }
+
+  Future<void> _ledger(DatabaseExecutor txn, int profileId, String day,
+      int amount, String reason, String? ref, String nowIso) async {
+    await txn.insert('reward_ledger', {
+      'profile_id': profileId,
+      'day': day,
+      'amount': amount,
+      'reason': reason,
+      'ref': ref,
+      'created_at': nowIso,
+    });
+  }
+
+  Future<void> _applyWallet(DatabaseExecutor txn, int profileId,
+      Map<String, int> result, String nowIso) async {
+    final total = result.values.fold(0, (a, b) => a + b);
+    if (total <= 0) return;
+    await txn.rawInsert('''
+      INSERT INTO reward_wallet (profile_id, stars, total_earned, updated_at)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(profile_id) DO UPDATE SET
+        stars        = stars + excluded.stars,
+        total_earned = total_earned + excluded.total_earned,
+        updated_at   = excluded.updated_at
+    ''', [profileId, total, total, nowIso]);
+  }
+
   // ── Profile CRUD ──────────────────────────────────────────────────────────────
 
   Future<List<UserProfile>> getAllProfiles() async {
@@ -499,12 +829,25 @@ class LicenseCacheDb {
   }
 
   Future<void> deleteProfile(int profileId) async {
-    await (await _database).delete(
-      'profiles',
-      where: 'id = ?',
-      whereArgs: [profileId],
-    );
-    // Cascade handles article_history and favorites.
+    final db = await _database;
+    // FK enforcement is not enabled on this DB, so remove profile-scoped rows
+    // explicitly (both the older tables and the v9 reward tables).
+    await db.transaction((txn) async {
+      for (final table in const [
+        'article_history',
+        'favorites',
+        'reward_wallet',
+        'reward_ledger',
+        'quiz_answer_progress',
+        'quiz_completions',
+        'discovered_areas',
+        'area_stats',
+        'daily_activity',
+      ]) {
+        await txn.delete(table, where: 'profile_id = ?', whereArgs: [profileId]);
+      }
+      await txn.delete('profiles', where: 'id = ?', whereArgs: [profileId]);
+    });
   }
 
   // ── Article history ───────────────────────────────────────────────────────────

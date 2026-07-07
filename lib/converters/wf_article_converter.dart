@@ -60,8 +60,11 @@ class WfArticleConverter {
         )).toList();
 
     return RenderedArticle(
-      source:     ArticleSource.json,
-      title:      article.meta.title,
+      source:      ArticleSource.json,
+      id:          article.meta.id,
+      title:       article.meta.title,
+      categoryTop: article.meta.categoryTop,
+      categorySub: article.meta.categorySub,
       subtitle:   article.meta.subtitle,
       emoji:      article.meta.emoji,
       themeColor: article.meta.themeColor,

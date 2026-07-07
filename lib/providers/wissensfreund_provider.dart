@@ -245,6 +245,9 @@ class WissensfreundProvider extends ChangeNotifier {
   WfQuiz? _articleQuiz;
   String _articleEmoji      = '';
   String _articleThemeColor = '';
+  String _articleId          = '';   // JSON article id — reward keying
+  String _articleCategoryTop = '';   // Themengebiet — reward "neues Gebiet"
+  String _articleCategorySub = '';
 
   // Internal link navigation
   List<Map<String, dynamic>> _articleLinks = [];
@@ -313,6 +316,9 @@ class WissensfreundProvider extends ChangeNotifier {
   WfQuiz?                    get articleQuiz     => _articleQuiz;
   String                     get articleEmoji      => _articleEmoji;
   String                     get articleThemeColor => _articleThemeColor;
+  String                     get articleId          => _articleId;
+  String                     get articleCategoryTop => _articleCategoryTop;
+  String                     get articleCategorySub => _articleCategorySub;
   bool get canGoBack => _navStack.isNotEmpty;
 
   WissensfreundProvider() {
@@ -1190,6 +1196,9 @@ class WissensfreundProvider extends ChangeNotifier {
     _articleQuiz        = rendered.quiz;
     _articleEmoji       = rendered.emoji;
     _articleThemeColor  = rendered.themeColor;
+    _articleId          = rendered.id;
+    _articleCategoryTop = rendered.categoryTop;
+    _articleCategorySub = rendered.categorySub;
     _articleLinks       = [];
     _selectedImageIndex = -1;
     _imageBytesCache.clear();
@@ -2052,6 +2061,9 @@ class WissensfreundProvider extends ChangeNotifier {
     _articleQuiz      = null;
     _articleEmoji      = '';
     _articleThemeColor = '';
+    _articleId          = '';
+    _articleCategoryTop = '';
+    _articleCategorySub = '';
     _articleImages      = [];
     _selectedImageIndex = -1;
     _mediaItems         = [];

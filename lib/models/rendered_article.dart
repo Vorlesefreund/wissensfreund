@@ -90,10 +90,13 @@ class RenderedSection {
 /// ZIM articles leave subtitle/emoji/themeColor empty and quiz/ttsConfig null.
 class RenderedArticle {
   final ArticleSource source;
+  final String id;            // '' for ZIM; stable JSON article id (reward keying)
   final String title;
   final String subtitle;      // '' for ZIM
   final String emoji;         // '' for ZIM
   final String themeColor;    // '' for ZIM
+  final String categoryTop;   // '' for ZIM; Themengebiet (reward "neues Gebiet")
+  final String categorySub;   // '' for ZIM
   final String plainText;     // TTS-ready full text
   final List<RenderedSection> sections;
   final List<RenderedImage> images;
@@ -104,10 +107,13 @@ class RenderedArticle {
 
   const RenderedArticle({
     required this.source,
+    this.id = '',
     required this.title,
     this.subtitle = '',
     this.emoji = '',
     this.themeColor = '',
+    this.categoryTop = '',
+    this.categorySub = '',
     required this.plainText,
     required this.sections,
     required this.images,

@@ -14,6 +14,7 @@ import '../services/network_service.dart';
 import '../services/network_settings_service.dart';
 import '../services/parental_lock_service.dart';
 import '../services/profile_service.dart';
+import '../services/reward_service.dart';
 import '../services/storage_manager.dart';
 import '../services/subscription_service.dart';
 import '../services/zim_update_service.dart';
@@ -21,6 +22,7 @@ import '../widgets/professor_widget.dart';
 import 'article_screen.dart';
 import 'profile_management_screen.dart';
 import 'profile_selection_screen.dart';
+import 'wf_article_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -376,9 +378,11 @@ class _HomeScreenState extends State<HomeScreen>
                                   title: provider.articleTitle,
                                   text: provider.articleText,
                                 ),
-                              // TODO: TEMP TEST — remove before release
+                              // TODO: TEMP TEST — auskommentiert, durch Artikelliste ersetzt
+                              // if (provider.state == AppState.idle)
+                              //   _JsonTestButton(provider: provider),
                               if (provider.state == AppState.idle)
-                                _JsonTestButton(provider: provider),
+                                _ArticleListButton(),
                               const SizedBox(height: 16),
                             ],
                           ),
@@ -563,8 +567,9 @@ class _AppHeader extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(24, 20, 24, 4),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          // Left flex balances the ⭐ badge so the title stays visually centered.
+          const Expanded(child: SizedBox()),
           const Text('🎓', style: TextStyle(fontSize: 28)),
           const SizedBox(width: 10),
           Text(
@@ -581,6 +586,55 @@ class _AppHeader extends StatelessWidget {
                   blurRadius: 6,
                 ),
               ],
+            ),
+          ),
+          const Expanded(
+            child: Align(
+              alignment: Alignment.centerRight,
+              child: _StarBadge(),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// ⭐ balance pill in the header. Reactive to [RewardService]; hidden when no
+/// profile is active (rewards are per profile).
+class _StarBadge extends StatelessWidget {
+  const _StarBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    final hasProfile = context.watch<ProfileService>().activeProfile != null;
+    if (!hasProfile) return const SizedBox.shrink();
+    final stars = context.watch<RewardService>().stars;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+      decoration: BoxDecoration(
+        color: const Color(0xFFFFF3D6),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFF0C36D), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.amber.withValues(alpha: 0.18),
+            blurRadius: 6,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('⭐', style: TextStyle(fontSize: 15)),
+          const SizedBox(width: 4),
+          Text(
+            '$stars',
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF9A6B00),
             ),
           ),
         ],
@@ -3913,6 +3967,32 @@ class _UpgradeCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ArticleListButton extends StatelessWidget {
+  const _ArticleListButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: OutlinedButton.icon(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+                builder: (_) => const WfArticleListScreen()),
+          );
+        },
+        icon: const Icon(Icons.library_books_rounded, size: 18),
+        label: const Text('Neue Artikel →'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFF2E7D32),
+          side: const BorderSide(color: Color(0xFF2E7D32)),
+        ),
       ),
     );
   }

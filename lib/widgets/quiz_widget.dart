@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/wf_article.dart';
 import '../providers/wissensfreund_provider.dart';
+import '../services/reward_service.dart';
 import '../utils/professor_phrases.dart';
 
 class QuizWidget extends StatefulWidget {
@@ -18,6 +19,7 @@ class _QuizWidgetState extends State<QuizWidget> {
   bool _answered = false;
   int _correctCount = 0;
   bool _finished = false;
+  int _sessionStars = 0; // ⭐ earned during this quiz run (for result screen)
 
   // Each question gets a stable "Weiter" phrase so it doesn't change on rebuild.
   late final List<String> _nextPhrases = List.generate(
@@ -41,6 +43,24 @@ class _QuizWidgetState extends State<QuizWidget> {
       _answered = true;
       if (correct) _correctCount++;
     });
+    if (correct) {
+      final p = context.read<WissensfreundProvider>();
+      if (p.articleId.isNotEmpty) {
+        RewardService.instance
+            .onCorrectAnswer(
+              articleId: p.articleId,
+              topicArea: p.articleCategoryTop,
+              questionId:
+                  _question.id.isNotEmpty ? _question.id : 'q$_questionIdx',
+            )
+            .then(_addAward);
+      }
+    }
+  }
+
+  void _addAward(RewardAward award) {
+    if (!mounted || award.totalStars <= 0) return;
+    setState(() => _sessionStars += award.totalStars);
   }
 
   void _next() {
@@ -48,6 +68,16 @@ class _QuizWidgetState extends State<QuizWidget> {
     if (_questionIdx >= total - 1) {
       setState(() => _finished = true);
       _speakResult();
+      final p = context.read<WissensfreundProvider>();
+      if (p.articleId.isNotEmpty) {
+        RewardService.instance
+            .onQuizFinished(
+              articleId: p.articleId,
+              topicArea: p.articleCategoryTop,
+              allCorrect: _correctCount == total,
+            )
+            .then(_addAward);
+      }
     } else {
       setState(() {
         _questionIdx++;
@@ -117,6 +147,25 @@ class _QuizWidgetState extends State<QuizWidget> {
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
+        if (_sessionStars > 0) ...[
+          const SizedBox(height: 14),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF3D6),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFF0C36D), width: 1),
+            ),
+            child: Text(
+              '+$_sessionStars ⭐',
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF9A6B00),
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

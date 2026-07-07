@@ -79,6 +79,56 @@ class JsonArticleService extends ChangeNotifier {
     return _loadIndexFile('index/sub_$subcategoryId.json');
   }
 
+  /// Loads index/level_{level}.json from the articles R2 bucket.
+  Future<List<WfArticleIndexEntry>> loadLevelIndex(int level) async {
+    await _ensureInit();
+    final path = 'index/level_$level.json';
+    final cacheFile = File('${_cacheDir!.path}/$path');
+    if (await cacheFile.exists()) {
+      final age = DateTime.now().difference((await cacheFile.stat()).modified);
+      if (age < _indexTtl) {
+        try {
+          return _parseIndexResponse(await cacheFile.readAsString());
+        } catch (e) {
+          debugPrint('[JsonArticleService] level index cache parse error: $e');
+        }
+      }
+    }
+    final url = '${AssetConfig.r2ArticlesBaseUrl}/$path';
+    try {
+      final resp = await _client.get(Uri.parse(url));
+      if (resp.statusCode == 404) return [];
+      if (resp.statusCode != 200) {
+        debugPrint('[JsonArticleService] HTTP ${resp.statusCode} for $path');
+        return [];
+      }
+      final body = resp.body;
+      await cacheFile.parent.create(recursive: true);
+      await cacheFile.writeAsString(body);
+      return _parseIndexResponse(body);
+    } catch (e) {
+      debugPrint('[JsonArticleService] level index network error: $e');
+      if (await cacheFile.exists()) {
+        try {
+          return _parseIndexResponse(await cacheFile.readAsString());
+        } catch (_) {}
+      }
+      return [];
+    }
+  }
+
+  /// "biene_l2" → "biene"
+  static String baseId(String articleId) {
+    final idx = articleId.lastIndexOf('_l');
+    return idx >= 0 ? articleId.substring(0, idx) : articleId;
+  }
+
+  /// "biene_l2" → 2
+  static int levelFromId(String articleId) {
+    final m = RegExp(r'_l(\d)$').firstMatch(articleId);
+    return m != null ? int.parse(m.group(1)!) : 2;
+  }
+
   Future<WfArticle?> loadArticle(String articleId) async {
     await _ensureInit();
     final cacheFile = File('${_cacheDir!.path}/articles/$articleId.json');
@@ -183,6 +233,22 @@ class JsonArticleService extends ChangeNotifier {
           .toList();
     }
     return [];
+  }
+
+  // Handles both a raw JSON array and {"articles": [...]} wrapper (upload_articles.py format).
+  List<WfArticleIndexEntry> _parseIndexResponse(String body) {
+    final data = json.decode(body);
+    final List<dynamic> list;
+    if (data is List) {
+      list = data;
+    } else if (data is Map && data['articles'] is List) {
+      list = data['articles'] as List<dynamic>;
+    } else {
+      return [];
+    }
+    return list
+        .map((e) => WfArticleIndexEntry.fromJson(e as Map<String, dynamic>))
+        .toList();
   }
 
   Future<void> _ensureInit() async {

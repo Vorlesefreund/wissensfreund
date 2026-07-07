@@ -10,6 +10,7 @@ import 'services/data_limit_overlay_service.dart';
 import 'services/json_article_service.dart';
 import 'services/parental_lock_service.dart';
 import 'services/profile_service.dart';
+import 'services/reward_service.dart';
 import 'screens/first_run_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/profile_selection_screen.dart';
@@ -21,6 +22,7 @@ void main() async {
   restoreSystemUI();
   await ParentalLockService.instance.init();
   await ProfileService.instance.initialize();
+  await RewardService.instance.initialize();
   unawaited(JsonArticleService.instance.initialize());
   final prefs = await SharedPreferences.getInstance();
   final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
@@ -34,6 +36,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => WissensfreundProvider()),
         ChangeNotifierProvider.value(value: ParentalLockService.instance),
         ChangeNotifierProvider.value(value: ProfileService.instance),
+        ChangeNotifierProvider.value(value: RewardService.instance),
         ChangeNotifierProvider.value(value: DataLimitOverlayService.instance),
       ],
       child: WissensfreundApp(onboardingComplete: onboardingComplete),
