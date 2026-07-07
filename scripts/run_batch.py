@@ -2161,7 +2161,10 @@ def main() -> None:
              _RUN_ID, len(themen_raw), stufen,
              args.stage if args.stage else "alle", pipeline, args.dry_run)
 
-    client  = genai.Client(api_key=api_key)
+    # 10-min Client-Timeout: haengende Gemini-Calls (SDK hat sonst KEIN Timeout ->
+    # ein Server-Stall blockiert endlos) brechen ab statt still zu haengen.
+    client  = genai.Client(api_key=api_key,
+                           http_options=types.HttpOptions(timeout=600_000))
     session = requests.Session()
     session.headers["User-Agent"] = (
         "WissensfreundPipeline/1.0 (az@expansionssupport.de; Kinderwissens-App)"

@@ -523,7 +523,7 @@ def select_companions_raw(
     )
 
     max_attempts = 6
-    exhausted_503 = False
+    exhausted_transient = False
     for attempt in range(1, max_attempts + 1):
         try:
             response = client.models.generate_content(
@@ -554,22 +554,28 @@ def select_companions_raw(
             return [], {}
         except Exception as e:
             err = str(e)
-            is_503 = ("503" in err or "unavailable" in err.lower())
-            if attempt < max_attempts and is_503:
+            e_low = err.lower()
+            is_transient = (
+                "503" in err or "429" in err or "unavailable" in e_low or "overloaded" in e_low
+                or "timeout" in e_low or "timed out" in e_low or "deadline" in e_low
+                or "connection" in e_low or "reset" in e_low
+            )
+            if attempt < max_attempts and is_transient:
                 wait = min(60 * (2 ** (attempt - 1)), 300)
-                log.warning("  Phase 1 503 (V%d/%d) -- warte %ds ...", attempt, max_attempts, wait)
+                log.warning("  Phase 1 transient (V%d/%d): %s -- warte %ds ...",
+                            attempt, max_attempts, err[:80], wait)
                 time.sleep(wait)
-            elif is_503:
-                log.error("  Phase 1 Fehler: %s", e)
-                exhausted_503 = True   # alle Versuche mit 503 erschöpft → Fallback unten
+            elif is_transient:
+                log.error("  Phase 1 Fehler (transient erschöpft): %s", e)
+                exhausted_transient = True   # alle Versuche transient erschöpft → Fallback unten
                 break
             else:
                 log.error("  Phase 1 Fehler: %s", e)
                 return [], {}
 
-    # Fallback auf alternatives Modell — nur bei 503-Erschöpfung des Primärmodells
-    if exhausted_503 and model == KOMPASS_MODEL and model != KOMPASS_MODEL_FALLBACK:
-        log.warning("  Kompass 503-Erschöpfung auf %s — Fallback auf %s",
+    # Fallback auf alternatives Modell — bei transienter Erschöpfung des Primärmodells
+    if exhausted_transient and model == KOMPASS_MODEL and model != KOMPASS_MODEL_FALLBACK:
+        log.warning("  Kompass transient erschöpft auf %s — Fallback auf %s",
                     model, KOMPASS_MODEL_FALLBACK)
         try:
             fb_thinking = _make_thinking_config(KOMPASS_MODEL_FALLBACK, budget_for_2_5=1024)

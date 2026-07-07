@@ -543,8 +543,14 @@ def analyze_with_vision(
             return None, {}
         except Exception as e:
             err = str(e)
-            if attempt < 2 and ("503" in err or "unavailable" in err.lower()):
-                log.warning("  Vision 503 (Versuch 1/2) -- warte 30s ...")
+            e_low = err.lower()
+            is_transient = (
+                "503" in err or "429" in err or "unavailable" in e_low or "overloaded" in e_low
+                or "timeout" in e_low or "timed out" in e_low or "deadline" in e_low
+                or "connection" in e_low or "reset" in e_low
+            )
+            if attempt < 2 and is_transient:
+                log.warning("  Vision transient (Versuch 1/2): %s -- warte 30s ...", err[:80])
                 time.sleep(30)
                 continue
             log.warning("  Vision-Fehler: %s", e)

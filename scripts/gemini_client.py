@@ -31,7 +31,7 @@ _DOTENV_PATH   = Path(__file__).parent.parent / ".env"
 
 
 def _is_retriable_error(err_str: str) -> bool:
-    """True für transiente Fehler (503, 429) → Retry.
+    """True für transiente Fehler (503, 429, Timeout/Deadline, Verbindungsabbruch) → Retry.
     False für echte API-Fehler (400 Bad Request, 404 Not Found) → sofort raise.
     """
     s = err_str.lower()
@@ -50,7 +50,10 @@ def _is_retriable_error(err_str: str) -> bool:
         or "quota" in s
         or "resource exhausted" in s
         or "unavailable" in s
+        or "overloaded" in s              # Modell-Ueberlastung
         or "rate" in s
+        or "timeout" in s or "timed out" in s or "deadline" in s   # Client-Timeout / Server-Deadline (Hang-Schutz)
+        or "connection" in s or "reset" in s                        # abgebrochene Verbindung
         or "finish_reason" in err_str     # unvollständige Antwort → Retry
         or "unvollst" in s                # eigene RuntimeError-Meldung
     )
@@ -83,7 +86,10 @@ def call_gemini(
     effective_model    = model or GEMINI_MODEL
     effective_thinking = thinking_config or types.ThinkingConfig(thinking_budget=8192)
     label              = f"[{call_name}] " if call_name else ""
-    client             = genai.Client(api_key=api_key)
+    # 10-min Client-Timeout: haengende Gemini-Calls (SDK hat sonst KEIN Timeout ->
+    # Server-Stall blockiert endlos) brechen ab -> _is_retriable_error faengt sie -> Retry.
+    client             = genai.Client(api_key=api_key,
+                                      http_options=types.HttpOptions(timeout=600_000))
 
     last_exc: Exception | None = None
 

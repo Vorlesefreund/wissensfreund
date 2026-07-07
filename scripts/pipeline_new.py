@@ -121,12 +121,23 @@ def _call_pass(system_prompt: str, body: str, source: str, model: str, thinking,
                response_mime_type: str | None = None, response_schema=None) -> str:
     """Ein Pass-Aufruf. Mit Cache: Quelle steckt im Cache, System-Prompt wird in die
     User-Message gefaltet (call_gemini setzt bei cached_content kein system_instruction).
-    Ohne Cache: System-Prompt separat, Quelle an den Body angehängt (Alt-Verhalten)."""
+    Ohne Cache: System-Prompt separat, Quelle an den Body angehängt (Alt-Verhalten).
+
+    Läuft der Quelltext-Cache ab (403 'CachedContent not found' — z.B. TTL-Ablauf
+    während eines langen/503-verzögerten Laufs), wird transparent auf vollen Kontext
+    zurückgefallen, statt hart abzubrechen (wie im alten Pfad, generate_grounded)."""
     if cache:
-        return gemini_client.call_gemini(
-            system_prompt, system_prompt + "\n\n" + body, model=model,
-            thinking_config=thinking, response_mime_type=response_mime_type,
-            response_schema=response_schema, cached_content=cache, call_name=call_name)
+        try:
+            return gemini_client.call_gemini(
+                system_prompt, system_prompt + "\n\n" + body, model=model,
+                thinking_config=thinking, response_mime_type=response_mime_type,
+                response_schema=response_schema, cached_content=cache, call_name=call_name)
+        except Exception as e:
+            if "cachedcontent not found" not in str(e).lower():
+                raise
+            log.warning("  [new] Quelltext-Cache abgelaufen/ungültig bei %s — "
+                        "Fallback auf vollen Kontext", call_name)
+            # → unten: voller Kontext (Quelle an den Body)
     return gemini_client.call_gemini(
         system_prompt, body + "\n\n" + source, model=model, thinking_config=thinking,
         response_mime_type=response_mime_type, response_schema=response_schema,
