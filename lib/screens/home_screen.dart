@@ -22,6 +22,7 @@ import '../widgets/professor_widget.dart';
 import 'article_screen.dart';
 import 'card_album_screen.dart';
 import 'profile_management_screen.dart';
+import 'trophy_screen.dart';
 import 'profile_selection_screen.dart';
 import 'wf_article_list_screen.dart';
 
@@ -386,6 +387,8 @@ class _HomeScreenState extends State<HomeScreen>
                                 _ArticleListButton(),
                               if (provider.state == AppState.idle)
                                 _CardAlbumButton(),
+                              if (provider.state == AppState.idle)
+                                _TrophyButton(),
                               const SizedBox(height: 16),
                             ],
                           ),
@@ -4017,6 +4020,31 @@ class _CardAlbumButton extends StatelessWidget {
         },
         icon: const Text('🃏', style: TextStyle(fontSize: 16)),
         label: const Text('Sammelkarten'),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: const Color(0xFFB8860B),
+          side: const BorderSide(color: Color(0xFFB8860B)),
+        ),
+      ),
+    );
+  }
+}
+
+class _TrophyButton extends StatelessWidget {
+  const _TrophyButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: OutlinedButton.icon(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const TrophyScreen()),
+          );
+        },
+        icon: const Text('🏆', style: TextStyle(fontSize: 16)),
+        label: const Text('Trophäen'),
         style: OutlinedButton.styleFrom(
           foregroundColor: const Color(0xFFB8860B),
           side: const BorderSide(color: Color(0xFFB8860B)),

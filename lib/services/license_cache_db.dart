@@ -2,6 +2,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import '../models/collected_card.dart';
+import '../models/trophy.dart';
 import 'profile_service.dart';
 import 'reward_rules.dart';
 
@@ -588,6 +589,24 @@ class LicenseCacheDb {
       whereArgs: [profileId],
     );
     return rows.map((r) => r['card_id'] as String).toSet();
+  }
+
+  // ── Trophy reads (derived from area_stats) ────────────────────────────────────
+
+  Future<List<AreaStat>> getAreaStats(int profileId) async {
+    final rows = await (await _database).query(
+      'area_stats',
+      where: 'profile_id = ?',
+      whereArgs: [profileId],
+      orderBy: 'quizzes_passed DESC, questions_correct DESC',
+    );
+    return rows
+        .map((r) => AreaStat(
+              area: r['topic_area'] as String? ?? '',
+              quizzesPassed: r['quizzes_passed'] as int? ?? 0,
+              questionsCorrect: r['questions_correct'] as int? ?? 0,
+            ))
+        .toList();
   }
 
   // ── Reward reads ──────────────────────────────────────────────────────────────
