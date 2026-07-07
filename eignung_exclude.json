@@ -1,8 +1,8 @@
 {
   "_meta": {
     "source": "catalog_review_master.xlsx",
-    "built": "2026-07-06T09:47:45.127418+00:00",
-    "count": 59,
+    "built": "2026-07-07T07:44:19.172204+00:00",
+    "count": 61,
     "note": "Positive Exclude-Liste (normalisierte Lemmata) als Safety-Backstop"
   },
   "exclude": [
@@ -51,6 +51,7 @@
     "the beatles",
     "tim und struppi (hergé)",
     "tintenfischschnecke",
+    "todesstrafe",
     "toter see",
     "trickfilm-sport",
     "vegetarismus",
@@ -64,6 +65,7 @@
     "wilhelm shakespeare",
     "wilhelm von oranien",
     "wolfgang von kempelen",
+    "zeugen jehovas",
     "ägyptische götter"
   ]
 }
