@@ -86,7 +86,7 @@ def _level_register(stufe: int) -> str:
 
 
 def create_source_cache(client, model: str, thema: str, primary_text: str,
-                        companion_texts: dict[str, str], ttl: str = "1800s") -> str | None:
+                        companion_texts: dict[str, str], ttl: str = "21600s") -> str | None:
     """Gemini Context Cache für den QUELLTEXT eines Themas (Primär + Companions).
 
     Bewusst OHNE eingebackenen System-Prompt (im Gegensatz zum alten Pfad): der
@@ -98,6 +98,12 @@ def create_source_cache(client, model: str, thema: str, primary_text: str,
     Der wiederverwendbare Kern ist der stabile `_source_block`: ein Anthropic-
     Lektorat kann denselben Block über sein eigenes Prompt-Caching (cache_control)
     nutzen; ein Gemini-Lektorat direkt diesen Cache.
+
+    TTL=6h: Die Caches werden in run_batch VORAB für alle Themen erzeugt; bei
+    serieller Generierung muss der Cache des letzten Themas die gesamte
+    Batch-Laufzeit überleben (~5 min/Thema → große Batches laufen Stunden).
+    6h deckt einen Über-Nacht-Batch ab; darüber hinaus greift der Cache-Ablauf-
+    Fallback in `_call_pass` (voller Kontext) korrekt, nur weniger token-effizient.
     """
     from google.genai import types as _types
     source = _source_block(thema, primary_text, companion_texts)
