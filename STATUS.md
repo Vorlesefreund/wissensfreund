@@ -1,7 +1,17 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-07T06:41:38Z -->
+<!-- updated: 2026-07-07T07:12:22Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
+> **07.07.2026 — FIX B: SVG-DIAGRAMME FREIGESCHALTET (`image_vision_filter.py`, geteilt alt+neu).**
+> Didaktische SVG-Diagramme (Schemata/Stromfluss/Querschnitt) dürfen jetzt in die Bildsammlung. `.svg` war in
+> `_IMG_SKIP_EXT` und filterte implizit fast alle Deko mit (Logos/Icons/Flaggen sind meist SVG). **Kein neues
+> Dependency:** Wikimedia rendert SVG→PNG serverseitig (`iiurlwidth` gesetzt → `thumburl` ist bei SVG bereits PNG);
+> `_wikimedia_thumb_url` als Fallback (vorher toter Code). Deko-Filter **trenner-agnostisch** gemacht
+> (`t_key`: `-`/Leerz.→`_`), damit `_logo.`/`flag_of` auch Bindestrich-/Leerzeichen-Titel fangen (`Enigma-logo.svg`)
+> + neu `qsicon`/`favicon`. `_scale_image`: Alpha→**Weiß** statt schwarz. **Verifiziert:** Enigma → Rotor-Diagramm
+> überlebt, Deko-SVGs raus, 24 Foto-JPGs unverändert (Alt-Pfad intakt), Rasterung+Tiers grün, verify 0 Hart-FAIL.
+> **OFFEN:** Vision-Akzeptanz (Gemini-Urteil) e2e nachziehen sobald Flash stabil. Details [[WISSEN_BILDER.md]].
+>
 > **07.07.2026 — QUALITÄTS-FEINSCHLIFF (PO-Feedback an den Vulkan-Artikeln): BILD-ALT-TEXTE, S1/S2-TON, S3-QUIZ.**
 > Vier Commits, alle an der neuen Pipeline (`pipeline_new.py` / `lektorat_new.py`):
 > **Bild-Alt-Texte (`8d14472`):** waren die 220-Zeichen-Vision-Beschreibung (ganze Sätze) und ignorierten

@@ -108,6 +108,32 @@ Der offene Punkt „Attributionsanzeige" deckt FAL vollständig mit ab (gleiche 
 
 ---
 
+## SVG-Diagramme (Fix B, 07.07.2026 — `image_vision_filter.py`, geteilt alt+neu)
+
+Didaktische SVG-Diagramme (Schemata, Stromfluss, Querschnitte) sind jetzt erlaubt.
+`.svg` war zuvor in `_IMG_SKIP_EXT` — der Skip filterte implizit auch fast alle
+Deko (Logos/Icons/Flaggen sind meist SVG). Beim Öffnen des SVG-Tors mussten daher
+die Namensfilter nachziehen.
+
+- **Kein neues Dependency:** Die Wikimedia-API rendert SVG→PNG serverseitig, sobald
+  `iiurlwidth` gesetzt ist — `thumburl` ist bei SVG bereits ein PNG
+  (`.../Foo.svg/1600px-Foo.svg.png`). `thumb_url` (Download-/Vision-/Tier-Quelle)
+  zeigt darauf; nie die rohe `.svg` (PIL kann sie nicht öffnen).
+- **Fallback:** Fehlt `thumburl` bei SVG, baut `_wikimedia_thumb_url(filename, 1600)`
+  die PNG-Thumb-URL per md5-Hash selbst (vorher toter Code, jetzt Sicherheitsnetz).
+- **Deko-Filter trenner-agnostisch:** `t_key = t_lower.replace(" ","_").replace("-","_")`
+  vor dem Matchen. Damit greifen `_logo.`/`_icon.`/`flag_of` auch für Bindestrich-/
+  Leerzeichen-Titel (`Enigma-logo.svg`, `Flag of X.svg`) — vorher rutschten die durch.
+  `_IMG_SKIP_PREFIXES_KEY` = normalisierte Prefix-Liste; neu: `qsicon`, `favicon`.
+- **Transparenz → Weiß:** `_scale_image` legt Alpha (RGBA/LA/P) via `alpha_composite`
+  auf weißen Grund statt `convert("RGB")` (sonst Diagramm-Linien auf Schwarz). Betrifft
+  nur Bilder mit Alpha; JPGs unberührt.
+- **Verifiziert:** Enigma → `Enigma-action.svg` (Rotor-Diagramm) überlebt, Deko-SVGs
+  gefiltert, 24 Foto-JPGs unverändert; Download→RGBA(1920²)→JPEG-Tiers 300/800,
+  Eckpixel weiß. Vision-*Akzeptanz* (Gemini) noch e2e nachzuziehen (503-Welle).
+
+---
+
 ## Offene Punkte
 
 - **Gallery-Artikel (111 Artikel, 540 Bilder)** → Version 1.1

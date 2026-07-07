@@ -72,8 +72,16 @@ _IMG_SKIP_LOWER = (
     "_logo.", "logo_of", "_icon.", "icon_of",
     "pictogram", "emblem_of", "coat_of_arms", "wappen",
     "flag_of", "flagge_", "national_flag",
+    "qsicon", "favicon",   # SVG-Chrome (Qualitaets-Icons, Favicons)
 )
-_IMG_SKIP_EXT = (".webm", ".ogv", ".ogg", ".svg", ".gif")
+# SVG bleibt erlaubt (didaktische Diagramme); Deko faengt der trenner-agnostische
+# Namensfilter (_IMG_SKIP_PREFIXES_KEY/_LOWER) + die Vision-Relevanzpruefung ab.
+_IMG_SKIP_EXT = (".webm", ".ogv", ".ogg", ".gif")
+# Prefixe trenner-normalisiert (- und Leerzeichen -> _), damit sie auch fuer
+# Bindestrich-/Leerzeichen-Titel greifen (z.B. "Flag of X.svg", "Enigma-logo.svg").
+_IMG_SKIP_PREFIXES_KEY = tuple(
+    p.lower().replace(" ", "_").replace("-", "_") for p in _IMG_SKIP_PREFIXES
+)
 
 VISION_SYSTEM_PROMPT = """Du bist ein Bildredakteur für eine Kinder-Wissensapp (Zielgruppe 4–12 Jahre).
 Antworte ausschließlich mit gültigem JSON ohne Markdown-Code-Blöcke oder Erklärungen."""
@@ -242,7 +250,12 @@ def _wikimedia_thumb_url(filename: str, width: int = 1280) -> str:
 def _scale_image(raw_bytes: bytes, max_width: int) -> bytes:
     """Skaliert Bild auf max. max_width px (LANCZOS), gibt JPEG-Bytes zurueck."""
     img = Image.open(io.BytesIO(raw_bytes))
-    if img.mode not in ("RGB", "L"):
+    if img.mode in ("RGBA", "LA", "P"):
+        # Transparenz (v.a. gerasterte SVG-Diagramme) auf WEISS legen statt auf Schwarz
+        rgba = img.convert("RGBA")
+        bg = Image.new("RGBA", rgba.size, (255, 255, 255, 255))
+        img = Image.alpha_composite(bg, rgba).convert("RGB")
+    elif img.mode not in ("RGB", "L"):
         img = img.convert("RGB")
     if img.width > max_width:
         ratio = max_width / img.width
@@ -317,12 +330,13 @@ def fetch_image_candidates(
     for page in pages.values():
         title = _normalize_file_title(page.get("title", ""))
         t_lower = title.lower()
+        t_key = t_lower.replace(" ", "_").replace("-", "_")  # Trenner-agnostisch (SVG-Deko)
 
         if t_lower.endswith(_IMG_SKIP_EXT):
             continue
-        if any(title.startswith(skip) for skip in _IMG_SKIP_PREFIXES):
+        if any(t_key.startswith(skip) for skip in _IMG_SKIP_PREFIXES_KEY):
             continue
-        if any(sub in t_lower for sub in _IMG_SKIP_LOWER):
+        if any(sub in t_key for sub in _IMG_SKIP_LOWER):
             continue
 
         filename = _filename_from_title(title)
@@ -344,7 +358,13 @@ def fetch_image_candidates(
             continue
         ii = ii_list[0]
         orig_url  = ii.get("url", "")
-        thumb_url = ii.get("thumburl", "") or orig_url   # 1600px CDN; Fallback: Original
+        api_thumb = ii.get("thumburl", "")               # 1600px CDN (bei SVG bereits PNG-Render)
+        if api_thumb:
+            thumb_url = api_thumb
+        elif t_lower.endswith(".svg"):
+            thumb_url = _wikimedia_thumb_url(filename, 1600)  # SVG->PNG serverseitig, nie roh
+        else:
+            thumb_url = orig_url
         if not orig_url and not thumb_url:
             continue
 
