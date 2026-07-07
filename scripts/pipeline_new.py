@@ -930,11 +930,32 @@ def pass4_images(sections: list[dict], images_stufe: list[dict], thema: str,
 
 
 PASS5_SYSTEM = (
-    "Du erstellst ein kurzes Quiz zu einem Kinderlexikon-Artikel. Alle Fragen und "
-    "alle Antwortoptionen kommen AUSSCHLIESSLICH aus dem Artikelinhalt — nichts "
-    "erfinden, kein Wissen von außen. Die falschen Optionen sind plausibel, aber "
-    "klar falsch. Kindgerecht und eindeutig. Antworte NUR als JSON."
+    "Du erstellst ein kurzes Quiz zu einem Kinderlexikon-Artikel. Fragen und "
+    "Antwortoptionen stützen sich AUSSCHLIESSLICH auf den Artikelinhalt — kein Wissen "
+    "von außen, keine erfundenen Fakten. Genau eine Option ist eindeutig richtig. "
+    "Die falschen Optionen müssen VERLOCKEND sein, nicht albern: gleiches Themenfeld "
+    "wie die richtige Antwort und aus echten Begriffen/Konzepten des Artikels gebaut "
+    "(naheliegende Verwechslungen, typische Denkfehler). Fragt die Frage nach einer "
+    "ZEIT, sind auch die falschen Optionen Zeiten; nach einem PROZESS, andere plausible "
+    "Prozesse; nach einer ZAHL, andere plausible Zahlen. Eine falsche Option darf NICHT "
+    "durch bloßen Hausverstand, Absurdität oder eine falsche Kategorie ausscheidbar "
+    "sein. Alle Optionen etwa gleich knapp und gleich gebaut — die richtige nicht durch "
+    "Länge oder Ausführlichkeit verraten. Kindgerecht. Antworte NUR als JSON."
 )
+
+
+def _quiz_difficulty(stufe: int) -> str:
+    return {
+        1: "SCHWIERIGKEIT S1 (4–6 J.): einfache Erinnerungsfragen zu einem klaren "
+           "Kernfakt; die falschen Optionen dürfen deutlich falsch sein, aber im Thema "
+           "bleiben (nicht albern).",
+        2: "SCHWIERIGKEIT S2 (8–9 J.): mittlere Fragen; die falschen Optionen sind "
+           "plausible Beinah-Treffer aus demselben Themenfeld.",
+        3: "SCHWIERIGKEIT S3 (10–12 J.): anspruchsvoll — prüfe VERSTÄNDNIS "
+           "(warum/wie/Zusammenhang/Unterschied), nicht bloß ein Einzelwort. Die "
+           "falschen Optionen sind enge, verlockende Beinah-Treffer, sodass man den "
+           "Artikel wirklich verstanden haben muss, um sie auszuschließen.",
+    }.get(stufe, "SCHWIERIGKEIT S2: mittlere Fragen mit plausiblen Beinah-Treffern.")
 
 PASS5_SCHEMA = {
     "type": "object",
@@ -961,6 +982,7 @@ def pass5_quiz(sections: list[dict], thema: str, stufe: int, model: str,
         for s in sections)
     body = (
         "ARTIKEL:\n" + article_txt + "\n\n"
+        f"{_quiz_difficulty(stufe)}\n\n"
         f"Erstelle {target} Quizfragen NUR aus diesem Artikel. Je Frage: frage, "
         "optionen (GENAU 3), richtige_nr (0, 1 oder 2 = Index der richtigen Option)."
     )
