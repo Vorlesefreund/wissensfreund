@@ -1,7 +1,32 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-07T07:12:22Z -->
+<!-- updated: 2026-07-07T09:05:50Z -->
 <!-- Älteres Wissen → WISSEN_BILDER.md / WISSEN_ARTIKEL_PIPELINE.md / WISSEN_APP_ARCHITEKTUR.md -->
 
+> **07.07.2026 (Vormittag) — LISTEN-KONSOLIDIERUNG „EIN BRETT" (Phase A/B/C) + KATALOG-GAP-AUFNAHME.**
+> Ziel gelöst: `catalog_review_master.xlsx` ist die EINZIGE Datei zum Arbeiten; alles andere abgeleitet.
+> **NEUER WORKFLOW:** Master editieren → `python -X utf8 scripts/build_all.py` erzeugt in einem Rutsch
+> catalog_full/reserve + eignung_exclude + ergiebigkeit_scores + Sheet „Produktion". Master darf dabei
+> nicht in Excel offen sein (Lock-Check bricht sonst ab).
+> **Phase A (`f5b6d36`):** `scripts/build_production_status.py` — reiner Lese-Scan von `articles/batch_output/`;
+> Sheet „Produktion" zeigt je Thema/Stufe generiert/lektoriert/vertont (farbcodiert gelb/blau/grün).
+> Stand: 6 Themen generiert, 6 lektoriert, 1 vertont (Vulkan).
+> **Phase B (`f8f35d5`):** `scripts/build_catalog_from_master.py` leitet catalog_full/reserve AUS dem Master ab
+> (getestete catalog_merge-Kette OHNE `export_xlsx`) → der `catalog_review.xlsx`-Rückwärts-Nebeneffekt ist weg.
+> `build_all.py` = Ein-Befehl-Kette. catalog_full 4343→4352 (9 neue Includes jetzt produktionsbereit).
+> **Phase C (`ccc4175`):** Audit-Snapshots (coverage_gaps_*, catalog_review_delta_r2) → `archiv/`.
+> `eignung_verdicts.json` bewusst BEHALTEN (von generate_grounded als Eignungs-Gate gelesen). Alter
+> `catalog_merge.py` bleibt unangetastet als Fallback.
+> **KATALOG-GAPS (`f1c8f8b` Archiv + `247aa49`):** Audit-Analyse (179 → Dubletten-/Kollisions-/Substring-Filter)
+> → 11 verifizierte echte Lücken (alle mit Wikipedia-Deckung) in `catalog_manual.json`, geparkt als exclude
+> (Token AUDIT-GAP-2026-07 in notiz). Andreas triagiert: 9 include, Todesstrafe/Zeugen Jehovas exclude;
+> erg/age_floor/themengebiete gesetzt. „Moldau"→„Moldawien" (Land; „die Moldau" = Fluss). Abgelöste
+> catalog_review.xlsx/_audit.xlsx nach `archiv/catalog_review_superseded_2026-07/`. verify 0 Hart-FAIL.
+> **PRODUKTIONS-ZIEL (User):** die 6 bereits generierten Artikel (Dinosaurier/Elefant/Hund/Spartacus/Vulkan/
+> Zweiter Weltkrieg) auf der NEUEN Pipeline neu produzieren — braucht neue Pipeline als `--pipeline`-Default
+> (Phase 5) + stabiles gemini-3.5-flash. KEIN Voll-Katalog-Lauf.
+> **OFFEN:** Phase 5 (`--pipeline` Default `new`) · WWII-Ton/Einstiegs-Verifikation (flash-503-blockiert) ·
+> SVG-Vision-Akzeptanz e2e (Fix B) sobald Flash stabil.
+>
 > **07.07.2026 — FIX B: SVG-DIAGRAMME FREIGESCHALTET (`image_vision_filter.py`, geteilt alt+neu).**
 > Didaktische SVG-Diagramme (Schemata/Stromfluss/Querschnitt) dürfen jetzt in die Bildsammlung. `.svg` war in
 > `_IMG_SKIP_EXT` und filterte implizit fast alle Deko mit (Logos/Icons/Flaggen sind meist SVG). **Kein neues
