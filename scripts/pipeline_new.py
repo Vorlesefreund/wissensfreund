@@ -373,6 +373,9 @@ _MONTHS = {
     "august", "september", "oktober", "november", "dezember",
 }
 
+# Nomen, die nach einer Ordinalzahl folgen können, ohne Satzende ("19. Jahrhundert").
+_ORDINAL_NOUNS = {"jahrhundert", "jahrtausend"}
+
 _TERMINATORS = ".!?…"
 _QUOTE_START = set("„«‚‹\"'“‘([")
 
@@ -410,9 +413,9 @@ def _is_boundary(text: str, i: int, j: int, k: int, n: int) -> bool:
             return False
         if len(token) == 1 and token.isupper():   # Initiale wie "z. B."
             return False
-        if token.isdigit():                        # Ordinalzahl wie "8. Mai"
+        if token.isdigit():                        # Ordinalzahl wie "8. Mai", "19. Jahrhundert"
             nxt = _leading_alpha(text, k).lower()
-            if nxt in _MONTHS or text[k].islower():
+            if nxt in _MONTHS or nxt in _ORDINAL_NOUNS or text[k].islower():
                 return False
     # Startsignal des nächsten Satzes?
     c = text[k]
