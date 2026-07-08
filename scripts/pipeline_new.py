@@ -172,7 +172,13 @@ PASS1_SYSTEM = (
     "Du arbeitest AUSSCHLIESSLICH mit dem gelieferten Quelltext — kein Wissen von "
     "außerhalb, nichts erfinden. Der Artikel handelt vom HAUPTTHEMA; Begleitartikel "
     "sind Fenster, die es illustrieren, kein Ersatz. Wähle nur, was die Geschichte "
-    "trägt und ins Wortbudget passt. Gib NUR den Plan als JSON aus."
+    "trägt und ins Wortbudget passt. "
+    "BEVORZUGE dabei LEBENDIGE, konkrete, geschichtenträchtige Inhalte — Menschen, "
+    "Ereignisse, dramatische Vorgänge (z. B. der Ausbruch, der Pompeji verschüttete) — "
+    "vor trockenen Detail-/Fachfakten (z. B. Minerale wie Obsidian, chemische "
+    "Klassifikationen). Je jünger die Stufe, desto stärker dieser Vorzug. Was in den "
+    "Plan kommt, bestimmt auch, welche Bilder später passen — plane so, dass Text und "
+    "mögliche Bilder dasselbe zeigen. Gib NUR den Plan als JSON aus."
 )
 
 PASS1_SCHEMA = {
@@ -230,12 +236,18 @@ def pass1_plan(thema: str, stufe: int, wmin: int, wmax: int,
 PASS2_SYSTEM = (
     "Du schreibst einen kindgerechten Lexikonartikel für eine deutsche Kinder-App. "
     "Schreib EINE zusammenhängende, spannende Geschichte ums Hauptthema — erzähl, "
-    "zähl nicht auf, keine dichten Zahlen-Ketten. Verwende AUSSCHLIESSLICH belegte "
-    "Fakten aus dem Quelltext; erfinde keine Gefühle, Motive oder Verstärker. Bei "
-    "ernsten Themen nüchtern bleiben, keine beschönigenden Wörter für Leid oder "
-    "Gewalt. Wähle den Einstieg frei, aber passend zum Ton des Themas (ernst = "
-    "nüchtern, kein dramatisierendes Szenenbild), und variiere ihn — verfalle nicht "
-    "bei jedem Artikel in dieselbe Eröffnungsformel.\n\n"
+    "zähl nicht auf, keine dichten Zahlen-Ketten. Baue einen klaren Faden mit "
+    "Anfang → Mitte → Ende und einer Ursache-Wirkung, die das Kind nachvollziehen "
+    "kann — GERADE für die jüngste Stufe: eine vollständige Geschichte, die für sich "
+    "steht und ein Kind mitnimmt, kein komprimierter Fakten-Abriss. Verwende "
+    "AUSSCHLIESSLICH belegte Fakten aus dem Quelltext; erfinde keine Gefühle, Motive "
+    "oder Verstärker. Bei ernsten Themen nüchtern bleiben, keine beschönigenden "
+    "Wörter für Leid oder Gewalt. Wähle den Einstieg frei, aber passend zum Ton des "
+    "Themas (ernst = nüchtern, kein dramatisierendes Szenenbild). VERMEIDE die "
+    "überstrapazierte Formel „Stell dir vor …“ als Einstieg — sie ist abgenutzt; "
+    "nutze sie nur, wenn sie ausnahmsweise wirklich am besten passt. Wähle bewusst "
+    "aus verschiedenen Einstiegen: eine überraschende Tatsache, eine kleine Frage, "
+    "eine konkrete Szene, eine direkte Ansprache.\n\n"
     "FORMAT (streng): NUR Markdown mit `## Überschrift`-Zeilen und normalen "
     "Absätzen. KEIN JSON, keine Aufzählungszeichen, keine Boxen, keine Bilder, "
     "keine IDs. Beginne mit einer `## Überschrift`."
@@ -384,6 +396,10 @@ def _is_boundary(text: str, i: int, j: int, k: int, n: int) -> bool:
     if single_dot:
         token = _prev_alnum_token(text, i)
         low = token.lower()
+        # Zahl-interner Punkt (Tausendertrennung "20.000", "1.000.000"):
+        # Ziffer . Ziffer OHNE Leerzeichen → keine Satzgrenze.
+        if token and token[-1].isdigit() and k == i + 1 and text[k].isdigit():
+            return False
         if low in _ABBREV:
             return False
         if len(token) == 1 and token.isupper():   # Initiale wie "z. B."
@@ -579,8 +595,13 @@ PASS3_SYSTEM = (
     "arbeitest AUSSCHLIESSLICH mit dem gelieferten Quelltext — nichts erfinden, "
     "kein Wissen von außerhalb. Du fasst den Fließtext NICHT an. Eine Box liefert "
     "einen zusätzlichen, im Artikel NOCH NICHT genannten Fakt aus der Quelle — nie "
-    "eine Umformulierung von etwas, das schon im Text steht. Findest du nichts "
-    "Passendes, gib eine leere Liste aus. Antworte NUR als JSON."
+    "eine Umformulierung von etwas, das schon im Text steht. WICHTIG: Der Zusatz-Fakt "
+    "muss an ein Thema ANKNÜPFEN, das der Artikel bereits behandelt — er vertieft oder "
+    "erweitert einen vorhandenen Erzählstrang. Führe KEIN im Artikel nicht "
+    "vorkommendes Nebenthema neu ein (z. B. keine Box über Geheimcodes, wenn der "
+    "Artikel Codes nie erwähnt). Passt ein interessanter Fakt zu keinem Abschnitt des "
+    "Artikels, gehört er NICHT in eine Box. Findest du nichts Passendes, gib eine "
+    "leere Liste aus. Antworte NUR als JSON."
 )
 
 PASS3_SCHEMA = {
@@ -636,12 +657,15 @@ def pass3_boxes(sections: list[dict], thema: str, stufe: int, primary_text: str,
         "FERTIGER ARTIKEL (Fließtext — Boxen müssen zusätzliche Fakten bringen, "
         "nichts hieraus wiederholen):\n" + article_txt + "\n\n"
         "AUFGABE: Finde im QUELLTEXT bis zu " + str(budget) + " Fakten, die im "
-        "Artikel NOCH NICHT vorkommen und ein Kind dieser Stufe spannend findet. "
-        "Je Box: {type (wow|fakt|warnung|stimmt_das), text, heading (aus der Liste), "
-        "reveal_text (NUR bei stimmt_das: die Auflösung)}. wow = konkrete "
-        "überraschende Tatsache; warnung = themenspezifischer Hinweis; stimmt_das = "
-        "Frage, die NICHT abfragt, was im Artikel schon klar dasteht. Selbst-Check: "
-        "Steht der Fakt schon im Artikel? → verwerfen. Nichts Passendes → boxes: []."
+        "Artikel NOCH NICHT vorkommen, aber inhaltlich an einen VORHANDENEN Abschnitt "
+        "anknüpfen (ihn vertiefen) und ein Kind dieser Stufe spannend findet. "
+        "Je Box: {type (wow|fakt|warnung|stimmt_das), text, heading (aus der Liste — "
+        "der Abschnitt, an den die Box anknüpft), reveal_text (NUR bei stimmt_das: die "
+        "Auflösung)}. wow = konkrete überraschende Tatsache; warnung = themen"
+        "spezifischer Hinweis; stimmt_das = Frage, die NICHT abfragt, was im Artikel "
+        "schon klar dasteht. Selbst-Check je Box: (1) Steht der Fakt schon im Artikel? "
+        "→ verwerfen. (2) Knüpft die Box an ein Thema an, das der zugeordnete Abschnitt "
+        "wirklich behandelt? Wenn nein → verwerfen. Nichts Passendes → boxes: []."
     )
     thinking = _make_thinking_config(model, 4096)
     try:

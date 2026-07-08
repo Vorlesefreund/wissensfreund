@@ -121,7 +121,7 @@ import gemini_client  # noqa: E402
 
 # ── Konstanten ────────────────────────────────────────────────────────────────
 
-VISION_MODEL         = "gemini-2.5-flash"
+VISION_MODEL         = stage_models.get_stage_config("vision")["model"]  # config-getrieben
 VISION_CHUNK_SIZE    = 500   # ungenutzt seit Sync-Umbau (war: max InlinedRequests/Batch)
 POLL_SECS_GEMINI     = 30
 POLL_SECS_ANTHROPIC  = 30
@@ -692,10 +692,23 @@ def stage1_sourcing(
             beschreibung    = result.get("beschreibung", "")
             relevanz        = result.get("relevanz", 0)
             hero            = result.get("hero_candidate", False)
+            ist_symbol      = result.get("ist_symbol_oder_logo", False)
+            ist_konkret     = result.get("ist_konkret", True)
+            motiv_key       = (result.get("motiv_key") or "").strip().lower()
             if grenzfall and ab_stufe == 1:
                 ab_stufe = 2
                 log.info("    grenzfall=true: '%s' → ab_stufe 1→2 (%s)",
                          img_meta.get("filename", "")[:40], grenzfall_grund[:60])
+            # Logo/Wappen/Symbol NICHT hart verwerfen (kann beim passenden Thema
+            # sinnvoll sein, z.B. Landesflagge). Nur nie Hero; tangentiale Symbole
+            # filtert die Relevanz-Schwelle (relevanz<4) ohnehin heraus.
+            if ist_symbol:
+                hero = False
+            # Abstrakt (Diagramm/Schema/Detail/Karte) → nicht für die Kleinsten, nie Hero
+            if not ist_konkret:
+                if ab_stufe < 2:
+                    ab_stufe = 2
+                hero = False
             if ab_stufe == 0 or relevanz < 4:
                 n_rejected += 1
                 continue
@@ -707,9 +720,23 @@ def stage1_sourcing(
                 "confidence":      confidence,
                 "relevanz":        relevanz,
                 "hero_candidate":  hero,
+                "ist_konkret":     ist_konkret,
+                "motiv_key":       motiv_key,
                 "beschreibung":    beschreibung,
             })
         accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))
+        # Dubletten desselben Motivs entfernen (z.B. 3× Kolosseum) → bestes je motiv_key
+        _seen_motive: set[str] = set()
+        _deduped: list[dict] = []
+        for a in accepted:
+            mk = a.get("motiv_key", "")
+            if mk and mk in _seen_motive:
+                log.info("    Dublette verworfen (%s): '%s'", mk, a.get("filename", "")[:40])
+                continue
+            if mk:
+                _seen_motive.add(mk)
+            _deduped.append(a)
+        accepted = _deduped
         # Sensible Themen: Pool auf top-OPUS_CAP begrenzen (Stage 2 zieht nur daraus)
         images = accepted[:OPUS_CAP] if data["sensibel"] else accepted
         s1 = sum(1 for i in images if i.get("ab_stufe", 0) == 1)

@@ -11,7 +11,7 @@ fallback: optionaler Modellname (gleicher Provider) bei Erschöpfung — None = 
 STAGE_MODELS = {
     "lemma":          {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": None},
     "kompass":        {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": "gemini-2.5-flash"},
-    "vision":         {"provider": "gemini",    "model": "gemini-2.5-flash",  "fallback": None},
+    "vision":         {"provider": "anthropic", "model": "claude-sonnet-5",   "fallback": None},
     # Bild-Recheck sensibler Bilder: derzeit DEAKTIVIERT (Option A, Gemini-only).
     # Bilder werden ohnehin manuell nachgeprüft. Zum Reaktivieren provider auf
     # "anthropic" setzen; model = gewünschtes Recheck-Modell (z.B. claude-sonnet-4-6

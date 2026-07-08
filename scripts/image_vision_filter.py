@@ -130,19 +130,52 @@ Thematisch relevante Diagramme, Karten, Querschnitte oder Skizzen (z.B. Vulkanqu
 Enigma-Schema, Stadtplan Pompeji) erhalten ab_stufe=2 oder 3 — sie sind lehrreich und für
 ältere Kinder wertvoll.
 
-SCHRITT 3 — WEITERE FELDER:
+SCHRITT 3 — MOTIV-ART (entscheidet über Eignung als Kinderbild):
 
-  relevanz (0–10): Wie gut passt das Bild zum Thema "{thema}"?
-    10=perfekt, 7–9=sehr gut, 5–6=passabel, 0–4=kaum relevant
+  ist_symbol_oder_logo (bool): Ist das Bild ein Logo, eine Wortmarke, ein Wappen,
+    ein Emblem, ein Organisations-/Auszeichnungszeichen (z. B. UNESCO-Welterbe-Logo),
+    ein Piktogramm/Icon (z. B. ein Mikrofon-Symbol), eine reine Text-/Schrifttafel
+    oder ein abstraktes Zeichen OHNE gegenständliches Motiv? → true.
+    WICHTIG zur Relevanz: Ein Symbol ist NUR dann relevant, wenn es den Gegenstand
+    des Artikels DIREKT repräsentiert (z. B. Landesflagge/Wappen bei einem Länder-
+    oder Ortsartikel, Vereinslogo beim Verein). Als bloßes Umfeld-Zeichen (fremdes
+    Logo, generisches Piktogramm) → relevanz ≤ 2. Als Hero nur, wenn es DAS Wahr-
+    zeichen des Themas ist.
 
-  confidence ("hoch" | "mittel" | "niedrig"): Wie sicher bist du in der ab_stufe-Einschätzung?
-    "hoch" = klarer Fall | "mittel" = Grenzfall aber vertretbar | "niedrig" = echte Unsicherheit
+  ist_konkret (bool): Zeigt das Bild etwas, das ein JUNGES Kind (4–6 J.) direkt
+    erkennt — ein echtes Tier, einen Menschen, einen Ort, einen Gegenstand, eine
+    klare Szene? → true.
+    Abstrakte Diagramme, Schemata, Mikroskop-/Detailaufnahmen, anatomische
+    Zeichnungen, Karten, Symbole → false.
 
-  beschreibung (string): Was ist auf dem Bild zu sehen? (1–2 Sätze, sachlich)
+  motiv_key (string): kurzer snake_case-Schlüssel für das HAUPTMOTIV, damit
+    Dubletten erkennbar sind — gleiches Motiv = gleicher key.
+    Beispiele: "kolosseum", "caesar_bueste", "vulkan_ausbruch", "elefanten_herde",
+    "dino_skelett". Verschiedene Fotos DESSELBEN Motivs → identischer key.
+
+SCHRITT 4 — RELEVANZ & HERO:
+
+  relevanz (0–10): Bildet das Bild WIRKLICH den Gegenstand des Artikels ab — die
+    Sache, Person oder Szene, um die es im Thema "{thema}" geht?
+    - 8–10: zeigt den Kern des Themas konkret und lebendig
+    - 5–7: passt, aber nur mittelbar / Randaspekt
+    - 0–4: nur lose verwandt, Symbolbild, tangentiales Bauwerk, Nebenfigur
+    WICHTIG: Ein Bild, das „irgendwie zum Umfeld gehört" (z. B. ein modernes
+    Touristenfoto eines nur am Rande verwandten Bauwerks, das Porträt einer
+    Nebenfigur, eine allgemeine Landkarte), ist NICHT relevant — relevanz ≤ 4.
+    Ein Symbol/Logo ist nur relevant, wenn es das Thema DIREKT repräsentiert
+    (siehe oben); sonst relevanz ≤ 2.
+
+  hero_candidate (bool): Als ERSTES Bild (Hero) geeignet? NUR true, wenn
+    ist_konkret=true UND ist_symbol_oder_logo=false UND das Bild den Haupt-
+    gegenstand/Protagonisten des Themas klar, attraktiv und repräsentativ zeigt.
+    Bauwerke am Rande, Karten, Diagramme, Symbole, Porträts von Nebenfiguren,
+    Texttafeln → hero_candidate=false.
+
+  confidence ("hoch" | "mittel" | "niedrig"): Sicherheit deiner ab_stufe-Einschätzung.
+
+  beschreibung (string): Was ist zu sehen? (1–2 Sätze, sachlich)
     Bei ab_stufe=0: kurze Begründung für die Sperrung.
-
-  hero_candidate (bool): Wäre das Bild als erstes Bild (Hero) geeignet?
-    Kriterien: klar erkennbares Motiv, attraktiv, repräsentativ für das Thema, gute Bildqualität.
 
 Antworte NUR mit diesem JSON (kein Markdown, kein Text davor/danach):
 {{
@@ -150,11 +183,59 @@ Antworte NUR mit diesem JSON (kein Markdown, kein Text davor/danach):
   "grenzfall_grund": "",
   "ab_stufe": 1,
   "kindgerecht": true,
+  "ist_symbol_oder_logo": false,
+  "ist_konkret": true,
+  "motiv_key": "elefanten_herde",
   "confidence": "hoch",
   "relevanz": 7,
   "beschreibung": "...",
   "hero_candidate": false
 }}"""
+
+# JSON-Schema für Claude forced tool-use (Vision-Urteil). Feldnamen == Gemini-Ausgabe.
+VISION_RESULT_SCHEMA = {
+    "type": "object",
+    "required": ["grenzfall", "ab_stufe", "ist_symbol_oder_logo", "ist_konkret",
+                 "motiv_key", "relevanz", "beschreibung", "hero_candidate"],
+    "properties": {
+        "grenzfall":            {"type": "boolean"},
+        "grenzfall_grund":      {"type": "string"},
+        "ab_stufe":             {"type": "integer", "minimum": 0, "maximum": 3},
+        "kindgerecht":          {"type": "boolean"},
+        "ist_symbol_oder_logo": {"type": "boolean"},
+        "ist_konkret":          {"type": "boolean"},
+        "motiv_key":            {"type": "string"},
+        "confidence":           {"type": "string"},
+        "relevanz":             {"type": "integer", "minimum": 0, "maximum": 10},
+        "beschreibung":         {"type": "string"},
+        "hero_candidate":       {"type": "boolean"},
+    },
+}
+
+
+def _analyze_vision_claude(image_bytes: bytes, mime_type: str, thema: str,
+                           model: str) -> tuple[dict | None, dict]:
+    """Bild-Urteil via Claude (andere KI-Familie, schärferes Motiv-/Relevanz-Urteil).
+    Gleiche Rückgabe-Signatur wie analyze_with_vision (Gemini): (result, usage)."""
+    import claude_client
+    prompt = VISION_PROMPT_TEMPLATE.format(thema=thema)
+    try:
+        result = claude_client.call_claude_json(
+            VISION_SYSTEM_PROMPT, prompt, VISION_RESULT_SCHEMA,
+            model=model, image_bytes=image_bytes, image_media_type=mime_type,
+            max_tokens=1024, call_name="vision")
+    except Exception as e:
+        log.warning("  Claude-Vision-Fehler: %s", str(e)[:120])
+        return None, {}
+    u = {}
+    try:
+        lu = claude_client.get_last_usage()
+        u = {"input_tok": int(lu.get("input_tokens", 0)), "output_tok": int(lu.get("output_tokens", 0)),
+             "cached_tok": 0, "thoughts_tok": 0}
+    except Exception:
+        pass
+    return result, u
+
 
 # ── Request-Zaehler (Modul-Global, fuer Tests) ──────────────────────────────
 _wikimedia_req_count: int = 0
@@ -501,7 +582,17 @@ def analyze_with_vision(
     model: str | None = None,
 ) -> tuple[dict | None, dict]:
     """Gibt (result, usage_dict) zurueck. usage_dict kann {} sein.
-    model=None -> Default GEMINI_MODEL; sonst der uebergebene Modellname."""
+    Provider aus stage_models["vision"]: 'anthropic' -> Claude (claude_client),
+    sonst Gemini (unveraendert). model=None -> Default GEMINI_MODEL."""
+    try:
+        import stage_models
+        _vcfg = stage_models.get_stage_config("vision")
+    except Exception:
+        _vcfg = {"provider": "gemini", "model": None}
+    if _vcfg.get("provider") == "anthropic":
+        # Bei Claude den in stage_models konfigurierten Modellnamen nutzen
+        # (der uebergebene 'model' ist ggf. ein Gemini-Name aus dem Aufrufer).
+        return _analyze_vision_claude(image_bytes, mime_type, thema, _vcfg.get("model"))
     prompt = VISION_PROMPT_TEMPLATE.format(thema=thema)
     for attempt in range(1, 3):
         try:
