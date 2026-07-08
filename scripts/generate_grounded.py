@@ -559,6 +559,7 @@ def select_companions_raw(
                 "503" in err or "429" in err or "unavailable" in e_low or "overloaded" in e_low
                 or "timeout" in e_low or "timed out" in e_low or "deadline" in e_low
                 or "connection" in e_low or "reset" in e_low
+                or "499" in err or "cancelled" in e_low or "canceled" in e_low
             )
             if attempt < max_attempts and is_transient:
                 wait = min(60 * (2 ** (attempt - 1)), 300)

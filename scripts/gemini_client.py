@@ -54,6 +54,7 @@ def _is_retriable_error(err_str: str) -> bool:
         or "rate" in s
         or "timeout" in s or "timed out" in s or "deadline" in s   # Client-Timeout / Server-Deadline (Hang-Schutz)
         or "connection" in s or "reset" in s                        # abgebrochene Verbindung
+        or "499" in err_str or "cancelled" in s or "canceled" in s  # Client-Timeout -> 499 CANCELLED -> Retry (nicht droppen)
         or "finish_reason" in err_str     # unvollständige Antwort → Retry
         or "unvollst" in s                # eigene RuntimeError-Meldung
     )
