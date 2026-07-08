@@ -1000,8 +1000,11 @@ PASS5_SYSTEM = (
 def _quiz_difficulty(stufe: int) -> str:
     return {
         1: "SCHWIERIGKEIT S1 (4–6 J.): einfache Erinnerungsfragen zu einem klaren "
-           "Kernfakt; die falschen Optionen dürfen deutlich falsch sein, aber im Thema "
-           "bleiben (nicht albern).",
+           "Kernfakt. Die falschen Optionen sind ECHTE Dinge/Tiere aus der Welt des "
+           "Artikels, die ein kleines Kind wirklich raten oder glauben könnte (eine "
+           "typische kindliche Verwechslung) — NIEMALS erfundene Wörter, Wortdopplungen "
+           "('riesige Riesen') oder offensichtlicher Unsinn ('aus grünen Blättern'). "
+           "Das Kind soll kurz überlegen müssen, nicht die alberne Option weglachen.",
         2: "SCHWIERIGKEIT S2 (8–9 J.): mittlere Fragen; die falschen Optionen sind "
            "plausible Beinah-Treffer aus demselben Themenfeld.",
         3: "SCHWIERIGKEIT S3 (10–12 J.): anspruchsvoll — prüfe VERSTÄNDNIS "
