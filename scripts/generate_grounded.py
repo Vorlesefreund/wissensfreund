@@ -340,22 +340,32 @@ COMPANION_SYSTEM_PROMPT = (
 _KOMPASS_SCHEMA = {
     "type": "object",
     "properties": {
+        "plan": {"type": "string"},
         "companions": {"type": "array", "items": {"type": "string"}},
     },
-    "required": ["companions"],
+    "required": ["plan", "companions"],
 }
 
 COMPANION_PROMPT_TMPL = """\
 THEMA: {thema}
 APPEAL: {appeal} (low/medium/high)
-PRIMAERARTIKEL-EINLEITUNG:
+PRIMAERARTIKEL (Anfang):
 {lead}
 
-## 1. DEINE ROLLE UND DEIN ZIEL
-Du bist Chef-Rechercheur für das deutsche Kinderlexikon **Wissensfreund**. Deine Aufgabe ist es, Begleitartikel (Companions) aus der deutschen Wikipedia zu finden, die dem Hauptthema Tiefe, Anschaulichkeit und narrative Ankerpunkte für Kinder geben.
+## 1. DEINE ROLLE
+Du bist Chef-Rechercheur für das deutsche Kinderlexikon **Wissensfreund**. Du überlegst ZUERST, was dieser Kinderartikel erzählen soll, und wählst DANN die Begleitartikel (Companions), die genau dazu passen — sie geben dem Thema Tiefe, Anschaulichkeit und narrative Anker für Kinder.
+
+## 2. ARBEITE IN ZWEI SCHRITTEN (Reihenfolge einhalten)
+
+**SCHRITT 1 — Schreibplan (Feld "plan"):**
+Überlege zuerst in 2–4 Sätzen: Was ist der rote Faden / Blickwinkel dieses Kinderartikels, und welche KONKRETEN Anker, Szenen oder Beispiele machen das Thema für Kinder anschaulich und spannend? (z. B. eine weltberühmte konkrete Art, ein einzelnes berühmtes Tier/Exemplar, eine Entdecker-Geschichte, ein erlebbarer Vorgang). Leite den Plan NUR aus dem Primärartikel ab, erfinde nichts.
+
+**SCHRITT 2 — Companions (Feld "companions"):**
+Wähle DANN die Begleitartikel, die genau diese geplanten Anker mit echtem Wikipedia-Stoff füllen. Jeder Companion muss einem Anker oder Blickwinkel aus deinem Plan dienen — nimm keinen Companion ohne Bezug zum Plan.
+
 Wähle Companions, die ECHTE neue Blickwinkel eröffnen, statt bloß viele kleine Phänomene des Hauptthemas aufzuzählen. Ein starker Companion bereichert den Artikel um eine Perspektive, die das Primärthema allein nicht zeigen kann. AUSNAHME (ausdrücklich erwünscht): Das EINE ikonische, konkrete Aushängeschild des Themas — z. B. eine weltberühmte Dinosaurier-Art wie Tyrannosaurus rex, ein weltbekanntes Einzeltier oder -exemplar — ist gerade für jüngere Kinder ein besonders starker, anschaulicher Anker und DARF als Companion gewählt werden, obwohl es Teil des Hauptthemas ist. Höchstens EIN solches Aushängeschild; die übrigen Companions weiterhin für neue Blickwinkel.
 
-## 2. AUSWAHL-VORGABEN
+## 3. AUSWAHL-VORGABEN
 
 **A. Menge & Qualität (Das APPEAL-Level entscheidet)**
 - **APPEAL low:** Wähle 2–3 Companions.
@@ -373,9 +383,9 @@ Wähle Companions, die ECHTE neue Blickwinkel eröffnen, statt bloß viele klein
 - **Reine Bezeichnungen:** Fotos oder bloße Namen (z.B. "Blue Marble") sind keine echten Themen.
 - **Trauma ohne Sachkern:** Ernste Themen (Unglücke, Konflikte) sind erlaubt, aber nur, wenn sie einen kindgerechten, lehrreichen Kern haben (Mut, Technik, Ausgrabung) – niemals für reinen Schockwert.
 
-## 3. AUSGABE
-Generiere AUSSCHLIESSLICH ein valides JSON-Objekt mit den exakten deutschsprachigen Wikipedia-Lemmata. Kein Markdown, keine Erklärungen.
-{{"companions": ["Lemma1", "Lemma2", "Lemma3"]}}"""
+## 4. AUSGABE
+Generiere AUSSCHLIESSLICH ein valides JSON-Objekt: zuerst dein Schreibplan, dann die exakten deutschsprachigen Wikipedia-Lemmata. Kein Markdown, keine Erklärungen.
+{{"plan": "…", "companions": ["Lemma1", "Lemma2", "Lemma3"]}}"""
 
 
 # ── Legacy-Funktionen (von batch_run.py importiert) ──────────────────────────
@@ -470,6 +480,25 @@ def validate_companions(
 
 # ── Phase 1: Kompass-Auswahl ─────────────────────────────────────────────────
 
+# Schreibplan des letzten KOMPASS-Calls — Stage 1 kann ihn nach dem Aufruf lesen
+# und in den Checkpoint schreiben (spaetere Weitergabe an Stage 2 / Pass 1).
+_LAST_KOMPASS_PLAN: str = ""
+
+
+def _capture_kompass(data: dict) -> list[str]:
+    """Stasht den Schreibplan modulweit + loggt ihn, gibt die Companion-Liste zurueck."""
+    global _LAST_KOMPASS_PLAN
+    _LAST_KOMPASS_PLAN = str(data.get("plan", "") or "").strip()
+    if _LAST_KOMPASS_PLAN:
+        log.info("  Kompass-Schreibplan: %s", _LAST_KOMPASS_PLAN)
+    return [str(c) for c in data.get("companions", [])][:10]
+
+
+def get_last_kompass_plan() -> str:
+    """Schreibplan des zuletzt ausgefuehrten select_companions_raw (oder '')."""
+    return _LAST_KOMPASS_PLAN
+
+
 def select_companions_raw(
     client: genai.Client,
     thema: str,
@@ -482,7 +511,13 @@ def select_companions_raw(
     Provider/Modell aus stage_models["kompass"]. anthropic → forced tool-use (claude_client),
     gemini → response_schema + 503-Fallback (unverändert). Prompts bleiben wortgleich.
     """
-    lead = primary_text[:1500]
+    # Reset: sonst leckt bei einem gescheiterten Call (0 Companions) der Plan des
+    # vorigen Topics durch get_last_kompass_plan() (Bug im Nachmittags-Flash-Test).
+    global _LAST_KOMPASS_PLAN
+    _LAST_KOMPASS_PLAN = ""
+    # Plan-first: KOMPASS soll erst den Schreibplan skizzieren, dann Companions
+    # dazu waehlen -> mehr Hauptartikel-Kontext (nicht nur die Einleitung).
+    lead = primary_text[:6000]
     prompt = COMPANION_PROMPT_TMPL.format(thema=thema, lead=lead, appeal=appeal)
 
     from stage_models import get_stage_config
@@ -502,7 +537,7 @@ def select_companions_raw(
             lu = get_last_usage()
             usage = {"input_tok": lu.get("input_tokens", 0), "output_tok": lu.get("output_tokens", 0),
                      "cached_tok": 0, "thoughts_tok": 0}
-            return [str(c) for c in data.get("companions", [])][:10], usage
+            return _capture_kompass(data), usage
         except Exception as e:
             log.error("  Kompass (anthropic) Fehler: %s", e)
             return [], {}
@@ -514,12 +549,13 @@ def select_companions_raw(
     companions_schema = types.Schema(
         type=types.Type.OBJECT,
         properties={
+            "plan": types.Schema(type=types.Type.STRING),
             "companions": types.Schema(
                 type=types.Type.ARRAY,
                 items=types.Schema(type=types.Type.STRING),
             )
         },
-        required=["companions"],
+        required=["plan", "companions"],
     )
 
     max_attempts = 6
@@ -548,7 +584,7 @@ def select_companions_raw(
                 }
             text = (response.text or "").strip()
             data = json.loads(text)
-            return [str(c) for c in data.get("companions", [])][:10], usage
+            return _capture_kompass(data), usage
         except json.JSONDecodeError as e:
             log.warning("  Phase 1 JSON-Fehler (V%d): %s | raw=%r", attempt, e, (response.text or "")[:120])
             return [], {}
@@ -595,7 +631,7 @@ def select_companions_raw(
             usage = {}  # kein Usage-Tracking für Fallback
             log.warning("  Kompass Fallback erfolgreich: %d Companions",
                         len(data.get("companions", [])))
-            return [str(c) for c in data.get("companions", [])][:10], usage
+            return _capture_kompass(data), usage
         except Exception as fe:
             log.error("  Kompass Fallback auch gescheitert: %s", fe)
             return [], {}
