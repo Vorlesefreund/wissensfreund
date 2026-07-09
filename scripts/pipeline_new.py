@@ -66,17 +66,6 @@ def _source_block(thema: str, primary_text: str,
 
 def _level_register(stufe: int) -> str:
     return {
-        1: "Stufe 1 (ca. 4–6 Jahre, wird meist vorgelesen): kurze, einfache Sätze "
-           "aus Alltagswörtern, aber zu einer warmen, lebendigen kleinen Erzählung "
-           "VERWOBEN — kein Stakkato aus zusammenhanglosen Sätzen. Verbinde die Sätze "
-           "mit einfachen Bindewörtern (und, dann, weil, so, deshalb, denn) und "
-           "variiere die Satzlänge, damit ein Lesefluss entsteht. Du DARFST das Kind "
-           "direkt ansprechen, eine kleine Frage stellen oder auch mit 'Stell dir "
-           "vor …' beginnen — variiere aber die Einstiege und mach 'Stell dir vor …' "
-           "nicht zur Standard-Formel. Beschreibe konkret "
-           "und bildhaft, was man sehen, hören oder fühlen könnte — AUSSCHLIESSLICH "
-           "aus belegten Fakten, ohne erfundene Gefühle, Motive oder Verstärker. "
-           "Höchstens ein neuer Gedanke pro Satz.",
         2: "Stufe 2 (ca. 8–9 Jahre): erste Fachbegriffe, aber sofort erklärt. "
            "Etwas längere Sätze mit klarem roten Faden und gutem Lesefluss — sachlich, "
            "aber nicht trocken: ab und zu ein anschauliches Bild oder eine Überleitung, "
@@ -179,7 +168,7 @@ PASS1_SYSTEM = (
     "vor trockenen Detail-/Fachfakten (z. B. Minerale wie Obsidian, chemische "
     "Klassifikationen). Je jünger die Stufe, desto stärker dieser Vorzug. Was in den "
     "Plan kommt, bestimmt auch, welche Bilder später passen — plane so, dass Text und "
-    "mögliche Bilder dasselbe zeigen. Gib NUR den Plan als JSON aus."
+    "mögliche Bilder dasselbe zeigen. Geht es um ein Lebewesen, plane — sofern die Quelle es hergibt — auch Herkunft/Abstammung und die nächsten Verwandten ein und stelle dabei einen verbreiteten Irrtum klar (z. B. dass der Elefant NICHT vom Mammut abstammt, sondern beide nur miteinander verwandt sind). Gib NUR den Plan als JSON aus."
 )
 
 PASS1_SCHEMA = {
@@ -249,7 +238,7 @@ PASS2_SYSTEM = (
     "AUSSCHLIESSLICH belegte Fakten aus dem Quelltext; erfinde keine Gefühle, Motive "
     "oder Verstärker. Bei ernsten Themen nüchtern bleiben, keine beschönigenden "
     "Wörter für Leid oder Gewalt. Wähle den Einstieg frei, aber passend zum Ton des "
-    "Themas (ernst = nüchtern, kein dramatisierendes Szenenbild). „Stell dir vor …“ "
+    "Themas (ernst = nüchtern, kein dramatisierendes Szenenbild). Führe mit dem Einstieg NICHT auf eine falsche Fährte — beginne den Artikel nicht mit einem anderen Gegenstand, von dem du das Thema erst abgrenzt (z. B. einen Dinosaurier-Artikel nicht mit Eidechsen eröffnen). Steig beim eigentlichen Thema ein. „Stell dir vor …“ "
     "ist ein guter Einstieg — aber mach ihn NICHT zur Standard-Formel für jeden "
     "Artikel. Variiere die Einstiege bewusst: mal eine überraschende Tatsache, eine "
     "kleine Frage, eine konkrete Szene, eine direkte Ansprache — und ab und zu auch "
@@ -578,9 +567,9 @@ def build_sections(markdown: str, fallback_heading: str) -> list[dict]:
 # ══════════════════════════════════════════════════════════════════════════════
 
 # Box-Budget je Stufe (Obergrenze): S1/S2 bis 2, S3 bis 3.
-BOX_BUDGET_MAX = {1: 2, 2: 2, 3: 3}
+BOX_BUDGET_MAX = {2: 2, 3: 3}
 # Box-Länge je Stufe (Richtwert Wörter, im Prompt): knapp halten, kein Absatz.
-BOX_MAXWORDS = {1: 18, 2: 28, 3: 35}
+BOX_MAXWORDS = {2: 28, 3: 35}
 _BOX_TYPES = {"wow", "fakt", "warnung", "stimmt_das"}
 
 # Leichter Anti-Redundanz-Guard: Box nur bei STARKER Wort-Überlappung mit EINEM
@@ -671,8 +660,11 @@ def pass3_boxes(sections: list[dict], thema: str, stufe: int, primary_text: str,
         "Je Box: {type (wow|fakt|warnung|stimmt_das), text, heading (aus der Liste — "
         "der Abschnitt, an den die Box anknüpft), reveal_text (NUR bei stimmt_das: die "
         "Auflösung)}. wow = konkrete überraschende Tatsache; warnung = themen"
-        "spezifischer Hinweis; stimmt_das = Frage, die NICHT abfragt, was im Artikel "
-        "schon klar dasteht. Selbst-Check je Box: (1) Steht der Fakt schon im Artikel? "
+        "spezifischer Hinweis; stimmt_das = greift einen VERBREITETEN Irrtum oder ein "
+        "gängiges Vorurteil zum Thema auf und räumt damit auf (Frage → Auflösung, die "
+        "den Irrtum mit einem belegten Fakt aus der Quelle korrigiert) — KEIN bloß "
+        "skurriler Einzelfakt und keine Frage nach etwas, das im Artikel schon klar "
+        "dasteht. Selbst-Check je Box: (1) Steht der Fakt schon im Artikel? "
         "→ verwerfen. (2) Knüpft die Box an ein Thema an, das der zugeordnete Abschnitt "
         "wirklich behandelt? Wenn nein → verwerfen. Nichts Passendes → boxes: []."
     )
@@ -999,12 +991,6 @@ PASS5_SYSTEM = (
 
 def _quiz_difficulty(stufe: int) -> str:
     return {
-        1: "SCHWIERIGKEIT S1 (4–6 J.): einfache Erinnerungsfragen zu einem klaren "
-           "Kernfakt. Die falschen Optionen sind ECHTE Dinge/Tiere aus der Welt des "
-           "Artikels, die ein kleines Kind wirklich raten oder glauben könnte (eine "
-           "typische kindliche Verwechslung) — NIEMALS erfundene Wörter, Wortdopplungen "
-           "('riesige Riesen') oder offensichtlicher Unsinn ('aus grünen Blättern'). "
-           "Das Kind soll kurz überlegen müssen, nicht die alberne Option weglachen.",
         2: "SCHWIERIGKEIT S2 (8–9 J.): mittlere Fragen; die falschen Optionen sind "
            "plausible Beinah-Treffer aus demselben Themenfeld.",
         3: "SCHWIERIGKEIT S3 (10–12 J.): anspruchsvoll — prüfe VERSTÄNDNIS "
@@ -1023,8 +1009,8 @@ PASS5_SCHEMA = {
             "richtige_nr": {"type": "integer"}}}}},
 }
 
-QUIZ_TARGET = {1: 3, 2: 3, 3: 4}
-QUIZ_MAX = {1: 3, 2: 3, 3: 5}
+QUIZ_TARGET = {2: 3, 3: 4}
+QUIZ_MAX = {2: 3, 3: 5}
 
 
 def pass5_quiz(sections: list[dict], thema: str, stufe: int, model: str,

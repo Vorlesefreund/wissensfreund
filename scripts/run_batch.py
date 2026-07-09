@@ -2090,7 +2090,7 @@ def main() -> None:
         help="Top-N nach production_rank aus catalog_full.json",
     )
     parser.add_argument(
-        "--stufen", nargs="+", type=int, choices=[1, 2, 3], default=[1, 2, 3],
+        "--stufen", nargs="+", type=int, choices=[2, 3], default=[2, 3],
     )
     parser.add_argument(
         "--run-id", default=None,

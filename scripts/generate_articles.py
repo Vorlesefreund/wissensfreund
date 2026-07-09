@@ -51,7 +51,7 @@ RETRY_BACKOFF     = 5      # Sekunden, verdoppelt bei jedem Retry
 # Plausibilitätsgrenzen für Qualitätsprüfung
 MIN_SENTENCES_PER_ARTICLE = {"1": 8,  "2": 15, "3": 25}
 MAX_SENTENCES_PER_ARTICLE = {"1": 30, "2": 60, "3": 100}
-MIN_QUIZ_QUESTIONS        = {"1": 3,  "2": 3,  "3": 4}
+MIN_QUIZ_QUESTIONS        = {"2": 3,  "3": 4}  # S1 entfernt
 
 
 # ─────────────────────────────────────────────

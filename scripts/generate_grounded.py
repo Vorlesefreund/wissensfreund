@@ -97,7 +97,7 @@ MAX_IMG_COMPANION = 6
 COMPANION_CAP = {"low": 4, "medium": 5, "high": 6}
 
 # Ergiebigkeits-Bänder je Stufe: (Wlo, Whi). Wortziel = Kurve über Ergiebigkeits-Score.
-ERG_BANDS: dict[int, tuple[int, int]] = {1: (110, 250), 2: (100, 400), 3: (150, 650)}
+ERG_BANDS: dict[int, tuple[int, int]] = {2: (150, 600), 3: (225, 975)}  # S1 entfernt (2026-07-09); S2/S3 +50%
 RETRY_FLOOR_FRAC   = 0.70   # Retry-Untergrenze als Bruchteil des Ziels (nur klares Untertreiben nachfordern)
 ERG_FALLBACK_SCORE = 6      # medium, wenn Thema (noch) nicht gerated — sichtbar geloggt
 APPEAL_TIER_HIGH   = 7.0    # Erg-Mittel ≥ → high   (steuert Companion-/Bildmenge)
@@ -105,7 +105,7 @@ APPEAL_TIER_MED    = 4.0    # Erg-Mittel ≥ → medium, sonst low
 CAP_GRACE_FRAC     = 0.05   # Toleranz über wmax, bevor getrimmt wird (0.0 = strikt ≤ Cap)
 TRIM_MAX_ATTEMPTS  = 2      # max. Trim-Pässe, danach review_flag
 
-AGE_RANGES = {1: "4-6 Jahre", 2: "7-9 Jahre", 3: "10-12 Jahre"}
+AGE_RANGES = {2: "7-9 Jahre", 3: "10-12 Jahre"}  # S1 (4-6 J.) ersatzlos entfernt
 
 
 def _load_ergiebigkeit() -> dict[str, dict]:
@@ -157,8 +157,8 @@ def appeal_for(thema: str, job_appeal: str | None = None) -> tuple[str, str]:
     """
     rec = _ERGIEBIGKEIT.get(thema.strip().lower())
     if rec is not None:
-        s = [int(rec.get(f"S{i}", ERG_FALLBACK_SCORE)) for i in (1, 2, 3)]
-        mean = sum(s) / 3
+        s = [int(rec.get(f"S{i}", ERG_FALLBACK_SCORE)) for i in (2, 3)]
+        mean = sum(s) / 2
         tier = "high" if mean >= APPEAL_TIER_HIGH else ("medium" if mean >= APPEAL_TIER_MED else "low")
         return tier, "ergiebigkeit"
     if job_appeal in ("low", "medium", "high"):
@@ -1774,8 +1774,8 @@ def main() -> None:
         help="Top-N Themen nach production_rank aus catalog_full.json",
     )
     parser.add_argument(
-        "--stufen", nargs="+", type=int, choices=[1, 2, 3], default=[1, 2, 3],
-        help="Zu generierende Stufen (default: 1 2 3)",
+        "--stufen", nargs="+", type=int, choices=[2, 3], default=[2, 3],
+        help="Zu generierende Stufen (default: 2 3; S1 entfernt)",
     )
     parser.add_argument(
         "--run-id", default=None,

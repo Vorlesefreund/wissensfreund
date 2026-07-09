@@ -492,7 +492,7 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Wissensfreund Artikel-Pipeline — Schritt 1: prepare_articles")
     p.add_argument("--whitelist",   required=True,  type=Path, help="Pfad zur wissensfreund_categories_whitelist.json")
     p.add_argument("--out-dir",     default="jobs", type=Path, help="Ausgabeverzeichnis für Batch-JSONs")
-    p.add_argument("--age-levels",  nargs="+", type=int, default=[1, 2, 3], choices=[1, 2, 3])
+    p.add_argument("--age-levels",  nargs="+", type=int, default=[2, 3], choices=[2, 3])
     p.add_argument("--batch-size",  type=int, default=50, help="Jobs pro Batch-Datei")
     p.add_argument("--min-length",  type=int, default=500,   help="Min. Wikipedia-Textlänge (Zeichen)")
     p.add_argument("--max-length",  type=int, default=50000, help="Max. Wikipedia-Textlänge (Zeichen)")

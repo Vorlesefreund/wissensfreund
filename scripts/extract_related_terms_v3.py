@@ -351,7 +351,7 @@ def main():
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--title',    required=True)
-    parser.add_argument('--age',      type=int, default=2, choices=[1,2,3])
+    parser.add_argument('--age',      type=int, default=2, choices=[2,3])
     parser.add_argument('--index',    default='article_index.json')
     parser.add_argument('--wishlist', default='wishlist.json')
     args = parser.parse_args()
