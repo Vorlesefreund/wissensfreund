@@ -20,7 +20,7 @@ STAGE_MODELS = {
     "generator":      {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": None},
     "trim":           {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": None},
     "box_repair":     {"provider": "gemini",    "model": "gemini-3.5-flash",  "fallback": None},
-    "lektorat":       {"provider": "anthropic", "model": "claude-sonnet-4-6", "fallback": None},
+    "lektorat":       {"provider": "anthropic", "model": "claude-sonnet-5",   "fallback": None},
 }
 
 

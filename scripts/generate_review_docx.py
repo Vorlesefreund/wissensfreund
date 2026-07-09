@@ -266,26 +266,46 @@ def _finding_lookups(findings):
 
 
 def _render_tracked_change(left_cell, f: dict) -> None:
+    """Zeigt den Artikeltext IMMER als EINE normal gesetzte Zeile — genau die
+    Fassung, die wirklich im Artikel steht — und die Lektorats-Änderung darunter
+    als klein gesetzte Notiz. So liest sich der Artikel flüssig; nichts wirkt
+    fälschlich gedoppelt (kein durchgestrichenes Original neben der Neufassung).
+
+    - Angewandte Korrektur (status=auto_angewandt): Body = neue Fassung,
+      Notiz = „vorher …“ + Beleg.
+    - Offener Vorschlag (PRÜFEN / nicht angewandt): Body = Original,
+      Notiz = Vorschlag (grün) + Grund.
+    """
     p = left_cell.paragraphs[0]
-    _run(p, f"[{f.get('verdikt','')}] ", 11, italic=True, color=GRAY)
     orig = _strip_box_prefix(f.get("claim_original") or "")
     new  = _strip_box_prefix(f.get("korrektur_neu") or f.get("korrektur_vorschlag") or "")
-    _run(p, orig, 11, color=RED, strike=True)
-    if new:
-        _run(p, "  ", 11)
-        _run(p, new, 11, bold=True, color=GREEN)
-    verdikt = f.get("verdikt", "")
-    if verdikt == "PRÜFEN":
-        problem = f.get("problem") or ""
-        beleg   = f.get("beleg") or ""
-        if problem:
-            pp = left_cell.add_paragraph()
-            _run(pp, "Quelle: " + problem[:300] + ("…" if len(problem) > 300 else ""),
-                 size=9, italic=True, color=GRAY)
+    applied = f.get("status") == "auto_angewandt"
+
+    if applied and new:
+        _run(p, new, 11)  # der Artikel enthält die korrigierte Fassung
+        tag = ("Lektorat "
+               + "·".join(x for x in (f.get("phase", ""), f.get("tier", "")) if x)).strip()
+        note = left_cell.add_paragraph()
+        _run(note, f"✎ {tag}: vorher „{orig}“", size=9, italic=True, color=GRAY)
+        beleg = f.get("beleg_fuer_korrektur") or ""
         if beleg:
-            pb = left_cell.add_paragraph()
-            _run(pb, "Beleg: " + beleg[:300] + ("…" if len(beleg) > 300 else ""),
+            bp = left_cell.add_paragraph()
+            _run(bp, "Beleg: " + beleg[:250] + ("…" if len(beleg) > 250 else ""),
                  size=9, italic=True, color=GRAY)
+        return
+
+    # Offener Vorschlag — der Artikel zeigt weiterhin das Original.
+    _run(p, orig, 11)
+    if new:
+        sp = left_cell.add_paragraph()
+        _run(sp, f"⟶ Vorschlag ({f.get('verdikt','PRÜFEN')}): ",
+             size=9, italic=True, color=GRAY)
+        _run(sp, new, 9, italic=True, color=GREEN)
+    begr = f.get("beleg_oder_begruendung") or f.get("problem") or f.get("beleg") or ""
+    if begr:
+        gp = left_cell.add_paragraph()
+        _run(gp, "Grund: " + begr[:300] + ("…" if len(begr) > 300 else ""),
+             size=9, italic=True, color=GRAY)
 
 
 def add_box_cell(left, box) -> bool:

@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-07T14:01:57Z -->
+<!-- updated: 2026-07-09T18:32:17Z -->
 <!-- Ältere Banner-Historie → STATUS_ARCHIV.md · Wissen → WISSEN_*.md · Details → PROJEKTDOKUMENT.md -->
 
 **Wissensfreund:** Flutter-App für Kinder (3 Altersstufen: S1 4–6, S2 7–9, S3 10–12),
@@ -7,8 +7,15 @@ KI-generierte Artikel streng aus geladenem Artikel-Quelltext (nie Trainingswisse
 Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-Pipeline
 (`scripts/pipeline_new.py` / `lektorat_new.py`, Fallback-sicher, JSON-Schema unverändert).
 
-## Zuletzt abgeschlossen (Stand 2026-07-07)
+## Zuletzt abgeschlossen (Stand 2026-07-09)
 
+- **5-Fixes-Batch (Review-Feedback batch_new_20260710):**
+  (1) **Lektorat-Modell → `claude-sonnet-5`** (besser + günstiger als sonnet-4-6; `stage_models`, `lektorat_common`, `verify`).
+  (2) **Review-Docx** zeigt Korrekturen sauber: finaler Satz einmal als Body, Änderung als klein gesetzte Notiz (keine Scheindopplung) — `generate_review_docx._render_tracked_change`.
+  (3) **Lektorat-Beleg-Gate** um `typ`=WIDERSPRUCH/UNGEDECKT erweitert: Streichung quellfremder Details wird jetzt angewandt (verifiziert: Phrase im Alt-Satz, weg im Neu-Satz, nicht in Quelle); + Sinn/Zahlen-Regel (falsche Zahl → belegte Zahl, nie zu Unfug verkürzen).
+  (4) **PASS3 stimmt_das** enger (nur echte verbreitete Irrtümer, keine Datums-/Detailfragen); **PASS1/PASS2** Abschnitts-Reihenfolge (Bedeutung/Symbol ans Ende) + weiche Übergänge.
+  (5) **Bild**: Hero muss Person/Tätigkeit zeigen (Gladiator statt Helm), Caption nur Sichtbares (keine erfundenen Rauchwolken).
+  Alle kompiliert, `verify` = 0 Hart-FAIL, Streichungs-Logik + Docx-Rendering smoke-getestet.
 - **Listen-Konsolidierung „Ein Brett" (Phase A/B/C):** `catalog_review_master.xlsx` ist die
   EINZIGE Datei zum Arbeiten. **Workflow:** Master editieren → `python -X utf8 scripts/build_all.py`
   erzeugt alle abgeleiteten Listen (catalog_full/reserve, eignung_exclude, ergiebigkeit_scores)

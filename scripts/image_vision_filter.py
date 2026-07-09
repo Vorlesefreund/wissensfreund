@@ -171,6 +171,11 @@ SCHRITT 4 — RELEVANZ & HERO:
     gegenstand/Protagonisten des Themas klar, attraktiv und repräsentativ zeigt.
     Bauwerke am Rande, Karten, Diagramme, Symbole, Porträts von Nebenfiguren,
     Texttafeln → hero_candidate=false.
+    Geht es im Thema um eine PERSON oder ein EREIGNIS, muss der Hero die Person
+    selbst bzw. ihre Tätigkeit zeigen (z. B. bei "Spartacus" ein Gladiator, nicht
+    ein beliebiger römischer Helm oder eine Waffe der Epoche). Ein bloß
+    zeitgenössisches Umfeld-Objekt (Helm, Rüstung, Gebäude, Alltagsgegenstand)
+    ANSTELLE des Protagonisten → hero_candidate=false und relevanz ≤ 4.
 
   confidence ("hoch" | "mittel" | "niedrig"): Sicherheit deiner ab_stufe-Einschätzung.
 

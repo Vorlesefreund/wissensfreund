@@ -11,7 +11,7 @@ Zwei fokussierte, gegroundete Pässe, feste Reihenfolge A→B:
 
 Grounding-Regel (eisern): geprüft wird gegen den Quelltext-SNAPSHOT der
 Generierungszeit (Phase-1-Sourcing), nie gegen ein nachgeladenes Exemplar.
-Modell: Anthropic Sonnet (claude-sonnet-4-6), temperature=0 (reproduzierbar).
+Modell: Anthropic Sonnet (claude-sonnet-5), temperature=0 (reproduzierbar).
 Prompt-Caching über cached_prefix (Quellblock) — Pass B trifft den A-Cache.
 
 Kein Rückgriff auf die alte Monolith-Logik (lektorat_common). Das Ausgabeformat
@@ -28,7 +28,7 @@ from generate_grounded import count_article_words, COMPANION_CHAR_CAP
 
 log = logging.getLogger("lektorat_new")
 
-LEKTORAT_MODEL = stage_models.get_stage_config("lektorat")["model"]  # claude-sonnet-4-6
+LEKTORAT_MODEL = stage_models.get_stage_config("lektorat")["model"]  # claude-sonnet-5
 # COMPANION_CHAR_CAP (kanonisch = 30_000) importiert — MUSS mit pipeline_new._source_block
 # übereinstimmen, sonst prüft das Lektorat gegen einen anderen Snapshot als die Generierung.
 
@@ -93,8 +93,23 @@ LEKTORAT_A_SYSTEM = (
     "('flüssig wie eine Suppe') sind erlaubt und KEIN ungedeckter Zusatz, solange sie "
     "keinen neuen FAKT behaupten — nicht melden, nicht entfernen. "
     "Für jede Meldung gib den minimal korrigierten Satz (quellenbasiert, "
-    "gleiches kindgerechtes Register, kleinster Eingriff) und ein WÖRTLICHES Quellzitat "
-    "(beleg) an. stufe=SILENT für kleine, klar belegbare Korrekturen; stufe=KORRIGIERT "
+    "gleiches kindgerechtes Register, kleinster Eingriff), ein WÖRTLICHES Quellzitat "
+    "(beleg) und den typ an.\n"
+    "SINN WAHREN (wichtig): Korrigiere so, dass der Satz WEITERHIN eine sinnvolle, "
+    "vollständige Aussage macht — verschlimmbessere nicht. Ist eine ZAHL oder MENGE "
+    "falsch, ersetze sie durch die Zahl/Menge, die die Quelle WIRKLICH nennt; streiche "
+    "die Angabe NICHT zu etwas Nichtssagendem. Beispiel: Quelle sagt „über eine Million "
+    "Kinder“ → richtig ist „über eine Million Kinder“, FALSCH wäre bloß „Kinder“ (das "
+    "könnten auch zwei sein).\n"
+    "typ bestimmt, wie der beleg zu lesen ist:\n"
+    "- typ=WIDERSPRUCH: Die Quelle sagt es ANDERS. Der korrigierte Satz muss durch den "
+    "beleg gedeckt sein — beleg = wörtliches Zitat AUS der Quelle, das die neue Aussage "
+    "trägt.\n"
+    "- typ=UNGEDECKT: Ein konkretes Detail, das die Quelle NICHT hergibt. Korrigiere, "
+    "indem du genau dieses Detail ENTFERNST oder verallgemeinerst (sonst nichts ändern) "
+    "— beleg = die exakte, ungedeckte Phrase, die du entfernst (sie steht so NICHT in "
+    "der Quelle).\n"
+    "stufe=SILENT für kleine, klar belegbare Korrekturen; stufe=KORRIGIERT "
     "für größere, aber klare. Nicht eindeutig auflösbar → pruefen (nicht corrections). "
     "Ist alles gedeckt: leere Listen. Erfinde nichts."
 )
@@ -104,10 +119,11 @@ LEKTORAT_A_SCHEMA = {
     "required": ["corrections", "pruefen"],
     "properties": {
         "corrections": {"type": "array", "items": {"type": "object",
-            "required": ["satz_id", "korrektur_neu", "stufe", "beleg"], "properties": {
+            "required": ["satz_id", "korrektur_neu", "stufe", "beleg", "typ"], "properties": {
                 "satz_id": {"type": "string"},
                 "korrektur_neu": {"type": "string"},
                 "stufe": {"type": "string", "enum": ["SILENT", "KORRIGIERT"]},
+                "typ": {"type": "string", "enum": ["WIDERSPRUCH", "UNGEDECKT"]},
                 "beleg": {"type": "string"}}}},
         "pruefen": {"type": "array", "items": {"type": "object",
             "required": ["satz_id", "korrektur_vorschlag", "problem", "begruendung"],
@@ -207,6 +223,34 @@ def _apply_corrections(article: dict, corrections: list[dict], source_norm: str,
         alt = sent["text"]
         if _norm(neu) == _norm(alt):
             continue  # keine echte Änderung
+        typ = (c.get("typ") or "WIDERSPRUCH").upper()
+
+        # Pass A, typ=UNGEDECKT: Streichung/Verallgemeinerung eines ungedeckten
+        # Details. Hier ist KEIN Positiv-Beleg in der Quelle möglich (man entfernt ja
+        # etwas Ungedecktes). Verifizierbar ist die Streichung stattdessen so: die im
+        # beleg genannte Phrase steht im ALTEN Satz, fehlt im NEUEN und kommt in der
+        # Quelle NICHT vor. Nur dann anwenden — sonst dem Review als Vorschlag geben.
+        if phase == "A" and typ == "UNGEDECKT":
+            bn = _norm(beleg)
+            streichung_ok = (len(bn) >= 4 and bn in _norm(alt)
+                             and bn not in _norm(neu)
+                             and not _beleg_in_source(beleg, source_norm))
+            if streichung_ok:
+                sent["text"] = neu
+                findings.append({
+                    "claim_original": alt, "verdikt": "KORRIGIERT", "tier": "STREICHUNG",
+                    "beleg_oder_begruendung": f"ungedecktes Detail entfernt: „{beleg}“",
+                    "korrektur_neu": neu, "beleg_fuer_korrektur": beleg,
+                    "status": "auto_angewandt", "phase": phase})
+            else:
+                findings.append({
+                    "claim_original": alt, "verdikt": "PRÜFEN", "tier": "VORSCHLAG",
+                    "beleg_oder_begruendung":
+                        f"[{phase}] Streichung nicht verifizierbar — nicht angewandt",
+                    "korrektur_neu": neu, "beleg_fuer_korrektur": beleg,
+                    "status": "vorschlag_offen"})
+            continue
+
         beleg_ok = _beleg_in_source(beleg, source_norm)
         if not beleg_ok:
             # Re-Grounding verletzt → nicht anwenden, als Vorschlag flaggen.

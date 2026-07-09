@@ -168,7 +168,7 @@ PASS1_SYSTEM = (
     "vor trockenen Detail-/Fachfakten (z. B. Minerale wie Obsidian, chemische "
     "Klassifikationen). Je jünger die Stufe, desto stärker dieser Vorzug. Was in den "
     "Plan kommt, bestimmt auch, welche Bilder später passen — plane so, dass Text und "
-    "mögliche Bilder dasselbe zeigen. Geht es um ein Lebewesen, plane — sofern die Quelle es hergibt — auch Herkunft/Abstammung und die nächsten Verwandten ein und stelle dabei einen verbreiteten Irrtum klar (z. B. dass der Elefant NICHT vom Mammut abstammt, sondern beide nur miteinander verwandt sind). Gib NUR den Plan als JSON aus."
+    "mögliche Bilder dasselbe zeigen. Geht es um ein Lebewesen, plane — sofern die Quelle es hergibt — auch Herkunft/Abstammung und die nächsten Verwandten ein und stelle dabei einen verbreiteten Irrtum klar (z. B. dass der Elefant NICHT vom Mammut abstammt, sondern beide nur miteinander verwandt sind). Ordne die Abschnitte in eine logische, zusammenhängende Reihenfolge (chronologisch oder thematisch: Hinführung → Kern/Verlauf → Abschluss). Ein Abschnitt über Bedeutung, Vermächtnis, Nachwirkung oder das Symbol, zu dem jemand/etwas wurde, gehört ans ENDE — er darf einen laufenden Erzählstrang (z. B. den Tod einer Person) nicht unterbrechen. Gib NUR den Plan als JSON aus."
 )
 
 PASS1_SCHEMA = {
@@ -230,7 +230,11 @@ PASS2_SYSTEM = (
     "zähl nicht auf, keine dichten Zahlen-Ketten. Baue einen klaren Faden mit "
     "Anfang → Mitte → Ende und einer Ursache-Wirkung, die das Kind nachvollziehen "
     "kann — GERADE für die jüngste Stufe: eine vollständige Geschichte, die für sich "
-    "steht und ein Kind mitnimmt, kein komprimierter Fakten-Abriss. ERKLÄRE "
+    "steht und ein Kind mitnimmt, kein komprimierter Fakten-Abriss. Sorge für WEICHE "
+    "ÜBERGÄNGE: Jeder Abschnitt und jeder Absatz knüpft an den vorherigen an — kein "
+    "harter Themensprung und kein loser Einzelsatz, der unvermittelt aus dem Nichts "
+    "kommt; führe einen neuen Aspekt mit einer kurzen Überleitung ein, statt ihn "
+    "danebenzustellen. ERKLÄRE "
     "Schwieriges oder Abstraktes ANSCHAULICH — mit einem konkreten Vergleich oder "
     "Beispiel aus der Lebenswelt eines Kindes DIESER Stufe, damit es das Konzept "
     "wirklich versteht (der Vergleich darf veranschaulichen, muss aber auf belegten "
@@ -660,13 +664,21 @@ def pass3_boxes(sections: list[dict], thema: str, stufe: int, primary_text: str,
         "Je Box: {type (wow|fakt|warnung|stimmt_das), text, heading (aus der Liste — "
         "der Abschnitt, an den die Box anknüpft), reveal_text (NUR bei stimmt_das: die "
         "Auflösung)}. wow = konkrete überraschende Tatsache; warnung = themen"
-        "spezifischer Hinweis; stimmt_das = greift einen VERBREITETEN Irrtum oder ein "
-        "gängiges Vorurteil zum Thema auf und räumt damit auf (Frage → Auflösung, die "
-        "den Irrtum mit einem belegten Fakt aus der Quelle korrigiert) — KEIN bloß "
-        "skurriler Einzelfakt und keine Frage nach etwas, das im Artikel schon klar "
-        "dasteht. Selbst-Check je Box: (1) Steht der Fakt schon im Artikel? "
-        "→ verwerfen. (2) Knüpft die Box an ein Thema an, das der zugeordnete Abschnitt "
-        "wirklich behandelt? Wenn nein → verwerfen. Nichts Passendes → boxes: []."
+        "spezifischer Hinweis; stimmt_das = greift einen ECHTEN, WEIT VERBREITETEN "
+        "Irrtum auf, den viele Kinder ODER Erwachsene über das Thema tatsächlich glauben "
+        "(ein gängiges Vorurteil / Alltagsmissverständnis), und räumt damit auf (Frage → "
+        "Auflösung mit belegtem Quellfakt). Der Irrtum muss so verbreitet sein, dass sich "
+        "Leser darin wiedererkennen. VERBOTEN als stimmt_das: bloß skurrile Einzelfakten "
+        "sowie Detail-, Datums- oder Fachkorrekturen (z. B. NICHT die Frage, ob Pompeji "
+        "wirklich im Jahr 79 verschüttet wurde, oder ob der Krieg erst an Tag X offiziell "
+        "erklärt wurde — solche Daten glaubt niemand aktiv falsch, das sind reine "
+        "Detailfragen) und keine Frage nach etwas, das im Artikel schon klar dasteht. "
+        "Findest du KEINEN echten verbreiteten Irrtum, nimm KEINE stimmt_das-Box (wähle "
+        "wow/fakt oder lass die Box weg). Selbst-Check je Box: (1) Steht der Fakt schon "
+        "im Artikel? → verwerfen. (2) Knüpft die Box an ein Thema an, das der zugeordnete "
+        "Abschnitt wirklich behandelt? Wenn nein → verwerfen. (3) Bei stimmt_das: Ist der "
+        "Irrtum wirklich weit verbreitet (kein Detail/Datum)? Wenn nein → nicht als "
+        "stimmt_das. Nichts Passendes → boxes: []."
     )
     thinking = _make_thinking_config(model, 4096)
     try:
@@ -846,7 +858,10 @@ PASS4_SYSTEM = (
     "Originaltitel hervorgeht (z. B. 'Der Vulkan Teide auf Teneriffa', 'Der Fuji in "
     "Japan', 'Ausbruch des Stromboli'); ist kein Name/Ort erkennbar, ein knapper "
     "deutscher Sachtitel ('Fließende Lava'). (b) caption = eine kurze, kindgerechte "
-    "Bildunterschrift (ein Satz), die beschreibt, was zu sehen ist. Antworte NUR als JSON."
+    "Bildunterschrift (ein Satz). Sie darf NUR beschreiben, was laut der gelieferten "
+    "Bild-Beschreibung WIRKLICH im Bild zu sehen ist — erfinde keine Szenendetails aus "
+    "dem Thema, die im Bild gar nicht sichtbar sind (z. B. keine Rauchwolken, Schiffe "
+    "oder Personen erwähnen, wenn die Beschreibung sie nicht nennt). Antworte NUR als JSON."
 )
 
 PASS4_SCHEMA = {

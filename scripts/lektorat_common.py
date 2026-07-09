@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 # ── Konstanten ────────────────────────────────────────────────────────────────
 
 COMPANION_CHAR_CAP   = 30_000          # positional slice je Companion-Text
-LEKTORAT_MODEL       = "claude-sonnet-4-6"
+LEKTORAT_MODEL       = "claude-sonnet-5"
 TIER_VALUES_V2       = {"SILENT", "KORRIGIERT", "PRÜFEN"}
 # Aliase für Backward-Compat (generate_grounded.py, ältere Skripte)
 PROBLEMATIC_VERDICTS = {"NICHT_BELEGT", "ÜBERZOGEN", "WIDERSPRUCH"}
