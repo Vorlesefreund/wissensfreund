@@ -205,7 +205,9 @@ def pass1_plan(thema: str, stufe: int, wmin: int, wmax: int,
         "- kernfakten: 3–8 wichtigste Fakten AUS DEM QUELLTEXT (wörtlich gedeckt).\n"
         "- companion_rolle: welcher Begleitartikel VERANSCHAULICHT WAS (macht das "
         "Hauptthema greifbarer/verständlicher) — oder \"weglassen\".\n"
-        "- abschnitte: 3–5 Abschnitte, je {heading, inhalt(kurz)}.\n"
+        "- abschnitte: 3–5 Abschnitte, je {heading, inhalt(kurz)}. Wähle sie nach "
+        "dem, was für den Leser am interessantesten ist, und gib dem Artikel Breite "
+        "— mehrere verschiedene spannende Facetten statt nur einer Linie.\n"
         "- subtitle: kurzer kindgerechter Untertitel.\n"
         "- emoji: ein passendes Emoji."
     )
@@ -271,7 +273,10 @@ PASS2_SYSTEM = (
     "Absatzanfang.\n\n"
     "FORMAT (streng): NUR Markdown mit `## Überschrift`-Zeilen und normalen "
     "Absätzen. KEIN JSON, keine Aufzählungszeichen, keine Boxen, keine Bilder, "
-    "keine IDs. Beginne mit einer `## Überschrift`."
+    "keine IDs. Gliedere den Text in MEHRERE Abschnitte — je geplantem "
+    "Abschnitt eine eigene `## Überschrift` (mindestens zwei, auch bei kleiner "
+    "Wortzahl); schreib nie den ganzen Artikel unter eine einzige Überschrift. "
+    "Beginne mit einer `## Überschrift`."
 )
 
 
