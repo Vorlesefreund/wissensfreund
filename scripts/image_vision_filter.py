@@ -180,6 +180,13 @@ SCHRITT 4 — RELEVANZ & HERO:
     Nebenfigur, eine allgemeine Landkarte), ist NICHT relevant — relevanz ≤ 4.
     Ein Symbol/Logo ist nur relevant, wenn es das Thema DIREKT repräsentiert
     (siehe oben); sonst relevanz ≤ 2.
+    AUTHENTIZITÄT: Bewerte nur die ECHTE Sache/das Original hoch. Parodien,
+    Nachahmungen, Karikaturen, Graffiti/Wandbilder, moderne Nachbildungen,
+    Wandteppiche/Kopien, Souvenirs/Merchandise, Briefmarken oder Hommagen an das
+    eigentliche Werk/den Gegenstand sind KEINE authentische Abbildung → relevanz ≤ 3,
+    auch wenn das Motiv klar erkennbar ist (z. B. eine Mona-Lisa-Parodie, ein
+    Wandteppich statt des Originalgemäldes). Das ORIGINALWERK bzw. eine echte
+    Aufnahme des Gegenstands zählt hoch.
 
   hero_candidate (bool): Als ERSTES Bild (Hero) geeignet? NUR true, wenn
     ist_konkret=true UND ist_symbol_oder_logo=false UND das Bild den Haupt-
@@ -383,13 +390,144 @@ def _scale_image(raw_bytes: bytes, max_width: int) -> bytes:
 
 # ── Metadaten holen: EINE Generator-API-Anfrage pro Artikel ─────────────────
 
+def _api_get(session: requests.Session, params: dict, label: str) -> dict | None:
+    """MediaWiki-API-GET mit maxlag/429/Retry. Gibt JSON-dict oder None."""
+    global _wikimedia_req_count
+    for attempt in range(1, 4):
+        try:
+            resp = session.get(WIKIPEDIA_API, params=params, timeout=30)
+            _wikimedia_req_count += 1
+        except Exception as e:
+            log.warning("  %s Verbindungsfehler (V%d): %s", label, attempt, e)
+            time.sleep(5)
+            continue
+        if _handle_maxlag(resp) > 0:
+            continue
+        if resp.status_code == 429:
+            wait = float(resp.headers.get("Retry-After", 15))
+            log.warning("  %s 429 (V%d) -- warte %.0fs", label, attempt, wait)
+            time.sleep(wait)
+            continue
+        try:
+            resp.raise_for_status()
+            return resp.json()
+        except Exception as e:
+            log.warning("  %s Fehler (V%d): %s", label, attempt, e)
+            time.sleep(5)
+    return None
+
+
+def _skip_file_title(title: str) -> bool:
+    """Deko-/Icon-/Logo-Skip wie zuvor (trenner-agnostisch)."""
+    t_lower = title.lower()
+    t_key = t_lower.replace(" ", "_").replace("-", "_")
+    return (t_lower.endswith(_IMG_SKIP_EXT)
+            or any(t_key.startswith(skip) for skip in _IMG_SKIP_PREFIXES_KEY)
+            or any(sub in t_key for sub in _IMG_SKIP_LOWER))
+
+
+def _candidate_from_imageinfo(title: str, ii: dict, cache: dict) -> dict | None:
+    """Baut den Kandidaten aus einem imageinfo-Objekt + füllt den Meta-Cache.
+    None, wenn keine freie Lizenz oder keine URL."""
+    global _meta_cache_dirty
+    filename = _filename_from_title(title)
+    orig_url = ii.get("url", "")
+    api_thumb = ii.get("thumburl", "")                   # 1600px CDN (bei SVG bereits PNG-Render)
+    if api_thumb:
+        thumb_url = api_thumb
+    elif title.lower().endswith(".svg"):
+        thumb_url = _wikimedia_thumb_url(filename, 1600)  # SVG->PNG serverseitig, nie roh
+    else:
+        thumb_url = orig_url
+    if not orig_url and not thumb_url:
+        return None
+    meta = ii.get("extmetadata", {})
+    license_str = (meta.get("LicenseShortName", {}).get("value", "")
+                   or meta.get("License", {}).get("value", ""))
+    if not _is_free_license(license_str):
+        return None
+    raw_author = (meta.get("Artist", {}).get("value", "")
+                  or meta.get("Credit", {}).get("value", ""))
+    clean_author = re.sub(r"<[^>]+>", "", raw_author).strip()[:80]
+    cache[filename] = {"url_orig": orig_url, "url_1600": thumb_url,
+                       "artist": clean_author, "license": license_str}
+    _meta_cache_dirty = True
+    return {"wikimedia_id": title, "filename": filename, "thumb_url": thumb_url,
+            "original_url": orig_url, "license": license_str, "license_author": clean_author}
+
+
 def fetch_image_candidates(
     session: requests.Session,
     wikipedia_title: str,
     max_candidates: int = 50,
 ) -> list[dict]:
-    """Laedt Bild-Metadaten via generator=images (1 Request).
-    Kein iiurlwidth → Original-URL (statisches CDN, kein Thumb-Generierungs-Trigger)."""
+    """Bild-Kandidaten in LESEREIHENFOLGE des Artikels (action=parse&prop=images) statt
+    alphabetisch (generator=images) — so gehen prominente Artikelbilder (z. B. das
+    Abendmahl im Leonardo-Artikel) nicht durch die alphabetische Kappung verloren.
+    Danach imageinfo (URL/Lizenz), gebatcht. Fällt bei parse-Fehler auf generator zurück."""
+    cache = _ensure_meta_cache()
+
+    # 1) Geordnete Dateititel (Reihenfolge des Vorkommens auf der Seite)
+    pdata = _api_get(session, {"action": "parse", "format": "json", "page": wikipedia_title,
+                               "redirects": "1", "prop": "images", "maxlag": 5}, "parse-images")
+    ordered_titles: list[str] = []
+    if pdata and "parse" in pdata:
+        for name in pdata["parse"].get("images", []):
+            title = _normalize_file_title("File:" + name)
+            if _skip_file_title(title):
+                continue
+            ordered_titles.append(title)
+            if len(ordered_titles) >= max_candidates:
+                break
+
+    if not ordered_titles:
+        # Fallback: alter alphabetischer Weg (parse fehlgeschlagen / keine Bilder)
+        return _fetch_image_candidates_generator(session, wikipedia_title, max_candidates)
+
+    # 2) imageinfo — Cache zuerst, Rest gebatcht (max 50 Titel/Query)
+    info: dict[str, dict] = {}
+    need: list[str] = []
+    for title in ordered_titles:
+        fn = _filename_from_title(title)
+        if fn in cache and "url_orig" in cache[fn]:
+            c = cache[fn]
+            info[fn] = {"wikimedia_id": title, "filename": fn,
+                        "thumb_url": c.get("url_1600") or c["url_orig"],
+                        "original_url": c["url_orig"], "license": c["license"],
+                        "license_author": c["artist"]}
+        else:
+            need.append(title)
+
+    for i in range(0, len(need), 50):
+        chunk = need[i:i + 50]
+        qd = _api_get(session, {"action": "query", "format": "json", "titles": "|".join(chunk),
+                                "prop": "imageinfo", "iiprop": "url|thumburl|extmetadata",
+                                "iiurlwidth": "1600",
+                                "iiextmetadatafilter": "Artist|LicenseShortName|License",
+                                "maxlag": 5}, "imageinfo")
+        if not qd:
+            continue
+        for page in qd.get("query", {}).get("pages", {}).values():
+            title = _normalize_file_title(page.get("title", ""))
+            ii_list = page.get("imageinfo", [])
+            if not ii_list:
+                continue
+            cand = _candidate_from_imageinfo(title, ii_list[0], cache)
+            if cand:
+                info[cand["filename"]] = cand
+
+    save_meta_cache()
+    # 3) In Lesereihenfolge zurückgeben
+    return [info[_filename_from_title(t)] for t in ordered_titles
+            if _filename_from_title(t) in info]
+
+
+def _fetch_image_candidates_generator(
+    session: requests.Session,
+    wikipedia_title: str,
+    max_candidates: int = 50,
+) -> list[dict]:
+    """Fallback: Bild-Metadaten via generator=images (alphabetisch, 1 Request)."""
     global _wikimedia_req_count, _meta_cache_dirty
     cache = _ensure_meta_cache()
 
@@ -402,38 +540,12 @@ def fetch_image_candidates(
         "gimlimit": str(max_candidates),
         "prop": "imageinfo",
         "iiprop": "url|thumburl|extmetadata",
-        "iiurlwidth": "1600",      # CDN-Thumbnail (JPEG, max 1600px) statt Original
+        "iiurlwidth": "1600",
         "iiextmetadatafilter": "Artist|LicenseShortName|License",
         "maxlag": 5,
     }
-
-    data: dict = {}
-    for attempt in range(1, 4):
-        try:
-            resp = session.get(WIKIPEDIA_API, params=params, timeout=30)
-            _wikimedia_req_count += 1
-        except Exception as e:
-            log.warning("  fetch_image_candidates Verbindungsfehler (V%d): %s", attempt, e)
-            time.sleep(5)
-            continue
-
-        if _handle_maxlag(resp) > 0:
-            continue
-
-        if resp.status_code == 429:
-            wait = float(resp.headers.get("Retry-After", 15))
-            log.warning("  fetch_image_candidates 429 (V%d) -- warte %.0fs", attempt, wait)
-            time.sleep(wait)
-            continue
-
-        try:
-            resp.raise_for_status()
-            data = resp.json()
-            break
-        except Exception as e:
-            log.warning("  fetch_image_candidates Fehler (V%d): %s", attempt, e)
-            time.sleep(5)
-    else:
+    data = _api_get(session, params, "fetch_image_candidates")
+    if not data:
         log.warning("  fetch_image_candidates fehlgeschlagen: %s", wikipedia_title)
         return []
 
@@ -444,18 +556,9 @@ def fetch_image_candidates(
     images: list[dict] = []
     for page in pages.values():
         title = _normalize_file_title(page.get("title", ""))
-        t_lower = title.lower()
-        t_key = t_lower.replace(" ", "_").replace("-", "_")  # Trenner-agnostisch (SVG-Deko)
-
-        if t_lower.endswith(_IMG_SKIP_EXT):
+        if _skip_file_title(title):
             continue
-        if any(t_key.startswith(skip) for skip in _IMG_SKIP_PREFIXES_KEY):
-            continue
-        if any(sub in t_key for sub in _IMG_SKIP_LOWER):
-            continue
-
         filename = _filename_from_title(title)
-
         if filename in cache and "url_orig" in cache[filename]:
             cached = cache[filename]
             images.append({
@@ -467,52 +570,12 @@ def fetch_image_candidates(
                 "license_author": cached["artist"],
             })
             continue
-
         ii_list = page.get("imageinfo", [])
         if not ii_list:
             continue
-        ii = ii_list[0]
-        orig_url  = ii.get("url", "")
-        api_thumb = ii.get("thumburl", "")               # 1600px CDN (bei SVG bereits PNG-Render)
-        if api_thumb:
-            thumb_url = api_thumb
-        elif t_lower.endswith(".svg"):
-            thumb_url = _wikimedia_thumb_url(filename, 1600)  # SVG->PNG serverseitig, nie roh
-        else:
-            thumb_url = orig_url
-        if not orig_url and not thumb_url:
-            continue
-
-        meta = ii.get("extmetadata", {})
-        license_str = (
-            meta.get("LicenseShortName", {}).get("value", "")
-            or meta.get("License", {}).get("value", "")
-        )
-        if not _is_free_license(license_str):
-            continue
-
-        raw_author = (
-            meta.get("Artist", {}).get("value", "")
-            or meta.get("Credit", {}).get("value", "")
-        )
-        clean_author = re.sub(r"<[^>]+>", "", raw_author).strip()[:80]
-
-        cache[filename] = {
-            "url_orig":  orig_url,
-            "url_1600":  thumb_url,
-            "artist":    clean_author,
-            "license":   license_str,
-        }
-        _meta_cache_dirty = True
-
-        images.append({
-            "wikimedia_id":  title,
-            "filename":      filename,
-            "thumb_url":     thumb_url,     # 1600px CDN-URL (Download-Quelle)
-            "original_url":  orig_url,
-            "license":       license_str,
-            "license_author": clean_author,
-        })
+        cand = _candidate_from_imageinfo(title, ii_list[0], cache)
+        if cand:
+            images.append(cand)
 
     save_meta_cache()
     return images
