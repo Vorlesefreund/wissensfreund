@@ -50,6 +50,7 @@ FIGUREN & ERZÄHLROLLEN (klare Trennung — trägt auch die spätere Vertonung):
 
 WAS DU ERZÄHLST (Auswahl & Tiefe):
 - Sei INHALTSREICH: Das Kind soll aus der Geschichte richtig viel echtes Wissen mitnehmen. Schöpfe den Quellenstoff aus und bringe entlang des roten Fadens mehrere gedeckte Fakten unter — zu jedem Schlüsselmoment das Was, das Warum UND das Wie. „Tiefe" heißt reich und gründlich erzählt, nicht dünn oder inhaltsarm. Erreiche das Wortziel mit echtem Inhalt aus der Quelle, nicht mit Füllsätzen oder ausgemaltem Rahmen.
+- Reichtum entsteht durch VERDICHTUNG, nicht durch Länge: Bleib im vorgegebenen Wortband und halte besonders das obere Limit ein. Bist du am oberen Rand, formuliere dichter (jeder Satz trägt einen Fakt) oder lass einen Nebenaspekt weg — dehne die Geschichte NICHT aus. Eine kürzere, dichte Geschichte ist besser als eine lange.
 - Tiefe vor Breite meint: die gewählten Aspekte gründlich entwickeln (mehrere Fakten je Szene, jeweils mit Warum und Wie), statt viele Aspekte nur anzureißen. Verboten ist die zusammenhanglose Faktenliste — nicht der Informationsgehalt.
 - Folge einem roten Faden statt einer lückenlosen Zeitleiste, aber fülle diesen Faden mit reichem, gedecktem Stoff. Das berühmteste, ikonische Beispiel muss dabei sein.
 - Wähle bei Daten und Namen die GRÖBSTE Angabe, die noch reicht (Jahreszahl statt Datum, Rolle statt Name), außer der Tag oder Name trägt die Geschichte wirklich. Meide lange Namens- oder Länder-Aufzählungen ohne eigenen Reiz.
@@ -182,6 +183,45 @@ LEKTORAT_SCHEMA = {
 }
 
 
+# ── Quiz ─────────────────────────────────────────────────────────────────────
+QUIZ_SYSTEM = """Du machst ein kleines, fröhliches Quiz zu einer WISSENSGESCHICHTE für Kinder von etwa 4 bis 8 Jahren. Es soll Spaß machen und das Zuhören belohnen — kein Test.
+
+REGELN:
+- 3 Fragen. Frage NUR nach Dingen, die WIRKLICH in der Geschichte vorkommen — nichts, was ein Kind aus der Geschichte nicht wissen kann. Das ist die EISERNE REGEL.
+- Frag nach dem KERN (was das Thema ist, was passiert, warum etwas so ist), nicht nach schwer merkbaren Zahlen, Daten oder Namen-Details.
+- Ganz einfache Sprache, kurze Frage. Genau 3 Antwortmöglichkeiten, davon genau EINE richtig. Die falschen sind klar falsch, aber nicht albern — keine Fangfragen.
+- lob = ein kurzer, ermutigender Satz, der die richtige Antwort noch einmal in einem Satz erklärt (z. B. „Genau! Leonardo war Maler UND Erfinder.").
+- Steigere leicht: erste Frage ganz leicht, letzte etwas kniffliger.
+
+Antworte NUR als JSON: {"fragen":[{"frage":"...","optionen":["...","...","..."],"richtig":0,"lob":"..."}]}. richtig = Index der richtigen Option (0, 1 oder 2)."""
+
+QUIZ_SCHEMA = {
+    "type": "object",
+    "required": ["fragen"],
+    "properties": {
+        "fragen": {"type": "array", "items": {
+            "type": "object",
+            "required": ["frage", "optionen", "richtig", "lob"],
+            "properties": {
+                "frage":    {"type": "string"},
+                "optionen": {"type": "array", "items": {"type": "string"}},
+                "richtig":  {"type": "integer"},
+                "lob":      {"type": "string"}}}},
+    },
+}
+
+
+def run_quiz(story_text: str, source_block: str, quiz_model: str) -> dict:
+    """Erzeugt 3 kindgerechte MC-Fragen — streng aus der (lektorierten) Geschichte."""
+    body = (
+        "GESCHICHTE (einzige erlaubte Quelle für die Fragen — frag nur, was hier vorkommt):\n"
+        + story_text + "\n\n"
+        "QUELLTEXT (nur zur Absicherung, dass die richtige Antwort stimmt):\n" + source_block + "\n\n"
+        "AUFGABE: Mach 3 einfache Quizfragen nach deinen Regeln als JSON."
+    )
+    return _call_json(quiz_model, QUIZ_SYSTEM, QUIZ_SCHEMA, body, max_tokens=2048)
+
+
 def run_lektorat(story_clean: str, source_block: str, lektor_model: str) -> dict:
     """Prüft die Geschichte gegen den Quelltext (Kreuz-Modell). Gibt {eingriffe, anmerkung}."""
     body = (
@@ -214,7 +254,8 @@ def build_story(thema: str, td: dict, model: str, max_images: int = 10) -> dict:
     body = (
         f"THEMA: {thema}\n"
         f"ZIELALTER: etwa 4 bis 8 Jahre.\n"
-        f"LÄNGE: {WMIN}–{WMAX} Wörter.\n\n"
+        f"LÄNGE: {WMIN}–{WMAX} Wörter — HALTE das obere Limit {WMAX} ein. "
+        f"Lieber dichter formulieren als länger werden.\n\n"
         + source_block + "\n\n"
         "GEEIGNETE BILDER (im Text mit [BILD:N] verwendbar UND Alt/Caption nötig):\n"
         + img_usable + "\n\n"
@@ -331,6 +372,36 @@ def _apply_marked(story: str, eingriffe: list) -> tuple[str, dict, list]:
     return story, spanmap, applied
 
 
+def _corrected_clean(story_clean: str, eingriffe: list) -> str:
+    """Wendet die Lektorat-Eingriffe auf die reine Prosa an (für Quiz-Grundlage)."""
+    for e in eingriffe:
+        orig = e.get("original") or ""
+        if orig and orig in story_clean:
+            story_clean = story_clean.replace(orig, e.get("ersatz") or "", 1)
+    return re.sub(r"\s{2,}", " ", story_clean).strip()
+
+
+def _quiz_html(quiz: dict) -> str:
+    fragen = (quiz or {}).get("fragen", []) or []
+    if not fragen:
+        return ""
+    out = ['<h4 class=quizh>❓ Quiz — was hast du behalten?</h4><ol class=quiz>']
+    for f in fragen:
+        opts = f.get("optionen", []) or []
+        rix  = f.get("richtig", -1)
+        out.append(f'<li><b>{html.escape(f.get("frage",""))}</b><ul class=opts>')
+        for j, o in enumerate(opts):
+            cls = " class=right" if j == rix else ""
+            tick = " ✓" if j == rix else ""
+            out.append(f'<li{cls}>{html.escape(o)}{tick}</li>')
+        out.append('</ul>')
+        if f.get("lob"):
+            out.append(f'<span class=lob>{html.escape(f["lob"])}</span>')
+        out.append('</li>')
+    out.append('</ol>')
+    return "\n".join(out)
+
+
 def _render_model(pool, res, model):
     lek  = res.get("lektorat")
     eing = (lek["result"].get("eingriffe", []) if lek else []) or []
@@ -380,6 +451,9 @@ def _render_model(pool, res, model):
         h.append(_lektorat_table(eing, applied))
         if lek["result"].get("anmerkung"):
             h.append(f'<p class=note>Anmerkung: {html.escape(lek["result"]["anmerkung"])}</p>')
+
+    if res.get("quiz"):
+        h.append(_quiz_html(res["quiz"]))
     h.append('</div>')
     return "\n".join(h)
 
@@ -423,6 +497,13 @@ table.lek th,table.lek td{border:1px solid #e0d6ea;padding:6px 8px;text-align:le
 table.lek th{background:#f3ebf8}
 table.lek td.beleg{color:#555;font-style:italic}
 .nf{color:#c00;font-weight:bold}
+h4.quizh{margin-top:26px;color:#1f7a3d;border-top:2px dashed #bfe6cd;padding-top:14px}
+ol.quiz{font-family:sans-serif;font-size:15px;padding-left:20px}
+ol.quiz>li{margin:12px 0}
+ul.opts{list-style:none;padding:4px 0;margin:6px 0}
+ul.opts li{padding:3px 8px;margin:3px 0;background:#f4f2ee;border-radius:5px;display:inline-block;margin-right:6px}
+ul.opts li.right{background:#e7f7ea;color:#0a7d28;font-weight:bold}
+.lob{font-size:13px;color:#1f7a3d;font-style:italic}
 """
     html = [f"<meta charset=utf-8><title>Story-Modus v2 — {thema}</title><style>{css}</style>",
             "<div class=wrap>",
@@ -455,6 +536,8 @@ def main():
                     help="Obergrenze GESAMT sichtbarer Bilder (Hero+Inline+Galerie); harte Grenze 15 (Speicher)")
     ap.add_argument("--lektorat", action=argparse.BooleanOptionalAction, default=True,
                     help="Beleg-/Lektorat-Pass (Kreuz-Modell) an/aus (--no-lektorat)")
+    ap.add_argument("--quiz", action=argparse.BooleanOptionalAction, default=True,
+                    help="Quiz-Pass (3 kindgerechte MC-Fragen) an/aus (--no-quiz)")
     args = ap.parse_args()
 
     topics = _load_topics(Path(args.checkpoint))
@@ -494,6 +577,19 @@ def main():
                     print(f"    {len(lek.get('eingriffe', []))} Eingriff(e)")
                 except Exception as e:
                     print(f"    Lektorat-FEHLER ({lm}): {str(e)[:120]}")
+
+        # Quiz-Pass — auf der lektorierten Fassung, vom Generierungsmodell (Provider-Cache)
+        if args.quiz:
+            src_block = _source_block(thema, td)
+            for gen_model, res in results.items():
+                eing = (res.get("lektorat", {}) or {}).get("result", {}).get("eingriffe", []) or []
+                grounded = _corrected_clean(res["story_clean"], eing)
+                print(f"  Quiz: {gen_model} …")
+                try:
+                    res["quiz"] = run_quiz(grounded, src_block, gen_model)
+                    print(f"    {len(res['quiz'].get('fragen', []))} Frage(n)")
+                except Exception as e:
+                    print(f"    Quiz-FEHLER ({gen_model}): {str(e)[:120]}")
         safe = re.sub(r"[^\w]+", "_", thema).strip("_")
         out_path = out_dir / f"_story_v2_{safe}_{args.suffix}.html"
         render_theme(thema, results, out_path)
