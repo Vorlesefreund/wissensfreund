@@ -100,6 +100,7 @@ from generate_grounded import (  # noqa: E402
 )
 from image_vision_filter import (  # noqa: E402
     fetch_image_candidates,
+    fetch_lead_image,
     download_image,
     load_cached_image_bytes,
     get_download_sizes,
@@ -624,6 +625,16 @@ def stage1_sourcing(
         primary_wp = data["resolved_title"]
         comp_with_text = [c for c in valid_companions if c in companion_texts]
         all_candidates: list[dict] = []
+        # LEITBILDER zuerst (kanonisch/bekannt): Infobox-Bild von Haupt- + JEDEM Companion
+        # gezielt holen und voranstellen — generator=images kappt das Leitbild sonst
+        # alphabetisch weg (z. B. Mona Lisa, Selbstbildnis, Abendmahl).
+        for lt in [primary_wp] + comp_with_text:
+            lead = fetch_lead_image(session, lt)
+            time.sleep(0.3)
+            if lead:
+                lead["_source"] = lt
+                all_candidates.append(lead)
+                log.info("    Leitbild '%s': %s", lt, lead["filename"][:60])
         primary_imgs = fetch_image_candidates(session, primary_wp, max_candidates=MAX_IMG_PRIMARY)
         for img in primary_imgs:
             img["_source"] = primary_wp

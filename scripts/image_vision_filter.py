@@ -99,10 +99,16 @@ grenzfall (true | false): Zeigt das Bild eines oder mehrere dieser Merkmale?
   - medizinische Eingriffe (Spritzen, Operationen, Verbände, Behandlungen an Personen/Tieren)
   - Tod, Sterben, Trauer oder traumatisierende Situationen
   - historisch ernste Darstellungen (Krieg, Gewalt, Unterdrückung, Gefangenschaft)
-  - nackte oder teils nackte Körper (unabhängig vom Kontext)
+  - nackte oder teils nackte Körper in Fotos oder realistisch-expliziten Darstellungen (unabhängig vom Kontext)
   - potenziell beängstigende, erschreckende oder belastende Szenen für Kinder unter 12 Jahren
   → true, wenn mindestens ein Merkmal zutrifft — auch wenn das Bild lehrreich gemeint ist
   → false nur, wenn das Bild eindeutig harmlos und nicht verstörend ist
+
+  KUNST-AUSNAHME: Berühmte klassische Kunstwerke — Gemälde, Zeichnungen und Skulpturen
+  alter Meister, wie ein Museum sie ausstellt (z. B. der Vitruvianische Mensch, Statuen
+  der Antike, Aktstudien der Kunstgeschichte) — sind KEIN Grenzfall, auch wenn sie den
+  menschlichen Körper künstlerisch und unbekleidet zeigen. Sie gelten als Museumsexponate.
+  Nur bei EXPLIZIT sexueller Darstellung oder grafischer Gewalt bleibt es grenzfall=true.
 
 grenzfall_grund (string): Falls grenzfall=true — welches Merkmal trifft zu? (1 Satz, konkret)
   Falls grenzfall=false: leerer String "".
@@ -122,7 +128,13 @@ SCHRITT 2 — ALTERSFREIGABE (unter Berücksichtigung des grenzfall-Ergebnisses)
   ab_stufe=3  → ab 10 J.: detaillierte Anatomie (Organe, Muskeln), komplexe
                 wissenschaftliche Darstellungen, historisch ernste Motive
   ab_stufe=0  → GESPERRT (keine Stufe geeignet): Blut, offene Verletzungen, tote Tiere,
-                Nacktheit, Kriegsfotos, grafische Gewalt, beängstigende Inhalte
+                Nacktheit in Fotos/expliziten Darstellungen, Kriegsfotos, grafische Gewalt,
+                beängstigende Inhalte
+
+Berühmte klassische Kunstwerke (Gemälde, Zeichnungen, Skulpturen der Kunstgeschichte,
+inkl. künstlerischer Aktdarstellungen alter Meister) sind wie Museumsexponate für ALLE
+geeignet → ab_stufe=1 (bei ernstem/komplexem Motiv 2). NICHT wegen künstlerischer
+Nacktheit sperren oder auf Stufe 3 hochstufen.
 
 Im Zweifel IMMER die höhere Stufe wählen.
 Rein dekorative oder inhaltlich leere Grafiken ohne erkennbaren thematischen Bezug → ab_stufe=0.
@@ -506,6 +518,82 @@ def fetch_image_candidates(
     return images
 
 
+def fetch_lead_image(session: requests.Session, wikipedia_title: str) -> dict | None:
+    """Holt das LEIT-/Infobox-Bild eines Artikels (prop=pageimages) als Prioritäts-
+    Kandidat — das kanonische, bekannteste Bild des Lemmas (z. B. die Mona Lisa auf
+    dem Artikel 'Mona Lisa', das Selbstbildnis auf 'Leonardo da Vinci'). generator=images
+    liefert nur alphabetisch und kappt das Leitbild oft weg; hier holen wir es gezielt."""
+    global _wikimedia_req_count
+    cache = _ensure_meta_cache()
+    # 1) Dateiname des Leitbilds
+    p1 = {"action": "query", "format": "json", "titles": wikipedia_title,
+          "redirects": "1", "prop": "pageimages", "piprop": "name", "maxlag": 5}
+    try:
+        r = session.get(WIKIPEDIA_API, params=p1, timeout=30)
+        _wikimedia_req_count += 1
+        if _handle_maxlag(r) > 0:
+            return None
+        r.raise_for_status()
+        pages = r.json().get("query", {}).get("pages", {})
+    except Exception as e:
+        log.warning("  fetch_lead_image (name) Fehler bei '%s': %s", wikipedia_title, e)
+        return None
+
+    name = next((page.get("pageimage") for page in pages.values() if page.get("pageimage")), None)
+    if not name:
+        return None
+    file_title = _normalize_file_title("File:" + name)
+    t_lower = file_title.lower()
+    t_key = t_lower.replace(" ", "_").replace("-", "_")
+    if (t_lower.endswith(_IMG_SKIP_EXT)
+            or any(t_key.startswith(skip) for skip in _IMG_SKIP_PREFIXES_KEY)
+            or any(sub in t_key for sub in _IMG_SKIP_LOWER)):
+        return None
+    filename = _filename_from_title(file_title)
+
+    def _mk(thumb, orig, lic, author):
+        return {"wikimedia_id": file_title, "filename": filename, "thumb_url": thumb,
+                "original_url": orig, "license": lic, "license_author": author}
+
+    if filename in cache and "url_orig" in cache[filename]:
+        c = cache[filename]
+        return _mk(c.get("url_1600") or c["url_orig"], c["url_orig"], c["license"], c["artist"])
+
+    # 2) imageinfo für dieses eine File
+    p2 = {"action": "query", "format": "json", "titles": file_title, "prop": "imageinfo",
+          "iiprop": "url|thumburl|extmetadata", "iiurlwidth": "1600",
+          "iiextmetadatafilter": "Artist|LicenseShortName|License", "maxlag": 5}
+    try:
+        r = session.get(WIKIPEDIA_API, params=p2, timeout=30)
+        _wikimedia_req_count += 1
+        if _handle_maxlag(r) > 0:
+            return None
+        r.raise_for_status()
+        pages = r.json().get("query", {}).get("pages", {})
+    except Exception as e:
+        log.warning("  fetch_lead_image (info) Fehler bei '%s': %s", file_title, e)
+        return None
+
+    for page in pages.values():
+        ii = (page.get("imageinfo") or [None])[0]
+        if not ii:
+            return None
+        orig = ii.get("url", "")
+        thumb = ii.get("thumburl", "") or orig
+        if not orig and not thumb:
+            return None
+        meta = ii.get("extmetadata", {})
+        lic = (meta.get("LicenseShortName", {}).get("value", "")
+               or meta.get("License", {}).get("value", ""))
+        if not _is_free_license(lic):
+            return None
+        author = re.sub(r"<[^>]+>", "", meta.get("Artist", {}).get("value", "")).strip()[:80]
+        cache[filename] = {"url_orig": orig, "url_1600": thumb, "artist": author, "license": lic}
+        save_meta_cache()
+        return _mk(thumb, orig, lic, author)
+    return None
+
+
 # ── Download: Original + lokale Skalierung (300px + 800px) ──────────────────
 
 def _do_download(session: requests.Session, url: str) -> bytes | None:
@@ -683,7 +771,11 @@ OPUS_RECHECK_PROMPT = """Prüfe dieses Bild für Wissensfreund (Thema: "{thema}"
                 Mammuts) → Lern-/Ausstellungsobjekte → ab_stufe=1 (sofern kein grenzfall=true)
   ab_stufe=2  → ab 7 J.: Knochen/Skelette OHNE Museumskontext, leichte historische Darstellungen
   ab_stufe=3  → ab 10 J.: Organe, detaillierte Anatomie, wissenschaftlich/historisch ernst
-  ab_stufe=0  → GESPERRT: Blut, Gewalt, Nacktheit, Kriegsfotos, verstörende Inhalte
+  ab_stufe=0  → GESPERRT: Blut, Gewalt, Nacktheit in Fotos/expliziten Darstellungen, Kriegsfotos, verstörende Inhalte
+
+AUSNAHME: Berühmte klassische Kunstwerke (Gemälde/Zeichnungen/Skulpturen der Kunstgeschichte,
+inkl. künstlerischer Aktdarstellungen alter Meister, z. B. der Vitruvianische Mensch) sind wie
+Museumsexponate für ALLE geeignet → ab_stufe=1 (bei ernstem Motiv 2), NICHT sperren/hochstufen.
 
 Sei STRENGER als ein durchschnittlicher Prüfer. Im Zweifel höhere Stufe vergeben.
 

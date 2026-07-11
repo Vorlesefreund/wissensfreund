@@ -26,6 +26,8 @@ import gemini_client
 
 COMP_CAP = 4000          # Companion-Zeichen kappen
 WMIN, WMAX = 600, 720    # Wortziel Geschichte
+# Sichtbare Bilder GESAMT je Reiz-Stufe (appeal) — hoher Reiz zeigt mehr, harte Grenze 15.
+APPEAL_IMG = {"high": 15, "medium": 10, "low": 6}
 
 # ── Prompt ────────────────────────────────────────────────────────────────────
 STORY_SYSTEM = """Du schreibst eine WISSENSGESCHICHTE für Kinder von etwa 4 bis 8 Jahren — wie eine kurze Hörspiel-Folge oder eine Geschichte aus der Sendung mit der Maus. Du verpackst echtes Wissen in eine warme Geschichte zum Vorlesen. Sie ist für die ganze Spanne 4 bis 8 Jahre. Schreib so, dass ein Vierjähriger mühelos folgen kann und einem Achtjährigen nicht langweilig wird: klar und greifbar für die Kleinen, mit genug Gehalt für die Größeren.
@@ -301,12 +303,14 @@ def build_story(thema: str, td: dict, model: str, max_images: int = 10) -> dict:
             meta[b["index"]] = {"alt": (b.get("alt") or "").strip(),
                                 "caption": (b.get("caption") or "").strip()}
 
-    # Galerie = S1 (nicht inline, nicht hero) + alle S2 — relevanzsortiert, S1 vor S2
+    # Galerie = S1 (nicht inline, nicht hero) + alle S2. Sortierung: Relevanz + Bildqualität
+    # gemischt, damit visuell reizvolle Bilder (Gemälde) vor topisch-relevanten, aber
+    # langweiligen Motiven (Handschriften/Schriftstücke) stehen. S1 vor S2.
     used = set(inline_order) | ({hero} if hero is not None else set())
-    gal_s1 = sorted([i for i in usable_ix if i not in used],
-                    key=lambda i: -pool[i].get("relevanz", 0))
-    gal_s2 = sorted([i for i, _ in gallery_only if i not in used],
-                    key=lambda i: -pool[i].get("relevanz", 0))
+    def _gal_key(i):
+        return -(pool[i].get("relevanz", 0) + pool[i].get("bildqualitaet", 0))
+    gal_s1 = sorted([i for i in usable_ix if i not in used], key=_gal_key)
+    gal_s2 = sorted([i for i, _ in gallery_only if i not in used], key=_gal_key)
     # Gesamt-Deckel: Hero + Inline + Galerie <= max_images (S1 vor S2 in der Galerie)
     budget = max(0, max_images - len(inline_order) - (1 if hero is not None else 0))
     gallery = (gal_s1 + gal_s2)[:budget]
@@ -532,8 +536,8 @@ def main():
     ap.add_argument("--suffix", default="v2", help="Dateisuffix")
     ap.add_argument("--themen", nargs="*", default=None)
     ap.add_argument("--models", nargs="+", default=["claude-sonnet-5", "gemini-3.5-flash"])
-    ap.add_argument("--max-images", type=int, default=12,
-                    help="Obergrenze GESAMT sichtbarer Bilder (Hero+Inline+Galerie); harte Grenze 15 (Speicher)")
+    ap.add_argument("--max-images", type=int, default=0,
+                    help="Obergrenze GESAMT sichtbarer Bilder (0 = automatisch nach Reiz: high 15 / medium 10 / low 6); harte Grenze 15")
     ap.add_argument("--lektorat", action=argparse.BooleanOptionalAction, default=True,
                     help="Beleg-/Lektorat-Pass (Kreuz-Modell) an/aus (--no-lektorat)")
     ap.add_argument("--quiz", action=argparse.BooleanOptionalAction, default=True,
@@ -551,12 +555,14 @@ def main():
         if not td:
             print(f"! {thema}: nicht im Checkpoint"); continue
         pool_n = len(td.get("images", []))
-        print(f"\n=== {thema} ({pool_n} Bilder im Pool) ===")
+        appeal = (td.get("appeal") or "medium").lower()
+        cap = args.max_images or min(15, APPEAL_IMG.get(appeal, 10))
+        print(f"\n=== {thema} ({pool_n} Bilder im Pool · Reiz={appeal} → max {cap} Bilder) ===")
         results = {}
         for model in args.models:
             print(f"  Story ({model}) …")
             try:
-                res = build_story(thema, td, model, max_images=args.max_images)
+                res = build_story(thema, td, model, max_images=cap)
                 results[model] = res
                 print(f"    {res['wc']} W · Text-Bilder {res['inline']} · Hero {res['hero']} "
                       f"· Galerie {len(res['gallery'])}")

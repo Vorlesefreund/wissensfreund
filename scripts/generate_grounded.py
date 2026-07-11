@@ -64,6 +64,7 @@ from generate_articles import (          # noqa: E402
 import gemini_client                     # noqa: E402
 from image_vision_filter import (        # noqa: E402
     fetch_image_candidates,
+    fetch_lead_image,
     download_image,
     analyze_with_vision,
     load_cached_image_bytes,
@@ -826,6 +827,18 @@ def build_image_pool(
 ) -> tuple[list[dict], dict]:
     all_candidates: list[dict] = []
     sources: dict[str, int] = {}
+
+    # LEITBILDER zuerst (kanonisch/bekannt): das Infobox-Bild von Haupt- und JEDEM
+    # Companion-Artikel gezielt holen und voranstellen. generator=images liefert nur
+    # alphabetisch und kappt das Leitbild sonst weg (z. B. die Mona Lisa, das Selbstbildnis).
+    lead_titles = [primary_wikipedia] + list(companion_titles)
+    for lt in lead_titles:
+        lead = fetch_lead_image(session, lt)
+        time.sleep(0.3)
+        if lead:
+            lead["_source"] = f"{lt} (Leitbild)"
+            all_candidates.append(lead)
+            log.info("    Leitbild aus '%s': %s", lt, lead["filename"][:60])
 
     primary_imgs = fetch_image_candidates(
         session, primary_wikipedia, max_candidates=MAX_IMG_PRIMARY
