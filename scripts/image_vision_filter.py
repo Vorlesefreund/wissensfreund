@@ -148,10 +148,13 @@ SCHRITT 3 — MOTIV-ART (entscheidet über Eignung als Kinderbild):
     Abstrakte Diagramme, Schemata, Mikroskop-/Detailaufnahmen, anatomische
     Zeichnungen, Karten, Symbole → false.
 
-  motiv_key (string): kurzer snake_case-Schlüssel für das HAUPTMOTIV, damit
-    Dubletten erkennbar sind — gleiches Motiv = gleicher key.
-    Beispiele: "kolosseum", "caesar_bueste", "vulkan_ausbruch", "elefanten_herde",
-    "dino_skelett". Verschiedene Fotos DESSELBEN Motivs → identischer key.
+  motiv_key (string): snake_case-Schlüssel für die KONKRETE Szene, damit nur ECHTE
+    Dubletten (dasselbe Motiv aus fast gleicher Sicht) denselben key bekommen.
+    Unterscheide verschiedene Szenen/Aspekte im key: Nahaufnahme ≠ Luftbild,
+    Lavafontäne ≠ Rauchsäule ≠ Krater ≠ Landschaft, Tag ≠ Nacht, Objekt A ≠ Objekt B,
+    Skelett ≠ lebendes Tier ≠ Zeichnung. Nur zwei Fotos, die WIRKLICH dasselbe zeigen,
+    teilen den key. Im Zweifel lieber feiner unterscheiden als zu grob zusammenwerfen
+    (grobe keys werfen später gute, verschiedene Bilder als Schein-Dubletten weg).
 
 SCHRITT 4 — RELEVANZ & HERO:
 
@@ -177,9 +180,21 @@ SCHRITT 4 — RELEVANZ & HERO:
     zeitgenössisches Umfeld-Objekt (Helm, Rüstung, Gebäude, Alltagsgegenstand)
     ANSTELLE des Protagonisten → hero_candidate=false und relevanz ≤ 4.
 
+  bildqualitaet (0–10): Wie GUT ist das Foto als solches — UNABHÄNGIG von der Relevanz.
+    Achte auf: scharf und klar (nicht verschwommen/verpixelt), EIN deutlich erkennbares
+    Hauptmotiv (nicht überladen, kein winziges Detail), gute Belichtung und lebendige
+    Farben, kein störender Text/Wasserzeichen/Rahmen, eindrucksvoll und ansprechend für
+    ein Kind.
+    - 8–10: eindrucksvoll, klar, würde ein Kind fesseln
+    - 5–7: brauchbar, aber unspektakulär
+    - 0–4: schwach (unscharf, überladen, fad oder störende Overlays)
+
   confidence ("hoch" | "mittel" | "niedrig"): Sicherheit deiner ab_stufe-Einschätzung.
 
-  beschreibung (string): Was ist zu sehen? (1–2 Sätze, sachlich)
+  beschreibung (string): Was ist WIRKLICH zu sehen? (1–2 Sätze, sachlich)
+    Beschreibe nur sichtbare Objekte, Personen und Handlungen. Schließe keine typische
+    Tätigkeit oder Szene hinzu, die das Motiv zwar nahelegt, aber nicht zeigt — im
+    Zweifel neutral benennen statt aus dem Kontext zu raten.
     Bei ab_stufe=0: kurze Begründung für die Sperrung.
 
 Antworte NUR mit diesem JSON (kein Markdown, kein Text davor/danach):
@@ -193,6 +208,7 @@ Antworte NUR mit diesem JSON (kein Markdown, kein Text davor/danach):
   "motiv_key": "elefanten_herde",
   "confidence": "hoch",
   "relevanz": 7,
+  "bildqualitaet": 8,
   "beschreibung": "...",
   "hero_candidate": false
 }}"""
@@ -212,6 +228,7 @@ VISION_RESULT_SCHEMA = {
         "motiv_key":            {"type": "string"},
         "confidence":           {"type": "string"},
         "relevanz":             {"type": "integer", "minimum": 0, "maximum": 10},
+        "bildqualitaet":        {"type": "integer", "minimum": 0, "maximum": 10},
         "beschreibung":         {"type": "string"},
         "hero_candidate":       {"type": "boolean"},
     },
@@ -806,6 +823,7 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
             grenzfall_grund = result.get("grenzfall_grund", "")
             confidence    = result.get("confidence", "hoch")
             relevanz      = result.get("relevanz", 0)
+            bildqualitaet = result.get("bildqualitaet", 5)
             beschreibung  = result.get("beschreibung", "")
             hero          = result.get("hero_candidate", False)
 
@@ -821,6 +839,7 @@ def run(thema: str, wikipedia_title: str, max_images: int = 30) -> None:
                 accepted.append({**img, "ab_stufe": ab_stufe,
                                  "grenzfall": grenzfall, "grenzfall_grund": grenzfall_grund,
                                  "confidence": confidence, "relevanz": relevanz,
+                                 "bildqualitaet": bildqualitaet,
                                  "hero_candidate": hero, "beschreibung": beschreibung})
                 gz_marker   = " [GZ]" if grenzfall else ""
                 conf_marker = f" conf={confidence}" if confidence != "hoch" else ""

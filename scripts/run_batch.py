@@ -691,6 +691,7 @@ def stage1_sourcing(
             confidence      = result.get("confidence", "hoch")
             beschreibung    = result.get("beschreibung", "")
             relevanz        = result.get("relevanz", 0)
+            bildqualitaet   = result.get("bildqualitaet", 5)
             hero            = result.get("hero_candidate", False)
             ist_symbol      = result.get("ist_symbol_oder_logo", False)
             ist_konkret     = result.get("ist_konkret", True)
@@ -719,12 +720,16 @@ def stage1_sourcing(
                 "grenzfall_grund": grenzfall_grund,
                 "confidence":      confidence,
                 "relevanz":        relevanz,
+                "bildqualitaet":   bildqualitaet,
                 "hero_candidate":  hero,
                 "ist_konkret":     ist_konkret,
                 "motiv_key":       motiv_key,
                 "beschreibung":    beschreibung,
             })
-        accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))
+        # Bei Motiv-Dubletten das qualitativ beste Foto behalten: nach Relevanz,
+        # dann Bildqualität, dann Hero sortieren — Dedup behält jeweils das erste.
+        accepted.sort(key=lambda x: (-x["relevanz"], -x.get("bildqualitaet", 5),
+                                     -int(x.get("hero_candidate", False))))
         # Dubletten desselben Motivs entfernen (z.B. 3× Kolosseum) → bestes je motiv_key
         _seen_motive: set[str] = set()
         _deduped: list[dict] = []

@@ -374,12 +374,12 @@ Maßstab bei jedem Companion ist allein, wie interessant und spannend der Aspekt
 
 **B. Die 3 Säulen eines guten Companions (Prioritäten)**
 1. **Kinderwelt & Fantasie:** Was kennen Kinder aus ihrem echten Alltag, aus Büchern oder Filmen? (Beispiele: Dinosaurier im Buch, Gewitter, Mondschein).
-2. **Dynamik & Leben:** Prozesse, Kreisläufe und Lebewesen schlagen statische Zustände. (Beispiele: Wasserkreislauf, Vulkanausbruch).
+2. **Dynamik & Leben — bild-konkret:** Sichtbare Lebewesen, Orte und Ereignisse, die sich für Kinder FOTOGRAFIEREN lassen, schlagen statische Zustände und abstrakte Prozesse. Bei ähnlich starken Kandidaten gewinnt der fotografierbare (ein konkretes Tier, eine Pflanze, ein Ort) gegen einen, der real nur als Diagramm existiert. (Beispiele: Vulkanausbruch, ein Regenwald-Tier statt „Photosynthese").
 3. **Kultur & Menschliches:** Gibt es ein berühmtes Buch, einen Mythos, eine Sage oder ein historisches Ereignis? (Beispiele: Moby Dick bei Wal, Pompeji bei Vulkan).
 
 **C. Harte Ausschlusskriterien (Was du NICHT wählst)**
 - **Statische Geologie & Zustände:** Keine starren Strukturen ohne erlebbare Dynamik (Erdmantel, Pangaea).
-- **Wissenschaftliche Abstrakta:** Keine abstrakten Theorien oder Kategorien, die ein Kind sich nicht bildlich vorstellen kann.
+- **Nur-Diagramm / Nur-Modell:** Keine abstrakten Theorien oder Kategorien, die ein Kind sich nicht bildlich vorstellen kann — und keine Themen, die real überwiegend als Diagramm, Lehrpfad-Modell oder Nachbildung existieren (z. B. ein Planetenweg): Sie liefern keine echten Kinderbilder des Gegenstands.
 - **Reine Bezeichnungen:** Fotos oder bloße Namen (z.B. "Blue Marble") sind keine echten Themen.
 - **Trauma ohne Sachkern:** Ernste Themen (Unglücke, Konflikte) sind erlaubt, aber nur, wenn sie einen kindgerechten, lehrreichen Kern haben (Mut, Technik, Ausgrabung) – niemals für reinen Schockwert.
 
