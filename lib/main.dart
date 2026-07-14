@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/wissensfreund_provider.dart';
 import 'services/data_limit_overlay_service.dart';
 import 'services/json_article_service.dart';
+import 'services/narration_service.dart';
 import 'services/parental_lock_service.dart';
 import 'services/profile_service.dart';
 import 'services/reward_service.dart';
@@ -24,6 +25,7 @@ void main() async {
   await ProfileService.instance.initialize();
   await RewardService.instance.initialize();
   unawaited(JsonArticleService.instance.initialize());
+  unawaited(NarrationService.instance.initialize()); // ZIM-unabhängig (Premium-Vertonung)
   final prefs = await SharedPreferences.getInstance();
   final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
   // Kiosk-Modus nach erstem Frame automatisch reaktivieren (falls zuvor aktiviert)
