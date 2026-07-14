@@ -457,9 +457,9 @@ def main() -> None:
     if args.dry_run:
         log.info("DRY-RUN: kein R2-Upload")
         if args.audio_dir and args.audio_dir.exists():
-            n_wav = len(list(args.audio_dir.glob("*.wav")))
-            log.info("DRY-RUN: %d WAVs würden nach r2:%s/audio/ hochgeladen (%s)",
-                     n_wav, args.bucket, args.audio_dir)
+            n_aud = len(list(args.audio_dir.glob("*.m4a"))) or len(list(args.audio_dir.glob("*.wav")))
+            log.info("DRY-RUN: %d Audio-Dateien würden nach r2:%s/audio/ hochgeladen (%s)",
+                     n_aud, args.bucket, args.audio_dir)
         elif args.audio_dir:
             log.warning("DRY-RUN: --audio-dir %s existiert nicht", args.audio_dir)
         _print_staging_summary(args.out_dir)
@@ -472,10 +472,16 @@ def main() -> None:
 
     # 6b. Audio-Upload (optional)
     if args.audio_dir and args.audio_dir.exists():
+        n_m4a = len(list(args.audio_dir.glob("*.m4a")))
         n_wav = len(list(args.audio_dir.glob("*.wav")))
         if not upload_audio_to_r2(args.audio_dir, args.bucket, endpoint, access_key, secret_key):
             sys.exit(1)
-        log.info("Audio-Upload: %d WAVs → r2:%s/audio/", n_wav, args.bucket)
+        # Empfohlen wird der komprimierte m4a-Staging-Ordner (inkl. narration_index.json);
+        # rohe WAVs funktionieren weiter, sind aber ~8–12× größer.
+        if n_m4a:
+            log.info("Audio-Upload: %d m4a → r2:%s/audio/", n_m4a, args.bucket)
+        else:
+            log.info("Audio-Upload: %d WAVs → r2:%s/audio/ (Tipp: erst scripts/compress_narration.py)", n_wav, args.bucket)
     elif args.audio_dir:
         log.warning("--audio-dir %s existiert nicht — Audio-Upload übersprungen", args.audio_dir)
 
