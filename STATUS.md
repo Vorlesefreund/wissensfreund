@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-09T18:32:17Z -->
+<!-- updated: 2026-07-14T08:46:23Z -->
 <!-- Ältere Banner-Historie → STATUS_ARCHIV.md · Wissen → WISSEN_*.md · Details → PROJEKTDOKUMENT.md -->
 
 **Wissensfreund:** Flutter-App für Kinder (3 Altersstufen: S1 4–6, S2 7–9, S3 10–12),
@@ -36,6 +36,13 @@ Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-P
 
 ## Gerade in Arbeit / Nächster Schritt
 
+- **Nico-Stimme (Voice-Cloning, 2026-07-14):** Erster LoRA-Fine-Tune-Lauf auf RunPod (RTX 3090,
+  Chatterbox MIT) **validiert** — Pipeline Datensatz→Training→Inferenz läuft durch, Ergebnis =
+  Kinderstimme in sauberem Deutsch (`Desktop\_nico_clone\nico_finetune_v1.mp3`). Nur 5,5 Min Daten
+  → einige Sätze früh „forcing EOS"-abgeschnitten (erwartet). **Offen:** ~25–30 Min mehr Aufnahmen
+  (User heute Abend) → echter Qualitätslauf. Pod läuft WARM weiter (~$0,22/h, User-Freigabe).
+  Reconnect + Ablauf: `Desktop\_nico_clone\pod_zugang\RECONNECT.md`. Strategie: [[project_voice_strategy]]
+  (Erwachsene=Gemini Flash TTS, Nico=geklonte Sohn-Stimme). **Pod-Terminierung nicht vergessen**, wenn fertig.
 - **Nachtlauf geplant: 2026-07-08 03:00 Berlin** (Scheduled Task `WF_NightlyRerun_20260708`, Frühfenster
   laut 503-Monitor am ruhigsten). Die 6 Themen (Dinosaurier/Elefant/Hund/Spartacus/Vulkan/Zweiter Weltkrieg)
   × 3 Stufen, `--pipeline new`, Stages 1–3 (Gen+Lektorat, kein TTS) → `articles/batch_new_20260708`,
