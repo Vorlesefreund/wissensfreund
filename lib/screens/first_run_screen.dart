@@ -516,17 +516,17 @@ class _FirstRunScreenState extends State<FirstRunScreen>
           ),
           const SizedBox(height: 24),
           _QualityCard(
-            icon: Icons.wifi_rounded,
-            title: 'Nur WLAN (Standard)',
-            subtitle: 'Bilder werden per WLAN geladen, 300px, kein Download nötig',
-            highlight: !hasEnoughSpace,
+            icon: Icons.download_rounded,
+            title: 'Bilder aufs Gerät (empfohlen)',
+            subtitle: '300px-Paket herunterladen — Bilder sind dann offline und schnell da',
+            highlight: hasEnoughSpace,
           ),
           const SizedBox(height: 12),
           _QualityCard(
-            icon: Icons.download_rounded,
-            title: 'Einfacher Download',
-            subtitle: '300px-Paket (~150 MB) herunterladen, offline verfügbar',
-            highlight: hasEnoughSpace,
+            icon: Icons.wifi_rounded,
+            title: 'Nur per WLAN',
+            subtitle: 'Kein Download — Bilder werden bei Bedarf über WLAN geladen',
+            highlight: !hasEnoughSpace,
           ),
           if (_freeBytes >= 0 && !hasEnoughSpace) ...[
             const SizedBox(height: 10),
@@ -544,17 +544,13 @@ class _FirstRunScreenState extends State<FirstRunScreen>
           ],
           const SizedBox(height: 32),
           _BigButton(
-            label: 'Herunterladen & weiter',
-            icon: Icons.download_rounded,
-            onPressed: hasEnoughSpace ? _downloadImage : null,
+            label: hasEnoughSpace ? 'Herunterladen & weiter' : 'Weiter (nur per WLAN)',
+            icon: hasEnoughSpace ? Icons.download_rounded : Icons.wifi_rounded,
+            onPressed: hasEnoughSpace ? _downloadImage : _skipImageAndNext,
           ),
-          const SizedBox(height: 12),
-          Center(
-            child: TextButton(
-              onPressed: _skipImageAndNext,
-              child: Text('Nein danke, nur per WLAN', style: TextStyle(color: Colors.grey.shade600)),
-            ),
-          ),
+          // Der kleine Offline-Download ist Pflicht (die App ist ohne Bilder
+          // langweilig). Nur wenn der Speicher NICHT reicht, gibt es den
+          // WLAN-Ausweg — dann ist „Weiter" oben ohnehin der WLAN-Weg.
           const SizedBox(height: 20),
           Container(
             padding: const EdgeInsets.all(12),

@@ -39,4 +39,26 @@ class AssetConfig {
   static String get imageLibraryUrl  => '$r2BaseUrl/images_standard.zip';
   static String get imageManifestUrl => '$r2BaseUrl/images_standard_manifest.json';
   static const int imageLibrarySizeBytes = 3346 * 1024 * 1024; // ~3.3 GB
+
+  // ── Größen-Labels (einzige Quelle der Wahrheit) ──────────────────────────────
+  // Die UI zeigt NIRGENDS hartkodierte MB/GB-Zahlen. Alle Paketgrößen leiten
+  // sich aus den beiden Byte-Konstanten oben ab. Wächst der Artikelbestand
+  // (geplant 4.500–5.000 Artikel × 5–10 Bilder), genügt es, die zwei Konstanten
+  // anzupassen — jede Anzeige folgt automatisch. Nach dem Download zeigt der
+  // Screen ohnehin die real belegten Bytes.
+  static String get imageThumbLibrarySizeLabel =>
+      _fmtSize(imageThumbLibrarySizeBytes);
+  static String get imageLibrarySizeLabel => _fmtSize(imageLibrarySizeBytes);
+
+  static String _fmtSize(int bytes) {
+    const gb = 1024 * 1024 * 1024;
+    const mb = 1024 * 1024;
+    if (bytes >= gb) {
+      final v = bytes / gb;
+      // 1 Nachkommastelle, deutsches Komma (3,3 GB); ganze Zahlen ohne „,0".
+      final s = v.toStringAsFixed(1).replaceAll('.', ',');
+      return '${s.endsWith(',0') ? s.substring(0, s.length - 2) : s} GB';
+    }
+    return '${(bytes / mb).round()} MB';
+  }
 }

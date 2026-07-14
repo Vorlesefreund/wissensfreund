@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-14T12:35:31Z -->
+<!-- updated: 2026-07-14T13:39:45Z -->
 <!-- Ältere Banner-Historie → STATUS_ARCHIV.md · Wissen → WISSEN_*.md · Details → PROJEKTDOKUMENT.md -->
 
 **Wissensfreund:** Flutter-App für Kinder (3 Altersstufen: S1 4–6, S2 7–9, S3 10–12),
@@ -16,6 +16,15 @@ Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-P
   Erklärtexte, „Stand: Mai 2026" statt interner ZIM-Kennung. Getestet per adb am echten Galaxy Tab
   S10 FE (`R52Y30B9GVD`). Plan/Screen-Inventar: `Desktop\wissensfreund_tablet_strategie.html`.
   Entschieden: voller Tablet-Modus inkl. Querformat für Lesemodi (A/B/C); Home-Kachel-Umbau danach.
+- **Screen „Speicher & Qualität" komplett (Handy+Tablet, freigegeben):** Tablet-zentriert (`TabletMaxWidth`);
+  neue Speicher-Übersicht oben (Bilderanzahl + belegte MB + freier Gerätespeicher via `getFreeStorageBytes`
+  + rote Warnung < 1,5 GB frei); interner „(aus ZIM)"-Begriff raus. **Freeze-Bug behoben**: `_extractZipTo`
+  (`image_library_service`) lief synchron auf dem UI-Isolate → Balken fror bei 100 % → jetzt yield alle 40
+  Dateien, „wird entpackt…" läuft sichtbar. **Paketgrößen zentralisiert**: alle MB/GB-Anzeigen leiten aus
+  `AssetConfig.image*SizeBytes` ab (einzige Quelle; 545 MB ist **Platzhalter** — Onboarding rechnet mit
+  141 MB ZIP, echte Zahl offen bis Voll-Paket). **Onboarding**: 300px-Download jetzt Pflicht (Skip nur bei
+  zu wenig Platz → WLAN-Weg bleibt offen; `first_run_screen`). **Audio bleibt Stream/on-demand** (offline
+  undenkbar: 5.000 Art.×3 Stufen ≈ 13–36 GB komprimiert; heute noch unkomprimiertes WAV 24kHz = 2,88 MB/min).
 - **5-Fixes-Batch (Review-Feedback batch_new_20260710):**
   (1) **Lektorat-Modell → `claude-sonnet-5`** (besser + günstiger als sonnet-4-6; `stage_models`, `lektorat_common`, `verify`).
   (2) **Review-Docx** zeigt Korrekturen sauber: finaler Satz einmal als Body, Änderung als klein gesetzte Notiz (keine Scheindopplung) — `generate_review_docx._render_tracked_change`.
@@ -43,10 +52,14 @@ Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-P
 
 ## Gerade in Arbeit / Nächster Schritt
 
-- **Tablet-Pass (App), Screen für Screen:** nächste Formular-Screens (Kinderschutz / Speicher &
-  Qualität / Plus & Premium) tablet-zentrieren (`_tabletConstrain` / `MaxWidthCenter`) + ggf. gleiche
-  Aufräum-Kur. Danach Lesemodi A/B/C — brauchen Wissensspeicher auf dem Tablet (**Klexikon-Daten nicht
-  anfassen**, User-Wunsch). Bildschirm bleibt beim Testen wach: `adb ... svc power stayon usb`.
+- **Tablet-Pass (App), Screen für Screen:** nächste Formular-Screens (Kinderschutz / Plus & Premium /
+  Menü / Profile / Neues Profil) tablet-zentrieren (`TabletMaxWidth`) + ggf. gleiche Aufräum-Kur.
+  Danach Lesemodi A/B/C — brauchen Wissensspeicher auf dem Tablet (**Klexikon-Daten nicht anfassen**,
+  User-Wunsch). Bildschirm bleibt beim Testen wach: `adb ... svc power stayon usb`.
+- **Onboarding-Pflicht noch am Tablet ansehen** (Profil-Reset nötig) — User wollte einmal durchklicken.
+- **Offen (eigene Stränge, nicht ungefragt):** echte 300px-Paketgröße bestimmen → `AssetConfig`-Konstante
+  aktualisieren (oder Anzeige auf `images_thumb_manifest.json` verdrahten); serverseitige Opus-Kompression
+  der Vertonungen (heute WAV) + Audio-Streaming/On-demand-Cache pro Stufe.
 - **Nico-Stimme (Voice-Cloning, 2026-07-14):** Erster LoRA-Fine-Tune-Lauf auf RunPod (RTX 3090,
   Chatterbox MIT) **validiert** — Pipeline Datensatz→Training→Inferenz läuft durch, Ergebnis =
   Kinderstimme in sauberem Deutsch (`Desktop\_nico_clone\nico_finetune_v1.mp3`). Nur 5,5 Min Daten

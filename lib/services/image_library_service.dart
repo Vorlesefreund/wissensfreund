@@ -55,6 +55,13 @@ class ImageLibraryService {
     });
   }
 
+  /// Anzahl der offline gespeicherten Bilddateien in image_library/.
+  int get totalImageCount {
+    final dir = StorageManager.instance.imageLibraryDir;
+    if (!dir.existsSync()) return 0;
+    return dir.listSync(recursive: true).whereType<File>().length;
+  }
+
   bool get isDownloading => _downloading;
 
   /// Bricht einen laufenden Download ab. Keine Wirkung wenn kein Download läuft.
@@ -202,6 +209,11 @@ class ImageLibraryService {
       out.close();
       done++;
       onExtractProgress?.call(done, files.length);
+      // Das Entpacken vieler kleiner Dateien läuft auf dem UI-Isolate. Ohne
+      // regelmäßiges Freigeben des Event-Loops repaintet Flutter nie → der
+      // Balken „friert" bei 100 % ein. Alle paar Dateien einmal yielden lässt
+      // den Fortschritt („wird entpackt… X %") sichtbar durchlaufen.
+      if (done % 40 == 0) await Future<void>.delayed(Duration.zero);
     }
     stream.close();
   }

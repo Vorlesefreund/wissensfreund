@@ -1946,7 +1946,9 @@ class _ImageQualityDialogState extends State<_ImageQualityDialog> {
                     final isPlus = SubscriptionService.instance.isPlus;
                     return _QualityRow(
                       icon: Icons.hd_outlined,
-                      title: isPlus ? 'Gut  (~3,3 GB · 800px)' : 'Einheitlich 300px  (~545 MB)',
+                      title: isPlus
+                          ? 'Gut  (~${AssetConfig.imageLibrarySizeLabel} · 800px)'
+                          : 'Einheitlich 300px  (~${AssetConfig.imageThumbLibrarySizeLabel})',
                       subtitle: 'Offline-Bilderbibliothek · ca. 1–3 min im WLAN',
                       highlight: _hasEnoughSpace,
                     );
@@ -2064,6 +2066,8 @@ class _StorageScreen extends StatefulWidget {
 
 class _StorageScreenState extends State<_StorageScreen> {
   int _libraryBytes = 0;
+  int _libraryCount = 0; // Anzahl offline gespeicherter Bilder
+  int _freeBytes = 0; // freier Gerätespeicher (0 = unbekannt)
   bool? _libraryIsThumb; // true=300px, false=800px, null=unbekannt
   bool _hiresOnWifi = true;
   bool _loadingLibrary = false;
@@ -2093,9 +2097,12 @@ class _StorageScreenState extends State<_StorageScreen> {
       if (!mounted) return;
       final tier     = await ImageLibraryService.getStoredTier();
       final hiresWifi = await ImageLibraryService.hiresOnWifiEnabled();
+      final freeBytes = await StorageManager.instance.getFreeStorageBytes();
       if (!mounted) return;
       setState(() {
         _libraryBytes   = ImageLibraryService.instance.totalSizeBytes;
+        _libraryCount   = ImageLibraryService.instance.totalImageCount;
+        _freeBytes      = freeBytes;
         _libraryIsThumb = tier;
         _hiresOnWifi    = hiresWifi;
         _bgDownloading  = bgDl;
@@ -2152,8 +2159,12 @@ class _StorageScreenState extends State<_StorageScreen> {
         _downloading = false;
         _dlProgress = 0;
         _libraryBytes = ImageLibraryService.instance.totalSizeBytes;
+        _libraryCount = ImageLibraryService.instance.totalImageCount;
         _downloadComplete = true;
       });
+      // Freien Speicher neu lesen, damit die Übersicht nach dem Download stimmt.
+      final freeBytes = await StorageManager.instance.getFreeStorageBytes();
+      if (mounted && freeBytes > 0) setState(() => _freeBytes = freeBytes);
     } else if (error == 'cancelled') {
       setState(() { _downloading = false; _dlProgress = 0; _downloadComplete = false; });
     } else {
@@ -2181,6 +2192,78 @@ class _StorageScreenState extends State<_StorageScreen> {
   String _fmtEta(Duration d) =>
       d.inMinutes >= 1 ? '~${d.inMinutes} min' : '~${d.inSeconds}s';
 
+  /// Zahl mit deutschem Tausenderpunkt: 15234 → „15.234".
+  String _fmtCount(int n) => n.toString().replaceAllMapped(
+      RegExp(r'(\d)(?=(\d{3})+$)'), (m) => '${m[1]}.');
+
+  /// Kompakte Speicher-Übersicht: was liegt offline auf dem Gerät und wie viel
+  /// Platz ist noch frei. Warnt farblich, wenn es eng wird. Handy + Tablet gleich.
+  Widget _buildStorageOverview() {
+    final hasLib = _libraryBytes > 0;
+    final knowFree = _freeBytes > 0;
+    // „Knapp" ab < 1,5 GB frei — dann reicht ein 800px-Upgrade (~3,3 GB) nicht
+    // mehr, und auch das kleine Paket wird eng.
+    const lowThreshold = 1500 * 1024 * 1024;
+    final low = knowFree && _freeBytes < lowThreshold;
+
+    Widget row(String label, String value, {Color? valueColor}) => Padding(
+          padding: const EdgeInsets.symmetric(vertical: 3),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(label,
+                  style: const TextStyle(fontSize: 14, color: Color(0xFF555555))),
+              Text(value,
+                  style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w700,
+                      color: valueColor ?? const Color(0xFF2E7D32))),
+            ],
+          ),
+        );
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF6FAF6),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFFE8F5E9)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(children: [
+            Icon(Icons.sd_storage_rounded, color: Color(0xFF2E7D32), size: 18),
+            SizedBox(width: 6),
+            Text('Speicherplatz',
+                style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF1B5E20))),
+          ]),
+          const SizedBox(height: 8),
+          row(
+            'Bilder offline',
+            hasLib
+                ? '${_fmtCount(_libraryCount)} Bilder · ${_fmtSize(_libraryBytes)}'
+                : 'Noch keine',
+          ),
+          if (knowFree)
+            row('Frei auf dem Gerät', _fmtSize(_freeBytes),
+                valueColor: low ? const Color(0xFFC62828) : const Color(0xFF2E7D32)),
+          if (low) ...[
+            const SizedBox(height: 8),
+            Text(
+              'Der Speicher wird knapp. Für das große Bildpaket '
+              '(~${AssetConfig.imageLibrarySizeLabel}) könnte der Platz nicht reichen.',
+              style: const TextStyle(fontSize: 12, color: Color(0xFFC62828)),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   Widget _buildUpgradeTeaser(BuildContext ctx) {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -2202,9 +2285,10 @@ class _StorageScreenState extends State<_StorageScreen> {
                     color: Color(0xFF1B5E20))),
           ]),
           const SizedBox(height: 6),
-          const Text(
-            '800px statt 300px offline (~3,3 GB) und automatisch beste Qualität bei WLAN.',
-            style: TextStyle(fontSize: 12, color: Color(0xFF555555)),
+          Text(
+            '800px statt 300px offline (~${AssetConfig.imageLibrarySizeLabel}) '
+            'und automatisch beste Qualität bei WLAN.',
+            style: const TextStyle(fontSize: 12, color: Color(0xFF555555)),
           ),
           const SizedBox(height: 10),
           SizedBox(
@@ -2326,7 +2410,7 @@ class _StorageScreenState extends State<_StorageScreen> {
       ),
       body: _loadingStats
           ? const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50)))
-          : SafeArea(
+          : TabletMaxWidth(child: SafeArea(
               top: false,
               minimum: const EdgeInsets.only(bottom: 8),
               child: SingleChildScrollView(
@@ -2334,17 +2418,19 @@ class _StorageScreenState extends State<_StorageScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildStorageOverview(),
+                  const SizedBox(height: 20),
                   // ── Bildqualität-Status ──────────────────────────────
                   if (!isPlus && !hasLib) ...[
                     _InfoRow(
                       label: 'Bildqualität',
-                      value: isDl ? 'Wird heruntergeladen…' : 'Variabel (aus ZIM)',
+                      value: isDl ? 'Wird heruntergeladen…' : 'Noch nicht gespeichert',
                     ),
                     const SizedBox(height: 4),
                     if (!isDl)
-                      const Text(
-                        'Lokal speichern für einheitlich 300px (~545 MB)',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
+                      Text(
+                        'Lokal speichern für einheitlich 300px (~${AssetConfig.imageThumbLibrarySizeLabel})',
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF888888)),
                       ),
                     const SizedBox(height: 12),
                     if (isDl)
@@ -2360,7 +2446,7 @@ class _StorageScreenState extends State<_StorageScreen> {
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.download_rounded, size: 18),
-                          label: const Text('Bilder herunterladen (300px, ~545 MB)'),
+                          label: Text('Bilder herunterladen (300px, ~${AssetConfig.imageThumbLibrarySizeLabel})'),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF2E7D32),
                             side: const BorderSide(color: Color(0xFF2E7D32)),
@@ -2404,9 +2490,9 @@ class _StorageScreenState extends State<_StorageScreen> {
                     ),
                     const SizedBox(height: 4),
                     if (!isDl)
-                      const Text(
-                        'Lade alle Bilder für schnelle Offline-Anzeige (~3,3 GB)',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
+                      Text(
+                        'Lade alle Bilder für schnelle Offline-Anzeige (~${AssetConfig.imageLibrarySizeLabel})',
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF888888)),
                       ),
                     const SizedBox(height: 12),
                     if (isDl)
@@ -2422,7 +2508,7 @@ class _StorageScreenState extends State<_StorageScreen> {
                         width: double.infinity,
                         child: OutlinedButton.icon(
                           icon: const Icon(Icons.download_rounded, size: 18),
-                          label: const Text('Bilder herunterladen (800px, ~3,3 GB)'),
+                          label: Text('Bilder herunterladen (800px, ~${AssetConfig.imageLibrarySizeLabel})'),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: const Color(0xFF2E7D32),
                             side: const BorderSide(color: Color(0xFF2E7D32)),
@@ -2439,9 +2525,9 @@ class _StorageScreenState extends State<_StorageScreen> {
                     ),
                     if (_libraryIsThumb != false) ...[
                       const SizedBox(height: 4),
-                      const Text(
-                        'Mit Plus kannst du auf 800px upgraden (~3,3 GB)',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF888888)),
+                      Text(
+                        'Mit Plus kannst du auf 800px upgraden (~${AssetConfig.imageLibrarySizeLabel})',
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF888888)),
                       ),
                       const SizedBox(height: 12),
                       if (isDl)
@@ -2451,7 +2537,7 @@ class _StorageScreenState extends State<_StorageScreen> {
                           width: double.infinity,
                           child: OutlinedButton.icon(
                             icon: const Icon(Icons.upgrade_rounded, size: 18),
-                            label: const Text('Auf 800px upgraden (~3,3 GB)'),
+                            label: Text('Auf 800px upgraden (~${AssetConfig.imageLibrarySizeLabel})'),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: const Color(0xFF2E7D32),
                               side: const BorderSide(color: Color(0xFF2E7D32)),
@@ -2487,7 +2573,7 @@ class _StorageScreenState extends State<_StorageScreen> {
                 ],
               ),
             ),
-            ),
+            )),
     );
   }
 

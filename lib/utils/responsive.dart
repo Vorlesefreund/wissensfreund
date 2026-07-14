@@ -27,24 +27,27 @@ extension ResponsiveContext on BuildContext {
   bool get isTabletLandscape => isTablet && isLandscape;
 }
 
-/// Begrenzt Inhalt auf eine angenehme Maximalbreite und zentriert ihn.
+/// Begrenzt Inhalt auf einem Tablet auf eine angenehme Maximalbreite und
+/// richtet ihn oben-zentriert aus — so werden Formular-/Textspalten auf der
+/// breiten Fläche nicht auseinandergezogen.
 ///
-/// Auf dem Handy (Viewport schmaler als [maxWidth]) ist das ein No-Op —
-/// die Ansicht bleibt exakt wie bisher. Erst auf breiten Tablet-Screens
-/// verhindert es, dass Text-/Formularspalten unangenehm auseinandergezogen
-/// werden.
-class MaxWidthCenter extends StatelessWidget {
+/// Auf dem Handy ([ResponsiveContext.isTablet] == false) wird das Kind
+/// **unverändert** zurückgegeben; der bestehende Handy-Baum bleibt Byte für
+/// Byte erhalten (kein zusätzliches Align/ConstrainedBox).
+class TabletMaxWidth extends StatelessWidget {
   final double maxWidth;
   final Widget child;
-  const MaxWidthCenter({
+  const TabletMaxWidth({
     super.key,
-    this.maxWidth = 640,
+    this.maxWidth = 560,
     required this.child,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    if (!context.isTablet) return child;
+    return Align(
+      alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: BoxConstraints(maxWidth: maxWidth),
         child: child,
