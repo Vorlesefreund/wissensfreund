@@ -39,6 +39,16 @@ class NarrationTiming {
     required this.sentences,
   });
 
+  /// Abspielzeit (ms) für einen Zeichen-Offset — erstes Wort, dessen Bereich den
+  /// Offset enthält oder danach beginnt. Für Seek/Resume ab einer Textstelle.
+  int timeForChar(int charOffset) {
+    if (words.isEmpty) return 0;
+    for (final w in words) {
+      if (w.ce > charOffset) return w.t0;
+    }
+    return words.last.t0;
+  }
+
   /// Wort-Index für eine Abspielposition (ms) via Binärsuche; -1 vor dem ersten Wort.
   int wordIndexAt(int posMs) {
     if (words.isEmpty) return -1;

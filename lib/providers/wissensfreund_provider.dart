@@ -20,6 +20,7 @@ import '../models/rendered_article.dart';
 import '../models/wf_article.dart';
 import '../services/json_article_service.dart';
 import '../services/subscription_service.dart';
+import '../services/narration_service.dart';
 import '../utils/professor_phrases.dart';
 import '../services/wikimedia_license_checker.dart';
 import '../services/zim_update_service.dart';
@@ -193,6 +194,16 @@ class WissensfreundProvider extends ChangeNotifier {
 
   // Audio playback
   final _audioPlayer = AudioPlayer();
+
+  // ── Premium-Vertonung (gestreamt, Plus) ──────────────────────────────────────
+  // Getrennter Player. Ist _narrationActive false (Nicht-Plus / keine Vertonung /
+  // offline ohne Cache / Ladefehler), laeuft ueberall der bestehende flutter_tts-Pfad.
+  AudioPlayer? _narrationPlayer;
+  bool _narrationActive = false;
+  AudioSource? _narrationSource;
+  NarrationTiming? _narrationTiming;
+  StreamSubscription<Duration>? _narrationPosSub;
+  StreamSubscription<PlayerState>? _narrationStateSub;
   bool _isPlayingAudio = false;
   int _activeAudioIndex = -1; // index in _mediaItems
 
@@ -567,6 +578,123 @@ class WissensfreundProvider extends ChangeNotifier {
     return chunks;
   }
 
+  // ── Premium-Vertonung: Steuerung ────────────────────────────────────────────
+  // Streamt die vorgerenderte Stimme (Plus) und treibt Cursor/Bild aus der
+  // Zeitleiste. Solange _narrationActive false ist, bleibt alles beim flutter_tts-Pfad.
+
+  /// Beendet flutter_tts UND — falls aktiv — den Narration-Player. Verhaltensgleich
+  /// zu _tts.stop(), solange keine Vertonung laeuft (Player null/idle).
+  Future<void> _haltSpeech() async {
+    await _tts.stop();
+    final p = _narrationPlayer;
+    if (p != null) {
+      try { await p.stop(); } catch (_) {}
+    }
+  }
+
+  /// Entscheidet einmal pro Artikel, ob per Premium-Stimme vorgelesen wird, und lädt
+  /// Quelle + Zeitleiste. Setzt _narrationActive. Kein Handy-Effekt, wenn false.
+  Future<void> _prepareNarration() async {
+    _narrationActive = false;
+    _narrationSource = null;
+    _narrationTiming = null;
+    if (!SubscriptionService.instance.isPlus) return;
+    if (_articleId.isEmpty || !NarrationService.instance.hasNarration(_articleId)) return;
+    try {
+      final src    = await NarrationService.instance.audioSourceFor(_articleId);
+      final timing = await NarrationService.instance.timingFor(_articleId);
+      if (src == null || timing == null || timing.words.isEmpty) return;
+      _narrationSource = src;
+      _narrationTiming = timing;
+      _narrationActive = true;
+    } catch (_) {
+      _narrationActive = false;
+    }
+  }
+
+  AudioPlayer _ensureNarrationPlayer() {
+    final existing = _narrationPlayer;
+    if (existing != null) return existing;
+    final p = AudioPlayer();
+    _narrationPlayer   = p;
+    _narrationPosSub   = p.positionStream.listen(_onNarrationPosition);
+    _narrationStateSub = p.playerStateStream.listen((st) {
+      if (st.processingState == ProcessingState.completed) _onNarrationComplete();
+    });
+    return p;
+  }
+
+  /// Startet/seekt die Vertonung ab einem Zeichen-Offset im Artikeltext.
+  Future<void> _narrationPlayFromChar(int charOffset) async {
+    final timing = _narrationTiming;
+    final src    = _narrationSource;
+    if (timing == null || src == null) {
+      _narrationActive = false;
+      return;
+    }
+    final startMs = timing.timeForChar(charOffset);
+    final p = _ensureNarrationPlayer();
+    _state = AppState.speaking;
+    notifyListeners();
+    _pauseScreenTimer();
+    try {
+      await p.setAudioSource(src, initialPosition: Duration(milliseconds: startMs));
+      await p.play();
+    } catch (_) {
+      // Stream/Netz kaputt → sauber auf flutter_tts zurueckfallen.
+      _narrationActive = false;
+      _startSpeakingFrom(charOffset);
+    }
+  }
+
+  void _onNarrationPosition(Duration pos) {
+    final timing = _narrationTiming;
+    if (!_narrationActive || timing == null) return;
+    if (_isPaused || _state != AppState.speaking) return;
+    final wi = timing.wordIndexAt(pos.inMilliseconds);
+    if (wi < 0) return;
+    final cursor = timing.words[wi].cs;
+    if (cursor == _ttsCursor) return;
+    _ttsCursor = cursor;
+    _narrationSyncImage(cursor);
+    notifyListeners();
+  }
+
+  /// Bild-Weiterschaltung analog zum flutter_tts-Pfad, getrieben vom Cursor.
+  void _narrationSyncImage(int cursor) {
+    if (_chunkImgIndices.isEmpty || _imageSyncPaused) return;
+    int idx = 0;
+    for (int i = _chunkOffsets.length - 1; i >= 0; i--) {
+      if (_chunkIsBox.length > i && _chunkIsBox[i]) continue;
+      if (_chunkOffsets[i] <= cursor) { idx = i; break; }
+    }
+    _currentChunk = idx;
+    final img = _chunkImgIndices[idx.clamp(0, _chunkImgIndices.length - 1)];
+    if (img >= 0 && img != _selectedImageIndex) {
+      _selectedImageIndex = img;
+      int ic = 0;
+      for (int i = 0; i < _mediaItems.length; i++) {
+        if (!_mediaItems[i].isAudio) {
+          if (ic == img) { _selectedMediaIndex = i; break; }
+          ic++;
+        }
+      }
+    }
+  }
+
+  void _onNarrationComplete() {
+    if (!_narrationActive) return;
+    _ttsCursor    = 0;
+    _currentChunk = 0;
+    _isPaused     = false;
+    _resumeOffset = 0;
+    unawaited(ProfileService.instance.clearLastArticle());
+    _state = AppState.idle;
+    notifyListeners();
+    resetScreenTimer();
+    _onArticleEnd();
+  }
+
   void _startSpeakingFrom(int offset) {
     final remaining = _articleText.substring(offset);
     _speechChunks = _splitIntoChunks(remaining);
@@ -589,7 +717,9 @@ class WissensfreundProvider extends ChangeNotifier {
     _state = AppState.speaking;
     notifyListeners();
     _pauseScreenTimer(); // Während Vorlesen kein Idle-Timeout
-    if (_speechChunks.isNotEmpty) {
+    if (_narrationActive) {
+      unawaited(_narrationPlayFromChar(offset));
+    } else if (_speechChunks.isNotEmpty) {
       _tts.speak(_speechChunks[0]);
     }
   }
@@ -638,7 +768,7 @@ class WissensfreundProvider extends ChangeNotifier {
     _stimmtPauseTimer?.cancel();
     if (_state == AppState.speaking && !_isPaused) {
       _ttsStopPending = true;
-      unawaited(_tts.stop());
+      unawaited(_haltSpeech());
       _seekToChunkForOffset(charOffset);
     } else {
       _seekToChunkForOffset(charOffset, startSpeaking: !_isPaused);
@@ -655,7 +785,7 @@ class WissensfreundProvider extends ChangeNotifier {
     if (_state == AppState.speaking && !_isPaused && !_stoppedForDelayedSeek) {
       _ttsStopPending = true;
       _stoppedForDelayedSeek = true;
-      unawaited(_tts.stop());
+      unawaited(_haltSpeech());
     }
     _seekDelayTimer = Timer(delay, () {
       _stoppedForDelayedSeek = false;
@@ -717,7 +847,7 @@ class WissensfreundProvider extends ChangeNotifier {
     if (_state == AppState.speaking && !_isPaused && !_stoppedForDelayedSeek) {
       _ttsStopPending = true;
       _stoppedForDelayedSeek = true;
-      unawaited(_tts.stop());
+      unawaited(_haltSpeech());
     }
     _seekDelayTimer = Timer(delay, () {
       _stoppedForDelayedSeek = false;
@@ -753,7 +883,7 @@ class WissensfreundProvider extends ChangeNotifier {
       _isPaused = true;   // guard: onComplete-Handler nicht auslösen
       _state = AppState.idle;
       notifyListeners();
-      await _tts.stop();
+      await _haltSpeech();
       _isPaused = false;
     }
     _seekToChunkForOffset(charOffset, startSpeaking: !_isPaused);
@@ -780,10 +910,14 @@ class WissensfreundProvider extends ChangeNotifier {
         }
       }
       if (startSpeaking) {
-        _state = AppState.speaking;
-        notifyListeners();
-        _pauseScreenTimer();
-        _tts.speak(_speechChunks[targetChunk]);
+        if (_narrationActive) {
+          unawaited(_narrationPlayFromChar(_chunkOffsets[targetChunk]));
+        } else {
+          _state = AppState.speaking;
+          notifyListeners();
+          _pauseScreenTimer();
+          _tts.speak(_speechChunks[targetChunk]);
+        }
       } else {
         // Paused seek: update position and image, keep paused state.
         _resumeOffset = _chunkOffsets[targetChunk];
@@ -814,6 +948,7 @@ class WissensfreundProvider extends ChangeNotifier {
     _isCaptionPlaying = false;
     _isPromptPlaying  = false;
     _showCaptionResumePrompt = false;
+    _narrationActive = false; // neue Frage → Vertonungs-Kontext verlassen
     _state = AppState.listening;
     _recognizedText = '';
     if (!_awaitingLinkConfirmation) {
@@ -828,7 +963,7 @@ class WissensfreundProvider extends ChangeNotifier {
     }
     notifyListeners();
 
-    await _tts.stop();
+    await _haltSpeech();
     await Future.delayed(Duration(milliseconds: skipLeadDelay ? 80 : 500));
     if (_state != AppState.listening) return;
 
@@ -1049,6 +1184,7 @@ class WissensfreundProvider extends ChangeNotifier {
   }
 
   Future<void> _loadAndSpeak(int urlIndex, String title) async {
+    _narrationActive = false; // ZIM-Artikel: keine vorgerenderte Vertonung
     try {
       final raw = await _zimChannel.invokeMethod<Map>('article', {
         'urlIndex': urlIndex,
@@ -1303,7 +1439,10 @@ class WissensfreundProvider extends ChangeNotifier {
     _pauseScreenTimer();
     _trackArticleListened();
 
-    if (_speechChunks.isNotEmpty) {
+    await _prepareNarration();
+    if (_narrationActive) {
+      unawaited(_narrationPlayFromChar(0));
+    } else if (_speechChunks.isNotEmpty) {
       unawaited(_tts.speak(_speechChunks[0]));
     }
   }
@@ -1336,6 +1475,7 @@ class WissensfreundProvider extends ChangeNotifier {
 
   /// Loads an article and starts reading from [charOffset] after an intro phrase.
   Future<void> _loadAndSpeakFrom(int urlIndex, String title, int charOffset) async {
+    _narrationActive = false; // ZIM-Artikel: keine vorgerenderte Vertonung
     try {
       final raw = await _zimChannel.invokeMethod<Map>('article', {'urlIndex': urlIndex});
       if (raw == null) {
@@ -1408,7 +1548,7 @@ class WissensfreundProvider extends ChangeNotifier {
       _isPaused = true;
       _state    = AppState.idle;
       notifyListeners();
-      await _tts.stop();
+      await _haltSpeech();
     }
     await _followLink(target);
   }
@@ -1498,7 +1638,7 @@ class WissensfreundProvider extends ChangeNotifier {
     notifyListeners();
 
     _ttsStopPending = true;
-    unawaited(_tts.stop());
+    unawaited(_haltSpeech());
 
     try {
       final raw = await _zimChannel.invokeMethod<Map>('article', {'urlIndex': entry.urlIndex});
@@ -1614,7 +1754,7 @@ class WissensfreundProvider extends ChangeNotifier {
     if (_wasPlayingBeforeCaption) {
       _isPaused = true;
       _state    = AppState.idle;
-      await _tts.stop();
+      await _haltSpeech();
     }
 
     _resumeOffset     = sentStart;
@@ -1776,7 +1916,7 @@ class WissensfreundProvider extends ChangeNotifier {
       _isPaused = true;
       _state = AppState.idle;
       notifyListeners();
-      await _tts.stop();
+      await _haltSpeech();
     } else if (_isPaused) {
       // Professor war bereits pausiert — Resume-Position bleibt erhalten.
     }
@@ -1972,7 +2112,7 @@ class WissensfreundProvider extends ChangeNotifier {
       _isPaused = true;
       _state = AppState.idle;
       notifyListeners();
-      await _tts.stop();
+      await _haltSpeech();
     }
     await _tts.speak(text);
   }
@@ -1983,7 +2123,7 @@ class WissensfreundProvider extends ChangeNotifier {
     _resumeOffset = _ttsCursor;
     _isPaused = true;  // guard completion handler before stop()
     _state = AppState.idle;
-    await _tts.stop();
+    await _haltSpeech();
     notifyListeners();
   }
 
@@ -1997,7 +2137,7 @@ class WissensfreundProvider extends ChangeNotifier {
       _state = AppState.idle;
       notifyListeners();
     }
-    await _tts.stop(); // auch laufende Idle-Ansagen abbrechen
+    await _haltSpeech(); // auch laufende Idle-Ansagen abbrechen
   }
 
   /// App kommt in den Vordergrund zurück.
@@ -2050,7 +2190,8 @@ class WissensfreundProvider extends ChangeNotifier {
     _isCaptionPlaying = false;
     _isPromptPlaying  = false;
     _showCaptionResumePrompt = false;
-    await _tts.stop();
+    _narrationActive = false;
+    await _haltSpeech();
     _isPaused     = false;
     _resumeOffset = 0;
     _ttsCursor    = 0;
@@ -2135,7 +2276,7 @@ class WissensfreundProvider extends ChangeNotifier {
     if (wasSpeaking) {
       _isPaused = false;
       _state    = AppState.idle;
-      await _tts.stop();
+      await _haltSpeech();
       notifyListeners();
     }
     // startListening() will clear _articleText etc. — saved copies are preserved above.
@@ -2235,7 +2376,7 @@ class WissensfreundProvider extends ChangeNotifier {
       _resumeOffset = _sentenceStartOffset();
       _isPaused     = true;
       _state        = AppState.idle;
-      await _tts.stop();
+      await _haltSpeech();
     }
     // Set completer before speaking so the completion handler can drain it.
     _handoffCompleter = Completer<void>();
@@ -2264,6 +2405,9 @@ class WissensfreundProvider extends ChangeNotifier {
     _seekDelayTimer?.cancel();
     _tts.stop();
     _audioPlayer.dispose();
+    _narrationPosSub?.cancel();
+    _narrationStateSub?.cancel();
+    _narrationPlayer?.dispose();
     super.dispose();
   }
 }
