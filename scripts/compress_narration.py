@@ -43,8 +43,10 @@ if hasattr(sys.stdout, "buffer") and (getattr(sys.stdout, "encoding", "") or "")
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
     sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
-# {article_id}_l{level}_{kind}.wav  — id greedy, damit ids mit '_' (zweiter_weltkrieg) passen.
-NAME_RE = re.compile(r"^(?P<id>.+)_l(?P<lvl>\d+)_(?P<kind>.+)\.wav$", re.IGNORECASE)
+# Voller App-Artikel-Schlüssel = "{slug}_l{level}" (articleIdFor / meta.id in der App),
+# gefolgt vom Typ. kind = "artikel" (Narration) oder "quiz_..." (Clip).
+# aid greedy bis zum letzten "_l\d+", damit slugs mit '_' (zweiter_weltkrieg_l2) passen.
+NAME_RE = re.compile(r"^(?P<aid>.+_l\d+)_(?P<kind>.+)\.wav$", re.IGNORECASE)
 
 
 def find_ffmpeg(name: str) -> str:
@@ -107,10 +109,10 @@ def main() -> int:
         print(f"Keine .wav in {in_dir}")
         return 1
 
-    # narration[id][stufe] = {file, dur_s, bytes}      (Artikel-Narration)
-    # clips[id][stufe]     = [{suffix, file, dur_s, bytes}, ...]  (Quiz etc.)
-    narration: dict[str, dict[str, dict]] = {}
-    clips: dict[str, dict[str, list]] = {}
+    # narration[article_id] = {file, dur_s, bytes}      (article_id = "{slug}_l{level}")
+    # clips[article_id]      = [{suffix, file, dur_s, bytes}, ...]  (Quiz etc.)
+    narration: dict[str, dict] = {}
+    clips: dict[str, list] = {}
 
     total_wav = total_m4a = 0
     n_enc = n_skip = n_fail = 0
@@ -120,7 +122,7 @@ def main() -> int:
         if not m:
             print(f"  ? Namensschema unbekannt, übersprungen: {wav.name}")
             continue
-        aid, lvl, kind = m["id"], m["lvl"], m["kind"]
+        aid, kind = m["aid"], m["kind"]
         m4a = out_dir / f"{wav.stem}.m4a"
 
         # Idempotenz: aktuelle m4a behalten (außer --force).
@@ -138,10 +140,10 @@ def main() -> int:
         rec = {"file": m4a.name, "dur_s": probe_duration(m4a), "bytes": m4a.stat().st_size}
 
         if kind.lower() == "artikel":
-            narration.setdefault(aid, {})[lvl] = rec
+            narration[aid] = rec
         else:
             rec["suffix"] = kind
-            clips.setdefault(aid, {}).setdefault(lvl, []).append(rec)
+            clips.setdefault(aid, []).append(rec)
 
     index = {
         "generated": date.today().isoformat(),
@@ -158,9 +160,8 @@ def main() -> int:
     ratio = (total_wav / total_m4a) if total_m4a else 0
     print("\n── Fertig ─────────────────────────────────")
     print(f"  Konvertiert: {n_enc} | übersprungen: {n_skip} | Fehler: {n_fail}")
-    print(f"  Artikel-Narrationen: {sum(len(v) for v in narration.values())} "
-          f"({len(narration)} Themen)")
-    print(f"  Clips: {sum(len(l) for v in clips.values() for l in v.values())}")
+    print(f"  Artikel-Narrationen: {len(narration)} (article_id inkl. Stufe, z. B. vulkan_l1)")
+    print(f"  Clips: {sum(len(v) for v in clips.values())}")
     print(f"  Größe: {total_wav/mb:.1f} MB WAV → {total_m4a/mb:.1f} MB m4a  (~{ratio:.1f}× kleiner)")
     print(f"  Index: {idx_path}")
     return 0

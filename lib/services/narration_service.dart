@@ -67,8 +67,8 @@ class NarrationService {
   static const String _capPrefKey = 'narration_cache_cap_mb';
   static const int _defaultCapMb = 200; // vom Nutzer im Menü einstellbar
 
-  // articleId → { stufe → {file, dur_s, bytes} }
-  Map<String, Map<String, Map<String, dynamic>>> _index = {};
+  // articleId ("{slug}_l{level}", = App _articleId) → {file, dur_s, bytes}
+  Map<String, Map<String, dynamic>> _index = {};
   String? _cacheDir;
   bool _initialized = false;
 
@@ -88,33 +88,45 @@ class NarrationService {
     unawaited(_syncIfNeeded(indexFile));
   }
 
-  /// Gibt es eine Vertonung für diesen Artikel + Stufe (1/2/3)?
-  bool hasNarration(String articleId, int stufe) =>
-      _index[articleId]?[stufe.toString()]?['file'] != null;
+  /// Gibt es eine Vertonung für diese Artikel-ID (z. B. "vulkan_l1")?
+  bool hasNarration(String articleId) => _index[articleId]?['file'] != null;
 
-  /// Streaming-Audioquelle mit Disk-Cache (zweites Abspielen offline). Respektiert
-  /// den Nutzer-Cap per LRU-Eviction. null, wenn keine Vertonung existiert.
-  Future<AudioSource?> audioSourceFor(String articleId, int stufe) async {
-    final file = _index[articleId]?[stufe.toString()]?['file'] as String?;
+  /// Streaming-Audioquelle mit Disk-Cache (zweites Abspielen offline). Nutzt eine
+  /// bereits vollständig lokal vorhandene Datei direkt (Offline-Paket/Test), sonst
+  /// LockCachingAudioSource (streamt + cached). null, wenn keine Vertonung existiert.
+  Future<AudioSource?> audioSourceFor(String articleId) async {
+    final file = _index[articleId]?['file'] as String?;
     if (file == null || _cacheDir == null) return null;
+    final local = File('$_cacheDir/$file');
+    // Vollständig vorliegende Datei (z. B. vorab per Offline-Paket geladen) direkt
+    // abspielen — kein Netz. LockCachingAudioSource verwaltet sonst ihren eigenen
+    // Cache-Container, daher der getrennte lokale Pfad für „fertige" Dateien.
+    final full = File('$_cacheDir/full/$file');
+    if (full.existsSync() && full.lengthSync() > 0) {
+      return AudioSource.uri(Uri.file(full.path));
+    }
     unawaited(_evictIfOverCap());
     return LockCachingAudioSource(
       Uri.parse(AssetConfig.narrationFileUrl(file)),
-      cacheFile: File('$_cacheDir/$file'),
+      cacheFile: local,
     );
   }
 
   /// Wort-/Satz-Zeitleiste zur Vertonung (für die synchrone Markierung). Wird
   /// gecacht. null, wenn kein Sidecar existiert oder das Parsen scheitert.
-  Future<NarrationTiming?> timingFor(String articleId, int stufe) async {
-    final file = _index[articleId]?[stufe.toString()]?['file'] as String?;
+  Future<NarrationTiming?> timingFor(String articleId) async {
+    final file = _index[articleId]?['file'] as String?;
     if (file == null || _cacheDir == null) return null;
     final timingName = file.replaceFirst(RegExp(r'\.m4a$'), '.timing.json');
+    final fullPath = '$_cacheDir/full/$timingName';
     final localPath = '$_cacheDir/$timingName';
+    final full = File(fullPath);
     final local = File(localPath);
 
     String? body;
-    if (local.existsSync()) {
+    if (full.existsSync()) {
+      body = full.readAsStringSync();
+    } else if (local.existsSync()) {
       body = local.readAsStringSync();
     } else {
       final res = await AssetDownloadService.instance.downloadAsset(
@@ -162,15 +174,8 @@ class NarrationService {
     try {
       final data = jsonDecode(body) as Map<String, dynamic>;
       final nar = data['narration'] as Map<String, dynamic>? ?? {};
-      final result = <String, Map<String, Map<String, dynamic>>>{};
-      for (final e in nar.entries) {
-        final byStufe = (e.value as Map<String, dynamic>).map(
-          (k, v) => MapEntry(k, (v as Map<String, dynamic>)),
-        );
-        result[e.key] = byStufe;
-      }
-      _index = result;
-      debugPrint('Narration: index loaded — ${_index.length} Themen');
+      _index = nar.map((k, v) => MapEntry(k, (v as Map<String, dynamic>)));
+      debugPrint('Narration: index loaded — ${_index.length} Artikel');
     } catch (e) {
       debugPrint('Narration: index parse failed: $e');
       _index = {};
