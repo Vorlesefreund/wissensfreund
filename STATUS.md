@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-14T08:46:23Z -->
+<!-- updated: 2026-07-14T12:35:31Z -->
 <!-- Ältere Banner-Historie → STATUS_ARCHIV.md · Wissen → WISSEN_*.md · Details → PROJEKTDOKUMENT.md -->
 
 **Wissensfreund:** Flutter-App für Kinder (3 Altersstufen: S1 4–6, S2 7–9, S3 10–12),
@@ -7,8 +7,15 @@ KI-generierte Artikel streng aus geladenem Artikel-Quelltext (nie Trainingswisse
 Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-Pipeline
 (`scripts/pipeline_new.py` / `lektorat_new.py`, Fallback-sicher, JSON-Schema unverändert).
 
-## Zuletzt abgeschlossen (Stand 2026-07-09)
+## Zuletzt abgeschlossen (Stand 2026-07-14)
 
+- **Tablet-Version gestartet (App, 2026-07-14):** Fundament `lib/utils/responsive.dart`
+  (`isTablet` shortestSide≥600 / `isLandscape` / `MaxWidthCenter`), **rein additiv — Handy-Modus
+  unberührt** (User-Regel: jede Handy-Änderung vorher absprechen). Screen **„Internet & Daten" neu**
+  (Handy+Tablet, mit Freigabe): 3 Karten WLAN/Mobilfunk/Wissensspeicher, einheitliche Typo, ehrliche
+  Erklärtexte, „Stand: Mai 2026" statt interner ZIM-Kennung. Getestet per adb am echten Galaxy Tab
+  S10 FE (`R52Y30B9GVD`). Plan/Screen-Inventar: `Desktop\wissensfreund_tablet_strategie.html`.
+  Entschieden: voller Tablet-Modus inkl. Querformat für Lesemodi (A/B/C); Home-Kachel-Umbau danach.
 - **5-Fixes-Batch (Review-Feedback batch_new_20260710):**
   (1) **Lektorat-Modell → `claude-sonnet-5`** (besser + günstiger als sonnet-4-6; `stage_models`, `lektorat_common`, `verify`).
   (2) **Review-Docx** zeigt Korrekturen sauber: finaler Satz einmal als Body, Änderung als klein gesetzte Notiz (keine Scheindopplung) — `generate_review_docx._render_tracked_change`.
@@ -36,6 +43,10 @@ Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-P
 
 ## Gerade in Arbeit / Nächster Schritt
 
+- **Tablet-Pass (App), Screen für Screen:** nächste Formular-Screens (Kinderschutz / Speicher &
+  Qualität / Plus & Premium) tablet-zentrieren (`_tabletConstrain` / `MaxWidthCenter`) + ggf. gleiche
+  Aufräum-Kur. Danach Lesemodi A/B/C — brauchen Wissensspeicher auf dem Tablet (**Klexikon-Daten nicht
+  anfassen**, User-Wunsch). Bildschirm bleibt beim Testen wach: `adb ... svc power stayon usb`.
 - **Nico-Stimme (Voice-Cloning, 2026-07-14):** Erster LoRA-Fine-Tune-Lauf auf RunPod (RTX 3090,
   Chatterbox MIT) **validiert** — Pipeline Datensatz→Training→Inferenz läuft durch, Ergebnis =
   Kinderstimme in sauberem Deutsch (`Desktop\_nico_clone\nico_finetune_v1.mp3`). Nur 5,5 Min Daten

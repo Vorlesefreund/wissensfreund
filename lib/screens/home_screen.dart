@@ -18,6 +18,7 @@ import '../services/reward_service.dart';
 import '../services/storage_manager.dart';
 import '../services/subscription_service.dart';
 import '../services/zim_update_service.dart';
+import '../utils/responsive.dart';
 import '../widgets/professor_widget.dart';
 import 'article_screen.dart';
 import 'card_album_screen.dart';
@@ -2926,13 +2927,102 @@ class _InternetDataScreenState extends State<_InternetDataScreen> {
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 
+  // Einheitliche Typografie für diesen Screen (behebt die Größen-Mischung).
+  static const _label = TextStyle(fontSize: 15, color: Color(0xFF333333));
+  static const _value = TextStyle(
+      fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFF2E7D32));
+  static const _hint =
+      TextStyle(fontSize: 13, height: 1.4, color: Color(0xFF888888));
+  static const _cardTitle = TextStyle(
+      fontSize: 15, fontWeight: FontWeight.w800, color: Color(0xFF2E7D32));
+
+  /// Abgesetzte Karte mit Icon-Titel — trennt WLAN / Mobilfunk / Wissensspeicher klar.
+  Widget _card({
+    required IconData icon,
+    required String title,
+    required List<Widget> children,
+  }) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE8F5E9), width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(children: [
+            Icon(icon, size: 20, color: const Color(0xFF2E7D32)),
+            const SizedBox(width: 8),
+            Text(title, style: _cardTitle),
+          ]),
+          const SizedBox(height: 6),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  /// Schalter-Zeile mit Erklärung darunter (einheitlich für beide Schalter).
+  Widget _switchRow({
+    required String label,
+    required String hint,
+    required bool value,
+    required ValueChanged<bool> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(child: Text(label, style: _label)),
+            Switch(
+              value: value,
+              onChanged: onChanged,
+              activeColor: const Color(0xFF2E7D32),
+            ),
+          ],
+        ),
+        Text(hint, style: _hint),
+      ],
+    );
+  }
+
+  /// "klexikon_de_all_maxi_2026-05" → "Mai 2026" — ohne interne Kennung/URL.
+  String _friendlyZimVersion(String? raw) {
+    if (raw == null || raw.isEmpty) return '—';
+    final m = RegExp(r'(\d{4})-(\d{2})').firstMatch(raw);
+    if (m == null) return raw;
+    const months = [
+      '', 'Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+      'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'
+    ];
+    final mon = int.tryParse(m.group(2)!) ?? 0;
+    if (mon < 1 || mon > 12) return raw;
+    return '${months[mon]} ${m.group(1)}';
+  }
+
+  /// Tablet: Formular auf angenehme Breite begrenzen und zentrieren.
+  /// Handy (isTablet == false): unverändert der bestehende Baum.
+  Widget _tabletConstrain(Widget child) => context.isTablet
+      ? Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: child,
+          ),
+        )
+      : child;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFFF8EE),
       appBar: AppBar(
         title: const Text('Internet & Daten'),
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFFFFF8EE),
         foregroundColor: const Color(0xFF2E7D32),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
@@ -2943,7 +3033,7 @@ class _InternetDataScreenState extends State<_InternetDataScreen> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50)))
-          : Column(
+          : _tabletConstrain(Column(
               children: [
                 Expanded(
                   child: SingleChildScrollView(
@@ -2951,108 +3041,171 @@ class _InternetDataScreenState extends State<_InternetDataScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // ── WiFi ─────────────────────────────────────────────
-                        _SectionHeader('WLAN'),
-                        SwitchListTile(
-                          value: _wifiUnlimited,
-                          onChanged: (v) => setState(() => _wifiUnlimited = v),
-                          title: const Text('Unbegrenzt',
-                              style: TextStyle(fontSize: 14)),
-                          dense: true,
-                          activeColor: const Color(0xFF2E7D32),
-                        ),
-                        if (!_wifiUnlimited) ...[
-                          _LimitDropdown(
-                            label: 'Tageslimit',
-                            value: _wifiDailyMb,
-                            options: _wifiDailyOptions,
-                            fmt: _mbLabel,
-                            onChanged: (v) => setState(() => _wifiDailyMb = v),
+                        // Kurz-Erklärung ganz oben
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 14),
+                          child: Text(
+                            'Für manche Artikel lädt die App Bilder aus dem '
+                            'Internet. Hier legst du fest, wie viel Datenvolumen '
+                            'sie dafür verwenden darf. Alle Artikeltexte und '
+                            'die Vorschaubilder sind bereits offline gespeichert '
+                            'und zählen nie mit.',
+                            style: _hint,
                           ),
-                          _LimitDropdown(
-                            label: 'Monatslimit',
-                            value: _wifiMonthlyMb,
-                            options: _wifiMonthlyOptions,
-                            fmt: _mbLabel,
-                            onChanged: (v) => setState(() => _wifiMonthlyMb = v),
-                          ),
-                        ],
-                        _UsageProgressRow(
-                          label: 'Heute',
-                          used: _bytesLabel(_wifiDailyUsed),
-                          limit: _wifiUnlimited || _wifiDailyMb == 0
-                              ? null : _mbLabel(_wifiDailyMb),
-                          pct: _wifiDailyMb == 0 ? 0 :
-                              (_wifiDailyUsed / (_wifiDailyMb * 1024 * 1024)).clamp(0.0, 1.0),
                         ),
-                        _UsageProgressRow(
-                          label: 'Dieser Monat',
-                          used: _bytesLabel(_wifiMonthlyUsed),
-                          limit: _wifiUnlimited || _wifiMonthlyMb == 0
-                              ? null : _mbLabel(_wifiMonthlyMb),
-                          pct: _wifiMonthlyMb == 0 ? 0 :
-                              (_wifiMonthlyUsed / (_wifiMonthlyMb * 1024 * 1024)).clamp(0.0, 1.0),
-                        ),
-                        const SizedBox(height: 16),
 
-                        // ── Mobile ───────────────────────────────────────────
-                        _SectionHeader('Mobilfunk'),
-                        SwitchListTile(
-                          value: _mobileAllowed,
-                          onChanged: (v) => setState(() => _mobileAllowed = v),
-                          title: const Text('Downloads erlaubt',
-                              style: TextStyle(fontSize: 14)),
-                          dense: true,
-                          activeColor: const Color(0xFF2E7D32),
+                        // ── WLAN ─────────────────────────────────────────────
+                        _card(
+                          icon: Icons.wifi_rounded,
+                          title: 'WLAN',
+                          children: [
+                            _switchRow(
+                              label: 'Unbegrenzt',
+                              hint: _wifiUnlimited
+                                  ? 'Bilder laden im WLAN ohne Begrenzung. '
+                                      'Empfohlen, wenn dein WLAN kein Datenlimit hat.'
+                                  : 'Es gilt ein WLAN-Budget. Ist es erreicht, '
+                                      'werden weitere Bilderdownloads pausiert. '
+                                      'Texte und bereits heruntergeladene Bilder '
+                                      'sind weiterhin offline verfügbar.',
+                              value: _wifiUnlimited,
+                              onChanged: (v) =>
+                                  setState(() => _wifiUnlimited = v),
+                            ),
+                            if (!_wifiUnlimited) ...[
+                              const _CardDivider(),
+                              _LimitDropdown(
+                                label: 'Tageslimit',
+                                value: _wifiDailyMb,
+                                options: _wifiDailyOptions,
+                                fmt: _mbLabel,
+                                onChanged: (v) =>
+                                    setState(() => _wifiDailyMb = v),
+                              ),
+                              _LimitDropdown(
+                                label: 'Monatslimit',
+                                value: _wifiMonthlyMb,
+                                options: _wifiMonthlyOptions,
+                                fmt: _mbLabel,
+                                onChanged: (v) =>
+                                    setState(() => _wifiMonthlyMb = v),
+                              ),
+                            ],
+                            const _CardDivider(),
+                            _UsageProgressRow(
+                              label: 'Heute',
+                              used: _bytesLabel(_wifiDailyUsed),
+                              limit: _wifiUnlimited || _wifiDailyMb == 0
+                                  ? null
+                                  : _mbLabel(_wifiDailyMb),
+                              pct: _wifiDailyMb == 0
+                                  ? 0
+                                  : (_wifiDailyUsed /
+                                          (_wifiDailyMb * 1024 * 1024))
+                                      .clamp(0.0, 1.0),
+                            ),
+                            _UsageProgressRow(
+                              label: 'Dieser Monat',
+                              used: _bytesLabel(_wifiMonthlyUsed),
+                              limit: _wifiUnlimited || _wifiMonthlyMb == 0
+                                  ? null
+                                  : _mbLabel(_wifiMonthlyMb),
+                              pct: _wifiMonthlyMb == 0
+                                  ? 0
+                                  : (_wifiMonthlyUsed /
+                                          (_wifiMonthlyMb * 1024 * 1024))
+                                      .clamp(0.0, 1.0),
+                            ),
+                          ],
                         ),
-                        if (_mobileAllowed) ...[
-                          _LimitDropdown(
-                            label: 'Tageslimit',
-                            value: _mobileDailyMb,
-                            options: _mobileDailyOptions,
-                            fmt: _mbLabel,
-                            onChanged: (v) => setState(() => _mobileDailyMb = v),
-                          ),
-                          _LimitDropdown(
-                            label: 'Monatslimit',
-                            value: _mobileMonthlyMb,
-                            options: _mobileMonthlyOptions,
-                            fmt: _mbLabel,
-                            onChanged: (v) => setState(() => _mobileMonthlyMb = v),
-                          ),
-                        ],
-                        _UsageProgressRow(
-                          label: 'Heute',
-                          used: _bytesLabel(_mobileDailyUsed),
-                          limit: _mobileDailyMb == 0
-                              ? null : _mbLabel(_mobileDailyMb),
-                          pct: _mobileDailyMb == 0 ? 0 :
-                              (_mobileDailyUsed / (_mobileDailyMb * 1024 * 1024)).clamp(0.0, 1.0),
-                        ),
-                        _UsageProgressRow(
-                          label: 'Dieser Monat',
-                          used: _bytesLabel(_mobileMonthlyUsed),
-                          limit: _mobileMonthlyMb == 0
-                              ? null : _mbLabel(_mobileMonthlyMb),
-                          pct: _mobileMonthlyMb == 0 ? 0 :
-                              (_mobileMonthlyUsed / (_mobileMonthlyMb * 1024 * 1024)).clamp(0.0, 1.0),
-                        ),
-                        const SizedBox(height: 16),
 
-                        // ── ZIM-Version ──────────────────────────────────────
-                        _SectionHeader('Wissensspeicher'),
-                        FutureBuilder<String?>(
-                          future: LicenseCacheDb.instance.getStoredZimVersion(),
-                          builder: (_, snap) => _UsageRow(
-                            'Aktuelle Version:',
-                            snap.data ?? '—',
-                          ),
+                        // ── Mobilfunk ────────────────────────────────────────
+                        _card(
+                          icon: Icons.signal_cellular_alt_rounded,
+                          title: 'Mobilfunk',
+                          children: [
+                            _switchRow(
+                              label: 'Downloads erlaubt',
+                              hint: _mobileAllowed
+                                  ? 'Bilder dürfen auch übers Mobilnetz laden – '
+                                      'im Rahmen der Limits unten.'
+                                  : 'Unterwegs werden keine neuen Bilder geladen. '
+                                      'Das schont dein Datenvolumen.',
+                              value: _mobileAllowed,
+                              onChanged: (v) =>
+                                  setState(() => _mobileAllowed = v),
+                            ),
+                            if (_mobileAllowed) ...[
+                              const _CardDivider(),
+                              _LimitDropdown(
+                                label: 'Tageslimit',
+                                value: _mobileDailyMb,
+                                options: _mobileDailyOptions,
+                                fmt: _mbLabel,
+                                onChanged: (v) =>
+                                    setState(() => _mobileDailyMb = v),
+                              ),
+                              _LimitDropdown(
+                                label: 'Monatslimit',
+                                value: _mobileMonthlyMb,
+                                options: _mobileMonthlyOptions,
+                                fmt: _mbLabel,
+                                onChanged: (v) =>
+                                    setState(() => _mobileMonthlyMb = v),
+                              ),
+                              const _CardDivider(),
+                              _UsageProgressRow(
+                                label: 'Heute',
+                                used: _bytesLabel(_mobileDailyUsed),
+                                limit: _mobileDailyMb == 0
+                                    ? null
+                                    : _mbLabel(_mobileDailyMb),
+                                pct: _mobileDailyMb == 0
+                                    ? 0
+                                    : (_mobileDailyUsed /
+                                            (_mobileDailyMb * 1024 * 1024))
+                                        .clamp(0.0, 1.0),
+                              ),
+                              _UsageProgressRow(
+                                label: 'Dieser Monat',
+                                used: _bytesLabel(_mobileMonthlyUsed),
+                                limit: _mobileMonthlyMb == 0
+                                    ? null
+                                    : _mbLabel(_mobileMonthlyMb),
+                                pct: _mobileMonthlyMb == 0
+                                    ? 0
+                                    : (_mobileMonthlyUsed /
+                                            (_mobileMonthlyMb * 1024 * 1024))
+                                        .clamp(0.0, 1.0),
+                              ),
+                            ],
+                          ],
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'R2: ${AssetConfig.zimVersionUrl}',
-                          style: TextStyle(fontSize: 10, color: Colors.grey.shade400),
-                          overflow: TextOverflow.ellipsis,
+
+                        // ── Wissensspeicher ──────────────────────────────────
+                        _card(
+                          icon: Icons.menu_book_rounded,
+                          title: 'Wissensspeicher',
+                          children: [
+                            Text(
+                              'Alle Artikeltexte und Vorschaubilder sind offline '
+                              'auf dem Gerät gespeichert – dafür brauchst du kein '
+                              'Internet.',
+                              style: _hint,
+                            ),
+                            const SizedBox(height: 8),
+                            FutureBuilder<String?>(
+                              future:
+                                  LicenseCacheDb.instance.getStoredZimVersion(),
+                              builder: (_, snap) => Row(
+                                children: [
+                                  Text('Stand: ', style: _label),
+                                  Text(_friendlyZimVersion(snap.data),
+                                      style: _value),
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -3079,7 +3232,7 @@ class _InternetDataScreenState extends State<_InternetDataScreen> {
                   ),
                 ),
               ],
-            ),
+            )),
     );
   }
 }
@@ -3274,7 +3427,7 @@ class _LimitDropdown extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(label, style: const TextStyle(fontSize: 13)),
+            child: Text(label, style: const TextStyle(fontSize: 15)),
           ),
           DropdownButton<int>(
             value: safeValue,
@@ -3284,7 +3437,7 @@ class _LimitDropdown extends StatelessWidget {
             onChanged: (v) { if (v != null) onChanged(v); },
             underline: const SizedBox(),
             style: const TextStyle(
-                fontSize: 13, color: Color(0xFF2E7D32),
+                fontSize: 15, color: Color(0xFF2E7D32),
                 fontWeight: FontWeight.w600),
           ),
         ],
@@ -3324,13 +3477,13 @@ class _UsageProgressRow extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(label,
-                  style: const TextStyle(fontSize: 12, color: Color(0xFF666666))),
+                  style: const TextStyle(fontSize: 13, color: Color(0xFF666666))),
               Text(
                 limit != null
                     ? '$used / $limit  (${(pct * 100).round()}%)'
                     : used,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: 13,
                   fontWeight: FontWeight.w600,
                   color: limit != null ? _barColor : const Color(0xFF2E7D32),
                 ),
@@ -3384,6 +3537,16 @@ class _UsageRow extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Dünner Trenner innerhalb einer Karte.
+class _CardDivider extends StatelessWidget {
+  const _CardDivider();
+  @override
+  Widget build(BuildContext context) => const Padding(
+        padding: EdgeInsets.symmetric(vertical: 10),
+        child: Divider(height: 1, color: Color(0xFFE8F5E9)),
+      );
 }
 
 class _StorageRow extends StatelessWidget {
