@@ -40,6 +40,17 @@ class AssetConfig {
   static String get imageManifestUrl => '$r2BaseUrl/images_standard_manifest.json';
   static const int imageLibrarySizeBytes = 3346 * 1024 * 1024; // ~3.3 GB
 
+  // ── Premium-Vertonung (gestreamt, Plus/Premium) ─────────────────────────────
+  // Narration wird pro Artikel/Stufe einzeln von R2 gestreamt (AAC .m4a) + on-device
+  // gecacht — NICHT als Offline-Bündel (skaliert bei 5.000 Artikeln nicht). Index +
+  // Wort-Timing-Sidecars liegen im selben audio/-Präfix. Erzeugt via
+  // scripts/compress_narration.py (m4a + Index) und scripts/align_narration.py (Timing).
+  static String get narrationIndexUrl => '$r2BaseUrl/audio/narration_index.json';
+
+  /// URL einer einzelnen Audio-/Timing-Datei im audio/-Präfix (z. B.
+  /// "vulkan_l3_artikel.m4a" oder "vulkan_l3_artikel.timing.json").
+  static String narrationFileUrl(String file) => '$r2BaseUrl/audio/$file';
+
   // ── Größen-Labels (einzige Quelle der Wahrheit) ──────────────────────────────
   // Die UI zeigt NIRGENDS hartkodierte MB/GB-Zahlen. Alle Paketgrößen leiten
   // sich aus den beiden Byte-Konstanten oben ab. Wächst der Artikelbestand
