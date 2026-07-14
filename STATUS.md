@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-14T13:39:45Z -->
+<!-- updated: 2026-07-14T17:19:29Z -->
 <!-- Ältere Banner-Historie → STATUS_ARCHIV.md · Wissen → WISSEN_*.md · Details → PROJEKTDOKUMENT.md -->
 
 **Wissensfreund:** Flutter-App für Kinder (3 Altersstufen: S1 4–6, S2 7–9, S3 10–12),
@@ -8,6 +8,25 @@ Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-P
 (`scripts/pipeline_new.py` / `lektorat_new.py`, Fallback-sicher, JSON-Schema unverändert).
 
 ## Zuletzt abgeschlossen (Stand 2026-07-14)
+
+- **Audio-Streaming-Umbau (Premium-Vertonung) — Track A + B M2 am Tablet validiert:**
+  Vertonung wird künftig **pro Artikel gestreamt** (AAC .m4a von R2, on-device gecacht),
+  NICHT als Riesen-WAV-Bündel (skaliert bei 5.000 Art. nicht: 13–36 GB). Auf R2 kostet das
+  fast nichts (Egress $0, Speicher ~$0,30/Mon). **flutter_tts bleibt Gratis-Fallback** (offline,
+  alle); die schönen Stimmen = **Plus/Premium**. Wortgenaue Markierung in Modus A/B/C über ein
+  **Timing-Sidecar** (`positionStream` → `_ttsCursor`, gleiche grüne Markierung, Bild-Sync).
+  - Track A: `scripts/compress_narration.py` (WAV→AAC 48k + `narration_index.json`, keyt nach
+    voller `article_id` = App `_articleId`); `upload_articles.py` lädt den m4a-Ordner inkl. Index.
+  - Track B: `lib/services/narration_service.dart` (Streaming `LockCachingAudioSource` + Cache
+    + Wort-Timeline + nutzer-Cache-Cap) + Provider-Verdrahtung **streng additiv** (Handy-Pfad
+    byte-identisch, Regression bestätigt). Init ZIM-unabhängig in `main.dart`.
+  - **E2E am Galaxy Tab getestet** (elefant_l2, Platzhalter-Audio + proportionales Test-Sidecar):
+    Streaming läuft, Cursor trackt Audioposition in Echtzeit, Bild-Auto-Weiterschaltung, stabil.
+  - Commits: `7d198a1` (A) · `2eea9e9`/`babaf56` (B-Foundation) · `8018c74` (M2) · `f0df7ce` (init).
+  - **Offen:** M1 Forced Alignment (`align_narration.py`, WhisperX auf RunPod → echte Wort-Zeiten
+    statt proportional; **GPU-Kosten → Freigabe nötig**); Cache-Cap-Regler in „Speicher & Qualität";
+    opt-in Leuchtturm-Offline-Paket (Plus); echter Vertonungs→compress→align→upload-Durchlauf.
+    Details: `Desktop\wissensfreund_audio_umbau_plan.md`. Budgets: [[reference-media-storage-budget]].
 
 - **Tablet-Version gestartet (App, 2026-07-14):** Fundament `lib/utils/responsive.dart`
   (`isTablet` shortestSide≥600 / `isLandscape` / `MaxWidthCenter`), **rein additiv — Handy-Modus
@@ -57,9 +76,11 @@ Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-P
   Danach Lesemodi A/B/C — brauchen Wissensspeicher auf dem Tablet (**Klexikon-Daten nicht anfassen**,
   User-Wunsch). Bildschirm bleibt beim Testen wach: `adb ... svc power stayon usb`.
 - **Onboarding-Pflicht noch am Tablet ansehen** (Profil-Reset nötig) — User wollte einmal durchklicken.
+- **Audio nächster Schritt: M1 Forced Alignment** (`scripts/align_narration.py`, WhisperX auf RunPod)
+  → echte Wort-Zeitstempel statt proportionalem Test-Sidecar; **GPU-Kosten, vor Lauf Freigabe**. Danach
+  Cache-Cap-Regler in „Speicher & Qualität" + opt-in Leuchtturm-Offline-Paket + echter Vertonungslauf.
 - **Offen (eigene Stränge, nicht ungefragt):** echte 300px-Paketgröße bestimmen → `AssetConfig`-Konstante
-  aktualisieren (oder Anzeige auf `images_thumb_manifest.json` verdrahten); serverseitige Opus-Kompression
-  der Vertonungen (heute WAV) + Audio-Streaming/On-demand-Cache pro Stufe.
+  aktualisieren (oder Anzeige auf `images_thumb_manifest.json` verdrahten).
 - **Nico-Stimme (Voice-Cloning, 2026-07-14):** Erster LoRA-Fine-Tune-Lauf auf RunPod (RTX 3090,
   Chatterbox MIT) **validiert** — Pipeline Datensatz→Training→Inferenz läuft durch, Ergebnis =
   Kinderstimme in sauberem Deutsch (`Desktop\_nico_clone\nico_finetune_v1.mp3`). Nur 5,5 Min Daten
