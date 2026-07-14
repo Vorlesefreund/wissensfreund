@@ -381,6 +381,8 @@ class WissensfreundProvider extends ChangeNotifier {
           debugPrint('ZIM ready: $_zimArticleCount articles');
           // Download audio package in background (parallel to normal use).
           unawaited(AudioPackageService.instance.initialize());
+          // Premium-Vertonungs-Index laden + im Hintergrund syncen.
+          unawaited(NarrationService.instance.initialize());
         } else {
           _zimNotFound = true;
           debugPrint('ZIM not found — running without offline knowledge base');
