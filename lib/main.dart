@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -12,6 +13,7 @@ import 'services/narration_service.dart';
 import 'services/parental_lock_service.dart';
 import 'services/profile_service.dart';
 import 'services/reward_service.dart';
+import 'services/subscription_service.dart';
 import 'screens/first_run_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/profile_selection_screen.dart';
@@ -26,6 +28,12 @@ void main() async {
   await RewardService.instance.initialize();
   unawaited(JsonArticleService.instance.initialize());
   unawaited(NarrationService.instance.initialize()); // ZIM-unabhängig (Premium-Vertonung)
+  // TEST-HOOK (nur Debug): Plus erzwingen, damit die Premium-Vertonung am Tablet
+  // testbar ist (Leonardo-Story). Berührt Release/Handy NICHT (kDebugMode=false).
+  if (kDebugMode) {
+    await SubscriptionService.instance.initialize();
+    await SubscriptionService.instance.setTierForTesting(SubscriptionTier.plus);
+  }
   final prefs = await SharedPreferences.getInstance();
   final onboardingComplete = prefs.getBool('onboarding_complete') ?? false;
   // Kiosk-Modus nach erstem Frame automatisch reaktivieren (falls zuvor aktiviert)

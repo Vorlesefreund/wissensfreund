@@ -382,9 +382,9 @@ class _HomeScreenState extends State<HomeScreen>
                                   title: provider.articleTitle,
                                   text: provider.articleText,
                                 ),
-                              // TODO: TEMP TEST — auskommentiert, durch Artikelliste ersetzt
-                              // if (provider.state == AppState.idle)
-                              //   _JsonTestButton(provider: provider),
+                              // TODO: TEMP TEST — vor Release wieder entfernen
+                              if (provider.state == AppState.idle)
+                                _JsonTestButton(provider: provider),
                               if (provider.state == AppState.idle)
                                 _ArticleListButton(),
                               if (provider.state == AppState.idle)
@@ -4341,11 +4341,16 @@ class _JsonTestButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 12),
       child: OutlinedButton.icon(
-        onPressed: () {
-          provider.loadAndSpeakJsonArticle('elefant_l2');
+        onPressed: () async {
+          await provider.loadAndSpeakJsonArticle('leonardo_da_vinci_l2');
+          if (!context.mounted) return;
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const ArticleScreen()),
+          );
         },
-        icon: const Text('🐘', style: TextStyle(fontSize: 16)),
-        label: const Text('JSON Test (Elefant L2)'),
+        icon: const Text('🎨', style: TextStyle(fontSize: 16)),
+        label: const Text('JSON Test (Leonardo L2)'),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.deepOrange,
           side: const BorderSide(color: Colors.deepOrange),

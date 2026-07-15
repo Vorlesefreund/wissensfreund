@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-15T10:08:57Z -->
+<!-- updated: 2026-07-15T10:46:32Z -->
 <!-- Ältere Banner-Historie → STATUS_ARCHIV.md · Wissen → WISSEN_*.md · Details → PROJEKTDOKUMENT.md -->
 
 **Wissensfreund:** Flutter-App für Kinder (3 Altersstufen: S1 4–6, S2 7–9, S3 10–12),
@@ -93,9 +93,15 @@ Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-P
   Standard AUS → normale Pipeline unverändert; beide Pfade smoke-getestet, `py_compile` OK. Demo:
   `Desktop\_nico_clone\vc_test\STORY_KOMPLETT\Leonardo_v2_Hoerspiel_Emotion.mp3` (37 Turns, 6,6 Min).
   **Offen:** VC-Pfad auf echter GPU im integrierten `--nico-ref`-Lauf noch nicht end-to-end gefahren
-  (OpenVoice-Logik selbst auf Pods bewährt). Nächste Aufgabe: Story am Tablet lesen+hören, Lupe/Mitlese-
-  Sync prüfen (Bildschirmtext MIT Sprech-Tags vs. Audio OHNE → Wort-Sync muss auf Audio-Fassung mappen).
-  Details: [[project_voice_strategy]]. Alle Test-Pods terminiert.
+  (OpenVoice-Logik selbst auf Pods bewährt). Details: [[project_voice_strategy]]. Alle Test-Pods terminiert.
+- **Leonardo-Story am Tablet gelesen+gehört — Lupe-Sync bestätigt (2026-07-15):** Komplette Hörspiel-Story
+  (37 Turns, Erzähler+Erwachsene+Kind) als WfArticle `assets/test/leonardo_da_vinci_l2.json` + Premium-m4a
+  (395,3 s) + proportionales Timing-Sidecar aufs Galaxy Tab S10 FE (`R52Y30B9GVD`) gespielt (Flugmodus →
+  Asset-Fallback, Debug-isPlus-Hook in `main.dart`, Temp-Button 🎨 in `home_screen.dart` → `ArticleScreen`).
+  **Ergebnis:** Streaming läuft, grüne Lupe (Modus A) wandert satz-/phrasengenau mit der Audioposition mit
+  (Frame 1 Satz 2 → Frame 2 Phrase „vor über fünfhundert Jahren, in Italien."), Bild-Sync, stabil.
+  **Noch proportionales Sidecar** (Option 2) — Option 3 = echte Wort-Zeiten via Forced Alignment
+  (`align_narration.py`, GPU) offen. Debug-Hook + Temp-Button vor Release wieder entfernen.
 - **Nachtlauf geplant: 2026-07-08 03:00 Berlin** (Scheduled Task `WF_NightlyRerun_20260708`, Frühfenster
   laut 503-Monitor am ruhigsten). Die 6 Themen (Dinosaurier/Elefant/Hund/Spartacus/Vulkan/Zweiter Weltkrieg)
   × 3 Stufen, `--pipeline new`, Stages 1–3 (Gen+Lektorat, kein TTS) → `articles/batch_new_20260708`,
