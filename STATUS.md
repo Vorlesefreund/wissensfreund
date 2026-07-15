@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-15T12:14:31Z -->
+<!-- updated: 2026-07-15T12:33:19Z -->
 <!-- Ältere Banner-Historie → STATUS_ARCHIV.md · Wissen → WISSEN_*.md · Details → PROJEKTDOKUMENT.md -->
 
 **Wissensfreund:** Flutter-App für Kinder (3 Altersstufen: S1 4–6, S2 7–9, S3 10–12),
@@ -119,9 +119,14 @@ Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-P
     `_narrationActive`-Zweig; zusätzlich seekte `_narrationPlayFromChar` per erneutem `setAudioSource`
     (wirft → Fallback) statt `seek()`. Jetzt am Tablet verifiziert: Scroll-Sprung bleibt Premium, spielt
     weiter, Lupe auf neuer Stelle (nur MediaCodec/ExoPlayer, kein LocalSynthesizer im Log).
+  - **ENTSCHEIDUNG (2026-07-15): Variante A „mit Tags" gewählt** — Erzähler spricht die Redebegleitsätze
+    verbatim mit; Text = Audio, exakte Wort-Lupe, KEINE Pausen, KEINE Umformulierung. „ohne Tags" verworfen
+    (gefühlt überlange Pausen statt der Tags; brauchte zudem den grammatischen Rewrite). Stabilität >
+    Perfektion. Nur noch EIN Test-Button „Leonardo (Vorlese-Test)" → `leo_mit_tags_l2`; `leo_ohne_tags`-Asset
+    entfernt (Narration-Files am Gerät bleiben ungenutzt liegen).
   - **Theo-Stimme = Platzhalter Puck** (klingt evtl. weiblich) → finale Kinderstimme wird Nico (Sohn-VC).
-  - **Offen:** User entscheidet endgültig A/B nach Höreindruck; dann Nico-VC-Timbre (GPU) + optional echte
-    Wort-Zeiten via Forced Alignment. Debug-Hook + Temp-Buttons vor Release raus. Details: [[project_voice_strategy]].
+  - **Offen:** Nico-VC-Timbre auf die Kind-Zeilen (GPU-Lauf, Kosten vorher nennen) + optional echte
+    Wort-Zeiten via Forced Alignment. Debug-isPlus-Hook + Temp-Button vor Release raus. Details: [[project_voice_strategy]].
 - **Nachtlauf geplant: 2026-07-08 03:00 Berlin** (Scheduled Task `WF_NightlyRerun_20260708`, Frühfenster
   laut 503-Monitor am ruhigsten). Die 6 Themen (Dinosaurier/Elefant/Hund/Spartacus/Vulkan/Zweiter Weltkrieg)
   × 3 Stufen, `--pipeline new`, Stages 1–3 (Gen+Lektorat, kein TTS) → `articles/batch_new_20260708`,

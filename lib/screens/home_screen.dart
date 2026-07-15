@@ -387,13 +387,7 @@ class _HomeScreenState extends State<HomeScreen>
                                 _JsonTestButton(
                                   provider: provider,
                                   articleId: 'leo_mit_tags_l2',
-                                  label: 'Leonardo (mit Tags)',
-                                ),
-                              if (provider.state == AppState.idle)
-                                _JsonTestButton(
-                                  provider: provider,
-                                  articleId: 'leo_ohne_tags_l2',
-                                  label: 'Leonardo (ohne Tags)',
+                                  label: 'Leonardo (Vorlese-Test)',
                                 ),
                               if (provider.state == AppState.idle)
                                 _ArticleListButton(),
