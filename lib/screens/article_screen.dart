@@ -1839,22 +1839,95 @@ List<Widget> _insertSectionBoxes(
 // Shared sentence utilities
 // ─────────────────────────────────────────────────────────────────────────────
 
-List<String> _splitSentences(String text) {
-  if (text.isEmpty) return [];
-  // \d+(?:[.,]\d+)+ matches German numbers (1.000, 1.000.000, 1,5) as one unit
-  // so the period/comma inside them is not treated as a sentence boundary.
-  final matches = RegExp(r'(?:\d+(?:[.,]\d+)+|[^.!?])+[.!?]+\s*').allMatches(text);
-  final result = matches.map((m) => m.group(0)!.trim()).toList();
-  return result.isEmpty ? [text] : result;
+// ── Quote-aware Satz-Zerlegung ────────────────────────────────────────────────
+// Trennt NICHT an .?! innerhalb direkter Rede („…"), damit dialoglastige
+// Geschichten als lesbare Absätze erscheinen statt „ein Fragment pro Zeile".
+// Grenze: .?!-Lauf bei depth==0 ODER ein schließendes Zitat, dem ein .?! vorausging —
+// jeweils nur, wenn danach (nach Leerraum) Großbuchstabe/öffnendes Zitat/Ende folgt
+// und KEIN Komma/Kleinbuchstabe (Redebegleitsatz). Zahlen (1.000/1,5) bleiben ganz.
+// _splitSentences und _splitSentenceStarts leiten BEIDE aus _sentenceRanges ab —
+// sie bleiben so garantiert deckungsgleich (gleiche Anzahl, gleiche Grenzen).
+const String _kEndPunct = '.!?…';
+bool _isWs(String ch) => ch == ' ' || ch == '\n' || ch == '\t' || ch == '\r';
+bool _isDigit(String ch) => ch.length == 1 && ch.codeUnitAt(0) >= 0x30 && ch.codeUnitAt(0) <= 0x39;
+bool _isUpper(String ch) => ch.isNotEmpty && ch == ch.toUpperCase() && ch != ch.toLowerCase();
+bool _isLower(String ch) => ch.isNotEmpty && ch == ch.toLowerCase() && ch != ch.toUpperCase();
+bool _isOpenerCh(String ch) => ch == '„' || ch == '"' || ch == '“';
+bool _boundaryNext(String nxt) => nxt.isEmpty || _isUpper(nxt) || _isOpenerCh(nxt);
+
+class _SentRange {
+  final int start;
+  final int end;
+  const _SentRange(this.start, this.end);
 }
 
-/// Gibt die Start-Offsets aller Sätze zurück — identische Regex wie _splitSentences,
-/// nur .start statt .group(0).trim(). Ändert sich _splitSentences, muss diese mit.
+List<_SentRange> _sentenceRanges(String text) {
+  final n = text.length;
+  if (n == 0) return const [];
+  final res = <_SentRange>[];
+  int start = 0, i = 0, depth = 0;
+  int nextNonSpace(int m) {
+    while (m < n && _isWs(text[m])) m++;
+    return m;
+  }
+  void push(int s, int e) {
+    while (e > s && _isWs(text[e - 1])) e--;
+    while (s < e && _isWs(text[s])) s++;
+    if (e > s) res.add(_SentRange(s, e));
+  }
+  while (i < n) {
+    final c = text[i];
+    if (c == '„') { depth++; i++; continue; }
+    if (c == '"' || c == '“' || c == '”') {
+      final wasInside = depth > 0;
+      if (c == '"') {
+        depth = wasInside ? depth - 1 : depth + 1;
+      } else if (depth > 0) {
+        depth--;
+      }
+      i++;
+      // Schließt dieses Zitat einen Satz ab? (Zeichen vor dem Quote war Satzende)
+      if (wasInside && i >= 2 && _kEndPunct.contains(text[i - 2])) {
+        final m = nextNonSpace(i);
+        final nxt = m < n ? text[m] : '';
+        if (_boundaryNext(nxt) && nxt != ',' && nxt != ';' && nxt != ':' && !_isLower(nxt)) {
+          push(start, i); start = m; i = m;
+        }
+      }
+      continue;
+    }
+    if (_kEndPunct.contains(c) && depth == 0) {
+      // Dezimalzahl (1.000 / 1,5) nicht trennen
+      if (c == '.' && i > 0 && _isDigit(text[i - 1]) && i + 1 < n && _isDigit(text[i + 1])) {
+        i++; continue;
+      }
+      int j = i;
+      while (j < n && _kEndPunct.contains(text[j])) j++;
+      final m = nextNonSpace(j);
+      final nxt = m < n ? text[m] : '';
+      if (_boundaryNext(nxt) && nxt != ',' && nxt != ';' && nxt != ':' && !_isLower(nxt)) {
+        push(start, j); start = m; i = m; continue;
+      }
+      i = j; continue;
+    }
+    i++;
+  }
+  if (start < n) push(start, n);
+  return res;
+}
+
+List<String> _splitSentences(String text) {
+  final r = _sentenceRanges(text);
+  if (r.isEmpty) return text.isEmpty ? [] : [text];
+  return r.map((s) => text.substring(s.start, s.end)).toList();
+}
+
+/// Start-Offsets aller Sätze — leitet aus derselben _sentenceRanges ab wie
+/// _splitSentences, bleibt dadurch garantiert deckungsgleich.
 List<int> _splitSentenceStarts(String text) {
-  if (text.isEmpty) return [];
-  final ms = RegExp(r'(?:\d+(?:[.,]\d+)+|[^.!?])+[.!?]+\s*').allMatches(text);
-  final result = ms.map((m) => m.start).toList();
-  return result.isEmpty ? [0] : result;
+  final r = _sentenceRanges(text);
+  if (r.isEmpty) return text.isEmpty ? [] : [0];
+  return r.map((s) => s.start).toList();
 }
 
 int _findActiveIdx(String text, int cursor, List<String> sentences) {

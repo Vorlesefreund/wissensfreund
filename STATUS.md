@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-15T10:46:32Z -->
+<!-- updated: 2026-07-15T11:41:13Z -->
 <!-- Ältere Banner-Historie → STATUS_ARCHIV.md · Wissen → WISSEN_*.md · Details → PROJEKTDOKUMENT.md -->
 
 **Wissensfreund:** Flutter-App für Kinder (3 Altersstufen: S1 4–6, S2 7–9, S3 10–12),
@@ -94,14 +94,25 @@ Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-P
   `Desktop\_nico_clone\vc_test\STORY_KOMPLETT\Leonardo_v2_Hoerspiel_Emotion.mp3` (37 Turns, 6,6 Min).
   **Offen:** VC-Pfad auf echter GPU im integrierten `--nico-ref`-Lauf noch nicht end-to-end gefahren
   (OpenVoice-Logik selbst auf Pods bewährt). Details: [[project_voice_strategy]]. Alle Test-Pods terminiert.
-- **Leonardo-Story am Tablet gelesen+gehört — Lupe-Sync bestätigt (2026-07-15):** Komplette Hörspiel-Story
-  (37 Turns, Erzähler+Erwachsene+Kind) als WfArticle `assets/test/leonardo_da_vinci_l2.json` + Premium-m4a
-  (395,3 s) + proportionales Timing-Sidecar aufs Galaxy Tab S10 FE (`R52Y30B9GVD`) gespielt (Flugmodus →
-  Asset-Fallback, Debug-isPlus-Hook in `main.dart`, Temp-Button 🎨 in `home_screen.dart` → `ArticleScreen`).
-  **Ergebnis:** Streaming läuft, grüne Lupe (Modus A) wandert satz-/phrasengenau mit der Audioposition mit
-  (Frame 1 Satz 2 → Frame 2 Phrase „vor über fünfhundert Jahren, in Italien."), Bild-Sync, stabil.
-  **Noch proportionales Sidecar** (Option 2) — Option 3 = echte Wort-Zeiten via Forced Alignment
-  (`align_narration.py`, GPU) offen. Debug-Hook + Temp-Button vor Release wieder entfernen.
+- **Vorlese-Text = volle Prosa MIT Tags/Anführungszeichen + 2 Audio-Varianten (2026-07-15):**
+  Korrektur: der erste Tablet-Test lief fälschlich auf der ONBOARD-Stimme (Debug-Test-Tier wurde von der
+  Play-Verifikation überschrieben → `fix(narration)` 06b040b, `_testTierLocked`). Zudem war der Lese-Text
+  die tag-freie Hörspiel-Fassung (unlesbar, „ein Satz pro Zeile", keine Tags). User-Entscheidung: Lese-Text
+  = die volle Story-Prosa MIT „fragt Theo"/„sagt Oma" + Anführungszeichen (wie die Quell-HTML); zwei
+  Audio-Varianten zum Vergleich am Tablet.
+  - **Quote-aware Satz-Splitter** (`article_screen.dart` `_sentenceRanges` → `_splitSentences`/`…Starts`
+    deckungsgleich): trennt NICHT an .?! innerhalb „…" → Dialog+Tag bleiben auf einer Zeile. Dart==Python
+    verifiziert (40 Sätze, JOIN==Prosa, 0 Abweichungen).
+  - **Verbatim-Pipeline** (`scratchpad/leo_build2.py`): deterministische Quote/Nicht-Quote-Spans (zeichen-
+    genau, lückenlos) + 1 LLM-Pass (Sprecher-Rolle je Zitat + reiner Redebegleitsatz je Erzähler-Span,
+    exakter Teilstring). Zwei m4a + Timing-Sidecars, Wörter mappen auf dieselben Prosa-Offsets:
+    **A) `leo_mit_tags_l2`** (Erzähler spricht Tags mit; 409,7 s/796 W) · **B) `leo_ohne_tags_l2`**
+    (Audio ohne Tags, Lupe überspringt sie; 395,2 s/773 W). bad_offset=0, monoton, im-Audio — beide.
+  - **Am Galaxy Tab bestätigt:** Premium-m4a spielt (ExoPlayer, nicht mehr Onboard), Text lesbar mit Tags,
+    Wort-Lupe folgt (mit-Tags: „Fünfhundert Jahre?" wortgenau markiert). Zwei Temp-Buttons 🎨 auf Home.
+  - **Offen:** User wählt A oder B nach Höreindruck; danach Nico-VC-Timbre auf die gewählte Variant
+    (GPU) + echte Wort-Zeiten via Forced Alignment optional. Debug-Hook + Temp-Buttons vor Release raus.
+    Details: [[project_voice_strategy]].
 - **Nachtlauf geplant: 2026-07-08 03:00 Berlin** (Scheduled Task `WF_NightlyRerun_20260708`, Frühfenster
   laut 503-Monitor am ruhigsten). Die 6 Themen (Dinosaurier/Elefant/Hund/Spartacus/Vulkan/Zweiter Weltkrieg)
   × 3 Stufen, `--pipeline new`, Stages 1–3 (Gen+Lektorat, kein TTS) → `articles/batch_new_20260708`,

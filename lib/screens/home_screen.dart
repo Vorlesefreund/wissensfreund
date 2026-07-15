@@ -384,7 +384,17 @@ class _HomeScreenState extends State<HomeScreen>
                                 ),
                               // TODO: TEMP TEST — vor Release wieder entfernen
                               if (provider.state == AppState.idle)
-                                _JsonTestButton(provider: provider),
+                                _JsonTestButton(
+                                  provider: provider,
+                                  articleId: 'leo_mit_tags_l2',
+                                  label: 'Leonardo (mit Tags)',
+                                ),
+                              if (provider.state == AppState.idle)
+                                _JsonTestButton(
+                                  provider: provider,
+                                  articleId: 'leo_ohne_tags_l2',
+                                  label: 'Leonardo (ohne Tags)',
+                                ),
                               if (provider.state == AppState.idle)
                                 _ArticleListButton(),
                               if (provider.state == AppState.idle)
@@ -4333,8 +4343,14 @@ class _RoomButton extends StatelessWidget {
 
 // TEMP TEST BUTTON — remove before release
 class _JsonTestButton extends StatelessWidget {
-  const _JsonTestButton({required this.provider});
+  const _JsonTestButton({
+    required this.provider,
+    required this.articleId,
+    required this.label,
+  });
   final WissensfreundProvider provider;
+  final String articleId;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -4342,7 +4358,7 @@ class _JsonTestButton extends StatelessWidget {
       padding: const EdgeInsets.only(top: 12),
       child: OutlinedButton.icon(
         onPressed: () async {
-          await provider.loadAndSpeakJsonArticle('leonardo_da_vinci_l2');
+          await provider.loadAndSpeakJsonArticle(articleId);
           if (!context.mounted) return;
           await Navigator.push(
             context,
@@ -4350,7 +4366,7 @@ class _JsonTestButton extends StatelessWidget {
           );
         },
         icon: const Text('🎨', style: TextStyle(fontSize: 16)),
-        label: const Text('JSON Test (Leonardo L2)'),
+        label: Text(label),
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.deepOrange,
           side: const BorderSide(color: Colors.deepOrange),

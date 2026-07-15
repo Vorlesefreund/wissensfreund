@@ -1,0 +1,270 @@
+{
+ "meta": {
+  "id": "leo_ohne_tags_l2",
+  "title": "Leonardo (ohne Tags)",
+  "subtitle": "Audio ohne Redebegleitsätze",
+  "emoji": "🎨",
+  "age_level": 2,
+  "pattern": "person",
+  "theme_color": "#8d6e63",
+  "word_count": 790,
+  "source_url": "",
+  "generated_at": "2026-07-15T00:00:00Z",
+  "schema_version": "1.0",
+  "review_flag": false,
+  "category_top": "kunst",
+  "category_sub": "maler"
+ },
+ "images": [
+  {
+   "index": 0,
+   "filename": "leonardo_da_vinci_0.png",
+   "alt": "Platzhalter 1",
+   "caption": "Platzhalterbild 1 (Test)",
+   "license": "",
+   "license_author": "",
+   "source_url": "",
+   "thumb_url": ""
+  },
+  {
+   "index": 1,
+   "filename": "leonardo_da_vinci_1.png",
+   "alt": "Platzhalter 2",
+   "caption": "Platzhalterbild 2 (Test)",
+   "license": "",
+   "license_author": "",
+   "source_url": "",
+   "thumb_url": ""
+  },
+  {
+   "index": 2,
+   "filename": "leonardo_da_vinci_2.png",
+   "alt": "Platzhalter 3",
+   "caption": "Platzhalterbild 3 (Test)",
+   "license": "",
+   "license_author": "",
+   "source_url": "",
+   "thumb_url": ""
+  }
+ ],
+ "sections": [
+  {
+   "id": "s1",
+   "heading": "",
+   "section_role": "story",
+   "sentences": [
+    {
+     "id": "t0",
+     "text": "Oma Rina blättert in einem großen Bilderbuch.",
+     "img_index": 0
+    },
+    {
+     "id": "t1",
+     "text": "Neben ihr sitzt der kleine Theo und schaut auf ein Gemälde mit einer lächelnden Frau.",
+     "img_index": 0
+    },
+    {
+     "id": "t2",
+     "text": "„Wer ist das?\", fragt Theo und tippt mit dem Finger auf das Bild.",
+     "img_index": 0
+    },
+    {
+     "id": "t3",
+     "text": "„Das ist die Mona Lisa\", sagt Oma Rina.",
+     "img_index": 0
+    },
+    {
+     "id": "t4",
+     "text": "„Gemalt hat sie Leonardo da Vinci, vor über fünfhundert Jahren, in Italien.\"",
+     "img_index": 0
+    },
+    {
+     "id": "t5",
+     "text": "„Fünfhundert Jahre? Das ist uralt!\", ruft Theo.",
+     "img_index": 0
+    },
+    {
+     "id": "t6",
+     "text": "„Ja, aber die Bilder von Leonardo sehen immer noch so aus, als könnten die Menschen darin gleich zu atmen anfangen\", erklärt Oma Rina.",
+     "img_index": 0
+    },
+    {
+     "id": "t7",
+     "text": "„Leonardo wurde 1452 in einem kleinen Ort namens Vinci geboren. Deshalb heißt er da Vinci — das heißt einfach ‚aus Vinci'.\"",
+     "img_index": 0
+    },
+    {
+     "id": "t8",
+     "text": "„War er gleich ein berühmter Maler?\"",
+     "img_index": 0
+    },
+    {
+     "id": "t9",
+     "text": "„Nein, zuerst musste er das Malen lernen. Mit ungefähr siebzehn Jahren kam er in die Werkstatt eines Meisters namens Verrocchio, in der Stadt Florenz. Dort lernte er von den Großen und malte zuerst nur kleine Teile in fremden Bildern — einen Hund hier, einen Fisch dort. Aber der Meister merkte schnell: Dieser Schüler kann mehr als er selbst.\"",
+     "img_index": 0
+    },
+    {
+     "id": "t10",
+     "text": "Theo blättert weiter zu einem Bild mit vielen Männern an einem langen Tisch.",
+     "img_index": 0
+    },
+    {
+     "id": "t11",
+     "text": "„Und das hier?\"",
+     "img_index": 0
+    },
+    {
+     "id": "t12",
+     "text": "„Das ist Das Abendmahl\", sagt Oma Rina.",
+     "img_index": 0
+    },
+    {
+     "id": "t13",
+     "text": "„Leonardo hat es auf eine ganze Wand gemalt, in einem Kloster in Mailand. Es ist so groß wie eine ganze Zimmerwand bei uns zu Hause — fast neun Meter breit!\"",
+     "img_index": 0
+    },
+    {
+     "id": "t14",
+     "text": "„Wow, das ist riesig!\"",
+     "img_index": 1
+    },
+    {
+     "id": "t15",
+     "text": "„Auf dem Bild sitzt Jesus mit seinen zwölf Freunden am Tisch. Gerade hat er gesagt: Einer von euch wird mich verraten. Schau genau hin — alle reagieren anders. Manche erschrecken, manche reden aufgeregt, einer lehnt sich zurück. Leonardo wollte, dass man den Gefühlen der Menschen ansieht, was in ihnen vorgeht.\"",
+     "img_index": 1
+    },
+    {
+     "id": "t16",
+     "text": "„Warum ist die Farbe an manchen Stellen so blass?\"",
+     "img_index": 1
+    },
+    {
+     "id": "t17",
+     "text": "„Weil Leonardo etwas ausprobiert hat, das nicht gut hielt. Normalerweise malt man auf eine feuchte Wand, dann hält die Farbe fest. Leonardo aber malte auf eine trockene Wand, damit er in Ruhe malen und immer wieder Änderungen machen konnte. Das Bild sah zuerst wunderschön aus — aber die Farbe begann schon bald abzublättern. Erst vor nicht allzu langer Zeit haben Fachleute das Bild vorsichtig gerettet.\"",
+     "img_index": 1
+    },
+    {
+     "id": "t18",
+     "text": "Theo streicht mit dem Finger über eine Seite mit einer Zeichnung: ein Mann mit ausgestreckten Armen und Beinen, umgeben von einem Kreis und einem Viereck.",
+     "img_index": 1
+    },
+    {
+     "id": "t19",
+     "text": "„Und dieser Mann mit den vier Armen?\"",
+     "img_index": 1
+    },
+    {
+     "id": "t20",
+     "text": "Oma Rina lacht.",
+     "img_index": 1
+    },
+    {
+     "id": "t21",
+     "text": "„Er hat nicht vier Arme, Theo. Leonardo hat zwei Haltungen übereinandergezeichnet. Das nennt man den Vitruvianischen Menschen.\"",
+     "img_index": 1
+    },
+    {
+     "id": "t22",
+     "text": "„Warum hat er das gemacht?\"",
+     "img_index": 1
+    },
+    {
+     "id": "t23",
+     "text": "„Ein alter römischer Baumeister namens Vitruv hatte aufgeschrieben, wie die Teile des menschlichen Körpers zueinander passen — zum Beispiel, dass die ausgestreckten Arme genauso lang sind wie der ganze Körper hoch ist. Leonardo wollte das mit einer Zeichnung zeigen. Er passte den Mann genau in einen Kreis und in ein Quadrat. Das war gar nicht so einfach, denn die Mittelpunkte von Kreis und Quadrat liegen an verschiedenen Stellen am Körper. Aber Leonardo hat es geschafft — und deshalb ist dieses Bild bis heute so berühmt.\"",
+     "img_index": 1
+    },
+    {
+     "id": "t24",
+     "text": "„War Leonardo nur Maler?\"",
+     "img_index": 1
+    },
+    {
+     "id": "t25",
+     "text": "„Nein, das ist das Besondere an ihm! Er wollte einfach alles verstehen. Er hat Menschen und Tiere ganz genau untersucht, um herauszufinden, wie Knochen und Muskeln unter der Haut liegen. Deshalb sehen seine gemalten Menschen so echt aus — er kannte ihren Körper von innen.\"",
+     "img_index": 1
+    },
+    {
+     "id": "t26",
+     "text": "„Hat er auch Maschinen gebaut?\"",
+     "img_index": 1
+    },
+    {
+     "id": "t27",
+     "text": "„Er hat viele Maschinen gezeichnet — Flugapparate, Boote, sogar ein frühes U-Boot. Manche seiner Zeichnungen hatten aber kleine Fehler, zum Beispiel drehten sich bei einer Erfindung die Zahnräder in die falsche Richtung. Trotzdem war er neugierig auf fast alles: Wasser, Wolken, Pflanzen, sogar warum man Muscheln auf hohen Bergen findet.\"",
+     "img_index": 2
+    },
+    {
+     "id": "t28",
+     "text": "„Wie kann eine Muschel auf einen Berg kommen?\"",
+     "img_index": 2
+    },
+    {
+     "id": "t29",
+     "text": "„Das hat sich Leonardo auch gefragt! Er hat genau hingeschaut und viele Notizbücher vollgeschrieben — mit Zeichnungen und Schrift, die er sogar spiegelverkehrt schrieb, von rechts nach links.\"",
+     "img_index": 2
+    },
+    {
+     "id": "t30",
+     "text": "„Warum hat er so komisch geschrieben?\"",
+     "img_index": 2
+    },
+    {
+     "id": "t31",
+     "text": "„Das weiß man nicht genau. Vielleicht, weil er Linkshänder war und so leichter schreiben konnte, ohne die Tinte zu verschmieren.\"",
+     "img_index": 2
+    },
+    {
+     "id": "t32",
+     "text": "Theo schaut noch einmal auf die Mona Lisa.",
+     "img_index": 2
+    },
+    {
+     "id": "t33",
+     "text": "„Und wo ist das Bild jetzt?\"",
+     "img_index": 2
+    },
+    {
+     "id": "t34",
+     "text": "„Es hängt heute in einem großen Museum in Paris, im Louvre. Ganz viele Menschen aus der ganzen Welt kommen dorthin, nur um dieses eine kleine Bild zu sehen. Es ist gar nicht besonders groß — kleiner als dieses Buch hier.\"",
+     "img_index": 2
+    },
+    {
+     "id": "t35",
+     "text": "„Und Leonardo? Wo ist er geblieben?\"",
+     "img_index": 2
+    },
+    {
+     "id": "t36",
+     "text": "„Er lebte seine letzten Jahre in Frankreich, in einem Schloss. Der französische König mochte ihn sehr. Dort ist Leonardo gestorben, im Jahr 1519, als alter Mann. Aber seine Bilder und Zeichnungen leben weiter — und die Menschen bewundern sie noch heute, so wie wir gerade.\"",
+     "img_index": 2
+    },
+    {
+     "id": "t37",
+     "text": "Theo schließt das Buch vorsichtig.",
+     "img_index": 2
+    },
+    {
+     "id": "t38",
+     "text": "„Ich will auch mal alles wissen wollen, so wie Leonardo.\"",
+     "img_index": 2
+    },
+    {
+     "id": "t39",
+     "text": "„Das\", sagt Oma Rina lächelnd, „ist schon ein sehr guter Anfang.\"",
+     "img_index": 2
+    }
+   ],
+   "boxes": []
+  }
+ ],
+ "quiz": {
+  "heading": "",
+  "questions": []
+ },
+ "tts_config": {
+  "reading_speed_factor": 1.0,
+  "pause_after_heading_ms": 400,
+  "pause_after_sentence_ms": 150,
+  "pause_before_quiz_ms": 800
+ }
+}
