@@ -200,6 +200,7 @@ class WissensfreundProvider extends ChangeNotifier {
   // offline ohne Cache / Ladefehler), laeuft ueberall der bestehende flutter_tts-Pfad.
   AudioPlayer? _narrationPlayer;
   bool _narrationActive = false;
+  bool _narrationLoaded = false; // Quelle bereits in den Player gesetzt? (Seek statt Neu-Laden)
   AudioSource? _narrationSource;
   NarrationTiming? _narrationTiming;
   StreamSubscription<Duration>? _narrationPosSub;
@@ -596,6 +597,7 @@ class WissensfreundProvider extends ChangeNotifier {
   /// Quelle + Zeitleiste. Setzt _narrationActive. Kein Handy-Effekt, wenn false.
   Future<void> _prepareNarration() async {
     _narrationActive = false;
+    _narrationLoaded = false;
     _narrationSource = null;
     _narrationTiming = null;
     if (!SubscriptionService.instance.isPlus) {
@@ -651,10 +653,19 @@ class WissensfreundProvider extends ChangeNotifier {
     notifyListeners();
     _pauseScreenTimer();
     try {
-      await p.setAudioSource(src, initialPosition: Duration(milliseconds: startMs));
+      if (!_narrationLoaded) {
+        // Quelle nur EINMAL setzen. Erneutes setAudioSource auf die gecachte
+        // Quelle wirft teils (LockCachingAudioSource) → früher Fallback auf
+        // die Onboard-Stimme beim Springen. Danach nur noch seek().
+        await p.setAudioSource(src, initialPosition: Duration(milliseconds: startMs));
+        _narrationLoaded = true;
+      } else {
+        await p.seek(Duration(milliseconds: startMs));
+      }
       await p.play();
     } catch (_) {
       // Stream/Netz kaputt → sauber auf flutter_tts zurueckfallen.
+      _narrationLoaded = false;
       _narrationActive = false;
       _startSpeakingFrom(charOffset);
     }
@@ -821,7 +832,11 @@ class WissensfreundProvider extends ChangeNotifier {
       if (_state == AppState.speaking && !_isPaused && _currentChunk < _speechChunks.length) {
         _ttsCursor = _chunkOffsets[_currentChunk];
         notifyListeners();
-        unawaited(_tts.speak(_speechChunks[_currentChunk]));
+        if (_narrationActive) {
+          unawaited(_narrationPlayFromChar(_chunkOffsets[_currentChunk]));
+        } else {
+          unawaited(_tts.speak(_speechChunks[_currentChunk]));
+        }
       }
     }
   }
@@ -879,7 +894,11 @@ class WissensfreundProvider extends ChangeNotifier {
         _state = AppState.speaking;
         notifyListeners();
         _pauseScreenTimer();
-        unawaited(_tts.speak(_speechChunks[chunkIndex]));
+        if (_narrationActive) {
+          unawaited(_narrationPlayFromChar(_chunkOffsets[chunkIndex]));
+        } else {
+          unawaited(_tts.speak(_speechChunks[chunkIndex]));
+        }
       } else {
         _resumeOffset = _chunkOffsets[chunkIndex];
         notifyListeners();

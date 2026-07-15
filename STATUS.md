@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-15T11:41:13Z -->
+<!-- updated: 2026-07-15T12:14:31Z -->
 <!-- Ältere Banner-Historie → STATUS_ARCHIV.md · Wissen → WISSEN_*.md · Details → PROJEKTDOKUMENT.md -->
 
 **Wissensfreund:** Flutter-App für Kinder (3 Altersstufen: S1 4–6, S2 7–9, S3 10–12),
@@ -110,9 +110,18 @@ Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-P
     (Audio ohne Tags, Lupe überspringt sie; 395,2 s/773 W). bad_offset=0, monoton, im-Audio — beide.
   - **Am Galaxy Tab bestätigt:** Premium-m4a spielt (ExoPlayer, nicht mehr Onboard), Text lesbar mit Tags,
     Wort-Lupe folgt (mit-Tags: „Fünfhundert Jahre?" wortgenau markiert). Zwei Temp-Buttons 🎨 auf Home.
-  - **Offen:** User wählt A oder B nach Höreindruck; danach Nico-VC-Timbre auf die gewählte Variant
-    (GPU) + echte Wort-Zeiten via Forced Alignment optional. Debug-Hook + Temp-Buttons vor Release raus.
-    Details: [[project_voice_strategy]].
+  - **Feedback-Runde 2 (2026-07-15):** User bevorzugt B (ohne Tags). Fixes: (a) bei Redebegleitung MIT
+    Handlung spricht der Erzähler jetzt einen GRAMMATISCHEN Satz mit Subjekt ("Theo tippt mit dem Finger
+    auf das Bild." statt hängendem "und tippt…") — LLM-Feld `spoken` in `leo_build2.py`; (b) nicht
+    gesprochene Tags werden im Text TROTZDEM markiert (stille Units → kurze Pause, Lupe gleitet drüber,
+    jedes Wort hat eine Zeit, 796 W volle Abdeckung); (c) **Seek-Bug behoben**: Scroll-Sprung schaltete
+    auf die Onboard-Stimme um — `seekToChunk`/`cancelPendingSeek` riefen `_tts.speak` ohne
+    `_narrationActive`-Zweig; zusätzlich seekte `_narrationPlayFromChar` per erneutem `setAudioSource`
+    (wirft → Fallback) statt `seek()`. Jetzt am Tablet verifiziert: Scroll-Sprung bleibt Premium, spielt
+    weiter, Lupe auf neuer Stelle (nur MediaCodec/ExoPlayer, kein LocalSynthesizer im Log).
+  - **Theo-Stimme = Platzhalter Puck** (klingt evtl. weiblich) → finale Kinderstimme wird Nico (Sohn-VC).
+  - **Offen:** User entscheidet endgültig A/B nach Höreindruck; dann Nico-VC-Timbre (GPU) + optional echte
+    Wort-Zeiten via Forced Alignment. Debug-Hook + Temp-Buttons vor Release raus. Details: [[project_voice_strategy]].
 - **Nachtlauf geplant: 2026-07-08 03:00 Berlin** (Scheduled Task `WF_NightlyRerun_20260708`, Frühfenster
   laut 503-Monitor am ruhigsten). Die 6 Themen (Dinosaurier/Elefant/Hund/Spartacus/Vulkan/Zweiter Weltkrieg)
   × 3 Stufen, `--pipeline new`, Stages 1–3 (Gen+Lektorat, kein TTS) → `articles/batch_new_20260708`,
