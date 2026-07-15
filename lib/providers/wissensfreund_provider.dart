@@ -598,16 +598,29 @@ class WissensfreundProvider extends ChangeNotifier {
     _narrationActive = false;
     _narrationSource = null;
     _narrationTiming = null;
-    if (!SubscriptionService.instance.isPlus) return;
-    if (_articleId.isEmpty || !NarrationService.instance.hasNarration(_articleId)) return;
+    if (!SubscriptionService.instance.isPlus) {
+      debugPrint('[Narration] skip: not isPlus (tier=${SubscriptionService.instance.tier})');
+      return;
+    }
+    if (_articleId.isEmpty || !NarrationService.instance.hasNarration(_articleId)) {
+      debugPrint('[Narration] skip: no narration for "$_articleId"');
+      return;
+    }
     try {
       final src    = await NarrationService.instance.audioSourceFor(_articleId);
       final timing = await NarrationService.instance.timingFor(_articleId);
-      if (src == null || timing == null || timing.words.isEmpty) return;
+      if (src == null || timing == null || timing.words.isEmpty) {
+        debugPrint('[Narration] skip: src=${src != null} timing=${timing != null} '
+            'words=${timing?.words.length ?? -1}');
+        return;
+      }
       _narrationSource = src;
       _narrationTiming = timing;
       _narrationActive = true;
-    } catch (_) {
+      debugPrint('[Narration] ACTIVE for "$_articleId" — ${timing.words.length} words, '
+          '${timing.durMs}ms');
+    } catch (e) {
+      debugPrint('[Narration] error: $e');
       _narrationActive = false;
     }
   }

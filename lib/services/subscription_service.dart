@@ -19,6 +19,7 @@ class SubscriptionService {
 
   SubscriptionTier _tier = SubscriptionTier.free;
   bool _initialized = false;
+  bool _testTierLocked = false; // Debug: forcierten Test-Tier gegen Play-Verify sperren
 
   // ── Feature gates ───────────────────────────────────────────────────────────
 
@@ -60,8 +61,10 @@ class SubscriptionService {
   }
 
   Future<void> _verifyInBackground() async {
+    if (_testTierLocked) return; // Debug-Test-Tier gesetzt → nicht überschreiben
     try {
       final result = await _channel.invokeMethod<String>('getStatus');
+      if (_testTierLocked) return; // während des await gesetzt → verwerfen
       if (result != null) await _applyTier(_parseTier(result));
     } catch (_) {
       // Billing unavailable or offline — keep cached tier.
@@ -107,7 +110,11 @@ class SubscriptionService {
   // ── Testing ──────────────────────────────────────────────────────────────────
 
   /// Sets the tier directly without Play Store — debug builds only.
-  Future<void> setTierForTesting(SubscriptionTier tier) => _applyTier(tier);
+  /// Sperrt zugleich die Play-Verifikation, damit der Test-Tier bestehen bleibt.
+  Future<void> setTierForTesting(SubscriptionTier tier) {
+    _testTierLocked = true;
+    return _applyTier(tier);
+  }
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
