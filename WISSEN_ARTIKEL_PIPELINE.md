@@ -737,3 +737,57 @@ oder Opus), keine Code-Änderung. Konservatives Hochstufen (`confidence=niedrig 
 **Roadmap:** Phase 5 = Default auf `new` umschalten (Produktion) · größerer Themen-Lauf über `new` ·
 Modellwahl je Pass empirisch an echten Läufen schärfen · offene Verifikation: Einstiegs-Streuung + 2.-WK-Ton
 (503-Welle abwarten).
+
+## Stimmen-Stabilität & TTS-Kosten (Stand 2026-07-16)
+
+**KERNBEFUND: Die OpenVoice-VC (tau 0.7) ist selbst ein Tonhöhen-Normalisierer.**
+Die Streuung der Flash-Quellstimme erbt sich NICHT durch — sie wird von der VC weggebügelt.
+Gemessen (librosa-pyin, F0-Median):
+
+| Stufe | F0 | Streuung |
+|---|---|---|
+| Flash-Quelle Puck (roh) | 175 Hz | — |
+| Rohes Puck default, GLEICHER Satz ×4 | 266 Hz | ±54 |
+| Rohes Puck `temperature=0.3`, gleicher Satz ×4 | 258 Hz | ±16 |
+| **Nico NACH VC, FÜNF VERSCHIEDENE Texte** | **311 Hz** | **±11** |
+| Nico nach VC — aufgeregt / frech | 307 / 302 Hz | ±14 / ±9 |
+
+Folgen: für **Kind-Zeilen** sind `temperature`, Best-of-N und Pitch-Post-Processing **hinfällig — N=1 reicht**.
+Erzähler/Erwachsene bekommen KEINE VC (Streuung ±12–20 Hz, vom PO nie bemängelt) → `temperature=0.3`
+dort optionales Gratis-Extra. Timbre (MFCC-Cosine) ist durchweg 0,94–0,99 stabil — es schwankt nur die Tonhöhe.
+LEHRE: Vor jeder Stabilitäts-Messung prüfen, an WELCHER Stufe der Kette gemessen wird. Der Nacht-Test maß
+die Quelle vor der VC und war damit für die Kind-Zeilen gegenstandslos.
+
+**VERWORFEN — `seed`:** wird vom TTS-Modell NICHT honoriert. Fixer seed=777, 4 Nahmen: Puck ±12 Hz,
+Sadaltager ±36, Iapetus ±37 (bei echtem Seed-Effekt müsste std≈0 sein). Kein Reproduzierbarkeits-Hebel.
+
+**VERWORFEN — F0-Normalisierung im Post-Processing:** Blind-Test (Gemini als Ohr-Richter, gegen das
+PO-Ohr validiert): Original t0.3 = **4/5 sauber**; `librosa.pitch_shift` = deutlicher Nachhall 2/5;
+`ffmpeg rubberband:formant=preserved` = beste Zahl (±20→±4 Hz), aber Doppelstimme/Phasing 2/5.
+Die Zahl war gut, der Klang schlechter — das Original schlägt beide „Verbesserungen". Pitch-Shift auf
+Sprache verbiegt sie hörbar. (`pyworld`/`resemblyzer` bauen auf Python 3.14 nicht → MFCC-Cosine als Timbre-Maß.)
+
+**Kosten (verifiziert 2026-07-15/16):** `gemini-3.1-flash-tts-preview` = $1/1M Input, **$20/1M Output-Audio**;
+**Batch −50 %** ($0.50/$10). Audio-Output-Rate **32 Tokens/Sekunde** real gemessen (447 tok / 14,0 s; Google
+nennt 25/s → real ~20 % günstiger). Referenz Leonardo-Hörspiel = 395 s ≈ 12.640 Audio-Tokens ≈ **0,12 €/Vertonung
+(Batch, N=1)**. Katalog × 2 Stufen: 2.000 Art. ≈ 470 € · 2.500 ≈ 590 € · 4.000 ≈ 940 € · 5.000 ≈ 1.180 €.
+Einmalige Produktionsausgabe (Audio wird eingefroren), kein laufender Betrieb. Bewerten (F0 + lokales
+Whisper) = 0 €. **Entscheidung: Batch auf jeden Fall, N=1.**
+
+**Flash-TTS ist auch NACHTS überlastet** (Nacht-Test 02:00: Dutzende 504/503, halbe Matrix unmessbar,
+Task lief ins 1h-ExecutionTimeLimit) → **Batch-API für Produktion faktisch Pflicht**. Nacht-Läufe künftig:
+höheres Zeitlimit + schnelleres Aufgeben statt langer Retry-Ketten.
+
+**PRODUKTIONS-PFLICHT (offen in `tts_story.py`):** `_tts_call` setzt bis heute KEIN Timeout — ein hängender
+Call blockiert unbegrenzt. Nötig: `genai.Client(..., http_options=types.HttpOptions(timeout=60000))`.
+
+**Read-Along-Produktionsweg (bewährt, ohne APK-Rebuild):**
+1. Fertigen, freigegebenen Render nehmen — **NIE neu synthetisieren** (ein roher Puck-Platzhalter OHNE VC
+   war die Ursache des „Theo kippt in eine Erwachsenenstimme"-Reports).
+2. Wort-Zeiten per **Forced Alignment auf CPU**: `scripts/align_narration.py` (torchaudio **MMS_FA**,
+   romanisiert Deutsch, mappt gesprochene Wörter zurück auf plainText-Char-Offsets). Kein GPU/Pod nötig.
+   Gotcha: `torchaudio.load()` braucht seit 2.11 `torchcodec` → Audio per ffmpeg nach 16 kHz mono WAV
+   dekodieren und mit `wave`+numpy laden.
+3. Deployen: `JsonArticleService.loadArticle` liest `app_flutter/wf_articles/articles/{id}.json` VOR dem
+   gebündelten Asset → Artikel-JSON + `narration_cache/full/*.m4a` + `.timing.json` + `narration_index.json`
+   per adb pushen. Kein Build nötig.

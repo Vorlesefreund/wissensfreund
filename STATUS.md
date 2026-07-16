@@ -1,149 +1,61 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-15T12:33:19Z -->
+<!-- updated: 2026-07-16T14:03:05Z -->
 <!-- Ältere Banner-Historie → STATUS_ARCHIV.md · Wissen → WISSEN_*.md · Details → PROJEKTDOKUMENT.md -->
 
-**Wissensfreund:** Flutter-App für Kinder (3 Altersstufen: S1 4–6, S2 7–9, S3 10–12),
-KI-generierte Artikel streng aus geladenem Artikel-Quelltext (nie Trainingswissen).
-Zwei Pipelines nebeneinander: alter Monolith (Produktion) + neue modulare Pass-Pipeline
-(`scripts/pipeline_new.py` / `lektorat_new.py`, Fallback-sicher, JSON-Schema unverändert).
+**Wissensfreund:** Flutter-App für Kinder (Stufen S1 4–6, S2 7–9, S3 10–12), KI-Artikel streng aus
+geladenem Artikel-Quelltext (nie Trainingswissen). Zwei Pipelines nebeneinander: alter Monolith
+(Produktion) + neue modulare Pass-Pipeline (`scripts/pipeline_new.py`, Fallback-sicher).
 
-## Zuletzt abgeschlossen (Stand 2026-07-14)
+## Zuletzt abgeschlossen (2026-07-16)
 
-- **Audio-Streaming-Umbau (Premium-Vertonung) — Track A + B M2 am Tablet validiert:**
-  Vertonung wird künftig **pro Artikel gestreamt** (AAC .m4a von R2, on-device gecacht),
-  NICHT als Riesen-WAV-Bündel (skaliert bei 5.000 Art. nicht: 13–36 GB). Auf R2 kostet das
-  fast nichts (Egress $0, Speicher ~$0,30/Mon). **flutter_tts bleibt Gratis-Fallback** (offline,
-  alle); die schönen Stimmen = **Plus/Premium**. Wortgenaue Markierung in Modus A/B/C über ein
-  **Timing-Sidecar** (`positionStream` → `_ttsCursor`, gleiche grüne Markierung, Bild-Sync).
-  - Track A: `scripts/compress_narration.py` (WAV→AAC 48k + `narration_index.json`, keyt nach
-    voller `article_id` = App `_articleId`); `upload_articles.py` lädt den m4a-Ordner inkl. Index.
-  - Track B: `lib/services/narration_service.dart` (Streaming `LockCachingAudioSource` + Cache
-    + Wort-Timeline + nutzer-Cache-Cap) + Provider-Verdrahtung **streng additiv** (Handy-Pfad
-    byte-identisch, Regression bestätigt). Init ZIM-unabhängig in `main.dart`.
-  - **E2E am Galaxy Tab getestet** (elefant_l2, Platzhalter-Audio + proportionales Test-Sidecar):
-    Streaming läuft, Cursor trackt Audioposition in Echtzeit, Bild-Auto-Weiterschaltung, stabil.
-  - Commits: `7d198a1` (A) · `2eea9e9`/`babaf56` (B-Foundation) · `8018c74` (M2) · `f0df7ce` (init).
-  - **Offen:** M1 Forced Alignment (`align_narration.py`, WhisperX auf RunPod → echte Wort-Zeiten
-    statt proportional; **GPU-Kosten → Freigabe nötig**); Cache-Cap-Regler in „Speicher & Qualität";
-    opt-in Leuchtturm-Offline-Paket (Plus); echter Vertonungs→compress→align→upload-Durchlauf.
-    Details: `Desktop\wissensfreund_audio_umbau_plan.md`. Budgets: [[reference-media-storage-budget]].
-
-- **Tablet-Version gestartet (App, 2026-07-14):** Fundament `lib/utils/responsive.dart`
-  (`isTablet` shortestSide≥600 / `isLandscape` / `MaxWidthCenter`), **rein additiv — Handy-Modus
-  unberührt** (User-Regel: jede Handy-Änderung vorher absprechen). Screen **„Internet & Daten" neu**
-  (Handy+Tablet, mit Freigabe): 3 Karten WLAN/Mobilfunk/Wissensspeicher, einheitliche Typo, ehrliche
-  Erklärtexte, „Stand: Mai 2026" statt interner ZIM-Kennung. Getestet per adb am echten Galaxy Tab
-  S10 FE (`R52Y30B9GVD`). Plan/Screen-Inventar: `Desktop\wissensfreund_tablet_strategie.html`.
-  Entschieden: voller Tablet-Modus inkl. Querformat für Lesemodi (A/B/C); Home-Kachel-Umbau danach.
-- **Screen „Speicher & Qualität" komplett (Handy+Tablet, freigegeben):** Tablet-zentriert (`TabletMaxWidth`);
-  neue Speicher-Übersicht oben (Bilderanzahl + belegte MB + freier Gerätespeicher via `getFreeStorageBytes`
-  + rote Warnung < 1,5 GB frei); interner „(aus ZIM)"-Begriff raus. **Freeze-Bug behoben**: `_extractZipTo`
-  (`image_library_service`) lief synchron auf dem UI-Isolate → Balken fror bei 100 % → jetzt yield alle 40
-  Dateien, „wird entpackt…" läuft sichtbar. **Paketgrößen zentralisiert**: alle MB/GB-Anzeigen leiten aus
-  `AssetConfig.image*SizeBytes` ab (einzige Quelle; 545 MB ist **Platzhalter** — Onboarding rechnet mit
-  141 MB ZIP, echte Zahl offen bis Voll-Paket). **Onboarding**: 300px-Download jetzt Pflicht (Skip nur bei
-  zu wenig Platz → WLAN-Weg bleibt offen; `first_run_screen`). **Audio bleibt Stream/on-demand** (offline
-  undenkbar: 5.000 Art.×3 Stufen ≈ 13–36 GB komprimiert; heute noch unkomprimiertes WAV 24kHz = 2,88 MB/min).
-- **5-Fixes-Batch (Review-Feedback batch_new_20260710):**
-  (1) **Lektorat-Modell → `claude-sonnet-5`** (besser + günstiger als sonnet-4-6; `stage_models`, `lektorat_common`, `verify`).
-  (2) **Review-Docx** zeigt Korrekturen sauber: finaler Satz einmal als Body, Änderung als klein gesetzte Notiz (keine Scheindopplung) — `generate_review_docx._render_tracked_change`.
-  (3) **Lektorat-Beleg-Gate** um `typ`=WIDERSPRUCH/UNGEDECKT erweitert: Streichung quellfremder Details wird jetzt angewandt (verifiziert: Phrase im Alt-Satz, weg im Neu-Satz, nicht in Quelle); + Sinn/Zahlen-Regel (falsche Zahl → belegte Zahl, nie zu Unfug verkürzen).
-  (4) **PASS3 stimmt_das** enger (nur echte verbreitete Irrtümer, keine Datums-/Detailfragen); **PASS1/PASS2** Abschnitts-Reihenfolge (Bedeutung/Symbol ans Ende) + weiche Übergänge.
-  (5) **Bild**: Hero muss Person/Tätigkeit zeigen (Gladiator statt Helm), Caption nur Sichtbares (keine erfundenen Rauchwolken).
-  Alle kompiliert, `verify` = 0 Hart-FAIL, Streichungs-Logik + Docx-Rendering smoke-getestet.
-- **Listen-Konsolidierung „Ein Brett" (Phase A/B/C):** `catalog_review_master.xlsx` ist die
-  EINZIGE Datei zum Arbeiten. **Workflow:** Master editieren → `python -X utf8 scripts/build_all.py`
-  erzeugt alle abgeleiteten Listen (catalog_full/reserve, eignung_exclude, ergiebigkeit_scores)
-  + Sheet „Produktion" (generiert/lektoriert/vertont je Thema/Stufe). catalog_full wird jetzt AUS
-  dem Master abgeleitet (kein catalog_review.xlsx-Rückwärts-Nebeneffekt mehr).
-  Commits `f5b6d36` (A) · `f8f35d5` (B) · `ccc4175` (C). Alter `catalog_merge.py` bleibt Fallback.
-- **Katalog-Gaps:** 11 verifizierte Audit-Lücken (Wikipedia-Deckung) in `catalog_manual.json` aufgenommen
-  + triagiert (9 include, Todesstrafe/Zeugen Jehovas exclude); „Moldau"→„Moldawien". Abgelöste
-  Review-XLSX + Audit-Snapshots nach `archiv/`. Commits `f1c8f8b` · `247aa49`.
-- **Neue Pipeline Phase 0–4** komplett+committet, Vulkan e2e validiert; **Feinschliff** (Bild-Alt-Texte,
-  S1/S2-Ton, S3-Quiz) + **SVG-Diagramme (Fix B)**. `verify_project_facts` durchgehend 0 Hart-FAIL.
-- **Resilienz-Härtung (`cf1ffaf`):** Cache-Ablauf-Fallback in `pipeline_new._call_pass` (403 „CachedContent
-  not found" → voller Kontext statt Hart-Abbruch; behebt die Kaskade, die zuvor 17/18 Artikel killte) +
-  10-min Client-Timeout (Gemini-SDK hat keins → Server-Stall hing endlos) + breiteres `is_transient`-Retry
-  (Timeout/Deadline/Connection/overloaded) in gemini_client/run_batch/generate_grounded/image_vision_filter.
-- **Cache-TTL 30min → 6h (`c846e57`):** Caches werden vorab für alle Themen erzeugt → müssen ganze
-  Batch-Laufzeit überleben; Gemini akzeptiert 6h/12h (getestet).
+- **Read-Along am Tablet fertig — freigegebener Hörspiel-Render + echte Wort-Zeiten.**
+  Artikel `leo_mit_tags_l2` = `Leonardo_v2_Hoerspiel_Emotion.mp3` (395,3 s, Nico-VC-Stimme, Theo 316 Hz).
+  Lese-Text = gesprochener Text (Prosa mit Tags + „…"), Wort-Lupe per **Forced Alignment** (torchaudio
+  MMS_FA, CPU, 773 Wörter, bad_offset=0). Deploy OHNE APK-Rebuild über den `wf_articles`-Cache-Pfad.
+  PO-Urteil: „Stimme ist ok so". Weg + Gotchas: WISSEN_ARTIKEL_PIPELINE.md.
+- **Emotions-Regression gefixt:** `feed_for` gab den Rollen-Grundstil zurück und verwarf damit die
+  per-Zeile-`emotion` für ALLE Zitate („Oma Rina lacht." → Oma sprach ohne Lachen). Jetzt wird
+  `unit_style` durchgereicht. Zusätzlich persistenter PCM-Cache → kein Stimm-Drift bei Rebuilds.
+- **Stimmen-Stabilität geklärt (Nacht-Test 02:00 + Nachlauf):** **Die OpenVoice-VC (tau 0.7) ist selbst
+  der Tonhöhen-Normalisierer** — Quell-Streuung erbt sich NICHT durch (rohes Puck ±54 Hz → Nico nach VC
+  **±11 Hz über fünf verschiedene Texte**, 311 Hz Kinderlage). Folge: für Kind-Zeilen **N=1, kein
+  Best-of-N, kein temperature-Tuning nötig**. Das ursprüngliche „Theo kippt in eine Erwachsenenstimme"
+  war schlicht der rohe Puck-Platzhalter OHNE VC.
+- **Verworfen:** `seed` (wird nicht honoriert, ±12–37 Hz trotz fixem seed) · F0-Post-Processing
+  (librosa/rubberband: Zahl besser, Klang schlechter — Nachhall/Phasing, Blind-Test bestätigt).
+- **TTS-Kosten verifiziert:** 3.1-flash-tts = $1/$20 pro 1M, **Batch −50 %**; real 32 Audio-Tokens/s
+  → **~0,12 €/Vertonung (Batch, N=1)**. Start-Katalog 2.000–2.500 Art. × 2 Stufen ≈ **470–590 €**;
+  Vollausbau 4.000–5.000 ≈ 940–1.180 €. Einmalig, kein laufender Betrieb. **Entscheidung: Batch, N=1.**
+  Flash ist auch nachts überlastet (viele 504/503) → Batch faktisch Pflicht.
+- **Früher im Juli:** Audio-Streaming-Umbau (m4a von R2 + Timing-Sidecar, Track A+B am Tablet validiert)
+  · Tablet-Fundament `responsive.dart` (rein additiv, Handy-Modus unberührt) · Screens „Internet & Daten"
+  + „Speicher & Qualität" · Nico-VC in `tts_story.py` integriert (`nico_vc.py`, Standard AUS) ·
+  Listen-Konsolidierung „Ein Brett" (`catalog_review_master.xlsx` + `build_all.py`) · neue Pipeline
+  Phase 0–4 komplett. Verbatim → STATUS_ARCHIV.md.
 
 ## Gerade in Arbeit / Nächster Schritt
 
-- **Tablet-Pass (App), Screen für Screen:** nächste Formular-Screens (Kinderschutz / Plus & Premium /
-  Menü / Profile / Neues Profil) tablet-zentrieren (`TabletMaxWidth`) + ggf. gleiche Aufräum-Kur.
-  Danach Lesemodi A/B/C — brauchen Wissensspeicher auf dem Tablet (**Klexikon-Daten nicht anfassen**,
-  User-Wunsch). Bildschirm bleibt beim Testen wach: `adb ... svc power stayon usb`.
-- **Onboarding-Pflicht noch am Tablet ansehen** (Profil-Reset nötig) — User wollte einmal durchklicken.
-- **Audio nächster Schritt: M1 Forced Alignment** (`scripts/align_narration.py`, WhisperX auf RunPod)
-  → echte Wort-Zeitstempel statt proportionalem Test-Sidecar; **GPU-Kosten, vor Lauf Freigabe**. Danach
-  Cache-Cap-Regler in „Speicher & Qualität" + opt-in Leuchtturm-Offline-Paket + echter Vertonungslauf.
-- **Offen (eigene Stränge, nicht ungefragt):** echte 300px-Paketgröße bestimmen → `AssetConfig`-Konstante
-  aktualisieren (oder Anzeige auf `images_thumb_manifest.json` verdrahten).
-- **Nico-Stimme (Voice-Conversion) — FREIGEGEBEN + in tts_story.py integriert (2026-07-15):**
-  Fine-Tune verworfen. Finaler Weg (User-Freigabe „soll reichen"): **Gemini-Flash-TTS (Puck, neutral)
-  → OpenVoice v2 (MIT) VC** auf Sohn-Referenz, **tau 0.7**; Tonhöhe landet automatisch in Kinderlage
-  (~310 Hz). `tts_story.py` erweitert: (1) **Hörspiel-Segmentierung** (reine Sprech-Tags weg, unterbrochene
-  Zitate zusammengezogen, echte Handlungen bleiben), (2) **`emotion`-Feld pro Turn** → `_style_for`
-  (z. B. „Oma Rina lacht." → Folgesatz amüsiert; Trauriges → ernst), (3) **Bare-Text-Fallback** in
-  `synth_pcm` gegen den Safety-Block (Stil-Präfix+Fragment = PROHIBITED_CONTENT; nackter Text läuft),
-  (4) **VC-Naht in `vertone(nico_converter=…)`** + neues Modul **`nico_vc.py`** (OpenVoice-Converter,
-  GPU-seitig) + CLI `--nico-ref/--nico-ckpt/--nico-tau/--openvoice-path` + loudnorm-Pegelangleich.
-  Standard AUS → normale Pipeline unverändert; beide Pfade smoke-getestet, `py_compile` OK. Demo:
-  `Desktop\_nico_clone\vc_test\STORY_KOMPLETT\Leonardo_v2_Hoerspiel_Emotion.mp3` (37 Turns, 6,6 Min).
-  **Offen:** VC-Pfad auf echter GPU im integrierten `--nico-ref`-Lauf noch nicht end-to-end gefahren
-  (OpenVoice-Logik selbst auf Pods bewährt). Details: [[project_voice_strategy]]. Alle Test-Pods terminiert.
-- **Vorlese-Text = volle Prosa MIT Tags/Anführungszeichen + 2 Audio-Varianten (2026-07-15):**
-  Korrektur: der erste Tablet-Test lief fälschlich auf der ONBOARD-Stimme (Debug-Test-Tier wurde von der
-  Play-Verifikation überschrieben → `fix(narration)` 06b040b, `_testTierLocked`). Zudem war der Lese-Text
-  die tag-freie Hörspiel-Fassung (unlesbar, „ein Satz pro Zeile", keine Tags). User-Entscheidung: Lese-Text
-  = die volle Story-Prosa MIT „fragt Theo"/„sagt Oma" + Anführungszeichen (wie die Quell-HTML); zwei
-  Audio-Varianten zum Vergleich am Tablet.
-  - **Quote-aware Satz-Splitter** (`article_screen.dart` `_sentenceRanges` → `_splitSentences`/`…Starts`
-    deckungsgleich): trennt NICHT an .?! innerhalb „…" → Dialog+Tag bleiben auf einer Zeile. Dart==Python
-    verifiziert (40 Sätze, JOIN==Prosa, 0 Abweichungen).
-  - **Verbatim-Pipeline** (`scratchpad/leo_build2.py`): deterministische Quote/Nicht-Quote-Spans (zeichen-
-    genau, lückenlos) + 1 LLM-Pass (Sprecher-Rolle je Zitat + reiner Redebegleitsatz je Erzähler-Span,
-    exakter Teilstring). Zwei m4a + Timing-Sidecars, Wörter mappen auf dieselben Prosa-Offsets:
-    **A) `leo_mit_tags_l2`** (Erzähler spricht Tags mit; 409,7 s/796 W) · **B) `leo_ohne_tags_l2`**
-    (Audio ohne Tags, Lupe überspringt sie; 395,2 s/773 W). bad_offset=0, monoton, im-Audio — beide.
-  - **Am Galaxy Tab bestätigt:** Premium-m4a spielt (ExoPlayer, nicht mehr Onboard), Text lesbar mit Tags,
-    Wort-Lupe folgt (mit-Tags: „Fünfhundert Jahre?" wortgenau markiert). Zwei Temp-Buttons 🎨 auf Home.
-  - **Feedback-Runde 2 (2026-07-15):** User bevorzugt B (ohne Tags). Fixes: (a) bei Redebegleitung MIT
-    Handlung spricht der Erzähler jetzt einen GRAMMATISCHEN Satz mit Subjekt ("Theo tippt mit dem Finger
-    auf das Bild." statt hängendem "und tippt…") — LLM-Feld `spoken` in `leo_build2.py`; (b) nicht
-    gesprochene Tags werden im Text TROTZDEM markiert (stille Units → kurze Pause, Lupe gleitet drüber,
-    jedes Wort hat eine Zeit, 796 W volle Abdeckung); (c) **Seek-Bug behoben**: Scroll-Sprung schaltete
-    auf die Onboard-Stimme um — `seekToChunk`/`cancelPendingSeek` riefen `_tts.speak` ohne
-    `_narrationActive`-Zweig; zusätzlich seekte `_narrationPlayFromChar` per erneutem `setAudioSource`
-    (wirft → Fallback) statt `seek()`. Jetzt am Tablet verifiziert: Scroll-Sprung bleibt Premium, spielt
-    weiter, Lupe auf neuer Stelle (nur MediaCodec/ExoPlayer, kein LocalSynthesizer im Log).
-  - **ENTSCHEIDUNG (2026-07-15): Variante A „mit Tags" gewählt** — Erzähler spricht die Redebegleitsätze
-    verbatim mit; Text = Audio, exakte Wort-Lupe, KEINE Pausen, KEINE Umformulierung. „ohne Tags" verworfen
-    (gefühlt überlange Pausen statt der Tags; brauchte zudem den grammatischen Rewrite). Stabilität >
-    Perfektion. Nur noch EIN Test-Button „Leonardo (Vorlese-Test)" → `leo_mit_tags_l2`; `leo_ohne_tags`-Asset
-    entfernt (Narration-Files am Gerät bleiben ungenutzt liegen).
-  - **Theo-Stimme = Platzhalter Puck** (klingt evtl. weiblich) → finale Kinderstimme wird Nico (Sohn-VC).
-  - **Offen:** Nico-VC-Timbre auf die Kind-Zeilen (GPU-Lauf, Kosten vorher nennen) + optional echte
-    Wort-Zeiten via Forced Alignment. Debug-isPlus-Hook + Temp-Button vor Release raus. Details: [[project_voice_strategy]].
-- **Nachtlauf geplant: 2026-07-08 03:00 Berlin** (Scheduled Task `WF_NightlyRerun_20260708`, Frühfenster
-  laut 503-Monitor am ruhigsten). Die 6 Themen (Dinosaurier/Elefant/Hund/Spartacus/Vulkan/Zweiter Weltkrieg)
-  × 3 Stufen, `--pipeline new`, Stages 1–3 (Gen+Lektorat, kein TTS) → `articles/batch_new_20260708`,
-  Review-Docx → `Desktop\_review_batch_new_20260708.docx`, Log → `articles/batch_new_20260708/run.log`.
-  Wrapper: `_nightly_rerun_20260708.ps1` (Repo-Root, nicht committet; `PYTHONUTF8=1` gegen cp1252-Crash).
-- **Auswertung morgen früh:** Läuft alles sauber (18/18) → Phase 5 (Default `new`) freigeben.
+- Nichts offen angefangen — Read-Along-Strang ist abgeschlossen und am Gerät bestätigt.
 
 ## Offen nach Priorität
 
-1. **Phase 5:** `--pipeline`-Default auf `new` umstellen — nach erfolgreicher Nachtlauf-Auswertung.
-2. **Verifikation:** WWII-Ton (nüchtern?) + Einstiegs-Streuung über mehrere Themen; SVG-Vision-Akzeptanz
-   (Fix B) end-to-end — kommt aus dem Nachtlauf.
-3. **Modellwahl Pass 2** empirisch schärfen.
-4. Nicht-committete Validierungsordner (`articles/wwii_new_*`, `vulkan_new_demo` …) sind Wegwerf.
+1. **Nico-VC in `tts_story.py.vertone()` verdrahten** (GPU zur Synthese-Zeit), damit nie wieder ein roher
+   Puck-Platzhalter in einen Build rutscht. Kosten vorher nennen. Details: [[project_voice_strategy]].
+2. **`tts_story.py._tts_call` härten (0 €):** Client-`timeout=60000` (Produktionsbug — ein Call kann heute
+   unbegrenzt hängen) + optional `temperature=0.3` für Erzähler/Erwachsene (die haben keine VC).
+3. **Vor Release raus:** Debug-`isPlus`-Hook, Temp-Test-Button „Leonardo (Vorlese-Test)" in
+   `home_screen.dart`, TEMP-Diagnose-Prints in `_prepareNarration`.
+4. **Phase 5:** `--pipeline`-Default auf `new` umstellen (nach Nachtlauf-Auswertung).
+5. **Tablet-Pass, Screen für Screen:** Kinderschutz / Plus & Premium / Menü / Profile / Neues Profil
+   tablet-zentrieren (`TabletMaxWidth`). Danach Lesemodi A/B/C (Klexikon-Daten nicht anfassen).
+6. Onboarding-Pflichtweg einmal am Tablet durchklicken (Profil-Reset nötig).
+7. Echte 300px-Paketgröße bestimmen → `AssetConfig`-Konstante (545 MB ist Platzhalter).
+8. Cache-Cap-Regler in „Speicher & Qualität" + opt-in Leuchtturm-Offline-Paket (Plus).
+9. Modellwahl Pass 2 empirisch schärfen.
+10. Aufräumen: Scheduled Task `Wissensfreund_Stimmtest_Nacht` ist verbraucht (NextRun leer) → löschbar.
+    Nicht-committete Validierungsordner (`articles/wwii_new_*`, `vulkan_new_demo` …) sind Wegwerf.
 
 ## Historie & Details
 
-Ältere Stände (Juni–Anfang Juli: TTS-Pipeline end-to-end, Weg-B-Rückbau, Stage-1/2/3-Resilienz,
-Companion-Faszination/Vielfalt, Lektorat-Bausteine, Review-Workflow) → **STATUS_ARCHIV.md** (verbatim)
-· `git log STATUS.md` · **PROJEKTDOKUMENT.md** (Entscheidungs-Log + Roadmap).
+Ältere Stände (Juni–Mitte Juli) → **STATUS_ARCHIV.md** (verbatim) · `git log STATUS.md` ·
+**PROJEKTDOKUMENT.md** (Entscheidungs-Log + Roadmap).
