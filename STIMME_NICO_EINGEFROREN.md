@@ -55,12 +55,65 @@ sind Historie, kein Bestandteil des Rezepts.
 | Chatterbox Fine-Tune | verschlechtert deutsche Aussprache (ü/ö out-of-distribution). |
 | CosyVoice2 | englischer Akzent. |
 
-## Der einzige verbliebene Hebel (bewusst NICHT gezogen)
+---
 
-Ein **größeres Referenz-Set** (mehrere saubere Clips statt einem) könnte den Rest-Unterschied
-zwischen Sätzen glätten (s1 ~330 Hz vs s2 ~280 Hz — die VC gleicht INNERHALB eines Satzes stark
-an, ZWISCHEN Sätzen bleibt Spielraum). Kostet nur GPU-Minuten.
+# WENN DIE STIMME ZU SEHR SCHWANKT — was wir noch versuchen können
 
-**Nicht gezogen, weil:** ein neues Referenz-Set = ein anderes Timbre = neue Abnahme nötig. Die
-aktuelle Stimme ist abgenommen. Erst ziehen, wenn beim echten Mehr-Themen-Lauf tatsächlich
-Schwankung auffällt — sonst optimieren wir gegen eine Zahl statt gegen ein Problem.
+Diese Seite ist für den Fall geschrieben, dass beim echten Hören über mehrere Themen auffällt:
+„Nico schwankt." Dann NICHT blind herumschrauben — die meisten Hebel sind nachweislich tot
+(s. „Verworfen" oben). Der Reihe nach:
+
+## Hebel 1: Größeres Referenz-Set (der einzige echte, kostet nur GPU-Minuten)
+
+**Warum das plausibel hilft.** Nicos Timbre steckt heute in EINEM Clip (`rich_ref.wav`, 80 s,
+eine Aufnahme). `nico_vc.py` sagt es selbst: *„alle werden zu EINEM Sprecher-Embedding gemittelt
+— mehr saubere Clips = stabiler"*. Ein Embedding aus einer einzigen Aufnahme trägt die Eigenheiten
+genau dieser Aufnahme (Tagesform, Mikrofonabstand, Raum).
+
+**Woran man sieht, dass da wirklich Luft ist.** Gemessen 2026-07-16 (Nico nach VC, je 3 Nahmen):
+
+| | s1 „Fünfhundert Jahre? Das ist uralt!" | s2 „War Leonardo nur Maler?" |
+|---|---|---|
+| F0 nach VC | ~313–330 Hz | ~272–283 Hz |
+
+**INNERHALB** eines Satzes bügelt die VC fast alles weg (±2–11 Hz). **ZWISCHEN** Sätzen bleiben
+~50 Hz stehen. Das ist genau die Größenordnung, die man als „schwankt noch etwas" hört — und der
+plausibelste Ansatzpunkt, weil das Ziel-Embedding die einzige Größe ist, die über alle Sätze
+konstant sein sollte.
+
+**Das Rezept.**
+1. Rohmaterial: `Documents/Audioaufzeichnungen/` (104 × m4a). Nach 24 kHz mono WAV wandeln:
+   `ffmpeg -i "Aufzeichnung (N).m4a" -ar 24000 -ac 1 take_N.wav`
+2. Sauber auswählen — das ist der eigentliche Aufwand, nicht die Rechenzeit. Kriterien:
+   kein Hall, kein Nebengeräusch, keine Übersteuerung, ruhige Sprechlage, verschiedene Sätze.
+   Ziel: **5–10 Clips à 10–20 s aus VERSCHIEDENEN Aufnahmen** (Vielfalt ist der Punkt — sonst
+   mittelt man dieselbe Eigenheit nur mehrfach).
+3. Alle in EINEN Ordner, den an `--nico-ref` übergeben (die Funktion mittelt sie automatisch).
+4. GPU-Pod (s. `Desktop/_nico_clone/pod_zugang/`), `bootstrap_openvoice.sh`, dann dieselben
+   Sätze wie oben rendern.
+5. **Messen UND hören**: bleibt der Abstand s1↔s2 unter ~50 Hz? Und klingt es noch nach Nico?
+
+**Der Preis, den man dabei zahlt.** Ein neues Referenz-Set ist ein **anderes Timbre**. Die neue
+Stimme muss neu abgenommen werden, und sie kann schlechter sein — mehr Clips heißt auch: mehr
+Gelegenheit, Müll mit hineinzumitteln. Deshalb: **das alte Set NIE überschreiben**, neue Variante
+parallel bauen, A/B gegen `rich_ref.wav` hören, und nur wechseln, wenn es hörbar besser ist.
+
+## Hebel 2: tau nachjustieren (klein, riskant)
+
+tau 0.7 wurde durchgesweept (`vc_test/tau_sweep`) und abgenommen. Höheres tau = mehr Sohn-Timbre =
+stärkere Normalisierung, aber irgendwann Artefakte. Nur anfassen, wenn Hebel 1 nichts bringt, und
+nur im A/B gegen den eingefrorenen Stand.
+
+## Hebel 3: Best-of-N NUR auf Kind-Zeilen (teuer, letzte Wahl)
+
+Mehrere Nahmen je Zeile, die mediannächste behalten. **Kostet Faktor 2–3 auf die Kind-Zeilen**
+(Katalog-Auswirkung: s. Kostentabelle in `WISSEN_ARTIKEL_PIPELINE.md`). Wurde als überflüssig
+eingestuft, WEIL die VC die Tonhöhe normalisiert — das gilt aber nur für die Tonhöhe. Wenn der
+VORTRAG schwankt (Betonung, Tempo), ist Best-of-N mit Ohr-Richter der einzige Hebel, der dort
+greift, denn Betonung kommt aus dem Flash-Original und überlebt die VC.
+
+## Was NICHT hilft (nicht nochmal ausprobieren)
+
+`seed` (wird ignoriert) · F0-Nachbearbeitung (klingt schlechter) · andere Quellstimme als Puck
+(die VC normalisiert die Quelle ohnehin — Sadaltager war roh stabiler, nach VC egal) ·
+Fine-Tune (deutsche Aussprache bricht).
