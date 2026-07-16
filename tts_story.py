@@ -27,11 +27,15 @@ GAP_TURN    = 0.35           # Pause zwischen Turns desselben Sprechers / kurzer
 GAP_SCENE   = 0.75           # Pause an Szenen-/Absatzgrenzen
 
 TTS_TIMEOUT_MS = 60_000      # Das SDK hat KEIN Default-Timeout — ohne das hängt ein Call unbegrenzt.
-TTS_TEMPERATURE = 0.3        # Nur für Turns OHNE Voice-Conversion (s. _temperature_for).
-                             # Gemessen an derselben Zeile ×4: default ±54 Hz Grundton-Streuung,
-                             # t0.3 ±16 Hz. Kind-Turns mit VC brauchen das nicht (die VC normalisiert
-                             # die Tonhöhe selbst auf ~310 Hz, ±11 Hz) → dort Default lassen, damit
-                             # der Vortrag (emotion) nicht unnötig eingeebnet wird.
+TTS_TEMPERATURE = 0.3        # Gilt für ALLE Rollen, auch Kind-Turns mit VC.
+                             # Rohe Quelle: default ±54 Hz Grundton-Streuung, t0.3 ±16 Hz.
+                             # NACH der VC ist die Tonhöhe temperature-unabhängig ruhig (±2–11 Hz,
+                             # egal welche Stufe) — die Tonhöhe ist also KEIN Argument mehr.
+                             # Entscheidend war das Hörurteil des PO (2026-07-16): t0.3 klingt im
+                             # VORTRAG am überzeugendsten. Betonung/Sprechmelodie stammen aus dem
+                             # Flash-Original und überleben die VC (die überträgt nur die Klangfarbe)
+                             # — deshalb wirkt temperature dort weiter, messbar ist es per F0 nicht.
+                             # Samples: Desktop/_nico_temp_vergleich (2 Sätze × 3 Stufen × 3 Nahmen).
 
 # ── Stimm-Zuordnung + (bewusst zurückgenommene) Stil-Vorgaben ──────────────────
 VOICES = {
@@ -193,15 +197,9 @@ def synth_pcm(client, voice: str, style: str, text: str, retries: int = 3,
     return None
 
 
-def _temperature_for(rolle: str, has_vc: bool, temperature: float | None) -> float | None:
-    """Turns, die NICHT durch die Voice-Conversion gehen, bekommen die ruhigere temperature.
-    Kind-Turns MIT VC behalten den Default — die VC normalisiert die Tonhöhe ohnehin, und ein
-    niedriges temperature würde nur den Vortrag (emotion) einebnen."""
-    return None if (rolle == "kind" and has_vc) else temperature
-
-
 def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | None = None,
-            allow_raw_kind: bool = False, temperature: float | None = TTS_TEMPERATURE) -> dict:
+            allow_raw_kind: bool = False, temperature: float | None = TTS_TEMPERATURE,
+            allow_incomplete: bool = False) -> dict:
     """Rendert alle Turns und schneidet sie zu einer WAV. Gibt ein Manifest zurück.
 
     nico_converter: Callable ``(pcm: bytes, sr: int) -> bytes``. KIND-Turns gehen durch diese
@@ -212,7 +210,11 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
         zu und stempelt sie im Manifest (``raw_kind``). Niemals für einen Build verwenden.
     normalize: Turn-Pegel per loudnorm angleichen. Standard = an, sobald ein Converter
         aktiv ist (Kind-VC und Flash-Turns stammen dann aus verschiedenen Quellen).
-    temperature: Grundton-Beruhigung für Turns ohne VC (s. _temperature_for). None = SDK-Default."""
+    temperature: gilt für ALLE Turns (auch Kind mit VC — per Hörurteil festgelegt, s.
+        TTS_TEMPERATURE). None = SDK-Default.
+    allow_incomplete: Notausgang für Tests — lässt fehlgeschlagene Turns überspringen statt
+        abzubrechen. Ein übersprungener Turn hinterlässt ein LOCH in der Geschichte, das der
+        fertigen Datei nicht anzusehen ist → im Build niemals verwenden."""
     import os
     from google import genai
     from google.genai import types
@@ -225,6 +227,9 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
         normalize = nico_converter is not None
 
     cast, turns = seg.get("cast", {}), seg.get("turns", [])
+    # Leere Turns sind kein Inhalt → sie zählen nicht als "zu rendern" (sonst meldet ein
+    # perfekter Lauf faelschlich Unvollstaendigkeit).
+    n_soll = sum(1 for t in turns if (t.get("text") or "").strip())
     n_kind = sum(1 for t in turns if t.get("rolle") == "kind" and (t.get("text") or "").strip())
     if n_kind and nico_converter is None and not allow_raw_kind:
         raise RuntimeError(
@@ -238,6 +243,7 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
           f"{f' · !! {n_kind} Kind-Turns ROH (--allow-raw-kind)' if n_kind and not nico_converter else ''}")
     chunks: list[bytes] = []
     manifest = []
+    fehlende: list[int] = []
     for i, t in enumerate(turns):
         rolle = t.get("rolle", "erzähler")
         text  = (t.get("text") or "").strip()
@@ -245,11 +251,16 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
             continue
         voice = _voice_for(rolle, cast)
         style = _style_for(rolle, t)
-        temp = _temperature_for(rolle, nico_converter is not None, temperature)
         print(f"    [{i+1:02}/{len(turns)}] {rolle:12} {voice:12} \"{text[:48]}…\"")
-        pcm = synth_pcm(client, voice, style, text, temperature=temp)
+        pcm = synth_pcm(client, voice, style, text, temperature=temperature)
         if pcm is None:
-            print(f"      ! Turn {i+1} fehlgeschlagen — übersprungen")
+            if not allow_incomplete:
+                raise RuntimeError(
+                    f"Turn {i+1}/{len(turns)} ({rolle}) konnte nicht vertont werden: \"{text[:60]}\". "
+                    f"Abbruch — ein übersprungener Turn hinterlässt ein Loch in der Geschichte, das "
+                    f"der fertigen Datei nicht anzusehen ist. (Notausgang: --allow-incomplete.)")
+            fehlende.append(i + 1)
+            print(f"      ! Turn {i+1} fehlgeschlagen — übersprungen (--allow-incomplete)")
             continue
         vc = False
         if rolle == "kind" and nico_converter is not None:
@@ -274,7 +285,7 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
             chunks.append(_silence(GAP_SCENE if t.get("szene") else GAP_TURN))
         chunks.append(pcm)
         manifest.append({"i": i, "rolle": rolle, "voice": voice, "vc": vc,
-                         "raw_kind": rolle == "kind" and not vc, "temp": temp,
+                         "raw_kind": rolle == "kind" and not vc, "temp": temperature,
                          "sec": round(len(pcm) / 2 / SAMPLE_RATE, 2), "text": text[:80]})
         time.sleep(0.8)
 
@@ -284,10 +295,16 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
         wf.writeframes(b"".join(chunks))
     total = sum(len(c) for c in chunks) / 2 / SAMPLE_RATE
     n_raw = sum(1 for m in manifest if m["raw_kind"])
+    # EINE Fahne, an der nachgelagerte Schritte (Schnitt/Upload) entscheiden koennen.
+    vollstaendig = not fehlende and len(manifest) == n_soll and n_raw == 0
     if n_raw:
         print(f"  !! {n_raw} Kind-Turns OHNE Nico-VC (Platzhalter-Stimme) — nicht ausliefern.")
-    return {"cast": cast, "n_turns": len(turns), "n_rendered": len(manifest),
+    if fehlende:
+        print(f"  !! {len(fehlende)} Turns FEHLEN im Audio (Nr. {fehlende}) — Loch in der Geschichte, "
+              f"nicht ausliefern.")
+    return {"cast": cast, "n_turns": len(turns), "n_soll": n_soll, "n_rendered": len(manifest),
             "nico_vc": nico_converter is not None, "raw_kind_turns": n_raw,
+            "fehlende_turns": fehlende, "vollstaendig": vollstaendig,
             "total_sec": round(total, 1), "wav": str(out_wav), "turns": manifest}
 
 
@@ -317,8 +334,11 @@ def main():
     ap.add_argument("--openvoice-path", help="Pfad zum geklonten OpenVoice-Repo (für den Import)")
     ap.add_argument("--allow-raw-kind", action="store_true",
                     help="NUR für Tests: Kind-Turns ohne VC zulassen (rohe Platzhalter-Stimme, nie ausliefern)")
+    ap.add_argument("--allow-incomplete", action="store_true",
+                    help="NUR für Tests: fehlgeschlagene Turns überspringen statt abzubrechen "
+                         "(erzeugt ein Loch in der Geschichte — nie ausliefern)")
     ap.add_argument("--tts-temperature", type=float, default=TTS_TEMPERATURE,
-                    help=f"Grundton-Beruhigung für Turns ohne VC (Standard {TTS_TEMPERATURE}; "
+                    help=f"temperature für alle Turns (Standard {TTS_TEMPERATURE} = Hörurteil; "
                          f"-1 = SDK-Default)")
     args = ap.parse_args()
 
@@ -348,14 +368,20 @@ def main():
     print(f"Vertone → {wav}")
     temp = None if args.tts_temperature < 0 else args.tts_temperature
     info = vertone(seg, wav, nico_converter=nico_converter,
-                   allow_raw_kind=args.allow_raw_kind, temperature=temp)
+                   allow_raw_kind=args.allow_raw_kind, temperature=temp,
+                   allow_incomplete=args.allow_incomplete)
 
     (out_dir / f"{safe}_manifest.json").write_text(
         json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
-    print(f"\nFERTIG: {info['n_rendered']}/{info['n_turns']} Turns · "
-          f"{info['total_sec']} s · {wav}"
-          + (f"\n!! {info['raw_kind_turns']} Kind-Turns mit Platzhalter-Stimme — NICHT ausliefern."
-             if info["raw_kind_turns"] else ""))
+    print(f"\nFERTIG: {info['n_rendered']}/{info['n_soll']} Turns · "
+          f"{info['total_sec']} s · {wav}")
+    if not info["vollstaendig"]:
+        print("!! NICHT AUSLIEFERN:"
+              + (f" {info['raw_kind_turns']} Kind-Turns mit Platzhalter-Stimme."
+                 if info["raw_kind_turns"] else "")
+              + (f" {len(info['fehlende_turns'])} Turns fehlen im Audio (Nr. {info['fehlende_turns']})."
+                 if info["fehlende_turns"] else ""))
+        sys.exit(1)
 
 
 if __name__ == "__main__":
