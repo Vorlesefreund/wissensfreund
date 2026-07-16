@@ -197,9 +197,25 @@ def synth_pcm(client, voice: str, style: str, text: str, retries: int = 3,
     return None
 
 
+def _turn_requests(turns: list[dict], cast: dict, temperature: float | None):
+    """Baut die TTS-Einheiten aller nicht-leeren Turns → [(turn_index, TtsRequest)]."""
+    from tts_batch import TtsRequest
+    out = []
+    for i, t in enumerate(turns):
+        text = (t.get("text") or "").strip()
+        if not text:
+            continue
+        rolle = t.get("rolle", "erzähler")
+        out.append((i, TtsRequest.build(
+            voice=_voice_for(rolle, cast), style=_style_for(rolle, t),
+            text=text, temperature=temperature, turn=i, rolle=rolle)))
+    return out
+
+
 def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | None = None,
             allow_raw_kind: bool = False, temperature: float | None = TTS_TEMPERATURE,
-            allow_incomplete: bool = False) -> dict:
+            allow_incomplete: bool = False, synth_mode: str = "batch",
+            pcm_cache: Path | None = None) -> dict:
     """Rendert alle Turns und schneidet sie zu einer WAV. Gibt ein Manifest zurück.
 
     nico_converter: Callable ``(pcm: bytes, sr: int) -> bytes``. KIND-Turns gehen durch diese
@@ -214,7 +230,18 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
         TTS_TEMPERATURE). None = SDK-Default.
     allow_incomplete: Notausgang für Tests — lässt fehlgeschlagene Turns überspringen statt
         abzubrechen. Ein übersprungener Turn hinterlässt ein LOCH in der Geschichte, das der
-        fertigen Datei nicht anzusehen ist → im Build niemals verwenden."""
+        fertigen Datei nicht anzusehen ist → im Build niemals verwenden.
+    synth_mode: ``"batch"`` (Standard, Produktion) = alle Turns über die Batch-API, mit Cache
+        und Nachreich-Runden (tts_batch). Unempfindlich gegen die 504/503-Stürme, die den
+        sync-Pfad am 16.07. zerlegt haben, und halber Preis — dafür LANGSAM (Warteschlange;
+        2 Sätze brauchten 15 Min). ``"sync"`` = ein Call je Turn, schnell, aber bricht bei
+        API-Stau ab → nur zum Iterieren, nicht für Läufe.
+    pcm_cache: Cache-Ordner (Inhalts-Hash → PCM). Standard ``out_wav.parent/pcm_cache``.
+        Für Mehr-Themen-Läufe EINEN gemeinsamen Ordner übergeben (maximale Wiederverwendung).
+
+    Hinweis zur Batch-Synthese: gleiche (Stimme, Stil, Text, temperature) = EIN Call, das
+    Audio wird geteilt. Zwei wortgleiche Turns klingen dadurch identisch statt leicht
+    verschieden — gewollt (kein Neuwürfeln beim Rebuild), fällt bei echten Dialogen nicht auf."""
     import os
     from google import genai
     from google.genai import types
@@ -237,10 +264,31 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
             f"({VOICES[('kind', 'm')]}/{VOICES[('kind', 'w')]}) ist nur ein Platzhalter und klingt "
             f"nicht wie ein Kind — sie darf nicht in einen Build. Entweder --nico-ref + --nico-ckpt "
             f"setzen oder bewusst --allow-raw-kind angeben.")
+    if synth_mode not in ("batch", "sync"):
+        raise ValueError(f"synth_mode muss 'batch' oder 'sync' sein, nicht {synth_mode!r}")
     print(f"  Cast: Kind={cast.get('kind')} · Erwachsener={cast.get('erwachsener')} · {len(turns)} Turns"
+          f" · {synth_mode}"
           f"{' · Nico-VC AN' if nico_converter else ''}{' · loudnorm' if normalize else ''}"
           f"{f' · temp {temperature}' if temperature is not None else ''}"
           f"{f' · !! {n_kind} Kind-Turns ROH (--allow-raw-kind)' if n_kind and not nico_converter else ''}")
+
+    # ── Synthese vorab (Batch): ALLE Turns auf einmal, mit Cache + Nachreich-Runden ──
+    # Das Vollstaendigkeits-Gate greift HIER — vor der VC. Sonst faerbt die (teure, GPU-
+    # gebundene) Umfaerbung Audio um, aus dem ohnehin kein Artefakt werden darf.
+    vorab: dict[int, bytes] = {}
+    if synth_mode == "batch":
+        from tts_batch import batch_synthesize
+        cache_dir = pcm_cache or (out_wav.parent / "pcm_cache")
+        paare = _turn_requests(turns, cast, temperature)
+        pcms, fehlgeschlagen = batch_synthesize(client, [r for _, r in paare], cache_dir=cache_dir)
+        vorab = {i: pcms[r.key] for i, r in paare if r.key in pcms}
+        if fehlgeschlagen and not allow_incomplete:
+            raise RuntimeError(
+                f"{len(fehlgeschlagen)} von {len(paare)} Turns konnten auch nach den Nachreich-Runden "
+                f"nicht vertont werden — Abbruch VOR der Voice-Conversion. Ein fehlender Turn "
+                f"hinterlässt ein Loch in der Geschichte, das der fertigen Datei nicht anzusehen ist. "
+                f"Erster Ausfall: \"{fehlgeschlagen[0].text[:60]}\". (Notausgang: --allow-incomplete.)")
+
     chunks: list[bytes] = []
     manifest = []
     fehlende: list[int] = []
@@ -252,7 +300,8 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
         voice = _voice_for(rolle, cast)
         style = _style_for(rolle, t)
         print(f"    [{i+1:02}/{len(turns)}] {rolle:12} {voice:12} \"{text[:48]}…\"")
-        pcm = synth_pcm(client, voice, style, text, temperature=temperature)
+        pcm = vorab.get(i) if synth_mode == "batch" else \
+            synth_pcm(client, voice, style, text, temperature=temperature)
         if pcm is None:
             if not allow_incomplete:
                 raise RuntimeError(
@@ -340,6 +389,12 @@ def main():
     ap.add_argument("--tts-temperature", type=float, default=TTS_TEMPERATURE,
                     help=f"temperature für alle Turns (Standard {TTS_TEMPERATURE} = Hörurteil; "
                          f"-1 = SDK-Default)")
+    ap.add_argument("--sync", action="store_true",
+                    help="Synchron statt Batch synthetisieren: schnell zum Iterieren, aber bricht "
+                         "bei API-Stau ab. Für Läufe NICHT verwenden (Standard = Batch).")
+    ap.add_argument("--pcm-cache", help="Cache-Ordner für synthetisierte Turns "
+                                        "(Standard: <out-dir>/pcm_cache; für Mehr-Themen-Läufe "
+                                        "einen gemeinsamen Ordner angeben)")
     args = ap.parse_args()
 
     if args.story_file:
@@ -369,7 +424,9 @@ def main():
     temp = None if args.tts_temperature < 0 else args.tts_temperature
     info = vertone(seg, wav, nico_converter=nico_converter,
                    allow_raw_kind=args.allow_raw_kind, temperature=temp,
-                   allow_incomplete=args.allow_incomplete)
+                   allow_incomplete=args.allow_incomplete,
+                   synth_mode="sync" if args.sync else "batch",
+                   pcm_cache=Path(args.pcm_cache) if args.pcm_cache else None)
 
     (out_dir / f"{safe}_manifest.json").write_text(
         json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
