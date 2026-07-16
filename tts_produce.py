@@ -49,6 +49,8 @@ TTS_MODEL       = "gemini-3.1-flash-tts-preview"
 VOICE_NAME      = "Iapetus"
 SAMPLE_RATE     = 24000   # Gemini liefert PCM 24 kHz mono 16-bit
 PAUSE_SPLIT_MIN = 1.5     # Pausen >= 1.5 s → echte Stille; kleinere bleiben inline
+TTS_TIMEOUT_MS  = 60_000  # Das SDK hat KEIN Default-Timeout — ohne das hängt ein Call unbegrenzt
+                          # und blockiert den ganzen Batch (Flash liefert regelmäßig 504/503).
 
 # ── Stimmungs-Varianten der Scene-Instruction (je Stufe) ───────────────────────
 MOOD_SCENE = {
@@ -316,7 +318,9 @@ def produce_article(json_path, out_dir, quiz: bool = False,
         run_id = "tts_" + datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     if client is None:
         from google import genai
-        client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+        from google.genai import types
+        client = genai.Client(api_key=os.environ["GEMINI_API_KEY"],
+                              http_options=types.HttpOptions(timeout=TTS_TIMEOUT_MS))
 
     result = {
         "json": str(json_path), "thema": thema, "stufe": stufe, "mood": mood,
@@ -378,7 +382,9 @@ def main():
         sys.exit("FEHLER: GEMINI_API_KEY nicht gesetzt (.env).")
 
     from google import genai
-    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+    from google.genai import types
+    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"],
+                          http_options=types.HttpOptions(timeout=TTS_TIMEOUT_MS))
 
     res = produce_article(args.json_path, args.out_dir, quiz=args.quiz,
                           client=client, run_id=args.run_id)

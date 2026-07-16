@@ -26,6 +26,13 @@ TTS_MODEL   = "gemini-3.1-flash-tts-preview"
 GAP_TURN    = 0.35           # Pause zwischen Turns desselben Sprechers / kurzer Wechsel
 GAP_SCENE   = 0.75           # Pause an Szenen-/Absatzgrenzen
 
+TTS_TIMEOUT_MS = 60_000      # Das SDK hat KEIN Default-Timeout — ohne das hängt ein Call unbegrenzt.
+TTS_TEMPERATURE = 0.3        # Nur für Turns OHNE Voice-Conversion (s. _temperature_for).
+                             # Gemessen an derselben Zeile ×4: default ±54 Hz Grundton-Streuung,
+                             # t0.3 ±16 Hz. Kind-Turns mit VC brauchen das nicht (die VC normalisiert
+                             # die Tonhöhe selbst auf ~310 Hz, ±11 Hz) → dort Default lassen, damit
+                             # der Vortrag (emotion) nicht unnötig eingeebnet wird.
+
 # ── Stimm-Zuordnung + (bewusst zurückgenommene) Stil-Vorgaben ──────────────────
 VOICES = {
     "erzähler":          "Iapetus",
@@ -131,17 +138,21 @@ def _loudnorm(pcm: bytes, sr: int = SAMPLE_RATE) -> bytes:
         return pcm
 
 
-def _tts_call(client, voice: str, content: str):
+def _tts_call(client, voice: str, content: str, temperature: float | None = None):
     """Ein einzelner TTS-Aufruf. Gibt (pcm|None, block_reason|None) zurück.
     Wirft bei echten API-Fehlern (Timeout/5xx) — die fängt synth_pcm ab."""
     from google.genai import types
+    cfg = dict(
+        response_modalities=["AUDIO"],
+        speech_config=types.SpeechConfig(
+            voice_config=types.VoiceConfig(
+                prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=voice))),
+    )
+    if temperature is not None:
+        cfg["temperature"] = temperature
     resp = client.models.generate_content(
         model=TTS_MODEL, contents=content,
-        config=types.GenerateContentConfig(
-            response_modalities=["AUDIO"],
-            speech_config=types.SpeechConfig(
-                voice_config=types.VoiceConfig(
-                    prebuilt_voice_config=types.PrebuiltVoiceConfig(voice_name=voice)))),
+        config=types.GenerateContentConfig(**cfg),
     )
     pf = getattr(resp, "prompt_feedback", None)
     block = getattr(pf, "block_reason", None) if pf else None
@@ -151,7 +162,8 @@ def _tts_call(client, voice: str, content: str):
     return pcm, block
 
 
-def synth_pcm(client, voice: str, style: str, text: str, retries: int = 3) -> bytes | None:
+def synth_pcm(client, voice: str, style: str, text: str, retries: int = 3,
+              temperature: float | None = None) -> bytes | None:
     """Rendert Text als PCM — robust gegen den Safety-False-Positive.
 
     Flash blockt deterministisch die Kombination (Stil-Präfix + kurzes/heikles
@@ -164,12 +176,12 @@ def synth_pcm(client, voice: str, style: str, text: str, retries: int = 3) -> by
     full = f"{style}\n\n{text}"
     for attempt in range(retries):
         try:
-            pcm, block = _tts_call(client, voice, full)
+            pcm, block = _tts_call(client, voice, full, temperature)
             if pcm is not None:
                 return pcm
             if block is not None:                       # deterministischer Block → Präfix weglassen
                 print(f"      TTS-Block ({block}) — Fallback ohne Stil-Präfix")
-                pcm2, block2 = _tts_call(client, voice, text)
+                pcm2, block2 = _tts_call(client, voice, text, temperature)
                 if pcm2 is not None:
                     return pcm2
                 print(f"      ! Fallback weiter blockiert ({block2}) — Turn übersprungen")
@@ -181,25 +193,49 @@ def synth_pcm(client, voice: str, style: str, text: str, retries: int = 3) -> by
     return None
 
 
-def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | None = None) -> dict:
+def _temperature_for(rolle: str, has_vc: bool, temperature: float | None) -> float | None:
+    """Turns, die NICHT durch die Voice-Conversion gehen, bekommen die ruhigere temperature.
+    Kind-Turns MIT VC behalten den Default — die VC normalisiert die Tonhöhe ohnehin, und ein
+    niedriges temperature würde nur den Vortrag (emotion) einebnen."""
+    return None if (rolle == "kind" and has_vc) else temperature
+
+
+def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | None = None,
+            allow_raw_kind: bool = False, temperature: float | None = TTS_TEMPERATURE) -> dict:
     """Rendert alle Turns und schneidet sie zu einer WAV. Gibt ein Manifest zurück.
 
-    nico_converter: optionaler Callable ``(pcm: bytes, sr: int) -> bytes``. Wenn gesetzt,
-        werden KIND-Turns durch diese Voice-Conversion geschickt (Flash-Quellstimme →
-        Klangfarbe des Sohnes). Standard None = unveränderte Prebuilt-Stimme.
+    nico_converter: Callable ``(pcm: bytes, sr: int) -> bytes``. KIND-Turns gehen durch diese
+        Voice-Conversion (Flash-Quellstimme → Klangfarbe des Sohnes). PFLICHT, sobald die
+        Segmentierung Kind-Turns enthält — die Prebuilt-Stimme (Puck) ist nur ein Platzhalter
+        und klingt nicht wie ein Kind. Ohne Converter bricht der Lauf ab.
+    allow_raw_kind: Notausgang für Tests/Platzhalter-Renders — lässt Kind-Turns bewusst OHNE VC
+        zu und stempelt sie im Manifest (``raw_kind``). Niemals für einen Build verwenden.
     normalize: Turn-Pegel per loudnorm angleichen. Standard = an, sobald ein Converter
-        aktiv ist (Kind-VC und Flash-Turns stammen dann aus verschiedenen Quellen)."""
+        aktiv ist (Kind-VC und Flash-Turns stammen dann aus verschiedenen Quellen).
+    temperature: Grundton-Beruhigung für Turns ohne VC (s. _temperature_for). None = SDK-Default."""
     import os
     from google import genai
+    from google.genai import types
     from dotenv import load_dotenv
     load_dotenv(Path(__file__).resolve().parent / ".env")
-    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+    # Ohne http_options hat das SDK KEIN Timeout — ein stehender Call blockiert den Lauf endlos.
+    client = genai.Client(api_key=os.environ["GEMINI_API_KEY"],
+                          http_options=types.HttpOptions(timeout=TTS_TIMEOUT_MS))
     if normalize is None:
         normalize = nico_converter is not None
 
     cast, turns = seg.get("cast", {}), seg.get("turns", [])
+    n_kind = sum(1 for t in turns if t.get("rolle") == "kind" and (t.get("text") or "").strip())
+    if n_kind and nico_converter is None and not allow_raw_kind:
+        raise RuntimeError(
+            f"{n_kind} Kind-Turns, aber keine Nico-VC konfiguriert. Die Flash-Prebuilt-Stimme "
+            f"({VOICES[('kind', 'm')]}/{VOICES[('kind', 'w')]}) ist nur ein Platzhalter und klingt "
+            f"nicht wie ein Kind — sie darf nicht in einen Build. Entweder --nico-ref + --nico-ckpt "
+            f"setzen oder bewusst --allow-raw-kind angeben.")
     print(f"  Cast: Kind={cast.get('kind')} · Erwachsener={cast.get('erwachsener')} · {len(turns)} Turns"
-          f"{' · Nico-VC AN' if nico_converter else ''}{' · loudnorm' if normalize else ''}")
+          f"{' · Nico-VC AN' if nico_converter else ''}{' · loudnorm' if normalize else ''}"
+          f"{f' · temp {temperature}' if temperature is not None else ''}"
+          f"{f' · !! {n_kind} Kind-Turns ROH (--allow-raw-kind)' if n_kind and not nico_converter else ''}")
     chunks: list[bytes] = []
     manifest = []
     for i, t in enumerate(turns):
@@ -209,25 +245,36 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
             continue
         voice = _voice_for(rolle, cast)
         style = _style_for(rolle, t)
+        temp = _temperature_for(rolle, nico_converter is not None, temperature)
         print(f"    [{i+1:02}/{len(turns)}] {rolle:12} {voice:12} \"{text[:48]}…\"")
-        pcm = synth_pcm(client, voice, style, text)
+        pcm = synth_pcm(client, voice, style, text, temperature=temp)
         if pcm is None:
             print(f"      ! Turn {i+1} fehlgeschlagen — übersprungen")
             continue
         vc = False
         if rolle == "kind" and nico_converter is not None:
+            conv = None
             try:
                 conv = nico_converter(pcm, SAMPLE_RATE)
-                if conv:
-                    pcm, vc = conv, True
             except Exception as e:
-                print(f"      ! Nico-VC fehlgeschlagen ({str(e)[:60]}) — Flash-Kind behalten")
+                if not allow_raw_kind:
+                    raise RuntimeError(
+                        f"Nico-VC bei Kind-Turn {i+1} fehlgeschlagen: {e}. Abbruch — sonst landet die "
+                        f"rohe Platzhalter-Stimme im Build.") from e
+                print(f"      ! Nico-VC fehlgeschlagen ({str(e)[:60]}) — rohes Flash-Kind behalten")
+            if conv:
+                pcm, vc = conv, True
+            elif not allow_raw_kind:
+                raise RuntimeError(
+                    f"Nico-VC lieferte bei Kind-Turn {i+1} kein Audio. Abbruch — sonst landet die "
+                    f"rohe Platzhalter-Stimme im Build.")
         if normalize:
             pcm = _loudnorm(pcm)
         if chunks:                                   # Pause VOR diesem Turn (nur wenn schon Audio da ist)
             chunks.append(_silence(GAP_SCENE if t.get("szene") else GAP_TURN))
         chunks.append(pcm)
         manifest.append({"i": i, "rolle": rolle, "voice": voice, "vc": vc,
+                         "raw_kind": rolle == "kind" and not vc, "temp": temp,
                          "sec": round(len(pcm) / 2 / SAMPLE_RATE, 2), "text": text[:80]})
         time.sleep(0.8)
 
@@ -236,7 +283,11 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
         wf.setnchannels(1); wf.setsampwidth(2); wf.setframerate(SAMPLE_RATE)
         wf.writeframes(b"".join(chunks))
     total = sum(len(c) for c in chunks) / 2 / SAMPLE_RATE
+    n_raw = sum(1 for m in manifest if m["raw_kind"])
+    if n_raw:
+        print(f"  !! {n_raw} Kind-Turns OHNE Nico-VC (Platzhalter-Stimme) — nicht ausliefern.")
     return {"cast": cast, "n_turns": len(turns), "n_rendered": len(manifest),
+            "nico_vc": nico_converter is not None, "raw_kind_turns": n_raw,
             "total_sec": round(total, 1), "wav": str(out_wav), "turns": manifest}
 
 
@@ -258,11 +309,17 @@ def main():
     ap.add_argument("--seg-model", default="claude-sonnet-5", help="Segmentierungsmodell")
     ap.add_argument("--titel", default="story", help="Dateiname-Basis")
     ap.add_argument("--out-dir", required=True)
-    # Nico-Voice-Conversion (optional, braucht GPU + OpenVoice; siehe nico_vc.py)
+    # Nico-Voice-Conversion (braucht GPU + OpenVoice; siehe nico_vc.py).
+    # PFLICHT, sobald die Story Kind-Turns hat — sonst bricht vertone() ab (--allow-raw-kind übergeht das).
     ap.add_argument("--nico-ref", help="Ordner mit Sohn-Referenz-WAVs → Kind-Turns per VC umfärben")
     ap.add_argument("--nico-ckpt", help="OpenVoice-converter-Checkpoint-Ordner (config.json + checkpoint.pth)")
     ap.add_argument("--nico-tau", type=float, default=0.7, help="VC-Stärke (Standard 0.7)")
     ap.add_argument("--openvoice-path", help="Pfad zum geklonten OpenVoice-Repo (für den Import)")
+    ap.add_argument("--allow-raw-kind", action="store_true",
+                    help="NUR für Tests: Kind-Turns ohne VC zulassen (rohe Platzhalter-Stimme, nie ausliefern)")
+    ap.add_argument("--tts-temperature", type=float, default=TTS_TEMPERATURE,
+                    help=f"Grundton-Beruhigung für Turns ohne VC (Standard {TTS_TEMPERATURE}; "
+                         f"-1 = SDK-Default)")
     args = ap.parse_args()
 
     if args.story_file:
@@ -289,12 +346,16 @@ def main():
     safe = re.sub(r"[^\w]+", "_", args.titel).strip("_")
     wav = out_dir / f"{safe}.wav"
     print(f"Vertone → {wav}")
-    info = vertone(seg, wav, nico_converter=nico_converter)
+    temp = None if args.tts_temperature < 0 else args.tts_temperature
+    info = vertone(seg, wav, nico_converter=nico_converter,
+                   allow_raw_kind=args.allow_raw_kind, temperature=temp)
 
     (out_dir / f"{safe}_manifest.json").write_text(
         json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"\nFERTIG: {info['n_rendered']}/{info['n_turns']} Turns · "
-          f"{info['total_sec']} s · {wav}")
+          f"{info['total_sec']} s · {wav}"
+          + (f"\n!! {info['raw_kind_turns']} Kind-Turns mit Platzhalter-Stimme — NICHT ausliefern."
+             if info["raw_kind_turns"] else ""))
 
 
 if __name__ == "__main__":
