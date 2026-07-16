@@ -82,3 +82,11 @@ flash_monitor_task.log
 
 # Test-Ordner generalize_test — lokal behalten, nicht tracken
 articles/generalize_test/
+
+# Sprachaufnahmen des Kindes (Nico-Referenz für die Voice-Conversion).
+# DIESES REPO IST OEFFENTLICH — solche Dateien duerfen hier NIE landen.
+# Sie liegen bewusst ausserhalb: Desktop/_nico_clone/ref_clips/ (s. STIMME_NICO_EINGEFROREN.md).
+*ref*.wav
+ref_clips/
+nico_dataset/
+Audioaufzeichnungen/
