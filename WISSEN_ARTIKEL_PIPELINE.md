@@ -791,3 +791,55 @@ Call blockiert unbegrenzt. Nötig: `genai.Client(..., http_options=types.HttpOpt
 3. Deployen: `JsonArticleService.loadArticle` liest `app_flutter/wf_articles/articles/{id}.json` VOR dem
    gebündelten Asset → Artikel-JSON + `narration_cache/full/*.m4a` + `.timing.json` + `narration_index.json`
    per adb pushen. Kein Build nötig.
+
+## TTS-Produktion: Batch statt sync (Stand 2026-07-16)
+
+**Warum sync für Läufe untauglich ist — gemessen, nicht vermutet.** Ein e2e-Lauf auf gemieteter GPU
+(RunPod A40) am 16.07.: Flash lieferte 504/503 im Minutentakt, **7 von 23 Turns fielen aus**, ein Turn
+blockierte 3 Minuten (3 Retries × 60 s Timeout). Nach ~75 Min Miete war ein einziger Render nicht fertig.
+Hochgerechnet auf 100 Renders (50 Themen × 2 Stufen): **~100 h GPU, ~50 $, fast alles Leerlauf.**
+Flash ist auch nachts überlastet → **Batch ist für Produktion faktisch Pflicht**, nicht Optimierung.
+
+**BATCH KANN AUDIO (verifiziert).** `client.batches.create(model="gemini-3.1-flash-tts-preview",
+src=[types.InlinedRequest(contents=…, config=GenerateContentConfig(response_modalities=["AUDIO"],
+speech_config=…), metadata=…)])` wird akzeptiert und liefert `mime_type='audio/l16; rate=24000;
+channels=1'` — exakt unser PCM-Format. Muster übernommen aus `scripts/batch_run.py`.
+
+**DER ENTSCHEIDENDE BEFUND: `JOB_STATE_SUCCEEDED` heißt NICHT „alles da".** Von 2 Requests kam einer
+leer zurück — `finish_reason=OTHER`, `content.parts=None`, `error=None`, `prompt_feedback=None`, keine
+safety_ratings — und der Job galt trotzdem als erfolgreich. Das ist dieselbe Signatur wie die
+„'NoneType' object is not subscriptable"-Abbrüche im Nachttest: **kein Code-Bug, sondern das Modell.**
+Wer das Ergebnis ungeprüft einsammelt, baut sich still Löcher ins Audio.
+→ **Jede Antwort einzeln prüfen. Nie den Job-Status als Vollständigkeit lesen.**
+
+**Bausteine (`scripts/tts_batch.py`, 29 Tests):**
+- `TtsRequest.build(voice, text, style, temperature)` → Key = sha256 über
+  `model|voice|style|temperature|text`. Alles, was den Klang bestimmt, steckt im Hash — sonst liefert
+  der Cache bei geänderten Parametern altes Audio.
+- `batch_synthesize(client, reqs, cache_dir) -> (pcms, nicht_geschafft)`: Cache-Treffer zuerst, dann
+  Runden-Schleife (max 3). Leere/fehlerhafte Antworten kommen in die nächste Runde. **Der Aufrufer MUSS
+  die zweite Rückgabe prüfen** — daran hängt das Vollständigkeits-Gate.
+- **Nackt-Text ab Runde 2 NUR bei echtem `PROHIBITED_CONTENT`** (der ist deterministisch — erneut senden
+  hilft nie, nackter Text schon). Eine bloß leere Antwort behält den Stil-Präfix. Wortlaut bleibt immer
+  unverändert.
+- **Cache = Voraussetzung für Strenge.** Ohne ihn hieße „bei einer Lücke abbrechen": 37 Turns neu
+  synthetisieren. Mit ihm: nur die Lücke. Nebeneffekt (in leo_build2.py bewährt): gleicher Text →
+  gleiches Audio, **kein Stimm-Drift beim Rebuild**. Und Dedup: gleicher Inhalt = EIN Call (dokumentierter
+  Preis: zwei wortgleiche Turns klingen identisch statt leicht verschieden).
+
+**REIHENFOLGE IST ARCHITEKTUR: das Gate greift VOR der Voice-Conversion.** `vertone()` synthetisiert
+erst ALLE Turns (Batch), prüft die Vollständigkeit, und lässt erst dann die VC laufen. Sonst färbt die
+GPU-gebundene Umfärbung Audio um, aus dem ohnehin kein Artefakt werden darf. Ein Test zählt die
+VC-Aufrufe und besteht nur, wenn sie bei einem unvollständigen Batch bei 0 bleiben.
+
+**Synthese und VC gehören getrennt.** Die VC braucht GPU, die Synthese nicht. Zusammen in einem Prozess
+(so lief der 16.07.-Test) heißt: gemietete GPU wartet auf API-Timeouts. Zielbild für 50 Themen:
+(A) Batch-Synthese ohne GPU → PCM-Cache · (B) EIN Pod lädt OpenVoice einmal und färbt die Kind-Zeilen
+aller Renders am Stück um (~1–3 $ statt ~50 $) · (C) Schnitt/Pegel ohne GPU. Nebeneffekt: der API-Key
+muss nie auf eine gemietete Maschine.
+
+**Kein Artefakt ohne Vollständigkeit** — der Grundsatz, der beide Fixes von heute verbindet:
+`vertone()` bricht ab bei fehlenden Turns UND bei Kind-Turns ohne VC; `manifest["vollstaendig"]` ist die
+eine prüfbare Fahne für nachgelagerte Schritte (Schnitt/Upload); die CLI endet mit exit 1 +
+„NICHT AUSLIEFERN". Vorbild war `tts_produce.synth_with_pauses`, das bei einem fehlgeschlagenen Segment
+längst den ganzen Artikel abbricht — der Story-Pfad war die Ausnahme, nicht die Regel.
