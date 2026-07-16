@@ -17,18 +17,35 @@ Parameter unten ergibt eine ANDERE Stimme.
 
 Ergebnis: F0 ~272–330 Hz (Kinderlage), Streuung nach VC ±2–11 Hz.
 
-## Wo die Referenz liegt — WICHTIG
+## Wo die Referenz liegt — und was sie IST
 
-`C:\Users\Andreas\Desktop\_nico_clone\ref_clips\rich_ref.wav`
+`C:\Users\Andreas\Desktop\_nico_clone\ref_clips\rich_ref.wav` — **eine** Datei, 3,7 MB, **80,1 s**,
+24 kHz mono. Inhalt: **~47 kurze Sprech-Schnipsel aneinandergehängt** (längster Block 3,2 s, durch
+Stille getrennt) — also ein Zusammenschnitt AUS den Rohaufnahmen, nicht eine durchgehende Aufnahme.
 
-**Diese Datei ist der Flaschenhals der ganzen Stimme.** Ohne sie ist Nico nicht reproduzierbar.
-Sie lag bis 16.07. NUR in einem Temp-Verzeichnis und wäre beim Aufräumen verloren gewesen.
+**Nicht verwechseln:** die „94 Clips" aus `pod_zugang/RECONNECT.md` (`MyTTSDataset_clean`) waren der
+Datensatz für den VERWORFENEN Fine-Tune, nicht diese Referenz.
 
-- **Gehört NICHT ins Repo** — das Repo ist ÖFFENTLICH (`Vorlesefreund/wissensfreund`), und das ist
-  die Stimme eines Kindes. Niemals committen, auch nicht in einem privaten Unterordner „nur kurz".
-- **Braucht ein Backup außerhalb des Desktops** (externe Platte / privater Cloud-Ordner). Aktuell
-  existiert sie an genau EINER Stelle — ein Plattenfehler kostet die abgenommene Stimme.
-- Rohaufnahmen (Quelle für ein evtl. neues Set): `Documents/Audioaufzeichnungen/` (104 × m4a).
+**Diese Datei ist der Flaschenhals der ganzen Stimme** — und sie ist **NICHT exakt nachbaubar**:
+es existiert kein Skript, das sie erzeugt hat (nur eines, das sie benutzt — `openvoice_convert.py`).
+Welche Schnipsel in welcher Reihenfolge hineingingen, ist nirgends festgehalten. Ein Nachbau ergäbe
+ein anderes Embedding = eine andere Stimme. **Die Datei IST der Zustand, nicht ihr Rezept.**
+Sie lag bis 16.07. nur in einem Temp-Verzeichnis und wäre beim Aufräumen verloren gewesen.
+
+### Backup — Stand 2026-07-16: es gibt KEINS
+
+Geprüft: der OneDrive-Ordner ist **leer**, Desktop und Documents sind **nicht** dorthin umgeleitet.
+Beides existiert ausschließlich auf der lokalen Platte. Zu sichern (zusammen ~25 MB):
+
+| Ordner | Größe | Warum unersetzlich |
+|---|---|---|
+| `Documents\Audioaufzeichnungen\` | 18 MB (104 × m4a) | die Originalaufnahmen — die Stimme des Kindes IN DIESEM ALTER. Nicht nachträglich herstellbar. |
+| `Desktop\_nico_clone\ref_clips\` | 6 MB | die abgenommene Referenz, nicht nachbaubar (s. o.) |
+
+Ziel: externe Platte oder privater Cloud-Ordner. **NICHT ins Repo** — das Repo ist ÖFFENTLICH
+(`Vorlesefreund/wissensfreund`), und das sind Sprachaufnahmen eines Kindes. Auch nicht „kurz mal"
+in einem Unterordner. `.gitignore` blockt `*ref*.wav` / `ref_clips/` / `nico_dataset/` /
+`Audioaufzeichnungen/` als zweite Sicherung.
 
 **Gotcha:** `--nico-ref` mittelt ALLE WAVs im Ordner zu EINEM Embedding. Für das eingefrorene
 Rezept darf nur `rich_ref.wav` im übergebenen Ordner liegen. Die anderen Clips in `ref_clips/`
