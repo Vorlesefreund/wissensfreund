@@ -2821,7 +2821,8 @@ class _ParentalScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: _appBar(context),
       body: Consumer<ParentalLockService>(
-        builder: (ctx, ps, _) => SingleChildScrollView(
+        builder: (ctx, ps, _) => TabletMaxWidth(
+            child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -2931,7 +2932,7 @@ class _ParentalScreen extends StatelessWidget {
               ),
             ],
           ),
-        ),
+        )),
       ),
     );
   }
