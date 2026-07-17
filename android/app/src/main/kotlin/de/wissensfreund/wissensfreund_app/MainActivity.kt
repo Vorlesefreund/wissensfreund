@@ -3,6 +3,7 @@ package de.wissensfreund.wissensfreund_app
 import android.Manifest
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -73,6 +74,16 @@ class MainActivity : FlutterFragmentActivity() {
         WissensfreundForegroundService.hideOverlay()
     }
 
+    // onResume: Anheften (wieder) herstellen, solange der Kiosk an ist.
+    // Noetig, weil der Systemgriff "Zurueck+Recents lange druecken" das Anheften
+    // loest — ohne dies bliebe danach nur das Overlay, und die Statusleiste waere
+    // wieder offen. startLockTask() verlangt eine resumed Activity, deshalb hier
+    // und nicht in onStart().
+    override fun onResume() {
+        super.onResume()
+        if (kioskEnabled && !WissensfreundForegroundService.released) startPinning()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -123,6 +134,9 @@ class MainActivity : FlutterFragmentActivity() {
                     }
                     "suppressRestoreOnce"      -> { suppressRestoreOnce = true; result.success(null) }
                     "releaseKioskTemporarily"  -> {
+                        // Eltern geben bewusst frei → auch anheften loesen, sonst
+                        // kaemen sie nicht aus der App heraus.
+                        stopPinning()
                         WissensfreundForegroundService.released = true
                         result.success(null)
                     }
@@ -563,11 +577,13 @@ class MainActivity : FlutterFragmentActivity() {
         if (Settings.canDrawOverlays(this)) {
             startForegroundService(Intent(this, WissensfreundForegroundService::class.java))
         }
+        startPinning()
         result.success(true)
     }
 
     private fun stopKioskMode(result: MethodChannel.Result) {
         kioskEnabled = false
+        stopPinning()
         WissensfreundForegroundService.released = false
         WissensfreundForegroundService.hideOverlay()
         stopService(Intent(this, WissensfreundForegroundService::class.java))
@@ -575,6 +591,45 @@ class MainActivity : FlutterFragmentActivity() {
     }
 
     private fun isInKioskMode(): Boolean = kioskEnabled
+
+    // ── Screen-Pinning (Lock Task) ───────────────────────────────────────────
+    //
+    // Warum zusaetzlich zum Overlay: Das Overlay ist REAKTIV — es deckt den
+    // Bildschirm erst ab, NACHDEM das Kind die App verlassen hat. Ein
+    // TYPE_APPLICATION_OVERLAY darf die Statusleiste aber nicht ueberdecken:
+    // Herunterziehen oeffnete die Schnelleinstellungen ueber dem Overlay, von
+    // dort ging es in die Android-Einstellungen (PO-Fund am Tablet). Im
+    // angehefteten Modus sperrt das System die Leiste UND Home/Recents.
+    //
+    // Ohne Device-Owner-Provisioning ist das "Screen Pinning" mit
+    // Bestaetigungsdialog; Ausstieg per Zurueck+Recents-Langdruck. Kein
+    // Ersatz fuer das Overlay, sondern die zweite Schicht: greift Pinning auf
+    // einem Geraet nicht, faengt das Overlay weiter auf.
+
+    private fun isPinned(): Boolean {
+        val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        return am.lockTaskModeState != ActivityManager.LOCK_TASK_MODE_NONE
+    }
+
+    private fun startPinning() {
+        if (isPinned()) return
+        try {
+            startLockTask()
+        } catch (e: Exception) {
+            // Nicht verfuegbar (OEM-Einstellung aus, Activity nicht resumed, ...)
+            // → kein harter Fehler, das Overlay bleibt die Absicherung.
+            Log.w("WfKiosk", "startLockTask fehlgeschlagen: ${e.message}")
+        }
+    }
+
+    private fun stopPinning() {
+        if (!isPinned()) return
+        try {
+            stopLockTask()
+        } catch (e: Exception) {
+            Log.w("WfKiosk", "stopLockTask fehlgeschlagen: ${e.message}")
+        }
+    }
 
     // ── Parental lock — Device Admin ──────────────────────────────────────────
 

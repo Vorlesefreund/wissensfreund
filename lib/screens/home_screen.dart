@@ -192,7 +192,12 @@ class _HomeScreenState extends State<HomeScreen>
         provider.resumeSpeaking();
         return;
       }
-      await ps.stopKioskMode();
+      // NICHT stopKioskMode(): Das schrieb kiosk_auto_start=false und schaltete
+      // den Kinderschutz damit DAUERHAFT ab — einmal die App beenden und der
+      // Schutz war für immer weg (PO-Fund). Beenden ≠ Schutz abschalten.
+      // releaseKioskTemporarily() löst nur das Anheften und unterdrückt das
+      // Overlay für diesen einen Ausstieg; beim nächsten Start greift alles wieder.
+      await ps.releaseKioskTemporarily();
     }
 
     SystemNavigator.pop();
@@ -2980,6 +2985,33 @@ class _ParentalScreen extends StatelessWidget {
                         child: const Text('Kindermodus aktivieren'),
                       ),
               ),
+              // Bei aktivem Anheften lässt sich die App nicht verlassen — damit
+              // erscheint auch das Eltern-Overlay nie, und der dortige
+              // „Gerät freigeben"-Knopf wäre unerreichbar. Deshalb hier ein
+              // bewusster Ausgang, der die Kindersicherung ANLÄSST.
+              if (ps.isKioskMode) ...[
+                const SizedBox(height: 8),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      await ps.releaseKioskTemporarily();
+                      if (!ctx.mounted) return;
+                      ScaffoldMessenger.of(ctx).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Gerät freigegeben. Du kannst Wissensfreund jetzt '
+                            'verlassen — beim nächsten Öffnen schützt die '
+                            'Kindersicherung wieder.',
+                          ),
+                          duration: Duration(seconds: 5),
+                        ),
+                      );
+                    },
+                    child: const Text('Gerät freigeben — Schutz bleibt an'),
+                  ),
+                ),
+              ],
             ],
           ),
         )),
