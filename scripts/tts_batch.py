@@ -198,9 +198,43 @@ def _zuordnen(offen: list[TtsRequest], responses: list
     return [], list(offen)
 
 
+RUNDEN_JE_STUFE = 2
+
+
+def eskalationsleiter(basis_temp: float | None, runden_je_stufe: int = RUNDEN_JE_STUFE
+                      ) -> list[tuple[float | None, bool]]:
+    """[(temperature, ohne_stil_praefix)] je Runde.
+
+    WARUM ESKALIEREN statt nur wiederholen: Bei ``temperature=0.3`` ist die Token-Auswahl fast
+    deterministisch — das ist ihr Sinn (sie liefert die kanonische Betonung). Derselbe Text nimmt
+    deshalb fast immer denselben Pfad; führt der in eine Degenerations-Schleife, führt er beim
+    zehnten Versuch genauso hinein. Gemessen 2026-07-17: Trefferquote je Runde 38 % → 22 % → 5,6 %,
+    also praktisch Stillstand. Zehnmal denselben Request zu schicken und ein anderes Ergebnis zu
+    erwarten, ist keine Strategie. Erst eine GEÄNDERTE Eingabe ändert den Pfad.
+
+    Reihenfolge ist Absicht — der billigste Verlust zuerst:
+      1. temp unverändert (2×)            — reiner Zufallsanteil, kostet nichts.
+      2. temp unverändert, OHNE Stil-Präfix (2×) — ändert den Pfad, LÄSST die Betonung bei 0.3.
+         Es entfällt nur die feine Stilsteuerung. (Derselbe Hebel wie beim PROHIBITED_CONTENT-Block.)
+      3. temp 0.5, dann 0.6 (je 2×)       — ändert die Betonung. Erst hier wird das PO-Kriterium
+         angetastet: ein Turn mit anderer Betonung schlägt einen Turn, den es nicht gibt.
+      4. Default (2×)                     — läuft nachweislich immer (16/16), letzter Ausweg.
+
+    Eskalierte Turns stehen hinterher im Manifest (``temp`` je Turn) → der PO muss nicht 37 Turns
+    hören, sondern nur die Handvoll Ausnahmen.
+    """
+    if basis_temp is None:
+        return [(None, False)] * (runden_je_stufe * 5)      # nichts zu eskalieren
+    stufen: list[tuple[float | None, bool]] = [(basis_temp, False), (basis_temp, True)]
+    stufen += [(t, False) for t in (0.5, 0.6) if t > basis_temp]
+    stufen.append((None, False))
+    return [s for s in stufen for _ in range(runden_je_stufe)]
+
+
 def batch_synthesize(client, reqs: list[TtsRequest], cache_dir: Path,
                      max_rounds: int = MAX_ROUNDS, poll_seconds: int = POLL_SECONDS,
-                     qa=None) -> tuple[dict[str, bytes], list[TtsRequest]]:
+                     qa=None, eskalation: bool = True,
+                     protokoll: dict | None = None) -> tuple[dict[str, bytes], list[TtsRequest]]:
     """Synthetisiert alle Requests. Gibt ({key: pcm}, [nicht geschaffte Requests]) zurück.
 
     Der Aufrufer MUSS die zweite Liste prüfen — ist sie nicht leer, fehlt Audio, und daraus darf
@@ -209,6 +243,10 @@ def batch_synthesize(client, reqs: list[TtsRequest], cache_dir: Path,
     qa: ``(pcm, text) -> (ok, grund)``. Durchgefallenes Audio wird wie eine leere Antwort behandelt:
         nicht cachen, nächste Runde. Ohne das kann ein Turn mit gueltigem Blob, aber 54 s Stille
         durchrutschen (real passiert) — "Bytes vorhanden" ist KEIN Qualitaetsmerkmal.
+    eskalation: ab Runde 3 die Eingabe ändern statt denselben Request zu wiederholen —
+        s. ``eskalationsleiter``. False = altes Verhalten (nur wiederholen).
+    protokoll: wird je ERFOLGREICHEM Original-Key gefüllt mit {"temperature", "ohne_stil", "runde"}.
+        Damit steht im Manifest, welche Turns eskaliert sind → nur die gehören ans PO-Ohr.
     """
     cache_dir.mkdir(parents=True, exist_ok=True)
     uniq: dict[str, TtsRequest] = {r.key: r for r in reqs}   # gleicher Inhalt = ein Call
@@ -218,13 +256,36 @@ def batch_synthesize(client, reqs: list[TtsRequest], cache_dir: Path,
 
     offen = [r for k, r in uniq.items() if k not in pcms]
     bare_keys: set[str] = set()
+    basis_temp = offen[0].temperature if offen else None
+    leiter = eskalationsleiter(basis_temp) if eskalation else []
 
     for runde in range(1, max_rounds + 1):
         if not offen:
             break
-        log.info("Runde %d/%d: %d Einheiten einreichen …", runde, max_rounds, len(offen))
+        # Die Leiter bestimmt, WAS diese Runde rausgeht. Ohne sie: unveränderte Wiederholung.
+        temp, ohne_stil = leiter[runde - 1] if runde - 1 < len(leiter) else (basis_temp, False)
+        # Neue Requests mit der Stufen-temperature: die geht in den Hash ein → eigener Cache-Eintrag,
+        # kein Vermischen von Audio verschiedener Stufen. urspruenglich[versuch.key] = original.key.
+        versuche, urspruenglich = [], {}
+        for r in offen:
+            v = (r if temp == r.temperature else
+                 TtsRequest.build(voice=r.voice, text=r.text, style=r.style,
+                                  temperature=temp, **r.meta))
+            versuche.append(v)
+            urspruenglich[v.key] = r.key
+        # bare_keys sammelt ORIGINAL-Keys (aus BLOCK-Faellen) — hier auf die Versuchs-Keys
+        # uebersetzen, sonst verliert ein geblockter Turn seinen Ausweg, sobald er eskaliert.
+        runden_bare = {v.key for v in versuche if urspruenglich[v.key] in bare_keys}
+        if ohne_stil:
+            runden_bare |= {v.key for v in versuche}
+        if runde > 1 and (temp != basis_temp or ohne_stil):
+            log.info("Runde %d/%d: %d Einheiten — ESKALATION: temperature=%s%s",
+                     runde, max_rounds, len(versuche), temp,
+                     " OHNE Stil-Präfix" if ohne_stil else "")
+        else:
+            log.info("Runde %d/%d: %d Einheiten einreichen …", runde, max_rounds, len(versuche))
         try:
-            job = client.batches.create(model=TTS_MODEL, src=_build_inlined(offen, bare_keys))
+            job = client.batches.create(model=TTS_MODEL, src=_build_inlined(versuche, runden_bare))
         except Exception as e:
             log.error("Batch-Einreichung fehlgeschlagen: %s", e)
             break
@@ -236,11 +297,15 @@ def batch_synthesize(client, reqs: list[TtsRequest], cache_dir: Path,
             continue
 
         responses = getattr(getattr(job, "dest", None), "inlined_responses", None) or []
-        paare, ohne_antwort = _zuordnen(offen, responses)
-        naechste: list[TtsRequest] = list(ohne_antwort)
-        for r in ohne_antwort:
-            log.warning("  %s: keine Antwort im Job → Runde %d", r.key[:8], runde + 1)
-        for r, resp_wrap in paare:
+        # Gegen die VERSUCHE zuordnen, nicht gegen die Originale: die Antworten tragen die metadata
+        # der tatsaechlich gesendeten (evtl. eskalierten) Requests.
+        original_von = {r.key: r for r in offen}
+        paare, ohne_antwort = _zuordnen(versuche, responses)
+        naechste: list[TtsRequest] = [original_von[urspruenglich[v.key]] for v in ohne_antwort]
+        for v in ohne_antwort:
+            log.warning("  %s: keine Antwort im Job → Runde %d", urspruenglich[v.key][:8], runde + 1)
+        for v, resp_wrap in paare:
+            r = original_von[urspruenglich[v.key]]        # der Turn, um den es geht
             if getattr(resp_wrap, "error", None):
                 log.warning("  %s: Fehler %s", r.key[:8], str(resp_wrap.error)[:80])
                 naechste.append(r)
@@ -251,14 +316,23 @@ def batch_synthesize(client, reqs: list[TtsRequest], cache_dir: Path,
                 # Cache waere fuer immer ausgeliefert — der Hash kennt nur Text/Stimme/Stil/temp,
                 # nicht die Qualitaet), sondern in die naechste Runde. Real gefangen: ein Turn kam
                 # als 54 s STILLE zurueck, mit gueltigem Audio-Blob und JOB_STATE_SUCCEEDED.
-                ok, qa_grund = qa(pcm, r.text)
+                ok, qa_grund = qa(pcm, v.text)
                 if not ok:
                     log.warning("  %s: QA durchgefallen (%s) → Runde %d", r.key[:8], qa_grund, runde + 1)
                     naechste.append(r)
                     continue
             if pcm:
-                _cache_path(cache_dir, r.key).write_bytes(pcm)
+                # Unter dem VERSUCHS-Key cachen (die Stufe steckt im Hash), aber unter dem ORIGINAL-
+                # Key zurueckgeben — der Aufrufer kennt nur seine urspruenglichen Requests.
+                _cache_path(cache_dir, v.key).write_bytes(pcm)
                 pcms[r.key] = pcm
+                if protokoll is not None:
+                    protokoll[r.key] = {"temperature": v.temperature,
+                                        "ohne_stil": v.key in runden_bare, "runde": runde}
+                if v.temperature != basis_temp or v.key in runden_bare:
+                    log.info("  %s: per ESKALATION geschafft (temperature=%s%s, Runde %d)",
+                             r.key[:8], v.temperature,
+                             ", ohne Stil-Präfix" if v.key in runden_bare else "", runde)
                 continue
             log.warning("  %s: kein Audio (%s) → Runde %d", r.key[:8], grund, runde + 1)
             if grund and grund.startswith("BLOCK:") and r.style:

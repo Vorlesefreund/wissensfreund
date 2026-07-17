@@ -337,11 +337,12 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
          for i, r in paare}, ensure_ascii=False, indent=2), encoding="utf-8")
 
     qa_fn = _qa_pruefer(qa)
+    eskalations_protokoll: dict = {}
     vorab: dict[int, bytes] = {}
     if synth_mode == "batch":
         from tts_batch import batch_synthesize
         pcms, fehlgeschlagen = batch_synthesize(client, [r for _, r in paare], cache_dir=cache_dir,
-                                                qa=qa_fn)
+                                                qa=qa_fn, protokoll=eskalations_protokoll)
         vorab = {i: pcms[r.key] for i, r in paare if r.key in pcms}
         if fehlgeschlagen:
             (cache_dir / "_fehlgeschlagen.json").write_text(json.dumps(
@@ -402,8 +403,14 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
         if chunks:                                   # Pause VOR diesem Turn (nur wenn schon Audio da ist)
             chunks.append(_silence(GAP_SCENE if t.get("szene") else GAP_TURN))
         chunks.append(pcm)
+        # Welche Stufe hat diesen Turn geliefert? Ohne Eintrag: die Basis-Stufe (Runde 1/2 oder Cache).
+        stufe = eskalations_protokoll.get(req_by_turn[i].key) if i in req_by_turn else None
+        ist_temp = stufe["temperature"] if stufe else temperature
+        eskaliert = bool(stufe) and (ist_temp != temperature or stufe.get("ohne_stil"))
         manifest.append({"i": i, "rolle": rolle, "voice": voice, "vc": vc,
-                         "raw_kind": rolle == "kind" and not vc, "temp": temperature,
+                         "raw_kind": rolle == "kind" and not vc, "temp": ist_temp,
+                         "eskaliert": eskaliert,
+                         "ohne_stil": bool(stufe and stufe.get("ohne_stil")),
                          "sec": round(len(pcm) / 2 / SAMPLE_RATE, 2), "text": text[:80]})
         time.sleep(0.8)
 
@@ -420,7 +427,18 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
     if fehlende:
         print(f"  !! {len(fehlende)} Turns FEHLEN im Audio (Nr. {fehlende}) — Loch in der Geschichte, "
               f"nicht ausliefern.")
+    # Die Liste fuer das PO-Ohr: NUR diese Turns weichen vom eingefrorenen Rezept ab. Der PO hoert
+    # 4.000+ Vertonungen nicht durch — er soll die Handvoll Ausnahmen pruefen koennen, nicht alles.
+    eskalierte = [m for m in manifest if m.get("eskaliert")]
+    if eskalierte:
+        print(f"\n  ESKALIERT: {len(eskalierte)} von {n_soll} Turns brauchten eine andere Stufe "
+              f"(anderer Vortrag als der Rest — nur diese pruefen):")
+        for m in eskalierte:
+            wie = f"temperature {m['temp']}" if m["temp"] != temperature else ""
+            wie += (" · " if wie and m["ohne_stil"] else "") + ("ohne Stil-Präfix" if m["ohne_stil"] else "")
+            print(f"     Turn {m['i']+1:02d} [{m['rolle']}] {wie} — \"{m['text'][:44]}\"")
     return {"cast": cast, "n_turns": len(turns), "n_soll": n_soll, "n_rendered": len(manifest),
+            "n_eskaliert": len(eskalierte), "eskalierte_turns": [m["i"] + 1 for m in eskalierte],
             "nico_vc": nico_converter is not None, "raw_kind_turns": n_raw,
             "fehlende_turns": fehlende, "vollstaendig": vollstaendig,
             "total_sec": round(total, 1), "wav": str(out_wav), "turns": manifest}

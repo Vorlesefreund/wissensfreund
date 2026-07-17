@@ -159,5 +159,61 @@ paare, ohne = B2._zuordnen(offen, resp)
 check("ohne metadata + Anzahl falsch -> NICHTS zuordnen", paare == [])
 check("ohne metadata + Anzahl falsch -> alles in die naechste Runde", len(ohne) == 3)
 
+# ── 7) Eskalationsleiter ──────────────────────────────────────────────────────
+print("\n7) Eskalationsleiter (statt 10x denselben Request zu schicken)")
+L = B2.eskalationsleiter(0.3)
+check("10 Runden bei Basis 0.3", len(L) == 10, str(len(L)))
+check("Runde 1+2: unveraendert 0.3 mit Stil", L[0] == (0.3, False) and L[1] == (0.3, False), str(L[:2]))
+check("Runde 3+4: 0.3 OHNE Stil (Betonung bleibt!)", L[2] == (0.3, True) and L[3] == (0.3, True), str(L[2:4]))
+check("Runde 5+6: temperature 0.5", L[4] == (0.5, False) and L[5] == (0.5, False), str(L[4:6]))
+check("Runde 7+8: temperature 0.6", L[6] == (0.6, False) and L[7] == (0.6, False), str(L[6:8]))
+check("Runde 9+10: default (laeuft nachweislich immer)", L[8] == (None, False) and L[9] == (None, False), str(L[8:]))
+check("Bare-Stufe kommt VOR jeder temperature-Aenderung (PO-Kriterium zuletzt opfern)",
+      L.index((0.3, True)) < min(i for i, s in enumerate(L) if s[0] != 0.3))
+L06 = B2.eskalationsleiter(0.6)
+check("Basis 0.6: keine Stufe unter/gleich 0.6 doppelt", (0.5, False) not in L06 and (0.6, False) not in L06[2:], str(L06[:6]))
+Ld = B2.eskalationsleiter(None)
+check("Basis default: nichts zu eskalieren", set(Ld) == {(None, False)}, str(set(Ld)))
+
+print("\n7b) Eskalierte Requests: Hash aendert sich, Wortlaut NICHT")
+r_basis = B2.TtsRequest.build(voice="Puck", text="Fuenfhundert Jahre?", style="Sprich ruhig.", temperature=0.3)
+r_esk   = B2.TtsRequest.build(voice="Puck", text="Fuenfhundert Jahre?", style="Sprich ruhig.", temperature=0.6)
+check("andere temperature -> anderer Cache-Key (kein Vermischen der Stufen)", r_basis.key != r_esk.key)
+check("Wortlaut bleibt identisch", r_basis.text == r_esk.text)
+check("ohne Stil-Praefix: contents == nackter Text", r_basis.contents(bare=True) == "Fuenfhundert Jahre?")
+check("mit Stil-Praefix: Praefix davor", r_basis.contents(bare=False).endswith("Fuenfhundert Jahre?")
+      and r_basis.contents(bare=False) != "Fuenfhundert Jahre?")
+
+print("\n7c) Manifest meldet die eskalierten Turns (die Liste fuer das PO-Ohr)")
+cache2 = Path(tempfile.mkdtemp())
+SEG2 = {"cast": {"kind": {"name": "Theo", "geschlecht": "m"},
+                 "erwachsener": {"name": "Oma", "geschlecht": "w"}},
+        "turns": [{"rolle": "erzähler", "text": "Theo schaut auf das Bild."},
+                  {"rolle": "kind", "text": "Warum ist die Farbe so blass?"}]}
+
+def fake_batch(client, reqs, cache_dir, qa=None, protokoll=None, **kw):
+    """Turn 2 kommt angeblich erst per Eskalation (0.6, ohne Stil) durch."""
+    for r in reqs:
+        if "blass" in r.text and protokoll is not None:
+            protokoll[r.key] = {"temperature": 0.6, "ohne_stil": True, "runde": 7}
+    return {r.key: ton(1.0) for r in reqs}, []
+
+_echt = B2.batch_synthesize
+B2.batch_synthesize = fake_batch
+try:
+    info = T.vertone(SEG2, cache2 / "x.wav", nico_converter=lambda p, s: ton(1.0),
+                     synth_mode="batch", pcm_cache=cache2 / "c", qa=False)
+finally:
+    B2.batch_synthesize = _echt
+check("n_eskaliert == 1", info.get("n_eskaliert") == 1, str(info.get("n_eskaliert")))
+check("eskalierte_turns nennt Turn 2", info.get("eskalierte_turns") == [2],
+      str(info.get("eskalierte_turns")))
+m2 = [m for m in info["turns"] if m["i"] == 1][0]
+check("Manifest: Turn 2 traegt die ECHTE temperature 0.6", m2["temp"] == 0.6, str(m2["temp"]))
+check("Manifest: Turn 2 als ohne_stil markiert", m2["ohne_stil"] is True)
+m1 = [m for m in info["turns"] if m["i"] == 0][0]
+check("Manifest: Turn 1 NICHT eskaliert", m1["eskaliert"] is False and m1["temp"] == 0.3,
+      str(m1["temp"]))
+
 print("\n" + ("ALLE TESTS OK" if not fails else f"{len(fails)} FEHLER: {fails}"))
 sys.exit(1 if fails else 0)

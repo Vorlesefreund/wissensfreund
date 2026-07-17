@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-17T07:24:44Z -->
+<!-- updated: 2026-07-17T14:55:00Z -->
 <!-- Ältere Stände (verbatim) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
@@ -89,6 +89,35 @@ modulare Pass-Pipeline (`scripts/pipeline_new.py`, Fallback-sicher).
   = die 7 Löcher; nach 10 Promille) · **PCM-Cache gilt jetzt für BEIDE Pfade** (`_sync_pcm_cached`)
   — vorher warf ein Sync-Abbruch alle fertigen Turns weg; neuer Test 6d sichert das ab (2. Lauf =
   0 API-Calls; anderer temperature-Wert = kein Treffer).
+
+## DURCHBRUCH: erster vollständiger Batch-Lauf 37/37 (2026-07-17)
+
+**Ursache der Ausfälle war der STIL-PRÄFIX bei niedriger temperature — nicht temperature allein.**
+Nachgewiesen im echten Lauf (`articles/leo_final_20260717`): 13 Turns waren bei `temperature 0.3`
+**verschlossen** — zwei Runden unveränderter Wiederholung brachten 0 Treffer (Turn `7e7c1503`
+scheiterte über beide Läufe ~6× an identischem Request). **Runde 3 mit demselben Text, derselben
+temperature, nur OHNE Stil-Präfix: 10 von 13 durch. Runde 4: der Rest.** Alle 13 auf `temperature
+0.3 ohne Stil-Präfix` — **die höheren Stufen (0.5/0.6/default) wurden NIE gebraucht.**
+
+**Folge: das eingefrorene Rezept bleibt VOLLSTÄNDIG intakt.** Jeder der 37 Turns läuft auf
+temperature 0.3, die PO-Betonung ist überall erhalten. Die 13 Ausnahmen unterscheiden sich nur
+durch den fehlenden Stil-HINWEIS (Regieanweisung), nicht die temperature — und bei Nico trägt
+ohnehin die VC den Charakter. **`[calm]`-Tags und temperature-Eskalation waren gar nicht nötig.**
+Rückblick: der Bare-Text-Ausweg steckte seit dem 16.07. im Code — nur für den Safety-Block gezogen,
+nicht für den Hänger. Passt zur Notiz vom 15.07. „Präfix + kurzes Fragment ist heikel" → drittes
+Symptom derselben Wurzel (neben Füllwörtern und PROHIBITED_CONTENT).
+
+**Die QA hat das erst sichtbar gemacht:** „Fünfhundert Jahre? Das ist uralt!" kam 3× als „500 Jahre?"
+zurück (zweiter Satz weg, gültiges Audio, Ähnlichkeit 0.63) — ohne Gate ausgeliefert worden. Dazu
+mehrere 44–56-s-Stille-Turns und ein 55-s-Turn mit nur 5,7 s hektischer Sprache (nur von der
+Tempo-Regel gefangen, RMS hätte durchgelassen). Roh-Ausfallrate bestätigt: von den gelieferten
+Audios war ~jedes 5. Müll mit Erfolgsmeldung.
+
+**Eskalationsleiter** (`tts_batch.eskalationsleiter`, PO-Vorschlag): je 2 Runden 0.3 → 0.3-ohne-Stil
+→ 0.5 → 0.6 → default. Billigster Verlust zuerst, PO-Kriterium (Betonung) zuletzt. Manifest führt je
+Turn `temp`/`ohne_stil`/`eskaliert` → am Laufende Liste der Ausnahmen fürs PO-Ohr (hier: 13, alle
+mildester Typ, müssen streng genommen nicht gehört werden). Artefakt: `leo_batch_final.wav` (37/37,
+noch roh — Kind-Turns ohne VC, das ist der nächste Schritt).
 
 ## QUALITÄTS-GATE gebaut (`scripts/tts_qa.py`, 2026-07-17) — Tests grün
 
