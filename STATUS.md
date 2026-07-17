@@ -1,11 +1,36 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-17T14:55:00Z -->
+<!-- updated: 2026-07-17T21:44:08Z -->
 <!-- Ältere Stände (verbatim) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
 **Wissensfreund:** Flutter-App für Kinder (Stufen S1 4–6, S2 7–9, S3 10–12), KI-Artikel streng aus
 geladenem Artikel-Quelltext (nie Trainingswissen). Zwei Pipelines: alter Monolith (Produktion) + neue
 modulare Pass-Pipeline (`scripts/pipeline_new.py`, Fallback-sicher).
+
+## Zuletzt abgeschlossen (2026-07-17 spät)
+
+- **ZWEI vom PO gehörte Defekte im „finalen" Hörspiel ganz behoben** (`3e76ed8`, Tests grün).
+  Der PO hörte: (a) nach „wer ist das?" ~1 min **hohes Rauschen**, nochmal nach „…die Tinte
+  verschmieren"; (b) **das Lachen fehlt** bei „Oma Rina lacht", Oma später in **anderer, ernsterer
+  Tonlage**. Diagnose deckte sich exakt: **Fehler 1** = 2 Turns (i=2 mit **97 %** Stille/54 s, i=29 mit
+  82 %/14,5 s) — die alte QA prüfte Sprechdauer/Pegel EINZELN, nie den **Stille-ANTEIL**, also rutschten
+  sie durch, und die VC machte aus der Stille Rauschen. **Fehler 2** = 8 Emotions-Turns (u.a. i=18
+  „amüsiert, lachend", i=33 „nachdenklich, ernst"), die per **Präfix-Verlust** gerettet wurden — der
+  Stil-Präfix TRÄGT die Emotion, ihn wegzulassen killt sie.
+- **Fix 1:** QA prüft jetzt `MAX_STILLE_ANTEIL` (0.65) + `trim_stille()` VOR der VC (Rest-Stille wird
+  nicht mehr umgefärbt). **Fix 2:** `eskalationsleiter` ist pro Turn **emotions-abhängig** und
+  `batch_synthesize` eskaliert **PRO Turn** (eigener Versuchszähler/eigene Leiter, nicht mehr global
+  pro Runde): Emotions-Turns ziehen erst `temperature` hoch (0.3→0.5→0.6, **Präfix bleibt**) und opfern
+  ihn ganz zuletzt; emotionsfreie lassen ihn früh weg (billiger, hält Betonung). Tests: Sektion 7
+  (emotions-abhängige Leiter, gegenläufige Reihenfolge) + **7d Integrationstest** (2 Turns folgen in
+  EINEM Fake-Client-Lauf verschiedenen Leitern) + Sektion 8 (Stille-Anteil/Trim). → [[reference_tts_gotchas]].
+- **Fix im echten Lauf bestätigt** (`articles/leo_fix_20260717`, läuft noch): i=29 kam mit **71 % Stille
+  zurück und wurde von der neuen QA abgelehnt** (vorher durchgerutscht); die Emotions-Turns degenerieren
+  bei 0.3+Präfix und **eskalieren mit behaltenem Präfix** statt sofort bare. i=2 ging von 97 % → 43 %
+  Stille (echte 1,9 s Sprache). **Batch-Queue heute Nacht extrem träge: ~38 min/Runde.**
+- **NÄCHSTER SCHRITT (echtes Geld, PO-Warnung Pflicht):** wenn die 10 Turns sauber neu im Cache sind,
+  Pod-VC neu rechnen → korrigiertes Finale. 10 defekte Alt-PCMs liegen in
+  `pcm_cache/_defekt_backup_20260717/`.
 
 ## Zuletzt abgeschlossen (2026-07-17)
 
@@ -158,10 +183,9 @@ Ziffern schreibt und die Quelle ausschreibt („500" vs. „fünfhundert").
    am Stück um (~1–3 $ statt ~50 $). **Produktion = Batch** (PO bestätigt) und möglichst VIELE
    Artikel je Job: ein Job braucht ~70 Min unabhängig von der Menge → 10 Runden über den ganzen
    Katalog = ein Wochenendlauf, 10 Runden pro Artikel wären Wochen.
-2. **`zip`-Bug in `tts_batch.py`:** ordnet Antworten per **Reihenfolge** zu, obwohl jeder Request
-   `metadata={"key":…}` trägt. Lässt die API eine Antwort AUS (statt leer), verrutscht alles →
-   Audio am falschen Turn. Die QA fängt das jetzt (0.54), aber die Ursache gehört behoben:
-   Zuordnung über `metadata["key"]` statt `zip`.
+2. **ERLEDIGT — `zip`-Bug behoben:** `_zuordnen()` ordnet Antworten jetzt über `metadata["key"]` zu,
+   `zip` nur noch als Fallback wenn kein metadata UND Anzahl exakt passt; sonst wird die Runde
+   verworfen statt Audio am falschen Turn abzulegen. Tests in `test_tts_qa.py` Sektion 6.
 3. **Timeout-Optimierung:** Erfolgreiche Calls brauchen 7–16 s, ein Hänger kommt NIE zurück (gemessen).
    `TTS_TIMEOUT_MS=60000` verschenkt pro Hänger ~45 s. 25–30 s wären ~3× schnellere Retries.
    Achtung: Tests prüfen die Konstante == 60000, und lange Turns brauchen evtl. mehr → erst messen.
