@@ -22,6 +22,7 @@ import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.biometric.BiometricManager
 
 class WissensfreundForegroundService : Service() {
 
@@ -43,6 +44,13 @@ class WissensfreundForegroundService : Service() {
     private fun postOnMain(block: () -> Unit) {
         if (Looper.myLooper() == Looper.getMainLooper()) block() else mainHandler.post(block)
     }
+
+    private fun deviceLockAvailable(): Boolean =
+        BiometricManager.from(this).canAuthenticate(
+            BiometricManager.Authenticators.BIOMETRIC_STRONG or
+                BiometricManager.Authenticators.BIOMETRIC_WEAK or
+                BiometricManager.Authenticators.DEVICE_CREDENTIAL
+        ) == BiometricManager.BIOMETRIC_SUCCESS
 
     private var wm: WindowManager? = null
     private var overlayRoot: FrameLayout? = null
@@ -176,9 +184,13 @@ class WissensfreundForegroundService : Service() {
             setTextColor(Color.parseColor("#2E7D32")); typeface = Typeface.DEFAULT_BOLD
             setPadding(0, dp(28), 0, 0)
         })
-        // Hinweistext
+        // Hinweistext — ohne Geraetesperre gibt es keinen Fingerabdruck, dann
+        // entsperrt die App-eigene Eltern-PIN (siehe ParentalUnlockActivity).
         col.addView(TextView(this).apply {
-            text = "Bitte Fingerabdruck oder PIN eingeben"
+            text = if (deviceLockAvailable())
+                "Bitte Fingerabdruck oder PIN eingeben"
+            else
+                "Bitte Eltern-PIN eingeben"
             textSize = 14f; gravity = Gravity.CENTER
             setTextColor(Color.parseColor("#555555"))
             setPadding(0, dp(8), 0, 0)

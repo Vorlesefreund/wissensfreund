@@ -232,6 +232,11 @@ class ParentalLockService extends ChangeNotifier {
 
   Future<void> _loadPinState() async {
     final prefs = await SharedPreferences.getInstance();
+    // Frisch von der Platte lesen: Die PIN kann per Sicherheitsfrage auch am
+    // Kiosk-Overlay zurückgesetzt worden sein — das passiert nativ
+    // (ParentalUnlockActivity), an Darts In-Memory-Cache vorbei. Ohne reload()
+    // prüfte die App danach weiter gegen den alten Hash.
+    await prefs.reload();
     _hasAppPin = (prefs.getString(_pinHashKey) ?? '').isNotEmpty;
     _secQuestion = prefs.getString(_secQKey);
   }
