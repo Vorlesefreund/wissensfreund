@@ -30,7 +30,7 @@ class SubscriptionService {
   /// Premium: Rückfragen an Professor (Gemini API).
   bool get canAskQuestions => isPremium;
 
-  /// Plus or Premium: offline 600px image library download.
+  /// Plus or Premium: offline 800px image library download.
   bool get canDownloadMediumQuality => isPlus;
 
   /// Plus or Premium: HiRes on-demand images (1600px, WiFi only).

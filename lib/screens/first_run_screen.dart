@@ -560,7 +560,7 @@ class _FirstRunScreenState extends State<FirstRunScreen>
               border: Border.all(color: const Color(0xFFC8E6C9)),
             ),
             child: const Text(
-              'Mit Wissensfreund Plus gibt es Bilder in besserer Qualität (600px). '
+              'Mit Wissensfreund Plus gibt es Bilder in besserer Qualität (800px). '
               'Du kannst das jederzeit in den Einstellungen freischalten.',
               style: TextStyle(fontSize: 12, color: Color(0xFF558B2F), height: 1.4),
             ),

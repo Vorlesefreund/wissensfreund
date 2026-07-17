@@ -89,7 +89,7 @@ class ImageLibraryService {
   }
 
   /// Downloads the image library ZIP from R2, extracts it into image_library/.
-  /// [thumbTier] = true → 300px Free tier; false → 600px Plus/Premium tier.
+  /// [thumbTier] = true → 300px Free tier; false → 800px Plus/Premium tier.
   /// Returns null on success, or an error code string on failure.
   /// No-op (returns 'already_downloading') if already downloading.
   Future<String?> downloadLibrary({

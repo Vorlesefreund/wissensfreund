@@ -2085,7 +2085,7 @@ class _StorageScreenState extends State<_StorageScreen> {
   double _dlProgress = 0;   // 0..1 = download; >1 = extraction phase
   Duration? _dlEta;
   String? _dlError;
-  bool? _downloadingThumbTier; // tier being downloaded: true=300px, false=600px
+  bool? _downloadingThumbTier; // tier being downloaded: true=300px, false=800px
   bool _downloadComplete = false;
 
   @override
@@ -2318,7 +2318,7 @@ class _StorageScreenState extends State<_StorageScreen> {
 
   Widget _buildProgressBar() {
     if (_downloadComplete) {
-      final tierLabel = _downloadingThumbTier == true ? '300px' : '600px';
+      final tierLabel = _downloadingThumbTier == true ? '300px' : '800px';
       return Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
@@ -3892,7 +3892,7 @@ class _SubscriptionScreenState extends State<_SubscriptionScreen> {
                       subtitle: 'Einmaliger Kauf',
                       price: '2–4 €',
                       features: const [
-                        'Bessere Bilder offline (~600px)',
+                        'Bessere Bilder offline (800px)',
                         'Hochauflösende Bilder bei WLAN',
                       ],
                       onTap: _purchasePlus,
