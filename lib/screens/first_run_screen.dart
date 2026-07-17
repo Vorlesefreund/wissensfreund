@@ -7,6 +7,7 @@ import '../services/network_settings_service.dart';
 import '../services/parental_lock_service.dart';
 import '../services/storage_manager.dart';
 import '../services/subscription_service.dart';
+import '../widgets/parental_pin_dialog.dart';
 import 'profile_creation_screen.dart';
 
 class FirstRunScreen extends StatefulWidget {
@@ -181,6 +182,11 @@ class _FirstRunScreenState extends State<FirstRunScreen>
   }
 
   Future<void> _complete() async {
+    // Kinderschutz aktiv, aber das Gerät hat keinen Sperrbildschirm? Dann jetzt
+    // eine Eltern-PIN vergeben — sonst gäbe es nichts, womit sich der
+    // Sperr-Bildschirm entsperren ließe.
+    if (_kioskPhase == 2) await _ensureParentPin();
+    if (!mounted) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('onboarding_complete', true);
     await prefs.setBool('image_quality_offered', true);
@@ -190,6 +196,20 @@ class _FirstRunScreenState extends State<FirstRunScreen>
     if (!mounted) return;
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(builder: (_) => const ProfileCreationScreen(isFirstProfile: true)),
+    );
+  }
+
+  /// Vergibt eine Eltern-PIN, falls das Gerät keine Sperre hat und noch keine
+  /// PIN existiert. Bricht der Elternteil ab, greift später der Bootstrap beim
+  /// ersten Zugriff auf den Eltern-Bereich — der Zugang ist nie ungeschützt.
+  Future<void> _ensureParentPin() async {
+    final ps = ParentalLockService.instance;
+    if (await ps.deviceLockAvailable() || ps.hasAppPin) return;
+    if (!mounted) return;
+    await showParentalPinDialog(
+      context,
+      create: true,
+      reason: 'Eltern-PIN festlegen',
     );
   }
 
@@ -582,9 +602,17 @@ class _FirstRunScreenState extends State<FirstRunScreen>
       emoji = '✅';
       title = 'Kinderschutz ist aktiv!';
       titleColor = const Color(0xFF1B5E20);
-      body = 'Ab jetzt erscheint ein Sperr-Bildschirm, wenn dein Kind '
-          'Wissensfreund verlässt. Du kannst ihn jederzeit mit '
-          'Fingerabdruck oder PIN entsperren.';
+      // Ohne Gerätesperre gäbe es keinen Fingerabdruck — dann ist die Eltern-PIN
+      // der Schlüssel, und die Gerätesperre wird dringend empfohlen.
+      body = ParentalLockService.instance.hasDeviceLock
+          ? 'Ab jetzt erscheint ein Sperr-Bildschirm, wenn dein Kind '
+              'Wissensfreund verlässt. Du kannst ihn jederzeit mit '
+              'Fingerabdruck oder PIN entsperren.'
+          : 'Ab jetzt erscheint ein Sperr-Bildschirm, wenn dein Kind '
+              'Wissensfreund verlässt.\n\n'
+              'Dieses Gerät hat keine Bildschirmsperre. Wir richten gleich eine '
+              'Eltern-PIN ein — richte zusätzlich dringend eine Bildschirmsperre '
+              'in den Android-Einstellungen ein, sie schützt deutlich besser.';
     } else if (_kioskDenied) {
       emoji = '⚠️';
       title = 'Berechtigung nicht erteilt';

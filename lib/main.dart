@@ -19,10 +19,14 @@ import 'screens/home_screen.dart';
 import 'screens/profile_selection_screen.dart';
 import 'utils/system_ui.dart';
 import 'widgets/data_limit_overlay.dart';
+import 'widgets/parental_pin_dialog.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   restoreSystemUI();
+  // PIN-Dialog beim Service registrieren, bevor irgendetwas authenticate()
+  // aufrufen kann (der Service kennt so kein Widget → kein Import-Zyklus).
+  ParentalLockService.instance.pinPrompt = showParentalPinDialog;
   await ParentalLockService.instance.init();
   await ProfileService.instance.initialize();
   await RewardService.instance.initialize();
@@ -103,6 +107,7 @@ class _WissensfreundAppState extends State<WissensfreundApp>
     return MaterialApp(
       title: 'Wissensfreund',
       debugShowCheckedModeBanner: false,
+      navigatorKey: appNavigatorKey,
       navigatorObservers: [_NavBarVisibleObserver()],
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(

@@ -2829,6 +2829,54 @@ class _ParentalScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Ohne Gerätesperre schützt nur die App-PIN — und wer nachträglich
+              // eine Gerätesperre einrichtet, hebelt sie aus. Deshalb hier oben
+              // und dringend.
+              if (!ps.hasDeviceLock) ...[
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF3E0),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.orange.shade200),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(Icons.gpp_maybe_rounded,
+                              size: 18, color: Colors.orange.shade800),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Kein Sperrbildschirm eingerichtet',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 13.5,
+                                color: Colors.orange.shade900,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Richte in den Android-Einstellungen dringend eine '
+                        'Bildschirmsperre ein (Fingerabdruck, PIN oder Muster). '
+                        'Sie schützt den Eltern-Bereich deutlich besser als die '
+                        'Eltern-PIN allein.',
+                        style: TextStyle(
+                            fontSize: 12,
+                            height: 1.45,
+                            color: Colors.orange.shade900),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
               _DashboardRow(
                 icon: ps.hasOverlayPermission
                     ? Icons.layers_rounded

@@ -1,7 +1,25 @@
-import 'package:flutter/foundation.dart';
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:crypto/crypto.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+/// Globaler Navigator-Key. Erlaubt [ParentalLockService.authenticate], den
+/// PIN-Dialog selbst zu zeigen — dadurch ist JEDE Aufrufstelle automatisch
+/// geschützt und keine künftige kann die Prüfung versehentlich auslassen.
+final GlobalKey<NavigatorState> appNavigatorKey = GlobalKey<NavigatorState>();
+
+/// Zeigt den Eltern-PIN-Dialog. Wird von [main.dart] gesetzt, damit der Service
+/// keine Widget-Abhängigkeit hat (sonst Import-Zyklus Service ↔ Widget).
+/// Rückgabe: `true` = korrekt authentifiziert / PIN gesetzt.
+typedef ParentalPinPrompt = Future<bool> Function(
+  BuildContext context, {
+  required bool create,
+  required String reason,
+});
 
 class ParentalLockService extends ChangeNotifier {
   static const _channel = MethodChannel('wissensfreund/parental');
@@ -9,6 +27,9 @@ class ParentalLockService extends ChangeNotifier {
   ParentalLockService._();
 
   final _localAuth = LocalAuthentication();
+
+  /// Wird beim App-Start registriert (siehe main.dart).
+  ParentalPinPrompt? pinPrompt;
 
   bool _isAdminActive         = false;
   bool _showOverlay           = false;
@@ -18,11 +39,19 @@ class ParentalLockService extends ChangeNotifier {
   bool _kioskAutoStart        = false;
   bool _hasOverlayPermission = false;
 
+  bool _hasDeviceLock = false;
+
   bool get isAdminActive        => _isAdminActive;
   bool get showOverlay          => _showOverlay;
   bool get onboardingDone       => _onboardingDone;
   bool get isKioskMode          => _isKioskMode;
   bool get hasOverlayPermission => _hasOverlayPermission;
+
+  /// Zuletzt ermittelter Stand von [deviceLockAvailable] — synchron für die UI
+  /// (wird in [init] und [_refreshStatus] aktualisiert). Ist er `false`, läuft
+  /// der Eltern-Schutz nur über die App-PIN und die Gerätesperre wird dringend
+  /// empfohlen.
+  bool get hasDeviceLock => _hasDeviceLock;
 
   /// Verhindert Eltern-Overlay UND Self-Restore beim nächsten Hintergrundwechsel.
   /// Einmalig — wird beim Prüfen automatisch zurückgesetzt.
@@ -43,10 +72,12 @@ class ParentalLockService extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _onboardingDone = prefs.getBool('parental_onboarding_done') ?? false;
     _kioskAutoStart = prefs.getBool('kiosk_auto_start') ?? false;
+    await _loadPinState();
     await _refreshStatus();
   }
 
   Future<void> _refreshStatus() async {
+    _hasDeviceLock = await deviceLockAvailable();
     try {
       _isAdminActive = await _channel.invokeMethod<bool>('isDeviceAdminActive') ?? false;
     } catch (_) {
@@ -133,17 +164,123 @@ class ParentalLockService extends ChangeNotifier {
     await startKioskMode();
   }
 
+  /// Prüft die Eltern-Berechtigung.
+  ///
+  /// Reihenfolge: **Gerätesperre gewinnt immer** (Fingerabdruck/PIN/Muster —
+  /// bequem und vom System abgesichert), sonst **App-eigene Eltern-PIN**.
+  ///
+  /// PO-Entscheidung (bewusst): Richtet jemand nachträglich eine Gerätesperre
+  /// ein, greift ab dann sie — auch wenn eine App-PIN existiert. Das ist zugleich
+  /// ein Ausweg bei vergessener PIN und theoretisch ein Umweg für ein älteres
+  /// Kind. Gegenmaßnahme ist die dringende Empfehlung, von Anfang an eine
+  /// Gerätesperre einzurichten (Onboarding + Kinderschutz-Screen).
+  ///
+  /// WICHTIG — vormalige Sicherheitslücke: Hier stand
+  /// `if (!supported) return true;` — auf einem Gerät OHNE Sperrbildschirm war
+  /// damit die gesamte Kindersicherung wirkungslos (Kiosk verlassen, Kindermodus
+  /// abschalten, Datenlimit ändern). Genau der Normalfall auf einem Kinder-Tablet.
+  /// Es wird nie wieder ohne Prüfung `true` zurückgegeben.
   Future<bool> authenticate(String reason) async {
+    if (await deviceLockAvailable()) {
+      try {
+        return await _localAuth.authenticate(
+          localizedReason: reason,
+          persistAcrossBackgrounding: true,
+        );
+      } catch (_) {
+        return false;
+      }
+    }
+    return _authenticateWithAppPin(reason);
+  }
+
+  /// Ist eine Gerätesperre (Biometrie oder Geräte-PIN/Muster) nutzbar?
+  Future<bool> deviceLockAvailable() async {
     try {
-      final supported = await _localAuth.isDeviceSupported();
-      if (!supported) return true; // kein Sperrbildschirm eingerichtet → erlauben
-      return await _localAuth.authenticate(
-        localizedReason: reason,
-        persistAcrossBackgrounding: true,
-      );
+      return await _localAuth.isDeviceSupported();
     } catch (_) {
       return false;
     }
+  }
+
+  Future<bool> _authenticateWithAppPin(String reason) async {
+    // PIN-Zustand VOR dem Context-Zugriff laden — so entsteht keine async-Lücke,
+    // über die der Context veralten könnte.
+    await _loadPinState();
+    final ctx = appNavigatorKey.currentContext;
+    final prompt = pinPrompt;
+    // Ohne (lebenden) UI-Kanal gibt es keine Freigabe — Fail-closed statt Fail-open.
+    if (ctx == null || prompt == null || !ctx.mounted) return false;
+    // Bestandsinstallation oder Onboarding übersprungen: PIN jetzt einrichten.
+    return prompt(ctx, create: !_hasAppPin, reason: reason);
+  }
+
+  // ── Eltern-PIN (Fallback ohne Gerätesperre) ────────────────────────────────
+
+  static const _pinHashKey  = 'parental_pin_hash';
+  static const _pinSaltKey  = 'parental_pin_salt';
+  static const _secQKey     = 'parental_sec_question';
+  static const _secHashKey  = 'parental_sec_answer_hash';
+  static const _secSaltKey  = 'parental_sec_answer_salt';
+
+  bool _hasAppPin = false;
+  bool get hasAppPin => _hasAppPin;
+
+  String? _secQuestion;
+  /// Die gesetzte Sicherheitsfrage (für den „PIN vergessen?"-Weg), oder null.
+  String? get securityQuestion => _secQuestion;
+
+  Future<void> _loadPinState() async {
+    final prefs = await SharedPreferences.getInstance();
+    _hasAppPin = (prefs.getString(_pinHashKey) ?? '').isNotEmpty;
+    _secQuestion = prefs.getString(_secQKey);
+  }
+
+  // Gesalzener SHA-256 — weder PIN noch Antwort werden je im Klartext gespeichert.
+  String _hash(String value, String salt) =>
+      sha256.convert(utf8.encode('$salt:$value')).toString();
+
+  String _newSalt() {
+    final rnd = Random.secure();
+    return base64Url.encode(List<int>.generate(16, (_) => rnd.nextInt(256)));
+  }
+
+  /// Setzt die PIN. [question]/[answer] optional — beim Ersteinrichten Pflicht,
+  /// beim Zurücksetzen per Sicherheitsfrage bleibt die alte Frage bestehen.
+  Future<void> setAppPin(String pin, {String? question, String? answer}) async {
+    final prefs = await SharedPreferences.getInstance();
+    final salt = _newSalt();
+    await prefs.setString(_pinSaltKey, salt);
+    await prefs.setString(_pinHashKey, _hash(pin, salt));
+    if (question != null && answer != null && answer.trim().isNotEmpty) {
+      final aSalt = _newSalt();
+      await prefs.setString(_secQKey, question);
+      await prefs.setString(_secSaltKey, aSalt);
+      await prefs.setString(_secHashKey, _hash(_normalizeAnswer(answer), aSalt));
+      _secQuestion = question;
+    }
+    _hasAppPin = true;
+    notifyListeners();
+  }
+
+  Future<bool> verifyAppPin(String pin) async {
+    final prefs = await SharedPreferences.getInstance();
+    final hash = prefs.getString(_pinHashKey);
+    final salt = prefs.getString(_pinSaltKey);
+    if (hash == null || salt == null) return false;
+    return _hash(pin, salt) == hash;
+  }
+
+  /// Gross-/Kleinschreibung und Randleerzeichen dürfen die Antwort nicht
+  /// scheitern lassen — „Müller " und „müller" sind dieselbe Antwort.
+  String _normalizeAnswer(String a) => a.trim().toLowerCase();
+
+  Future<bool> verifySecurityAnswer(String answer) async {
+    final prefs = await SharedPreferences.getInstance();
+    final hash = prefs.getString(_secHashKey);
+    final salt = prefs.getString(_secSaltKey);
+    if (hash == null || salt == null) return false;
+    return _hash(_normalizeAnswer(answer), salt) == hash;
   }
 
   void showParentalOverlay() {
