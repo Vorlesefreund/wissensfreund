@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../services/profile_service.dart';
+import '../utils/responsive.dart';
 import 'profile_creation_screen.dart';
 
 class ProfileManagementScreen extends StatelessWidget {
@@ -46,7 +47,8 @@ class ProfileManagementScreen extends StatelessWidget {
               ),
             );
           }
-          return ListView.separated(
+          return TabletMaxWidth(
+              child: ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: ps.profiles.length,
             separatorBuilder: (_, __) => const SizedBox(height: 12),
@@ -168,7 +170,7 @@ class ProfileManagementScreen extends StatelessWidget {
                 ),
               );
             },
-          );
+          ));
         },
       ),
     );

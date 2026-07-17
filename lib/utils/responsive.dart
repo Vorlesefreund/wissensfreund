@@ -55,3 +55,36 @@ class TabletMaxWidth extends StatelessWidget {
     );
   }
 }
+
+/// Wie [TabletMaxWidth], aber für **Bottom-Sheets**: begrenzt die Breite und
+/// zentriert horizontal, ohne sich vertikal auszudehnen.
+///
+/// [TabletMaxWidth] richtet oben-zentriert aus und sein `Align` füllt die
+/// verfügbare Höhe — in einem `showModalBottomSheet` würde das Sheet dadurch
+/// über den ganzen Schirm aufziehen und der Inhalt oben kleben. `heightFactor:
+/// 1.0` bemisst die Höhe stattdessen exakt am Kind, sodass das Sheet seine
+/// inhaltsbemessene Höhe und seine Lage unten behält.
+///
+/// Handy-Modus unverändert: gibt bei `!isTablet` das Kind unangetastet zurück.
+class TabletMaxWidthSheet extends StatelessWidget {
+  final double maxWidth;
+  final Widget child;
+  const TabletMaxWidthSheet({
+    super.key,
+    this.maxWidth = 560,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    if (!context.isTablet) return child;
+    return Align(
+      alignment: Alignment.bottomCenter,
+      heightFactor: 1.0,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: maxWidth),
+        child: child,
+      ),
+    );
+  }
+}

@@ -850,10 +850,12 @@ class _BottomBar extends StatelessWidget {
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (_) => _AppMenu(
-        provider: provider,
-        outerContext: context,
-        navBarHeight: navBarHeight,
+      builder: (_) => TabletMaxWidthSheet(
+        child: _AppMenu(
+          provider: provider,
+          outerContext: context,
+          navBarHeight: navBarHeight,
+        ),
       ),
     );
   }
@@ -3836,7 +3838,7 @@ class _SubscriptionScreenState extends State<_SubscriptionScreen> {
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: Color(0xFF4CAF50)))
-          : SafeArea(
+          : TabletMaxWidth(child: SafeArea(
               top: false,
               minimum: const EdgeInsets.only(bottom: 8),
               child: SingleChildScrollView(
@@ -4101,7 +4103,7 @@ class _SubscriptionScreenState extends State<_SubscriptionScreen> {
                 ],
               ),
             ),
-            ),
+            )),
     );
   }
 }

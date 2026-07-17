@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../services/profile_service.dart';
+import '../utils/responsive.dart';
 import 'home_screen.dart';
 
 // ── Avatar palette ────────────────────────────────────────────────────────────
@@ -170,7 +171,8 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
         backgroundColor: const Color(0xFFFFF8EE),
         body: Stack(
           children: [
-            SafeArea(
+            TabletMaxWidth(
+                child: SafeArea(
               child: Column(
                 children: [
                   _buildHeader(),
@@ -203,7 +205,7 @@ class _ProfileCreationScreenState extends State<ProfileCreationScreen>
                   const SizedBox(height: 24),
                 ],
               ),
-            ),
+            )),
             if (_step == 3)
               IgnorePointer(
                 child: AnimatedBuilder(
