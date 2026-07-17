@@ -64,6 +64,12 @@ WPS_MIN, WPS_MAX = 1.2, 5.0   # Wörter je SPRECH-Sekunde (NACH Stille-Trim). Ec
                               # an ("Wer ist das?" = 3 Woerter in 7,4 s Datei, aber 1,3 s Sprache).
 MIN_SEC          = 0.25
 STILLE_SCHWELLE  = 500    # Amplitude, ab der ein 20-ms-Fenster als "Sprache" gilt.
+MAX_STILLE_ANTEIL = 0.65  # Anteil Stille am ganzen Turn. Echte Turns 18–47 %; die zwei Defekte
+                          # vom 17.07. (Turn 3 = 97 %, Turn 30 = 82 %) lagen weit darüber. GENAU
+                          # dieses blinde Feld hat die erste QA-Version durchgelassen: Sprech-Zeit,
+                          # Pegel und Transkript stimmten je einzeln — 3 s korrekte Sprache in 51 s
+                          # Stille. Nach der VC wurde aus der Stille hohes RAUSCHEN.
+TRIM_PAD_S        = 0.15  # Beim Trimmen vor/nach der Sprache stehen lassen (natürlicher Ein-/Ausklang).
 
 _MODELL = None            # faster-whisper ist teuer zu laden (~8 s) → genau einmal.
 
@@ -100,6 +106,39 @@ def rms(pcm: bytes) -> float:
     return (sum(float(x) * x for x in a) / len(a)) ** 0.5
 
 
+def _laut_fenster(pcm: bytes, sample_rate: int = SAMPLE_RATE, fenster_s: float = 0.02):
+    """Indexliste der 20-ms-Fenster mit Sprache (Spitze >= STILLE_SCHWELLE) + Fenstergröße."""
+    a = _samples(pcm)
+    fenster = max(1, int(sample_rate * fenster_s))
+    laut = [j for j in range(0, len(a) - fenster + 1, fenster)
+            if max((abs(x) for x in a[j:j + fenster]), default=0) >= STILLE_SCHWELLE]
+    return a, laut, fenster
+
+
+def stille_anteil(pcm: bytes, sample_rate: int = SAMPLE_RATE) -> float:
+    """Anteil des Turns OHNE Sprache (0..1). Fängt Turns, die fast nur aus Stille bestehen —
+    der Defekt, den die reine Sprech-Zeit-Messung nicht sieht (die stimmt ja, es ist nur wenig)."""
+    a, laut, fenster = _laut_fenster(pcm, sample_rate)
+    n = max(1, len(a) // fenster)
+    return 1.0 - len(laut) / n
+
+
+def trim_stille(pcm: bytes, sample_rate: int = SAMPLE_RATE, pad_s: float = TRIM_PAD_S) -> bytes:
+    """Führende/abschließende Stille abschneiden, kurzen Puffer stehen lassen.
+
+    Der eigentliche Fix für Fehler 1: Turn 3 war 48 s Stille + 3 s Sprache. Getrimmt bleiben ~3 s
+    saubere Sprache — und die VC sieht keine Stille mehr, aus der sie Rauschen macht. Interne
+    Pausen bleiben unangetastet (nur der Rand wird geschnitten); Inhalt geht nie verloren."""
+    a, laut, fenster = _laut_fenster(pcm, sample_rate)
+    if not laut:
+        return pcm                       # gar keine Sprache → nicht anfassen, das faengt die QA
+    pad = int(sample_rate * pad_s)
+    # laut[] sind bereits SAMPLE-Indizes (Fensteranfänge). Das letzte Sprachfenster reicht bis +fenster.
+    start = max(0, laut[0] - pad)
+    ende = min(len(a), laut[-1] + fenster + pad)
+    return a[start:ende].tobytes()
+
+
 def sprech_sekunden(pcm: bytes, sample_rate: int = SAMPLE_RATE) -> float:
     """Sekunden mit tatsächlicher Sprache (Stille-Fenster zählen nicht mit).
 
@@ -107,16 +146,8 @@ def sprech_sekunden(pcm: bytes, sample_rate: int = SAMPLE_RATE) -> float:
     Turns gemessen zwischen 0,5 s und mehreren Sekunden. Auf der Rohdauer ist jede Wörter/Sekunde-
     Regel deshalb Rauschen. Auf der Sprechzeit wird sie trennscharf — und ein Stille-Turn faellt
     sofort auf 0 s."""
-    a = _samples(pcm)
-    if not a:
-        return 0.0
-    fenster = max(1, int(sample_rate * 0.02))          # 20 ms
-    laut = 0
-    for i in range(0, len(a) - fenster + 1, fenster):
-        spitze = max(abs(x) for x in a[i:i + fenster])
-        if spitze >= STILLE_SCHWELLE:
-            laut += 1
-    return laut * fenster / sample_rate
+    _, laut, fenster = _laut_fenster(pcm, sample_rate)
+    return len(laut) * fenster / sample_rate
 
 
 # Whisper schreibt Zahlen als ZIFFERN ("500"), die Quelle schreibt sie aus ("fünfhundert").
@@ -172,6 +203,11 @@ def pruefe(pcm: bytes | None, text: str, sample_rate: int = SAMPLE_RATE,
     sprech = sprech_sekunden(pcm, sample_rate)
     if sprech < MIN_SEC:
         return False, f"keine Sprache erkennbar ({sek:.1f}s Datei, {sprech:.2f}s Sprache)"
+    stille = 1.0 - sprech / sek if sek else 1.0
+    if stille > MAX_STILLE_ANTEIL:
+        # Der Fehler vom 17.07.: korrekte Sprache in einem Meer aus Stille. Jede Einzelprüfung
+        # stimmt, aber der Turn ist zu >65 % Stille → nach der VC wird Rauschen daraus.
+        return False, f"zu viel Stille ({stille*100:.0f}%: {sprech:.1f}s Sprache in {sek:.1f}s)"
     woerter = len(text.split())
     wps = woerter / sprech
     if woerter and not (WPS_MIN <= wps <= WPS_MAX):

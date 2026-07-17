@@ -103,11 +103,17 @@ else:
     echte = [(k, v) for k, v in paare if Q.rms((CD / f"{k}.pcm").read_bytes()) > 500]
     kaputt = [(k, v) for k, v in paare if Q.rms((CD / f"{k}.pcm").read_bytes()) <= 500]
     print(f"  ({len(echte)} intakte + {len(kaputt)} defekte Turns gefunden)")
+    # "Echt" heisst hier nur RMS>500. Der alte Cache enthaelt auch stille-lastige Turns (z.B.
+    # "Wer ist das?" 80% Stille) — die DUERFEN abgelehnt werden, SOLANGE der Trim sie rettet.
+    # Ein echter Fehlalarm waere: abgelehnt UND auch nach Trim noch kaputt.
     fehlalarme = []
     for k, v in echte[:8]:
-        ok, g = Q.pruefe((CD / f"{k}.pcm").read_bytes(), v["text"])
-        if not ok: fehlalarme.append((v["text"][:40], g))
-    check("KEIN Fehlalarm auf echten Turns", not fehlalarme, str(fehlalarme[:2]))
+        pcm = (CD / f"{k}.pcm").read_bytes()
+        ok, g = Q.pruefe(pcm, v["text"])
+        if not ok:
+            ok2, g2 = Q.pruefe(Q.trim_stille(pcm), v["text"])
+            if not ok2: fehlalarme.append((v["text"][:40], g, g2))
+    check("KEIN echter Fehlalarm (abgelehnt UND Trim rettet nicht)", not fehlalarme, str(fehlalarme[:2]))
     for k, v in kaputt:
         ok, g = Q.pruefe((CD / f"{k}.pcm").read_bytes(), v["text"])
         check(f"realer Defekt erkannt ({v['text'][:28]}…)", not ok, g)
@@ -175,6 +181,75 @@ check("Basis 0.6: keine Stufe unter/gleich 0.6 doppelt", (0.5, False) not in L06
 Ld = B2.eskalationsleiter(None)
 check("Basis default: nichts zu eskalieren", set(Ld) == {(None, False)}, str(set(Ld)))
 
+# Emotions-Turn: der Stil-Präfix TRÄGT die Emotion (Lachen, ernster Ton). Deshalb erst die
+# temperature hochziehen (Präfix behalten) und den Präfix ganz zuletzt opfern — umgekehrt zur
+# emotionslosen Leiter. Belegt am 17.07.: „Oma Rina lacht" verlor sonst ihr Lachen.
+Le = B2.eskalationsleiter(0.3, hat_emotion=True)
+check("Emotion: 10 Runden bei Basis 0.3", len(Le) == 10, str(len(Le)))
+check("Emotion Runde 1+2: 0.3 MIT Stil (Emotion + Betonung)", Le[0] == (0.3, False) and Le[1] == (0.3, False), str(Le[:2]))
+check("Emotion Runde 3+4: temperature 0.5, Präfix bleibt", Le[2] == (0.5, False) and Le[3] == (0.5, False), str(Le[2:4]))
+check("Emotion Runde 5+6: temperature 0.6, Präfix bleibt", Le[4] == (0.6, False) and Le[5] == (0.6, False), str(Le[4:6]))
+check("Emotion Runde 7+8: JETZT erst 0.3 ohne Stil", Le[6] == (0.3, True) and Le[7] == (0.3, True), str(Le[6:8]))
+check("Emotion Runde 9+10: default", Le[8] == (None, False) and Le[9] == (None, False), str(Le[8:]))
+check("Emotion: Präfix-Opfer kommt NACH jeder temperature-Anhebung (Emotion so lang wie möglich halten)",
+      Le.index((0.3, True)) > max(i for i, s in enumerate(Le) if s[0] in (0.5, 0.6)))
+check("Ohne vs. mit Emotion: gegenläufige Reihenfolge des Präfix-Opfers",
+      B2.eskalationsleiter(0.3, hat_emotion=False).index((0.3, True))
+      < B2.eskalationsleiter(0.3, hat_emotion=True).index((0.3, True)))
+
+print("\n7d) batch_synthesize: JEDER Turn folgt SEINER Leiter (Fehler 2, 17.07.)")
+# Zwei Turns in EINEM Lauf, die beide Runde 1 scheitern, aber verschieden gerettet werden müssen:
+#   - Emotions-Turn („Oma lacht") darf den Präfix NICHT verlieren → muss über temperature 0.5 kommen.
+#   - Erzähler (keine Emotion) darf temperature NICHT ändern → muss über „ohne Präfix" bei 0.3 kommen.
+# Vor dem Fix folgten beide derselben globalen Stufe — der Emotions-Turn verlor sein Lachen.
+r_erz  = B2.TtsRequest.build(voice="Iapetus", text="Theo schaut auf das Bild.",
+                             style="STILMARKE_ERZ Sprich ruhig.", temperature=0.3, hat_emotion=False)
+r_emo  = B2.TtsRequest.build(voice="Vindemiatrix", text="Oma Rina lacht herzlich.",
+                             style="STILMARKE_LACH Sprich amüsiert und lachend.", temperature=0.3,
+                             hat_emotion=True)
+
+def _resp_fuer(ireq):
+    """Entscheidet je gesendetem Versuch, ob er 'durchkommt' — nach Identität + Stufe."""
+    md = ireq.metadata or {}
+    contents = ireq.contents or ""
+    temp = getattr(ireq.config, "temperature", None)
+    ist_bare = "STILMARKE" not in contents          # Präfix wurde weggelassen
+    if "Theo schaut" in contents:                   # Erzähler: nur OHNE Präfix (0.3 bleibt)
+        gut = ist_bare
+    else:                                            # Emotion: nur mit ANGEHOBENER temperature
+        gut = (temp is not None and temp >= 0.5) and not ist_bare
+    pcm = ton(1.2) if gut else None
+    if pcm is None:
+        cand = NS(content=NS(parts=None), finish_reason="OTHER")
+    else:
+        cand = NS(content=NS(parts=[NS(inline_data=NS(data=pcm))]), finish_reason="STOP")
+    return NS(metadata=md, error=None, response=NS(prompt_feedback=None, candidates=[cand]))
+
+class _FakeBatches:
+    def __init__(self): self._last = None
+    def create(self, model=None, src=None):
+        self._last = [_resp_fuer(ir) for ir in src]
+        return NS(name="fake-job-000000000001")
+    def get(self, name=None):
+        return NS(state=NS(name="JOB_STATE_SUCCEEDED"),
+                  dest=NS(inlined_responses=self._last))
+
+class _FakeClient:
+    def __init__(self): self.batches = _FakeBatches()
+
+prot = {}
+pcms, offen = B2.batch_synthesize(_FakeClient(), [r_erz, r_emo], Path(tempfile.mkdtemp()),
+                                  max_rounds=10, poll_seconds=0, qa=None,
+                                  eskalation=True, protokoll=prot)
+check("beide Turns vertont (nichts offen)", offen == [] and len(pcms) == 2, f"offen={len(offen)}")
+check("Erzähler kam durch", r_erz.key in pcms)
+check("Emotions-Turn kam durch", r_emo.key in pcms)
+p_erz, p_emo = prot.get(r_erz.key, {}), prot.get(r_emo.key, {})
+check("Erzähler: temperature BLIEB 0.3 (keine Betonungsänderung)", p_erz.get("temperature") == 0.3, str(p_erz))
+check("Erzähler: per 'ohne Stil-Präfix' gerettet", p_erz.get("ohne_stil") is True, str(p_erz))
+check("Emotions-Turn: temperature ANGEHOBEN (>=0.5)", (p_emo.get("temperature") or 0) >= 0.5, str(p_emo))
+check("Emotions-Turn: Präfix BEHALTEN (Lachen bleibt)", p_emo.get("ohne_stil") is False, str(p_emo))
+
 print("\n7b) Eskalierte Requests: Hash aendert sich, Wortlaut NICHT")
 r_basis = B2.TtsRequest.build(voice="Puck", text="Fuenfhundert Jahre?", style="Sprich ruhig.", temperature=0.3)
 r_esk   = B2.TtsRequest.build(voice="Puck", text="Fuenfhundert Jahre?", style="Sprich ruhig.", temperature=0.6)
@@ -214,6 +289,44 @@ check("Manifest: Turn 2 als ohne_stil markiert", m2["ohne_stil"] is True)
 m1 = [m for m in info["turns"] if m["i"] == 0][0]
 check("Manifest: Turn 1 NICHT eskaliert", m1["eskaliert"] is False and m1["temp"] == 0.3,
       str(m1["temp"]))
+
+print("\n8) Stille-Anteil + Trim (Fehler 1 vom 17.07.: korrekte Sprache in einem Meer aus Stille)")
+# stille_anteil
+check("Ton: fast kein Stille-Anteil", Q.stille_anteil(ton(2.0)) < 0.1, f"{Q.stille_anteil(ton(2.0)):.2f}")
+mix = ton(2.0) + b"\x00\x00" * int(Q.SAMPLE_RATE * 4.0)   # 2s Sprache + 4s Stille = 67%
+check("2s Ton + 4s Stille ~= 67%", 0.6 < Q.stille_anteil(mix) < 0.72, f"{Q.stille_anteil(mix):.2f}")
+# pruefe: >65% Stille faellt durch, obwohl Sprech-Zeit/Tempo/Pegel je einzeln stimmen
+ok, g = Q.pruefe(mix, "Dies sind vier Woerter", mit_whisper=False)
+check("Turn mit 67% Stille -> abgelehnt (der Blind-Spot)", not ok and "Stille" in g, g)
+mix_ok = ton(3.0) + b"\x00\x00" * int(Q.SAMPLE_RATE * 1.0)  # 3s + 1s = 25%, wie echte Turns
+ok, g = Q.pruefe(mix_ok, "Dies sind fuenf ganze Woerter", mit_whisper=False)
+check("Turn mit 25% Stille (wie echt) -> durch", ok, g)
+# trim_stille
+leer_vorne = b"\x00\x00" * int(Q.SAMPLE_RATE * 3.0) + ton(2.0) + b"\x00\x00" * int(Q.SAMPLE_RATE * 3.0)
+tr = Q.trim_stille(leer_vorne)
+check("Trim: 3s Stille + 2s Ton + 3s Stille -> ~2s", 1.8 < len(tr)/Q.BYTES_PER_SEC < 2.6,
+      f"{len(tr)/Q.BYTES_PER_SEC:.2f}s")
+check("Trim: reine Stille bleibt unangetastet (faengt die QA)",
+      Q.trim_stille(b"\x00\x00" * 24000) == b"\x00\x00" * 24000)
+mitte = ton(1.0) + b"\x00\x00" * int(Q.SAMPLE_RATE * 0.3) + ton(1.0)  # interne Pause bleibt
+tr2 = Q.trim_stille(mitte)
+check("Trim: interne Pause bleibt erhalten (kein Inhaltsverlust)",
+      2.0 < len(tr2)/Q.BYTES_PER_SEC < 2.6, f"{len(tr2)/Q.BYTES_PER_SEC:.2f}s")
+
+if (REPO / "articles/leo_final_20260717/pcm_cache/_index.json").exists():
+    CD8 = REPO / "articles/leo_final_20260717/pcm_cache"
+    idx8 = json.loads((CD8 / "_index.json").read_text(encoding="utf-8"))
+    def _pcm(turn_i):
+        k = [k for k, v in idx8.items() if v["turn"] == turn_i][0]
+        return (CD8 / f"{k}.pcm").read_bytes(), [v["text"] for kk, v in idx8.items() if v["turn"] == turn_i][0]
+    p3, t3 = _pcm(2)   # der 54-s-Defekt
+    ok, g = Q.pruefe(p3, t3)
+    check("realer 54s-Turn (97% Stille) -> abgelehnt", not ok and "Stille" in g, g)
+    tr3 = Q.trim_stille(p3)
+    ok2, g2 = Q.pruefe(tr3, t3)
+    check("nach Trim -> besteht QA (Sprache war korrekt)", ok2, g2)
+    check("nach Trim: Transkript trifft den Soll-Text",
+          Q.aehnlichkeit(t3, Q.transkribiere(tr3)) > 0.85)
 
 print("\n" + ("ALLE TESTS OK" if not fails else f"{len(fails)} FEHLER: {fails}"))
 sys.exit(1 if fails else 0)

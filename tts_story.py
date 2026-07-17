@@ -131,6 +131,13 @@ def _silence(seconds: float) -> bytes:
     return b"\x00\x00" * int(round(seconds * SAMPLE_RATE))
 
 
+def _trim_stille(pcm: bytes) -> bytes:
+    """Führende/abschließende Stille abschneiden (Detail + Begründung in tts_qa.trim_stille).
+    Lazy import: zieht faster-whisper NICHT mit (das lädt tts_qa erst bei der Transkription)."""
+    from tts_qa import trim_stille
+    return trim_stille(pcm, sample_rate=SAMPLE_RATE)
+
+
 def _loudnorm(pcm: bytes, sr: int = SAMPLE_RATE) -> bytes:
     """Gleicht die Lautheit eines Turns an (I=-16 LUFS). Wichtig, wenn Kind-Turns
     aus der Voice-Conversion und Erwachsenen-/Erzähler-Turns aus Flash gemischt
@@ -215,9 +222,13 @@ def _turn_requests(turns: list[dict], cast: dict, temperature: float | None):
         if not text:
             continue
         rolle = t.get("rolle", "erzähler")
+        # hat_emotion steuert die Eskalations-Reihenfolge: Turns MIT Regieanweisung behalten den
+        # Stil-Präfix so lange wie möglich (Temperatur zuerst hoch), sonst geht die Emotion
+        # verloren — genau das ließ am 17.07. „Oma Rina lacht" das Lachen einbüßen.
         out.append((i, TtsRequest.build(
             voice=_voice_for(rolle, cast), style=_style_for(rolle, t),
-            text=text, temperature=temperature, turn=i, rolle=rolle)))
+            text=text, temperature=temperature, turn=i, rolle=rolle,
+            hat_emotion=bool((t.get("emotion") or "").strip()))))
     return out
 
 
@@ -381,6 +392,13 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
             fehlende.append(i + 1)
             print(f"      ! Turn {i+1} fehlgeschlagen — übersprungen (--allow-incomplete)")
             continue
+        # Führende/abschließende Stille abschneiden — VOR der VC. Sonst macht die VC aus langer
+        # Stille hohes Rauschen (Fehler 1 vom 17.07.: Turn 3 = 48 s Stille → 48 s Rauschen nach VC).
+        # Interne Pausen bleiben; der Wortlaut ist unberührt.
+        roh_sek = len(pcm) / 2 / SAMPLE_RATE
+        pcm = _trim_stille(pcm)
+        if roh_sek - len(pcm) / 2 / SAMPLE_RATE > 1.0:
+            print(f"      Stille getrimmt: {roh_sek:.1f}s → {len(pcm)/2/SAMPLE_RATE:.1f}s")
         vc = False
         if rolle == "kind" and nico_converter is not None:
             conv = None

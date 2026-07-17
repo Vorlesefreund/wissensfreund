@@ -201,33 +201,34 @@ def _zuordnen(offen: list[TtsRequest], responses: list
 RUNDEN_JE_STUFE = 2
 
 
-def eskalationsleiter(basis_temp: float | None, runden_je_stufe: int = RUNDEN_JE_STUFE
-                      ) -> list[tuple[float | None, bool]]:
-    """[(temperature, ohne_stil_praefix)] je Runde.
+def eskalationsleiter(basis_temp: float | None, hat_emotion: bool = False,
+                      runden_je_stufe: int = RUNDEN_JE_STUFE) -> list[tuple[float | None, bool]]:
+    """[(temperature, ohne_stil_praefix)] je Versuch — PRO TURN, abhängig von seiner Emotion.
 
     WARUM ESKALIEREN statt nur wiederholen: Bei ``temperature=0.3`` ist die Token-Auswahl fast
-    deterministisch — das ist ihr Sinn (sie liefert die kanonische Betonung). Derselbe Text nimmt
-    deshalb fast immer denselben Pfad; führt der in eine Degenerations-Schleife, führt er beim
-    zehnten Versuch genauso hinein. Gemessen 2026-07-17: Trefferquote je Runde 38 % → 22 % → 5,6 %,
-    also praktisch Stillstand. Zehnmal denselben Request zu schicken und ein anderes Ergebnis zu
-    erwarten, ist keine Strategie. Erst eine GEÄNDERTE Eingabe ändert den Pfad.
+    deterministisch — das ist ihr Sinn (kanonische Betonung). Derselbe Text nimmt fast immer
+    denselben Pfad; führt der in eine Degenerations-Schleife, führt er beim zehnten Versuch genauso
+    hinein (gemessen 2026-07-17: Trefferquote 38 % → 22 % → 5,6 %). Erst eine GEÄNDERTE Eingabe
+    ändert den Pfad — belegt: 0.3 OHNE Stil-Präfix rettete 13 verschlossene Turns beim ersten Versuch.
 
-    Reihenfolge ist Absicht — der billigste Verlust zuerst:
-      1. temp unverändert (2×)            — reiner Zufallsanteil, kostet nichts.
-      2. temp unverändert, OHNE Stil-Präfix (2×) — ändert den Pfad, LÄSST die Betonung bei 0.3.
-         Es entfällt nur die feine Stilsteuerung. (Derselbe Hebel wie beim PROHIBITED_CONTENT-Block.)
-      3. temp 0.5, dann 0.6 (je 2×)       — ändert die Betonung. Erst hier wird das PO-Kriterium
-         angetastet: ein Turn mit anderer Betonung schlägt einen Turn, den es nicht gibt.
-      4. Default (2×)                     — läuft nachweislich immer (16/16), letzter Ausweg.
+    Zwei Dinge stehen auf dem Spiel und kollidieren:
+      - Der Stil-Präfix trägt die EMOTION (Regieanweisung „amüsiert, lachend"). Weglassen rettet den
+        Turn, killt aber die Emotion — am 17.07. verlor „Oma Rina lacht" so ihr Lachen.
+      - Die temperature trägt die BETONUNG. Anheben rettet auch, ändert aber die Betonung leicht.
 
-    Eskalierte Turns stehen hinterher im Manifest (``temp`` je Turn) → der PO muss nicht 37 Turns
-    hören, sondern nur die Handvoll Ausnahmen.
+    Deshalb hängt die Reihenfolge davon ab, was der Turn zu verlieren hat:
+      - MIT Emotion  → temperature zuerst hoch (Präfix/Emotion behalten), Präfix erst ganz zuletzt:
+        0.3 → 0.5 → 0.6 (alle MIT Präfix) → 0.3 ohne Präfix → default.
+      - OHNE Emotion → Präfix früh weg (kostet nichts, ändert Pfad, behält Betonung 0.3):
+        0.3 → 0.3 ohne Präfix → 0.5 → 0.6 → default.
     """
     if basis_temp is None:
         return [(None, False)] * (runden_je_stufe * 5)      # nichts zu eskalieren
-    stufen: list[tuple[float | None, bool]] = [(basis_temp, False), (basis_temp, True)]
-    stufen += [(t, False) for t in (0.5, 0.6) if t > basis_temp]
-    stufen.append((None, False))
+    hoch = [t for t in (0.5, 0.6) if t > basis_temp]
+    if hat_emotion:
+        stufen = [(basis_temp, False)] + [(t, False) for t in hoch] + [(basis_temp, True), (None, False)]
+    else:
+        stufen = [(basis_temp, False), (basis_temp, True)] + [(t, False) for t in hoch] + [(None, False)]
     return [s for s in stufen for _ in range(runden_je_stufe)]
 
 
@@ -257,31 +258,37 @@ def batch_synthesize(client, reqs: list[TtsRequest], cache_dir: Path,
     offen = [r for k, r in uniq.items() if k not in pcms]
     bare_keys: set[str] = set()
     basis_temp = offen[0].temperature if offen else None
-    leiter = eskalationsleiter(basis_temp) if eskalation else []
+    # PRO Turn eine eigene Leiter (emotions-abhängig) + ein eigener Versuchszähler. Nur so kann ein
+    # Emotions-Turn temperature hochziehen, während ein emotionsfreier daneben den Präfix fallenlässt.
+    leiter_je_key = {r.key: (eskalationsleiter(basis_temp, r.meta.get("hat_emotion", False))
+                             if eskalation else []) for r in offen}
+    versuch_nr: dict[str, int] = {r.key: 0 for r in offen}
 
     for runde in range(1, max_rounds + 1):
         if not offen:
             break
-        # Die Leiter bestimmt, WAS diese Runde rausgeht. Ohne sie: unveränderte Wiederholung.
-        temp, ohne_stil = leiter[runde - 1] if runde - 1 < len(leiter) else (basis_temp, False)
-        # Neue Requests mit der Stufen-temperature: die geht in den Hash ein → eigener Cache-Eintrag,
-        # kein Vermischen von Audio verschiedener Stufen. urspruenglich[versuch.key] = original.key.
-        versuche, urspruenglich = [], {}
+        # Jeder offene Turn wählt seine Stufe aus SEINER Leiter nach SEINEM Versuchszähler.
+        versuche, urspruenglich, stufe_je_versuch = [], {}, {}
         for r in offen:
+            leiter = leiter_je_key.get(r.key) or []
+            n = versuch_nr[r.key]
+            temp, ohne_stil = leiter[n] if n < len(leiter) else (basis_temp, False)
+            # Stufen-temperature geht in den Hash → eigener Cache-Eintrag, kein Vermischen der Stufen.
             v = (r if temp == r.temperature else
                  TtsRequest.build(voice=r.voice, text=r.text, style=r.style,
                                   temperature=temp, **r.meta))
             versuche.append(v)
             urspruenglich[v.key] = r.key
-        # bare_keys sammelt ORIGINAL-Keys (aus BLOCK-Faellen) — hier auf die Versuchs-Keys
-        # uebersetzen, sonst verliert ein geblockter Turn seinen Ausweg, sobald er eskaliert.
+            stufe_je_versuch[v.key] = (temp, ohne_stil)
+        # bare_keys sammelt ORIGINAL-Keys (aus BLOCK-Faellen) → auf Versuchs-Keys übersetzen, plus
+        # die Turns, deren Stufe „ohne Stil-Präfix" vorsieht.
         runden_bare = {v.key for v in versuche if urspruenglich[v.key] in bare_keys}
-        if ohne_stil:
-            runden_bare |= {v.key for v in versuche}
-        if runde > 1 and (temp != basis_temp or ohne_stil):
-            log.info("Runde %d/%d: %d Einheiten — ESKALATION: temperature=%s%s",
-                     runde, max_rounds, len(versuche), temp,
-                     " OHNE Stil-Präfix" if ohne_stil else "")
+        runden_bare |= {vk for vk, (_, os) in stufe_je_versuch.items() if os}
+        eskaliert_n = sum(1 for vk, (t, os) in stufe_je_versuch.items()
+                          if t != basis_temp or os)
+        if runde > 1 and eskaliert_n:
+            log.info("Runde %d/%d: %d Einheiten (%d davon eskaliert)",
+                     runde, max_rounds, len(versuche), eskaliert_n)
         else:
             log.info("Runde %d/%d: %d Einheiten einreichen …", runde, max_rounds, len(versuche))
         try:
@@ -339,6 +346,9 @@ def batch_synthesize(client, reqs: list[TtsRequest], cache_dir: Path,
                 # Deterministischer Block: erneut senden bringt nichts, nackter Text schon.
                 bare_keys.add(r.key)
             naechste.append(r)
+        # Jeder Turn, der erneut ran muss, rückt eine Stufe auf SEINER Leiter vor.
+        for r in naechste:
+            versuch_nr[r.key] = versuch_nr.get(r.key, 0) + 1
         offen = naechste
 
     if offen:
