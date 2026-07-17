@@ -13,7 +13,7 @@ Dazu: temperature-Weitergabe, Vollständigkeits-Fahne, Batch-Pfad (Gate VOR der 
 
 TTS und Converter sind gefälscht → kein Netz, keine Kosten, keine GPU.
 """
-import sys, tempfile, wave
+import itertools, sys, tempfile, wave
 from pathlib import Path
 REPO = Path(__file__).resolve().parent.parent      # Repo-Wurzel aus dem Skriptpfad
 sys.path.insert(0, str(REPO))
@@ -49,7 +49,23 @@ _patch_client()
 # Tests 1-6b pruefen die SCHUTZLOGIK, nicht den Synthese-Weg → dort sync (kein Batch-API-Call).
 # Test 6c schaltet auf den echten Default (batch) mit gefaelschtem batch_synthesize zurueck.
 _vertone = T.vertone
-T.vertone = lambda *a, **kw: _vertone(*a, **{**{"synth_mode": "sync"}, **kw})
+_cache_nr = itertools.count()
+
+def _vertone_isoliert(*a, **kw):
+    kw.setdefault("synth_mode", "sync")
+    # Das Fake-TTS liefert 0,1 s Stille — die echte QA (Whisper/Pegel/Tempo) lehnt das zu Recht ab.
+    # Diese Tests pruefen die SCHUTZLOGIK, nicht die QA → QA aus. Eigene QA-Tests: Abschnitt 8.
+    kw.setdefault("qa", False)
+    # Seit der Sync-Pfad den PCM-Cache nutzt, teilen sich sonst ALLE Tests einen Ordner
+    # (cache_dir leitet sich aus out_wav.parent ab, und alle WAVs liegen in TMP). Test 5 saehe
+    # dann Cache-Treffer aus Test 4 → synth_pcm wird nie gerufen, temperature nie geprueft; der
+    # Fehlschlag-Test bekaeme seinen "kaputten" Turn fertig aus dem Cache. Jeder Sync-Test ist ein
+    # eigenes Szenario → eigener Cache. Batch-Tests bleiben unangetastet (sie pruefen den Default).
+    if kw["synth_mode"] == "sync":
+        kw.setdefault("pcm_cache", TMP / f"cache_{next(_cache_nr)}")
+    return _vertone(*a, **kw)
+
+T.vertone = _vertone_isoliert
 
 fails = []
 def check(name, cond, detail=""):
@@ -140,6 +156,8 @@ check("leerer Turn macht Lauf NICHT unvollstaendig", info["vollstaendig"] is Tru
 
 print("\n6c) Batch-Pfad: Gate greift VOR der VC (keine GPU-Arbeit an Unvollstaendigem)")
 T.vertone = _vertone          # ab hier der echte Default (batch)
+_ohne_qa = lambda *a, **kw: _vertone(*a, **{"qa": False, **kw})   # Fake-PCM besteht keine echte QA
+T.vertone = _ohne_qa
 import inspect
 _sig = inspect.signature(_vertone)
 check("Standard synth_mode ist 'batch'", _sig.parameters["synth_mode"].default == "batch",
@@ -192,6 +210,26 @@ try:
     check("unbekannter synth_mode -> ValueError", False)
 except ValueError:
     check("unbekannter synth_mode -> ValueError", True)
+
+print("\n6d) Sync-Pfad nutzt den PCM-Cache (Wiederaufsetzen nach Abbruch)")
+# Warum das zaehlt: mit temperature=0.3 haengt ~jeder 2.-3. Call. Ohne Cache im Sync-Pfad begann
+# jeder Wiederholungslauf bei null — der Abbruch vom 17.07. warf 11 fertige Turns weg.
+cache_gt = TMP / "sync_cache_test"
+CALLS.clear()
+T.vertone(SEG, TMP / "q.wav", nico_converter=good_vc, pcm_cache=cache_gt, synth_mode="sync")
+n_erst = len(CALLS)
+check("1. Lauf ruft die API fuer alle 3 Turns", n_erst == 3, str(n_erst))
+check("Cache-Dateien liegen da", len(list(cache_gt.glob("*.pcm"))) == 3,
+      str(len(list(cache_gt.glob("*.pcm")))))
+CALLS.clear()
+info = T.vertone(SEG, TMP / "r.wav", nico_converter=good_vc, pcm_cache=cache_gt, synth_mode="sync")
+check("2. Lauf ruft die API GAR NICHT (alles aus Cache)", len(CALLS) == 0, str(len(CALLS)))
+check("2. Lauf ist trotzdem vollstaendig", info["vollstaendig"] is True)
+check("2. Lauf rendert alle 3 Turns", info["n_rendered"] == 3, str(info["n_rendered"]))
+# Ein anderer temperature-Wert MUSS am Cache vorbei (sonst liefert er Audio der falschen Stufe).
+CALLS.clear()
+T.vertone(SEG, TMP / "s.wav", nico_converter=good_vc, pcm_cache=cache_gt, temperature=0.9, synth_mode="sync")
+check("anderer temperature-Wert -> KEIN Cache-Treffer", len(CALLS) == 3, str(len(CALLS)))
 
 print("\n7) WAV wird geschrieben + Timeout-Konstanten gesetzt")
 check("WAV existiert", (TMP / "d.wav").exists())

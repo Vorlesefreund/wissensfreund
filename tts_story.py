@@ -15,7 +15,7 @@ Stimmen (Prebuilt): Erzähler=Iapetus · Kind ♂=Puck ♀=Leda · Erwachsener �
   python -X utf8 tts_story.py --checkpoint <cp.json> --thema "Leonardo da Vinci" --model claude-sonnet-5 --out-dir DIR
 """
 from __future__ import annotations
-import argparse, json, re, subprocess, sys, time, wave
+import argparse, json, logging, random, re, subprocess, sys, time, wave
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -27,6 +27,9 @@ GAP_TURN    = 0.35           # Pause zwischen Turns desselben Sprechers / kurzer
 GAP_SCENE   = 0.75           # Pause an Szenen-/Absatzgrenzen
 
 TTS_TIMEOUT_MS = 60_000      # Das SDK hat KEIN Default-Timeout — ohne das hängt ein Call unbegrenzt.
+RETRY_BASE_S   = 6           # Backoff: 6s → 12s → 24s … (+ bis zu 30 % Jitter)
+RETRY_MAX_S    = 90
+QA_VERSUCHE    = 3           # Sync: so oft neu synthetisieren, wenn die QA Ausschuss meldet.
 TTS_TEMPERATURE = 0.3        # Gilt für ALLE Rollen, auch Kind-Turns mit VC.
                              # Rohe Quelle: default ±54 Hz Grundton-Streuung, t0.3 ±16 Hz.
                              # NACH der VC ist die Tonhöhe temperature-unabhängig ruhig (±2–11 Hz,
@@ -166,7 +169,7 @@ def _tts_call(client, voice: str, content: str, temperature: float | None = None
     return pcm, block
 
 
-def synth_pcm(client, voice: str, style: str, text: str, retries: int = 3,
+def synth_pcm(client, voice: str, style: str, text: str, retries: int = 6,
               temperature: float | None = None) -> bytes | None:
     """Rendert Text als PCM — robust gegen den Safety-False-Positive.
 
@@ -193,7 +196,13 @@ def synth_pcm(client, voice: str, style: str, text: str, retries: int = 3,
             print(f"      TTS leer (kein Block) — Retry {attempt+1}")   # transient
         except Exception as e:
             print(f"      TTS-Retry {attempt+1}: {str(e)[:60]}")
-        time.sleep(6)
+        if attempt < retries - 1:
+            # Exponentiell + Jitter: gegen 500/503/504-Wellen ist starres Warten chancenlos —
+            # alle Turns liefen sonst im Gleichschritt in dieselbe ueberlastete Minute.
+            pause = min(RETRY_BASE_S * (2 ** attempt), RETRY_MAX_S)
+            pause += random.uniform(0, pause * 0.3)
+            print(f"      … {pause:.0f}s warten")
+            time.sleep(pause)
     return None
 
 
@@ -212,10 +221,49 @@ def _turn_requests(turns: list[dict], cast: dict, temperature: float | None):
     return out
 
 
+def _qa_pruefer(aktiv: bool):
+    """(pcm, text) -> (ok, grund). None = QA aus."""
+    if not aktiv:
+        return None
+    from tts_qa import pruefe
+    return lambda pcm, text: pruefe(pcm, text, sample_rate=SAMPLE_RATE)
+
+
+def _sync_pcm_cached(client, cache_dir: Path, req, voice: str, style: str, text: str,
+                     temperature: float | None, qa=None) -> bytes | None:
+    """Sync-Synthese MIT Cache: derselbe Inhalts-Hash wie im Batch-Pfad (tts_batch.TtsRequest).
+
+    Ein fertiger Turn wird nie zweimal bezahlt — entscheidend, weil mit temperature=0.3 rund jeder
+    2.-3. Call haengt und ein Wiederholungslauf sonst bei null anfinge. Cache-Treffer ueberspringen
+    den Call komplett; Modell/Stimme/Stil/temperature stecken im Hash, also kann kein Treffer aus
+    einer anderen Konfiguration stammen."""
+    from tts_batch import _cache_path
+    if req is not None:
+        p = _cache_path(cache_dir, req.key)
+        if p.exists() and p.stat().st_size > 0:
+            print("      (aus Cache)")
+            return p.read_bytes()
+    # QA-Ausschuss wird wie ein Fehlschlag behandelt → neuer Versuch. Nicht cachen: ein kaputtes
+    # PCM im Cache waere fuer immer ausgeliefert (der Hash kennt die Qualitaet nicht).
+    for versuch in range(QA_VERSUCHE):
+        pcm = synth_pcm(client, voice, style, text, temperature=temperature)
+        if pcm is None or qa is None:
+            break
+        ok, grund = qa(pcm, text)
+        if ok:
+            break
+        print(f"      QA durchgefallen ({grund}) — neu synthetisieren "
+              f"[{versuch + 1}/{QA_VERSUCHE}]")
+        pcm = None
+    if pcm and req is not None:
+        _cache_path(cache_dir, req.key).write_bytes(pcm)
+    return pcm
+
+
 def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | None = None,
             allow_raw_kind: bool = False, temperature: float | None = TTS_TEMPERATURE,
             allow_incomplete: bool = False, synth_mode: str = "batch",
-            pcm_cache: Path | None = None) -> dict:
+            pcm_cache: Path | None = None, qa: bool = True) -> dict:
     """Rendert alle Turns und schneidet sie zu einer WAV. Gibt ein Manifest zurück.
 
     nico_converter: Callable ``(pcm: bytes, sr: int) -> bytes``. KIND-Turns gehen durch diese
@@ -275,13 +323,31 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
     # ── Synthese vorab (Batch): ALLE Turns auf einmal, mit Cache + Nachreich-Runden ──
     # Das Vollstaendigkeits-Gate greift HIER — vor der VC. Sonst faerbt die (teure, GPU-
     # gebundene) Umfaerbung Audio um, aus dem ohnehin kein Artefakt werden darf.
+    # Der Cache gilt fuer BEIDE Pfade. Frueher hing er ganz im batch-Zweig: --pcm-cache wurde im
+    # Sync-Modus stillschweigend ignoriert → ein Abbruch bei Turn 12 warf 11 fertige Turns weg.
+    # Mit temperature=0.3 haengt ~jeder 2.-3. Call, also ist Wiederaufsetzen der Normalfall.
+    cache_dir = pcm_cache or (out_wav.parent / "pcm_cache")
+    paare = _turn_requests(turns, cast, temperature)
+    req_by_turn = {i: r for i, r in paare}
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    # Der Cache heisst nach Inhalts-Hashes. Ohne diese Zuordnung ist nach einem Abbruch nicht mehr
+    # feststellbar, WELCHE Turns geklemmt haben — die Segmentierung lebt sonst nur im Speicher.
+    (cache_dir / "_index.json").write_text(json.dumps(
+        {r.key: {"turn": i, "rolle": r.meta.get("rolle"), "voice": r.voice, "text": r.text}
+         for i, r in paare}, ensure_ascii=False, indent=2), encoding="utf-8")
+
+    qa_fn = _qa_pruefer(qa)
     vorab: dict[int, bytes] = {}
     if synth_mode == "batch":
         from tts_batch import batch_synthesize
-        cache_dir = pcm_cache or (out_wav.parent / "pcm_cache")
-        paare = _turn_requests(turns, cast, temperature)
-        pcms, fehlgeschlagen = batch_synthesize(client, [r for _, r in paare], cache_dir=cache_dir)
+        pcms, fehlgeschlagen = batch_synthesize(client, [r for _, r in paare], cache_dir=cache_dir,
+                                                qa=qa_fn)
         vorab = {i: pcms[r.key] for i, r in paare if r.key in pcms}
+        if fehlgeschlagen:
+            (cache_dir / "_fehlgeschlagen.json").write_text(json.dumps(
+                [{"key": r.key, "turn": r.meta.get("turn"), "rolle": r.meta.get("rolle"),
+                  "voice": r.voice, "style": r.style, "text": r.text}
+                 for r in fehlgeschlagen], ensure_ascii=False, indent=2), encoding="utf-8")
         if fehlgeschlagen and not allow_incomplete:
             raise RuntimeError(
                 f"{len(fehlgeschlagen)} von {len(paare)} Turns konnten auch nach den Nachreich-Runden "
@@ -300,8 +366,11 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
         voice = _voice_for(rolle, cast)
         style = _style_for(rolle, t)
         print(f"    [{i+1:02}/{len(turns)}] {rolle:12} {voice:12} \"{text[:48]}…\"")
-        pcm = vorab.get(i) if synth_mode == "batch" else \
-            synth_pcm(client, voice, style, text, temperature=temperature)
+        if synth_mode == "batch":
+            pcm = vorab.get(i)
+        else:
+            pcm = _sync_pcm_cached(client, cache_dir, req_by_turn.get(i),
+                                   voice, style, text, temperature, qa=qa_fn)
         if pcm is None:
             if not allow_incomplete:
                 raise RuntimeError(
@@ -367,6 +436,17 @@ def _story_from_checkpoint(cp: Path, thema: str, model: str) -> str:
 
 
 def main():
+    # Die Fortschritts-Prints enthalten → und Umlaute; eine cp1252-Konsole killt sonst den
+    # ganzen Lauf an einer Ausgabezeile. Ohne basicConfig verwirft Python zudem jedes
+    # log.info aus tts_batch — ein stundenlanger Batch-Lauf liefe dann ohne Rundenmeldung.
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(encoding="utf-8", errors="replace")
+        except (AttributeError, ValueError):
+            pass
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s",
+                        datefmt="%H:%M:%S")
+
     ap = argparse.ArgumentParser()
     ap.add_argument("--story-file", help="Roh-Prosa der Geschichte (txt) — direkt vertonen")
     ap.add_argument("--checkpoint", help="Stage-1-Checkpoint (alternativ: frisch erzeugen)")
@@ -395,18 +475,49 @@ def main():
     ap.add_argument("--pcm-cache", help="Cache-Ordner für synthetisierte Turns "
                                         "(Standard: <out-dir>/pcm_cache; für Mehr-Themen-Läufe "
                                         "einen gemeinsamen Ordner angeben)")
+    ap.add_argument("--no-qa", action="store_true",
+                    help="Qualitaetspruefung (lokales Whisper + Pegel + Tempo) abschalten. "
+                         "NUR fuer Tests — ohne QA rutscht Stille/falsch zugeordnetes Audio durch.")
+    ap.add_argument("--tts-model", default=TTS_MODEL,
+                    help=f"TTS-Modell (Standard: {TTS_MODEL}). Fuer A/B-Vergleiche, z.B. "
+                         f"gemini-2.5-flash-preview-tts. Geht in den Cache-Hash ein → "
+                         f"kein Vermischen verschiedener Modelle im selben Cache.")
+    ap.add_argument("--seg-file", help="Fertige Segmentierung (JSON) statt frisch segmentieren. "
+                                       "Macht einen Wiederholungslauf reproduzierbar und spart "
+                                       "den Seg-Call. Jeder Lauf schreibt seine Segmentierung "
+                                       "nach <out-dir>/<titel>_segmentierung.json.")
     args = ap.parse_args()
 
-    if args.story_file:
-        story = Path(args.story_file).read_text(encoding="utf-8").strip()
-    elif args.checkpoint and args.thema:
-        print(f"Erzeuge Geschichte ({args.model}) …")
-        story = _story_from_checkpoint(Path(args.checkpoint), args.thema, args.model)
-    else:
-        sys.exit("Entweder --story-file ODER (--checkpoint + --thema) angeben.")
+    # Das Modell steckt als Konstante in beiden Modulen (Sync-Call hier, Cache-Hash + Einreichung
+    # in tts_batch). Beide umstellen, sonst rendert der Sync-Pfad Modell A und der Hash behauptet B.
+    if args.tts_model != TTS_MODEL:
+        globals()["TTS_MODEL"] = args.tts_model
+        import tts_batch
+        tts_batch.TTS_MODEL = args.tts_model
+        print(f"TTS-Modell: {args.tts_model}")
 
-    print(f"Segmentiere ({args.seg_model}) …")
-    seg = segment_story(story, args.seg_model)
+    out_dir = Path(args.out_dir)
+    safe = re.sub(r"[^\w]+", "_", args.titel).strip("_")
+
+    if args.seg_file:
+        seg = json.loads(Path(args.seg_file).read_text(encoding="utf-8"))
+        print(f"Segmentierung aus {args.seg_file} ({len(seg.get('turns', []))} Turns)")
+    else:
+        if args.story_file:
+            story = Path(args.story_file).read_text(encoding="utf-8").strip()
+        elif args.checkpoint and args.thema:
+            print(f"Erzeuge Geschichte ({args.model}) …")
+            story = _story_from_checkpoint(Path(args.checkpoint), args.thema, args.model)
+        else:
+            sys.exit("Entweder --story-file ODER (--checkpoint + --thema) ODER --seg-file angeben.")
+
+        print(f"Segmentiere ({args.seg_model}) …")
+        seg = segment_story(story, args.seg_model)
+        # Vor der teuren Synthese sichern: sonst ist nach einem Abbruch weder nachvollziehbar,
+        # WAS vertont wurde, noch laesst sich derselbe Lauf wiederholen (Seg ist nicht deterministisch).
+        out_dir.mkdir(parents=True, exist_ok=True)
+        (out_dir / f"{safe}_segmentierung.json").write_text(
+            json.dumps(seg, ensure_ascii=False, indent=2), encoding="utf-8")
 
     nico_converter = None
     if args.nico_ref:
@@ -417,8 +528,6 @@ def main():
         nico_converter = OpenVoiceNicoConverter(
             args.nico_ref, args.nico_ckpt, tau=args.nico_tau, openvoice_path=args.openvoice_path)
 
-    out_dir = Path(args.out_dir)
-    safe = re.sub(r"[^\w]+", "_", args.titel).strip("_")
     wav = out_dir / f"{safe}.wav"
     print(f"Vertone → {wav}")
     temp = None if args.tts_temperature < 0 else args.tts_temperature
@@ -426,7 +535,8 @@ def main():
                    allow_raw_kind=args.allow_raw_kind, temperature=temp,
                    allow_incomplete=args.allow_incomplete,
                    synth_mode="sync" if args.sync else "batch",
-                   pcm_cache=Path(args.pcm_cache) if args.pcm_cache else None)
+                   pcm_cache=Path(args.pcm_cache) if args.pcm_cache else None,
+                   qa=not args.no_qa)
 
     (out_dir / f"{safe}_manifest.json").write_text(
         json.dumps(info, ensure_ascii=False, indent=2), encoding="utf-8")

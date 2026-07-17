@@ -51,7 +51,13 @@ SAMPLE_RATE = 24000
 # Batch-Endzustände (SUCCEEDED heißt nur "Job fertig", NICHT "alle Antworten brauchbar" — s. oben).
 DONE_STATES = {"JOB_STATE_SUCCEEDED", "JOB_STATE_FAILED", "JOB_STATE_CANCELLED", "JOB_STATE_EXPIRED"}
 
-MAX_ROUNDS = 3          # Runde 1 + 2 Nachreich-Runden. Danach: laut abbrechen statt still liefern.
+# Runde 1 + 9 Nachreich-Runden. Danach: laut abbrechen statt still liefern.
+# Warum 10: mit temperature=0.3 haengt rund jeder 2.-3. Call (gemessen 2026-07-17: 19/32 OK; die
+# Quote schwankt mit der Tageslast). Der Hänger ist pro Call zufaellig — derselbe Text kommt beim
+# naechsten Versuch meist durch. Bei ~40 % Ausfall bleiben nach 3 Runden ~6 % uebrig (= die 7 Loecher
+# vom 16.07.), nach 10 Runden Promille. Leere Antworten kosten keine Output-Tokens → Runden sind
+# faktisch gratis, sie kosten nur Wartezeit. Siehe auch RETRY-Kommentar in tts_story.synth_pcm.
+MAX_ROUNDS = 10
 POLL_SECONDS = 30
 POLL_TIMEOUT = 6 * 3600  # Batch darf lange dauern (2 Sätze brauchten 15 Min) — aber nicht ewig.
 
@@ -155,13 +161,54 @@ def poll_batch(client, name: str, poll_seconds: int = POLL_SECONDS,
     return job, "TIMEOUT"
 
 
+def _zuordnen(offen: list[TtsRequest], responses: list
+              ) -> tuple[list[tuple[TtsRequest, object]], list[TtsRequest]]:
+    """([(request, response)], [requests ohne Antwort]).
+
+    WARUM NICHT ``zip``: Die Reihenfolge ist eine ANNAHME. Lässt der Job eine Antwort aus (statt sie
+    leer zu liefern), verrutscht ab dieser Stelle ALLES — Oma Rina bekäme Theos Audio, jeder Turn
+    hätte Audio, und das Vollständigkeits-Gate meldete zufrieden „vollständig". Ein stiller
+    Datenfehler in einer Datei, die niemand mehr anhört.
+
+    Jeder Request trägt ``metadata={"key": …}``, und die API gibt das Feld zurück → daran wird
+    zugeordnet. Fehlt das Feld (SDK-/Backend-Änderung), ist die Reihenfolge nur dann vertretbar,
+    wenn die Anzahl exakt passt. Passt sie nicht, wird NICHTS zugeordnet: die ganze Runde gilt als
+    offen und geht erneut raus. Lieber eine Runde verlieren als Audio am falschen Turn.
+    """
+    per_key: dict[str, object] = {}
+    for rw in responses:
+        md = getattr(rw, "metadata", None) or {}
+        k = md.get("key") if isinstance(md, dict) else None
+        if k:
+            per_key[k] = rw
+    if per_key:
+        paare = [(r, per_key[r.key]) for r in offen if r.key in per_key]
+        ohne = [r for r in offen if r.key not in per_key]
+        if ohne:
+            log.warning("%d von %d Requests ohne Antwort im Job (per metadata erkannt)",
+                        len(ohne), len(offen))
+        return paare, ohne
+    if len(responses) == len(offen):
+        # Kein metadata, aber Anzahl passt → Reihenfolge ist die einzige Information, die es gibt.
+        log.info("Antworten ohne metadata — Zuordnung per Reihenfolge (Anzahl stimmt: %d)", len(offen))
+        return list(zip(offen, responses)), []
+    log.error("Antwortzahl %d != Requestzahl %d UND kein metadata → Zuordnung unmöglich. "
+              "Runde verworfen (statt Audio am falschen Turn abzulegen).",
+              len(responses), len(offen))
+    return [], list(offen)
+
+
 def batch_synthesize(client, reqs: list[TtsRequest], cache_dir: Path,
-                     max_rounds: int = MAX_ROUNDS, poll_seconds: int = POLL_SECONDS
-                     ) -> tuple[dict[str, bytes], list[TtsRequest]]:
+                     max_rounds: int = MAX_ROUNDS, poll_seconds: int = POLL_SECONDS,
+                     qa=None) -> tuple[dict[str, bytes], list[TtsRequest]]:
     """Synthetisiert alle Requests. Gibt ({key: pcm}, [nicht geschaffte Requests]) zurück.
 
     Der Aufrufer MUSS die zweite Liste prüfen — ist sie nicht leer, fehlt Audio, und daraus darf
     kein Artefakt gebaut werden (s. Vollständigkeits-Gate in tts_story.vertone).
+
+    qa: ``(pcm, text) -> (ok, grund)``. Durchgefallenes Audio wird wie eine leere Antwort behandelt:
+        nicht cachen, nächste Runde. Ohne das kann ein Turn mit gueltigem Blob, aber 54 s Stille
+        durchrutschen (real passiert) — "Bytes vorhanden" ist KEIN Qualitaetsmerkmal.
     """
     cache_dir.mkdir(parents=True, exist_ok=True)
     uniq: dict[str, TtsRequest] = {r.key: r for r in reqs}   # gleicher Inhalt = ein Call
@@ -189,16 +236,26 @@ def batch_synthesize(client, reqs: list[TtsRequest], cache_dir: Path,
             continue
 
         responses = getattr(getattr(job, "dest", None), "inlined_responses", None) or []
-        if len(responses) != len(offen):
-            log.warning("Antwortzahl %d != Requestzahl %d — Zuordnung per Reihenfolge",
-                        len(responses), len(offen))
-        naechste: list[TtsRequest] = []
-        for r, resp_wrap in zip(offen, responses):
+        paare, ohne_antwort = _zuordnen(offen, responses)
+        naechste: list[TtsRequest] = list(ohne_antwort)
+        for r in ohne_antwort:
+            log.warning("  %s: keine Antwort im Job → Runde %d", r.key[:8], runde + 1)
+        for r, resp_wrap in paare:
             if getattr(resp_wrap, "error", None):
                 log.warning("  %s: Fehler %s", r.key[:8], str(resp_wrap.error)[:80])
                 naechste.append(r)
                 continue
             pcm, grund = _extract(getattr(resp_wrap, "response", None))
+            if pcm and qa is not None:
+                # Ausschuss verhaelt sich wie eine leere Antwort: NICHT cachen (ein kaputtes PCM im
+                # Cache waere fuer immer ausgeliefert — der Hash kennt nur Text/Stimme/Stil/temp,
+                # nicht die Qualitaet), sondern in die naechste Runde. Real gefangen: ein Turn kam
+                # als 54 s STILLE zurueck, mit gueltigem Audio-Blob und JOB_STATE_SUCCEEDED.
+                ok, qa_grund = qa(pcm, r.text)
+                if not ok:
+                    log.warning("  %s: QA durchgefallen (%s) → Runde %d", r.key[:8], qa_grund, runde + 1)
+                    naechste.append(r)
+                    continue
             if pcm:
                 _cache_path(cache_dir, r.key).write_bytes(pcm)
                 pcms[r.key] = pcm
@@ -208,8 +265,6 @@ def batch_synthesize(client, reqs: list[TtsRequest], cache_dir: Path,
                 # Deterministischer Block: erneut senden bringt nichts, nackter Text schon.
                 bare_keys.add(r.key)
             naechste.append(r)
-        # Requests ohne Antwort (kürzere Liste) gehören ebenfalls in die nächste Runde.
-        naechste.extend(offen[len(responses):])
         offen = naechste
 
     if offen:

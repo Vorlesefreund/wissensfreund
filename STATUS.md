@@ -1,11 +1,45 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-16T17:30:52Z -->
+<!-- updated: 2026-07-17T07:24:44Z -->
 <!-- Ältere Stände (verbatim) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
 **Wissensfreund:** Flutter-App für Kinder (Stufen S1 4–6, S2 7–9, S3 10–12), KI-Artikel streng aus
 geladenem Artikel-Quelltext (nie Trainingswissen). Zwei Pipelines: alter Monolith (Produktion) + neue
 modulare Pass-Pipeline (`scripts/pipeline_new.py`, Fallback-sicher).
+
+## Zuletzt abgeschlossen (2026-07-17)
+
+- **URSACHE GEFUNDEN: `temperature` killt die TTS — nicht die Batch-API, nicht das Modell.**
+  Kontrolliert gemessen (2 Stichproben, 32 Calls, Stimmen **Puck UND Iapetus**, gepaart/abwechselnd,
+  Reihenfolge im Paar gedreht → Tageslast als Störfaktor ausgeschlossen, identischer Text):
+  **ohne `temperature` 16/16 Audio, 0 Fehler · mit `temperature=0.3` nur 6/16** (Rest 504/500 bei 90 s).
+  Der Parameter ist gültig, macht die Generierung aber so langsam, dass sie ins Timeout läuft.
+  **EIN Fehler, ZWEI Masken:** Sync → 504/500; Batch kann kein Timeout melden → `finish_reason=OTHER`
+  mit `parts=None`. Deshalb sah es wie ein Batch-Problem aus. Belege: `articles/leo_batch_20260716/
+  temp_probe.log` + `temp_probe_paired.log`. **Dreifach unabhängig bestätigt:** (1) die Messung,
+  (2) Batch-Job mit temp = 4 von 17 Einheiten, (3) Sync-Render mit temp stirbt bei Turn 12/37 —
+  ohne temp **37/37, NULL Retries** (2.5 *und* 3.1). → [[reference_tts_gotchas]] korrigiert.
+  Der Hinweis stand seit 16.07. in den Notizen („temperature-Requests zeitweise 504-instabil") und
+  wurde mit „der Parameter ist aber gültig" abgetan — der Fehlschluss kostete einen halben Tag.
+- **Auslöser der Fehlersuche war die PO-Frage** „warum lief die MP3 vom 15.07. fehlerfrei?" → Zeitstrahl:
+  MP3 **15.07. 11:29**, Batch-Umstellung `a2ac2e0` **16.07. 19:27**, `temperature 0.3` `232cfa9`
+  **16.07. 18:48**. Zwei Variablen am selben Abend geändert → der Verdacht traf den falschen Commit.
+- **A/B-Renders für das PO-Ohr liegen auf dem Desktop** (`_tts_vergleich_20260717/`, + LIESMICH):
+  `A_2.5flash_ohne_temp.m4a` vs `B_3.1flash_ohne_temp.m4a` — identische Segmentierung, beide ohne temp,
+  beide 37/37. **OFFEN: PO-Hörurteil.** Theo klingt in beiden roh (kein GPU-Pod) → nur Erzähler/Oma
+  bewerten. Zweite Hörfrage: `_nico_temp_vergleich/Nico_default_*` vs `Nico_t03_*` — **derselbe
+  Vergleich wie am 16.07., aber jetzt mit Preisschild.** `temperature 0.3` ist Teil des eingefrorenen
+  Rezepts (STIMME_NICO_EINGEFROREN.md) → Änderung nur per PO-Ohr, nicht per Messung.
+- **tts_story.py gehärtet** (alles generisch): `sys.stdout.reconfigure(utf-8)` (cp1252-Konsole killte
+  den Lauf an eigenen Prints) · `logging.basicConfig(INFO)` (die `Runde N/3`-Zeilen aus tts_batch wurden
+  mangels Handler still verworfen — ein 6-h-Batch lief ohne jede Rückmeldung) · **Backoff 6→12→24…90 s
+  + Jitter**, Retries 3→6 (starre 6 s waren gegen 500er-Wellen chancenlos) · `--seg-file` +
+  `<titel>_segmentierung.json` (Seg ist NICHT deterministisch: ein Rerun verlor **10 von 30**
+  Cache-Treffern durch Stil-Drift) · `pcm_cache/_index.json` + `_fehlgeschlagen.json` (Hash→Text;
+  vorher war nach einem Abbruch nicht feststellbar, WELCHE Turns klemmten) · `--tts-model` für A/B.
+  74 Guard-Tests grün.
+- **Batch-Pfad ist rehabilitiert** (war nie kaputt) und das Vollständigkeits-Gate hat sich bewährt:
+  Abbruch bei 30/37 **vor** der VC → keine GPU-Minute an Unvollständigem, kein Hörspiel mit 7 Löchern.
 
 ## Zuletzt abgeschlossen (2026-07-16)
 
@@ -37,26 +71,80 @@ modulare Pass-Pipeline (`scripts/pipeline_new.py`, Fallback-sicher).
   ok so") · die VC ist der Tonhöhen-Normalisierer → N=1, kein Best-of-N · TTS-Kosten verifiziert
   (Batch ~0,12 €/Vertonung; Start 2.000–2.500 × 2 Stufen ≈ 470–590 €). → STATUS_ARCHIV.md.
 
+## Entscheidungen des PO (2026-07-17)
+
+- **Modell bleibt 3.1** — 2.5 ist „ok, aber 3.1 ist besser" (per Ohr, A/B ohne temp).
+- **`temperature 0.3` BLEIBT** — und der Grund ist wichtiger als gedacht: Es geht nicht um Klang,
+  sondern um **Bedeutung**. Prosodie wird mitgewürfelt; bei 0.3 nimmt das Modell die kanonische
+  Lesart (s2 „War Leonardo nur **Maler**?"), bei 0.6/default sampelt es eine andere Betonung
+  („nur") — das fragt etwas anderes. **Der Vorzug und der Bug haben dieselbe Wurzel: Determinismus.**
+  0.6 ist stabil (16/16), aber vom PO verworfen. → Ausfälle werden per Wiederholung erschlagen,
+  nicht per Parameterwechsel. Kosten: Wartezeit, kein Geld (leere Antworten = keine Output-Tokens).
+- **PO-Vorgabe:** „Stimme gut + konsistent, Aussprache zuverlässig, ohne viel manuellen Aufwand" —
+  **der PO wird die 4.000–5.000 Audios NICHT anhören.** → automatische Prüfung ist Pflicht, s. Prio 1.
+
 ## Gerade in Arbeit / Nächster Schritt
 
-- Nichts angefangen. Batch-Pfad ist verdrahtet + getestet, aber gegen die echte API nur mit **2 Sätzen**
-  verifiziert — ein echter 37-Turn-Batch-Lauf ist nie gelaufen (dauert Stunden, nicht Minuten).
+- **Umgesetzt (Tests grün):** `MAX_ROUNDS` 3 → **10** (bei ~40 % Ausfall bleiben nach 3 Runden ~6 %
+  = die 7 Löcher; nach 10 Promille) · **PCM-Cache gilt jetzt für BEIDE Pfade** (`_sync_pcm_cached`)
+  — vorher warf ein Sync-Abbruch alle fertigen Turns weg; neuer Test 6d sichert das ab (2. Lauf =
+  0 API-Calls; anderer temperature-Wert = kein Treffer).
+
+## QUALITÄTS-GATE gebaut (`scripts/tts_qa.py`, 2026-07-17) — Tests grün
+
+**Anlass:** `vertone()` prüfte nur, OB ein Turn Bytes hat. Sobald Bytes da sind, galt er als gut.
+Bei 4.000–5.000 ungehörten Vertonungen war das die gefährlichste Lücke — alle Fehler sind STUMM.
+
+**Beim Bauen sofort einen ECHTEN Defekt gefunden** (in `articles/leo_batch_20260716/pcm_cache`):
+Ein Turn („Er hat nicht vier Arme, Theo…") kam als **54,4 s STILLE** zurück — RMS 20 (echte Turns:
+984–3984), Whisper transkribiert Leerstring. Gültiger Audio-Blob, `JOB_STATE_SUCCEEDED`, vom alten
+Gate als „vollständig" abgehakt. **Das ist die zweite Spielart der Degenerations-Schleife:** statt zu
+hängen, liefert der Decoder minutenlang Stille-Token aus. Wäre als knappe Minute Nichts mitten in der
+Geschichte ausgeliefert worden.
+
+**Wie es greift:** bei der Synthese, VOR dem Cache-Schreiben und VOR der VC. Ausschuss verhält sich
+wie eine leere Antwort → nicht cachen (ein kaputtes PCM im Cache wäre für immer ausgeliefert), ab in
+die nächste Nachreich-Runde. Die Wiederhol-Maschinerie war schon da. Sync: `QA_VERSUCHE=3`.
+Abschaltbar per `--no-qa` (nur für Tests). Kosten **0 €**, ~1 s/Turn (faster-whisper small, CPU,
+int8; laeuft auf Python 3.14 — `pip install faster-whisper`).
+
+**An 24 echten Turns kalibriert — gefangen:** Stille (RMS 20 vs. 984+) · Audio am falschen Turn
+(zwei fast gleich lange Turns vertauscht → Ähnlichkeit 0.54 bei Schwelle 0.80) · kein Audio ·
+Abbruch ≤60 % · Dehnungs-Schleifen. **Fehlalarme: 0 von 24.**
+**NICHT gefangen (ehrliche Grenze, nicht per Schwelle behebbar — die Verteilungen ÜBERLAPPEN):**
+angeschnittenes Ende bis ~30 % (bei 80 % abgeschnitten = Ähnlichkeit 0.874, **besser** als der
+schlechteste echte Turn mit 0.832; Tempo: echt bis 4.45 W/s, bei 70 % abgeschnitten 4.33 W/s) ·
+einzelne erfundene Füllwörter. Dafür braucht es ein anderes Verfahren, keine schärferen Zahlen.
+
+**Zwei Konstruktionsfehler, die die Kalibrierung aufgedeckt hat:** (1) Dauer-Regel muss auf der
+SPRECH-Zeit rechnen, nicht auf der Dateilänge — das Modell hängt Stille an („Wer ist das?" = 3 Wörter
+in 7,4 s Datei, aber 1,3 s Sprache). (2) Ähnlichkeit auf ZEICHEN-Ebene, nicht Wort-Ebene: „Oma Rina"
+vs. Whispers „O Marina" ist auf Wortebene 0.33 = Fehlalarm. Dazu Zahl-Normalisierung, weil Whisper
+Ziffern schreibt und die Quelle ausschreibt („500" vs. „fünfhundert").
 
 ## Offen nach Priorität
 
-1. **DU: Backup der Sprachaufnahmen (~25 MB).** `Documents\Audioaufzeichnungen\` (18 MB, 104 m4a =
-   Originalaufnahmen des Sohnes IN DIESEM ALTER) + `Desktop\_nico_clone\ref_clips\` (6 MB = die
-   abgenommene Referenz, **nicht nachbaubar** — kein Skript erzeugt sie). Geprüft: **OneDrive ist leer,
-   Desktop/Documents nicht dorthin umgeleitet → es gibt KEIN Backup.** Externe Platte/privater Cloud-
-   Ordner; **NICHT ins Repo** (öffentlich!). Ohne diese Dateien ist die eingefrorene Stimme weg.
-2. **Echter Batch-Lauf** (37 Turns, Leonardo) → dann VC-Stufe getrennt auf EINEM Pod. Zielbild:
-   Synthese ohne GPU → PCM-Cache → ein Pod färbt alle Kind-Zeilen am Stück um (~1–3 $ statt ~50 $).
-3. **`verify_project_facts.py`:** 1 Hart-FAIL ist Verify-Drift — Regel erwartet beim Vision-Modell noch
+1. **Batch-Lauf mit temp 0.3 + 10 Runden + QA verifizieren** (Erwartung: 37/37 sauber). Danach
+   VC-Stufe getrennt auf EINEM Pod: Synthese ohne GPU → PCM-Cache → ein Pod färbt alle Kind-Zeilen
+   am Stück um (~1–3 $ statt ~50 $). **Produktion = Batch** (PO bestätigt) und möglichst VIELE
+   Artikel je Job: ein Job braucht ~70 Min unabhängig von der Menge → 10 Runden über den ganzen
+   Katalog = ein Wochenendlauf, 10 Runden pro Artikel wären Wochen.
+2. **`zip`-Bug in `tts_batch.py`:** ordnet Antworten per **Reihenfolge** zu, obwohl jeder Request
+   `metadata={"key":…}` trägt. Lässt die API eine Antwort AUS (statt leer), verrutscht alles →
+   Audio am falschen Turn. Die QA fängt das jetzt (0.54), aber die Ursache gehört behoben:
+   Zuordnung über `metadata["key"]` statt `zip`.
+3. **Timeout-Optimierung:** Erfolgreiche Calls brauchen 7–16 s, ein Hänger kommt NIE zurück (gemessen).
+   `TTS_TIMEOUT_MS=60000` verschenkt pro Hänger ~45 s. 25–30 s wären ~3× schnellere Retries.
+   Achtung: Tests prüfen die Konstante == 60000, und lange Turns brauchen evtl. mehr → erst messen.
+4. **QA-Laufzeit im Maßstab:** ~1 s/Turn × 37 × 10.000 Vertonungen ≈ 100 h einkernig → über Kerne
+   parallelisieren (oder Modell `base` prüfen). Einmalig, aber einplanen.
+5. **`verify_project_facts.py`:** 1 Hart-FAIL ist Verify-Drift — Regel erwartet beim Vision-Modell noch
    `claude-sonnet-5`, `stage_models.py` steht bewusst auf `gemini-2.5-flash-lite` (Kostenentscheidung).
-4. **Vor Release raus:** Debug-`isPlus`-Hook, Temp-Test-Button „Leonardo (Vorlese-Test)" in
+6. **Vor Release raus:** Debug-`isPlus`-Hook, Temp-Test-Button „Leonardo (Vorlese-Test)" in
    `home_screen.dart`, TEMP-Prints in `_prepareNarration`.
-5. **Phase 5:** `--pipeline`-Default auf `new` umstellen (nach Nachtlauf-Auswertung).
-6. **Tablet-Pass:** Kinderschutz / Plus & Premium / Menü / Profile tablet-zentrieren
+7. **Phase 5:** `--pipeline`-Default auf `new` umstellen (nach Nachtlauf-Auswertung).
+8. **Tablet-Pass** (eigener Chat!): Kinderschutz / Plus & Premium / Menü / Profile tablet-zentrieren
    (`TabletMaxWidth`), danach Lesemodi A/B/C. Onboarding einmal am Tablet durchklicken.
-7. **Kleineres:** echte 300px-Paketgröße → `AssetConfig` (545 MB ist Platzhalter) · Cache-Cap-Regler ·
+   **Handy-Modus bleibt unangetastet** — jede Handy-Änderung vorher absprechen.
+9. **Kleineres:** echte 300px-Paketgröße → `AssetConfig` (545 MB ist Platzhalter) · Cache-Cap-Regler ·
    Leuchtturm-Offline-Paket · Modellwahl Pass 2 schärfen · Validierungsordner sind Wegwerf.
