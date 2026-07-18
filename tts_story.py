@@ -55,18 +55,18 @@ STYLE = {
 }
 
 # ── Segmentierung (Modell) ─────────────────────────────────────────────────────
-SEG_SYSTEM = """Du zerlegst eine vorgelesene Kindergeschichte in SPRECHER-ABSCHNITTE für eine HÖRSPIEL-Vertonung mit verschiedenen Stimmen. Drei Sprecher-Rollen:
-- "erzähler": beschreibt Umgebung, Szene und HANDLUNGEN (alles außerhalb wörtlicher Rede), z. B. "Oma Rina lacht." oder "Theo blättert weiter."
-- "kind": die wörtliche Rede des neugierigen Kindes.
-- "erwachsener": die wörtliche Rede der erwachsenen Person, die erklärt.
+SEG_SYSTEM = """Du zerlegst eine vorgelesene Kindergeschichte in SPRECHER-ABSCHNITTE für eine Vertonung mit verschiedenen Stimmen. Der vertonte Text MUSS Wort für Wort der Vorlage entsprechen (Text = Audio, damit die Mitlese-Lupe am Tablet exakt mitgleitet): NICHTS weglassen, NICHTS umformulieren, NICHTS hinzufügen. Aufgeteilt wird NUR an den Grenzen der wörtlichen Rede, und jede Hälfte bekommt die richtige Stimme.
 
-HÖRSPIEL-REGELN (wichtig):
-- Verschiedene Stimmen sagen dem Zuhörer bereits, WER spricht. Reine Redebegleitsätze ("sagt Oma Rina", "fragt Theo", "antwortet sie") werden daher NICHT als Turn ausgegeben — lass sie komplett weg.
-- Enthält ein Redebegleitsatz eine ECHTE zusätzliche Handlung ("… und tippt mit dem Finger auf das Bild"), behalte NUR diesen Handlungsteil als erzähler-Turn; den reinen "sagt/fragt X"-Teil lässt du weg.
-- Ganze Handlungs-/Szenensätze ("Oma Rina lacht.", "Theo schließt das Buch vorsichtig.") BLEIBEN als erzähler-Turn erhalten.
-- Wird wörtliche Rede durch einen Redebegleitsatz UNTERBROCHEN ("A", sagt X, "B"), füge die beiden Hälften zu EINEM Sprech-Turn zusammen (text = "A B", flüssiger Wortlaut) mit der Rolle des Sprechers X. KEINE abgehängten Ein-Wort-Fragmente.
-- Fasse direkt aufeinanderfolgenden Text DERSELBEN Rolle zu EINEM Turn zusammen. Reihenfolge = exakte Textreihenfolge.
-- Der Wortlaut der Rede bleibt UNVERÄNDERT (nur Anführungszeichen entfernen und unterbrochene Zitate zusammenfügen).
+Drei Sprecher-Rollen:
+- "kind": die wörtliche Rede des neugierigen Kindes (nur der Teil in Anführungszeichen).
+- "erwachsener": die wörtliche Rede der erwachsenen Person, die erklärt (nur der Teil in Anführungszeichen).
+- "erzähler": ALLES ANDERE — Umgebung, Szene, Handlungen UND die Redebegleitsätze ("fragt Theo", "sagt Oma Rina", "antwortet sie"). Der Erzähler SPRICHT diese Redebegleitsätze MIT; sie werden NICHT weggelassen.
+
+REGELN (Text = Audio, verbatim):
+- Teile jeden Satz an den Anführungszeichen: der Teil INNERHALB der Anführungszeichen wird ein Turn mit der Rolle des Sprechers, der Teil AUSSERHALB (Redebegleitsatz + Handlung + Erzählung) wird ein erzähler-Turn. Beispiel: `"Wer ist das?", fragt Theo und tippt mit dem Finger auf das Bild.` → kind: "Wer ist das?" · erzähler: "fragt Theo und tippt mit dem Finger auf das Bild." — Beispiel: `"Das ist die Mona Lisa", sagt Oma Rina.` → erwachsener: "Das ist die Mona Lisa" · erzähler: "sagt Oma Rina."
+- Reihenfolge = exakte Textreihenfolge. Wird wörtliche Rede durch einen Redebegleitsatz UNTERBROCHEN ("A", sagt X, "B"), entstehen DREI Turns in genau dieser Reihenfolge: Sprecher "A" · erzähler "sagt X," · Sprecher "B". NICHT zusammenziehen.
+- Aus der wörtlichen Rede werden NUR die Anführungszeichen entfernt; die Wörter und die Satzzeichen INNERHALB (z. B. das "?") bleiben unverändert. Der erzähler-Text bleibt vollständig verbatim (inkl. "fragt Theo", "und tippt…"); Satzzeichen am Rand (Komma/Punkt) bleiben.
+- Fasse direkt aufeinanderfolgende Abschnitte DERSELBEN Rolle zu EINEM Turn zusammen (z. B. mehrere reine Erzählsätze hintereinander, oder Redebegleitsatz + direkt folgender Erzählsatz). Sprecher-Rede und Erzähler-Teil aber NIE mischen. KEINE Umformulierung, damit ein Fragment „grammatisch" wird — der Wortlaut der Vorlage zählt.
 - Ordne jede Rede der richtigen Rolle zu (an der Redebegleitung erkennbar: sagt Oma → erwachsener; fragt Nico → kind).
 - setze szene=true beim ersten Turn eines neuen Absatzes/Schauplatzwechsels, sonst false.
 
