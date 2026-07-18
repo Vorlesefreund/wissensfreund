@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-17T21:44:08Z -->
+<!-- updated: 2026-07-18T02:28:36Z -->
 <!-- Ältere Stände (verbatim) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
@@ -24,12 +24,18 @@ modulare Pass-Pipeline (`scripts/pipeline_new.py`, Fallback-sicher).
   ihn ganz zuletzt; emotionsfreie lassen ihn früh weg (billiger, hält Betonung). Tests: Sektion 7
   (emotions-abhängige Leiter, gegenläufige Reihenfolge) + **7d Integrationstest** (2 Turns folgen in
   EINEM Fake-Client-Lauf verschiedenen Leitern) + Sektion 8 (Stille-Anteil/Trim). → [[reference_tts_gotchas]].
-- **Fix im echten Lauf bestätigt** (`articles/leo_fix_20260717`, läuft noch): i=29 kam mit **71 % Stille
-  zurück und wurde von der neuen QA abgelehnt** (vorher durchgerutscht); die Emotions-Turns degenerieren
-  bei 0.3+Präfix und **eskalieren mit behaltenem Präfix** statt sofort bare. i=2 ging von 97 % → 43 %
-  Stille (echte 1,9 s Sprache). **Batch-Queue heute Nacht extrem träge: ~38 min/Runde.**
-- **NÄCHSTER SCHRITT (echtes Geld, PO-Warnung Pflicht):** wenn die 10 Turns sauber neu im Cache sind,
-  Pod-VC neu rechnen → korrigiertes Finale. 10 defekte Alt-PCMs liegen in
+- **Re-Synth der 10 Turns FERTIG + verifiziert** (`articles/leo_fix_20260717`, 18.07. ~04:25): 37/37,
+  die neue QA fing im Lauf **mehrfach Stille ab** (89 %, 90 %, 93 %, „RMS 20 stumm") und erzwang
+  Neuversuche. Escalation: i=2/4/27/29/30/32 auf 0.3, i=11/12/18 auf **0.5**, i=33 auf **0.6** — **alle
+  MIT behaltenem Präfix** (`ohne_stil` nirgends gesetzt) → Emotion erhalten. Alle 10 bestehen jetzt die
+  QA (i=2: 97 %→43 % Stille; i=18 „Lachen" 10,1 s; i=33 „ernst" 14,8 s). Roh-WAV `leo_fix.wav` liegt,
+  Kind-Turns noch Puck-Platzhalter. **Batch-Queue nachts extrem träge: 35–70 min/Runde.**
+- **Lehre (Prozess):** loser `&`-Hintergrundstart überlebt Systemereignisse NICHT (Prozess starb nachts
+  mitten in Runde 2) — lange Läufe als harness-verwalteten Task (`run_in_background`) starten, der meldet
+  sich beim Ende und übersteht Schlaf/Reaping. Neustart nutzte die 30 gecachten Turns weiter.
+- **NÄCHSTER SCHRITT (echtes Geld, PO-Okay Pflicht):** Pod-VC über alle 15 Kind-Turns → ausgeliefertes
+  Finale. Nur Kind-Turns gehen durch die VC; die korrigierten Erwachsenen-Turns (i=18 Lachen, i=33 Oma)
+  sind Vindemiatrix-Gemini, kein Pod nötig, stecken schon im Assembly. 10 defekte Alt-PCMs gesichert in
   `pcm_cache/_defekt_backup_20260717/`.
 
 ## Zuletzt abgeschlossen (2026-07-17)
