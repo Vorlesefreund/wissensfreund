@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-18T09:06:46Z -->
+<!-- updated: 2026-07-18T09:23:16Z -->
 <!-- Ältere Stände (verbatim) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
@@ -9,6 +9,16 @@ modulare Pass-Pipeline (`scripts/pipeline_new.py`, Fallback-sicher).
 
 ## Zuletzt abgeschlossen (2026-07-18)
 
+- **KINDERSCHUTZ gehärtet (Tablet-Track, eigener Chat)** — 4 Defekte behoben, alle erst am Gerät sichtbar:
+  Elternbereich ohne Sperrbildschirm völlig offen (`return true`) → App-PIN + Sicherheitsfrage; Overlay-
+  „Entsperren" tat nichts → nativer PIN-Pfad; Beenden schaltete Schutz DAUERHAFT ab; Schnelleinstellungen
+  offen → immersive Leisten + optionales Screen-Pinning (opt-in). Geräteadmin (tot + Schreck-Dialog)
+  komplett raus. Commits 4b2f6f4/53e05f9/5e1e39f/5f716f9.
+- **STUFEN-UMBAU entschieden (PLAN, Umsetzung offen)** → **`STUFEN_UMBAU_PLAN.md`** (Wahrheitsquelle).
+  Profil bleibt 3-stufig (4-6/7-9/10-12, steuert Modi), Inhalt 2-typig: Hörspiel (4-9, alt S1+S2) +
+  Erzählertext (10-12, = alt S3). IDs `_hoerspiel`/`_erzaehltext`. age_floor → Anbietezeit-Filter.
+  Bild-`ab_stufe` folgt jüngstem Zuschauer (generierungszeitlich). Hörspiel-Band (225,975), Dauer floatet,
+  Trim bei 12 min. **Nächster Schritt: Pipeline (Plan §7 Schritt 2) — in neuer Session.**
 - **GROSSER BEFUND: die ganze TTS-Woche lief auf der FALSCHEN Segmentierungs-Variante.** PO hörte nach
   „Wer ist das?" ein leises, kaputtes „und tippt mit dem Finger auf das Bild." — das ist kein Audiofehler,
   sondern der Segmentierer: `tts_story.py` `SEG_SYSTEM` machte die **reine Hörspielfassung („ohne Tags")**
