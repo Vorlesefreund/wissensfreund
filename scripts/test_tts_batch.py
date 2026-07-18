@@ -105,7 +105,7 @@ c5 = FakeClient([lambda i: resp_leer() if i == 0 else resp_audio()] * 3)
 pcms5, offen5 = B.batch_synthesize(c5, R, TMP / "c5", poll_seconds=0)
 check("2 PCMs da", len(pcms5) == 2, str(len(pcms5)))
 check("1 als NICHT vertont gemeldet", len(offen5) == 1, str(len(offen5)))
-check("max_rounds eingehalten", c5.batches.runde == 3, str(c5.batches.runde))
+check("max_rounds eingehalten", c5.batches.runde == B.MAX_ROUNDS, str(c5.batches.runde))
 
 print("\n6) Fehler-Feld in der Antwort -> Nachreichen")
 c6 = FakeClient([lambda i: "error" if i == 1 else resp_audio(), lambda i: resp_audio()])

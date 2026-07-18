@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-18T15:14:20Z -->
+<!-- updated: 2026-07-18T16:07:38Z -->
 <!-- Ältere Stände (verbatim) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
@@ -9,6 +9,18 @@ modulare Pass-Pipeline (`scripts/pipeline_new.py`, Fallback-sicher).
 
 ## Zuletzt abgeschlossen (2026-07-18)
 
+- **TTS-PRODUKTION ist jetzt reproduzierbares Repo-Tooling** (auf PO-Frage „ist das reproduzierbar?").
+  Die früher von Hand gefahrenen Scratchpad-Schritte (Cache-Flatten, Pod-VC-Orchestrierung, Payload-Bau)
+  sind committet: **`scripts/produce_story.py`** (Phasen `synth`/`vc`/`all`: lokale Synthese+QA →
+  Flatten → Pod-VC → m4a, Pod wird im `finally` immer terminiert), **`scripts/tts_flatten_cache.py`**
+  (eskalierte Cache-PCMs auf Basis-Key 0.3 kopieren, via echte `TtsRequest.build`), **`pod/`** (nico_vc.py
+  + bootstrap + do_vc.sh, Single Source of Truth statt Scratchpad). Doku: **`TTS_PRODUKTION_PIPELINE.md`**.
+  Guard-Tests grün: `test_produce_pipeline.py` (Flatten bit-genau/idempotent/ehrlich + Payload-Assembly).
+  Nebenbei stale Erwartung in `test_tts_batch.py` gefixt (`runde == MAX_ROUNDS` statt hart `3`, seit dem
+  Eskalationsleiter-Umbau veraltet — kein Verhaltenswechsel). **Reproduzierbar: Qualität ja (deterministisch/
+  QA-garantiert), bit-genau nur über die eingefrorenen Artefakte (seg.json + hash-Cache); Gemini-TTS bleibt
+  stochastisch.** Pod-Phase ist committet + trocken (`--dry-run`) verifiziert, aber NICHT erneut live
+  gefahren (Deliverable existiert, kein Grund einen Pod zu brennen). → [[project_tts_produktions_pipeline]].
 - **KINDERSCHUTZ gehärtet (Tablet-Track, eigener Chat)** — 4 Defekte behoben, alle erst am Gerät sichtbar:
   Elternbereich ohne Sperrbildschirm völlig offen (`return true`) → App-PIN + Sicherheitsfrage; Overlay-
   „Entsperren" tat nichts → nativer PIN-Pfad; Beenden schaltete Schutz DAUERHAFT ab; Schnelleinstellungen
