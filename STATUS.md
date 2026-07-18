@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-18T09:23:16Z -->
+<!-- updated: 2026-07-18T12:32:13Z -->
 <!-- Ältere Stände (verbatim) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
@@ -34,10 +34,18 @@ modulare Pass-Pipeline (`scripts/pipeline_new.py`, Fallback-sicher).
   Zitat→Sprecher, Rest verbatim→Erzähler, keine Umformulierung). Frische Leonardo-Segmentierung zum
   Gegenlesen: **46 Turns, Verbatim-Check 779/779 Wörter** (nichts weg, nichts dazu),
   `Desktop/_review_seg_mit_tags.txt`. **PO liest nicht mehr gegen, Prompt-Fix ist ok.**
-- **OFFEN:** Produktionslauf auf der mit-Tags-Segmentierung (neuer Cache → Batch → Pod-VC). ACHTUNG:
-  viele sehr kurze Erzähler-Fragmente („sagt Oma Rina.", „ruft Theo.") = die laut [[reference_tts_gotchas]]
-  heikelsten Turns (Füllwörter/PROHIBITED-Block) — in der QA gezielt beobachten. Das gerade korrigierte
-  Finale (`Leonardo_FINAL_NicoVC_KORRIGIERT.m4a`) ist die Hörspiel/ohne-Tags-Fassung = NICHT die Produktion.
+- **mit-Tags-PRODUKTION FERTIG** (`articles/leo_mittags_20260718`, 46 Turns): Batch-Synthese 46/46, QA
+  fing im Lauf mehrfach Stille/Tempo (84 %, 92 %, „6 W in 12.9s"), Eskalation rettete alles, **kein
+  Emotions-Turn verlor den Präfix**. Pod-VC (RTX 3090, ~$0,05×2) → `Leonardo_FINAL_mitTags_NicoVC.m4a`
+  (6:47, Desktop `_leo_final_20260717`). Verifiziert: Volltranskript 97,4 % Wortabdeckung, alle 46 Turns
+  hörbar, 0 Stille-Strecken >2s.
+- **DABEI 3. Defekt gefunden + gefixt (`1ff8f2e`): `_loudnorm` verstummte kurze Clips.** ffmpeg
+  `loudnorm` lieferte auf dem Pod bei kurzen Turns („Das ist Das Abendmahl") ein gleich langes, aber
+  STUMMES Ergebnis → Turn fiel im Finale aus, obwohl Roh-PCM sauber. Alter `stdout or pcm`-Fallback griff
+  nicht (nicht leer, nur still). Fix: Pegel nach loudnorm prüfen, bei Stille das Original behalten. Lokal
+  NICHT reproduzierbar (anderes ffmpeg) — nur auf dem Pod sichtbar. Re-Run mit Fix: Fallback-Meldung feuerte,
+  Turn wieder da. → [[reference_tts_gotchas]]. Lehre: Pod-Output IMMER per Volltranskript gegenprüfen,
+  nicht nur Manifest (`vollstaendig=True` sagt nichts über stille Turns).
 
 ## Zuletzt abgeschlossen (2026-07-17 spät)
 
