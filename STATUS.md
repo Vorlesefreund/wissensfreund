@@ -1,11 +1,33 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-18T06:13:48Z -->
+<!-- updated: 2026-07-18T09:06:46Z -->
 <!-- Ältere Stände (verbatim) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
 **Wissensfreund:** Flutter-App für Kinder (Stufen S1 4–6, S2 7–9, S3 10–12), KI-Artikel streng aus
 geladenem Artikel-Quelltext (nie Trainingswissen). Zwei Pipelines: alter Monolith (Produktion) + neue
 modulare Pass-Pipeline (`scripts/pipeline_new.py`, Fallback-sicher).
+
+## Zuletzt abgeschlossen (2026-07-18)
+
+- **GROSSER BEFUND: die ganze TTS-Woche lief auf der FALSCHEN Segmentierungs-Variante.** PO hörte nach
+  „Wer ist das?" ein leises, kaputtes „und tippt mit dem Finger auf das Bild." — das ist kein Audiofehler,
+  sondern der Segmentierer: `tts_story.py` `SEG_SYSTEM` machte die **reine Hörspielfassung („ohne Tags")**
+  und ließ Redebegleitsätze („fragt Theo", „sagt Oma") weg (sein eigenes Beispiel erzeugt wörtlich das
+  „und tippt…"-Fragment). Das **widerspricht der Produktionsentscheidung vom 15.07.** (STATUS_ARCHIV
+  ~Z.900, „Variante A **mit Tags**"): der Erzähler spricht die Redebegleitsätze verbatim mit, damit
+  **Text = Audio** für die Mitlese-Lupe; nur wörtliche Rede an die Figurenstimmen. Entscheidung stand nur
+  im Archiv (Tablet-Kontext) + wurde via `scratchpad/leo_build2.py` umgesetzt (App-Asset
+  `leo_mit_tags_l2.json`), floss NIE in die TTS-Pipeline. → dauerhaft dokumentiert:
+  [[project_vertonung_mit_tags]]. „Hörspiel" = Inhaltstyp (Figurenstimmen, 4–9, s. [[project_stage_model]]),
+  NICHT die „ohne Tags"-Variante — die zwei Dimensionen wurden verwechselt.
+- **Prompt-Fix committet (`aa590be`):** `SEG_SYSTEM` auf „mit Tags" umgestellt (an Anführungszeichen teilen,
+  Zitat→Sprecher, Rest verbatim→Erzähler, keine Umformulierung). Frische Leonardo-Segmentierung zum
+  Gegenlesen: **46 Turns, Verbatim-Check 779/779 Wörter** (nichts weg, nichts dazu),
+  `Desktop/_review_seg_mit_tags.txt`. **PO liest nicht mehr gegen, Prompt-Fix ist ok.**
+- **OFFEN:** Produktionslauf auf der mit-Tags-Segmentierung (neuer Cache → Batch → Pod-VC). ACHTUNG:
+  viele sehr kurze Erzähler-Fragmente („sagt Oma Rina.", „ruft Theo.") = die laut [[reference_tts_gotchas]]
+  heikelsten Turns (Füllwörter/PROHIBITED-Block) — in der QA gezielt beobachten. Das gerade korrigierte
+  Finale (`Leonardo_FINAL_NicoVC_KORRIGIERT.m4a`) ist die Hörspiel/ohne-Tags-Fassung = NICHT die Produktion.
 
 ## Zuletzt abgeschlossen (2026-07-17 spät)
 
