@@ -313,13 +313,13 @@ tr2 = Q.trim_stille(mitte)
 check("Trim: interne Pause bleibt erhalten (kein Inhaltsverlust)",
       2.0 < len(tr2)/Q.BYTES_PER_SEC < 2.6, f"{len(tr2)/Q.BYTES_PER_SEC:.2f}s")
 
-if (REPO / "articles/leo_final_20260717/pcm_cache/_index.json").exists():
-    CD8 = REPO / "articles/leo_final_20260717/pcm_cache"
-    idx8 = json.loads((CD8 / "_index.json").read_text(encoding="utf-8"))
-    def _pcm(turn_i):
-        k = [k for k, v in idx8.items() if v["turn"] == turn_i][0]
-        return (CD8 / f"{k}.pcm").read_bytes(), [v["text"] for kk, v in idx8.items() if v["turn"] == turn_i][0]
-    p3, t3 = _pcm(2)   # der 54-s-Defekt
+# Der 54-s-Stille-Defekt (Turn 2 des 17.07.-Laufs) wurde am 18.07. durch sauberes Audio ersetzt;
+# die Original-Defekt-PCMs liegen als Beleg im Backup. Der Test prüft weiter gegen den echten Defekt.
+_BAK8 = REPO / "articles/leo_final_20260717/pcm_cache/_defekt_backup_20260717"
+_def8 = sorted(_BAK8.glob("turn02_*.pcm")) if _BAK8.exists() else []
+if _def8:
+    p3 = _def8[0].read_bytes()
+    t3 = "und tippt mit dem Finger auf das Bild."   # Wortlaut dieses Turns (97 % Stille drumherum)
     ok, g = Q.pruefe(p3, t3)
     check("realer 54s-Turn (97% Stille) -> abgelehnt", not ok and "Stille" in g, g)
     tr3 = Q.trim_stille(p3)

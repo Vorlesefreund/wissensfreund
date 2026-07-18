@@ -15,7 +15,7 @@ Stimmen (Prebuilt): Erzähler=Iapetus · Kind ♂=Puck ♀=Leda · Erwachsener �
   python -X utf8 tts_story.py --checkpoint <cp.json> --thema "Leonardo da Vinci" --model claude-sonnet-5 --out-dir DIR
 """
 from __future__ import annotations
-import argparse, json, logging, random, re, subprocess, sys, time, wave
+import argparse, array, json, logging, random, re, subprocess, sys, time, wave
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -138,6 +138,15 @@ def _trim_stille(pcm: bytes) -> bytes:
     return trim_stille(pcm, sample_rate=SAMPLE_RATE)
 
 
+def _pcm_rms(pcm: bytes) -> float:
+    if not pcm:
+        return 0.0
+    a = array.array("h"); a.frombytes(pcm[: len(pcm) - (len(pcm) % 2)])
+    if not a:
+        return 0.0
+    return (sum(x * x for x in a) / len(a)) ** 0.5
+
+
 def _loudnorm(pcm: bytes, sr: int = SAMPLE_RATE) -> bytes:
     """Gleicht die Lautheit eines Turns an (I=-16 LUFS). Wichtig, wenn Kind-Turns
     aus der Voice-Conversion und Erwachsenen-/Erzähler-Turns aus Flash gemischt
@@ -147,7 +156,18 @@ def _loudnorm(pcm: bytes, sr: int = SAMPLE_RATE) -> bytes:
             ["ffmpeg", "-y", "-f", "s16le", "-ar", str(sr), "-ac", "1", "-i", "pipe:0",
              "-af", "loudnorm=I=-16:TP=-1.5", "-f", "s16le", "-ar", str(sr), "-ac", "1", "pipe:1"],
             input=pcm, capture_output=True)
-        return r.stdout or pcm
+        out = r.stdout
+        if not out:
+            return pcm
+        # Schutz gegen den 18.07.-Defekt: manche ffmpeg-Versionen liefern bei KURZEN Clips ein
+        # gleich langes, aber STUMMES loudnorm-Ergebnis (real auf dem Pod: "Das ist Das Abendmahl"
+        # + "erklärt Oma Rina." fielen so komplett aus, obwohl ihr Roh-PCM sauber war). `stdout` ist
+        # dann nicht leer → der alte `or pcm`-Fallback griff nicht. Hatte der Eingang Signal, der
+        # Ausgang aber praktisch keins, das unnormalisierte Original behalten (hörbar > still).
+        if _pcm_rms(out) < 50 <= _pcm_rms(pcm):
+            print("      ! loudnorm lieferte Stille — unnormalisiertes Original behalten")
+            return pcm
+        return out
     except Exception:
         return pcm
 
