@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-18T02:28:36Z -->
+<!-- updated: 2026-07-18T06:13:48Z -->
 <!-- Ältere Stände (verbatim) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
@@ -33,9 +33,18 @@ modulare Pass-Pipeline (`scripts/pipeline_new.py`, Fallback-sicher).
 - **Lehre (Prozess):** loser `&`-Hintergrundstart überlebt Systemereignisse NICHT (Prozess starb nachts
   mitten in Runde 2) — lange Läufe als harness-verwalteten Task (`run_in_background`) starten, der meldet
   sich beim Ende und übersteht Schlaf/Reaping. Neustart nutzte die 30 gecachten Turns weiter.
-- **NÄCHSTER SCHRITT (echtes Geld, PO-Okay Pflicht):** Pod-VC über alle 15 Kind-Turns → ausgeliefertes
-  Finale. Nur Kind-Turns gehen durch die VC; die korrigierten Erwachsenen-Turns (i=18 Lachen, i=33 Oma)
-  sind Vindemiatrix-Gemini, kein Pod nötig, stecken schon im Assembly. 10 defekte Alt-PCMs gesichert in
+- **KORRIGIERTES FINALE PRODUZIERT** (Pod-VC, RTX A5000, ~$0,05, Pod terminiert): abgeflachter Cache
+  (alle 37 PCMs unter Basis-0.3-Keys, eskalierte i=11/18/33 auf den Basis-Key kopiert) → lokaler
+  Pre-Flight mit Dummy-Key **0 API-Calls, 37/37 aus Cache**, dann Pod-`vertone` mit OpenVoice-VC
+  (rich_ref.wav allein, tau 0.7) → `Leonardo_FINAL_NicoVC_KORRIGIERT.m4a` (6:26, Desktop
+  `_leo_final_20260717`). Manifest: `vollstaendig=True`, `raw_kind=0`, VC auf 15 Kind-Turns.
+  **Fehler-1-Beweis:** silencedetect auf der fertigen Datei = **KEINE** Stille-/Rausch-Strecke >2s
+  (alte Datei hatte 3). Alte defekte `Leonardo_FINAL_NicoVC.m4a` bleibt zum A/B daneben liegen.
+  **OFFEN: PO-Hörprobe der korrigierten Datei** (v.a. i=18 Lachen, i=33 Omas Ton).
+- **Pod-Prozedur (wiederverwendbar):** Payload in Session-Scratchpad `pod_payload/run` (Code + seg +
+  nico_ref + abgeflachter Cache + `do_vc.sh`); `runpod_ctl.py create/info/stop`, SSH-Key
+  `pod_zugang/runpod_nico`, scp `-P`. `do_vc.sh` = bootstrap_openvoice + `vertone --no-qa` mit
+  `GEMINI_API_KEY=dummy` (alles gecacht, Client wird nie gerufen). 10 defekte Alt-PCMs gesichert in
   `pcm_cache/_defekt_backup_20260717/`.
 
 ## Zuletzt abgeschlossen (2026-07-17)
