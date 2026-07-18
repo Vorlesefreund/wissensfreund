@@ -118,9 +118,9 @@ im Hörspiel sekundär zum Ton.
   ersten Vorgabe). Ergiebige Themen dürfen 8–11 min lang werden.
   - Rechnerischer Hintergrund: ~90–100 gesprochene Wörter/min (aus den echten
     vulkan-Vertonungen). 975 Körper-Wörter + Rahmung ≈ 10–11 min.
-  - OFFEN/optional: eine Sicherheits-Obergrenze (z. B. Trim bei > ~11–12 min über
-    den bestehenden `CAP_GRACE_FRAC`/`TRIM`-Mechanismus), damit kein Ausreißer
-    entsteht. Vom PO noch zu bestätigen.
+  - **Sicherheits-Obergrenze: Trim bei > 12 min Hördauer** (PO 2026-07-18), über
+    den bestehenden `CAP_GRACE_FRAC`/`TRIM`-Mechanismus. „So lang wie nötig, aber
+    kein Monster-Hörspiel." Keine Rückkehr zur 5–7-min-Grenze.
 - **Erzählertext (10–12):** Wortband bleibt unverändert `(225, 975)` (= altes S3).
 - **Vier Band-Quellen vereinheitlichen:** Code `ERG_BANDS` (generate_grounded.py:101)
   ist die Wahrheit — S2 `(150,600)`, S3 `(225,975)`, +50 % seit 09.07. Die drei
@@ -202,8 +202,8 @@ im Hörspiel sekundär zum Ton.
 1. **Nummerierung/Namen** — ENTSCHIEDEN (§2): `_hoerspiel/_erzaehltext`, Profil
    dreistufig, Stufen-Namen bleiben.
 2. **Wortbänder** — ENTSCHIEDEN (§5): Hörspiel-Körperband `(225,975)` wie S3,
-   Dauer floatet (5–7 min = Richtwert). Code `ERG_BANDS` ist die Wahrheit, Doku
-   vereinheitlichen. OFFEN: optionale Sicherheits-Obergrenze gegen Ausreißer.
+   Dauer floatet (5–7 min = Richtwert), Trim-Deckel bei 12 min. Code `ERG_BANDS`
+   ist die Wahrheit, Doku vereinheitlichen.
 3. **Migration bestehender Profile** — kein Handlungsbedarf: Profil bleibt
    dreistufig (`ageLevel` 1/2/3), Bestandsprofile funktionieren weiter. Nur prüfen,
    ob Default `=2` noch passt.
