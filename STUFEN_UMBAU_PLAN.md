@@ -29,13 +29,12 @@ unabhängig vom Inhalt). Alle heute vorhandenen Artikel sind Klexikon-Reste und
 werden verworfen → **Neugenerierung von Grund auf**, freie Neunummerierung
 (keine Kollision mit Bestand).
 
-## 2. Nummerierung & Benennung (Vorschlag, Entscheidung offen)
+## 2. Nummerierung & Benennung (ENTSCHIEDEN 2026-07-18)
 
-Artikel-ID heute: `{slug}_l{1|2|3}`. Da nur noch zwei Inhaltstypen existieren,
-Vorschlag — **ID nach Inhaltstyp statt Profil-Band:**
+**ID nach Inhaltstyp** (PO-Entscheidung), nicht mehr `{slug}_l{n}`:
 
-- `{slug}_hoerspiel` (bzw. kurz `_h`)
-- `{slug}_erzaehltext` (bzw. kurz `_t`)
+- `{slug}_hoerspiel`
+- `{slug}_erzaehltext`
 
 **Mapping Profil → Inhalt** (eine Funktion, ersetzt `articleIdFor`):
 
@@ -45,13 +44,15 @@ ageLevel 2 (7–9)  → {slug}_hoerspiel   (dieselbe Datei)
 ageLevel 3 (10–12) → {slug}_erzaehltext
 ```
 
-Alternative (weniger Umbau): numerisch bleiben, `_l1` = Hörspiel, `_l2` =
-Erzählertext. Vorteil: `levelFromId`-Regex `_l(\d)` bleibt. Nachteil: verwirrend,
-weil Profil 3 Stufen hat, Inhalt aber 2 — `_l1` wäre dann „für Profil 1 UND 2".
+Begründung: Selbsterklärend, keine Doppeldeutigkeit. Die numerische Variante
+(`_l1` = Hörspiel, für Profil 1 UND 2) war genau die Verwechslungsquelle, die
+dieses Projekt schon zweimal gekostet hat. Mehr App-Umbau (`levelFromId` →
+`contentTypeFromId`), aber die App-Schicht wird ohnehin angefasst.
 
-**Offene Entscheidung:** Namensschema (`_hoerspiel/_erzaehltext` vs. `_l1/_l2`)
-und die drei sichtbaren Stufen-Namen (heute „Kleine Forscher / Entdecker /
-Wissensprofis" — evtl. neu, da die mittlere Gruppe jetzt zum Hörspiel gehört).
+Profil behält `ageLevel` 1/2/3 (dreistufige Auswahl). Die drei sichtbaren
+Stufen-Namen (heute „Kleine Forscher / Entdecker / Wissensprofis") bleiben
+zunächst; Auswahl erfolgt nach Alter, der Inhaltstyp-Split ist für den Nutzer
+unsichtbar (Implementierungsdetail). Feinschliff der Namen optional, nicht nötig.
 
 ## 3. age_floor: Freigabe zur Anbietezeit (gelöst)
 
@@ -109,14 +110,24 @@ Preis: Ein 8-Jähriger sieht beim age_floor-1-Hörspiel den konservativen
 4–6-Bildersatz. Bei einem bewusst jünger gedachten Format vertretbar; Bild ist
 im Hörspiel sekundär zum Ton.
 
-## 5. Wortziele / Hördauer Hörspiel
+## 5. Wortziele / Hördauer Hörspiel (ENTSCHIEDEN 2026-07-18)
 
-- Wortziel am alten S3 orientieren, evtl. leicht darüber (viel Text geht für die
-  rahmende Geschichte drauf).
-- **Harte Grenze: max. 5–7 min Hördauer.**
-- Erzählertext (10–12): Wortband bleibt wie heute (altes S3).
-- `ERG_BANDS` (generate_grounded.py:101) neu belegen; die vier widersprüchlichen
-  Band-Quellen im Repo vereinheitlichen (siehe §8).
+- **Hörspiel-Körperband ≈ altes S3, `(225, 975)`.** PO-Entscheidung: Inhaltstiefe
+  vor Kürze.
+- **5–7 min ist ein Richtwert, KEIN hartes Limit** (bewusst geändert ggü. der
+  ersten Vorgabe). Ergiebige Themen dürfen 8–11 min lang werden.
+  - Rechnerischer Hintergrund: ~90–100 gesprochene Wörter/min (aus den echten
+    vulkan-Vertonungen). 975 Körper-Wörter + Rahmung ≈ 10–11 min.
+  - OFFEN/optional: eine Sicherheits-Obergrenze (z. B. Trim bei > ~11–12 min über
+    den bestehenden `CAP_GRACE_FRAC`/`TRIM`-Mechanismus), damit kein Ausreißer
+    entsteht. Vom PO noch zu bestätigen.
+- **Erzählertext (10–12):** Wortband bleibt unverändert `(225, 975)` (= altes S3).
+- **Vier Band-Quellen vereinheitlichen:** Code `ERG_BANDS` (generate_grounded.py:101)
+  ist die Wahrheit — S2 `(150,600)`, S3 `(225,975)`, +50 % seit 09.07. Die drei
+  veralteten Doku-Kopien (PROJEKTDOKUMENT.md:41, WISSEN_ARTIKEL_PIPELINE.md:520,
+  _validation_run.py:42) auf den Code zeigen lassen statt eigene Zahlen zu nennen.
+- Kalibrierung: Das vorhandene Leonardo-Hörspiel als echten Dauer/Wort-Anker
+  messen, sobald das Band verdrahtet ist.
 
 ## 6. Betroffene Stellen (aus der Bestandsaufnahme)
 
@@ -186,19 +197,18 @@ im Hörspiel sekundär zum Ton.
 7. **Doku** aktualisieren (§6) + Projektdokument generalüberholen (auch auf
    weitere Inkonsistenzen prüfen).
 
-## 8. Offene Produktentscheidungen (vor Schritt 2)
+## 8. Produktentscheidungen
 
-1. **Nummerierung/Namen:** `_hoerspiel/_erzaehltext` vs. `_l1/_l2`; drei
-   Profil-Namen.
-2. **Wortbänder:** konkrete Zahlen fürs Hörspiel (an altem S3 orientiert, +X für
-   Rahmung, ≤ 5–7 min). Die vier widersprüchlichen Band-Quellen im Repo
-   (Code `ERG_BANDS`, `PROJEKTDOKUMENT.md:41`, `WISSEN_ARTIKEL_PIPELINE.md:520`,
-   `_validation_run.py:42`) auf EINE Wahrheit bringen.
-3. **Migration bestehender Profile:** Da Profil dreistufig BLEIBT (`ageLevel`
-   1/2/3 unverändert), entfällt die früher befürchtete Bruchkante — Bestandsprofile
-   funktionieren weiter. Nur prüfen, ob Default `=2` noch passt.
-4. **Vertonung/Timing-Sidecars:** bestehende `_l{n}`-Audios auf R2 werden mit der
-   Neugenerierung ohnehin ersetzt (kein Rename-Problem).
+1. **Nummerierung/Namen** — ENTSCHIEDEN (§2): `_hoerspiel/_erzaehltext`, Profil
+   dreistufig, Stufen-Namen bleiben.
+2. **Wortbänder** — ENTSCHIEDEN (§5): Hörspiel-Körperband `(225,975)` wie S3,
+   Dauer floatet (5–7 min = Richtwert). Code `ERG_BANDS` ist die Wahrheit, Doku
+   vereinheitlichen. OFFEN: optionale Sicherheits-Obergrenze gegen Ausreißer.
+3. **Migration bestehender Profile** — kein Handlungsbedarf: Profil bleibt
+   dreistufig (`ageLevel` 1/2/3), Bestandsprofile funktionieren weiter. Nur prüfen,
+   ob Default `=2` noch passt.
+4. **Vertonung/Timing-Sidecars** — kein Rename-Problem: bestehende Audios auf R2
+   werden mit der Neugenerierung ohnehin ersetzt.
 
 ## 9. Was gelöscht / neu erzeugt wird
 
