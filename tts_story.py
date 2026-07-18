@@ -138,38 +138,39 @@ def _trim_stille(pcm: bytes) -> bytes:
     return trim_stille(pcm, sample_rate=SAMPLE_RATE)
 
 
-def _pcm_rms(pcm: bytes) -> float:
+ZIEL_SPRECH_RMS = 6000      # Sprech-RMS-Zielpegel, gemessen am Median korrekt normalisierter Turns
+PEAK_LIMIT      = 30000     # int16-Headroom gegen Clipping (max 32767)
+
+
+def _sprech_rms(pcm: bytes) -> float:
+    """RMS NUR über die Sprech-Samples (Stille raus) — so hängt der Pegel nicht an der Cliplänge
+    oder am Stille-Anteil. Ein kurzer „sagt Oma Rina."-Fetzen und ein langer Satz werden vergleichbar."""
     if not pcm:
         return 0.0
     a = array.array("h"); a.frombytes(pcm[: len(pcm) - (len(pcm) % 2)])
-    if not a:
+    laut = [x for x in a if abs(x) > 200]
+    if not laut:
         return 0.0
-    return (sum(x * x for x in a) / len(a)) ** 0.5
+    return (sum(x * x for x in laut) / len(laut)) ** 0.5
 
 
 def _loudnorm(pcm: bytes, sr: int = SAMPLE_RATE) -> bytes:
-    """Gleicht die Lautheit eines Turns an (I=-16 LUFS). Wichtig, wenn Kind-Turns
-    aus der Voice-Conversion und Erwachsenen-/Erzähler-Turns aus Flash gemischt
-    werden — sonst springen die Pegel. Fällt bei ffmpeg-Fehler auf das Original zurück."""
-    try:
-        r = subprocess.run(
-            ["ffmpeg", "-y", "-f", "s16le", "-ar", str(sr), "-ac", "1", "-i", "pipe:0",
-             "-af", "loudnorm=I=-16:TP=-1.5", "-f", "s16le", "-ar", str(sr), "-ac", "1", "pipe:1"],
-            input=pcm, capture_output=True)
-        out = r.stdout
-        if not out:
-            return pcm
-        # Schutz gegen den 18.07.-Defekt: manche ffmpeg-Versionen liefern bei KURZEN Clips ein
-        # gleich langes, aber STUMMES loudnorm-Ergebnis (real auf dem Pod: "Das ist Das Abendmahl"
-        # + "erklärt Oma Rina." fielen so komplett aus, obwohl ihr Roh-PCM sauber war). `stdout` ist
-        # dann nicht leer → der alte `or pcm`-Fallback griff nicht. Hatte der Eingang Signal, der
-        # Ausgang aber praktisch keins, das unnormalisierte Original behalten (hörbar > still).
-        if _pcm_rms(out) < 50 <= _pcm_rms(pcm):
-            print("      ! loudnorm lieferte Stille — unnormalisiertes Original behalten")
-            return pcm
-        return out
-    except Exception:
+    """Bringt jeden Turn auf einen EINHEITLICHEN Sprech-Pegel — wichtig, weil VC-Kind-Turns und
+    Flash-Erwachsenen-/Erzähler-Turns sonst im Pegel springen.
+
+    Bewusst RMS-Gain statt ffmpeg ``loudnorm=I=-16``: der EBU-R128-loudnorm ist bei KURZEN Clips
+    unzuverlässig — auf dem Pod lieferte er am 18.07. bei „Wer ist das?", „sagt Oma Rina.",
+    „erklärt Oma Rina." still bis viel zu leise, obwohl das Roh-Audio sauber war (RMS ~4700). RMS-Gain
+    über die Sprech-Samples wirkt längenunabhängig und deterministisch; ein Peak-Limit verhindert Clipping."""
+    a = array.array("h"); a.frombytes(pcm[: len(pcm) - (len(pcm) % 2)])
+    if not a:
         return pcm
+    cur = _sprech_rms(pcm)
+    if cur < 1:
+        return pcm
+    peak = max((abs(x) for x in a), default=1) or 1
+    gain = min(ZIEL_SPRECH_RMS / cur, PEAK_LIMIT / peak)
+    return array.array("h", (max(-32768, min(32767, int(x * gain))) for x in a)).tobytes()
 
 
 def _tts_call(client, voice: str, content: str, temperature: float | None = None):
