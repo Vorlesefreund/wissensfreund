@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-18T12:32:13Z -->
+<!-- updated: 2026-07-18T15:14:20Z -->
 <!-- Ältere Stände (verbatim) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
@@ -39,13 +39,7 @@ modulare Pass-Pipeline (`scripts/pipeline_new.py`, Fallback-sicher).
   Emotions-Turn verlor den Präfix**. Pod-VC (RTX 3090, ~$0,05×2) → `Leonardo_FINAL_mitTags_NicoVC.m4a`
   (6:47, Desktop `_leo_final_20260717`). Verifiziert: Volltranskript 97,4 % Wortabdeckung, alle 46 Turns
   hörbar, 0 Stille-Strecken >2s.
-- **DABEI 3. Defekt gefunden + gefixt (`1ff8f2e`): `_loudnorm` verstummte kurze Clips.** ffmpeg
-  `loudnorm` lieferte auf dem Pod bei kurzen Turns („Das ist Das Abendmahl") ein gleich langes, aber
-  STUMMES Ergebnis → Turn fiel im Finale aus, obwohl Roh-PCM sauber. Alter `stdout or pcm`-Fallback griff
-  nicht (nicht leer, nur still). Fix: Pegel nach loudnorm prüfen, bei Stille das Original behalten. Lokal
-  NICHT reproduzierbar (anderes ffmpeg) — nur auf dem Pod sichtbar. Re-Run mit Fix: Fallback-Meldung feuerte,
-  Turn wieder da. → [[reference_tts_gotchas]]. Lehre: Pod-Output IMMER per Volltranskript gegenprüfen,
-  nicht nur Manifest (`vollstaendig=True` sagt nichts über stille Turns).
+- **DEFEKTE 3+4 gefunden + gefixt: `_loudnorm` bei kurzen Clips.** Erst verstummte ffmpeg loudnorm einzelne kurze Turns (`1ff8f2e`, Still-Fallback); dann hörte der PO, dass viele KURZE Turns ("Wer ist das?", "sagt Oma Rina.") **viel zu leise** waren — loudnorm attenuiert kurze Clips unzuverlässig (i=9 Roh-RMS 4697 → 150). **Endfix (`Pegel`): ffmpeg loudnorm ganz raus, RMS-Gain über Sprech-Samples auf ZIEL_SPRECH_RMS=6000 + Peak-Limit** — längen-/versionsunabhängig. Re-Run: alle 46 Turns 4300–6000 Sprech-RMS (vorher 250–1500 bei den kurzen), 0 Stille>2s, i=15 bestätigt hörbar. **Lehre: Pod-Output IMMER per Volltranskript + Per-Turn-Pegel prüfen** — `vollstaendig=True` sagt nichts über still/leise. → [[reference_tts_gotchas]].
 
 ## Zuletzt abgeschlossen (2026-07-17 spät)
 
