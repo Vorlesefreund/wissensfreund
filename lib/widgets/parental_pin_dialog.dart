@@ -225,6 +225,12 @@ class _ParentalPinDialogState extends State<_ParentalPinDialog> {
                   label: isCreate ? 'Neue PIN' : 'PIN',
                   autofocus: true,
                   onSubmitted: isCreate ? null : (_) => _submitVerify(),
+                  // Verify: sobald 4 Ziffern stehen, direkt prüfen — kein
+                  // „Entsperren"-Tipp nötig. Bei „Neue PIN" nicht, dort folgt
+                  // noch die Wiederholung.
+                  onChanged: isCreate
+                      ? null
+                      : (v) { if (v.length == _kPinLength) _submitVerify(); },
                 ),
                 if (isCreate) ...[
                   const SizedBox(height: 10),
@@ -496,11 +502,13 @@ class _PinField extends StatelessWidget {
   final String label;
   final bool autofocus;
   final ValueChanged<String>? onSubmitted;
+  final ValueChanged<String>? onChanged;
   const _PinField({
     required this.controller,
     required this.label,
     this.autofocus = false,
     this.onSubmitted,
+    this.onChanged,
   });
 
   @override
@@ -511,6 +519,7 @@ class _PinField extends StatelessWidget {
         keyboardType: TextInputType.number,
         maxLength: _kPinLength,
         onSubmitted: onSubmitted,
+        onChanged: onChanged,
         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
         style: const TextStyle(fontSize: 20, letterSpacing: 8),
         decoration: InputDecoration(

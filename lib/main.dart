@@ -95,7 +95,7 @@ class _WissensfreundAppState extends State<WissensfreundApp>
     } else if (state == AppLifecycleState.resumed && _wentToBackground) {
       _wentToBackground = false;
       restoreSystemUI();
-      ps.refreshAdminStatus();
+      ps.refreshStatus();
       final provider = context.read<WissensfreundProvider>();
       provider.exitBackground();
       unawaited(provider.resumeSpeaking());

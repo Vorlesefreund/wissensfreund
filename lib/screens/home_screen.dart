@@ -106,7 +106,7 @@ class _HomeScreenState extends State<HomeScreen>
       builder: (ctx) => _ParentalOnboardingDialog(ps: ps),
     );
     // Accessibility-Status nach Rückkehr aus Einstellungen aktualisieren
-    if (mounted) await ps.refreshAdminStatus();
+    if (mounted) await ps.refreshStatus();
   }
 
   Future<void> _checkImageQuality() async {
@@ -1650,7 +1650,7 @@ class _ParentalOnboardingDialogState extends State<_ParentalOnboardingDialog>
   }
 
   Future<void> _checkPermissionAndActivate() async {
-    await widget.ps.refreshAdminStatus();
+    await widget.ps.refreshStatus();
     if (!mounted) return;
     if (widget.ps.hasOverlayPermission) {
       await widget.ps.startKioskMode();
@@ -2896,8 +2896,14 @@ class _ParentalScreen extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 ps.hasOverlayPermission
-                    ? 'Wissensfreund kann ein Sperr-Bildschirm über anderen Apps anzeigen.'
-                    : 'Ohne diese Berechtigung kann kein Overlay erscheinen. Bitte unten einrichten.',
+                    ? 'Grundvoraussetzung für den Kinderschutz: Nur mit dieser '
+                        'Berechtigung kann sich der Sperr-Bildschirm über andere '
+                        'Apps legen. Aktiv wird er über den Kindermodus. Die '
+                        'Schnelleinstellungen (von oben herunterwischen) bleiben '
+                        'erreichbar.'
+                    : 'Ohne diese Berechtigung kann kein Sperr-Bildschirm '
+                        'erscheinen — der Kindermodus kann dein Kind dann nicht '
+                        'in Wissensfreund halten. Bitte unten einrichten.',
                 style: const TextStyle(fontSize: 13, height: 1.45),
               ),
               const SizedBox(height: 20),
@@ -2911,30 +2917,15 @@ class _ParentalScreen extends StatelessWidget {
                 label: ps.isKioskMode ? 'Kindermodus aktiv' : 'Kindermodus inaktiv',
               ),
               const SizedBox(height: 6),
-              Text(
-                ps.isKioskMode
-                    ? 'Home- und Recents-Taste führen direkt zum Eltern-Bildschirm.'
-                    : 'Wenn aktiviert, kehrt das Gerät bei Home- oder Recents-Taste sofort zurück.',
-                style: const TextStyle(fontSize: 13, height: 1.45),
-              ),
-              const SizedBox(height: 20),
-              _DashboardRow(
-                icon: ps.isAdminActive
-                    ? Icons.verified_rounded
-                    : Icons.info_outline_rounded,
-                color: ps.isAdminActive
-                    ? const Color(0xFF2E7D32)
-                    : Colors.orange.shade700,
-                label: ps.isAdminActive
-                    ? 'Gerätesperre beim Beenden'
-                    : 'Eltern-Bildschirm (Fallback)',
-              ),
-              const SizedBox(height: 6),
-              Text(
-                ps.isAdminActive
-                    ? 'Beim Verlassen der App sperrt sich das Gerät.'
-                    : 'Beim Zurückkehren zur App erscheint der Eltern-Bildschirm.',
-                style: const TextStyle(fontSize: 13, height: 1.45),
+              const Text(
+                'Hält dein Kind in Wissensfreund: Verlässt es die App über Home '
+                '(Startbildschirm) oder Übersicht (offene Apps), legt sich der '
+                'Sperr-Bildschirm darüber, der sich '
+                'nur mit der Eltern-PIN (oder per Fingerabdruck) öffnen lässt. '
+                'Der Schutz gilt nur für diese App — die Schnelleinstellungen '
+                '(von oben herunterwischen) bleiben erreichbar. Hier unten '
+                'schaltest du den Kindermodus ein und aus.',
+                style: TextStyle(fontSize: 13, height: 1.45),
               ),
               const SizedBox(height: 28),
               if (!ps.hasOverlayPermission) ...[
@@ -2944,22 +2935,9 @@ class _ParentalScreen extends StatelessWidget {
                     style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
                     onPressed: () async {
                       await ps.requestOverlayPermission();
-                      await ps.refreshAdminStatus();
+                      await ps.refreshStatus();
                     },
                     child: const Text('Overlay-Berechtigung einrichten'),
-                  ),
-                ),
-                const SizedBox(height: 8),
-              ],
-              if (!ps.isAdminActive) ...[
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: () async {
-                      await ps.requestDeviceAdmin();
-                      await ps.refreshAdminStatus();
-                    },
-                    child: const Text('Gerätesperre aktivieren'),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -2985,36 +2963,111 @@ class _ParentalScreen extends StatelessWidget {
                         child: const Text('Kindermodus aktivieren'),
                       ),
               ),
-              // Bei aktivem Anheften lässt sich die App nicht verlassen — damit
-              // erscheint auch das Eltern-Overlay nie, und der dortige
-              // „Gerät freigeben"-Knopf wäre unerreichbar. Deshalb hier ein
-              // bewusster Ausgang, der die Kindersicherung ANLÄSST.
+              // Anheften ist bewusst optional: Android zeigt dabei jedes Mal
+              // einen eigenen, nicht änderbaren Systemdialog, der bei einer
+              // Kinder-App unseriös wirkt. Eltern entscheiden selbst — der
+              // Standardschutz (Overlay + ausgeblendete Leisten) läuft ohne.
               if (ps.isKioskMode) ...[
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton(
-                    onPressed: () async {
-                      await ps.releaseKioskTemporarily();
-                      if (!ctx.mounted) return;
-                      ScaffoldMessenger.of(ctx).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Gerät freigegeben. Du kannst Wissensfreund jetzt '
-                            'verlassen — beim nächsten Öffnen schützt die '
-                            'Kindersicherung wieder.',
-                          ),
-                          duration: Duration(seconds: 5),
-                        ),
-                      );
-                    },
-                    child: const Text('Gerät freigeben — Schutz bleibt an'),
-                  ),
-                ),
+                const SizedBox(height: 20),
+                _PinningToggle(ps: ps),
               ],
             ],
           ),
         )),
+      ),
+    );
+  }
+}
+
+/// Schalter „Zusätzlich fixieren" im Kinderschutz-Screen.
+///
+/// Vor dem Einschalten erklärt ein eigener Dialog, dass Android gleich selbst
+/// nachfragt und warum sein Text so drastisch klingt. Ohne diese Vorwarnung
+/// wirkt der Systemdialog wie eine Warnung vor Wissensfreund selbst.
+class _PinningToggle extends StatelessWidget {
+  final ParentalLockService ps;
+  const _PinningToggle({required this.ps});
+
+  Future<void> _explainThenEnable(BuildContext context) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: const Color(0xFFFFF8EE),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Bildschirm fixieren',
+          style: TextStyle(
+              color: Color(0xFF2E7D32), fontWeight: FontWeight.w800, fontSize: 18),
+        ),
+        content: const Text(
+          'Damit sperrt Android die Home- und Übersichts-Taste (Startbildschirm '
+          'und offene Apps) sowie die '
+          'Schnelleinstellungen — dein Kind kommt dann gar nicht erst aus '
+          'Wissensfreund heraus.\n\n'
+          'Android fragt dich gleich selbst noch einmal und zeigt dabei eine '
+          'allgemeine Warnung („kann auf Daten zugreifen"). Die gilt für jede '
+          'App, die diese Funktion nutzt — bitte tippe dort auf „Ok".\n\n'
+          'Die Frage erscheint bei jedem App-Start erneut; das lässt sich '
+          'leider nicht abschalten.',
+          style: TextStyle(fontSize: 13, height: 1.5, color: Color(0xFF555555)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Abbrechen',
+                style: TextStyle(color: Color(0xFF888888))),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: const Color(0xFF2E7D32)),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Verstanden'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) await ps.setPinningEnabled(true);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0F7F2),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Bildschirm zusätzlich fixieren',
+                    style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.5,
+                        color: Color(0xFF1B5E20))),
+                SizedBox(height: 2),
+                Text(
+                  'Sperrt Home, Übersicht und die Schnelleinstellungen. '
+                  'Android fragt bei jedem Start nach.',
+                  style: TextStyle(fontSize: 12, height: 1.4, color: Color(0xFF555555)),
+                ),
+              ],
+            ),
+          ),
+          Switch(
+            value: ps.pinningEnabled,
+            activeThumbColor: const Color(0xFF2E7D32),
+            onChanged: (v) async {
+              if (v) {
+                await _explainThenEnable(context);
+              } else {
+                await ps.setPinningEnabled(false);
+              }
+            },
+          ),
+        ],
       ),
     );
   }

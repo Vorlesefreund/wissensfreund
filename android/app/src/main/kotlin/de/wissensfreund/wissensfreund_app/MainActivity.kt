@@ -1,8 +1,6 @@
 package de.wissensfreund.wissensfreund_app
 
 import android.Manifest
-import android.app.admin.DevicePolicyManager
-import android.content.ComponentName
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
@@ -118,9 +116,6 @@ class MainActivity : FlutterFragmentActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, parentalChannelName)
             .setMethodCallHandler { call, result ->
                 when (call.method) {
-                    "isDeviceAdminActive"      -> result.success(isDeviceAdminActive())
-                    "requestDeviceAdmin"       -> { requestDeviceAdmin(); result.success(null) }
-                    "lockDevice"               -> lockDevice(result)
                     "startKioskMode"           -> startKioskMode(result)
                     "stopKioskMode"            -> stopKioskMode(result)
                     "isInKioskMode"            -> result.success(isInKioskMode())
@@ -132,6 +127,8 @@ class MainActivity : FlutterFragmentActivity() {
                         })
                         result.success(null)
                     }
+                    "startPinning"             -> { startPinning(); result.success(null) }
+                    "stopPinning"              -> { stopPinning(); result.success(null) }
                     "suppressRestoreOnce"      -> { suppressRestoreOnce = true; result.success(null) }
                     "releaseKioskTemporarily"  -> {
                         // Eltern geben bewusst frei → auch anheften loesen, sonst
@@ -611,7 +608,17 @@ class MainActivity : FlutterFragmentActivity() {
         return am.lockTaskModeState != ActivityManager.LOCK_TASK_MODE_NONE
     }
 
+    /**
+     * Haben die Eltern das Anheften bewusst eingeschaltet? Standard: nein.
+     * Der Wert kommt aus den Flutter-Prefs (ParentalLockService.setPinningEnabled),
+     * damit onResume ihn ohne Channel-Roundtrip lesen kann.
+     */
+    private fun pinningEnabled(): Boolean =
+        getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
+            .getBoolean("flutter.kiosk_pinning_enabled", false)
+
     private fun startPinning() {
+        if (!pinningEnabled()) return
         if (isPinned()) return
         try {
             startLockTask()
@@ -628,37 +635,6 @@ class MainActivity : FlutterFragmentActivity() {
             stopLockTask()
         } catch (e: Exception) {
             Log.w("WfKiosk", "stopLockTask fehlgeschlagen: ${e.message}")
-        }
-    }
-
-    // ── Parental lock — Device Admin ──────────────────────────────────────────
-
-    private fun isDeviceAdminActive(): Boolean {
-        val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        val comp = ComponentName(this, WissensfreundDeviceAdmin::class.java)
-        return dpm.isAdminActive(comp)
-    }
-
-    private fun requestDeviceAdmin() {
-        val comp = ComponentName(this, WissensfreundDeviceAdmin::class.java)
-        val intent = Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN).apply {
-            putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, comp)
-            putExtra(
-                DevicePolicyManager.EXTRA_ADD_EXPLANATION,
-                "Wissensfreund sperrt das Gerät automatisch, wenn dein Kind die App verlässt."
-            )
-        }
-        startActivity(intent)
-    }
-
-    private fun lockDevice(result: MethodChannel.Result) {
-        val dpm = getSystemService(Context.DEVICE_POLICY_SERVICE) as DevicePolicyManager
-        val comp = ComponentName(this, WissensfreundDeviceAdmin::class.java)
-        if (dpm.isAdminActive(comp)) {
-            dpm.lockNow()
-            result.success(true)
-        } else {
-            result.success(false)
         }
     }
 

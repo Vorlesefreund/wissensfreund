@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.WindowManager
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
@@ -31,6 +33,8 @@ import java.security.SecureRandom
  * brach sofort ab und "Entsperren" tat sichtbar nichts (PO-Fund am Tablet).
  */
 class ParentalUnlockActivity : FragmentActivity() {
+
+    companion object { private const val PIN_LENGTH = 4 }
 
     private var failures = 0
 
@@ -100,21 +104,32 @@ class ParentalUnlockActivity : FragmentActivity() {
         b.title("Eltern-PIN")
         b.message("Bitte gib die Eltern-PIN ein, um das Gerät freizugeben.")
         val input = b.field("PIN", pin = true)
+
+        val check = {
+            val pin = input.text.toString().trim()
+            if (sha256("$salt:$pin") == hash) {
+                b.dismiss()
+                unlockAndLeave()
+            } else {
+                failures++
+                input.text.clear()
+                b.showError("Falsche PIN.")
+                // Wachsende Sperre bremst Durchprobieren (4 Stellen = 10.000 Kombis).
+                b.lockPositive(400L * failures)
+            }
+        }
+        // Sobald 4 Ziffern stehen, direkt prüfen — kein „Entsperren"-Tipp nötig.
+        input.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                if ((s?.length ?: 0) == PIN_LENGTH) check()
+            }
+            override fun beforeTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+            override fun onTextChanged(s: CharSequence?, a: Int, b: Int, c: Int) {}
+        })
+
         b.actions(
             positive = "Entsperren",
-            onPositive = {
-                val pin = input.text.toString().trim()
-                if (sha256("$salt:$pin") == hash) {
-                    b.dismiss()
-                    unlockAndLeave()
-                } else {
-                    failures++
-                    input.text.clear()
-                    b.showError("Falsche PIN.")
-                    // Wachsende Sperre bremst Durchprobieren (4 Stellen = 10.000 Kombis).
-                    b.lockPositive(400L * failures)
-                }
-            },
+            onPositive = check,
             onCancel = { b.dismiss(); abort() },
             neutral = if (hasQuestion) "PIN vergessen?" else null,
             onNeutral = if (hasQuestion) ({ b.dismiss(); showRecoveryDialog() }) else null,

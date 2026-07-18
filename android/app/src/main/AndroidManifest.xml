@@ -39,18 +39,6 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
-        <!-- Kinderschutz: Gerätesperre via DevicePolicyManager.lockNow() -->
-        <receiver
-            android:name=".WissensfreundDeviceAdmin"
-            android:permission="android.permission.BIND_DEVICE_ADMIN"
-            android:exported="true">
-            <meta-data
-                android:name="android.app.device_admin"
-                android:resource="@xml/device_admin"/>
-            <intent-filter>
-                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/>
-            </intent-filter>
-        </receiver>
         <!-- Kinderschutz: Foreground Service — zeigt Overlay wenn Kind die App verlässt.
              specialUse: kein anderer Typ passt (kein Location/Kamera/Media), unbegrenzte Laufzeit nötig. -->
         <service

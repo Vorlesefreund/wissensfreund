@@ -171,7 +171,7 @@ class _FirstRunScreenState extends State<FirstRunScreen>
 
   Future<void> _checkKioskPermission() async {
     final ps = context.read<ParentalLockService>();
-    await ps.refreshAdminStatus();
+    await ps.refreshStatus();
     if (!mounted) return;
     if (ps.hasOverlayPermission) {
       await ps.startKioskMode();

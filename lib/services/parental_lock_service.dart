@@ -31,7 +31,6 @@ class ParentalLockService extends ChangeNotifier {
   /// Wird beim App-Start registriert (siehe main.dart).
   ParentalPinPrompt? pinPrompt;
 
-  bool _isAdminActive         = false;
   bool _showOverlay           = false;
   bool _onboardingDone        = false;
   bool _suppressOverlay       = false;
@@ -41,7 +40,6 @@ class ParentalLockService extends ChangeNotifier {
 
   bool _hasDeviceLock = false;
 
-  bool get isAdminActive        => _isAdminActive;
   bool get showOverlay          => _showOverlay;
   bool get onboardingDone       => _onboardingDone;
   bool get isKioskMode          => _isKioskMode;
@@ -72,17 +70,13 @@ class ParentalLockService extends ChangeNotifier {
     final prefs = await SharedPreferences.getInstance();
     _onboardingDone = prefs.getBool('parental_onboarding_done') ?? false;
     _kioskAutoStart = prefs.getBool('kiosk_auto_start') ?? false;
+    _pinningEnabled = prefs.getBool('kiosk_pinning_enabled') ?? false;
     await _loadPinState();
     await _refreshStatus();
   }
 
   Future<void> _refreshStatus() async {
     _hasDeviceLock = await deviceLockAvailable();
-    try {
-      _isAdminActive = await _channel.invokeMethod<bool>('isDeviceAdminActive') ?? false;
-    } catch (_) {
-      _isAdminActive = false;
-    }
     try {
       _isKioskMode = await _channel.invokeMethod<bool>('isInKioskMode') ?? false;
     } catch (_) {
@@ -96,14 +90,9 @@ class ParentalLockService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> refreshAdminStatus() => _refreshStatus();
-
-  Future<void> requestDeviceAdmin() async {
-    suppressNextOverlay();
-    try {
-      await _channel.invokeMethod('requestDeviceAdmin');
-    } catch (_) {}
-  }
+  /// Aktualisiert den Kinderschutz-Status (Kiosk, Overlay-Berechtigung,
+  /// Gerätesperre). Nach Rückkehr aus Systemeinstellungen oder App-Resume.
+  Future<void> refreshStatus() => _refreshStatus();
 
   /// Öffnet die Android-Einstellung "Über anderen Apps anzeigen" direkt für Wissensfreund.
   Future<void> requestOverlayPermission() async {
@@ -118,14 +107,6 @@ class ParentalLockService extends ChangeNotifier {
     try {
       await _channel.invokeMethod('releaseKioskTemporarily');
     } catch (_) {}
-  }
-
-  Future<bool> lockDevice() async {
-    try {
-      return await _channel.invokeMethod<bool>('lockDevice') ?? false;
-    } catch (_) {
-      return false;
-    }
   }
 
   /// Startet den Kiosk-Modus (Lock Task Mode).
@@ -155,6 +136,31 @@ class ParentalLockService extends ChangeNotifier {
     _kioskAutoStart = false;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('kiosk_auto_start', false);
+    notifyListeners();
+  }
+
+  // ── Screen-Pinning (optional) ──────────────────────────────────────────────
+
+  bool _pinningEnabled = false;
+
+  /// Heftet die App zusätzlich per Android-Screen-Pinning an. Standard: aus.
+  ///
+  /// Warum optional: Ohne Device-Owner-Provisioning zeigt Android bei JEDEM
+  /// Anheften einen eigenen Systemdialog („kann auf personenbezogene Daten
+  /// zugreifen", „kann andere Apps öffnen"). Der Text ist nicht änderbar und
+  /// wirkt bei einer Kinder-App unseriös (PO-Urteil). Deshalb entscheiden
+  /// Eltern bewusst darüber; der Standardschutz ist Overlay + immersiveSticky.
+  bool get pinningEnabled => _pinningEnabled;
+
+  Future<void> setPinningEnabled(bool value) async {
+    _pinningEnabled = value;
+    final prefs = await SharedPreferences.getInstance();
+    // Die Kotlin-Seite liest diesen Wert direkt (onResume) — Schluessel dort:
+    // "flutter.kiosk_pinning_enabled".
+    await prefs.setBool('kiosk_pinning_enabled', value);
+    try {
+      await _channel.invokeMethod(value ? 'startPinning' : 'stopPinning');
+    } catch (_) {}
     notifyListeners();
   }
 
