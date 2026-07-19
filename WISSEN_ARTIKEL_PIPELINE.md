@@ -843,3 +843,36 @@ muss nie auf eine gemietete Maschine.
 eine prüfbare Fahne für nachgelagerte Schritte (Schnitt/Upload); die CLI endet mit exit 1 +
 „NICHT AUSLIEFERN". Vorbild war `tts_produce.synth_with_pauses`, das bei einem fehlgeschlagenen Segment
 längst den ganzen Artikel abbricht — der Story-Pfad war die Ausnahme, nicht die Regel.
+
+---
+
+## Inhaltstyp-Achse + Hörspiel-Genre (Stufen-Umbau, 2026-07-19)
+
+**Zwei Inhaltstypen statt drei Lesestufen.** `generate_grounded.py` läuft jetzt auf `content_type`
+(`hoerspiel` 4–9 = alt S1+S2, `erzaehltext` 10–12 = alt S3, unverändert v5.2). CLI `--typen`. age_floor
+ist von der Generierungszeit- zur **Anbietezeit**-Entscheidung gewandert (Hörspiel wird nur bei floor 3
+gedroppt). Eigener Prompt je Typ (`system_prompt_for`, Gemini-Cache je Typ), Wortband beide (225,975).
+
+**Hörspiel-Prompt v2 ist Story-first, nicht Fakten-Q&A.** v1 scheiterte als Fakten-Katalog. v2 erbt die
+gelobte story_mode_v2-DNA. Zwei Flash-Fallen, die sich am Wal-Output zeigten:
+- **Zahlen-Regel „eine pro Zeile" wird gegamed:** Flash zerhackt Antworten in Ein-Satz-Mini-Turns, um je
+  Zeile ≤1 Zahl zu haben — Prosa wird Stakkato, Zahlen bleiben. Richtig: Budget **pro ANTWORT/Erklär-Moment**
+  (2–4 fließende Sätze), Maße als Vergleiche, abstrakte Stückzahlen (40 Mio.) ganz raus.
+- **Ausgeschriebene Zahlen** („dreiunddreißig Meter") umgehen jeden Ziffern-Regex — beim QA-Prüfen auf
+  Zahlen IMMER auch Wortformen matchen, sonst falscher „0 Zahlen"-Befund.
+- **Moby Dick / kulturelle Anker:** als klar markierter erfundener RAHMEN erlaubt (kein Sachfakt →
+  EISERNE Regel unverletzt). Flash bringt ihn dann auch ohne Companion.
+
+**Kompass (Phase-1-Companion-Auswahl) ist content_type-AGNOSTISCH.** Ein eigener plan-first-Call (nur
+Thema/Appeal/Lead), läuft EINMAL je Thema → beide Typen teilen denselben Companion-Satz + Quell-Cache
+(bewusst: „einmal planen, zweimal erzählen"; ein zweiter Kompass-Call zerbräche den Cache = teurer). Die
+Breiten-/Tiefen-Anpassung machen die zwei Generierungs-Prompts aus dem gemeinsamen Menü („Menü, keine
+Checkliste"). Beobachtete Schwäche: Flash zog 4 Walarten (Regelverstoß) + übersah Moby Dick trotz eigener
+Regel → geschärft: **max. 2 Vertreter derselben Kategorie**, kultureller Anker **Pflicht-wenn-vorhanden**,
+„Breite"-Sog entschärft. *Welcher* Anker kommt, bleibt stochastisch (ohne Themen-Hardcoding nicht erzwingbar).
+
+**Lektorat war pipeline-weit tot — zwei getarnte Bugs in `lektorat_common.py` (sync + batch):**
+1. `temperature=0` → HTTP 400 „temperature is deprecated for this model" (claude-sonnet-4-6). Param entfernt.
+2. Danach: `msg.content[0].text` → `AttributeError: 'ThinkingBlock' object has no attribute 'text'` — bei
+   aktivem Reasoning ist Block 0 ein ThinkingBlock. Fix: den ersten Block mit `type=="text"` heraussuchen,
+   nie blind `content[0]`. **Lehre:** Anthropic-Antworten immer über den Block-Typ parsen, nicht per Index.

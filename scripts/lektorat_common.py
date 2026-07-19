@@ -978,7 +978,9 @@ def run_lektorat_sync(
             msg = client.messages.create(
                 model=LEKTORAT_MODEL,
                 max_tokens=16000,
-                temperature=0,  # Reproduzierbarkeit: gleicher Artikel → gleiches Lektorat
+                # temperature entfernt: claude-sonnet-4-6 lehnt den Parameter mit 400 ab
+                # ("temperature is deprecated for this model"). Default (=1) ist ok — das
+                # Lektorat ist ohnehin durch forced-JSON/Beleg-Prüfung eng geführt.
                 system=[
                     {"type": "text", "text": LEKTORAT_SYSTEM,
                      "cache_control": {"type": "ephemeral"}},
@@ -989,7 +991,14 @@ def run_lektorat_sync(
                     {"type": "text", "text": article_task},
                 ]}],
             )
-            raw = msg.content[0].text
+            # Robust gegen Thinking-Blocks: claude-sonnet-4-6 liefert bei aktivem
+            # Reasoning zuerst einen ThinkingBlock (ohne .text) — den echten
+            # Text-Block herausfischen statt blind content[0] zu nehmen.
+            raw = next(
+                (b.text for b in msg.content
+                 if getattr(b, "type", None) == "text" and hasattr(b, "text")),
+                "",
+            )
             u   = msg.usage
             log.info(
                 "  [%s] tokens in=%d create=%d read=%d out=%d",
@@ -1043,7 +1052,8 @@ def run_lektorat_batch(
             "params": {
                 "model":       LEKTORAT_MODEL,
                 "max_tokens":  16000,
-                "temperature": 0,  # Reproduzierbarkeit: gleicher Artikel → gleiches Lektorat
+                # temperature entfernt: claude-sonnet-4-6 lehnt den Parameter mit 400 ab
+                # ("temperature is deprecated for this model").
                 "system": [
                     {"type": "text", "text": LEKTORAT_SYSTEM,
                      "cache_control": {"type": "ephemeral"}},
@@ -1075,7 +1085,14 @@ def run_lektorat_batch(
         rid = result.custom_id
         if result.result.type == "succeeded":
             msg = result.result.message
-            raw = msg.content[0].text
+            # Robust gegen Thinking-Blocks: claude-sonnet-4-6 liefert bei aktivem
+            # Reasoning zuerst einen ThinkingBlock (ohne .text) — den echten
+            # Text-Block herausfischen statt blind content[0] zu nehmen.
+            raw = next(
+                (b.text for b in msg.content
+                 if getattr(b, "type", None) == "text" and hasattr(b, "text")),
+                "",
+            )
             u   = msg.usage
             log.info(
                 "  [%s] tokens in=%d create=%d read=%d out=%d",

@@ -87,7 +87,23 @@ OUT_DIR            = ROOT / "articles" / "test_grounded"
 CATALOG_PATH       = ROOT / "catalog_full.json"
 
 _RUN_ID: str = ""   # wird in main() gesetzt (--run-id)
-SYSTEM_PROMPT_PATH = ROOT / "wissensfreund_generator_prompt_v5_2.md"
+SYSTEM_PROMPT_PATH   = ROOT / "wissensfreund_generator_prompt_v5_2.md"   # Erzähltext (Sachprosa)
+HOERSPIEL_PROMPT_PATH = ROOT / "wissensfreund_hoerspiel_prompt_v2.md"    # Hörspiel (Story-first, Paket B)
+# System-Prompt je Inhaltstyp — Erzähltext = v5.2 (unverändert), Hörspiel = eigenes Genre.
+PROMPT_PATHS: dict[str, Path] = {
+    "hoerspiel":   HOERSPIEL_PROMPT_PATH,
+    "erzaehltext": SYSTEM_PROMPT_PATH,
+}
+_PROMPT_CACHE: dict[str, str] = {}
+
+
+def system_prompt_for(content_type: str) -> str:
+    """System-Prompt-Text je Inhaltstyp (gecacht). Fallback = Erzähltext-Prompt."""
+    path = PROMPT_PATHS.get(content_type, SYSTEM_PROMPT_PATH)
+    key = str(path)
+    if key not in _PROMPT_CACHE:
+        _PROMPT_CACHE[key] = path.read_text(encoding="utf-8")
+    return _PROMPT_CACHE[key]
 
 APPEAL_TARGET     = {"high": 15, "medium": 10, "low": 6}
 MAX_VISION_CHECKS = 40
@@ -97,8 +113,26 @@ MAX_IMG_COMPANION = 6
 # Companion-Cap gestaffelt nach Appeal (kein Auffüllen)
 COMPANION_CAP = {"low": 4, "medium": 5, "high": 6}
 
-# Ergiebigkeits-Bänder je Stufe: (Wlo, Whi). Wortziel = Kurve über Ergiebigkeits-Score.
-ERG_BANDS: dict[int, tuple[int, int]] = {2: (150, 600), 3: (225, 975)}  # S1 entfernt (2026-07-09); S2/S3 +50%
+# ── Inhaltstypen (Stufen-Umbau 2026-07, STUFEN_UMBAU_PLAN.md) ──────────────────
+# Zwei Inhaltstypen statt drei Lesestufen. Profil bleibt dreistufig (App-Ebene).
+#   hoerspiel   = 4–9 J. (ersetzt altes S1+S2), dramatisiert → Prompt-Genre in Paket B
+#   erzaehltext = 10–12 J. (= altes S3, inhaltlich unverändert)
+CONTENT_TYPES: tuple[str, ...] = ("hoerspiel", "erzaehltext")
+
+# Ergiebigkeits-Bänder je Inhaltstyp: (Wlo, Whi). Wortziel = Kurve über Ergiebigkeits-Score.
+# PO 2026-07-18: Hörspiel-Körperband = altes S3 (225,975) — Inhaltstiefe vor Kürze.
+ERG_BANDS: dict[str, tuple[int, int]] = {
+    "hoerspiel":   (225, 975),
+    "erzaehltext": (225, 975),
+}
+# Ergiebigkeits-Score-Quelle je Typ (ergiebigkeit_scores.json hat noch S1/S2/S3).
+# Interim (Paket A): Hörspiel nutzt S2 (ersetzt S1+S2, S1 war zu schwach); Erzähltext S3.
+# TODO(Datenrebuild §9): build_ergiebigkeit_scores.py auf Typ-Scores umstellen.
+_ERG_SCORE_KEY: dict[str, str] = {"hoerspiel": "S2", "erzaehltext": "S3"}
+# Sprach-/Altersstufe für den System-Prompt (AGE_LEVEL). Erzähltext = 3 (= altes S3).
+# Hörspiel interim = 2 (7–9-Sprache); Paket B ersetzt das Genre komplett.
+_PROMPT_AGE_LEVEL: dict[str, int] = {"hoerspiel": 2, "erzaehltext": 3}
+
 RETRY_FLOOR_FRAC   = 0.70   # Retry-Untergrenze als Bruchteil des Ziels (nur klares Untertreiben nachfordern)
 ERG_FALLBACK_SCORE = 6      # medium, wenn Thema (noch) nicht gerated — sichtbar geloggt
 APPEAL_TIER_HIGH   = 7.0    # Erg-Mittel ≥ → high   (steuert Companion-/Bildmenge)
@@ -106,7 +140,27 @@ APPEAL_TIER_MED    = 4.0    # Erg-Mittel ≥ → medium, sonst low
 CAP_GRACE_FRAC     = 0.05   # Toleranz über wmax, bevor getrimmt wird (0.0 = strikt ≤ Cap)
 TRIM_MAX_ATTEMPTS  = 2      # max. Trim-Pässe, danach review_flag
 
-AGE_RANGES = {2: "7-9 Jahre", 3: "10-12 Jahre"}  # S1 (4-6 J.) ersatzlos entfernt
+AGE_RANGES: dict[str, str] = {"hoerspiel": "4-9 Jahre", "erzaehltext": "10-12 Jahre"}
+
+
+def image_stufe_for(content_type: str, age_floor: int) -> int:
+    """Bild-Freigabestufe nach jüngstem Zuschauer (Plan §4).
+
+    Erzähltext (10–12) → 3. Hörspiel folgt dem age_floor: floor 1 → Stufe 1
+    (jüngster Zuschauer 4 J. → nur ab_stufe=1), floor 2 → Stufe 2 (jüngster 7 J.)."""
+    if content_type == "erzaehltext":
+        return 3
+    return max(1, min(2, int(age_floor)))
+
+
+def content_type_from_age_level(age_level: int) -> str:
+    """Back-compat für TEST_JOBS/Alt-Jobs ohne content_type: 1|2 → hoerspiel, 3 → erzaehltext."""
+    return "erzaehltext" if int(age_level) >= 3 else "hoerspiel"
+
+
+def _job_ct(job: dict) -> str:
+    """Inhaltstyp eines Jobs, mit Back-compat für Alt-Jobs (age_level)."""
+    return job.get("content_type") or content_type_from_age_level(job.get("age_level", 2))
 
 
 def _load_ergiebigkeit() -> dict[str, dict]:
@@ -121,33 +175,35 @@ def _load_ergiebigkeit() -> dict[str, dict]:
 _ERGIEBIGKEIT: dict[str, dict] = _load_ergiebigkeit()
 
 
-def wortziel_for(thema: str, level: int) -> tuple[int, int, str]:
+def wortziel_for(thema: str, content_type: str) -> tuple[int, int, str]:
     """(wmin_retry_floor, wmax_target, source) aus Ergiebigkeit + Kurve.
 
-    wmax = round(Wlo + clamp((Erg-2)/6, 0, 1) * (Whi-Wlo))   (Bänder = ERG_BANDS)
+    wmax = round(Wlo + clamp((Erg-2)/6, 0, 1) * (Whi-Wlo))   (Bänder = ERG_BANDS[typ])
     wmin = round(wmax * RETRY_FLOOR_FRAC)
+    Score-Quelle je Typ = _ERG_SCORE_KEY (Hörspiel S2, Erzähltext S3).
     Kein gerateter Score → ERG_FALLBACK_SCORE, sichtbar geloggt (nie still mis-sizen).
     """
-    lo, hi = ERG_BANDS.get(level, (100, 250))
+    lo, hi = ERG_BANDS.get(content_type, (225, 975))
+    score_key = _ERG_SCORE_KEY.get(content_type, "S3")
     rec = _ERGIEBIGKEIT.get(thema.strip().lower())
     if rec is None:
         erg, source = ERG_FALLBACK_SCORE, "fallback-medium"
-        log.warning("  Ergiebigkeit fehlt für '%s' (Stufe %d) → Fallback-Score %d",
-                    thema, level, erg)
+        log.warning("  Ergiebigkeit fehlt für '%s' (%s/%s) → Fallback-Score %d",
+                    thema, content_type, score_key, erg)
     else:
-        erg, source = int(rec.get(f"S{level}", ERG_FALLBACK_SCORE)), "ergiebigkeit"
+        erg, source = int(rec.get(score_key, ERG_FALLBACK_SCORE)), "ergiebigkeit"
     frac = max(0.0, min(1.0, (erg - 2) / 6))
     wmax = round(lo + frac * (hi - lo))
     wmin = round(wmax * RETRY_FLOOR_FRAC)
     return wmin, wmax, source
 
 
-def ergiebigkeit_for(thema: str, level: int) -> int:
-    """Roher Ergiebigkeits-Score (1–10) für Thema+Stufe; Fallback wenn ungerated."""
+def ergiebigkeit_for(thema: str, content_type: str) -> int:
+    """Roher Ergiebigkeits-Score (1–10) für Thema+Typ; Fallback wenn ungerated."""
     rec = _ERGIEBIGKEIT.get(thema.strip().lower())
     if rec is None:
         return ERG_FALLBACK_SCORE
-    return int(rec.get(f"S{level}", ERG_FALLBACK_SCORE))
+    return int(rec.get(_ERG_SCORE_KEY.get(content_type, "S3"), ERG_FALLBACK_SCORE))
 
 
 def appeal_for(thema: str, job_appeal: str | None = None) -> tuple[str, str]:
@@ -359,7 +415,7 @@ Du bist Chef-Rechercheur für das deutsche Kinderlexikon **Wissensfreund**. Du �
 ## 2. ARBEITE IN ZWEI SCHRITTEN (Reihenfolge einhalten)
 
 **SCHRITT 1 — Schreibplan (Feld "plan"):**
-Entscheide zuerst in 2–4 Sätzen, WELCHE Aspekte des Themas der Artikel behandeln soll. Einziger Maßstab: Wie interessant und spannend ist ein Aspekt für den Leser? Nimm die fesselndsten — und ruhig mehrere verschiedene, damit der Artikel Breite bekommt statt nur einer einzigen Linie. Leite alles NUR aus dem Primärartikel ab, erfinde nichts.
+Entscheide zuerst in 2–4 Sätzen, WELCHE Aspekte des Themas der Artikel behandeln soll. Einziger Maßstab: Wie interessant und spannend ist ein Aspekt für den Leser? Nimm die fesselndsten aus VERSCHIEDENEN Blickwinkeln (ein ikonischer Vertreter, ein kultureller/historischer Anker, eine überraschende Facette) — aber KEINE Aufzählung ähnlicher Unterarten oder Vertreter derselben Sorte (nicht vier Walarten): ein starker Aspekt je Blickwinkel schlägt eine Reihe naher Verwandter. Leite alles NUR aus dem Primärartikel ab, erfinde nichts.
 
 **SCHRITT 2 — Companions (Feld "companions"):**
 Wähle DANN die Begleitartikel, die genau diese geplanten Aspekte mit echtem Wikipedia-Stoff füllen. Jeder Companion muss einem geplanten Aspekt dienen — nimm keinen Companion ohne Bezug zum Plan.
@@ -371,12 +427,13 @@ Maßstab bei jedem Companion ist allein, wie interessant und spannend der Aspekt
 **A. Menge & Qualität (Das APPEAL-Level entscheidet)**
 - **APPEAL low:** Wähle 2–3 Companions.
 - **APPEAL medium / high:** Wähle 3–5 Companions.
-- **Qualität vor Quantität:** Fülle niemals mit unpassenden Artikeln auf. Jeder Companion muss einen eigenen, starken Mehrwert bringen. Strebe Vielfalt an (nicht drei Vertreter derselben Kategorie).
+- **Qualität vor Quantität:** Fülle niemals mit unpassenden Artikeln auf. Jeder Companion muss einen eigenen, starken Mehrwert bringen.
+- **Vielfalt (hart):** **Höchstens ZWEI Vertreter derselben Kategorie** (z. B. nicht vier Walarten, nicht drei Planeten hintereinander). Jeder weitere Companion muss einen NEUEN Blickwinkel öffnen — Kultur/Geschichte, ein verwandtes Phänomen, ein Extrembeispiel — nicht denselben Aspekt in einer weiteren Art.
 
 **B. Die 3 Säulen eines guten Companions (Prioritäten)**
 1. **Kinderwelt & Fantasie:** Was kennen Kinder aus ihrem echten Alltag, aus Büchern oder Filmen? (Beispiele: Dinosaurier im Buch, Gewitter, Mondschein).
 2. **Dynamik & Leben — bild-konkret:** Sichtbare Lebewesen, Orte und Ereignisse, die sich für Kinder FOTOGRAFIEREN lassen, schlagen statische Zustände und abstrakte Prozesse. Bei ähnlich starken Kandidaten gewinnt der fotografierbare (ein konkretes Tier, eine Pflanze, ein Ort) gegen einen, der real nur als Diagramm existiert. (Beispiele: Vulkanausbruch, ein Regenwald-Tier statt „Photosynthese").
-3. **Kultur & Menschliches:** Gibt es ein berühmtes Buch, einen Mythos, eine Sage oder ein historisches Ereignis? (Beispiele: Moby Dick bei Wal, Pompeji bei Vulkan).
+3. **Kultur & Menschliches (PFLICHT, wenn vorhanden):** Gibt es ein berühmtes Buch, einen Mythos, eine Sage oder ein historisches Ereignis? (Beispiele: Moby Dick bei Wal, Pompeji bei Vulkan). Ein solcher kultureller Anker ist der stärkste narrative Aufhänger für Kinder — WENN es ihn für das Thema gibt, MUSS er unter den Companions sein.
 
 **C. Harte Ausschlusskriterien (Was du NICHT wählst)**
 - **Statische Geologie & Zustände:** Keine starren Strukturen ohne erlebbare Dynamik (Erdmantel, Pangaea).
@@ -1007,13 +1064,18 @@ def select_images_for_stufe(pool: list[dict], stufe: int, appeal: str) -> list[d
 
 
 def _variable_suffix(job: dict, wmax: int) -> str:
-    """Variabler Suffix je Stufe: AGE_LEVEL + Bild-Stufen-Filter + WORTZIEL.
-    Muss identisch in build_grounded_user_message und _split_grounded_user_message sein."""
-    stufe = job.get("age_level", 2)
+    """Variabler Suffix je Inhaltstyp: AGE_LEVEL + Bild-Stufen-Filter + WORTZIEL.
+    Muss identisch in build_grounded_user_message und _split_grounded_user_message sein.
+
+    AGE_LEVEL (Sprachstufe) und BILD-STUFEN-FILTER sind ENTKOPPELT: Hörspiele
+    können 7–9-Sprache tragen (prompt_age_level 2), aber nach jüngstem Zuschauer
+    nur ab_stufe=1-Bilder (image_stufe 1). Plan §4."""
+    age_level   = job.get("prompt_age_level", job.get("age_level", 2))
+    image_stufe = job.get("image_stufe", age_level)
     return (
-        f"AGE_LEVEL: {stufe}\n"
-        f"BILD-STUFEN-FILTER: Fuer AGE_LEVEL={stufe} ausschliesslich Bilder mit "
-        f"ab_stufe<={stufe} verwenden. Bilder mit ab_stufe>{stufe} ignorieren.\n"
+        f"AGE_LEVEL: {age_level}\n"
+        f"BILD-STUFEN-FILTER: Ausschliesslich Bilder mit ab_stufe<={image_stufe} "
+        f"verwenden. Bilder mit ab_stufe>{image_stufe} ignorieren.\n"
         f"WORTZIEL: Strebe {wmax} Woerter an und schoepfe den Wikipedia-Stoff so weit aus, "
         f"dass du nah an {wmax} herankommst. "
         f"{wmax} ist zugleich die harte Obergrenze — schreibe nicht darueber hinaus. "
@@ -1091,9 +1153,8 @@ def build_grounded_user_message(
             "- Fuer jedes Bild: filename, alt, caption, license, license_author, source_url, thumb_url befuellen",
         ]
 
-    # ── Variabler Suffix: AGE_LEVEL + BILD-STUFEN-FILTER + WORTZIEL je Stufe ─
-    level   = job.get("age_level", 2)
-    wmin, wmax, _wz_src = wortziel_for(thema, level)
+    # ── Variabler Suffix: AGE_LEVEL + BILD-STUFEN-FILTER + WORTZIEL je Typ ─
+    wmin, wmax, _wz_src = wortziel_for(thema, _job_ct(job))
     parts.append(_variable_suffix(job, wmax))
 
     return "\n".join(parts)
@@ -1114,9 +1175,8 @@ def _split_grounded_user_message(
     full = build_grounded_user_message(
         job, primary_text, companion_texts, companion_order, images
     )
-    level  = job.get("age_level", 2)
     thema  = job.get("thema", job.get("title", ""))
-    wmin, wmax, _wz_src = wortziel_for(thema, level)
+    wmin, wmax, _wz_src = wortziel_for(thema, _job_ct(job))
     variable = _variable_suffix(job, wmax)
     stable = full[: len(full) - len(variable)].rstrip("\n")
     return stable, variable
@@ -1453,14 +1513,16 @@ def generate_one_level(
     """
     article_id       = job["article_id"]
     thema            = job.get("thema", job["title"])
-    prompt_version   = SYSTEM_PROMPT_PATH.stem.split("_v")[-1].split("_")[0]
-    generation_method = f"{model}/medium/v{prompt_version}"
+    content_type     = _job_ct(job)
+    image_stufe      = job.get("image_stufe", job.get("prompt_age_level", 3))
+    prompt_version   = PROMPT_PATHS.get(content_type, SYSTEM_PROMPT_PATH).stem.split("_v")[-1].split("_")[0]
+    generation_method = f"{model}/medium/{content_type}-v{prompt_version}"
 
-    # Stufengerechte Bildauswahl: nur Bilder mit ab_stufe <= age_level
+    # Bildauswahl nach jüngstem Zuschauer (Plan §4): nur Bilder mit ab_stufe <= image_stufe
     _appeal = job.get("resolved_appeal", "medium")
-    images = select_images_for_stufe(images, job["age_level"], _appeal)
-    log.info("  Bildpool fuer S%d: %d Bilder (ab_stufe<=%d, appeal=%s)",
-             job["age_level"], len(images), job["age_level"], _appeal)
+    images = select_images_for_stufe(images, image_stufe, _appeal)
+    log.info("  Bildpool fuer %s (image_stufe<=%d): %d Bilder (appeal=%s)",
+             content_type, image_stufe, len(images), _appeal)
 
     report: dict = {
         "article_id":        article_id,
@@ -1471,8 +1533,8 @@ def generate_one_level(
         "errors":            [],
     }
 
-    log.info("  Phase 2: Artikel generieren (Thema: %s, Stufe %d, Modell: %s)",
-             thema, job["age_level"], model)
+    log.info("  Phase 2: Artikel generieren (Thema: %s, Typ: %s, Modell: %s)",
+             thema, content_type, model)
 
     phase2_thinking = _make_thinking_config(model, budget_for_2_5=8192)
     _GEN_MAX_ATTEMPTS = 4
@@ -1526,7 +1588,7 @@ def generate_one_level(
             _u = gemini_client._last_usage.copy()
             if _u:
                 cost_tracker.track(run_id=_RUN_ID, thema=thema,
-                                    stufe=f"S{job['age_level']}", schritt="article_gen",
+                                    stufe=content_type, schritt="article_gen",
                                     modell=model, **_u)
             break  # Erfolg
 
@@ -1574,6 +1636,11 @@ def generate_one_level(
 
     article.setdefault("meta", {})["id"]           = article_id
     article["meta"]["title"]                        = thema
+    # Inhaltstyp-Felder in Code erzwingen (nicht dem Modell-Output vertrauen):
+    article["meta"]["content_type"]                 = content_type
+    article["meta"]["age_floor"]                     = int(job.get("age_floor", job.get("_catalog_age_floor", 1)))
+    article["meta"]["image_stufe"]                   = image_stufe
+    article["meta"]["age_level"]                     = job.get("prompt_age_level", 3)
     article["meta"]["generated_at"]                 = datetime.now(timezone.utc).isoformat()
     article["meta"]["grounding_companions"]          = valid_companions
     article["meta"]["generation_method"]             = generation_method
@@ -1584,7 +1651,7 @@ def generate_one_level(
         article["meta"]["review_reason"] = "; ".join(_review)
 
     # ── Wortzahl-Check + ggf. Retry ──────────────────────────────────────────
-    wmin, wmax, _wz_src = wortziel_for(thema, job["age_level"])
+    wmin, wmax, _wz_src = wortziel_for(thema, content_type)
     word_count = count_article_words(article)
     report["phase2"]["word_count"]  = word_count
     report["phase2"]["word_target"] = f"{wmin}–{wmax}"
@@ -1611,7 +1678,7 @@ def generate_one_level(
             _u = gemini_client._last_usage.copy()
             if _u:
                 cost_tracker.track(run_id=_RUN_ID, thema=thema,
-                                    stufe=f"S{job['age_level']}", schritt="article_gen",
+                                    stufe=content_type, schritt="article_gen",
                                     modell=model, **_u)
             wc_retry = count_article_words(article_retry)
             report["phase2"]["retry_needed"]     = True
@@ -1620,6 +1687,10 @@ def generate_one_level(
             # Metadaten auf Retry-Artikel übertragen
             article_retry.setdefault("meta", {})["id"]               = article_id
             article_retry["meta"]["title"]                            = thema
+            article_retry["meta"]["content_type"]                     = content_type
+            article_retry["meta"]["age_floor"]                        = article["meta"]["age_floor"]
+            article_retry["meta"]["image_stufe"]                      = image_stufe
+            article_retry["meta"]["age_level"]                        = job.get("prompt_age_level", 3)
             article_retry["meta"]["generated_at"]                     = article["meta"]["generated_at"]
             article_retry["meta"]["grounding_companions"]             = valid_companions
             article_retry["meta"]["generation_method"]                = generation_method
@@ -1649,7 +1720,7 @@ def generate_one_level(
             _u = gemini_client._last_usage.copy()
             if _u:
                 cost_tracker.track(run_id=_RUN_ID, thema=thema,
-                                    stufe=f"S{job['age_level']}", schritt="trim",
+                                    stufe=content_type, schritt="trim",
                                     modell=model, **_u)
             log.info("  Trim-Pass %d Ergebnis: %d Wörter", trims, word_count)
         except Exception as e:
@@ -1667,7 +1738,7 @@ def generate_one_level(
     report["phase2"]["word_count"] = word_count
     article["meta"]["word_count"]   = word_count
     article["meta"]["word_target"]  = f"{wmin}–{wmax}"
-    article["meta"]["ergiebigkeit"] = ergiebigkeit_for(thema, job["age_level"])
+    article["meta"]["ergiebigkeit"] = ergiebigkeit_for(thema, content_type)
 
     # ── Box-Verteilungs-Guard: Clusterung → Auto-Reparatur, sonst review_flag ──
     box_issue = _box_lint(article)
@@ -1678,7 +1749,7 @@ def generate_one_level(
             _u = gemini_client._last_usage.copy()
             if _u:
                 cost_tracker.track(run_id=_RUN_ID, thema=thema,
-                                    stufe=f"S{job['age_level']}", schritt="box_repair",
+                                    stufe=content_type, schritt="box_repair",
                                     modell=model, **_u)
             same_content = _box_signature(repaired) == _box_signature(article)
             if same_content and _box_lint(repaired) is None:
@@ -1716,8 +1787,13 @@ def generate_one_level(
 
 # ── Catalog-Connector ─────────────────────────────────────────────────────────
 
-def _build_catalog_jobs(themen: list[str], stufen: list[int]) -> list[dict]:
-    """Baut Job-Dicts aus catalog_full.json für die gegebenen Themen + Stufen."""
+def _build_catalog_jobs(themen: list[str], typen: list[str]) -> list[dict]:
+    """Baut Job-Dicts aus catalog_full.json für die gegebenen Themen + Inhaltstypen.
+
+    Je Thema ein Job pro Inhaltstyp (hoerspiel/erzaehltext). age_floor wird NICHT
+    mehr zur Generierungszeit als Stufen-Skip genutzt (Plan §3: age_floor →
+    Anbietezeit); der einzige generierungszeitliche Filter (Hörspiel-Drop bei
+    age_floor 3, image_stufe) läuft autoritativ im Haupt-Loop über eignung_for."""
     if not CATALOG_PATH.exists():
         raise FileNotFoundError(f"catalog_full.json nicht gefunden: {CATALOG_PATH}")
     catalog: list[dict] = json.load(CATALOG_PATH.open(encoding="utf-8"))
@@ -1732,30 +1808,28 @@ def _build_catalog_jobs(themen: list[str], stufen: list[int]) -> list[dict]:
         if entry.get("eignung") == "exclude" or thema.strip().lower() in _EXCLUDE_SET:
             log.info("  Catalog: '%s' ist exclude — uebersprungen", thema)
             continue
-        age_floor = int(entry.get("age_floor") or 1)
         canonical = entry["thema"]
-        for level in stufen:
-            if level < age_floor:
-                log.info("  Catalog: '%s' S%d unter age_floor S%d — uebersprungen", canonical, level, age_floor)
-                continue
-            slug = canonical.lower().replace(" ", "_").replace("/", "_")
+        slug = canonical.lower().replace(" ", "_").replace("/", "_")
+        for content_type in typen:
             jobs.append({
-                "article_id":        f"{slug}_l{level}",
+                "article_id":        f"{slug}_{content_type}",
                 "thema":             canonical,
                 "primaer_wikipedia": canonical,
                 "title":             canonical,
-                "age_level":         level,
+                "content_type":      content_type,
+                "prompt_age_level":  _PROMPT_AGE_LEVEL[content_type],
                 "topic_interest":    "medium",
                 "sensibel":          bool(entry.get("sensibel", False)),
                 "pattern":           entry.get("themengebiet", ""),
                 "category_top":      "",
                 "category_sub":      "",
                 "_catalog_rank":     entry.get("production_rank", 9999),
+                "_catalog_age_floor": int(entry.get("age_floor") or 1),
             })
     return jobs
 
 
-def _load_catalog_rank_jobs(top_n: int, stufen: list[int]) -> list[dict]:
+def _load_catalog_rank_jobs(top_n: int, typen: list[str]) -> list[dict]:
     """Lädt Top-N Themen nach production_rank aus catalog_full.json."""
     if not CATALOG_PATH.exists():
         raise FileNotFoundError(f"catalog_full.json nicht gefunden: {CATALOG_PATH}")
@@ -1766,7 +1840,7 @@ def _load_catalog_rank_jobs(top_n: int, stufen: list[int]) -> list[dict]:
     ]
     eligible.sort(key=lambda e: int(e.get("production_rank") or 9999))
     top_themen = [e["thema"] for e in eligible[:top_n]]
-    return _build_catalog_jobs(top_themen, stufen)
+    return _build_catalog_jobs(top_themen, typen)
 
 
 # ── CLI ───────────────────────────────────────────────────────────────────────
@@ -1787,8 +1861,8 @@ def main() -> None:
         help="Top-N Themen nach production_rank aus catalog_full.json",
     )
     parser.add_argument(
-        "--stufen", nargs="+", type=int, choices=[2, 3], default=[2, 3],
-        help="Zu generierende Stufen (default: 2 3; S1 entfernt)",
+        "--typen", nargs="+", choices=list(CONTENT_TYPES), default=list(CONTENT_TYPES),
+        help="Zu generierende Inhaltstypen (default: hoerspiel erzaehltext)",
     )
     parser.add_argument(
         "--run-id", default=None,
@@ -1839,8 +1913,8 @@ def main() -> None:
         log.warning("ANTHROPIC_API_KEY fehlt — Lektorat wird uebersprungen (--skip-lektorat zum Unterdrücken)")
         skip_lektorat = True
 
-    system_prompt = SYSTEM_PROMPT_PATH.read_text(encoding="utf-8")
-    log.info("System-Prompt: %d Zeichen", len(system_prompt))
+    log.info("System-Prompts: Erzähltext %d Z. | Hörspiel %d Z.",
+             len(system_prompt_for("erzaehltext")), len(system_prompt_for("hoerspiel")))
     log.info("Modell: %s | skip_images: %s | out_dir: %s | run_id: %s",
              model, args.skip_images, out_dir, _RUN_ID)
 
@@ -1855,14 +1929,14 @@ def main() -> None:
     resolved_jobs: list[dict] = []
     if args.catalog_rank:
         try:
-            resolved_jobs = _load_catalog_rank_jobs(args.catalog_rank, args.stufen)
+            resolved_jobs = _load_catalog_rank_jobs(args.catalog_rank, args.typen)
             log.info("Catalog-Rank: Top-%d Themen, %d Jobs", args.catalog_rank, len(resolved_jobs))
         except Exception as e:
             log.error("Catalog-Rank Fehler: %s", e)
             sys.exit(1)
     elif args.catalog:
         try:
-            resolved_jobs = _build_catalog_jobs(args.catalog, args.stufen)
+            resolved_jobs = _build_catalog_jobs(args.catalog, args.typen)
             log.info("Catalog: %d Themen, %d Jobs", len(args.catalog), len(resolved_jobs))
         except Exception as e:
             log.error("Catalog Fehler: %s", e)
@@ -1879,12 +1953,21 @@ def main() -> None:
 
     if args.dry_run:
         print(f"\n=== DRY-RUN: {len(resolved_jobs)} Jobs ===")
+        n_drop = 0
         for job in resolved_jobs:
             ev = eignung_for(job.get("thema", job["title"]))
-            gate = f"exclude={ev['eignung']=='exclude'} age_floor={ev['age_floor']}"
-            sens = "sensibel=True " if job.get("sensibel") else ""
-            print(f"  {job['article_id']:30s}  {gate}  {sens}")
-        print("Kein einziger API-Call — dry-run beendet.")
+            floor = int(ev["age_floor"])
+            ct = _job_ct(job)
+            if ev["eignung"] == "exclude":
+                verdikt = "EXCLUDE"
+            elif ct == "hoerspiel" and floor >= 3:
+                verdikt = "DROP (age_floor 3 → kein Hörspiel)"
+                n_drop += 1
+            else:
+                verdikt = f"OK  image_stufe={image_stufe_for(ct, floor)}"
+            sens = " sensibel" if job.get("sensibel") else ""
+            print(f"  {job['article_id']:32s}  age_floor={floor}  {verdikt}{sens}")
+        print(f"Kein einziger API-Call — dry-run beendet. ({n_drop} Hörspiel-Drop wg. age_floor 3)")
         return
 
     # Nach primaer_wikipedia gruppieren (Reihenfolge des ersten Auftretens bewahren)
@@ -1896,28 +1979,38 @@ def main() -> None:
             seen_topics.append(primaer)
         topic_groups[primaer].append(job)
 
-    # ── Pro Thema: Phase 1 einmal, Phase 2 je Stufe ──────────────────────────
+    # ── Pro Thema: Phase 1 einmal, Phase 2 je Inhaltstyp ─────────────────────
     for primary_wikipedia in seen_topics:
         topic_jobs = topic_groups[primary_wikipedia]
         thema      = topic_jobs[0].get("thema", topic_jobs[0]["title"])
-        levels     = [j["age_level"] for j in topic_jobs]
 
         # ── Eignungs-Gate: exclude / age_floor / framing ─────────────────────
+        # age_floor steuert jetzt Anbietezeit + Bild-/Typ-Auswahl (Plan §3/§4),
+        # NICHT mehr einen Stufen-Skip. Autoritative Quelle = eignung_for.
         ev = eignung_for(thema)
         if ev["eignung"] == "exclude":
             log.warning("  Eignungs-Gate: '%s' ausgeschlossen (%s) — übersprungen", thema, ev["source"])
             continue
-        floor = ev["age_floor"]
-        skipped = [j["age_level"] for j in topic_jobs if j["age_level"] < floor]
-        topic_jobs = [j for j in topic_jobs if j["age_level"] >= floor]
-        if skipped:
-            log.info("  Eignungs-Gate: '%s' age_floor=S%d → Stufen %s übersprungen", thema, floor, skipped)
-        if not topic_jobs:
-            log.warning("  Eignungs-Gate: '%s' — alle Stufen unter age_floor S%d, nichts zu tun", thema, floor)
-            continue
+        floor = int(ev["age_floor"])
+        kept: list[dict] = []
         for job in topic_jobs:
-            job["framing_note"] = ev["framing_note"]
-        levels = [j["age_level"] for j in topic_jobs]
+            ct = _job_ct(job)
+            # Hörspiel (4–9) entfällt nur bei age_floor 3 → ausschließlich Erzähltext.
+            if ct == "hoerspiel" and floor >= 3:
+                log.info("  age_floor=%d: '%s' bekommt kein Hörspiel (nur Erzähltext)", floor, thema)
+                continue
+            job["content_type"]     = ct
+            job.setdefault("prompt_age_level", _PROMPT_AGE_LEVEL[ct])
+            job["age_level"]         = job["prompt_age_level"]  # Back-compat: validate_article/Legacy lesen age_level
+            job["age_floor"]         = floor
+            job["image_stufe"]       = image_stufe_for(ct, floor)
+            job["framing_note"]      = ev["framing_note"]
+            kept.append(job)
+        topic_jobs = kept
+        if not topic_jobs:
+            log.warning("  Eignungs-Gate: '%s' — kein Inhaltstyp übrig, nichts zu tun", thema)
+            continue
+        types = [_job_ct(j) for j in topic_jobs]
 
         # ── Lemma auflösen (Redirect / BKS / Listen / Doppelbedeutung) ───────
         try:
@@ -1956,8 +2049,8 @@ def main() -> None:
 
         print(f"\n{'='*60}")
         print(f"THEMA: {thema} | Primaer: {primary_wikipedia} | Modell: {model}")
-        print(f"Stufen: {levels} | Appeal: {appeal} (Herkunft: {appeal_source}) | sensibel: {sensibel}")
-        print(f"Phase 1 laeuft EINMAL fuer alle Stufen")
+        print(f"Typen: {types} | Appeal: {appeal} (Herkunft: {appeal_source}) | sensibel: {sensibel}")
+        print(f"Phase 1 laeuft EINMAL fuer alle Typen")
         print(f"{'='*60}")
 
         try:
@@ -2019,29 +2112,36 @@ def main() -> None:
         log.info("  Quellblock: %d Zeichen (Primaer + %d Companions)",
                  len(sources_block), len(valid_companions))
 
-        # Gemini Context Cache: stabilen Prefix (Quellblock) einmal je Thema cachen
-        gemini_cache: str | None = None
+        # Gemini Context Cache: stabilen Prefix (Quellblock) je Thema cachen.
+        # Der Prefix (Quellen + Bildpool) ist typ-unabhängig; der System-Prompt NICHT
+        # (Hörspiel ≠ Erzähltext) → ein Cache PRO Inhaltstyp aus demselben Prefix.
+        stable_prefix: str | None = None
         if topic_jobs:
             stable_prefix, _ = _split_grounded_user_message(
                 topic_jobs[0], primary_text, companion_texts, valid_companions, images
             )
-            gemini_cache = try_create_gemini_cache(client, model, system_prompt, stable_prefix)
+        type_caches: dict[str, str | None] = {}
 
-        # Phase 2: Stufen SEQUENZIELL generieren (verhindert 503-Burst beim parallelen Feuern)
+        # Phase 2: Typen SEQUENZIELL generieren (verhindert 503-Burst beim parallelen Feuern)
         topic_articles: list[tuple[dict, dict, dict]] = []  # (job, article, report)
         failed_levels: list[str] = []
 
         try:
-            print(f"\n  Phase 2 startet {len(topic_jobs)} Stufe(n) sequenziell ...")
-            for job in sorted(topic_jobs, key=lambda j: j["age_level"]):
+            print(f"\n  Phase 2 startet {len(topic_jobs)} Typ(en) sequenziell ...")
+            for job in sorted(topic_jobs, key=lambda j: CONTENT_TYPES.index(_job_ct(j))):
                 article_id = job["article_id"]
-                print(f"\n  --- Stufe {job['age_level']}: {article_id} ---")
+                ct         = _job_ct(job)
+                sp         = system_prompt_for(ct)
+                print(f"\n  --- {ct}: {article_id} ---")
+
+                if stable_prefix is not None and ct not in type_caches:
+                    type_caches[ct] = try_create_gemini_cache(client, model, sp, stable_prefix)
 
                 article, report = generate_one_level(
-                    client, system_prompt, job,
+                    client, sp, job,
                     primary_text, companion_texts, valid_companions, images,
                     phase1_report, model, args.skip_images, out_dir,
-                    gemini_cache=gemini_cache,
+                    gemini_cache=type_caches.get(ct),
                 )
 
                 report_path = out_dir / f"{article_id}_report.json"
@@ -2059,11 +2159,11 @@ def main() -> None:
             # Lektorat (alle Stufen, Quellblock geteilt; sync=default, batch=--lektorat-batch)
             if not skip_lektorat and topic_articles:
                 parts = {}
-                aid_to_meta: dict[str, tuple[str, int]] = {}
+                aid_to_meta: dict[str, tuple[str, str]] = {}
                 for job, article, _ in topic_articles:
                     aid = job["article_id"]
                     parts[aid] = build_lektorat_parts(article, sources_block)
-                    aid_to_meta[aid] = (job.get("thema", job["title"]), job["age_level"])
+                    aid_to_meta[aid] = (job.get("thema", job["title"]), _job_ct(job))
                 if use_batch_lektorat:
                     log.info("  Starte Lektorat-Batch fuer %d Artikel (Modell: claude-sonnet-4-6) ...",
                              len(topic_articles))
@@ -2085,10 +2185,10 @@ def main() -> None:
                         lektorat_usage = {}
                 for aid, u in lektorat_usage.items():
                     if u:
-                        _thema_l, _level_l = aid_to_meta.get(aid, (thema, 0))
+                        _thema_l, _ct_l = aid_to_meta.get(aid, (thema, "erzaehltext"))
                         cost_tracker.track(
                             run_id=_RUN_ID, thema=_thema_l,
-                            stufe=f"S{_level_l}", schritt="lektorat",
+                            stufe=_ct_l, schritt="lektorat",
                             modell="claude-sonnet-4-6",
                             input_tok=u.get("input_tok", 0),
                             output_tok=u.get("output_tok", 0),
@@ -2097,9 +2197,9 @@ def main() -> None:
                 for job, article, _ in topic_articles:
                     aid = job["article_id"]
                     lektorat_result = lektorat_results.get(aid, {"corrections": [], "pruefen": []})
-                    _thema_a, _level_a = aid_to_meta.get(aid, (thema, job["age_level"]))
+                    _thema_a, _ct_a = aid_to_meta.get(aid, (thema, _job_ct(job)))
                     annotate_article_lektorat_v2(
-                        article, lektorat_result, thema=_thema_a, stufe=f"S{_level_a}"
+                        article, lektorat_result, thema=_thema_a, stufe=_ct_a
                     )
                     pb = article.get("pruefbericht", {})
                     log.info(
@@ -2152,12 +2252,13 @@ def main() -> None:
                 )
 
         finally:
-            if gemini_cache:
-                try:
-                    client.caches.delete(name=gemini_cache)
-                    log.info("  Gemini-Cache geloescht: %s", gemini_cache)
-                except Exception as e:
-                    log.warning("  Gemini-Cache loeschen fehlgeschlagen (%s): %s", gemini_cache, e)
+            for _ct, _cache in type_caches.items():
+                if _cache:
+                    try:
+                        client.caches.delete(name=_cache)
+                        log.info("  Gemini-Cache geloescht (%s): %s", _ct, _cache)
+                    except Exception as e:
+                        log.warning("  Gemini-Cache loeschen fehlgeschlagen (%s/%s): %s", _ct, _cache, e)
 
         print(f"\n  Appeal: {appeal} ({appeal_source}) | Companions ({len(valid_companions)}): {valid_companions}")
 
