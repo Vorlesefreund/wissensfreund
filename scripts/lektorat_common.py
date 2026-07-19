@@ -598,6 +598,20 @@ def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -
     if not claim_text or not korrektur_neu or claim_text == korrektur_neu:
         return False
 
+    # Mehr-Turn-Claim: das Lektorat zitiert im Dialog oft eine Frage + Antwort
+    # über ZWEI sentences[]-Einträge, mit Zeilenumbruch dazwischen verbunden
+    # (»Frage Theo\nAntwort Ronja«) — geändert wird meist nur EIN Turn, der
+    # andere ist in claim und korrektur identisch. Auf \n splitten und jeden
+    # geänderten Turn einzeln über die Einzel-Turn-Logik einbauen; identische
+    # Teile überspringen. Verhindert das stille Flaggen solcher Dialog-Korrekturen.
+    if "\n" in claim_text and "\n" in korrektur_neu:
+        cparts = [p.strip() for p in claim_text.split("\n") if p.strip()]
+        nparts = [p.strip() for p in korrektur_neu.split("\n") if p.strip()]
+        if len(cparts) == len(nparts) and len(cparts) > 1:
+            changed = [(c, n) for c, n in zip(cparts, nparts) if c != n]
+            if changed:
+                return all(_apply_auto_correction(article, c, n) for c, n in changed)
+
     best_score = 0.0
     # ("sec", si, sj) | ("box", si, bi, sj)
     # | ("box_text"|"box_reveal", si, bi, satz_str)  ← satz_str = exakt zu ersetzender Teil
@@ -632,8 +646,16 @@ def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -
     if best_loc[0] == "sec":
         _, si, sj = best_loc
         sents = article["sections"][si]["sentences"]
+        entry_text = sents[sj].get("text", "")
         claim_parts = _split_sentences(claim_text) or [claim_text]
-        if len(claim_parts) <= 1:
+        if claim_text in entry_text and claim_text != entry_text:
+            # Claim ist exakter Teilstring des Turns (Hörspiel: ein sentences[]-
+            # Eintrag ist ein Mehrsatz-Turn). Nur den Claim ersetzen, die übrigen
+            # Sätze des Turns (führender Satz UND Redebegleitsatz) bleiben stehen.
+            # Deckt Ein-Satz-Claims IN einem Mehrsatz-Turn UND Schwanz-/Mittel-
+            # Claims ab, die der Jaccard-/Lauf-Pfad sonst als „prüfen" flaggt.
+            sents[sj]["text"] = entry_text.replace(claim_text, korrektur_neu, 1)
+        elif len(claim_parts) <= 1:
             # Ein-Satz-Claim: unverändertes Verhalten (nur Text ersetzen)
             sents[sj]["text"] = korrektur_neu
         elif _jaccard(claim_text, sents[sj].get("text", "")) >= 0.9:

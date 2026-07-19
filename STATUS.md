@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-19T19:53:01Z -->
+<!-- updated: 2026-07-19T20:24:49Z -->
 <!-- Ältere Stände (verbatim, inkl. TTS-Woche 16.-18.07.) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
@@ -48,9 +48,17 @@ Wal run3: 815 W, Cast Ronja/Theo, Fluss statt Stakkato, Zahlen mit Vergleichen, 
   ergänzt → greift für Sprach-Pass UND Grounding-Lektorat (run6: silent=1 auto-eingebaut, 0 Flags).
 - **Erzähler-Regel:** kein „Der Erzähler lächelt" mehr (keine Selbst-Handlung; warmer Tonfall bleibt erlaubt).
 
-Offene Feinschliff-Punkte (nicht-blockierend): eine große Zahl bleibt („30.000 Wale" — bewusst Prompt+Review
-überlassen); run6 legte wörtl. Rede + Redebegleitsatz stochastisch in GETRENNTE Einträge (Konvention will sie
-zusammen wie Leo) — Prompt-Schärfung oder Post-Merge als Folgepunkt.
+- **Redebegleitsatz-Split BEHOBEN (Post-Merge):** `_merge_split_speech_tags` in generate_grounded.py zieht vor
+  validate zusammen: (A) wörtl. Rede + „ruft Theo" wieder in EINEN Turn, (B) über mehrere Einträge offene
+  Reden. Läuft nur für hoerspiel. run7–9: 0 danglende Rede-Kommas, 0 unbalancierte Anführungszeichen.
+- **Zwei Lektorat-Einbau-Klassen gefixt** (`_apply_auto_correction`, greifen für Grounding UND Sprach-Pass):
+  (1) Schwanz-Teilstring — Korrektur trifft nur den Schwanz eines Mehrsatz-Turns → in-place-Ersatz (führender
+  Satz + Redebegleitsatz bleiben). (2) Turn-Grenze — Dialog-Claim über Frage+Antwort (\n-verbunden) wird pro
+  Turn eingebaut, unveränderte Turns übersprungen. run9: alle Korrekturen gelandet (0 prüfen, 0 eskaliert).
+
+Offene Feinschliff-Punkte (nicht-blockierend): nackte Maße („33 Meter"/„200 Tonnen") als Vergleich (Zahl-
+Regel); Kompass kürzt „Moby-Dick"→„Moby" (Bindestrich-Split, Text landet trotzdem — kosmetisch); 76 Dialog-
+Turns triggern Validator-Bereich [15,60] (für alte Stufe 2 — für Typ hoerspiel Bereich anpassen).
 
 ## Gerade in Arbeit / Nächster Schritt
 

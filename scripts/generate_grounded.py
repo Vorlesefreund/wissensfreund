@@ -1086,6 +1086,59 @@ def _variable_suffix(job: dict, wmax: int) -> str:
     )
 
 
+def _merge_split_speech_tags(article: dict) -> int:
+    """Hörspiel-Normalisierung: fasst eine über mehrere sentences[]-Einträge
+    zerrissene Sprech-Handlung wieder zu EINEM Eintrag zusammen (wie Leo).
+
+    Flash legt eine Sprech-Handlung stochastisch getrennt ab. Zwei Fälle, beide
+    grammatisch unvollständig → der Eintrag wird mit dem/den Folge-Eintrag/en
+    verschmolzen, bis er wieder vollständig ist:
+      A) endet auf schließendes Anführungszeichen + Komma (»…!",«) → ein
+         Redebegleitsatz muss folgen (»…!", ruft Theo.«).
+      B) öffnet ein Anführungszeichen, das im selben Eintrag nicht schließt
+         (mehr „ als ") → die wörtliche Rede läuft in den nächsten Eintrag weiter.
+    Ausnahme: endet der Eintrag auf »,« UND öffnet der nächste eine NEUE Rede
+    (führendes „), wird nicht gemergt (mehrdeutig → in Ruhe lassen).
+    Gibt die Zahl der entfernten (verschmolzenen) Einträge zurück; bei >0 werden
+    die Satz-IDs global neu vergeben (s001, s002 …).
+    """
+    CLOSE = "“"   # deutsches schließendes Anführungszeichen "
+    OPEN  = "„"   # deutsches öffnendes Anführungszeichen „
+
+    def _incomplete(t: str) -> bool:
+        t = t.rstrip()
+        return t.endswith(CLOSE + ",") or (t.count(OPEN) > t.count(CLOSE))
+
+    removed = 0
+    for sec in article.get("sections", []):
+        sents = sec.get("sentences", []) or []
+        out: list[dict] = []
+        i = 0
+        while i < len(sents):
+            cur = dict(sents[i])
+            txt = (cur.get("text") or "").rstrip()
+            j = i + 1
+            while _incomplete(txt) and j < len(sents):
+                nxt_txt = (sents[j].get("text") or "").strip()
+                # Fall A + Folge-Eintrag öffnet neue Rede → mehrdeutig, abbrechen.
+                if txt.endswith(CLOSE + ",") and nxt_txt.startswith(OPEN):
+                    break
+                txt = (txt + " " + nxt_txt).rstrip()
+                j += 1
+                removed += 1
+            cur["text"] = txt
+            out.append(cur)
+            i = j
+        sec["sentences"] = out
+    if removed:
+        n = 0
+        for sec in article.get("sections", []):
+            for s in sec.get("sentences", []):
+                n += 1
+                s["id"] = f"s{n:03d}"
+    return removed
+
+
 # ── Phase-2-User-Message ──────────────────────────────────────────────────────
 
 def build_grounded_user_message(
@@ -1783,6 +1836,13 @@ def generate_one_level(
             article["meta"]["review_flag"]   = True
             article["meta"]["review_reason"] = (
                 article["meta"].get("review_reason", "") + f"; {box_issue}").lstrip("; ")
+
+    # Hörspiel: getrennt abgelegte Rede + Redebegleitsatz wieder zusammenführen
+    # (»„…!", / ruft Theo.« → EIN Eintrag), bevor validiert/lektoriert wird.
+    if content_type == "hoerspiel":
+        n_merged = _merge_split_speech_tags(article)
+        if n_merged:
+            log.info("  Redebegleitsatz-Merge: %d getrennte Rede-Zeilen zusammengefuehrt", n_merged)
 
     val_errors = validate_article(article, job, word_floor=wmin)
     if val_errors:
