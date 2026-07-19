@@ -78,6 +78,7 @@ from lektorat_common import (            # noqa: E402
     annotate_article_lektorat_v2,
     run_lektorat_batch,
     run_lektorat_sync,
+    run_sprachpass_sync,
 )
 
 GEMINI_MODEL       = "gemini-3.5-flash"
@@ -1121,6 +1122,19 @@ def build_grounded_user_message(
     fr = job.get("framing_note", "")
     if fr:
         parts.append(f"FRAMING: {fr}")
+    # Kompass-Schreibplan: die in Phase 1 gewaehlten Aspekte/Fenster. Ohne diese
+    # Weitergabe erzeugt Kompass zwar den Plan (inkl. Companions wie Moby Dick),
+    # die Generierung ignoriert ihn aber und faellt auf Default-Sachkunde zurueck.
+    # Typ-agnostisch (gilt fuer Hoerspiel + Erzaehltext) → bleibt im stabilen Prefix.
+    plan = (job.get("kompass_plan") or "").strip()
+    if plan:
+        parts.append(
+            "SCHREIBPLAN (in Phase 1 gewaehlte Aspekte/Fenster fuer diese Folge — "
+            "richte deine Fenster danach aus und setze die genannten Aspekte "
+            "TATSAECHLICH um, besonders die erzaehlerisch reichen Hoehepunkte "
+            "(beruehmte Geschichten, Ereignisse, Verwandte); lass keinen im Plan "
+            "genannten Hoehepunkt aus):\n" + plan
+        )
 
     # Bildpool (stabil — gleiche Images für alle Stufen)
     if images:
@@ -2096,6 +2110,12 @@ def main() -> None:
                 log.error("  FAILED: %s", job["article_id"])
             continue
 
+        # Kompass-Schreibplan (Phase 1) an alle Jobs des Topics haengen → wird in
+        # der Generierung als verbindliche Fenster-Vorgabe injiziert (build_grounded_user_message).
+        kompass_plan = get_last_kompass_plan()
+        for job in topic_jobs:
+            job["kompass_plan"] = kompass_plan
+
         # Befund Phase 1 ausgeben
         print(f"\n  [PHASE 1 — einmalig fuer '{thema}']")
         print(f"  Kompass-Vorschlag (roh): {phase1_report['raw_companions']}")
@@ -2194,6 +2214,23 @@ def main() -> None:
                             output_tok=u.get("output_tok", 0),
                             cached_tok=u.get("cache_read_tok", 0),
                         )
+                # Zweiter, leichter Sprach-Pass (Wortwahl/Grammatik) — mergt in
+                # dasselbe Lektorat-Ergebnis: EIN Einbau + EIN Pruefbericht.
+                try:
+                    _sp_articles = {job["article_id"]: art
+                                    for job, art, _ in topic_articles}
+                    sprach_results = run_sprachpass_sync(_sp_articles, anthropic_key)
+                    n_sp = sum(len(v) for v in sprach_results.values())
+                    log.info("  Sprach-Pass: %d Wort-/Grammatik-Korrektur(en)", n_sp)
+                    for aid_sp, corr in sprach_results.items():
+                        if corr:
+                            lr = lektorat_results.setdefault(
+                                aid_sp, {"corrections": [], "pruefen": []})
+                            lr.setdefault("corrections", []).extend(corr)
+                except Exception as exc:
+                    log.warning("  Sprach-Pass fehlgeschlagen: %s — ueberspringe",
+                                str(exc)[:100])
+
                 for job, article, _ in topic_articles:
                     aid = job["article_id"]
                     lektorat_result = lektorat_results.get(aid, {"corrections": [], "pruefen": []})

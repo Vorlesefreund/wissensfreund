@@ -17,7 +17,7 @@ Wichtig: Der Cast ist **fest und wiederkehrend** über tausende Folgen — das s
 
 Ein Hörspiel hat **drei Sprecher-Rollen** — Erzähler, Kind, eine erwachsene Bezugsperson — und **optional eine vierte Figur**, wenn die Geschichte davon lebt.
 
-**Erzähler (Professor)** — rahmt die Folge (kurzer Einstieg + warmer Schluss), beschreibt **nur** Schauplatz und Handlungen der Figuren UND spricht die **Redebegleitsätze** mit („fragt Theo", „sagt Oma Rosa", „erklärt sie"). Er **trägt selbst KEIN Sachwissen vor** — kein Warum, keine Zahl, kein Fakt. Er verbindet und beschreibt, er doziert nicht. Direkte Ansprache ans zuhörende Kind („Weißt du was?") gehört NIE dem Erzähler.
+**Erzähler (Professor)** — rahmt die Folge (kurzer Einstieg + warmer Schluss), beschreibt **nur** Schauplatz und Handlungen der Figuren UND spricht die **Redebegleitsätze** mit („fragt Theo", „sagt Oma Rosa", „erklärt sie"). Er **trägt selbst KEIN Sachwissen vor** — kein Warum, keine Zahl, kein Fakt. Er verbindet und beschreibt, er doziert nicht. Direkte Ansprache ans zuhörende Kind („Weißt du was?") gehört NIE dem Erzähler. **Der Erzähler ist selbst KEINE Figur in der Szene:** Schreibe nie eine Zeile, die den Erzähler etwas TUN lässt („Der Erzähler lächelt.", „…nickt.", „…schaut hinaus."). Seine Wärme liegt im Tonfall und in der Wortwahl — er darf durchaus mit einem Schmunzeln erzählen, aber das steht nie als Regieanweisung über ihn selbst im Text (eine Figur wie Oma darf lächeln, der Erzähler nicht).
 
 **Das Kind** — der wiederkehrende rote Faden. Genau EINES pro Folge:
 - **Theo** (Junge) oder **Mia** (Mädchen).
@@ -55,9 +55,10 @@ QUELLEN_FOKUS: [Welche injizierten Texte nutzt du wofür?]
 CAST: [Kind = Theo|Mia · Bezugsperson = feste Figur (nach Kategorie) · ggf. 4. Figur + Merkmal]
 HAKEN: [Was ist das WESEN des Themas? Der eine lebendige Kern, um den sich alles dreht.]
 IKONISCHES_BEISPIEL: [Das berühmteste, bekannteste Beispiel des Themas — es MUSS vorkommen (z. B. bei „Vulkan" ein berühmter Ausbruch). Sachfakten dazu nur, wenn die Quelle sie deckt. ERLAUBT als erfundener Rahmen: ein bekannter Geschichten-Anker (z. B. Moby Dick beim Wal), klar als Erzählung markiert, nie als Tatsache.]
-RAHMENHANDLUNG: [Eine kleine Szene MIT eigenem Bogen: ein Anlass (ein Ausflug, ein Fund, eine kleine Frage, etwas Vorbereiten) → das Kind entdeckt etwas → am Ende nimmt es etwas mit. Kein Fakten-Start, kein bloßes „Buch aufschlagen und abfragen".]
-FAKTEN: [4–10 wichtigste belegte Fakten aus der Quelle, altersgerecht ausgewählt — lieber wenige tief als viele flach.]
-ERZÄHLFADEN: [Die erzählerische Brücke, die eine reine Faktenaufzählung verhindert: Wie greift ein Fakt in den nächsten? Was verbindet sie zu EINER Geschichte? Welche Nebenaspekte lässt du bewusst weg, weil sie den Faden nur zerreißen?]
+RAHMENHANDLUNG: [Eine kleine Szene MIT eigenem Bogen, die als kleine REISE mehrere Fenster natürlich abklappert (Ausflug, Museum, Hafen, Fund, Rettung): ein Anlass → das Kind entdeckt von Station zu Station etwas → am Ende nimmt es etwas mit. Kein Fakten-Start, kein bloßes „Buch aufschlagen und abfragen", Schauplatz von Folge zu Folge variieren.]
+FENSTER: [3–6 lebendige Fenster/Stationen, je EIN Stichwort — über VERSCHIEDENE Aspekte/Companions verteilt, erzählerisch Reiches zuerst (berühmte Geschichte, Ereignis, Menschheitsgeschichte, Charakterkopf), generische Sachkunde sparsam. Jedes Fenster wird EINE Mini-Szene. Prüfe: sind die gelieferten Companions als Fenster genutzt?]
+FAKTEN: [pro Fenster 1–3 belegte Kern-Fakten aus der Quelle, altersgerecht — je Fenster verdichtet, nicht ausgequetscht.]
+ERZÄHLFADEN: [Die erzählerische Brücke, die aus den Fenstern EINE Geschichte macht statt einer Aufzählung: Wie führt die Reise von Fenster zu Fenster? Was verbindet sie? Welche Nebenaspekte lässt du bewusst weg, weil sie den Faden nur zerreißen?]
 SCHLUSS: [Warmer, thematischer Ausklang — das Kind nimmt ein Gefühl oder eine Erkenntnis mit. Kein Cliffhanger.]
 </planung>
 
@@ -70,9 +71,10 @@ SCHLUSS: [Warmer, thematischer Ausklang — das Kind nimmt ein Gefühl oder eine
 - Kein Framing: keine erfundenen Gefühle, Motive oder Wertungen der echten Personen/Tiere als Tatsache ausgeben.
 
 **B. Geschichte statt Fakten-Katalog (das Wichtigste)**
-- **Tiefe vor Breite:** Entwickle EINEN Fakt als kleine Szene (mit Warum und Wie), statt drei Fakten aneinanderzureihen. Eine kürzere, dichte Geschichte ist besser als eine lange Aufzählung.
+- **Mehrere lebendige Fenster, nicht ein Aspekt bis zum Anschlag.** Eine gute Folge besucht **mehrere verschiedene Fenster** ins Thema (verschiedene Aspekte/Companions) — jedes als EINE anschauliche Mini-Szene. Vorbild ist die Leonardo-Fassung: viele Stationen (Mona Lisa → Abendmahl → Erfindungen → Spiegelschrift → Louvre) in wenigen hundert Wörtern, jede ein Bild, verbunden durch die Reise — und trotzdem eine Geschichte. **Erschöpfe NICHT einen einzigen Bereich** (z. B. nur Anatomie/Biologie), bis das Wortbudget weg ist; dann fehlen die schönsten Fenster. Eine Wal-Folge ganz ohne Moby Dick, ohne eine Strandung/Rettung, ohne Walfang früher↔heute, ohne die frechen Delfine hat ihr Budget falsch ausgegeben.
+- **Tiefe meint Szene, nicht Vollständigkeit.** Jedes Fenster wird als kleine Szene mit einem Warum/Wie lebendig gemacht (nicht als bloßer Fakt) — aber nur so weit, wie die Szene trägt, dann weiter zum nächsten Fenster. **Jede Antwort ist ein Mini-Geschichtchen, keine Statistik** (statt „Das Bild ist neun Meter breit" → was auf dem Bild passiert und warum es besonders ist).
+- **Priorität der Fenster — erzählerisch Reiches zuerst.** Bevorzuge die Fenster mit dem meisten Geschichten-Stoff: eine **berühmte Geschichte** (z. B. Moby Dick), ein **dramatisches Ereignis** (eine Rettung, eine Strandung), **Menschheitsgeschichte** (früher↔heute, z. B. gejagt→geschützt), ein **Charakterkopf** (freche Delfine auf der Bugwelle). Die als Companions gelieferten Themen sind starke Fensterkandidaten — nutze sie, statt beim Kern-Steckbrief zu verharren. Generische Sachkunde (Anatomie-Listen, viele Maße) nur so viel, wie ein, zwei Fenster brauchen.
 - **Roter Faden statt Zeitleiste:** Folge einem Erzählfaden, kein lückenloses Abhaken. Das **ikonische Beispiel** ist das Rückgrat — es rahmt die Folge idealerweise am Anfang und am Ende. Das darf auch ein **bekannter Geschichten-Anker** sein (z. B. Moby Dick beim Wal): als klar markierte Erzählung eingeführt, die neugierig macht — nie als Sachfakt.
-- **Jede Antwort ist ein Mini-Geschichtchen, keine Statistik.** Vorbild: Statt „Das Bild ist neun Meter breit" → eine Szene, was auf dem Bild passiert und warum es besonders ist. Statt einer Aufzählung von Erfindungen → die eine mit dem kleinen Fehler, über den man schmunzelt.
 - **Wähle die gröbste Angabe, die reicht:** Jahreszahl statt genaues Datum, Rolle statt Name — außer der Tag oder Name trägt die Geschichte wirklich. Meide lange Namens- oder Länder-Aufzählungen.
 
 **C. Kindliche Fragen (keine Fakten-Türöffner)**
@@ -80,6 +82,7 @@ SCHLUSS: [Warmer, thematischer Ausklang — das Kind nimmt ein Gefühl oder eine
 - Echte Kinderfragen klingen so: „Und das hier?", „Warum macht der das?", „Ist der echt so groß?", „Wo ist der jetzt?" — oder eine naive Vermutung, die auch falsch sein darf.
 - **VERBOTEN** ist jede Frage, die ein echtes Kind von 4–9 nie stellen würde: keine erwachsenen Fach-Framings („Wie groß ist denn sein Herz?"), keine Fragen mit Fachbegriff im Mund des Kindes („Ist das das Graysche Paradoxon?"). Braucht ein Fakt einen Fachbegriff, gehört er in den Erzähltext (10–12), nicht hierher.
 - **Nicht jeder Fakt braucht eine Frage.** Die erwachsene Person darf auch von sich aus erzählen („Weißt du was …?"). Wechsle zwischen Fragen des Kindes und kleinen Erzähl-Momenten der Erwachsenen, damit es nie mechanisch „Frage – Antwort – Frage – Antwort" wird.
+- **Keine „Vorlage-Fragen".** Das Kind fragt nichts, was es gar nicht wissen kann, nur damit die Antwort passt. Fehler-Beispiel: „Und welcher Wal ist der größte **mit Zähnen**?", wenn von Zähnen noch nie die Rede war. Solche Übergänge trägt die **Erwachsene selbst** („Es gibt auch Wale mit Zähnen — der größte davon ist …"), nicht eine unecht wirkende Kinderfrage. Faustregel: Setzt eine Frage Wissen voraus, das erst die Antwort liefert, gehört sie der Erwachsenen.
 
 **D. Rollen-Disziplin (wichtig für die Vertonung)**
 - **Fakten nur bei der erwachsenen Person.** Legt das Kind versehentlich einen Fakt in den Mund → umschreiben, sodass die Erwachsene ihn sagt.
@@ -91,7 +94,9 @@ SCHLUSS: [Warmer, thematischer Ausklang — das Kind nimmt ein Gefühl oder eine
 **E. Spannend & unterhaltsam erzählen (nicht theatralisch)**
 Ziel ist ein Gespräch, das Kinder **fesselt und unterhält** — neugierig-warm, mit kleinen Aha-Momenten und Humor, wo er passt. **Nicht** theatralisch, reißerisch oder aufgeregt-dramatisch: Die Spannung kommt aus echter Neugier und dem Entdecken, nicht aus künstlicher Dramatik.
 - **Konkreter Einstieg**: eine kleine Szene, aus der die erste Kinderfrage natürlich entsteht.
-- **Handlungen ankern Bilder**: Erzähler-Zeilen wie „Theo blättert weiter zu einem Bild mit…" leiten zum nächsten Bild/Abschnitt über und takten das Stück.
+- **Rahmen als kleine Reise**: Wähle einen Schauplatz/Anlass, der **natürlich mehrere Fenster abklappert** — ein Ausflug, ein Museum, ein Hafen, ein Fund, eine Rettung — so wie Theo bei Leonardo durch das Buch/Museum wandert. Der Rahmen bringt die Figuren von Fenster zu Fenster, statt an einem Ort zu verharren. Wechsle den Schauplatz von Folge zu Folge (nicht immer „ein Buch auf dem Tisch").
+- **Handlungen ankern Bilder**: Erzähler-Zeilen wie „Theo blättert weiter zu einem Bild mit…" leiten zum nächsten Bild/Fenster über und takten das Stück.
+- **Verdichten, nicht füllen**: Streiche Füll- und Lob-Sätze, die keinen neuen Stoff bringen („Das hast du toll entdeckt!", „Das ist ein ganz wichtiger Unterschied!"). Jeder gesparte Satz kauft ein weiteres Fenster — Reichtum entsteht durch Verdichtung, nicht durch Länge.
 - **Warmer Schluss**: ein thematischer Ausklang, in dem das Kind etwas mitnimmt.
 
 **F. Sprache & Zahlen (4–9 Jahre)**
@@ -107,9 +112,10 @@ Das injizierte Feld WORTZIEL gibt die Wortspanne (min–max) für den **gesamten
 
 ### SCHRITT 3: Selbst-Check vor Ausgabe
 - **Belegt:** Jede Sachaussage der Erwachsenen aus der Quelle? Keine Zahl/kein Name aus dem Gedächtnis?
-- **Geschichte, nicht Katalog:** Liest sich das Ganze als EINE Szene mit Bogen (Anlass → Entdecken → Ausklang)? Ist das ikonische Beispiel drin? Oder ist es doch eine Frage-Antwort-Kette? Dann umbauen.
-- **Kindliche Fragen:** Würde ein echtes Kind von 4–9 jede Frage genau so stellen? Kein Fach-Framing, kein Fachbegriff im Kindermund?
-- **Zahlen:** Höchstens EINE Zahl pro Redebeitrag der Erwachsenen? Keine Zahlen-Ballung, keine abstrakten Stück-/Großzahlen (40 Mio., 50 Mio. Jahre)? Alle weiteren Größen als greifbaren, korrekten Vergleich?
+- **Geschichte, nicht Katalog:** Liest sich das Ganze als EINE Reise mit Bogen (Anlass → Entdecken → Ausklang)? Ist das ikonische Beispiel drin? Oder ist es doch eine Frage-Antwort-Kette? Dann umbauen.
+- **Fenster:** Besucht die Folge mehrere VERSCHIEDENE Fenster (auch die erzählerisch reichen Companions), oder klebt sie an einem Bereich (nur Biologie)? Ist jedes Fenster eine Mini-Szene, keines ausgequetscht? Kein Füll-/Lob-Satz ohne neuen Stoff?
+- **Kindliche Fragen:** Würde ein echtes Kind von 4–9 jede Frage genau so stellen? Kein Fach-Framing, kein Fachbegriff im Kindermund, keine „Vorlage-Frage", die Wissen voraussetzt, das erst die Antwort liefert?
+- **Zahlen:** Höchstens EINE Zahl pro Antwort/Erklär-Moment der Erwachsenen? Keine Zahlen-Ballung, keine abstrakten Stück-/Großzahlen (40 Mio., 50 Mio. Jahre)? Alle weiteren Größen als greifbaren, korrekten Vergleich?
 - **Rollen:** Trägt das Kind wirklich keine Fakten? Spricht der Erzähler die Redebegleitsätze mit und KEIN Sachwissen? Bleiben alle Namen über die Folge konstant?
 - **Rahmung:** Konkreter Einstieg + warmer Schluss vorhanden?
 - **Bild-Anker:** Zeigt jedes vergebene Bild genau den Gegenstand seiner Zeile? Im Zweifel `img_index: -1`.

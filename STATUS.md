@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-19T17:07:46Z -->
+<!-- updated: 2026-07-19T19:53:01Z -->
 <!-- Ältere Stände (verbatim, inkl. TTS-Woche 16.-18.07.) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
@@ -27,9 +27,30 @@ Trainingswissen). Umbau-Plan: `STUFEN_UMBAU_PLAN.md`. Hörspiel-Genre-Spec: `HOE
 - **Story-Cast festgezurrt (PO-Abnahme „alle Stimmen passen"):** 16 Figuren, feste Gemini-Stimme+Stil je
   Figur → [[project_story_cast]] (FINAL-Tabelle; einige weichen von tts_samples.py ab). Kind = Theo|Mia.
 
-Wal run3 (zeigbar, Desktop `_wal_hoerspiel_v2_review.txt`): 815 W, Cast Ronja/Theo, Fluss statt Stakkato,
-Zahlen mit Vergleichen, Grounding sauber. Rest-Feinschliff (nicht-blockierend): vereinzelt nackte Zahl
-(200 t/1000 m), Verschreiber „Vorlagen"→„Vorfahren", CO2→Kohlendioxid, Rahmen neigt zu „Buch auf Tisch".
+Wal run3: 815 W, Cast Ronja/Theo, Fluss statt Stakkato, Zahlen mit Vergleichen, Grounding sauber.
+
+### Nachgeschärft (run4–6, PO-Feedback am Wal-Output)
+
+- **Fenster-Prinzip statt „Tiefe in einem Bereich"** (Leo-Vorbild): Hörspiel-Prompt v2 auf „mehrere lebendige
+  Fenster, jedes eine Mini-Szene" umgestellt + Companion-Priorität (erzählerisch Reiches zuerst) +
+  Rahmen-als-Reise + Anti-Füllwort. Grund: run1–4 blieben biologielastig, ließen reiche Companions (Moby
+  Dick, Delfine) liegen.
+- **ROOT CAUSE + Fix — Kompass-Plan wurde nicht an die Generierung übergeben.** Kompass plante Moby Dick/
+  Delfine als Höhepunkte, Flash bekam nur die Companion-*Texte* (Plan war Sackgasse) → schrieb Default-
+  Biologie. Fix: `get_last_kompass_plan()` an die Jobs hängen + in `build_grounded_user_message` in den
+  stabilen (typ-agnostischen) Prefix injizieren. **run5/6: Moby Dick + Delfine + Walfang landen jetzt.**
+- **Sprach-Pass (2. leichter Lektorat-Durchgang)** in `lektorat_common.py` (`run_sprachpass_sync`, via
+  `call_claude_json` → thinking-robust): fängt Wort-Schnitzer (gewandelt→gewandert) UND un-kindgerechten
+  Jargon — entfernt/vereinfacht „Graysches Paradoxon"/„Spongiosaknochen"/„Osedax", schützt zentrale
+  Begriffe (Barten/Fluke/Krill/Walsturz). Verdrahtet in generate_grounded (merge → ein Prüfbericht).
+- **Einbau-Bug (Hörspiel) gefunden + gefixt:** `_apply_auto_correction` nahm 1 Satz/Eintrag an; Hörspiel-
+  Turns sind Mehrsatz-Einträge → jeder Turn-Einbau scheiterte („bitte prüfen"). Ganz-Turn-Fall (Jaccard≥0.9)
+  ergänzt → greift für Sprach-Pass UND Grounding-Lektorat (run6: silent=1 auto-eingebaut, 0 Flags).
+- **Erzähler-Regel:** kein „Der Erzähler lächelt" mehr (keine Selbst-Handlung; warmer Tonfall bleibt erlaubt).
+
+Offene Feinschliff-Punkte (nicht-blockierend): eine große Zahl bleibt („30.000 Wale" — bewusst Prompt+Review
+überlassen); run6 legte wörtl. Rede + Redebegleitsatz stochastisch in GETRENNTE Einträge (Konvention will sie
+zusammen wie Leo) — Prompt-Schärfung oder Post-Merge als Folgepunkt.
 
 ## Gerade in Arbeit / Nächster Schritt
 

@@ -636,6 +636,13 @@ def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -
         if len(claim_parts) <= 1:
             # Ein-Satz-Claim: unverändertes Verhalten (nur Text ersetzen)
             sents[sj]["text"] = korrektur_neu
+        elif _jaccard(claim_text, sents[sj].get("text", "")) >= 0.9:
+            # Mehr-Satz-Claim, der GANZ in EINEM Turn-Eintrag steckt (Hörspiel:
+            # eine sentences[]-Zeile ist ein Mehrsatz-Turn, kein Einzelsatz). Der
+            # Claim deckt den ganzen Eintrag → direkt ersetzen (nicht über mehrere
+            # Einträge laufen lassen). Partielle Zitate (Jaccard<0.9) fallen weiter
+            # in den _claim_covers_run-Pfad und werden sonst geflaggt.
+            sents[sj]["text"] = korrektur_neu
         elif _claim_covers_run(claim_parts, sents, sj):
             # Mehr-Satz-Claim, sauberer zusammenhängender Lauf ab sj:
             # ganzen Korrektur-Block in den ersten Satz, weitere abgedeckte
@@ -1024,6 +1031,136 @@ def run_lektorat_sync(
             usage_by_id[aid] = {}
 
     return results, usage_by_id
+
+
+# ── Sprach-Pass (leichter Wortwahl-/Grammatik-Durchgang) ─────────────────────
+#
+# Das Beleg-Lektorat oben prüft NUR Fakten gegen die Quelle und lässt Sprache
+# bewusst unangetastet. Dieser zweite, leichte Pass fängt genau das Übrige:
+# offensichtliche Wort-Verschreiber (die faktisch stimmen und daher durchrutschen,
+# z.B. "die Vorlagen der Wale" statt "Vorfahren") + un-kindgerechte Fachkürzel.
+# Bewusst KONSERVATIV: nur echte Fehler, keine Stilverschönerung (sonst kippt der
+# Kindstil, dieselbe Falle wie beim Beleg-Lektorat). Läuft über call_claude_json
+# (fischt den tool_use-Block → robust gegen Thinking-Blocks, keine temperature).
+
+SPRACH_SYSTEM = (
+    "Du bist Sprach-Korrektor für Kinder-Hörspiele (4–9 Jahre) im Wissensfreund. "
+    "Du prüfst AUSSCHLIESSLICH Wortwahl und Grammatik — NIEMALS Fakten (die sind "
+    "bereits gegen die Quelle geprüft) und NIEMALS Stil.\n\n"
+    "KORRIGIERE nur echte Fehler:\n"
+    "  (a) Offensichtliche Wort-/Verschreiber: ein falsches Wort, das im Kontext "
+    "keinen Sinn ergibt (z. B. «die Vorlagen der Wale» → «die Vorfahren der Wale»).\n"
+    "  (b) Grammatik-/Flexionsfehler (falscher Fall, Numerus, Verbform, Bezug).\n"
+    "  (c) Un-kindgerechte Fachbegriffe/Fremdwörter, die ein 6-Jähriger nicht "
+    "versteht und die NICHT im Text selbst kindgerecht erklärt werden. Zwei Fälle:\n"
+    "      – Es gibt ein einfaches deutsches Wort → ERSETZE («CO2» → «Kohlendioxid»; "
+    "«Spongiosaknochen» → «schwammartige, leichte Knochen»).\n"
+    "      – Es gibt keinen einfachen Ersatz und der Begriff bringt Kindern nichts → "
+    "ENTFERNE die Benennung, behalte die kindgerechte Erklärung drumherum. Beispiel: "
+    "«… mildert die Wirbel im Wasser ab. Das nennt man das Graysche Paradoxon. So "
+    "gleiten sie perfekt.» → «… mildert die Wirbel im Wasser ab. So gleiten sie "
+    "perfekt.» Auch lateinische Gattungsnamen («Osedax-Würmer» → «besondere Würmer»).\n"
+    "    SCHÜTZE dagegen Fachwörter, die im Text SELBST kindgerecht erklärt werden "
+    "oder zentral zur Geschichte gehören (Barten, Fluke, Blas, Krill, Blubber, "
+    "Walsturz, Fluke) — die BLEIBEN unangetastet.\n\n"
+    "ÄNDERE NICHT: Ton, Stil, Satzbau, kindgerechte Vereinfachungen, Vergleiche, "
+    "Wiederholungen, Redebegleitsätze («, sagt Ronja»), Namen, alles inhaltlich "
+    "Richtige. Verschönere nichts. Im Zweifel: NICHT anfassen — lieber eine Korrektur "
+    "zu wenig als eine überflüssige.\n\n"
+    "Gib für jede Korrektur den GANZEN betroffenen Satz (die ganze Sprecher-Zeile) "
+    "als claim_original zurück und dieselbe Zeile mit dem korrigierten/entfernten "
+    "Begriff als korrektur_neu. Beim Entfernen einer Benennung bleibt der Rest der "
+    "Zeile erhalten — korrektur_neu ist NIE leer und enthält weiterhin die Erklärung. "
+    "Keine Korrektur ohne echten Fehler."
+)
+
+SPRACH_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "corrections": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "claim_original": {"type": "string",
+                                       "description": "Der Originalsatz, unverändert."},
+                    "korrektur_neu":  {"type": "string",
+                                       "description": "Derselbe Satz mit korrigiertem Wort."},
+                    "grund":          {"type": "string",
+                                       "description": "Kurz: welcher Fehler (Wort/Grammatik)."},
+                },
+                "required": ["claim_original", "korrektur_neu"],
+            },
+        },
+    },
+    "required": ["corrections"],
+}
+
+
+def run_sprachpass_sync(
+    articles_by_id: dict[str, dict],
+    api_key: str,
+) -> dict[str, list[dict]]:
+    """Leichter Wortwahl-/Grammatik-Pass je Artikel.
+
+    Gibt {aid: [correction, ...]} im annotate_article_lektorat_v2-Format zurück
+    (claim_original / korrektur_neu / stufe / beleg). Fehler eines Artikels
+    isolieren (leere Liste), nie den ganzen Lauf reißen.
+    """
+    import claude_client
+
+    results: dict[str, list[dict]] = {}
+    for aid, article in articles_by_id.items():
+        lines = [
+            (s.get("text") or "")
+            for sec in article.get("sections", [])
+            for s in sec.get("sentences", [])
+        ]
+        text = "\n".join(l for l in lines if l)
+        if not text.strip():
+            results[aid] = []
+            continue
+        user = (
+            "HÖRSPIEL-TEXT (nur Wortwahl/Grammatik prüfen, KEINE Fakten):\n\n" + text
+        )
+        try:
+            data = claude_client.call_claude_json(
+                SPRACH_SYSTEM, user, SPRACH_SCHEMA,
+                model=LEKTORAT_MODEL, max_tokens=4096, thinking_budget=0,
+                call_name="sprachpass",
+            )
+        except Exception as exc:
+            log.warning("  Sprachpass [%s] fehlgeschlagen: %s", aid, str(exc)[:100])
+            results[aid] = []
+            continue
+        # Sprecher-Turns (sentences[].text) für die Teilsatz→Turn-Expansion.
+        turns = [
+            (s.get("text") or "")
+            for sec in article.get("sections", [])
+            for s in sec.get("sentences", [])
+        ]
+        corr: list[dict] = []
+        for c in (data.get("corrections") or []):
+            claim = (c.get("claim_original") or "").strip()
+            neu   = (c.get("korrektur_neu") or "").strip()
+            if not (claim and neu and claim != neu):
+                continue
+            # Liefert das Modell nur einen Teilsatz eines langen Turns, greift der
+            # Jaccard-Einbau (Satz-Ebene) evtl. nicht. Deshalb: den Turn suchen, der
+            # den Teilsatz woertlich enthaelt, und die Korrektur auf den GANZEN Turn
+            # expandieren (Jaccard = 1.0 → sicherer Einbau). Nur bei exaktem Substring.
+            for t in turns:
+                if claim != t and claim in t:
+                    claim, neu = t, t.replace(claim, neu, 1)
+                    break
+            corr.append({
+                "claim_original": claim,
+                "korrektur_neu":  neu,
+                "stufe":          "KORRIGIERT",
+                "beleg":          "Sprache",
+            })
+        results[aid] = corr
+    return results
 
 
 # ── Anthropic Batch-API ───────────────────────────────────────────────────────
