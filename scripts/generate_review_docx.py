@@ -279,15 +279,22 @@ def _render_tracked_change(left_cell, f: dict) -> None:
     p = left_cell.paragraphs[0]
     orig = _strip_box_prefix(f.get("claim_original") or "")
     new  = _strip_box_prefix(f.get("korrektur_neu") or f.get("korrektur_vorschlag") or "")
-    applied = f.get("status") == "auto_angewandt"
+    # V1-Findings tragen status=="auto_angewandt"; V2-Findings tragen stattdessen
+    # verdikt in {SILENT, KORRIGIERT} — beide sind IM ARTIKEL bereits eingebaut.
+    # Ohne den verdikt-Zweig würden angewandte V2-Korrekturen fälschlich als
+    # offener „Vorschlag“ samt Original-Text gezeigt (Artikel zeigt aber die
+    # Neufassung). EINBAU_FEHLGESCHLAGEN/PRÜFEN bleiben offene Vorschläge.
+    applied = (f.get("status") == "auto_angewandt"
+               or f.get("verdikt") in ("SILENT", "KORRIGIERT"))
 
     if applied and new:
         _run(p, new, 11)  # der Artikel enthält die korrigierte Fassung
         tag = ("Lektorat "
-               + "·".join(x for x in (f.get("phase", ""), f.get("tier", "")) if x)).strip()
+               + "·".join(x for x in (f.get("phase", ""), f.get("tier", "")
+                                       or f.get("verdikt", "")) if x)).strip()
         note = left_cell.add_paragraph()
         _run(note, f"✎ {tag}: vorher „{orig}“", size=9, italic=True, color=GRAY)
-        beleg = f.get("beleg_fuer_korrektur") or ""
+        beleg = f.get("beleg_fuer_korrektur") or f.get("beleg") or ""
         if beleg:
             bp = left_cell.add_paragraph()
             _run(bp, "Beleg: " + beleg[:250] + ("…" if len(beleg) > 250 else ""),
