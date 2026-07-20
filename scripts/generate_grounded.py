@@ -135,6 +135,9 @@ _ERG_SCORE_KEY: dict[str, str] = {"hoerspiel": "S2", "erzaehltext": "S3"}
 _PROMPT_AGE_LEVEL: dict[str, int] = {"hoerspiel": 2, "erzaehltext": 3}
 
 RETRY_FLOOR_FRAC   = 0.70   # Retry-Untergrenze als Bruchteil des Ziels (nur klares Untertreiben nachfordern)
+WORD_FLOOR_MIN     = 400    # PO 2026-07-20: harte Wort-Untergrenze — unter ~400 Wörtern trägt keine
+                            # Geschichte (Spartacus zeigte: ~440 reichen). Klemmt wmin für gering-ergiebige
+                            # Themen hoch; wmax wird mitgehoben, damit das Band kohärent bleibt (wmax>wmin).
 ERG_FALLBACK_SCORE = 6      # medium, wenn Thema (noch) nicht gerated — sichtbar geloggt
 APPEAL_TIER_HIGH   = 7.0    # Erg-Mittel ≥ → high   (steuert Companion-/Bildmenge)
 APPEAL_TIER_MED    = 4.0    # Erg-Mittel ≥ → medium, sonst low
@@ -196,6 +199,9 @@ def wortziel_for(thema: str, content_type: str) -> tuple[int, int, str]:
     frac = max(0.0, min(1.0, (erg - 2) / 6))
     wmax = round(lo + frac * (hi - lo))
     wmin = round(wmax * RETRY_FLOOR_FRAC)
+    if wmin < WORD_FLOOR_MIN:                       # harter Wort-Floor (s. WORD_FLOOR_MIN)
+        wmin = WORD_FLOOR_MIN
+        wmax = max(wmax, round(WORD_FLOOR_MIN / RETRY_FLOOR_FRAC))
     return wmin, wmax, source
 
 
