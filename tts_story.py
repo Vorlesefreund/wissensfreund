@@ -21,6 +21,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent / "scripts"))
 
+import story_cast   # EINE Wahrheitsquelle für den 16-Figuren-Cast (Name → Stimme + Stil)
+
 SAMPLE_RATE = 24000          # Gemini liefert PCM 24 kHz mono 16-bit
 TTS_MODEL   = "gemini-3.1-flash-tts-preview"
 GAP_TURN    = 0.35           # Pause zwischen Turns desselben Sprechers / kurzer Wechsel
@@ -40,7 +42,11 @@ TTS_TEMPERATURE = 0.3        # Gilt für ALLE Rollen, auch Kind-Turns mit VC.
                              # — deshalb wirkt temperature dort weiter, messbar ist es per F0 nicht.
                              # Samples: Desktop/_nico_temp_vergleich (2 Sätze × 3 Stufen × 3 Nahmen).
 
-# ── Stimm-Zuordnung + (bewusst zurückgenommene) Stil-Vorgaben ──────────────────
+# ── Stimm-Zuordnung ────────────────────────────────────────────────────────────
+# Primär per FIGURENNAME über story_cast (16-Figuren-Cast, FINAL). Die folgenden
+# Rollen-Defaults sind nur noch der RÜCKFALL für generische, unbenannte Sprecher
+# (alte Erzähltext-Segmentierungen ohne festen Cast-Namen): dann greift Rolle +
+# Geschlecht wie bisher, damit bestehende Läufe unverändert klingen.
 VOICES = {
     "erzähler":          "Iapetus",
     ("kind", "m"):       "Puck",
@@ -58,9 +64,11 @@ STYLE = {
 SEG_SYSTEM = """Du zerlegst eine vorgelesene Kindergeschichte in SPRECHER-ABSCHNITTE für eine Vertonung mit verschiedenen Stimmen. Der vertonte Text MUSS Wort für Wort der Vorlage entsprechen (Text = Audio, damit die Mitlese-Lupe am Tablet exakt mitgleitet): NICHTS weglassen, NICHTS umformulieren, NICHTS hinzufügen. Aufgeteilt wird NUR an den Grenzen der wörtlichen Rede, und jede Hälfte bekommt die richtige Stimme.
 
 Drei Sprecher-Rollen:
-- "kind": die wörtliche Rede des neugierigen Kindes (nur der Teil in Anführungszeichen).
-- "erwachsener": die wörtliche Rede der erwachsenen Person, die erklärt (nur der Teil in Anführungszeichen).
-- "erzähler": ALLES ANDERE — Umgebung, Szene, Handlungen UND die Redebegleitsätze ("fragt Theo", "sagt Oma Rina", "antwortet sie"). Der Erzähler SPRICHT diese Redebegleitsätze MIT; sie werden NICHT weggelassen.
+- "kind": die wörtliche Rede eines Kindes (nur der Teil in Anführungszeichen).
+- "erwachsener": die wörtliche Rede einer erwachsenen Figur (nur der Teil in Anführungszeichen).
+- "erzähler": ALLES ANDERE — Umgebung, Szene, Handlungen UND die Redebegleitsätze ("fragt Theo", "sagt Oma Rosa", "antwortet sie"). Der Erzähler SPRICHT diese Redebegleitsätze MIT; sie werden NICHT weggelassen.
+
+SPRECHER (Feld "sprecher"): Gib bei JEDEM kind-/erwachsener-Turn den NAMEN der sprechenden Figur an, genau so wie er im Text/Redebegleitsatz vorkommt ("Theo", "Mia", "Ronja", "Oma Rosa", "Rudi", "Dr. Samir", …). Steht der Name nur im Redebegleitsatz daneben ("…", ruft Theo → sprecher: "Theo"), übernimm ihn von dort. Bei erzähler-Turns ist "sprecher" IMMER "". Erfinde keine Namen; ist wirklich keiner erkennbar, nutze "" (dann wird nach Rolle/Geschlecht zugeordnet).
 
 REGELN (Text = Audio, verbatim):
 - Teile jeden Satz an den Anführungszeichen: der Teil INNERHALB der Anführungszeichen wird ein Turn mit der Rolle des Sprechers, der Teil AUSSERHALB (Redebegleitsatz + Handlung + Erzählung) wird ein erzähler-Turn. Beispiel: `"Wer ist das?", fragt Theo und tippt mit dem Finger auf das Bild.` → kind: "Wer ist das?" · erzähler: "fragt Theo und tippt mit dem Finger auf das Bild." — Beispiel: `"Das ist die Mona Lisa", sagt Oma Rina.` → erwachsener: "Das ist die Mona Lisa" · erzähler: "sagt Oma Rina."
@@ -78,7 +86,7 @@ VORTRAG / EMOTION (Feld "emotion", kurzer deutscher Hinweis 1–4 Wörter, sonst
 
 Bestimme außerdem den CAST: Name + Geschlecht (m/w) des Kindes und der erwachsenen Person.
 
-Antworte NUR als JSON: {"cast":{"kind":{"name":"...","geschlecht":"m|w"},"erwachsener":{"name":"...","geschlecht":"m|w"}},"turns":[{"rolle":"erzähler|kind|erwachsener","text":"...","szene":true|false,"emotion":"..."}]}"""
+Antworte NUR als JSON: {"cast":{"kind":{"name":"...","geschlecht":"m|w"},"erwachsener":{"name":"...","geschlecht":"m|w"}},"turns":[{"rolle":"erzähler|kind|erwachsener","sprecher":"Name|","text":"...","szene":true|false,"emotion":"..."}]}"""
 
 SEG_SCHEMA = {
     "type": "object",
@@ -90,8 +98,9 @@ SEG_SCHEMA = {
             "erwachsener": {"type": "object", "required": ["name", "geschlecht"],
                            "properties": {"name": {"type": "string"}, "geschlecht": {"type": "string"}}}}},
         "turns": {"type": "array", "items": {
-            "type": "object", "required": ["rolle", "text", "szene", "emotion"],
-            "properties": {"rolle": {"type": "string"}, "text": {"type": "string"},
+            "type": "object", "required": ["rolle", "sprecher", "text", "szene", "emotion"],
+            "properties": {"rolle": {"type": "string"}, "sprecher": {"type": "string"},
+                           "text": {"type": "string"},
                            "szene": {"type": "boolean"}, "emotion": {"type": "string"}}}},
     },
 }
@@ -111,19 +120,58 @@ def segment_story(story_text: str, model: str = "claude-sonnet-5") -> dict:
     return json.loads(raw)
 
 
-def _voice_for(rolle: str, cast: dict) -> str:
-    if rolle == "erzähler":
-        return VOICES["erzähler"]
+def _cast_gender(rolle: str, cast: dict) -> str:
     g = ((cast.get(rolle) or {}).get("geschlecht") or "m").lower()[:1]
-    g = g if g in ("m", "w") else "m"
-    return VOICES.get((rolle, g), VOICES["erzähler"])
+    return g if g in ("m", "w") else "m"
+
+
+def _figur_for(turn: dict):
+    """Feste Cast-Figur zu einem Turn (über sprecher-Namen). None = kein fester
+    Cast-Treffer (dann Rollen-Rückfall bzw. Gast)."""
+    return story_cast.lookup((turn.get("sprecher") or "").strip())
+
+
+def _voice_for(rolle: str, turn: dict, cast: dict) -> str:
+    """Stimme eines Turns. Priorität:
+       1) Erzähler → feste Erzähler-Stimme.
+       2) benannte Cast-Figur (sprecher) → deren FINAL-Stimme.
+       3) Sprecher, der im Seg-Cast steckt (alte Erzähltext-Logik) → Rolle+Geschlecht.
+       4) sonst (von Flash erfundener Gast) → deterministische Gast-Stimme."""
+    if rolle == "erzähler":
+        return story_cast.narrator().voice
+    fig = _figur_for(turn)
+    if fig is not None:
+        return fig.voice
+    name = (turn.get("sprecher") or "").strip().lower()
+    seg_names = {((cast.get(r) or {}).get("name") or "").strip().lower() for r in ("kind", "erwachsener")}
+    if not name or name in seg_names:                       # generischer Seg-Sprecher → Rollen-Default
+        return VOICES.get((rolle, _cast_gender(rolle, cast)), VOICES["erzähler"])
+    return story_cast.guest_voice(turn.get("sprecher") or "")   # unbekannt → Gast
 
 
 def _style_for(rolle: str, turn: dict) -> str:
-    """Rollen-Grundstil + optionaler Vortrags-Hinweis (emotion) aus der Segmentierung."""
-    base = STYLE.get(rolle, STYLE["erzähler"])
+    """Figuren-/Rollen-Grundstil + optionaler Vortrags-Hinweis (emotion)."""
+    if rolle == "erzähler":
+        base = story_cast.narrator().style
+    else:
+        fig = _figur_for(turn)
+        if fig is not None:
+            base = fig.style
+        elif (turn.get("sprecher") or "").strip():
+            base = story_cast.guest_style(turn.get("sprecher") or "")
+        else:
+            base = STYLE.get(rolle, STYLE["erzähler"])
     emo = (turn.get("emotion") or "").strip()
     return f"{base} Sprich diesen Satz {emo}." if emo else base
+
+
+def _is_child(rolle: str, turn: dict) -> bool:
+    """Kind-Turn (→ Nico-VC nötig): feste Kind-Figur (Theo/Mia) ODER — als
+    Rückfall für alte Segmentierungen ohne sprecher — Rolle 'kind'."""
+    fig = _figur_for(turn)
+    if fig is not None:
+        return fig.is_child
+    return rolle == "kind"
 
 
 # ── TTS + Schnitt ──────────────────────────────────────────────────────────────
@@ -247,7 +295,7 @@ def _turn_requests(turns: list[dict], cast: dict, temperature: float | None):
         # Stil-Präfix so lange wie möglich (Temperatur zuerst hoch), sonst geht die Emotion
         # verloren — genau das ließ am 17.07. „Oma Rina lacht" das Lachen einbüßen.
         out.append((i, TtsRequest.build(
-            voice=_voice_for(rolle, cast), style=_style_for(rolle, t),
+            voice=_voice_for(rolle, t, cast), style=_style_for(rolle, t),
             text=text, temperature=temperature, turn=i, rolle=rolle,
             hat_emotion=bool((t.get("emotion") or "").strip()))))
     return out
@@ -337,13 +385,13 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
     # Leere Turns sind kein Inhalt → sie zählen nicht als "zu rendern" (sonst meldet ein
     # perfekter Lauf faelschlich Unvollstaendigkeit).
     n_soll = sum(1 for t in turns if (t.get("text") or "").strip())
-    n_kind = sum(1 for t in turns if t.get("rolle") == "kind" and (t.get("text") or "").strip())
+    n_kind = sum(1 for t in turns if _is_child(t.get("rolle", "erzähler"), t) and (t.get("text") or "").strip())
     if n_kind and nico_converter is None and not allow_raw_kind:
         raise RuntimeError(
             f"{n_kind} Kind-Turns, aber keine Nico-VC konfiguriert. Die Flash-Prebuilt-Stimme "
-            f"({VOICES[('kind', 'm')]}/{VOICES[('kind', 'w')]}) ist nur ein Platzhalter und klingt "
-            f"nicht wie ein Kind — sie darf nicht in einen Build. Entweder --nico-ref + --nico-ckpt "
-            f"setzen oder bewusst --allow-raw-kind angeben.")
+            f"(Puck/Leda) ist nur ein Platzhalter und klingt nicht wie ein Kind — sie darf nicht "
+            f"in einen Build. Entweder --nico-ref + --nico-ckpt setzen oder bewusst "
+            f"--allow-raw-kind angeben.")
     if synth_mode not in ("batch", "sync"):
         raise ValueError(f"synth_mode muss 'batch' oder 'sync' sein, nicht {synth_mode!r}")
     print(f"  Cast: Kind={cast.get('kind')} · Erwachsener={cast.get('erwachsener')} · {len(turns)} Turns"
@@ -396,9 +444,11 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
         text  = (t.get("text") or "").strip()
         if not text:
             continue
-        voice = _voice_for(rolle, cast)
+        voice = _voice_for(rolle, t, cast)
         style = _style_for(rolle, t)
-        print(f"    [{i+1:02}/{len(turns)}] {rolle:12} {voice:12} \"{text[:48]}…\"")
+        ist_kind = _is_child(rolle, t)
+        etikett = (t.get("sprecher") or "").strip() or rolle
+        print(f"    [{i+1:02}/{len(turns)}] {etikett:14} {voice:12} \"{text[:44]}…\"")
         if synth_mode == "batch":
             pcm = vorab.get(i)
         else:
@@ -421,7 +471,7 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
         if roh_sek - len(pcm) / 2 / SAMPLE_RATE > 1.0:
             print(f"      Stille getrimmt: {roh_sek:.1f}s → {len(pcm)/2/SAMPLE_RATE:.1f}s")
         vc = False
-        if rolle == "kind" and nico_converter is not None:
+        if ist_kind and nico_converter is not None:
             conv = None
             try:
                 conv = nico_converter(pcm, SAMPLE_RATE)
@@ -446,8 +496,9 @@ def vertone(seg: dict, out_wav: Path, nico_converter=None, normalize: bool | Non
         stufe = eskalations_protokoll.get(req_by_turn[i].key) if i in req_by_turn else None
         ist_temp = stufe["temperature"] if stufe else temperature
         eskaliert = bool(stufe) and (ist_temp != temperature or stufe.get("ohne_stil"))
-        manifest.append({"i": i, "rolle": rolle, "voice": voice, "vc": vc,
-                         "raw_kind": rolle == "kind" and not vc, "temp": ist_temp,
+        manifest.append({"i": i, "rolle": rolle, "sprecher": (t.get("sprecher") or "").strip(),
+                         "voice": voice, "vc": vc,
+                         "raw_kind": ist_kind and not vc, "temp": ist_temp,
                          "eskaliert": eskaliert,
                          "ohne_stil": bool(stufe and stufe.get("ohne_stil")),
                          "sec": round(len(pcm) / 2 / SAMPLE_RATE, 2), "text": text[:80]})
@@ -492,6 +543,22 @@ def _story_from_checkpoint(cp: Path, thema: str, model: str) -> str:
     return res["story_clean"]
 
 
+def _story_from_hoerspiel_json(p: Path) -> str:
+    """Hörspiel-JSON (generate_grounded, sections[].sentences[]) → fortlaufende
+    Prosa. Jeder sentences[]-Eintrag ist bereits ein „mit-Tags"-Turn (wörtl. Rede
+    + Redebegleitsatz), liest also direkt als Story-Text — der bestehende
+    Segmentierer zerlegt ihn dann in Sprecher-Turns. Abschnittsgrenzen werden zu
+    Leerzeilen (Absatz = Szenenwechsel für das szene-Flag)."""
+    art = json.loads(p.read_text(encoding="utf-8"))
+    parts: list[str] = []
+    for sec in art.get("sections", []):
+        satze = [(s.get("text") or "").strip() for s in sec.get("sentences", [])]
+        satze = [s for s in satze if s]
+        if satze:
+            parts.append(" ".join(satze))
+    return "\n\n".join(parts)
+
+
 def main():
     # Die Fortschritts-Prints enthalten → und Umlaute; eine cp1252-Konsole killt sonst den
     # ganzen Lauf an einer Ausgabezeile. Ohne basicConfig verwirft Python zudem jedes
@@ -506,6 +573,8 @@ def main():
 
     ap = argparse.ArgumentParser()
     ap.add_argument("--story-file", help="Roh-Prosa der Geschichte (txt) — direkt vertonen")
+    ap.add_argument("--hoerspiel-json", help="Hörspiel-JSON (generate_grounded) — wird zu Prosa "
+                                            "geflacht und dann segmentiert/vertont")
     ap.add_argument("--checkpoint", help="Stage-1-Checkpoint (alternativ: frisch erzeugen)")
     ap.add_argument("--thema", help="Thema im Checkpoint")
     ap.add_argument("--model", default="claude-sonnet-5", help="Generierungsmodell (mit --checkpoint)")
@@ -562,11 +631,15 @@ def main():
     else:
         if args.story_file:
             story = Path(args.story_file).read_text(encoding="utf-8").strip()
+        elif args.hoerspiel_json:
+            print(f"Flache Hörspiel-JSON zu Prosa: {args.hoerspiel_json}")
+            story = _story_from_hoerspiel_json(Path(args.hoerspiel_json))
         elif args.checkpoint and args.thema:
             print(f"Erzeuge Geschichte ({args.model}) …")
             story = _story_from_checkpoint(Path(args.checkpoint), args.thema, args.model)
         else:
-            sys.exit("Entweder --story-file ODER (--checkpoint + --thema) ODER --seg-file angeben.")
+            sys.exit("Entweder --story-file ODER --hoerspiel-json ODER (--checkpoint + --thema) "
+                     "ODER --seg-file angeben.")
 
         print(f"Segmentiere ({args.seg_model}) …")
         seg = segment_story(story, args.seg_model)
