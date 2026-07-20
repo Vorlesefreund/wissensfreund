@@ -94,9 +94,14 @@ def phase_synth(args) -> None:
     cache = run_dir / "pcm_cache"
 
     # Lokaler Lauf: QA AN, KEINE VC (nico-Args weggelassen) → reiner Gegenlese-Render.
+    # --allow-raw-kind: Kind-Turns kommen hier bewusst als rohe Puck-Platzhalterstimme
+    # in die WAV (die Umfärbung passiert erst in Phase vc auf dem Pod). Ohne das bräche
+    # der Gegenlese-Render jeder Story MIT Kind an der Kind-Schutzsperre ab. Der PCM-Cache
+    # ist davon unberührt (gleiche Voice/Style/Temp-Keys → auf dem Pod Cache-Treffer).
     cmd = [sys.executable, "-X", "utf8", str(REPO / "tts_story.py"),
            "--seg-file", str(seg_file),
            "--pcm-cache", str(cache),
+           "--allow-raw-kind",
            "--titel", args.titel,
            "--out-dir", str(run_dir)]
     print("Lokale Synthese + QA (ohne VC):\n  " + " ".join(cmd))

@@ -612,6 +612,19 @@ def _apply_auto_correction(article: dict, claim_text: str, korrektur_neu: str) -
             if changed:
                 return all(_apply_auto_correction(article, c, n) for c, n in changed)
 
+    # Exakter-Teilstring-Override (höchste Konfidenz, VOR der Jaccard-Schwelle):
+    # Liegt der Claim WÖRTLICH in genau EINEM sentences[]-Turn, ersetze ihn dort
+    # direkt. Ein kurzer Claim in einem langen Hörspiel-Mehrsatz-Turn hat gegen den
+    # ganzen Turn ein Jaccard < 0.4 und würde sonst an der Schwelle unten abgewiesen —
+    # obwohl die wörtliche Enthaltung der sicherste denkbare Treffer ist. Nur bei
+    # EINDEUTIGKEIT (genau ein Turn enthält ihn), sonst regulär per Jaccard weiter.
+    treffer = [sent for sec in article.get("sections", [])
+               for sent in sec.get("sentences", [])
+               if claim_text in (sent.get("text") or "") and claim_text != (sent.get("text") or "")]
+    if len(treffer) == 1:
+        treffer[0]["text"] = treffer[0]["text"].replace(claim_text, korrektur_neu, 1)
+        return True
+
     best_score = 0.0
     # ("sec", si, sj) | ("box", si, bi, sj)
     # | ("box_text"|"box_reveal", si, bi, satz_str)  ← satz_str = exakt zu ersetzender Teil
