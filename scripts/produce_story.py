@@ -106,13 +106,20 @@ def phase_synth(args) -> None:
            "--out-dir", str(run_dir)]
     print("Lokale Synthese + QA (ohne VC):\n  " + " ".join(cmd))
     r = subprocess.run(cmd, cwd=str(REPO))
-    if r.returncode != 0:
-        sys.exit(f"tts_story.py (Synthese) endete mit Code {r.returncode} — Abbruch.")
 
     manifest_file = run_dir / f"{args.titel}_manifest.json"
     if not manifest_file.exists():
-        sys.exit(f"Manifest {manifest_file} fehlt — Synthese unvollständig.")
+        sys.exit(f"tts_story.py (Synthese) endete mit Code {r.returncode}, kein Manifest "
+                 f"({manifest_file}) — Abbruch.")
     manifest = json.loads(manifest_file.read_text(encoding="utf-8"))
+    # tts_story beendet sich absichtlich mit Code 1, sobald Roh-Kind-Turns im Render
+    # sind ("nicht ausliefern"-Signal). Im Gegenlese-Render (bewusst OHNE VC) ist das
+    # ERWARTET — das Kind ist Puck-Platzhalter und wird erst auf dem Pod umgefärbt; der
+    # PCM-Cache ist trotzdem pod-fertig. Fatal ist NUR echte Unvollständigkeit: fehlende
+    # Turns oder Anzahl-Mismatch. Sonst würde jede Story MIT Kind hier grundlos abbrechen.
+    if manifest.get("fehlende_turns") or manifest.get("n_rendered") != manifest.get("n_soll"):
+        sys.exit(f"Synthese unvollständig (fehlende={manifest.get('fehlende_turns')}, "
+                 f"{manifest.get('n_rendered')}/{manifest.get('n_soll')} gerendert) — Abbruch.")
 
     st = FL.flatten(seg, manifest, cache, base_temp=args.base_temp)
     fehlt = FL.coverage(seg, cache, base_temp=args.base_temp)
