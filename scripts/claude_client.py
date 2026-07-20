@@ -132,5 +132,68 @@ def call_claude_json(system_prompt, user_message, json_schema, *,
     raise last_err
 
 
+def call_claude_text(system_prompt, user_message, *,
+                     model=None, max_tokens=16000, thinking_budget=0,
+                     effort=None, call_name="", max_attempts=4, temperature=None):
+    """Freies Text-Ergebnis (KEIN forced tool-use) — für die Artikel-GENERIERUNG.
+
+    Anders als call_claude_json (das ein Schema erzwingt) gibt diese Funktion den
+    rohen Modell-Text zurück; der Aufrufer parst ihn mit parse_article_json
+    (robust gegen <planung>-Prefix, Markdown-Fences und den „…"-ASCII-Defekt).
+    Nutzt Streaming, weil die Hörspiel-/Erzähltext-Ausgabe groß ist (>10-Min-Schutz
+    des SDK bei nicht-streamenden Langläufern).
+    """
+    global _last_usage
+    client = _get_client()
+    effective_model = model or _DEFAULT_MODEL
+
+    kwargs = dict(
+        model=effective_model,
+        max_tokens=max_tokens,
+        system=system_prompt,
+        messages=[{"role": "user", "content": user_message}],
+    )
+    if temperature is not None:
+        kwargs["temperature"] = temperature
+    if thinking_budget > 0:
+        kwargs["thinking"] = {"type": "enabled", "budget_tokens": thinking_budget}
+        if max_tokens <= thinking_budget:
+            kwargs["max_tokens"] = thinking_budget + max_tokens
+    # Claude-5-Familie: adaptives Thinking wird über output_config.effort gesteuert
+    # (nicht über thinking.budget). Niedriger Effort spart Output-Budget, damit die
+    # große Artikel-JSON nicht am max_tokens-Cap abbricht.
+    if effort is not None:
+        kwargs["output_config"] = {"effort": effort}
+
+    last_err = None
+    for attempt in range(1, max_attempts + 1):
+        try:
+            with client.messages.stream(**kwargs) as s:
+                resp = s.get_final_message()
+            _last_usage = {
+                "input_tokens":  resp.usage.input_tokens,
+                "output_tokens": resp.usage.output_tokens,
+            }
+            if getattr(resp, "stop_reason", None) == "max_tokens":
+                raise ValueError(
+                    f"Antwort am max_tokens-Cap abgeschnitten ({call_name}, "
+                    f"max_tokens={kwargs['max_tokens']})"
+                )
+            text = "".join(b.text for b in resp.content if getattr(b, "type", "") == "text")
+            if not text.strip():
+                raise ValueError(f"Leerer Text-Block in Antwort ({call_name})")
+            return text
+        except anthropic.APIStatusError as e:
+            last_err = e
+            if e.status_code in (429, 503, 529) and attempt < max_attempts:
+                wait = min(10 * (2 ** (attempt - 1)), 160)
+                log.warning("  Claude %s %d (V%d/%d) — warte %ds",
+                            call_name, e.status_code, attempt, max_attempts, wait)
+                time.sleep(wait)
+            else:
+                raise
+    raise last_err
+
+
 def get_last_usage():
     return dict(_last_usage)

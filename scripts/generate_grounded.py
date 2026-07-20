@@ -608,6 +608,11 @@ def select_companions_raw(
             return [], {}
 
     # ── Gemini-Pfad (unverändert) ───────────────────────────────────────────────
+    # Der Kompass läuft bewusst auf Gemini (Flash). Ist der Run-GENERATOR ein
+    # Claude-Modell (--gen-model claude-*, A/B-Test), darf dieser Name NICHT an den
+    # Gemini-Endpunkt (→ 404) — dann das konfigurierte Kompass-Gemini-Modell nehmen.
+    if model.lower().startswith("claude"):
+        model = cfg.get("model") or KOMPASS_MODEL
     thinking = _make_thinking_config(model, budget_for_2_5=1024)
     log.info("  Phase 1 Kompass-Auswahl (Modell=%s, structured_output=JSON)", model)
 
@@ -1616,9 +1621,24 @@ def generate_one_level(
     article     = None
     user_msg: str | None = None  # lazy für Wortzahl-Retry
 
+    is_claude_gen = model.lower().startswith("claude")
+
     for gen_attempt in range(1, _GEN_MAX_ATTEMPTS + 1):
         try:
-            if gemini_cache:
+            if is_claude_gen:
+                # Claude als Generator (A/B-Test gegen Flash): kein Gemini-Context-Cache,
+                # freier Text → parse_article_json (planung/Fences/„…"-Repair robust).
+                import claude_client
+                if user_msg is None:
+                    user_msg = build_grounded_user_message(
+                        job, primary_text, companion_texts, valid_companions, images
+                    )
+                    report["phase2"]["user_msg_len"] = len(user_msg)
+                raw_response = claude_client.call_claude_text(
+                    system_prompt, user_msg, model=model, max_tokens=32000,
+                    thinking_budget=0, effort="low", call_name="article_gen",
+                )
+            elif gemini_cache:
                 _, variable_suffix = _split_grounded_user_message(
                     job, primary_text, companion_texts, valid_companions, images
                 )
@@ -1658,7 +1678,13 @@ def generate_one_level(
                     f"Artikel nicht plausibel: {n_secs} Sections, {n_sents} Sätze"
                 )
 
-            _u = gemini_client._last_usage.copy()
+            if is_claude_gen:
+                import claude_client
+                _cu = claude_client.get_last_usage()
+                _u = {"input_tok":  int(_cu.get("input_tokens", 0)),
+                      "output_tok": int(_cu.get("output_tokens", 0))} if _cu else {}
+            else:
+                _u = gemini_client._last_usage.copy()
             if _u:
                 cost_tracker.track(run_id=_RUN_ID, thema=thema,
                                     stufe=content_type, schritt="article_gen",
@@ -1965,6 +1991,11 @@ def main() -> None:
         help="Ausgabeverzeichnis (default: articles/test_grounded)",
     )
     parser.add_argument(
+        "--hoerspiel-prompt", default=None, metavar="PFAD",
+        help="Alternativer Hörspiel-System-Prompt (Bake-off A/B). Überschreibt "
+             "PROMPT_PATHS['hoerspiel'] für diesen Lauf.",
+    )
+    parser.add_argument(
         "--skip-lektorat", action="store_true",
         help="Lektorat-Schritt (Claude Sonnet) nach Generierung ueberspringen",
     )
@@ -1973,6 +2004,16 @@ def main() -> None:
         help="Lektorat ueber Anthropic Batch-API (async, Polling) statt synchron",
     )
     args = parser.parse_args()
+
+    # Bake-off: alternativen Hörspiel-Prompt für diesen Lauf einhängen (A/B).
+    if args.hoerspiel_prompt:
+        alt = Path(args.hoerspiel_prompt).resolve()
+        if not alt.exists():
+            log.error("Hörspiel-Prompt nicht gefunden: %s", alt)
+            sys.exit(1)
+        PROMPT_PATHS["hoerspiel"] = alt
+        _PROMPT_CACHE.pop(str(alt), None)
+        log.info("Bake-off: Hörspiel-Prompt = %s", alt.name)
 
     global _RUN_ID
     _RUN_ID = args.run_id or datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S")
@@ -2220,7 +2261,10 @@ def main() -> None:
                 sp         = system_prompt_for(ct)
                 print(f"\n  --- {ct}: {article_id} ---")
 
-                if stable_prefix is not None and ct not in type_caches:
+                # Gemini-Context-Cache nur für Gemini-Generatoren (bei Claude-Generator
+                # sinnlos/fehlerhaft — Claude nutzt eigenes Prompt-Caching, hier ungenutzt).
+                if (stable_prefix is not None and ct not in type_caches
+                        and not model.lower().startswith("claude")):
                     type_caches[ct] = try_create_gemini_cache(client, model, sp, stable_prefix)
 
                 article, report = generate_one_level(
