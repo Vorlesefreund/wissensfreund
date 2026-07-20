@@ -917,8 +917,17 @@ def validate_article(article: dict, job: dict, word_floor: int | None = None) ->
     hi = MAX_SENTENCES_PER_ARTICLE.get(level_str, 100)
     # Untergrenze nur als Stub-Signal werten, wenn auch die Wortzahl unter dem
     # Ziel liegt (siehe word_floor-Doku oben). Obergrenze bleibt immer scharf.
+    # AUSNAHME Hörspiel: dort ist eine niedrige Satzzahl bei gesundem Wortbudget
+    # KEIN Stil, sondern verschmolzene Sprecher-Turns (mehrere Turns in EINEM
+    # sentences-Eintrag → bricht Mitlese-Lupe + Per-Figur-TTS). Für Hörspiel bleibt
+    # die Untergrenze deshalb scharf, unabhängig vom Wortboden.
+    content_type = meta.get("content_type") or job.get("content_type") or ""
     wc_real  = meta.get("word_count")
-    too_few  = n < lo and (word_floor is None or wc_real is None or wc_real < word_floor)
+    suppress_low = (
+        word_floor is not None and wc_real is not None
+        and wc_real >= word_floor and content_type != "hoerspiel"
+    )
+    too_few  = n < lo and not suppress_low
     too_many = n > hi
     if too_few or too_many:
         errors.append(f"{n} Sätze außerhalb [{lo},{hi}] für Stufe {level_str}")
