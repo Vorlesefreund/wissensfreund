@@ -421,6 +421,16 @@ def _sort_key(path: Path):
     return (stem, 0)
 
 
+def _article_sort_key(path: Path):
+    """Sort-/Themenschlüssel für rohe Artikel-JSONs (z.B. 'vulkan_hoerspiel.json'
+    → ('vulkan', '_hoerspiel')). Gegenstück zu _sort_key für Lektorat-Dateien."""
+    stem = path.stem
+    for suf in ("_hoerspiel", "_erzaehltext"):
+        if stem.endswith(suf):
+            return (stem[: -len(suf)], suf)
+    return (stem, "")
+
+
 def build(run_dir: Path, output: Path, themen) -> None:
     lekt_dir = run_dir / "lektorat"
     files = sorted(lekt_dir.glob("lektorat_*.json"), key=_sort_key)
@@ -428,7 +438,18 @@ def build(run_dir: Path, output: Path, themen) -> None:
         tset = {t.lower() for t in themen}
         files = [f for f in files if _sort_key(f)[0].lower() in tset]
     if not files:
-        print(f"FEHLER: keine Lektorat-JSONs in {lekt_dir} (Filter: {themen})", file=sys.stderr)
+        # Fallback: Lektorat ist aus (--skip-lektorat) → direkt die rohen
+        # Artikel-JSONs rendern. Selbes Top-Level-Schema (meta/sections/quiz),
+        # nur ohne 'pruefbericht' → findings bleibt leer, jeder Satz normal gesetzt.
+        files = sorted(
+            list(run_dir.glob("*_hoerspiel.json")) + list(run_dir.glob("*_erzaehltext.json")),
+            key=_article_sort_key)
+        if themen:
+            tset = {t.lower() for t in themen}
+            files = [f for f in files if _article_sort_key(f)[0].lower() in tset]
+    if not files:
+        print(f"FEHLER: keine Lektorat- oder Artikel-JSONs in {run_dir} (Filter: {themen})",
+              file=sys.stderr)
         sys.exit(2)
 
     doc = Document()
