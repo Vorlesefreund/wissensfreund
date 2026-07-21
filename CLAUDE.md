@@ -5,7 +5,7 @@ Vor jedem Faktencheck den vollständigen echten Wikipedia-Quelltext beschaffen u
 
 ## EISERNE REGEL (App-Kernprinzip)
 KI darf NIEMALS aus Trainingswissen antworten.
-Nur aus geladenem Klexikon-Artikeltext. Kein Ausnahmefall. Kein Fallback.
+Nur aus geladenem Wikipedia-Artikeltext. Kein Ausnahmefall. Kein Fallback.
 
 ## ARTIKEL-LOGIK
 Relevanz: Titel +3P | Erster Absatz +2P | Fließtext +1P | mehrere Begriffe → multiplizieren
