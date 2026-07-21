@@ -100,6 +100,25 @@ def _to_sec(s):
         return None
 
 
+def _res_label(w, h):
+    """'3840x2160 4K' etc. + Pixelzahl (fuer Sortierung nach Aufloesung)."""
+    try:
+        w, h = int(w), int(h)
+    except (TypeError, ValueError):
+        return "", 0
+    if not w or not h:
+        return "", 0
+    if w >= 3840 or h >= 2160:
+        tag = "4K"
+    elif w >= 1920 or h >= 1080:
+        tag = "1080p"
+    elif h >= 720:
+        tag = "720p"
+    else:
+        tag = "SD"
+    return f"{w}x{h} {tag}", w * h
+
+
 # ---------------------------------------------------------------------------
 # ffprobe: echte Laenge + Tonspur + Sprach-Tag (falls gesetzt)
 # ---------------------------------------------------------------------------
@@ -465,12 +484,14 @@ def search_pexels(term, limit, api_key):
                 if f.get("quality") == "hd":
                     break
         slug = (v.get("url", "").rstrip("/").split("/") or [""])[-1]
+        res, res_px = _res_label(v.get("width"), v.get("height"))
         out.append({
             "source": "Pexels (Stock)", "flag": "green",
             "title": (slug.replace("-", " ").title() if slug else f"pexels-{v.get('id')}"),
             "author": (v.get("user") or {}).get("name", "Pexels"),
             "license": "Pexels License (frei, kommerziell, ohne Namensnennung)",
             "duration": _fmt_secs(v.get("duration")), "dur_sec": _to_sec(v.get("duration")),
+            "resolution": res, "res_px": res_px, "popularity": 0,
             "language": STOCK_LANG[0], "lang_rank": STOCK_LANG[1],
             "page": v.get("url", ""), "file": mp4 or v.get("url", ""),
             "thumb": v.get("image", ""), "note": STOCK_NOTE,
@@ -489,13 +510,15 @@ def search_pixabay(term, limit, api_key):
         return out, f"Pixabay-Fehler: {e}"
     for h in data.get("hits", [])[:limit]:
         vids = h.get("videos", {}) or {}
-        pick = vids.get("medium") or vids.get("large") or vids.get("small") or {}
+        pick = vids.get("large") or vids.get("medium") or vids.get("small") or {}
+        res, res_px = _res_label(pick.get("width"), pick.get("height"))
         out.append({
             "source": "Pixabay (Stock)", "flag": "green",
             "title": (h.get("tags") or f"pixabay-{h.get('id')}"),
             "author": h.get("user", "Pixabay"),
             "license": "Pixabay Content License (frei, kommerziell, ohne Namensnennung)",
             "duration": _fmt_secs(h.get("duration")), "dur_sec": _to_sec(h.get("duration")),
+            "resolution": res, "res_px": res_px, "popularity": int(h.get("views", 0) or 0),
             "language": STOCK_LANG[0], "lang_rank": STOCK_LANG[1],
             "page": h.get("pageURL", ""), "file": pick.get("url", ""),
             "thumb": pick.get("thumbnail", ""), "note": STOCK_NOTE,
@@ -547,6 +570,7 @@ def build_html(results_by_topic, path):
    <span class="badge" style="background:{color}">{label}</span>
    <span class="src">&nbsp;{html.escape(c['source'])}</span>
    {('&nbsp; ⏱ '+html.escape(c['duration'])) if c['duration'] else ''}
+   {('&nbsp; 🖥 '+html.escape(c.get('resolution',''))) if c.get('resolution') else ''}
    {('&nbsp; 🗣 '+html.escape(c.get('language',''))) if c.get('language') else ''}
    <div style="font-size:16px;font-weight:600;margin:4px 0">
      <a class="play" href="{html.escape(c['page'])}" target="_blank">{html.escape(c['title'])}</a></div>
@@ -587,8 +611,8 @@ def build_xlsx(results_by_topic, path, embed_thumbs=True):
     ws.title = "Video-Kandidaten"
     link_font = Font(color="0563C1", underline="single")
 
-    headers = ["Thema", "Vorschau", "Ampel", "Titel (Klick)", "Dauer", "Sprache",
-               "Quelle", "Autor/Kanal", "Lizenz", "Download (Klick)", "Hinweis",
+    headers = ["Thema", "Vorschau", "Ampel", "Titel (Klick)", "Dauer", "Aufloesung",
+               "Sprache", "Quelle", "Autor/Kanal", "Lizenz", "Download (Klick)", "Hinweis",
                "Verwenden?", "Note 1-5", "Kommentar"]
     ws.append(headers)
     for col in range(1, len(headers) + 1):
@@ -611,18 +635,19 @@ def build_xlsx(results_by_topic, path, embed_thumbs=True):
                 tcell.hyperlink = c["page"]
                 tcell.font = link_font
             ws.cell(row, 5, c["duration"])
-            scell = ws.cell(row, 6, c.get("language", ""))
+            ws.cell(row, 6, c.get("resolution", ""))
+            scell = ws.cell(row, 7, c.get("language", ""))
             if c.get("lang_rank", 1) == 0:
                 scell.fill = ideal_fill
             scell.alignment = Alignment(wrap_text=True, vertical="top")
-            ws.cell(row, 7, c["source"])
-            ws.cell(row, 8, c["author"])
-            ws.cell(row, 9, c["license"])
-            dcell = ws.cell(row, 10, "Datei oeffnen")
+            ws.cell(row, 8, c["source"])
+            ws.cell(row, 9, c["author"])
+            ws.cell(row, 10, c["license"])
+            dcell = ws.cell(row, 11, "Datei oeffnen")
             if c["file"]:
                 dcell.hyperlink = c["file"]
                 dcell.font = link_font
-            ncell = ws.cell(row, 11, c["note"])
+            ncell = ws.cell(row, 12, c["note"])
             ncell.alignment = Alignment(wrap_text=True, vertical="top")
             tcell.alignment = Alignment(wrap_text=True, vertical="top")
 
@@ -642,7 +667,7 @@ def build_xlsx(results_by_topic, path, embed_thumbs=True):
                     pass
             row += 1
 
-    widths = [16, 24, 20, 44, 8, 26, 18, 20, 22, 15, 34, 13, 9, 34]
+    widths = [16, 24, 20, 42, 8, 14, 24, 16, 18, 22, 15, 32, 13, 9, 32]
     for i, w in enumerate(widths, 1):
         ws.column_dimensions[get_column_letter(i)].width = w
     ws.freeze_panes = "A2"
@@ -651,7 +676,7 @@ def build_xlsx(results_by_topic, path, embed_thumbs=True):
         ws.auto_filter.ref = f"A1:{last}{row - 1}"
         dv = DataValidation(type="list", formula1='"ja,nein,vielleicht"', allow_blank=True)
         ws.add_data_validation(dv)
-        dv.add(f"L2:L{row - 1}")  # Spalte "Verwenden?"
+        dv.add(f"M2:M{row - 1}")  # Spalte "Verwenden?"
     wb.save(path)
 
 
@@ -690,6 +715,10 @@ def main():
     ap.add_argument("--max-sec", type=int, default=0, help="Maximallaenge in Sekunden (0=aus)")
     ap.add_argument("--top", type=int, default=0,
                     help="Nur die besten N Kandidaten je Thema behalten (0=alle)")
+    ap.add_argument("--sort", default="relevanz",
+                    choices=["relevanz", "aufloesung", "beliebtheit"],
+                    help="Reihung innerhalb Lizenz/Sprache: relevanz (default), "
+                         "aufloesung (4K zuerst), beliebtheit (Pixabay-Views)")
     ap.add_argument("--sources",
                     default="terrax,pexels,pixabay,usgs,noaa,commons,nasa,archive,youtube",
                     help="Auswahl: terrax,pexels,pixabay,usgs,noaa,commons,nasa,archive,youtube")
@@ -786,9 +815,14 @@ def main():
             before = len(cands)
             cands = [c for c in cands if _in_range(c)]
             print(f"    Laengenfilter {args.min_sec}-{args.max_sec}s: {before} -> {len(cands)}")
-        # Sortierung: 1) Lizenz (gruen zuerst) 2) Sprach-Eignung (stumm/dt zuerst)
+        # Sortierung: 1) Lizenz (gruen) 2) Sprach-Eignung 3) --sort-Signal
         _order = {"green": 0, "yellow": 1, "red": 2}
-        cands.sort(key=lambda c: (_order.get(c["flag"], 1), c.get("lang_rank", 1)))
+        _third = {
+            "relevanz": lambda c: 0,  # Quellenreihenfolge beibehalten (stabil)
+            "aufloesung": lambda c: -c.get("res_px", 0),
+            "beliebtheit": lambda c: -c.get("popularity", 0),
+        }[args.sort]
+        cands.sort(key=lambda c: (_order.get(c["flag"], 1), c.get("lang_rank", 1), _third(c)))
         # Top-N-Vorauswahl je Thema (nach Sortierung = beste zuerst)
         if args.top and len(cands) > args.top:
             cands = cands[:args.top]
