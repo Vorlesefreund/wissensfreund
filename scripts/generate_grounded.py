@@ -431,6 +431,8 @@ Maßstab bei jedem Companion ist allein, wie interessant und spannend der Aspekt
 
 ## 3. AUSWAHL-VORGABEN
 
+**Nachrangig — Fach-/Stoff-Sachkunde:** Gesteins-/Materialarten, Formations- oder Klassifikations-Artikel (z. B. „Lava" als Stoff, „Basalt", Säulen-/Kristallformen, Untergruppen-Taxonomie) sind trockene Sachkunde. Wähle sie NIEMALS anstelle eines lebendigen Ereignisses/Beispiels — nur ergänzend, wenn nach dem ikonischen Anker und den lebendigen Aspekten noch Platz für EINEN wirklich anschaulichen Prozess frei ist.
+
 **A. Menge & Qualität (Das APPEAL-Level entscheidet)**
 - **APPEAL low:** Wähle 2–3 Companions.
 - **APPEAL medium / high:** Wähle 3–5 Companions.
@@ -440,7 +442,7 @@ Maßstab bei jedem Companion ist allein, wie interessant und spannend der Aspekt
 **B. Die 3 Säulen eines guten Companions (Prioritäten)**
 1. **Kinderwelt & Fantasie:** Was kennen Kinder aus ihrem echten Alltag, aus Büchern oder Filmen? (Beispiele: Dinosaurier im Buch, Gewitter, Mondschein).
 2. **Dynamik & Leben — bild-konkret:** Sichtbare Lebewesen, Orte und Ereignisse, die sich für Kinder FOTOGRAFIEREN lassen, schlagen statische Zustände und abstrakte Prozesse. Bei ähnlich starken Kandidaten gewinnt der fotografierbare (ein konkretes Tier, eine Pflanze, ein Ort) gegen einen, der real nur als Diagramm existiert. (Beispiele: Vulkanausbruch, ein Regenwald-Tier statt „Photosynthese").
-3. **Kultur & Menschliches (PFLICHT, wenn vorhanden):** Gibt es ein berühmtes Buch, einen Mythos, eine Sage oder ein historisches Ereignis? (Beispiele: Moby Dick bei Wal, Pompeji bei Vulkan). Ein solcher kultureller Anker ist der stärkste narrative Aufhänger für Kinder — WENN es ihn für das Thema gibt, MUSS er unter den Companions sein.
+3. **Kultur & Menschliches (PFLICHT, wenn vorhanden):** Das eine berühmte Ereignis, Werk oder Beispiel, an das die meisten Menschen beim Thema ZUERST denken (Beispiele: Moby Dick bei Wal, **Pompeji/Vesuv bei Vulkan**, ein berühmtes Bauwerk bei einem Baumeister). Ein solcher lebendiger Anker ist der stärkste narrative Aufhänger für Kinder — WENN es ihn für das Thema gibt, MUSS er unter den Companions sein, und zwar als EINER DER ERSTEN. **Eine bloße Wortherkunft oder ein Namensgeber (z. B. der Gott Vulcanus als Ursprung des Wortes „Vulkan") ERSETZT diesen Anker NICHT.** Gibt es ein berühmtes dramatisches Ereignis (eine verschüttete Stadt, ein großes Unglück, eine berühmte Rettung/Entdeckung), hat es Vorrang vor Mythos, Etymologie und technischer Sachkunde — beides darf ergänzen, aber nie den ikonischen Ereignis-Anker verdrängen.
 
 **C. Harte Ausschlusskriterien (Was du NICHT wählst)**
 - **Statische Geologie & Zustände:** Keine starren Strukturen ohne erlebbare Dynamik (Erdmantel, Pangaea).
@@ -582,7 +584,11 @@ def select_companions_raw(
     _LAST_KOMPASS_PLAN = ""
     # Plan-first: KOMPASS soll erst den Schreibplan skizzieren, dann Companions
     # dazu waehlen -> mehr Hauptartikel-Kontext (nicht nur die Einleitung).
-    lead = primary_text[:6000]
+    # 25000 statt 6000: ikonische Ereignisse stehen oft weit hinten im Artikel
+    # (z.B. Vesuv bei „Vulkan" erst ~Pos 16800) — bei knappem Lead unsichtbar,
+    # dann fehlt der beste narrative Anker in der Companion-Auswahl. 25k deckt
+    # die meisten Artikelkörper ab; sehr lange (Elefant ~116k) bleiben gekappt.
+    lead = primary_text[:25000]
     prompt = COMPANION_PROMPT_TMPL.format(thema=thema, lead=lead, appeal=appeal)
 
     from stage_models import get_stage_config
