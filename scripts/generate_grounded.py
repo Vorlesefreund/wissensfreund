@@ -422,7 +422,8 @@ Du bist Chef-Rechercheur für das deutsche Kinderlexikon **Wissensfreund**. Du �
 ## 2. ARBEITE IN ZWEI SCHRITTEN (Reihenfolge einhalten)
 
 **SCHRITT 1 — Schreibplan (Feld "plan"):**
-Entscheide zuerst in 2–4 Sätzen, WELCHE Aspekte des Themas der Artikel behandeln soll. Einziger Maßstab: Wie interessant und spannend ist ein Aspekt für den Leser? Nimm die fesselndsten aus VERSCHIEDENEN Blickwinkeln (ein ikonischer Vertreter, ein kultureller/historischer Anker, eine überraschende Facette) — aber KEINE Aufzählung ähnlicher Unterarten oder Vertreter derselben Sorte (nicht vier Walarten): ein starker Aspekt je Blickwinkel schlägt eine Reihe naher Verwandter. Leite alles NUR aus dem Primärartikel ab, erfinde nichts.
+Entscheide zuerst in 2–4 Sätzen, WELCHE Aspekte des Themas der Artikel behandeln soll. Einziger Maßstab: Wie interessant und spannend ist ein Aspekt für den Leser? Nimm die fesselndsten aus VERSCHIEDENEN Blickwinkeln (ein ikonischer Vertreter, ein kultureller/historischer Anker, eine überraschende Facette) — aber KEINE Aufzählung ähnlicher Unterarten oder Vertreter derselben Sorte (nicht vier Walarten): ein starker Aspekt je Blickwinkel schlägt eine Reihe naher Verwandter.
+**Schöpfe für den Plan aus deinem WELTWISSEN über das Thema** — was ist das Berühmteste, Ikonischste, für Kinder Spannendste, woran denkt man beim Thema als ERSTES? Der Primärartikel oben ist nur EIN Hinweisgeber und oft gekürzt; verlasse dich NICHT darauf, dass jeder wichtige Aspekt darin steht (bei „Vulkan" gehört Pompeji/der Vesuv-Ausbruch in den Plan, auch wenn der Artikelanfang ihn nicht nennt). **Wichtige Trennung:** Weltwissen ist hier NUR erlaubt, um die Aspekte und Companions AUSZUWÄHLEN — die späteren Sachaussagen im Artikel stammen ausschließlich aus den geladenen Quellen (kein erfundener Fakt). Jeder geplante Aspekt MUSS sich einem ECHTEN Wikipedia-Artikel (Companion) zuordnen lassen, der ihn mit Stoff füllt; findest du keinen, lass den Aspekt weg.
 
 **SCHRITT 2 — Companions (Feld "companions"):**
 Wähle DANN die Begleitartikel, die genau diese geplanten Aspekte mit echtem Wikipedia-Stoff füllen. Jeder Companion muss einem geplanten Aspekt dienen — nimm keinen Companion ohne Bezug zum Plan.
@@ -584,11 +585,11 @@ def select_companions_raw(
     _LAST_KOMPASS_PLAN = ""
     # Plan-first: KOMPASS soll erst den Schreibplan skizzieren, dann Companions
     # dazu waehlen -> mehr Hauptartikel-Kontext (nicht nur die Einleitung).
-    # 25000 statt 6000: ikonische Ereignisse stehen oft weit hinten im Artikel
-    # (z.B. Vesuv bei „Vulkan" erst ~Pos 16800) — bei knappem Lead unsichtbar,
-    # dann fehlt der beste narrative Anker in der Companion-Auswahl. 25k deckt
-    # die meisten Artikelkörper ab; sehr lange (Elefant ~116k) bleiben gekappt.
-    lead = primary_text[:25000]
+    # Der Primärtext ist nur EIN Hinweisgeber für den Plan — die ikonischen Aspekte
+    # holt Kompass aus dem Weltwissen (s. COMPANION_PROMPT_TMPL SCHRITT 1), nicht aus
+    # den Artikelzeichen. Deshalb reicht ein knapper Lead (Thema/Disambiguierung);
+    # kein großer Ausschnitt nötig, um weit hinten genannte Ereignisse zu „sehen".
+    lead = primary_text[:6000]
     prompt = COMPANION_PROMPT_TMPL.format(thema=thema, lead=lead, appeal=appeal)
 
     from stage_models import get_stage_config
