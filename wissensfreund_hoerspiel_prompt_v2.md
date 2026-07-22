@@ -20,7 +20,7 @@ Ein Hörspiel hat **drei Sprecher-Rollen** — Erzähler, Kind, eine erwachsene 
 **Erzähler (Professor)** — rahmt die Folge (kurzer Einstieg + warmer Schluss), beschreibt **nur** Schauplatz und Handlungen der Figuren UND spricht die **Redebegleitsätze** mit („fragt Theo", „sagt Oma Rosa", „erklärt sie"). Er **trägt selbst KEIN Sachwissen vor** — kein Warum, keine Zahl, kein Fakt. Er verbindet und beschreibt, er doziert nicht. Direkte Ansprache ans zuhörende Kind („Weißt du was?") gehört NIE dem Erzähler. **Der Erzähler ist selbst KEINE Figur in der Szene:** Schreibe nie eine Zeile, die den Erzähler etwas TUN lässt („Der Erzähler lächelt.", „…nickt.", „…schaut hinaus."). Seine Wärme liegt im Tonfall und in der Wortwahl — er darf durchaus mit einem Schmunzeln erzählen, aber das steht nie als Regieanweisung über ihn selbst im Text (eine Figur wie Oma darf lächeln, der Erzähler nicht).
 
 **Das Kind** — der wiederkehrende rote Faden. Genau EINES pro Folge:
-- **Theo** (Junge) oder **Mia** (Mädchen).
+- **Theo** (Junge). **Kein anderes Kind** — nie eine Mia oder ein sonstiges Kind einführen.
 Das Kind **fragt und staunt**, treibt das Gespräch mit echten Kinderfragen. Es trägt **keine Sachfakten**; seine naiven Vermutungen dürfen sogar falsch sein und richten eine Korrektur ein („Der Mann mit den vier Armen?" → die Erwachsene klärt auf). Das Kind bemerkt nur, was wirklich **zu sehen** ist; alles Unsichtbare (das Innere, das weit Entfernte, das Vergangene) erklärt die erwachsene Person.
 
 **Die erwachsene Bezugsperson** — spricht die belegten Fakten, warm und kindzugewandt. Wähle **die eine feste Figur, deren Fach zum Thema passt** (Kategorie-Zuordnung unten). Behalte ihren Namen bei. Fachpersonen sind **nicht** mit dem Kind verwandt — nur Oma Rosa und Opa Karl sind die Familien-Anker.
@@ -52,7 +52,7 @@ Bevor du schreibst, legst du das Wesen des Themas und den Handlungsbogen fest �
 <planung>
 MUSTER: [living_being | place_geography | history_person | tech_science]
 QUELLEN_FOKUS: [Welche injizierten Texte nutzt du wofür?]
-CAST: [Kind = Theo|Mia · Bezugsperson = feste Figur (nach Kategorie) · ggf. 4. Figur + Merkmal]
+CAST: [Kind = Theo (immer) · Bezugsperson = feste Figur (nach Kategorie) · ggf. 4. Figur + Merkmal]
 HAKEN: [Was ist das WESEN des Themas? Der eine lebendige Kern, um den sich alles dreht.]
 IKONISCHES_BEISPIEL: [Das berühmteste, bekannteste Beispiel des Themas — es MUSS vorkommen (z. B. bei „Vulkan" ein berühmter Ausbruch). Sachfakten dazu nur, wenn die Quelle sie deckt. ERLAUBT als erfundener Rahmen: ein bekannter Geschichten-Anker (z. B. Moby Dick beim Wal), klar als Erzählung markiert, nie als Tatsache.]
 RAHMENHANDLUNG: [Eine kleine Szene MIT eigenem Bogen, die als kleine REISE mehrere Fenster natürlich abklappert (Ausflug, Museum, Hafen, Fund, Rettung): ein Anlass → das Kind entdeckt von Station zu Station etwas → am Ende nimmt es etwas mit. Kein Fakten-Start, kein bloßes „Buch aufschlagen und abfragen", Schauplatz von Folge zu Folge variieren.]
