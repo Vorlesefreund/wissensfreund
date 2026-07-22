@@ -146,16 +146,6 @@ APPEAL_TIER_MED    = 4.0    # Erg-Mittel ≥ → medium, sonst low
 CAP_GRACE_FRAC     = 0.05   # Toleranz über wmax, bevor getrimmt wird (0.0 = strikt ≤ Cap)
 TRIM_MAX_ATTEMPTS  = 2      # max. Trim-Pässe, danach review_flag
 
-# ── Kind-Turn-Guard (nur Hörspiel) ────────────────────────────────────────────
-# PO 2026-07-21: Das Kind (Theo/Mia) meldete sich in ~38 % der Dialog-Turns —
-# gefühlt zu oft (Pingpong). Die reine Prompt-Bitte biegt das nicht zuverlässig,
-# deshalb ein deterministischer Guard: übersteigt der Kind-Anteil das Budget,
-# wird mit gezieltem Hinweis regeneriert (freie Länge → mehr Aspekte statt Dialog).
-KID_NAMES               = frozenset({"theo", "mia"})   # Kind-Figuren laut Cast
-KID_TURN_MAX_FRAC       = 0.30   # Kind darf höchstens ~30 % der Dialog-Turns tragen
-KID_TURN_MIN_TURNS      = 6      # unter so wenig Dialog-Turns nicht urteilen (Rauschen)
-KID_TURN_GUARD_ATTEMPTS = 2      # max. Regenerierungen, danach nur review_flag
-
 AGE_RANGES: dict[str, str] = {"hoerspiel": "4-9 Jahre", "erzaehltext": "10-12 Jahre"}
 
 
@@ -301,39 +291,6 @@ def count_article_words(article: dict) -> int:
             words += len((box.get("text") or "").split())
             words += len((box.get("reveal_text") or "").split())
     return words
-
-
-_KID_SAY_RE = re.compile(
-    r'(?:sagt|fragt|ruft|erklärt|erzählt|antwortet|staunt|flüstert|meint|kichert|'
-    r'schmunzelt|lacht|wundert|stellt|nickt|überlegt|möchte|will)\s+([A-ZÄÖÜ][a-zäöüß]+)')
-_KID_LEAD_RE = re.compile(
-    r'([A-ZÄÖÜ][a-zäöüß]+)\s+(?:fragt|ruft|staunt|kichert|lacht|flüstert|wundert|stellt|nickt|überlegt)')
-_KID_QUOTE_RE = re.compile(r'[„“"]([^„“"]+)[”“"]')
-
-
-def kid_turn_fraction(article: dict) -> tuple[int, int]:
-    """Zählt Dialog-Turns nach Sprecher über die Redebegleitsätze.
-
-    Rückgabe: (kind_turns, dialog_turns_gesamt). Erzähler-Zeilen ohne Rede
-    zählen nicht. Eine Rede-Zeile ohne erkennbare Sprecher-Nennung erbt den
-    zuletzt erkannten Sprecher (fortlaufende Rede derselben Figur). Kind =
-    KID_NAMES (Theo/Mia). Heuristik über Text, da sentences[] kein speaker-Feld
-    trägt — bewusst konservativ (nur klar erkennbare Turns zählen)."""
-    last = None
-    kid = tot = 0
-    for sec in article.get("sections", []):
-        for s in sec.get("sentences", []):
-            t = s.get("text") or ""
-            if not _KID_QUOTE_RE.search(t):
-                continue
-            m = _KID_SAY_RE.search(t) or _KID_LEAD_RE.search(t)
-            spk = m.group(1) if m else last
-            if spk:
-                last = spk
-            tot += 1
-            if spk and spk.lower() in KID_NAMES:
-                kid += 1
-    return kid, tot
 
 
 def _make_thinking_config(model: str, budget_for_2_5: int) -> types.ThinkingConfig:
@@ -1927,69 +1884,6 @@ def generate_one_level(
         n_merged = _merge_split_speech_tags(article)
         if n_merged:
             log.info("  Redebegleitsatz-Merge: %d getrennte Rede-Zeilen zusammengefuehrt", n_merged)
-
-        # ── Kind-Turn-Guard: Kind spricht zu oft → Regenerierung erzwingen ──────
-        for _kg in range(1, KID_TURN_GUARD_ATTEMPTS + 1):
-            kid, tot = kid_turn_fraction(article)
-            frac = kid / tot if tot else 0.0
-            report["phase2"]["kid_turn_frac"] = round(frac, 3)
-            if tot < KID_TURN_MIN_TURNS or frac <= KID_TURN_MAX_FRAC:
-                break
-            log.warning("  Kind-Turn-Anteil zu hoch: %d/%d (%.0f%% > %.0f%%) — Regenerierung %d/%d",
-                        kid, tot, 100 * frac, 100 * KID_TURN_MAX_FRAC, _kg, KID_TURN_GUARD_ATTEMPTS)
-            if user_msg is None:
-                user_msg = build_grounded_user_message(
-                    job, primary_text, companion_texts, valid_companions, images)
-            kid_hint = (
-                f"\n\nRETRY_FEEDBACK: Das Kind meldet sich ZU OFT ({kid} von {tot} Gesprächs-Turns). "
-                f"Reduziere die Kinder-Einwürfe deutlich: MEHRERE Fenster kommen ganz OHNE Kinder-"
-                f"Zwischenruf aus, das Kind spricht höchstens in etwa jedem ZWEITEN Fenster. Die "
-                f"erwachsene Person trägt zusammenhängende Erzähl-Blöcke am Stück; stecke die frei "
-                f"werdende Länge in WEITERE Aspekte des Themas, nicht in mehr Dialog. Alle Sachaussagen "
-                f"weiter streng aus den Quellen. Harte Obergrenze {wmax} Wörter."
-            )
-            try:
-                raw_kg = gemini_client.call_gemini(
-                    system_prompt, user_msg + kid_hint, model=model,
-                    thinking_config=phase2_thinking, response_mime_type="application/json")
-                art_kg = parse_article_json(raw_kg)
-                _u = gemini_client._last_usage.copy()
-                if _u:
-                    cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe=content_type,
-                                       schritt="kid_turn_regen", modell=model, **_u)
-                mk = art_kg.setdefault("meta", {})
-                mk["id"]                    = article_id
-                mk["title"]                 = thema
-                mk["content_type"]          = content_type
-                mk["age_floor"]             = article["meta"]["age_floor"]
-                mk["image_stufe"]           = image_stufe
-                mk["age_level"]             = job.get("prompt_age_level", 3)
-                mk["generated_at"]          = article["meta"]["generated_at"]
-                mk["grounding_companions"]  = valid_companions
-                mk["generation_method"]     = generation_method
-                _merge_split_speech_tags(art_kg)
-                article = art_kg
-                word_count = count_article_words(article)
-                report["phase2"]["kid_turn_regen"] = _kg
-            except Exception as e:
-                log.error("  Kind-Turn-Regenerierung fehlgeschlagen: %s", e)
-                report["errors"].append(f"Kind-Turn-Regen fehlgeschlagen: {e}")
-                break
-        else:
-            # Schleife ohne break durchlaufen → Budget nach allen Versuchen weiter verletzt.
-            kid, tot = kid_turn_fraction(article)
-            frac = kid / tot if tot else 0.0
-            report["phase2"]["kid_turn_frac"] = round(frac, 3)
-            if tot >= KID_TURN_MIN_TURNS and frac > KID_TURN_MAX_FRAC:
-                log.warning("  Kind-Turn-Anteil nach %d Regenerierung(en) weiter zu hoch (%.0f%%) → review_flag",
-                            KID_TURN_GUARD_ATTEMPTS, 100 * frac)
-                article["meta"]["review_flag"] = True
-                article["meta"]["review_reason"] = (
-                    article["meta"].get("review_reason", "")
-                    + f"; Kind-Turn-Anteil {100 * frac:.0f}% > {100 * KID_TURN_MAX_FRAC:.0f}%").lstrip("; ")
-        # word_count kann sich durch Regenerierung geändert haben → Report/Meta angleichen
-        report["phase2"]["word_count"] = word_count
-        article["meta"]["word_count"]  = word_count
 
     val_errors = validate_article(article, job, word_floor=wmin)
     if val_errors:
