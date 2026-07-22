@@ -90,3 +90,6 @@ articles/generalize_test/
 ref_clips/
 nico_dataset/
 Audioaufzeichnungen/
+
+# YouTube-Kanalkatalog (abgeleitet, jederzeit neu holbar via --katalog-refresh)
+scripts/_yt_katalog/

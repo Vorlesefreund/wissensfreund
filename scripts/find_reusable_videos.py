@@ -42,9 +42,11 @@ Braucht openpyxl (+ Pillow fuer Vorschaubilder). Sonst nur Standardbibliothek.
 """
 
 import argparse
+import functools
 import html
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -472,9 +474,315 @@ def search_youtube_cc(term, limit, lang, api_key, probe=False):
     return out, None
 
 
-def search_youtube_kids(term, limit, lang, api_key):
+# Oeffentlich-rechtliche Kanaele: duerfen laut Telemedienwerbeverbot (Medienstaats-
+# vertrag) auf YouTube KEINE Werbung/Sponsoring schalten -> rechtlich werbefrei.
+# WICHTIG: nur konkrete Kinder-/Wissensformate — KEINE pauschalen Senderkuerzel
+# (zdf/ard/wdr), die auch Erwachsenen-/Satirekanaele derselben Anstalt treffen.
+OER_CHANNELS = [
+    "sendung mit der maus", "die maus", "der elefant",
+    "die sendung mit dem elefanten", "checker", "logo!", "terra x",
+    "kika", "zdftivi", "planet schule", "wissen macht ah",
+    "löwenzahn", "loewenzahn", "willi wills wissen", "pur+", "neuneinhalb",
+    "sesamstraße", "sesamstrasse", "anna und die", "paula und die",
+    "swr kindernetz", "tigerenten", "schau in meine welt", "quarks",
+    "die pfefferkörner", "erklär mir die welt", "kikaninchen",
+]
+
+
+def _channel_allowed(title, allow):
+    """Kanalname gegen Allowlist. Kurze Kuerzel (ard/zdf/wdr) nur als ganzes Wort."""
+    t = (title or "").lower()
+    for frag in allow:
+        f = frag.strip().lower()
+        if not f:
+            continue
+        if len(f) <= 4 and f.isalpha():
+            if re.search(r"\b" + re.escape(f) + r"\b", t):
+                return True
+        elif f in t:
+            return True
+    return False
+
+
+# ---------------------------------------------------------------------------
+# Kanal-Register fuer die GEZIELTE Suche IN vertrauenswuerdigen Kanaelen.
+# tier "oer"  = oeffentlich-rechtlich -> Telemedienwerbeverbot -> WERBEFREI garantiert
+# tier "komm" = kommerzieller Kinderkanal -> WERBUNG MOEGLICH (nicht abschaltbar!)
+# ---------------------------------------------------------------------------
+YT_CHANNEL_REGISTRY = [
+    ("Die Sendung mit der Maus", "oer"),
+    ("Der Elefant", "oer"),
+    ("Checker Welt", "oer"),
+    ("Terra X plus", "oer"),
+    ("logo!", "oer"),
+    ("Löwenzahn", "oer"),
+    ("Wissen macht Ah!", "oer"),
+    ("Anna und die wilde Tiere", "oer"),
+    ("planet schule", "oer"),
+    ("KiKA", "oer"),
+    ("pur+", "oer"),
+    ("Woozle Goozle", "komm"),
+    ("TOGGO", "komm"),
+    ("Lernen mit Glapi", "komm"),
+]
+AD_LABEL = {"oer": "werbefrei (oeffentlich-rechtlich)",
+            "komm": "WERBUNG MOEGLICH (kommerziell)"}
+
+
+def _channel_cache_path():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "_yt_channel_cache.json")
+
+
+def resolve_channel_ids(names, api_key):
+    """Kanalnamen -> channelId. Ergebnis wird gecacht (spart API-Kontingent:
+    jede Aufloesung kostet 100 Einheiten)."""
+    path = _channel_cache_path()
+    cache = {}
+    if os.path.isfile(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                cache = json.load(f)
+        except Exception:
+            cache = {}
+    missing = [n for n in names if n not in cache]
+    for name in missing:
+        try:
+            q = urllib.parse.urlencode({"part": "snippet", "type": "channel",
+                                        "q": name, "maxResults": "1", "key": api_key})
+            d = _get_json("https://www.googleapis.com/youtube/v3/search?" + q)
+            items = d.get("items", [])
+            cache[name] = items[0]["snippet"]["channelId"] if items else ""
+            print(f"    Kanal aufgeloest: {name} -> {cache[name] or 'NICHT GEFUNDEN'}")
+        except Exception as e:
+            print(f"    Kanal-Aufloesung fehlgeschlagen ({name}): {e}")
+            cache[name] = ""
+    if missing:
+        try:
+            with open(path, "w", encoding="utf-8") as f:
+                json.dump(cache, f, ensure_ascii=False, indent=2)
+        except Exception:
+            pass
+    return {n: cache.get(n, "") for n in names}
+
+
+def _katalog_dir():
+    d = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_yt_katalog")
+    os.makedirs(d, exist_ok=True)
+    return d
+
+
+def build_channel_catalog(name, tier, cid, api_key, max_videos=600, refresh=False):
+    """Kanal-Uploads EINMAL holen, danach alle Themensuchen offline.
+
+    search.list ist auf 100 Anfragen/Tag gedeckelt — playlistItems.list NICHT
+    (1 Einheit je 50 Videos). Ein Katalog kostet ~25 Einheiten und bedient
+    beliebig viele Themen ohne weiteren Verbrauch."""
+    path = os.path.join(_katalog_dir(), f"{cid}.json")
+    if not refresh and os.path.isfile(path):
+        try:
+            with open(path, encoding="utf-8") as f:
+                cat = json.load(f)
+            # gedeckelter Katalog + jetzt mehr Tiefe verlangt -> neu holen.
+            # Altkatalog ohne Tiefen-Angabe: Deckel unbekannt -> Videozahl annehmen.
+            tiefe = cat.get("max_videos", len(cat.get("videos", [])))
+            deckel = cat.get("gedeckelt", len(cat.get("videos", [])) >= tiefe)
+            zu_flach = deckel and tiefe < max_videos
+            if cat.get("videos") and not zu_flach:
+                return cat, None
+        except Exception:
+            pass
+    try:
+        q = urllib.parse.urlencode({"part": "contentDetails", "id": cid, "key": api_key})
+        d = _get_json("https://www.googleapis.com/youtube/v3/channels?" + q)
+        items = d.get("items", [])
+        if not items:
+            return None, f"{name}: Kanal nicht gefunden"
+        pl = items[0]["contentDetails"]["relatedPlaylists"]["uploads"]
+    except Exception as e:
+        return None, f"{name}: {e}"
+
+    vids, token = [], None
+    while len(vids) < max_videos:
+        p = {"part": "snippet", "playlistId": pl, "maxResults": "50", "key": api_key}
+        if token:
+            p["pageToken"] = token
+        try:
+            d = _get_json("https://www.googleapis.com/youtube/v3/playlistItems?"
+                          + urllib.parse.urlencode(p))
+        except Exception as e:
+            if not vids:
+                return None, f"{name}: {e}"
+            break
+        for it in d.get("items", []):
+            sn = it.get("snippet", {})
+            vid = (sn.get("resourceId") or {}).get("videoId")
+            if vid:
+                vids.append({"id": vid, "title": html.unescape(sn.get("title", "")),
+                             "description": sn.get("description", "")[:600],
+                             "published": sn.get("publishedAt", ""),
+                             "thumb": (sn.get("thumbnails", {}).get("medium", {}) or {}).get("url", "")})
+        token = d.get("nextPageToken")
+        if not token:
+            break
+
+    for i in range(0, len(vids), 50):                       # Dauer nachziehen
+        chunk = vids[i:i + 50]
+        try:
+            q2 = urllib.parse.urlencode({"part": "contentDetails",
+                                         "id": ",".join(v["id"] for v in chunk),
+                                         "key": api_key})
+            det = _get_json("https://www.googleapis.com/youtube/v3/videos?" + q2)
+            secs = {v["id"]: _iso_sec((v.get("contentDetails") or {}).get("duration", ""))
+                    for v in det.get("items", [])}
+            for v in chunk:
+                v["sec"] = secs.get(v["id"])
+        except Exception:
+            pass
+
+    cat = {"name": name, "tier": tier, "channel_id": cid,
+           "max_videos": max_videos, "gedeckelt": len(vids) >= max_videos,
+           "videos": vids}
+    try:
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(cat, f, ensure_ascii=False, indent=1)
+    except Exception:
+        pass
+    return cat, None
+
+
+def search_catalog(term, channels, api_key, per_channel=8, refresh=False, katalog_max=600):
+    """Offline-Themensuche im lokalen Kanalkatalog (kostet nach Aufbau NICHTS)."""
+    out = []
+    for name, tier, cid in channels:
+        if not cid:
+            continue
+        cat, err = build_channel_catalog(name, tier, cid, api_key,
+                                         max_videos=katalog_max, refresh=refresh)
+        if err:
+            print(f"    {name}: {err}")
+            continue
+        hits = [v for v in cat["videos"] if _title_matches(term, v)]
+        hits.sort(key=lambda v: v.get("published") or "", reverse=True)   # neueste zuerst
+        treffer = len(hits)
+        hits = hits[:per_channel]
+        print(f"    {name}: {treffer} von {len(cat['videos'])} Videos passend"
+              + (f" (zeige {per_channel})" if treffer > per_channel else ""))
+        for v in hits:
+            sec = v.get("sec")
+            out.append({
+                "source": f"YT {name}",
+                "flag": "embed",
+                "title": v["title"],
+                "author": name,
+                "license": f"Einbetten · {AD_LABEL[tier]}",
+                "duration": _fmt_secs(sec) if sec else "", "dur_sec": sec,
+                "language": "Deutsch (Kanal)" if tier == "oer" else "Deutsch (Kanal, komm.)",
+                "lang_rank": 0 if tier == "oer" else 1,
+                "page": f"https://www.youtube.com/watch?v={v['id']}",
+                "file": f"https://www.youtube-nocookie.com/embed/{v['id']}",
+                "thumb": v.get("thumb", ""),
+                "note": (f"{AD_LABEL[tier]}. Einbetten (kein Re-Host), Eltern-Opt-in noetig. "
+                         "Zu lang? start=/end= im Embed nutzen (schneidet KEINE Werbung!)."),
+            })
+    return out, None
+
+
+_DE_ENDUNGEN = r"(?:e|en|es|s|er|n)?"
+
+
+@functools.lru_cache(maxsize=256)
+def _term_pattern(word):
+    """Deutsche Komposita ohne blinden Substring-Treffer.
+
+    Immer: eigenstaendiges Wort samt Pluralendung (Wal, Wale) und Kompositum-
+    ENDE (Buckelwal, Blauwale). NICHT: Gewalt, Anwalt, Qualle.
+    Kompositum-ANFANG (Vulkanausbruch) nur ab 5 Zeichen — bei kurzen Woertern
+    waeren zu viele Fremdwoerter blosse Praefix-Zufaelle (Wal->Wald, Walzer)."""
+    w = re.escape(word)
+    arme = [r"(?:\w+)?" + w + _DE_ENDUNGEN + r"\b"]
+    if len(word) >= 5:
+        arme.append(r"\b" + w)
+    return re.compile("|".join(arme))
+
+
+def _title_matches(term, sn):
+    """Kanal-Suche fuellt mit Themenfremdem auf -> Begriff muss im TITEL stehen.
+    Beschreibungen sind Boilerplate-lastig und erzeugen zu viel Rauschen."""
+    hay = (sn.get("title", "") or "").lower()
+    words = [w for w in re.split(r"\W+", (term or "").lower()) if len(w) >= 3]
+    if not words:
+        return True
+    return any(_term_pattern(w).search(hay) for w in words)
+
+
+def search_youtube_channels(term, api_key, channels, per_channel=5, lang="de", strict=True):
+    """GEZIELTE Suche IN vertrauenswuerdigen Kanaelen (statt generisch + wegfiltern).
+    channels: Liste (name, tier, channel_id)."""
+    out = []
+    all_ids = []
+    staged = []
+    for name, tier, cid in channels:
+        if not cid:
+            continue
+        try:
+            q = urllib.parse.urlencode({
+                "part": "snippet", "type": "video", "channelId": cid, "q": term,
+                "maxResults": str(min(per_channel, 25)), "safeSearch": "strict",
+                "videoEmbeddable": "true", "key": api_key})
+            d = _get_json("https://www.googleapis.com/youtube/v3/search?" + q)
+        except Exception as e:
+            print(f"    {name}: Fehler {e}")
+            continue
+        kept = off = 0
+        for it in d.get("items", []):
+            vid = (it.get("id") or {}).get("videoId")
+            if not vid:
+                continue
+            sn = it.get("snippet", {})
+            if strict and not _title_matches(term, sn):
+                off += 1          # Kanal hat zum Thema nichts -> YT fuellt fremd auf
+                continue
+            staged.append((vid, sn, name, tier))
+            all_ids.append(vid)
+            kept += 1
+        if kept or off:
+            print(f"    {name}: {kept} passend" + (f", {off} themenfremd verworfen" if off else ""))
+    # Dauer in einem Rutsch (1 Einheit pro 50 IDs)
+    durs = {}
+    for i in range(0, len(all_ids), 50):
+        try:
+            q2 = urllib.parse.urlencode({"part": "contentDetails",
+                                         "id": ",".join(all_ids[i:i + 50]), "key": api_key})
+            det = _get_json("https://www.googleapis.com/youtube/v3/videos?" + q2)
+            for v in det.get("items", []):
+                iso = (v.get("contentDetails") or {}).get("duration", "")
+                durs[v["id"]] = _iso_sec(iso)
+        except Exception:
+            pass
+    for vid, sn, name, tier in staged:
+        sec = durs.get(vid)
+        out.append({
+            "source": f"YT {name}",
+            "flag": "embed",
+            "title": html.unescape(sn.get("title", vid)),
+            "author": sn.get("channelTitle", name),
+            "license": f"Einbetten · {AD_LABEL[tier]}",
+            "duration": _fmt_secs(sec) if sec else "", "dur_sec": sec,
+            "language": "Deutsch (Kanal)" if tier == "oer" else "Deutsch (Kanal, komm.)",
+            "lang_rank": 0 if tier == "oer" else 1,
+            "page": f"https://www.youtube.com/watch?v={vid}",
+            "file": f"https://www.youtube-nocookie.com/embed/{vid}",
+            "thumb": (sn.get("thumbnails", {}).get("medium", {}) or {}).get("url", ""),
+            "note": (f"{AD_LABEL[tier]}. Einbetten (kein Re-Host), Eltern-Opt-in noetig. "
+                     "Zu lang? start=/end= im Embed nutzen (schneidet KEINE Werbung!)."),
+        })
+    return out, None
+
+
+def search_youtube_kids(term, limit, lang, api_key, allow_channels=None, require_kids=True):
     """YouTube-Videos zum EINBETTEN (Opt-in, kein Re-Host), NUR 'made for kids'.
-    Kein CC-Filter (Einbetten braucht keine freie Lizenz). Filtert per status.madeForKids."""
+    Kein CC-Filter (Einbetten braucht keine freie Lizenz). Filtert per status.madeForKids
+    und optional auf eine Kanal-Allowlist (z.B. oeffentlich-rechtlich = werbefrei)."""
     out = []
     q = urllib.parse.urlencode({
         "part": "snippet", "q": term, "type": "video",
@@ -497,23 +805,31 @@ def search_youtube_kids(term, limit, lang, api_key):
                                      "id": ",".join(ids), "key": api_key})
         det = _get_json("https://www.googleapis.com/youtube/v3/videos?" + q2)
         for v in det.get("items", []):
+            iso = (v.get("contentDetails") or {}).get("duration", "")
             meta[v["id"]] = {
-                "dur": _iso_dur(v.get("contentDetails", {}).get("duration", "")),
+                "dur": _iso_dur(iso),
+                "sec": _iso_sec(iso),
                 "kids": bool((v.get("status") or {}).get("madeForKids", False)),
             }
     except Exception:
         pass
+    n_kids = n_chan = 0
     for vid in ids:
-        if not meta.get(vid, {}).get("kids"):   # nur 'made for kids'
-            continue
+        if require_kids and not meta.get(vid, {}).get("kids"):
+            continue                            # nur 'made for kids'
+        n_kids += 1
         sn = snip.get(vid, {})
+        chan = sn.get("channelTitle", "")
+        if allow_channels and not _channel_allowed(chan, allow_channels):
+            continue                            # nur erlaubte (werbefreie) Kanaele
+        n_chan += 1
         out.append({
             "source": "YouTube Kids (Embed)",
             "flag": "embed",
             "title": html.unescape(sn.get("title", vid)),
-            "author": sn.get("channelTitle", ""),
+            "author": chan,
             "license": "Einbetten (kein Re-Host); Video bleibt bei YouTube",
-            "duration": meta[vid].get("dur", ""), "dur_sec": None,
+            "duration": meta[vid].get("dur", ""), "dur_sec": meta[vid].get("sec"),
             "language": "YouTube-Sprache pruefen", "lang_rank": 1,
             "page": f"https://www.youtube.com/watch?v={vid}",
             "file": f"https://www.youtube-nocookie.com/embed/{vid}",
@@ -521,18 +837,23 @@ def search_youtube_kids(term, limit, lang, api_key):
             "note": ("NUR 'made for kids'. Einbetten via nocookie-Player; Eltern-Opt-in "
                      "noetig (Tracking an Google). Player abschotten (kein rel/Klickthrough)."),
         })
+    print(f"    YouTube-Trichter: {len(ids)} Treffer -> {n_kids} nach Kids-Filter "
+          f"-> {n_chan} nach Kanal-Filter")
     return out, None
 
 
-def _iso_dur(iso):
-    # PT#M#S -> M:SS  (grob)
-    import re
+def _iso_sec(iso):
+    """ISO-8601-Dauer (PT#H#M#S) -> Sekunden oder None."""
     m = re.match(r"PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?", iso or "")
     if not m:
-        return ""
+        return None
     h, mi, s = (int(x) if x else 0 for x in m.groups())
-    total = h * 3600 + mi * 60 + s
-    return _fmt_secs(total)
+    return h * 3600 + mi * 60 + s
+
+
+def _iso_dur(iso):
+    t = _iso_sec(iso)
+    return _fmt_secs(t) if t is not None else ""
 
 
 # ---------------------------------------------------------------------------
@@ -795,6 +1116,22 @@ def main():
     g.add_argument("--topics", help="Kommagetrennt, z.B. \"Vulkan,Wal,Dinosaurier\"")
     g.add_argument("--topics-file", help="Textdatei, ein Thema pro Zeile")
     ap.add_argument("--lang", default="de", help="Sprachpraeferenz fuer YouTube (default de)")
+    ap.add_argument("--channels", default="oer",
+                    help="YouTube-Kanalfilter: 'oer' = nur oeffentlich-rechtliche "
+                         "(gesetzlich werbefrei, Default) | 'all' = kein Filter | "
+                         "eigene Liste kommagetrennt")
+    ap.add_argument("--tier", default="oer", choices=["oer", "beide"],
+                    help="Quelle ytchannels: 'oer' nur werbefreie oeffentlich-rechtliche "
+                         "(Default) | 'beide' zusaetzlich kommerzielle Kinderkanaele "
+                         "(WERBUNG MOEGLICH)")
+    ap.add_argument("--per-channel", type=int, default=5,
+                    help="Treffer je Kanal bei ytchannels (default 5)")
+    ap.add_argument("--katalog-refresh", action="store_true",
+                    help="ytkatalog: Kanalkataloge neu holen (sonst lokaler Cache)")
+    ap.add_argument("--katalog-max", type=int, default=600,
+                    help="ytkatalog: max. Videos je Kanal (default 600)")
+    ap.add_argument("--locker", action="store_true",
+                    help="ytchannels: Titel-Relevanzfilter AUS (mehr Treffer, mehr Themenfremdes)")
     ap.add_argument("--max", type=int, default=6, help="Kandidaten pro Quelle/Thema (default 6)")
     ap.add_argument("--min-sec", type=int, default=0, help="Mindestlaenge in Sekunden (0=aus)")
     ap.add_argument("--max-sec", type=int, default=0, help="Maximallaenge in Sekunden (0=aus)")
@@ -808,7 +1145,10 @@ def main():
     ap.add_argument("--sources",
                     default="terrax,pexels,pixabay,usgs,noaa,commons,nasa,archive,youtube",
                     help="Auswahl: terrax,pexels,pixabay,usgs,noaa,commons,nasa,archive,youtube, "
-                         "youtubekids (Opt-in-Weg: einbetten, nur made-for-kids; nicht im Default)")
+                         "youtubekids (Opt-in-Weg: einbetten, nur made-for-kids), "
+                         "ytkatalog (EMPFOHLEN fuer YouTube: lokaler Kanalkatalog, "
+                         "verbraucht kein Suchkontingent), ytchannels (Live-Suche je Kanal, "
+                         "max. 100 Suchanfragen/Tag) — die drei nicht im Default")
     desktop = os.path.join(os.path.expanduser("~"), "Desktop")
     ap.add_argument("--xlsx", default=os.path.join(desktop, "video_kandidaten.xlsx"),
                     help="Ziel-Excel (Standardausgabe, default Desktop)")
@@ -847,6 +1187,34 @@ def main():
         print("[i] Pixabay uebersprungen (keine PIXABAY_API_KEY gesetzt) -> gratis: pixabay.com/api/docs")
     if not args.no_probe and not FFPROBE:
         print("[i] ffprobe nicht gefunden -> ohne echte Laenge/Sprach-Erkennung.")
+
+    ch = (args.channels or "").strip().lower()
+    if ch == "all":
+        allow_channels = None
+        print("[i] YouTube-Kanalfilter AUS -> Werbefreiheit NICHT garantiert.")
+    elif ch == "oer":
+        allow_channels = OER_CHANNELS
+        print("[i] YouTube nur oeffentlich-rechtliche Kanaele (gesetzlich werbefrei).")
+    else:
+        allow_channels = [x.strip() for x in args.channels.split(",") if x.strip()]
+    # Kanal-Allowlist ist selbst das Vertrauenssignal -> Kids-Flag dann nicht zwingend
+    require_kids = allow_channels is None
+
+    yt_channels = []
+    if ("ytchannels" in srcs or "ytkatalog" in srcs) and yt_key:
+        tiers = ("oer",) if args.tier == "oer" else ("oer", "komm")
+        wanted = [(n, t) for n, t in YT_CHANNEL_REGISTRY if t in tiers]
+        print(f"[i] Kanal-Quelle: {len(wanted)} Kanaele (Tier: {args.tier}) — "
+              f"loese IDs auf (gecacht)...")
+        ids = resolve_channel_ids([n for n, _ in wanted], yt_key)
+        yt_channels = [(n, t, ids.get(n, "")) for n, t in wanted]
+        ok = sum(1 for _, _, c in yt_channels if c)
+        print(f"[i] {ok}/{len(yt_channels)} Kanal-IDs verfuegbar.")
+        if args.tier == "beide":
+            print("[!] Tier 'beide': kommerzielle Kanaele haben WERBUNG (nicht abschaltbar).")
+    if not require_kids:
+        print("[i] Kanal-Allowlist aktiv -> made-for-kids-Flag nicht zwingend "
+              "(Kanal = Vertrauenssignal).")
 
     results = {}
     for disp, query in topics:
@@ -889,8 +1257,23 @@ def main():
             r, err = search_youtube_cc(query, args.max, args.lang, yt_key)
             cands += r
             if err: print("    " + err)
+        if "ytkatalog" in srcs and yt_channels:   # offline im lokalen Kanalkatalog
+            r, err = search_catalog(query, yt_channels, yt_key,
+                                    per_channel=args.per_channel,
+                                    refresh=args.katalog_refresh,
+                                    katalog_max=args.katalog_max)
+            cands += r
+            if err: print("    " + err)
+        if "ytchannels" in srcs and yt_channels:  # gezielte Suche IN vertrauten Kanaelen
+            r, err = search_youtube_channels(query, yt_key, yt_channels,
+                                             per_channel=args.per_channel, lang=args.lang,
+                                             strict=not args.locker)
+            cands += r
+            if err: print("    " + err)
         if "youtubekids" in srcs and yt_key:  # Opt-in-Weg: einbetten, nur made-for-kids
-            r, err = search_youtube_kids(query, args.max, args.lang, yt_key)
+            r, err = search_youtube_kids(query, args.max, args.lang, yt_key,
+                                         allow_channels=allow_channels,
+                                         require_kids=require_kids)
             cands += r
             if err: print("    " + err)
         # Laengenfilter (unbekannte Laenge bleibt drin)
