@@ -107,6 +107,10 @@ def system_prompt_for(content_type: str) -> str:
     return _PROMPT_CACHE[key]
 
 APPEAL_TARGET     = {"high": 15, "medium": 10, "low": 6}
+# Textbegleitende Bilder je Appeal — der Rest des Pools wird Galerie.
+INLINE_TARGET     = {"high": 8, "medium": 6, "low": 4}
+# Bildzuordnung laeuft in einem EIGENEN Aufruf nach der Prosa (assign_images_pass).
+DEFER_IMAGES      = True
 # Hero = Startbild ueber dem Text (App/Handy). MUSS Querformat sein, sonst wird
 # zu stark beschnitten oder das Bild zu klein (PO-Befund 2026-07-22).
 HERO_MIN_ASPECT   = 1.2   # Breite/Hoehe; darunter kein Hero-Kandidat
@@ -1175,6 +1179,182 @@ def enforce_landscape_hero(article: dict, pool: list[dict]) -> str | None:
             f"{imgs[0].get('filename', '?')} (aspect={asp(imgs[0])})")
 
 
+IMG_ASSIGN_SYSTEM = (
+    "Du ordnest einem FERTIGEN Kindertext Bilder zu. Der Text ist unveraenderlich — "
+    "du schreibst nichts um, du waehlst nur aus und beschriftest.\n\n"
+    "REGELN:\n"
+    "- Ein Bild kommt an eine Zeile NUR, wenn es genau das zeigt, wovon die Zeile "
+    "handelt. Im Zweifel gar kein Bild: ein unpassendes Bild ist schlimmer als keines.\n"
+    "- Verteile die Bilder ueber den ganzen Text (verschiedene Abschnitte), nicht "
+    "geballt an den Anfang.\n"
+    "- Jedes Bild hoechstens EINMAL zuordnen.\n"
+    "- hero_index: das repraesentativste Bild des HAUPTTHEMAS (nicht eines "
+    "Nebenthemas). Es MUSS ein mit [QUER] markiertes Bild sein — Hochformat ist als "
+    "Startbild unbrauchbar.\n"
+    "- caption: eine kurze, kindgerechte Bildunterschrift (EIN Satz), die zum "
+    "wirklich geschriebenen Text passt.\n"
+    "- alt: kurzer deutscher Bild-Titel mit Eigenname/Ort aus dem Originaltitel "
+    "(max. 6 Woerter, kein ganzer Satz, kein englischer Titel)."
+)
+
+IMG_ASSIGN_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "hero_index": {"type": "integer"},
+        "zuordnung": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "zeile": {"type": "integer"},
+                    "img_index": {"type": "integer"},
+                },
+                "required": ["zeile", "img_index"],
+            },
+        },
+        "captions": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "img_index": {"type": "integer"},
+                    "caption": {"type": "string"},
+                    "alt": {"type": "string"},
+                },
+                "required": ["img_index", "caption", "alt"],
+            },
+        },
+    },
+    "required": ["hero_index", "zuordnung", "captions"],
+}
+
+
+def assign_images_pass(article: dict, pool: list[dict], thema: str, model: str,
+                       max_inline: int) -> str:
+    """Ordnet Bilder ZU, NACHDEM der Text steht — eigener Aufruf, eigener Prompt.
+
+    Warum getrennt: Solange Prosa und Bildzuweisung im selben Aufruf entstanden,
+    konkurrierten sie um dieselbe Modellaufmerksamkeit. Angezogene Bildregeln haben
+    nachweislich den Text deformiert (erfundene Bild-Anker-Zeilen, Erzaehler-Labels,
+    Stakkato; PO-Befund 2026-07-22). Das ist die Rueckkehr zu pass4_images aus der
+    alten 6-Pass-Pipeline: der Text ist hier fertig und wird nicht mehr angefasst.
+
+    Nebeneffekt: Bildunterschriften passen zum WIRKLICH geschriebenen Text, nicht
+    nur zum Thema — das konnte der alte Weg prinzipiell nicht.
+
+    Mutiert article['images'] und die img_index der Saetze. Rueckgabe: Log-Meldung."""
+    sents = [s for sec in article.get("sections", []) for s in sec.get("sentences", [])]
+    for s in sents:                       # Ausgangszustand: kein Bild
+        s["img_index"] = -1
+    if not pool or not sents:
+        article["images"] = []
+        return "keine Bilder (Pool oder Text leer)"
+
+    zeilen = "\n".join(f"{i}: {s.get('text','')}" for i, s in enumerate(sents))
+    bilder = "\n".join(
+        f"[{i}] Originaltitel \"{p.get('wikimedia_id') or p.get('filename','')}\""
+        f"{' [QUER]' if float(p.get('aspect') or 0) >= HERO_MIN_ASPECT else ' [hoch]'}"
+        f" — zu sehen: {(p.get('beschreibung') or p.get('alt') or '')[:200]}"
+        for i, p in enumerate(pool)
+    )
+    body = (
+        f"THEMA: {thema}\n\n"
+        f"TEXT (Zeilennummer: Zeile):\n{zeilen}\n\n"
+        f"BILDER (index: Originaltitel — zu sehen):\n{bilder}\n\n"
+        f"Ordne HOECHSTENS {max_inline} Bilder zu (die uebrigen wandern automatisch "
+        f"in eine Galerie — du musst sie nicht unterbringen). Gib fuer JEDES der "
+        f"{len(pool)} Bilder eine caption und ein alt aus, auch fuer nicht zugeordnete."
+    )
+
+    try:
+        raw = gemini_client.call_gemini(
+            IMG_ASSIGN_SYSTEM, body, model=model,
+            response_mime_type="application/json", response_schema=IMG_ASSIGN_SCHEMA,
+            call_name="assign_images", max_output_tokens=8192,
+        )
+        data = json.loads(raw)
+    except Exception as e:
+        log.warning("  Bild-Zuordnung fehlgeschlagen: %s — alle Bilder in die Galerie", e)
+        data = {}
+
+    texts = {c.get("img_index"): c for c in data.get("captions", [])
+             if isinstance(c, dict)}
+
+    # Zuordnung einsammeln: pool-Index -> erste passende Zeile, jedes Bild nur einmal
+    paare: list[tuple[int, int]] = []
+    belegt: set[int] = set()
+    for z in data.get("zuordnung", []):
+        if not isinstance(z, dict):
+            continue
+        li, pi = z.get("zeile"), z.get("img_index")
+        if not isinstance(li, int) or not isinstance(pi, int):
+            continue
+        if not (0 <= li < len(sents)) or not (0 <= pi < len(pool)) or pi in belegt:
+            continue
+        belegt.add(pi)
+        paare.append((li, pi))
+        if len(paare) >= max_inline:
+            break
+
+    # Hero bestimmen — Modellwunsch nur, wenn Querformat; sonst bestes Querformat.
+    def quer(i: int) -> bool:
+        return float(pool[i].get("aspect") or 0) >= HERO_MIN_ASPECT
+
+    hero = data.get("hero_index")
+    if not (isinstance(hero, int) and 0 <= hero < len(pool) and quer(hero)):
+        kandidaten = [i for i in range(len(pool)) if quer(i)]
+        hero = max(
+            kandidaten,
+            key=lambda i: (int(bool(pool[i].get("hero_candidate"))),
+                           int(not pool[i].get("filename", "").lower().endswith(".svg")),
+                           int(pool[i].get("relevanz", 0)),
+                           -abs(float(pool[i].get("aspect") or 0) - 1.5)),
+        ) if kandidaten else None
+
+    def bild(pi: int, placement: str) -> dict:
+        p = pool[pi]
+        t = texts.get(pi, {})
+        return {
+            "filename": p.get("filename", ""),
+            "alt": (t.get("alt") or p.get("alt") or p.get("filename", ""))[:120],
+            "caption": (t.get("caption") or "")[:300],
+            "license": p.get("license", ""),
+            "license_author": p.get("license_author", ""),
+            "source_url": p.get("source_url", ""),
+            "wikimedia_id": p.get("wikimedia_id", ""),
+            "thumb_url": p.get("thumb_url", ""),
+            "width": p.get("width", 0),
+            "height": p.get("height", 0),
+            "aspect": p.get("aspect", 0.0),
+            "placement": placement,
+        }
+
+    # images[] aufbauen: Hero zuerst (App-Konvention), dann die zugeordneten,
+    # dann der Rest als Galerie. pool-Index -> Artikel-Index mitfuehren.
+    imgs: list[dict] = []
+    pos: dict[int, int] = {}
+    if hero is not None:
+        pos[hero] = 0
+        imgs.append(bild(hero, "inline"))
+        imgs[0]["is_hero"] = True
+    for _li, pi in paare:
+        if pi not in pos:
+            pos[pi] = len(imgs)
+            imgs.append(bild(pi, "inline"))
+    for li, pi in paare:
+        sents[li]["img_index"] = pos[pi]
+    for pi in range(len(pool)):
+        if pi not in pos:
+            imgs.append(bild(pi, "galerie"))
+
+    article["images"] = imgs
+    inline_n = sum(1 for im in imgs if im.get("placement") == "inline")
+    hero_name = imgs[0]["filename"][:40] if imgs else "-"
+    return (f"Bilder nachtraeglich zugeordnet: {len(paare)} Zeilen-Anker, "
+            f"{inline_n} textbegleitend, {len(imgs) - inline_n} Galerie, "
+            f"Hero={hero_name} (aspect={imgs[0].get('aspect') if imgs else 0})")
+
+
 def append_gallery_images(article: dict, pool: list[dict]) -> str:
     """Trennt textbegleitende Bilder von der Galerie — deterministisch, nach der Generierung.
 
@@ -1376,7 +1556,19 @@ def build_grounded_user_message(
             "genannten Hoehepunkt aus):\n" + plan
         )
 
-    # Bildpool (stabil — gleiche Images für alle Stufen)
+    # Bildpool (stabil — gleiche Images für alle Stufen).
+    # Leer, wenn die Zuordnung nachgelagert laeuft (DEFER_IMAGES): dann darf der
+    # Bildpool die Prosa gar nicht erst erreichen — siehe assign_images_pass().
+    if not images:
+        parts += [
+            "",
+            "BILDER: Fuer diesen Artikel werden die Bilder NACHTRAEGLICH zugeordnet, "
+            "wenn dein Text fertig ist. Gib deshalb images als LEERES Array aus "
+            "(\"images\": []) und setze in JEDER Zeile img_index auf -1. "
+            "Denke beim Schreiben nicht an Bilder: schreibe keine Zeile, um ein Bild "
+            "unterzubringen, und dehne keine Stelle fuer eine Bildbeschreibung. "
+            "Der Text steht fuer sich allein.",
+        ]
     if images:
         parts += [
             "",
@@ -1787,6 +1979,12 @@ def generate_one_level(
     log.info("  Bildpool fuer %s (image_stufe<=%d): %d Bilder (appeal=%s)",
              content_type, image_stufe, len(images), _appeal)
 
+    # Bildpool GEHT NICHT in die Generierung: Prosa und Bildzuweisung duerfen sich
+    # nicht dieselbe Modellaufmerksamkeit teilen (assign_images_pass laeuft spaeter
+    # auf dem fertigen Text). prompt_images bleibt leer, images bleibt der Pool.
+    prompt_images: list[dict] = [] if DEFER_IMAGES else images
+    max_inline = INLINE_TARGET.get(_appeal, 6)
+
     report: dict = {
         "article_id":        article_id,
         "thema":             thema,
@@ -1816,7 +2014,7 @@ def generate_one_level(
                 import claude_client
                 if user_msg is None:
                     user_msg = build_grounded_user_message(
-                        job, primary_text, companion_texts, valid_companions, images
+                        job, primary_text, companion_texts, valid_companions, prompt_images
                     )
                     report["phase2"]["user_msg_len"] = len(user_msg)
                 raw_response = claude_client.call_claude_text(
@@ -1825,7 +2023,7 @@ def generate_one_level(
                 )
             elif gemini_cache:
                 _, variable_suffix = _split_grounded_user_message(
-                    job, primary_text, companion_texts, valid_companions, images
+                    job, primary_text, companion_texts, valid_companions, prompt_images
                 )
                 report["phase2"]["user_msg_len"] = len(variable_suffix)
                 if gen_attempt == 1:
@@ -1838,7 +2036,7 @@ def generate_one_level(
             else:
                 if user_msg is None:
                     user_msg = build_grounded_user_message(
-                        job, primary_text, companion_texts, valid_companions, images
+                        job, primary_text, companion_texts, valid_companions, prompt_images
                     )
                     report["phase2"]["user_msg_len"] = len(user_msg)
                 raw_response = gemini_client.call_gemini(
@@ -1944,7 +2142,7 @@ def generate_one_level(
         log.warning("  Wortzahl zu kurz: %d Wörter (Ziel %d–%d) — Retry", word_count, wmin, wmax)
         if user_msg is None:
             user_msg = build_grounded_user_message(
-                job, primary_text, companion_texts, valid_companions, images
+                job, primary_text, companion_texts, valid_companions, prompt_images
             )
         retry_hint = (
             f"\n\nRETRY_FEEDBACK: Vorentwurf hatte {word_count} Wörter, Ziel {wmin}–{wmax}. "
@@ -2063,20 +2261,29 @@ def generate_one_level(
         if n_merged:
             log.info("  Redebegleitsatz-Merge: %d getrennte Rede-Zeilen zusammengefuehrt", n_merged)
 
-    # ── Hero-Riegel: images[0] MUSS Querformat sein (Modell haelt sich nicht dran) ──
-    hero_note = enforce_landscape_hero(article, images)
-    if hero_note:
-        log.info("  %s", hero_note)
-        report["phase2"]["hero_fix"] = hero_note
-        if hero_note.startswith("kein Querformat"):
+    # ── Bilder: eigener Aufruf auf dem FERTIGEN Text (Rueckkehr zu pass4_images) ──
+    if DEFER_IMAGES and not skip_images:
+        img_note = assign_images_pass(article, images, thema, model, max_inline)
+        log.info("  %s", img_note)
+        report["phase2"]["bildzuordnung"] = img_note
+        if not any(im.get("placement") == "inline" and im.get("is_hero")
+                   for im in article.get("images", [])):
             article["meta"]["review_flag"] = True
             article["meta"]["review_reason"] = (
-                article["meta"].get("review_reason", "") + "; Hero nicht im Querformat").lstrip("; ")
-
-    # ── Bild/Galerie-Trennung: nach dem Hero-Riegel, damit images[0] schon steht ──
-    gal_note = append_gallery_images(article, images)
-    log.info("  %s", gal_note)
-    report["phase2"]["galerie"] = gal_note
+                article["meta"].get("review_reason", "") + "; kein Querformat-Hero").lstrip("; ")
+    else:
+        # Alter Pfad (Bilder kamen aus der Generierung): Hero erzwingen, dann Galerie.
+        hero_note = enforce_landscape_hero(article, images)
+        if hero_note:
+            log.info("  %s", hero_note)
+            report["phase2"]["hero_fix"] = hero_note
+            if hero_note.startswith("kein Querformat"):
+                article["meta"]["review_flag"] = True
+                article["meta"]["review_reason"] = (
+                    article["meta"].get("review_reason", "") + "; Hero nicht im Querformat").lstrip("; ")
+        gal_note = append_gallery_images(article, images)
+        log.info("  %s", gal_note)
+        report["phase2"]["galerie"] = gal_note
 
     # ── Erzaehler-Riegel: er darf sich nie selbst als Sprecher benennen ──
     erz_hits = find_erzaehler_labels(article)
