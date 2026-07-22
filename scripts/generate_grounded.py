@@ -2271,6 +2271,14 @@ def generate_one_level(
             article["meta"]["review_flag"] = True
             article["meta"]["review_reason"] = (
                 article["meta"].get("review_reason", "") + "; kein Querformat-Hero").lstrip("; ")
+        # Faellt der Zuordnungs-Aufruf aus (503), landet ALLES in der Galerie und der
+        # Artikel haette kein einziges Bild im Text — das darf nicht still passieren.
+        if not any(isinstance(s.get("img_index"), int) and s["img_index"] >= 0
+                   for sec in article.get("sections", []) for s in sec.get("sentences", [])):
+            article["meta"]["review_flag"] = True
+            article["meta"]["review_reason"] = (
+                article["meta"].get("review_reason", "")
+                + "; keine Bilder im Text (Zuordnung fehlgeschlagen)").lstrip("; ")
     else:
         # Alter Pfad (Bilder kamen aus der Generierung): Hero erzwingen, dann Galerie.
         hero_note = enforce_landscape_hero(article, images)
