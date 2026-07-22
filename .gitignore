@@ -93,3 +93,6 @@ Audioaufzeichnungen/
 
 # YouTube-Kanalkatalog (abgeleitet, jederzeit neu holbar via --katalog-refresh)
 scripts/_yt_katalog/
+
+# Wegwerf-Galerie fuer die Browser-Vorschau
+_video_galerie.html

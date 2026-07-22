@@ -1,0 +1,23 @@
+# Themen 4-9 — Anzeige::Suchbegriff (Commons-Metadaten sind englisch)
+Hund::dog
+Katze::cat
+Pferd::horse
+Biene::bee
+Schmetterling::butterfly
+Spinne::spider
+Vogel::bird
+Hase::rabbit
+Elefant::elephant
+Wal::whale
+Delfin::dolphin
+Vulkan::volcano
+Eisenbahn::train
+Feuerwehr::fire truck
+Bagger::excavator
+Bauernhof::farm animals
+Mond::moon
+Dinosaurier::dinosaur
+Grille::cricket
+Heuschrecke::grasshopper
+Ameise::ant
+Frosch::frog

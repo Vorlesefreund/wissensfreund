@@ -249,10 +249,12 @@ def _nasa_mp4(nasa_id):
 def search_commons(term, limit, probe=True, category=None,
                    source_label="Wikimedia Commons",
                    note="CC-BY => Namensnennung Pflicht. Direkter Datei-Download erlaubt.",
-                   lang_override=None):
+                   lang_override=None, extra=None):
     search = f"filetype:video {term}"
-    if category:  # nur Dateien dieser Commons-Kategorie (z.B. Terra X, USGS)
+    if category:  # nur Dateien dieser Commons-Kategorie (z.B. Terra X)
         search += f' incategory:"{category}"'
+    if extra:     # zusaetzlicher Volltext-Anker (z.B. Behoerdenname statt Kategorie)
+        search += f" {extra}"
     q = urllib.parse.urlencode({
         "action": "query", "format": "json", "generator": "search",
         "gsrsearch": search, "gsrnamespace": "6",
@@ -320,19 +322,51 @@ def search_terrax(term, limit, probe=True):
 
 
 def search_usgs(term, limit, probe=True):
+    # Die Kategorie "Videos by the USGS" enthaelt nur 6 Dateien -> Volltext-Anker
+    # statt incategory (186 Treffer). Gleiches gilt fuer NOAA (1 vs. ~12.000).
     return search_commons(
-        term, limit, probe,
-        category="Videos by the United States Geological Survey",
+        term, limit, probe, extra="USGS",
         source_label="USGS (PD)",
         note="US-Behoerde -> meist Public Domain. Im Zweifel Dateiseite pruefen.")
 
 
 def search_noaa(term, limit, probe=True):
     return search_commons(
-        term, limit, probe,
-        category="Videos by the National Oceanic and Atmospheric Administration",
+        term, limit, probe, extra="NOAA",
         source_label="NOAA (PD)",
         note="US-Behoerde -> meist Public Domain. Im Zweifel Dateiseite pruefen.")
+
+
+def search_gailhampshire(term, limit, probe=True):
+    """367 CC-BY-Tiervideos (Voegel, Insekten, Reptilien) — Nahaufnahmen, i.d.R. ohne Sprache."""
+    return search_commons(
+        term, limit, probe,
+        category="Videos by Gailhampshire",
+        source_label="Gailhampshire (CC-BY, Tiere)",
+        note="CC-BY 2.0 — Namensnennung 'Gailhampshire' + Lizenz + Link Pflicht. "
+             "Tiernahaufnahmen ohne Sprache: ideal fuer eigene Hoerspiel-Erzaehlung.")
+
+
+def search_forstmeier(term, limit, probe=True):
+    """333 CC-BY-Videos (Insekten/Heuschrecken) — Originalton = Tierstimmen."""
+    return search_commons(
+        term, limit, probe,
+        category="Videos by Wolfgang Forstmeier",
+        source_label="Forstmeier (CC-BY, Insekten)",
+        note="CC-BY 3.0/4.0 — Namensnennung 'Wolfgang Forstmeier' + Lizenz + Link Pflicht. "
+             "Originalton = Tierstimmen (Zirpen/Summen), keine Sprache.")
+
+
+def search_esa(term, limit, probe=True):
+    """ESA auf Commons: Kategorie 'Videos from ESA' hat 6 Dateien, Hubble 47.
+    Zu duenn fuer eine eigene Quelle — Weltraum deckt die NASA-API ab.
+    Achtung: NICHT per Volltext 'ESA OR Hubble' bauen — die OR-Gruppe haengt
+    den Themenbegriff ab und liefert fuer JEDES Thema dieselben Teleskop-Clips."""
+    return search_commons(
+        term, limit, probe,
+        category="Videos from ESA",
+        source_label="ESA (CC BY-SA IGO)",
+        note="ESA-Material meist CC BY-SA 3.0 IGO = Copyleft. Dateiseite pruefen.")
 
 
 def _strip_tags(s):
@@ -1144,7 +1178,8 @@ def main():
                          "warm (Anteil Feuer-/Glut-Toene im Bild)")
     ap.add_argument("--sources",
                     default="terrax,pexels,pixabay,usgs,noaa,commons,nasa,archive,youtube",
-                    help="Auswahl: terrax,pexels,pixabay,usgs,noaa,commons,nasa,archive,youtube, "
+                    help="Auswahl: terrax,gailhampshire,forstmeier,esa,pexels,pixabay,usgs,noaa,"
+                         "commons,nasa,archive,youtube, "
                          "youtubekids (Opt-in-Weg: einbetten, nur made-for-kids), "
                          "ytkatalog (EMPFOHLEN fuer YouTube: lokaler Kanalkatalog, "
                          "verbraucht kein Suchkontingent), ytchannels (Live-Suche je Kanal, "
@@ -1231,6 +1266,18 @@ def main():
             if err: print("    " + err)
         if "noaa" in srcs:
             r, err = search_noaa(query, args.max, probe=probe)
+            cands += r
+            if err: print("    " + err)
+        if "gailhampshire" in srcs:
+            r, err = search_gailhampshire(query, args.max, probe=probe)
+            cands += r
+            if err: print("    " + err)
+        if "forstmeier" in srcs:
+            r, err = search_forstmeier(query, args.max, probe=probe)
+            cands += r
+            if err: print("    " + err)
+        if "esa" in srcs:
+            r, err = search_esa(query, args.max, probe=probe)
             cands += r
             if err: print("    " + err)
         if "pexels" in srcs and pexels_key:
