@@ -449,11 +449,19 @@ def _candidate_from_imageinfo(title: str, ii: dict, cache: dict) -> dict | None:
     raw_author = (meta.get("Artist", {}).get("value", "")
                   or meta.get("Credit", {}).get("value", ""))
     clean_author = re.sub(r"<[^>]+>", "", raw_author).strip()[:80]
+    # Bildmaße (iiprop=size) — noetig fuer die Hero-Wahl: das Startbild ueber dem
+    # Text braucht QUERFORMAT, sonst muss die App zu stark beschneiden. Ohne diese
+    # Felder war die Pipeline blind fuers Seitenverhaeltnis (PO-Befund 2026-07-22).
+    width  = int(ii.get("width") or 0)
+    height = int(ii.get("height") or 0)
+    aspect = round(width / height, 3) if width and height else 0.0
     cache[filename] = {"url_orig": orig_url, "url_1600": thumb_url,
-                       "artist": clean_author, "license": license_str}
+                       "artist": clean_author, "license": license_str,
+                       "width": width, "height": height, "aspect": aspect}
     _meta_cache_dirty = True
     return {"wikimedia_id": title, "filename": filename, "thumb_url": thumb_url,
-            "original_url": orig_url, "license": license_str, "license_author": clean_author}
+            "original_url": orig_url, "license": license_str, "license_author": clean_author,
+            "width": width, "height": height, "aspect": aspect}
 
 
 def fetch_image_candidates(
@@ -489,19 +497,24 @@ def fetch_image_candidates(
     need: list[str] = []
     for title in ordered_titles:
         fn = _filename_from_title(title)
-        if fn in cache and "url_orig" in cache[fn]:
+        # Alt-Cache-Eintraege (vor 2026-07-22) haben KEINE Bildmaße. Ohne width
+        # waere aspect=0 und der Hero-Gate wuerde jedes Bild verwerfen — deshalb
+        # solche Eintraege bewusst neu laden (sie werden dann mit Maßen gecacht).
+        if fn in cache and "url_orig" in cache[fn] and cache[fn].get("width"):
             c = cache[fn]
             info[fn] = {"wikimedia_id": title, "filename": fn,
                         "thumb_url": c.get("url_1600") or c["url_orig"],
                         "original_url": c["url_orig"], "license": c["license"],
-                        "license_author": c["artist"]}
+                        "license_author": c["artist"],
+                        "width": c.get("width", 0), "height": c.get("height", 0),
+                        "aspect": c.get("aspect", 0.0)}
         else:
             need.append(title)
 
     for i in range(0, len(need), 50):
         chunk = need[i:i + 50]
         qd = _api_get(session, {"action": "query", "format": "json", "titles": "|".join(chunk),
-                                "prop": "imageinfo", "iiprop": "url|thumburl|extmetadata",
+                                "prop": "imageinfo", "iiprop": "url|thumburl|size|extmetadata",
                                 "iiurlwidth": "1600",
                                 "iiextmetadatafilter": "Artist|LicenseShortName|License",
                                 "maxlag": 5}, "imageinfo")
@@ -539,7 +552,7 @@ def _fetch_image_candidates_generator(
         "generator": "images",
         "gimlimit": str(max_candidates),
         "prop": "imageinfo",
-        "iiprop": "url|thumburl|extmetadata",
+        "iiprop": "url|thumburl|size|extmetadata",
         "iiurlwidth": "1600",
         "iiextmetadatafilter": "Artist|LicenseShortName|License",
         "maxlag": 5,
@@ -614,17 +627,22 @@ def fetch_lead_image(session: requests.Session, wikipedia_title: str) -> dict | 
         return None
     filename = _filename_from_title(file_title)
 
-    def _mk(thumb, orig, lic, author):
+    def _mk(thumb, orig, lic, author, width=0, height=0):
+        # Maße muessen mit: das Leitbild ist oft der beste Hero-Kandidat und
+        # wuerde ohne aspect am Querformat-Gate scheitern.
+        aspect = round(width / height, 3) if width and height else 0.0
         return {"wikimedia_id": file_title, "filename": filename, "thumb_url": thumb,
-                "original_url": orig, "license": lic, "license_author": author}
+                "original_url": orig, "license": lic, "license_author": author,
+                "width": width, "height": height, "aspect": aspect}
 
-    if filename in cache and "url_orig" in cache[filename]:
+    if filename in cache and "url_orig" in cache[filename] and cache[filename].get("width"):
         c = cache[filename]
-        return _mk(c.get("url_1600") or c["url_orig"], c["url_orig"], c["license"], c["artist"])
+        return _mk(c.get("url_1600") or c["url_orig"], c["url_orig"], c["license"], c["artist"],
+                   c.get("width", 0), c.get("height", 0))
 
     # 2) imageinfo für dieses eine File
     p2 = {"action": "query", "format": "json", "titles": file_title, "prop": "imageinfo",
-          "iiprop": "url|thumburl|extmetadata", "iiurlwidth": "1600",
+          "iiprop": "url|thumburl|size|extmetadata", "iiurlwidth": "1600",
           "iiextmetadatafilter": "Artist|LicenseShortName|License", "maxlag": 5}
     try:
         r = session.get(WIKIPEDIA_API, params=p2, timeout=30)
@@ -651,9 +669,13 @@ def fetch_lead_image(session: requests.Session, wikipedia_title: str) -> dict | 
         if not _is_free_license(lic):
             return None
         author = re.sub(r"<[^>]+>", "", meta.get("Artist", {}).get("value", "")).strip()[:80]
-        cache[filename] = {"url_orig": orig, "url_1600": thumb, "artist": author, "license": lic}
+        w = int(ii.get("width") or 0)
+        h = int(ii.get("height") or 0)
+        cache[filename] = {"url_orig": orig, "url_1600": thumb, "artist": author, "license": lic,
+                           "width": w, "height": h,
+                           "aspect": round(w / h, 3) if w and h else 0.0}
         save_meta_cache()
-        return _mk(thumb, orig, lic, author)
+        return _mk(thumb, orig, lic, author, w, h)
     return None
 
 

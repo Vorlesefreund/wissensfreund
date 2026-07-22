@@ -107,6 +107,9 @@ def system_prompt_for(content_type: str) -> str:
     return _PROMPT_CACHE[key]
 
 APPEAL_TARGET     = {"high": 15, "medium": 10, "low": 6}
+# Hero = Startbild ueber dem Text (App/Handy). MUSS Querformat sein, sonst wird
+# zu stark beschnitten oder das Bild zu klein (PO-Befund 2026-07-22).
+HERO_MIN_ASPECT   = 1.2   # Breite/Hoehe; darunter kein Hero-Kandidat
 MAX_VISION_CHECKS = 40
 MAX_IMG_PRIMARY   = 20
 MAX_IMG_COMPANION = 6
@@ -1011,6 +1014,26 @@ def build_image_pool(
 
         time.sleep(10.0)
 
+    # ── Hero-Gate: nur Querformat darf Hero-Kandidat sein ────────────────────
+    # Das Startbild steht in der App ueber dem Text; Hochformat muesste stark
+    # beschnitten werden oder wird zu klein. Bilder ohne Maße (aspect=0) fallen
+    # ebenfalls raus, damit kein ungeprueftes Hochformat durchrutscht.
+    for a in accepted:
+        if a.get("aspect", 0) < HERO_MIN_ASPECT and a.get("hero_candidate"):
+            log.info("    Hero verworfen (kein Querformat, aspect=%.2f): %s",
+                     a.get("aspect", 0), a["filename"][:45])
+            a["hero_candidate"] = False
+    if not any(a.get("hero_candidate") for a in accepted):
+        quer = [a for a in accepted if a.get("aspect", 0) >= HERO_MIN_ASPECT]
+        if quer:
+            quer.sort(key=lambda x: (-x.get("relevanz", 0), -x.get("aspect", 0)))
+            quer[0]["hero_candidate"] = True
+            log.info("    Hero nachnominiert (Querformat): %s (aspect=%.2f, relevanz=%s)",
+                     quer[0]["filename"][:45], quer[0].get("aspect", 0),
+                     quer[0].get("relevanz"))
+        else:
+            log.warning("    KEIN Querformat-Bild im Pool — Hero bleibt offen")
+
     accepted.sort(key=lambda x: (-x["relevanz"], -int(x.get("hero_candidate", False))))
 
     # ── Bild-Recheck: sensible Themen, NUR unsichere Bilder (confidence=niedrig) ─
@@ -1226,17 +1249,23 @@ def build_grounded_user_message(
             if desc:
                 line += f"\n    Beschreibung: {desc}{hero_flag} Relevanz: {img['relevanz']}/10"
             parts.append(line)
-        _appeal_band = {"high": "10–15", "medium": "5–10", "low": "3–6"}.get(
-            job.get("resolved_appeal", "medium"), "5–10"
+        # Baender an den Pool-Cap (APPEAL_TARGET) angelehnt: der Pool soll
+        # AUSGESCHOEPFT werden. Vorher lagen die Baender deutlich darunter und
+        # die Anweisung "nie erzwingen" liess das Modell zusaetzlich sparen —
+        # Hoerspiele nutzten nur 5 von 15 Bildern (PO-Befund 2026-07-22).
+        _appeal_band = {"high": "12–15", "medium": "8–10", "low": "4–6"}.get(
+            job.get("resolved_appeal", "medium"), "8–10"
         )
         parts += [
             "",
             "Bildauswahl-Regeln:",
-            "- images[0] = Hero-Bild: das repraesentativste Foto des HAUPTTHEMAS (nicht eines Companions). Nur wenn KEIN Bild das Hauptthema zeigt, das am besten passende andere Bild.",
+            "- images[0] = Hero-Bild: das repraesentativste Foto des HAUPTTHEMAS (nicht eines Companions). Es MUSS eines der mit [HERO-KANDIDAT] markierten Bilder sein — diese sind garantiert QUERFORMAT. Hochformat ist als Hero unbrauchbar, weil es in der App ueber dem Text steht und sonst stark beschnitten wird.",
             "- thumb_url in images[] = URL aus AVAILABLE_IMAGES (exakt uebernehmen)",
             "- img_index in sentences = 0-basierter Index in DEINEM images[]-Array",
-            "- Kein Bild doppelt verwenden",
-            f"- {_appeal_band} Bilder gesamt (nur wenn gute vorhanden; nie erzwingen)",
+            "- Jede Datei nur EINMAL in images[] aufnehmen (keine Dubletten im Array)",
+            "- KEINE toten Bilder: JEDES Bild in images[] muss mindestens einer Zeile per img_index zugewiesen sein (Ausnahme: images[0], das Hero-Bild, steht ohnehin ueber dem Text). Ein Bild, das du aufnimmst, aber nirgends zuweist, erscheint nie — nimm es dann lieber gar nicht auf oder gib ihm eine passende Zeile.",
+            "- Verteile die Bilder auf VERSCHIEDENE Stationen des Textes, statt wenige Bilder ueber viele Zeilen zu wiederholen.",
+            f"- {_appeal_band} Bilder gesamt — SCHOEPFE den angebotenen Pool AUS: nimm jedes Bild, das zu einer Zeile wirklich passt. Die Untergrenze nur unterschreiten, wenn der Pool selbst kleiner ist.",
             "- Fuer jedes Bild: filename, alt, caption, license, license_author, source_url, thumb_url befuellen",
         ]
 
