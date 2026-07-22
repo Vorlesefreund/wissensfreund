@@ -89,7 +89,7 @@ CATALOG_PATH       = ROOT / "catalog_full.json"
 
 _RUN_ID: str = ""   # wird in main() gesetzt (--run-id)
 SYSTEM_PROMPT_PATH   = ROOT / "wissensfreund_generator_prompt_v5_2.md"   # Erzähltext (Sachprosa)
-HOERSPIEL_PROMPT_PATH = ROOT / "wissensfreund_hoerspiel_prompt_v2.md"    # Hörspiel (Story-first, Paket B)
+HOERSPIEL_PROMPT_PATH = ROOT / "wissensfreund_hoerspiel_prompt_v2_B.md"  # Hörspiel (Story-first, Paket B)
 # System-Prompt je Inhaltstyp — Erzähltext = v5.2 (unverändert), Hörspiel = eigenes Genre.
 PROMPT_PATHS: dict[str, Path] = {
     "hoerspiel":   HOERSPIEL_PROMPT_PATH,
@@ -427,7 +427,7 @@ Du bist Chef-Rechercheur für das deutsche Kinderlexikon **Wissensfreund**. Du �
 ## 2. ARBEITE IN ZWEI SCHRITTEN (Reihenfolge einhalten)
 
 **SCHRITT 1 — Schreibplan (Feld "plan"):**
-Entscheide zuerst in 2–4 Sätzen, WELCHE Aspekte des Themas der Artikel behandeln soll. Einziger Maßstab: Wie interessant und spannend ist ein Aspekt für den Leser? Nimm die fesselndsten aus VERSCHIEDENEN Blickwinkeln (ein ikonischer Vertreter, ein kultureller/historischer Anker, eine überraschende Facette) — aber KEINE Aufzählung ähnlicher Unterarten oder Vertreter derselben Sorte (nicht vier Walarten): ein starker Aspekt je Blickwinkel schlägt eine Reihe naher Verwandter. **Einer dieser Blickwinkel ist fast immer die Geschichte der MENSCHEN DAHINTER — wie das Thema entdeckt, erforscht, umkämpft oder errungen wurde** (die Entdecker, ihre Rivalität, ein Abenteuer, ein berühmter Irrtum, ein Wettlauf). Diese Menschheits-/Entdeckungsgeschichte ist für Kinder oft der lebendigste, spannendste Stoff — plane sie aktiv ein, wo es sie gibt (z. B. bei Dinosauriern der erbitterte Ausgrabungs-Wettstreit der Knochenkriege; bei einem Planeten das Wettrennen der Entdecker; bei einer Krankheit der Kampf um das Heilmittel), und wähle den passenden Companion dazu.
+Entscheide zuerst in 2–4 Sätzen, WELCHE Aspekte des Themas der Artikel behandeln soll. Einziger Maßstab: Wie interessant und spannend ist ein Aspekt für den Leser? Nimm die fesselndsten aus VERSCHIEDENEN Blickwinkeln (ein ikonischer Vertreter, ein kultureller/historischer Anker, eine überraschende Facette) — aber KEINE Aufzählung ähnlicher Unterarten oder Vertreter derselben Sorte (nicht vier Walarten): ein starker Aspekt je Blickwinkel schlägt eine Reihe naher Verwandter. **Einer dieser Blickwinkel ist fast immer die Geschichte der MENSCHEN DAHINTER — wie das Thema entdeckt, erforscht, umkämpft oder errungen wurde** (die Entdecker, ihre Rivalität, ein Abenteuer, ein berühmter Irrtum, ein Wettlauf). Diese Menschheits-/Entdeckungsgeschichte ist für Kinder oft der lebendigste, spannendste Stoff — plane sie aktiv ein, wo es sie gibt (z. B. bei Dinosauriern der erbitterte Ausgrabungs-Wettstreit der Knochenkriege; bei einem Planeten das Wettrennen der Entdecker; bei einer Krankheit der Kampf um das Heilmittel), und wähle den passenden Companion dazu. **Wähle das KONKRETE Belegstück, nicht den Oberbegriff:** Wird ein Aspekt an einem berühmten Fundstück, Bauwerk, Werk oder Ort greifbar, nimm dieses als Companion statt der allgemeinen Kategorie — das Konkrete kann ein Kind sich vorstellen, der Oberbegriff nicht (also der berühmte Übergangsfossil-Fund statt „Vögel", der benannte Einschlagkrater statt „Asteroid", das eine berühmte Gemälde statt „Malerei"). Steht der Oberbegriff bereits im Haupttext, gewinnt der konkrete Beleg den Companion-Platz.
 **Schöpfe für den Plan aus deinem WELTWISSEN über das Thema** — was ist das Berühmteste, Ikonischste, für Kinder Spannendste, woran denkt man beim Thema als ERSTES? Der Primärartikel oben ist nur EIN Hinweisgeber und oft gekürzt; verlasse dich NICHT darauf, dass jeder wichtige Aspekt darin steht (bei „Vulkan" gehört Pompeji/der Vesuv-Ausbruch in den Plan, auch wenn der Artikelanfang ihn nicht nennt). **Wichtige Trennung:** Weltwissen ist hier NUR erlaubt, um die Aspekte und Companions AUSZUWÄHLEN — die späteren Sachaussagen im Artikel stammen ausschließlich aus den geladenen Quellen (kein erfundener Fakt). Jeder geplante Aspekt MUSS sich einem ECHTEN Wikipedia-Artikel (Companion) zuordnen lassen, der ihn mit Stoff füllt; findest du keinen, lass den Aspekt weg.
 
 **SCHRITT 2 — Companions (Feld "companions"):**
@@ -1175,6 +1175,82 @@ def enforce_landscape_hero(article: dict, pool: list[dict]) -> str | None:
             f"{imgs[0].get('filename', '?')} (aspect={asp(imgs[0])})")
 
 
+def append_gallery_images(article: dict, pool: list[dict]) -> str:
+    """Trennt textbegleitende Bilder von der Galerie — deterministisch, nach der Generierung.
+
+    Bildmenge und Prosaqualitaet duerfen nicht im selben Aufruf konkurrieren: solange
+    der Prompt "schoepfe den Pool aus" verlangte, hat das Modell Zeilen erfunden, nur
+    um Bilder zu verankern (PO-Befund 2026-07-22). Deshalb waehlt das Modell nur noch
+    wenige Bilder FUER DEN TEXT; alles weitere Gute haengt hier der Code an.
+
+    Jedes Bild bekommt `placement`:
+      inline  — Hero (images[0]) und jedes Bild, auf das mindestens eine Zeile zeigt
+      galerie — der Rest: vom Modell aufgenommen aber nie verankert (frueher "totes
+                Bild"), plus alle uebrigen vom Vision-Filter akzeptierten Pool-Bilder
+
+    Dadurch kann es per Konstruktion keine toten Bilder mehr geben."""
+    imgs = article.get("images") or []
+    if not imgs:
+        return "keine Bilder"
+
+    used = {s.get("img_index") for sec in article.get("sections", [])
+            for s in sec.get("sentences", []) if isinstance(s.get("img_index"), int)}
+    for i, im in enumerate(imgs):
+        im["placement"] = "inline" if (i == 0 or i in used) else "galerie"
+    demoted = sum(1 for i, im in enumerate(imgs)
+                  if im["placement"] == "galerie" and i > 0)
+
+    have = {im.get("filename", "") for im in imgs}
+    added = 0
+    for p in pool:
+        fn = p.get("filename", "")
+        if not fn or fn in have:
+            continue
+        imgs.append({
+            "filename": fn,
+            "alt": p.get("beschreibung") or p.get("alt") or fn,
+            "caption": p.get("beschreibung") or "",
+            "license": p.get("license", ""),
+            "license_author": p.get("license_author", ""),
+            "source_url": p.get("source_url", ""),
+            "thumb_url": p.get("thumb_url", ""),
+            "wikimedia_id": p.get("wikimedia_id", ""),
+            "width": p.get("width", 0),
+            "height": p.get("height", 0),
+            "aspect": p.get("aspect", 0.0),
+            "placement": "galerie",
+        })
+        have.add(fn)
+        added += 1
+
+    inline_n = sum(1 for im in imgs if im.get("placement") == "inline")
+    return (f"Bilder: {inline_n} textbegleitend, {len(imgs) - inline_n} Galerie "
+            f"({demoted} unverankert abgestuft, {added} aus Pool ergaenzt)")
+
+
+# Das Modell schreibt den Erzaehler gelegentlich als Sprecher-Label in den Satztext
+# ("Der Erzaehler berichtet: ...", "Erzaehler Professor erklaert, dass ..."). Der
+# Text IST das Audio (Mitlese-Lupe) — solche Zeilen wuerden mitgesprochen und machen
+# den Erzaehler zur handelnden Figur. Prompt-Verbot allein reicht nicht, deshalb hart
+# pruefen (PO-Befund 2026-07-22).
+ERZAEHLER_LABEL_RE = re.compile(
+    r"^\s*(?:Der\s+)?Erzähler(?:\s+Professor)?\s+"
+    r"(?:berichtet|beschreibt|erklärt|erzählt|schildert|sagt|schließt|fährt\s+fort)"
+    r"\b|^\s*Erzähler\s*:",
+    re.IGNORECASE,
+)
+
+
+def find_erzaehler_labels(article: dict) -> list[str]:
+    """Zeilen, in denen der Erzaehler sich selbst als Sprecher benennt."""
+    hits = []
+    for sec in article.get("sections", []):
+        for s in sec.get("sentences", []):
+            if ERZAEHLER_LABEL_RE.search(s.get("text", "")):
+                hits.append(s.get("text", "")[:70])
+    return hits
+
+
 def _variable_suffix(job: dict, wmax: int) -> str:
     """Variabler Suffix je Inhaltstyp: AGE_LEVEL + Bild-Stufen-Filter + WORTZIEL.
     Muss identisch in build_grounded_user_message und _split_grounded_user_message sein.
@@ -1317,12 +1393,13 @@ def build_grounded_user_message(
             if desc:
                 line += f"\n    Beschreibung: {desc}{hero_flag} Relevanz: {img['relevanz']}/10"
             parts.append(line)
-        # Baender an den Pool-Cap (APPEAL_TARGET) angelehnt: der Pool soll
-        # AUSGESCHOEPFT werden. Vorher lagen die Baender deutlich darunter und
-        # die Anweisung "nie erzwingen" liess das Modell zusaetzlich sparen —
-        # Hoerspiele nutzten nur 5 von 15 Bildern (PO-Befund 2026-07-22).
-        _appeal_band = {"high": "12–15", "medium": "8–10", "low": "4–6"}.get(
-            job.get("resolved_appeal", "medium"), "8–10"
+        # Nur noch die TEXTBEGLEITENDEN Bilder werden hier verlangt. Alles weitere
+        # Gute aus dem Pool haengt der Code danach als Galerie an (append_gallery_images).
+        # Vorher forderte der Prompt "SCHOEPFE den Pool AUS" + "jedes Bild muss verankert
+        # sein" — das erzeugte Bild-Anker-Zeilen und hat die Prosa deformiert
+        # (Erzaehler-Labels, Stakkato; PO-Befund 2026-07-22).
+        _inline_band = {"high": "6–8", "medium": "5–7", "low": "3–5"}.get(
+            job.get("resolved_appeal", "medium"), "5–7"
         )
         parts += [
             "",
@@ -1331,9 +1408,9 @@ def build_grounded_user_message(
             "- thumb_url in images[] = URL aus AVAILABLE_IMAGES (exakt uebernehmen)",
             "- img_index in sentences = 0-basierter Index in DEINEM images[]-Array",
             "- Jede Datei nur EINMAL in images[] aufnehmen (keine Dubletten im Array)",
-            "- KEINE toten Bilder: JEDES Bild in images[] muss mindestens einer Zeile per img_index zugewiesen sein (Ausnahme: images[0], das Hero-Bild, steht ohnehin ueber dem Text). Ein Bild, das du aufnimmst, aber nirgends zuweist, erscheint nie — nimm es dann lieber gar nicht auf oder gib ihm eine passende Zeile.",
-            "- Verteile die Bilder auf VERSCHIEDENE Stationen des Textes, statt wenige Bilder ueber viele Zeilen zu wiederholen.",
-            f"- {_appeal_band} Bilder gesamt — SCHOEPFE den angebotenen Pool AUS: nimm jedes Bild, das zu einer Zeile wirklich passt. Die Untergrenze nur unterschreiten, wenn der Pool selbst kleiner ist.",
+            f"- {_inline_band} textbegleitende Bilder (zzgl. Hero) — mehr nicht. Waehle nur Bilder, zu denen es OHNEHIN eine Zeile gibt, und verteile sie auf verschiedene Stationen des Textes.",
+            "- DER TEXT FUEHRT, NIE DAS BILD: Schreibe niemals eine Zeile, nur damit ein Bild einen Anker bekommt, und dehne keine Stelle, um ein Bild unterzubringen. Passt zu einer Zeile kein angebotenes Bild, dann `img_index: -1` — das ist der Normalfall, kein Mangel.",
+            "- Uebrige gute Bilder musst du NICHT unterbringen: was du nicht textbegleitend brauchst, haengt die App automatisch als Galerie ans Ende. Nimm sie also gar nicht erst in images[] auf.",
             "- Fuer jedes Bild: filename, alt, caption, license, license_author, source_url, thumb_url befuellen",
         ]
 
@@ -1995,6 +2072,22 @@ def generate_one_level(
             article["meta"]["review_flag"] = True
             article["meta"]["review_reason"] = (
                 article["meta"].get("review_reason", "") + "; Hero nicht im Querformat").lstrip("; ")
+
+    # ── Bild/Galerie-Trennung: nach dem Hero-Riegel, damit images[0] schon steht ──
+    gal_note = append_gallery_images(article, images)
+    log.info("  %s", gal_note)
+    report["phase2"]["galerie"] = gal_note
+
+    # ── Erzaehler-Riegel: er darf sich nie selbst als Sprecher benennen ──
+    erz_hits = find_erzaehler_labels(article)
+    if erz_hits:
+        for h in erz_hits:
+            log.warning("  Erzaehler-Label im Text: %s", h)
+        report["phase2"]["erzaehler_labels"] = erz_hits
+        article["meta"]["review_flag"] = True
+        article["meta"]["review_reason"] = (
+            article["meta"].get("review_reason", "")
+            + f"; {len(erz_hits)} Erzaehler-Label-Zeilen").lstrip("; ")
 
     val_errors = validate_article(article, job, word_floor=wmin)
     if val_errors:
