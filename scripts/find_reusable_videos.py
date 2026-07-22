@@ -100,6 +100,32 @@ def _to_sec(s):
         return None
 
 
+def analyze_thumb(url):
+    """Generische Bildanalyse des Vorschaubilds (kein Theme-Hardcoding):
+    Anteil WARMER Toene (Feuer/Glut/Lava) und DUNKLER Toene (Rauch/Nacht) in %.
+    Warm = R kraeftig und deutlich groesser als Blau (deckt rot/orange/gelb ab)."""
+    try:
+        import io
+        from PIL import Image as PILImage
+        req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+        raw = urllib.request.urlopen(req, timeout=15).read()
+        im = PILImage.open(io.BytesIO(raw)).convert("RGB")
+        im.thumbnail((100, 100))
+        px = list(im.getdata())
+    except Exception:
+        return None, None
+    if not px:
+        return None, None
+    warm = dark = 0
+    for r, g, b in px:
+        if r >= 120 and r >= g >= b and (r - b) >= 45:
+            warm += 1
+        if r + g + b <= 140:
+            dark += 1
+    n = len(px)
+    return round(100 * warm / n, 1), round(100 * dark / n, 1)
+
+
 def _res_label(w, h):
     """'3840x2160 4K' etc. + Pixelzahl (fuer Sortierung nach Aufloesung)."""
     try:
@@ -446,6 +472,58 @@ def search_youtube_cc(term, limit, lang, api_key, probe=False):
     return out, None
 
 
+def search_youtube_kids(term, limit, lang, api_key):
+    """YouTube-Videos zum EINBETTEN (Opt-in, kein Re-Host), NUR 'made for kids'.
+    Kein CC-Filter (Einbetten braucht keine freie Lizenz). Filtert per status.madeForKids."""
+    out = []
+    q = urllib.parse.urlencode({
+        "part": "snippet", "q": term, "type": "video",
+        "safeSearch": "strict", "videoEmbeddable": "true",
+        "maxResults": str(min(limit, 50)),
+        "relevanceLanguage": lang, "key": api_key,
+    })
+    try:
+        data = _get_json("https://www.googleapis.com/youtube/v3/search?" + q)
+    except Exception as e:
+        return out, f"YouTube-Kids-Fehler: {e}"
+    snip = {it["id"]["videoId"]: it.get("snippet", {})
+            for it in data.get("items", []) if it.get("id", {}).get("videoId")}
+    ids = list(snip.keys())
+    if not ids:
+        return out, None
+    meta = {}
+    try:
+        q2 = urllib.parse.urlencode({"part": "contentDetails,status",
+                                     "id": ",".join(ids), "key": api_key})
+        det = _get_json("https://www.googleapis.com/youtube/v3/videos?" + q2)
+        for v in det.get("items", []):
+            meta[v["id"]] = {
+                "dur": _iso_dur(v.get("contentDetails", {}).get("duration", "")),
+                "kids": bool((v.get("status") or {}).get("madeForKids", False)),
+            }
+    except Exception:
+        pass
+    for vid in ids:
+        if not meta.get(vid, {}).get("kids"):   # nur 'made for kids'
+            continue
+        sn = snip.get(vid, {})
+        out.append({
+            "source": "YouTube Kids (Embed)",
+            "flag": "embed",
+            "title": html.unescape(sn.get("title", vid)),
+            "author": sn.get("channelTitle", ""),
+            "license": "Einbetten (kein Re-Host); Video bleibt bei YouTube",
+            "duration": meta[vid].get("dur", ""), "dur_sec": None,
+            "language": "YouTube-Sprache pruefen", "lang_rank": 1,
+            "page": f"https://www.youtube.com/watch?v={vid}",
+            "file": f"https://www.youtube-nocookie.com/embed/{vid}",
+            "thumb": (sn.get("thumbnails", {}).get("medium", {}) or {}).get("url", ""),
+            "note": ("NUR 'made for kids'. Einbetten via nocookie-Player; Eltern-Opt-in "
+                     "noetig (Tracking an Google). Player abschotten (kein rel/Klickthrough)."),
+        })
+    return out, None
+
+
 def _iso_dur(iso):
     # PT#M#S -> M:SS  (grob)
     import re
@@ -533,52 +611,59 @@ FLAG_LABEL = {
     "green": ("#1a7f37", "RE-HOSTBAR"),
     "yellow": ("#9a6700", "LIZENZ PRUEFEN"),
     "red": ("#b42318", "NICHT NUTZBAR (NC/ND)"),
+    "embed": ("#1f6feb", "EINBETTEN (Opt-in)"),
 }
 
 
 def build_html(results_by_topic, path):
+    """Kontaktbogen: klickbares Thumbnail-Raster zum schnellen visuellen Sichten."""
     parts = ["""<!doctype html><meta charset="utf-8">
-<title>Video-Kandidaten — Wissensfreund</title>
+<title>Video-Galerie — Wissensfreund</title>
 <style>
- body{font:15px/1.5 system-ui,Segoe UI,sans-serif;max-width:1100px;margin:24px auto;padding:0 16px;color:#1c1c1c}
- h1{font-size:22px} h2{margin-top:40px;border-bottom:2px solid #ddd;padding-bottom:6px}
- .card{display:flex;gap:14px;border:1px solid #e2e2e2;border-radius:10px;padding:12px;margin:10px 0}
- .card img{width:180px;height:101px;object-fit:cover;border-radius:6px;background:#f0f0f0;flex:none}
- .meta{font-size:13px;color:#444} .meta b{color:#111}
- .badge{display:inline-block;font-size:11px;font-weight:700;color:#fff;padding:2px 8px;border-radius:20px}
- .src{font-size:12px;color:#666;text-transform:uppercase;letter-spacing:.04em}
- a.play{font-weight:600} .note{font-size:12px;color:#8a5a00;margin-top:4px}
+ body{font:14px/1.5 system-ui,Segoe UI,sans-serif;max-width:1500px;margin:20px auto;padding:0 16px;color:#1c1c1c}
+ h1{font-size:22px} h2{margin-top:34px;border-bottom:2px solid #ddd;padding-bottom:6px}
+ .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-top:12px}
+ .card{border:1px solid #e2e2e2;border-radius:10px;overflow:hidden;background:#fff}
+ .card a.thumb{display:block;position:relative}
+ .card img{width:100%;height:150px;object-fit:cover;background:#eee;display:block}
+ .dur{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.75);color:#fff;font-size:12px;padding:1px 6px;border-radius:4px}
+ .body{padding:8px 10px}
+ .title{font-size:13px;font-weight:600;margin:0 0 4px;max-height:2.6em;overflow:hidden}
+ .badge{display:inline-block;font-size:10px;font-weight:700;color:#fff;padding:1px 7px;border-radius:20px}
+ .sub{font-size:11px;color:#666;margin-top:3px}
+ .dl{font-size:11px}
  .legend{font-size:13px;background:#f7f7f7;border-radius:8px;padding:10px 14px;margin:14px 0}
 </style>
-<h1>Video-Kandidaten fuer Leuchtturmthemen</h1>
-<div class="legend"><b style="color:#1a7f37">GRUEN</b> = freie Lizenz / Public Domain, direkt re-hostbar (CC-BY: Namensnennung!).
- &nbsp; <b style="color:#9a6700">GELB</b> = Lizenz pro Video manuell pruefen.
- &nbsp; <b style="color:#b42318">ROT</b> = NC/ND — fuer die bezahlpflichtige App NICHT nutzbar.
- <br>Kein Re-Host ohne verifizierte Lizenz. CC-BY/-SA immer mit Namensnennung.</div>
+<h1>Video-Galerie — visuell sichten &amp; picken</h1>
+<div class="legend"><b style="color:#1a7f37">GRUEN</b> re-hostbar (CC-BY: Namensnennung!) &nbsp;
+ <b style="color:#9a6700">GELB</b> Lizenz pruefen &nbsp; <b style="color:#b42318">ROT</b> NC/ND — nicht nutzbar &nbsp;
+ <b style="color:#1f6feb">BLAU</b> Einbetten (Opt-in, Tracking; kein Re-Host).
+ <br>Klick aufs Bild = Videoseite ansehen. Auswahl/Kommentar in der Excel. Kein Re-Host ohne verifizierte Lizenz.</div>
 """]
     for topic, cands in results_by_topic.items():
         parts.append(f"<h2>{html.escape(topic)} "
-                     f"<span class='src'>({len(cands)} Kandidaten)</span></h2>")
+                     f"<span class='sub'>({len(cands)} Kandidaten)</span></h2>")
         if not cands:
             parts.append("<p><i>Keine Treffer.</i></p>")
+            continue
+        parts.append('<div class="grid">')
         for c in cands:
             color, label = FLAG_LABEL.get(c["flag"], ("#555", "?"))
             thumb = html.escape(c["thumb"]) if c["thumb"] else ""
+            page = html.escape(c["page"])
+            dur = f'<span class="dur">{html.escape(c["duration"])}</span>' if c["duration"] else ""
             img = f"<img src='{thumb}' loading='lazy' alt=''>" if thumb else "<img alt=''>"
-            parts.append(f"""<div class="card">{img}
- <div>
+            extra = " · ".join(x for x in (c.get("resolution", ""), c.get("language", "")) if x)
+            parts.append(f"""<div class="card">
+ <a class="thumb" href="{page}" target="_blank">{img}{dur}</a>
+ <div class="body">
+   <div class="title"><a href="{page}" target="_blank">{html.escape(c['title'])}</a></div>
    <span class="badge" style="background:{color}">{label}</span>
-   <span class="src">&nbsp;{html.escape(c['source'])}</span>
-   {('&nbsp; ⏱ '+html.escape(c['duration'])) if c['duration'] else ''}
-   {('&nbsp; 🖥 '+html.escape(c.get('resolution',''))) if c.get('resolution') else ''}
-   {('&nbsp; 🗣 '+html.escape(c.get('language',''))) if c.get('language') else ''}
-   <div style="font-size:16px;font-weight:600;margin:4px 0">
-     <a class="play" href="{html.escape(c['page'])}" target="_blank">{html.escape(c['title'])}</a></div>
-   <div class="meta"><b>Autor/Kanal:</b> {html.escape(c['author'])} &nbsp;|&nbsp;
-     <b>Lizenz:</b> {html.escape(c['license'])}</div>
-   <div class="meta"><b>Datei/Download:</b> <a href="{html.escape(c['file'])}" target="_blank">{html.escape(c['file'])}</a></div>
-   <div class="note">⚠ {html.escape(c['note'])}</div>
+   <span class="sub">{html.escape(c['source'])}</span>
+   <div class="sub">{html.escape(extra)}</div>
+   <div class="sub dl"><a href="{html.escape(c['file'])}" target="_blank">Download</a> · {html.escape(c['license'][:28])}</div>
  </div></div>""")
+        parts.append('</div>')
     with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(parts))
 
@@ -586,9 +671,9 @@ def build_html(results_by_topic, path):
 # ---------------------------------------------------------------------------
 # Excel-Report (klickbar + kommentierbar)  -- Hauptausgabe
 # ---------------------------------------------------------------------------
-XLSX_FILLS = {"green": "C6EFCE", "yellow": "FFEB9C", "red": "FFC7CE"}
+XLSX_FILLS = {"green": "C6EFCE", "yellow": "FFEB9C", "red": "FFC7CE", "embed": "CFE2FF"}
 XLSX_AMPEL = {"green": "GRUEN – re-hostbar", "yellow": "GELB – pruefen",
-              "red": "ROT – NC/ND"}
+              "red": "ROT – NC/ND", "embed": "BLAU – Einbetten (Opt-in)"}
 
 
 def build_xlsx(results_by_topic, path, embed_thumbs=True):
@@ -716,12 +801,14 @@ def main():
     ap.add_argument("--top", type=int, default=0,
                     help="Nur die besten N Kandidaten je Thema behalten (0=alle)")
     ap.add_argument("--sort", default="relevanz",
-                    choices=["relevanz", "aufloesung", "beliebtheit"],
+                    choices=["relevanz", "aufloesung", "beliebtheit", "warm"],
                     help="Reihung innerhalb Lizenz/Sprache: relevanz (default), "
-                         "aufloesung (4K zuerst), beliebtheit (Pixabay-Views)")
+                         "aufloesung (4K zuerst), beliebtheit (Pixabay-Views), "
+                         "warm (Anteil Feuer-/Glut-Toene im Bild)")
     ap.add_argument("--sources",
                     default="terrax,pexels,pixabay,usgs,noaa,commons,nasa,archive,youtube",
-                    help="Auswahl: terrax,pexels,pixabay,usgs,noaa,commons,nasa,archive,youtube")
+                    help="Auswahl: terrax,pexels,pixabay,usgs,noaa,commons,nasa,archive,youtube, "
+                         "youtubekids (Opt-in-Weg: einbetten, nur made-for-kids; nicht im Default)")
     desktop = os.path.join(os.path.expanduser("~"), "Desktop")
     ap.add_argument("--xlsx", default=os.path.join(desktop, "video_kandidaten.xlsx"),
                     help="Ziel-Excel (Standardausgabe, default Desktop)")
@@ -751,8 +838,9 @@ def main():
     yt_key = os.environ.get("YT_API_KEY")
     pexels_key = os.environ.get("PEXELS_API_KEY")
     pixabay_key = os.environ.get("PIXABAY_API_KEY")
-    if "youtube" in srcs and not yt_key:
-        print("[i] YouTube uebersprungen (keine YT_API_KEY gesetzt).")
+    if ("youtube" in srcs or "youtubekids" in srcs) and not yt_key:
+        print("[i] YouTube uebersprungen (keine YT_API_KEY gesetzt -> Google Cloud: "
+              "YouTube Data API v3 aktivieren, Key in .env als YT_API_KEY).")
     if "pexels" in srcs and not pexels_key:
         print("[i] Pexels uebersprungen (keine PEXELS_API_KEY gesetzt) -> gratis: pexels.com/api")
     if "pixabay" in srcs and not pixabay_key:
@@ -801,6 +889,10 @@ def main():
             r, err = search_youtube_cc(query, args.max, args.lang, yt_key)
             cands += r
             if err: print("    " + err)
+        if "youtubekids" in srcs and yt_key:  # Opt-in-Weg: einbetten, nur made-for-kids
+            r, err = search_youtube_kids(query, args.max, args.lang, yt_key)
+            cands += r
+            if err: print("    " + err)
         # Laengenfilter (unbekannte Laenge bleibt drin)
         if args.min_sec or args.max_sec:
             def _in_range(c):
@@ -815,12 +907,19 @@ def main():
             before = len(cands)
             cands = [c for c in cands if _in_range(c)]
             print(f"    Laengenfilter {args.min_sec}-{args.max_sec}s: {before} -> {len(cands)}")
+        # Bildanalyse nur wenn nach 'warm' sortiert wird (spart Downloads)
+        if args.sort == "warm":
+            for c in cands:
+                if c.get("thumb"):
+                    wp, dp = analyze_thumb(c["thumb"])
+                    c["warm_pct"], c["dark_pct"] = wp, dp
         # Sortierung: 1) Lizenz (gruen) 2) Sprach-Eignung 3) --sort-Signal
-        _order = {"green": 0, "yellow": 1, "red": 2}
+        _order = {"green": 0, "embed": 1, "yellow": 1, "red": 2}
         _third = {
             "relevanz": lambda c: 0,  # Quellenreihenfolge beibehalten (stabil)
             "aufloesung": lambda c: -c.get("res_px", 0),
             "beliebtheit": lambda c: -c.get("popularity", 0),
+            "warm": lambda c: -(c.get("warm_pct") or 0),
         }[args.sort]
         cands.sort(key=lambda c: (_order.get(c["flag"], 1), c.get("lang_rank", 1), _third(c)))
         # Top-N-Vorauswahl je Thema (nach Sortierung = beste zuerst)
