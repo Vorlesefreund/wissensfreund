@@ -69,6 +69,7 @@ def call_gemini(
     response_schema: Any = None,
     cached_content: str | None = None,
     call_name: str = "",
+    max_output_tokens: int | None = None,
 ) -> str:
     global _last_usage
     """Ruft Gemini synchron auf und gibt den Antworttext zurück.
@@ -108,6 +109,8 @@ def call_gemini(
                 cfg.response_mime_type = response_mime_type
             if response_schema is not None:
                 cfg.response_schema = response_schema
+            if max_output_tokens is not None:
+                cfg.max_output_tokens = max_output_tokens
 
             response = client.models.generate_content(
                 model=effective_model,

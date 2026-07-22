@@ -1471,9 +1471,11 @@ def _trim_article_to_cap(article: dict, word_limit: int, model: str, thinking_co
             "model":        trim_model,
         }
     else:
+        # Der Trim echot den GANZEN Artikel zurück → großes Output-Budget nötig,
+        # sonst schneidet Gemini die Antwort ab (unbalanciertes JSON, s. Dino 1370 W).
         raw = gemini_client.call_gemini(
             TRIM_SYSTEM_PROMPT, trim_msg, model=model, thinking_config=thinking_config,
-            response_mime_type="application/json",
+            response_mime_type="application/json", max_output_tokens=16384,
         )
         trimmed = parse_article_json(raw)
         u = getattr(gemini_client, "_last_usage", {}) or {}
@@ -1832,9 +1834,11 @@ def generate_one_level(
                                     modell=model, **_u)
             log.info("  Trim-Pass %d Ergebnis: %d Wörter", trims, word_count)
         except Exception as e:
-            log.error("  Trim-Pass fehlgeschlagen: %s", e)
-            report["errors"].append(f"Trim-Pass fehlgeschlagen: {e}")
-            break
+            # z.B. abgeschnittenes JSON — nicht sofort aufgeben, sondern den
+            # naechsten Trim-Versuch nutzen (continue statt break).
+            log.error("  Trim-Pass %d fehlgeschlagen: %s — naechster Versuch", trims, e)
+            report["errors"].append(f"Trim-Pass {trims} fehlgeschlagen: {e}")
+            continue
     if trims:
         report["phase2"]["trim_passes"] = trims
         if word_count > cap:
