@@ -1107,6 +1107,74 @@ def select_images_for_stufe(pool: list[dict], stufe: int, appeal: str) -> list[d
     return filtered[:cap]
 
 
+def enforce_landscape_hero(article: dict, pool: list[dict]) -> str | None:
+    """Erzwingt ein QUERFORMAT-Hero (images[0]) nach der Generierung.
+
+    Das Modell waehlt images[0] frei; die [HERO-KANDIDAT]-Markierung im Prompt
+    allein reicht nachweislich nicht (PO-Befund: Hochformat landete trotzdem als
+    Hero). Der Artikel selbst traegt keine Bildmaße, deshalb kommen sie aus dem
+    Pool (per filename). Ist images[0] kein Querformat, wird es mit dem ersten
+    Querformat-Bild des Artikels getauscht und ALLE img_index-Verweise werden
+    mitgezogen. Nebenbei werden width/height/aspect in die Artikel-Bilder
+    geschrieben, damit die App das Seitenverhaeltnis kennt.
+
+    Rueckgabe: Meldung (fuer Log/Report) oder None, wenn nichts zu tun war."""
+    imgs = article.get("images") or []
+    if not imgs:
+        return None
+    by_name = {p.get("filename", ""): p for p in pool}
+
+    for im in imgs:                       # Maße in den Artikel uebernehmen
+        p = by_name.get(im.get("filename", ""))
+        if p:
+            im["width"]  = p.get("width", 0)
+            im["height"] = p.get("height", 0)
+            im["aspect"] = p.get("aspect", 0.0)
+
+    def asp(im: dict) -> float:
+        return float(im.get("aspect") or 0.0)
+
+    if asp(imgs[0]) >= HERO_MIN_ASPECT:
+        imgs[0]["is_hero"] = True
+        return None
+
+    # Bestes Querformat waehlen — Querformat ALLEIN reicht nicht: ein breites
+    # Diagramm (SVG) waere ein schlechtes Startbild. Rangfolge: vom Vision-Filter
+    # als hero_candidate markiert > hohe Relevanz > Foto statt Diagramm >
+    # Seitenverhaeltnis nahe 1.5 (statt extremer Panorama-Streifen).
+    def hero_score(i: int) -> tuple:
+        im = imgs[i]
+        p  = by_name.get(im.get("filename", ""), {})
+        is_svg = im.get("filename", "").lower().endswith(".svg")
+        return (
+            int(bool(p.get("hero_candidate"))),
+            int(not is_svg),
+            int(p.get("relevanz", 0)),
+            -abs(asp(im) - 1.5),
+        )
+
+    quer = [i for i in range(1, len(imgs)) if asp(imgs[i]) >= HERO_MIN_ASPECT]
+    swap = max(quer, key=hero_score) if quer else None
+    if swap is None:
+        return (f"kein Querformat-Bild im Artikel — Hero bleibt "
+                f"{imgs[0].get('filename', '?')} (aspect={asp(imgs[0])})")
+
+    old_name = imgs[0].get("filename", "?")
+    imgs[0], imgs[swap] = imgs[swap], imgs[0]
+    for sec in article.get("sections", []):
+        for s in sec.get("sentences", []):
+            idx = s.get("img_index")
+            if idx == 0:
+                s["img_index"] = swap
+            elif idx == swap:
+                s["img_index"] = 0
+    for im in imgs:
+        im.pop("is_hero", None)
+    imgs[0]["is_hero"] = True
+    return (f"Hero getauscht: {old_name} (aspect={asp(imgs[swap])}) -> "
+            f"{imgs[0].get('filename', '?')} (aspect={asp(imgs[0])})")
+
+
 def _variable_suffix(job: dict, wmax: int) -> str:
     """Variabler Suffix je Inhaltstyp: AGE_LEVEL + Bild-Stufen-Filter + WORTZIEL.
     Muss identisch in build_grounded_user_message und _split_grounded_user_message sein.
@@ -1917,6 +1985,16 @@ def generate_one_level(
         n_merged = _merge_split_speech_tags(article)
         if n_merged:
             log.info("  Redebegleitsatz-Merge: %d getrennte Rede-Zeilen zusammengefuehrt", n_merged)
+
+    # ── Hero-Riegel: images[0] MUSS Querformat sein (Modell haelt sich nicht dran) ──
+    hero_note = enforce_landscape_hero(article, images)
+    if hero_note:
+        log.info("  %s", hero_note)
+        report["phase2"]["hero_fix"] = hero_note
+        if hero_note.startswith("kein Querformat"):
+            article["meta"]["review_flag"] = True
+            article["meta"]["review_reason"] = (
+                article["meta"].get("review_reason", "") + "; Hero nicht im Querformat").lstrip("; ")
 
     val_errors = validate_article(article, job, word_floor=wmin)
     if val_errors:
