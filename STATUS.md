@@ -13,7 +13,7 @@ Trainingswissen). Umbau-Plan: `STUFEN_UMBAU_PLAN.md`. Hörspiel-Genre-Spec: `HOE
   (`hoerspiel`/`erzaehltext`); `--stufen`→`--typen`; age_floor → Anbietezeit-Filter (Hörspiel-Drop nur bei
   floor 3); `image_stufe_for`; Bänder beide (225,975). CI-Guards in `verify_project_facts.py` nachgezogen.
 - **Paket B — Hörspiel-Prompt v2 (Story-first) geschrieben + über 3 Wal-Läufe validiert.**
-  `wissensfreund_hoerspiel_prompt_v2.md` (v1 verworfen: war Fakten-Katalog). Erbt die story_mode_v2-DNA
+  `wissensfreund_hoerspiel_prompt_v2_B.md` (einzige Fassung; A geloescht 2026-07-22, v1 verworfen: war Fakten-Katalog). Erbt die story_mode_v2-DNA
   (keine großen Zahlen, ikonisches Beispiel/Moby Dick, Tiefe vor Breite, Erzähler ohne Sachwissen,
   EISERNE-Regel-Split) + „mit-Tags"-JSON-Gerüst. Verdrahtet via `content_type` (Cache je Typ), Guards grün.
 - **PO-Tuning eingebaut (per Ohr an Wal-Output):** Zahlen → höchstens EINE pro *Antwort*, Maße als
