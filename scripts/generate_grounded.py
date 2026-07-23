@@ -1485,7 +1485,22 @@ def _variable_suffix(job: dict, wmax: int) -> str:
     nur ab_stufe=1-Bilder (image_stufe 1). Plan §4."""
     age_level   = job.get("prompt_age_level", job.get("age_level", 2))
     image_stufe = job.get("image_stufe", age_level)
+    # STORY_PLAN (Hoerspiel, neue Mechanik): der in einem eigenen Aufruf vorab
+    # erstellte <planung>-Block. Steht bewusst im variablen Suffix — er ist
+    # artikelspezifisch und darf den geteilten Cache-Prefix nicht veraendern.
+    plan = (job.get("story_plan") or "").strip()
+    plan_block = ""
+    if plan:
+        plan_block = (
+            "STORY_PLAN — SCHRITT 1 ist bereits erledigt. Der folgende "
+            "<planung>-Block wurde vorab erstellt. UEBERNIMM ihn als verbindliche "
+            "Grundlage (Rahmen, Fenster, Erzaehlfaden, Dialog-Rhythmus) und plane "
+            "NICHT neu. Fuehre jetzt nur noch SCHRITT 2 aus: schreibe das "
+            "Hoerspiel-JSON gemaess diesem Plan. Weiche nicht vom Rahmen und der "
+            "Fenster-Auswahl ab.\n" + plan + "\n\n"
+        )
     return (
+        plan_block +
         f"AGE_LEVEL: {age_level}\n"
         f"BILD-STUFEN-FILTER: Ausschliesslich Bilder mit ab_stufe<={image_stufe} "
         f"verwenden. Bilder mit ab_stufe>{image_stufe} ignorieren.\n"
@@ -2306,6 +2321,78 @@ def _generate_erzaehltext_6pass(
     return article, report
 
 
+# ── Hoerspiel: getrennter Story-Plan (SCHRITT 1) vor der Prosa (SCHRITT 2) ────
+# Uebertraegt die Grundlehre des 6-Schritt-Systems (getrennte Arbeitsschritte)
+# auf das Hoerspiel: Erst plant das Modell in einem eigenen Aufruf NUR den
+# <planung>-Block (Rahmen, Fenster, Erzaehlfaden, Dialog-Rhythmus) — mit voller
+# Aufmerksamkeit, ohne gleichzeitig Prosa+Quiz zu schreiben. Der fertige Plan
+# geht dann als STORY_PLAN in den Schreib-Aufruf (SCHRITT 2). Faellt der
+# Plan-Aufruf aus (503, Parse), wird story_plan=None und der bewaehrte
+# Einzel-Call laeuft unveraendert (Modell plant selbst) — die neue Mechanik
+# kann den Lauf also nicht gefaehrden.
+HOERSPIEL_PLAN_SPLIT = True
+_PLANUNG_RE = re.compile(r"<planung>.*?</planung>", re.DOTALL | re.IGNORECASE)
+
+
+def _hoerspiel_story_plan(
+    system_prompt: str,
+    job: dict,
+    primary_text: str,
+    companion_texts: dict[str, str],
+    valid_companions: list[str],
+    model: str,
+) -> str | None:
+    """Plan-only-Aufruf: gibt NUR den <planung>-Block zurueck (oder None bei Fehler).
+
+    Nutzt denselben Hoerspiel-System-Prompt wie der Schreib-Aufruf (keine
+    Prompt-Duplikation) — nur die User-Message weist an, ausschliesslich
+    SCHRITT 1 auszufuehren und nach </planung> zu stoppen. Bilder bleiben
+    aussen vor (Plan braucht keinen Bildpool)."""
+    try:
+        base = build_grounded_user_message(
+            job, primary_text, companion_texts, valid_companions, []
+        )
+    except Exception as e:
+        log.warning("  Story-Plan: User-Message-Bau fehlgeschlagen (%s) — Fallback Einzel-Call", e)
+        return None
+    plan_msg = (
+        base
+        + "\n\n────────\n"
+        "AUFGABE NUR FUER DIESEN AUFRUF: Fuehre ausschliesslich SCHRITT 1 aus "
+        "(die Planung). Gib GENAU den vollstaendigen Block von <planung> bis "
+        "</planung> aus und stoppe unmittelbar danach. Schreibe in diesem Aufruf "
+        "KEIN Hoerspiel, KEINE sections, KEIN JSON — nur den <planung>-Block. "
+        "Nimm dir fuer den Rahmen, die Fenster, den Erzaehlfaden und den "
+        "Dialog-Rhythmus die volle Aufmerksamkeit; das Schreiben folgt spaeter."
+    )
+    try:
+        thinking = _make_thinking_config(model, budget_for_2_5=8192)
+        raw = gemini_client.call_gemini(
+            system_prompt, plan_msg, model=model, thinking_config=thinking,
+            response_mime_type="text/plain",
+        )
+    except Exception as e:
+        log.warning("  Story-Plan-Aufruf fehlgeschlagen (%s) — Fallback: Modell plant selbst", e)
+        return None
+    if not raw or not raw.strip():
+        log.warning("  Story-Plan leer — Fallback: Modell plant selbst")
+        return None
+    m = _PLANUNG_RE.search(raw)
+    if m:
+        plan = m.group(0).strip()
+    else:
+        # Kein Tag-Paar: nimm die Rohausgabe, wenn sie plausibel ein Plan ist
+        # (enthaelt Plan-Marker), sonst Fallback.
+        raw_s = raw.strip()
+        if "FENSTER" in raw_s.upper() and "RAHMEN" in raw_s.upper():
+            plan = raw_s if raw_s.lower().startswith("<planung>") else f"<planung>\n{raw_s}\n</planung>"
+        else:
+            log.warning("  Story-Plan ohne verwertbaren <planung>-Block — Fallback")
+            return None
+    log.info("  Story-Plan erstellt (%d Zeichen) — SCHRITT 1 getrennt vorab", len(plan))
+    return plan
+
+
 def generate_one_level(
     client: genai.Client,
     system_prompt: str,
@@ -2375,6 +2462,23 @@ def generate_one_level(
     user_msg: str | None = None  # lazy für Wortzahl-Retry
 
     is_claude_gen = model.lower().startswith("claude")
+
+    # Hoerspiel, neue Mechanik: SCHRITT 1 (Planung) in einem eigenen Aufruf
+    # vorab — analog pass1 im 6-Schritt-System. Der fertige <planung>-Block
+    # geht als STORY_PLAN in den Schreib-Aufruf. Nur Gemini (Claude-Pfad plant
+    # weiter im selben Call). Faellt der Plan-Aufruf aus, bleibt story_plan
+    # ungesetzt und der bewaehrte Einzel-Call laeuft unveraendert (Fallback).
+    if (HOERSPIEL_PLAN_SPLIT and content_type == "hoerspiel"
+            and not is_claude_gen and not job.get("story_plan")):
+        plan = _hoerspiel_story_plan(
+            system_prompt, job, primary_text, companion_texts, valid_companions, model
+        )
+        if plan:
+            job["story_plan"] = plan
+            report["phase2"]["story_plan_split"] = True
+            report["phase2"]["story_plan_len"] = len(plan)
+        else:
+            report["phase2"]["story_plan_split"] = False
 
     for gen_attempt in range(1, _GEN_MAX_ATTEMPTS + 1):
         try:

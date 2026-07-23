@@ -1,84 +1,56 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-19T20:24:49Z -->
-<!-- Ältere Stände (verbatim, inkl. TTS-Woche 16.-18.07.) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
+<!-- updated: 2026-07-23T13:19:04Z -->
+<!-- Ältere Stände (verbatim, inkl. TTS-Woche 16.-18.07. + Stufen-Umbau 19.07.) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
 **Wissensfreund:** Flutter-App für Kinder. Profil 3-stufig (4–6/7–9/10–12, steuert Modi), **Inhalt 2-typig**:
-Hörspiel (4–9, alt S1+S2) + Erzähltext (10–12, = alt S3). KI streng aus geladenem Quelltext (nie
-Trainingswissen). Umbau-Plan: `STUFEN_UMBAU_PLAN.md`. Hörspiel-Genre-Spec: `HOERSPIEL_GENRE_SPEC.md`.
+Hörspiel (4–9) + Erzähltext (10–12, = altes S3). KI streng aus geladenem Quelltext (nie Trainingswissen).
+**Zwei getrennte Text-Motoren** (bewusst) → [[project_zwei_textmotoren]].
 
-## Zuletzt abgeschlossen (2026-07-19) — Stufen-Umbau Pipeline (Plan §7.2) + Hörspiel-Genre
+## Zuletzt abgeschlossen (2026-07-23) — S3 wiederhergestellt + Hörspiel-Plan-Split
 
-- **Paket A (Mechanik) fertig+verifiziert:** `generate_grounded.py` Achse Lesestufe→`content_type`
-  (`hoerspiel`/`erzaehltext`); `--stufen`→`--typen`; age_floor → Anbietezeit-Filter (Hörspiel-Drop nur bei
-  floor 3); `image_stufe_for`; Bänder beide (225,975). CI-Guards in `verify_project_facts.py` nachgezogen.
-- **Paket B — Hörspiel-Prompt v2 (Story-first) geschrieben + über 3 Wal-Läufe validiert.**
-  `wissensfreund_hoerspiel_prompt_v2_B.md` (einzige Fassung; A geloescht 2026-07-22, v1 verworfen: war Fakten-Katalog). Erbt die story_mode_v2-DNA
-  (keine großen Zahlen, ikonisches Beispiel/Moby Dick, Tiefe vor Breite, Erzähler ohne Sachwissen,
-  EISERNE-Regel-Split) + „mit-Tags"-JSON-Gerüst. Verdrahtet via `content_type` (Cache je Typ), Guards grün.
-- **PO-Tuning eingebaut (per Ohr an Wal-Output):** Zahlen → höchstens EINE pro *Antwort*, Maße als
-  Vergleiche, kein Stakkato-Zerhacken; kulturelle Anker (Moby Dick) als erfundener Rahmen erlaubt.
-- **Kompass geschärft** (PO: geteilt lassen, nicht pro Typ trennen): harte Vielfaltsgrenze (max. 2 Vertreter
-  derselben Kategorie — vorher 4 Walarten), kultureller Anker Pflicht-wenn-vorhanden, „Breite"-Sog entschärft.
-  Phase 1 läuft weiter EINMAL für beide Typen (geteilter Quell-Cache).
-- **Zwei Lektorat-Bugs gefixt** (pipeline-weit, blockierten JEDES Lektorat): (1) `temperature=0` → 400
-  „deprecated for this model" entfernt; (2) `content[0].text` traf ThinkingBlock → echten Text-Block picken.
-  `lektorat_common.py` sync+batch. Run3-Lektorat lief sauber durch (0 silent/korrigiert/prüfen).
-- **Story-Cast festgezurrt (PO-Abnahme „alle Stimmen passen"):** 16 Figuren, feste Gemini-Stimme+Stil je
-  Figur → [[project_story_cast]] (FINAL-Tabelle; einige weichen von tts_samples.py ab). Kind = Theo|Mia.
-
-Wal run3: 815 W, Cast Ronja/Theo, Fluss statt Stakkato, Zahlen mit Vergleichen, Grounding sauber.
-
-### Nachgeschärft (run4–6, PO-Feedback am Wal-Output)
-
-- **Fenster-Prinzip statt „Tiefe in einem Bereich"** (Leo-Vorbild): Hörspiel-Prompt v2 auf „mehrere lebendige
-  Fenster, jedes eine Mini-Szene" umgestellt + Companion-Priorität (erzählerisch Reiches zuerst) +
-  Rahmen-als-Reise + Anti-Füllwort. Grund: run1–4 blieben biologielastig, ließen reiche Companions (Moby
-  Dick, Delfine) liegen.
-- **ROOT CAUSE + Fix — Kompass-Plan wurde nicht an die Generierung übergeben.** Kompass plante Moby Dick/
-  Delfine als Höhepunkte, Flash bekam nur die Companion-*Texte* (Plan war Sackgasse) → schrieb Default-
-  Biologie. Fix: `get_last_kompass_plan()` an die Jobs hängen + in `build_grounded_user_message` in den
-  stabilen (typ-agnostischen) Prefix injizieren. **run5/6: Moby Dick + Delfine + Walfang landen jetzt.**
-- **Sprach-Pass (2. leichter Lektorat-Durchgang)** in `lektorat_common.py` (`run_sprachpass_sync`, via
-  `call_claude_json` → thinking-robust): fängt Wort-Schnitzer (gewandelt→gewandert) UND un-kindgerechten
-  Jargon — entfernt/vereinfacht „Graysches Paradoxon"/„Spongiosaknochen"/„Osedax", schützt zentrale
-  Begriffe (Barten/Fluke/Krill/Walsturz). Verdrahtet in generate_grounded (merge → ein Prüfbericht).
-- **Einbau-Bug (Hörspiel) gefunden + gefixt:** `_apply_auto_correction` nahm 1 Satz/Eintrag an; Hörspiel-
-  Turns sind Mehrsatz-Einträge → jeder Turn-Einbau scheiterte („bitte prüfen"). Ganz-Turn-Fall (Jaccard≥0.9)
-  ergänzt → greift für Sprach-Pass UND Grounding-Lektorat (run6: silent=1 auto-eingebaut, 0 Flags).
-- **Erzähler-Regel:** kein „Der Erzähler lächelt" mehr (keine Selbst-Handlung; warmer Tonfall bleibt erlaubt).
-
-- **Redebegleitsatz-Split BEHOBEN (Post-Merge):** `_merge_split_speech_tags` in generate_grounded.py zieht vor
-  validate zusammen: (A) wörtl. Rede + „ruft Theo" wieder in EINEN Turn, (B) über mehrere Einträge offene
-  Reden. Läuft nur für hoerspiel. run7–9: 0 danglende Rede-Kommas, 0 unbalancierte Anführungszeichen.
-- **Zwei Lektorat-Einbau-Klassen gefixt** (`_apply_auto_correction`, greifen für Grounding UND Sprach-Pass):
-  (1) Schwanz-Teilstring — Korrektur trifft nur den Schwanz eines Mehrsatz-Turns → in-place-Ersatz (führender
-  Satz + Redebegleitsatz bleiben). (2) Turn-Grenze — Dialog-Claim über Frage+Antwort (\n-verbunden) wird pro
-  Turn eingebaut, unveränderte Turns übersprungen. run9: alle Korrekturen gelandet (0 prüfen, 0 eskaliert).
-
-Offene Feinschliff-Punkte (nicht-blockierend): nackte Maße („33 Meter"/„200 Tonnen") als Vergleich (Zahl-
-Regel); Kompass kürzt „Moby-Dick"→„Moby" (Bindestrich-Split, Text landet trotzdem — kosmetisch); 76 Dialog-
-Turns triggern Validator-Bereich [15,60] (für alte Stufe 2 — für Typ hoerspiel Bereich anpassen).
+- **S3-Wiederherstellung (Kern):** Der Erzähltext lief seit dem Stufen-Umbau (19.07.) versehentlich über den
+  Einzel-Call statt über das gute 6-Schritt-System — das war die Ursache der schlechteren Prosa. `generate_one_level`
+  verzweigt jetzt für `content_type=="erzaehltext"` (nur Gemini, nicht Claude) in `_generate_erzaehltext_6pass()`
+  → ruft `pipeline_new.generate_article_new` (pass1-6). Nur der Text-Motor getauscht; Naming, Meta, Kompass,
+  Bild-nach-Text, Nachtlauf, Docx bleiben. Hörspiel unberührt. Import-Dreieck zirkelfrei (lazy).
+- **Hörspiel-Plan-Split (neue Mechanik, NEU heute):** Überträgt die 6-Schritt-Lehre aufs Hörspiel — SCHRITT 1
+  (Planung) läuft in einem EIGENEN Gemini-Aufruf vorab (`_hoerspiel_story_plan`), der fertige `<planung>`-Block
+  geht als STORY_PLAN in den Schreib-Aufruf (SCHRITT 2). Steht im variablen Suffix (artikelspezifisch, kein
+  Cache-Eingriff). **Robuster Fallback:** scheitert der Plan-Aufruf (503/Parse) → `story_plan=None` → bewährter
+  Einzel-Call unverändert. Prompt-Regel „SCHRITT 1 überspringen, wenn STORY_PLAN da" ergänzt. Offline getestet.
+- **DEFER_IMAGES (Bilder nach dem Text):** Bildpool geht NICHT mehr in den Schreib-Call; `assign_images_pass`
+  ordnet Bilder dem fertigen Text zu (Rückkehr des pass4-Prinzips). Behebt Erzähler-als-Figur + Stakkato.
+- **Companion-Bild-Garantie:** `select_images_for_stufe` sichert 1 Bild je Quelle VOR dem Relevanz-Cap →
+  behebt „Archaeopteryx fehlt" (Pool hatte 6, Cap schnitt den ganzen Companion weg).
+- **Bild-Platzierung:** `images[].placement = inline|galerie` — 4–8 textbegleitend, Rest als Galerie ans Ende.
+  SVG beim Hörspiel raus, sonst Galerie. (App rendert `placement` noch NICHT — Handy-Modus unangetastet.)
+- **Box-Redundanz:** `find_redundant_boxes` (Overlap Box↔ganzer Fließtext ≥0.60) + `regenerate_redundant_boxes`
+  (Box mit NEUEN Quellfakten neu statt löschen — PO will die Boxen behalten). Behebt Vulkan-Wiederholungs-Boxen.
+- **Sprecherwechsel-Wächter:** `_split_double_speech_lines` misst Sprecher-Turns (regex), nicht Zeilenzahl —
+  lange Einzel-Monologe lösen keinen Fehlalarm mehr aus. Ersetzt die untaugliche Zeilen-Schranke [15,60].
+- **Kleinfixe:** But→Aber/And→Und (`fix_language_slips`), Querformat-Hero (`enforce_landscape_hero`),
+  „Tiefe vor Breite" im Prompt geschärft, Kompass-Companion-Wahl geschärft.
 
 ## Gerade in Arbeit / Nächster Schritt
 
-- **Task D — Vertonungs-Test:** `tts_story.py` von 3 Rollen-Stimmen auf den festen 16-Figuren-Cast erweitern
-  (Stimme + Stil-Vorspann je Figur, [[project_story_cast]]), dann ein v2-Hörspiel echt vertonen → PO-Frage
-  „überleben die Charakterstimmen die Produktion (bleibt z.B. Rudi lebendig)?". Heute NICHT nötig gewesen.
+- **Nachtlauf heute 03:00** (`Wissensfreund_Nachtlauf_Pass4`, 24.07. 03:00): `nachtlauf.py --label Review2
+  --themen Vulkan Dinosaurier Spielzeug --typen hoerspiel erzaehltext --versuche 3 --pause 1800`. Testet
+  ZWEI große, bisher nur offline verifizierte Umbauten auf einmal (beide fallback-geschützt): S3-Motor-Tausch
+  UND Hörspiel-Plan-Split. Erfolg wird an fertiger Artikelzahl gemessen (nicht am Exit-Code). Review-Docx →
+  Desktop `Wissensfreund_Review\2026-07-24_Review2\`.
+- **Am Morgen prüfen:** liest sich der restaurierte Erzähltext wieder wie der gute 10.07.-Vulkan-Text? Bringt
+  der Hörspiel-Plan-Split spürbar bessere Fenster-Struktur/Rhythmus? (Vergleich alt↔neu in der Docx.)
 
 ## Offen nach Priorität
 
-1. **Stufen-Umbau Rest (Plan §7):** §7.3 Upload/Index (age_floor in Metadaten, Index 2 Typen), §7.4 App
-   (ID-Mapping/Filter `_hoerspiel`/`_erzaehltext`), Datenrebuild `ergiebigkeit_scores` (§9).
-2. **Optionaler Feinschliff Hörspiel-Prompt:** nackte Zahlen (200t/1000m) als Vergleich erzwingen, Rahmen-
-   Vielfalt gegen „Buch auf dem Tisch", CO2→Kohlendioxid. (PO-Fork offen — kein Blocker.)
-3. **TTS-Produktion in Serie** (aus TTS-Woche): Batch mit temp 0.3 + 10 Runden + QA über Katalog; VC-Stufe
-   getrennt auf EINEM Pod (~1–3 $/Lauf). Reproduzierbares Tooling steht → [[project_tts_produktions_pipeline]].
-4. **`verify_project_facts.py`:** 1 Hart-FAIL = Verify-Drift (Vision-Regel erwartet `claude-sonnet-5`,
-   `stage_models.py` bewusst `gemini-2.5-flash-lite`) — Regel angleichen, unabhängig vom Umbau.
-5. **Vor Release raus:** Debug-`isPlus`-Hook, Temp-Test-Button „Leonardo (Vorlese-Test)", TEMP-Prints in
-   `_prepareNarration` (`home_screen.dart`).
-6. **Tablet-Pass** (eigener Chat!): Kinderschutz/Plus/Menü/Profile tablet-zentrieren, dann Lesemodi A/B/C.
-   **Handy-Modus bleibt unangetastet** — jede Handy-Änderung vorher absprechen.
+1. **Task D — Vertonungs-Test:** `tts_story.py` auf den festen 16-Figuren-Cast ([[project_story_cast]])
+   erweitern (Stimme + Stil je Figur), ein v2-Hörspiel echt vertonen → „überleben die Charakterstimmen?".
+2. **Stufen-Umbau Rest (Plan §7):** §7.3 Upload/Index (age_floor, 2 Typen), §7.4 App (ID-Mapping/Filter
+   `_hoerspiel`/`_erzaehltext`).
+3. **TTS-Produktion in Serie:** Batch temp 0.3 + 10 Runden + QA; VC auf EINEM Pod → [[project_tts_produktions_pipeline]].
+4. **CI-Migration (KNOWN_OPEN):** Workflow ruft noch Legacy `generate_articles.py` statt `run_batch.py`.
+5. **Vor Release raus:** Debug-`isPlus`-Hook, Temp-Test-Button, TEMP-Prints in `_prepareNarration` (`home_screen.dart`).
+6. **Tablet-Pass** (eigener Chat!): tablet-zentrieren. **Handy-Modus bleibt unangetastet** — vorher absprechen.
 
-<!-- Detail-Historie (TTS-Woche, QA-Gate, Batch-Durchbruch, Stimme eingefroren) verbatim in STATUS_ARCHIV.md. -->
+<!-- Detail-Historie (TTS-Woche, Stufen-Umbau, Wal-Läufe) verbatim in STATUS_ARCHIV.md. -->

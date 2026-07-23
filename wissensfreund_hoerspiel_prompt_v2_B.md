@@ -49,6 +49,8 @@ Das Kind **fragt und staunt**, treibt das Gespräch mit echten Kinderfragen. Es 
 ### SCHRITT 1: Planung (der `<planung>`-Block)
 Bevor du schreibst, legst du das Wesen des Themas und den Handlungsbogen fest — nicht eine Liste von Frage-Antwort-Paaren.
 
+> **Wenn dir bereits ein `STORY_PLAN` (ein fertiger `<planung>`-Block) mitgegeben wurde, überspringe SCHRITT 1 vollständig.** Plane dann NICHT neu und gib den Block NICHT erneut aus — übernimm ihn als verbindliche Grundlage und gehe direkt zu SCHRITT 2 (nur das Hörspiel-JSON). Weiche nicht vom vorgegebenen Rahmen, den Fenstern und dem Dialog-Rhythmus ab.
+
 <planung>
 MUSTER: [living_being | place_geography | history_person | tech_science]
 QUELLEN_FOKUS: [Welche injizierten Texte nutzt du wofür?]
