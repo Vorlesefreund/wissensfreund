@@ -1103,8 +1103,17 @@ def build_image_pool(
     return accepted, report
 
 
-def select_images_for_stufe(pool: list[dict], stufe: int, appeal: str) -> list[dict]:
+def _is_svg(img: dict) -> bool:
+    return img.get("filename", "").lower().endswith(".svg")
+
+
+def select_images_for_stufe(pool: list[dict], stufe: int, appeal: str,
+                            drop_svg: bool = False) -> list[dict]:
     """Filtert Bildpool auf Altersfreigabe (ab_stufe <= stufe), cap nach APPEAL_TARGET.
+
+    drop_svg: SVGs ganz aus dem Pool (fuer Hoerspiel — dort sind technische
+    Diagramme wie Becken-Zeichnungen fehl am Platz; PO 2026-07-23). Beim Erzaehltext
+    bleiben SVGs im Pool, landen aber nie im Text, nur in der Galerie (assign_images_pass).
 
     Companion-Abdeckung zuerst: Ein reiner Relevanz-Cap hat ganze Companions
     weggeschnitten — die 6 Archaeopteryx-Bilder fielen hinter die 20 Haupt-Dino-
@@ -1116,7 +1125,8 @@ def select_images_for_stufe(pool: list[dict], stufe: int, appeal: str) -> list[d
     def base(src: str) -> str:                # "Archaeopteryx (Leitbild)" -> "Archaeopteryx"
         return (src or "").split(" (")[0].strip()
 
-    filtered = [img for img in pool if img.get("ab_stufe", 1) <= stufe]
+    filtered = [img for img in pool if img.get("ab_stufe", 1) <= stufe
+                and not (drop_svg and _is_svg(img))]
     filtered.sort(key=lambda x: (-x.get("relevanz", 0), -int(x.get("hero_candidate", False))))
     cap = APPEAL_TARGET.get(appeal, 10)
     if len(filtered) <= cap:
@@ -1323,14 +1333,17 @@ def assign_images_pass(article: dict, pool: list[dict], thema: str, model: str,
             continue
         if not (0 <= li < len(sents)) or not (0 <= pi < len(pool)) or pi in belegt:
             continue
+        # SVGs (technische Diagramme) nie in den Text — sie bleiben Galerie (PO 2026-07-23).
+        if _is_svg(pool[pi]):
+            continue
         belegt.add(pi)
         paare.append((li, pi))
         if len(paare) >= max_inline:
             break
 
-    # Hero bestimmen — Modellwunsch nur, wenn Querformat; sonst bestes Querformat.
+    # Hero bestimmen — Modellwunsch nur, wenn Querformat UND kein SVG; sonst bestes Querformat.
     def quer(i: int) -> bool:
-        return float(pool[i].get("aspect") or 0) >= HERO_MIN_ASPECT
+        return float(pool[i].get("aspect") or 0) >= HERO_MIN_ASPECT and not _is_svg(pool[i])
 
     hero = data.get("hero_index")
     if not (isinstance(hero, int) and 0 <= hero < len(pool) and quer(hero)):
@@ -1639,18 +1652,15 @@ def _box_content_words(text: str) -> set:
     return {t for t in toks if len(t) >= 4 and t not in _BOX_STOP}
 
 
-def find_redundant_boxes(article: dict) -> list[str]:
-    """Boxen, die nichts Neues bringen: entweder stehen fast alle ihre
-    Inhaltswoerter schon irgendwo im Fliesstext (Aussage nur zusammengefasst),
-    oder sie doppeln fast woertlich EINEN Satz. Der alte Box-Pass hatte den
-    Schutz, der Einzel-Call verlor ihn (PO 2026-07-23, v. a. Vulkan)."""
+def _redundant_box_refs(article: dict) -> list[tuple]:
+    """Wie find_redundant_boxes, aber mit Position: (sec_index, box_index, box, overlap)."""
     sentences = [s.get("text", "") for sec in article.get("sections", [])
                  for s in sec.get("sentences", [])]
     sent_words = [_box_content_words(t) for t in sentences]
     text_words: set = set().union(*sent_words) if sent_words else set()
-    hits = []
-    for sec in article.get("sections", []):
-        for box in sec.get("boxes", []) or []:
+    refs = []
+    for si, sec in enumerate(article.get("sections", [])):
+        for bi, box in enumerate(sec.get("boxes", []) or []):
             full = (box.get("text", "") + " " + box.get("reveal_text", "")).strip()
             bw = _box_content_words(full)
             if len(bw) < _BOX_MIN_CONTENT_WORDS:
@@ -1658,9 +1668,123 @@ def find_redundant_boxes(article: dict) -> list[str]:
             whole = len(bw & text_words) / len(bw)
             per_sent = max((len(bw & sw) / len(bw) for sw in sent_words if sw), default=0)
             if whole >= _BOX_TEXT_OVERLAP or per_sent >= _BOX_SENT_OVERLAP:
-                label = (box.get("type", "box") or "box").upper()
-                hits.append(f"[{label}] {box.get('text', '')[:70]} ({whole:.0%} im Text)")
-    return hits
+                refs.append((si, bi, box, whole))
+    return refs
+
+
+def find_redundant_boxes(article: dict) -> list[str]:
+    """Boxen, die nichts Neues bringen: entweder stehen fast alle ihre
+    Inhaltswoerter schon irgendwo im Fliesstext (Aussage nur zusammengefasst),
+    oder sie doppeln fast woertlich EINEN Satz. Der alte Box-Pass hatte den
+    Schutz, der Einzel-Call verlor ihn (PO 2026-07-23, v. a. Vulkan)."""
+    return [f"[{(box.get('type','box') or 'box').upper()}] {box.get('text','')[:70]} ({whole:.0%} im Text)"
+            for _si, _bi, box, whole in _redundant_box_refs(article)]
+
+
+_REGEN_BOX_SYSTEM = (
+    "Du ersetzt Callout-Boxen in einem fertigen Kinderlexikon-Artikel. Jede "
+    "genannte Box WIEDERHOLT nur den Fliesstext — das ist wertlos. Schreibe fuer "
+    "jede eine NEUE Box, die etwas bringt, das NICHT im Artikel steht.\n\n"
+    "REGELN:\n"
+    "- Der Box-Inhalt stammt AUSSCHLIESSLICH aus dem gelieferten QUELLTEXT "
+    "(kein erfundener Fakt, keine Zahl aus dem Gedaechtnis).\n"
+    "- Der neue Fakt darf NICHT schon im Artikeltext stehen — bring etwas Neues, "
+    "Ueberraschendes, das ein Kind staunen laesst.\n"
+    "- Typ beibehalten. Bei 'stimmt_das': text = kurze Frage, reveal_text = "
+    "Antwort. Bei 'wow'/'fakt'/'warnung': der ganze Inhalt in text, KEIN reveal_text.\n"
+    "- Hoechstens ein bis zwei Saetze, kindgerecht.\n"
+    "- Findest du in der Quelle keinen passenden NEUEN Fakt fuer eine Box, gib "
+    "fuer sie text: \"\" zurueck (dann wird sie entfernt)."
+)
+
+_REGEN_BOX_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "boxes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "index": {"type": "integer"},
+                    "type": {"type": "string"},
+                    "text": {"type": "string"},
+                    "reveal_text": {"type": "string"},
+                },
+                "required": ["index", "text"],
+            },
+        },
+    },
+    "required": ["boxes"],
+}
+
+
+def regenerate_redundant_boxes(article: dict, primary_text: str,
+                               companion_texts: dict, thema: str, model: str) -> str:
+    """Ersetzt Boxen, die den Fliesstext wiederholen, durch NEUE Boxen aus
+    Quell-Fakten, die im Artikel fehlen (PO 2026-07-23: Boxen behalten, aber
+    inhaltlich neu — nicht loeschen). Analog zu assign_images_pass: eigener
+    Aufruf auf dem fertigen Text. Scheitert der Aufruf (503), bleiben die alten
+    Boxen stehen und werden geflaggt (kein Datenverlust)."""
+    refs = _redundant_box_refs(article)
+    if not refs:
+        return ""
+
+    sects = article.get("sections", [])
+    artikel_txt = "\n".join(s.get("text", "") for sec in sects
+                            for s in sec.get("sentences", []))
+    quelle = primary_text[:6000]
+    for comp, txt in (companion_texts or {}).items():
+        if txt:
+            quelle += f"\n\n=== {comp} ===\n{txt[:1500]}"
+
+    liste = "\n".join(
+        f"[{i}] Typ={box.get('type','fakt')} | Abschnitt „{sects[si].get('heading','')}\" "
+        f"| wiederholt: {box.get('text','')[:80]}"
+        for i, (si, bi, box, _ov) in enumerate(refs))
+    body = (
+        f"THEMA: {thema}\n\n"
+        f"ARTIKELTEXT (schon gesagt — NICHTS hieraus wiederholen):\n{artikel_txt}\n\n"
+        f"QUELLTEXT (nur hieraus schoepfen):\n{quelle}\n\n"
+        f"ZU ERSETZENDE BOXEN:\n{liste}\n\n"
+        f"Gib fuer jeden Index eine neue Box zurueck."
+    )
+    try:
+        raw = gemini_client.call_gemini(
+            _REGEN_BOX_SYSTEM, body, model=model,
+            response_mime_type="application/json", response_schema=_REGEN_BOX_SCHEMA,
+            call_name="regen_boxes", max_output_tokens=2048)
+        data = json.loads(raw)
+    except Exception as e:
+        log.warning("  Box-Neugenerierung fehlgeschlagen: %s — alte Boxen bleiben, geflaggt", e)
+        return f"FEHLER: {len(refs)} redundante Boxen nicht ersetzt ({str(e)[:40]})"
+
+    by_index = {b.get("index"): b for b in data.get("boxes", []) if isinstance(b, dict)}
+    ersetzt, entfernt = 0, 0
+    # Von hinten arbeiten, damit box_index beim Entfernen stabil bleibt.
+    for i, (si, bi, _box, _ov) in sorted(enumerate(refs), key=lambda x: -x[1][1]):
+        neu = by_index.get(i)
+        boxes = sects[si].get("boxes", [])
+        if not (0 <= bi < len(boxes)):
+            continue
+        new_text = (neu or {}).get("text", "").strip()
+        if not new_text:
+            boxes.pop(bi)
+            entfernt += 1
+            continue
+        typ = boxes[bi].get("type", "fakt")
+        boxes[bi]["text"] = new_text
+        if typ == "stimmt_das":
+            rt = (neu or {}).get("reveal_text", "").strip()
+            if rt:
+                boxes[bi]["reveal_text"] = rt
+        else:
+            boxes[bi].pop("reveal_text", None)
+        ersetzt += 1
+
+    # Nachkontrolle: ist eine neue Box wieder redundant?
+    rest = len(_redundant_box_refs(article))
+    return (f"Box-Neugenerierung: {ersetzt} ersetzt, {entfernt} entfernt "
+            f"(kein Quell-Fakt), {rest} weiterhin redundant")
 
 
 # ── Phase-2-User-Message ──────────────────────────────────────────────────────
@@ -2132,7 +2256,8 @@ def generate_one_level(
 
     # Bildauswahl nach jüngstem Zuschauer (Plan §4): nur Bilder mit ab_stufe <= image_stufe
     _appeal = job.get("resolved_appeal", "medium")
-    images = select_images_for_stufe(images, image_stufe, _appeal)
+    images = select_images_for_stufe(images, image_stufe, _appeal,
+                                     drop_svg=(content_type == "hoerspiel"))
     log.info("  Bildpool fuer %s (image_stufe<=%d): %d Bilder (appeal=%s)",
              content_type, image_stufe, len(images), _appeal)
 
@@ -2486,16 +2611,26 @@ def generate_one_level(
                 article["meta"].get("review_reason", "")
                 + f"; {len(multi)} Zeilen mit mehreren Reden").lstrip("; ")
 
-    # ── Box-Redundanz-Riegel: Callout-Boxen duerfen den Fliesstext nicht wiederholen ──
+    # ── Box-Redundanz: wiederholende Boxen NEU generieren (PO 2026-07-23: Boxen
+    #    behalten, aber inhaltlich neu — nicht loeschen). Eigener Aufruf auf dem
+    #    fertigen Text, analog assign_images_pass. ──
     redundant = find_redundant_boxes(article)
     if redundant:
         for h in redundant:
-            log.warning("  Box wiederholt den Text: %s", h)
+            log.info("  Box wiederholt den Text: %s", h)
         report["phase2"]["redundant_boxes"] = redundant
-        article["meta"]["review_flag"] = True
-        article["meta"]["review_reason"] = (
-            article["meta"].get("review_reason", "")
-            + f"; {len(redundant)} Boxen wiederholen den Text").lstrip("; ")
+        box_note = regenerate_redundant_boxes(
+            article, primary_text, companion_texts, thema, model)
+        log.info("  %s", box_note)
+        report["phase2"]["box_regen"] = box_note
+        # Nur flaggen, wenn NACH der Neugenerierung noch etwas redundant ist
+        # (oder der Aufruf scheiterte).
+        rest = find_redundant_boxes(article)
+        if rest or box_note.startswith("FEHLER"):
+            article["meta"]["review_flag"] = True
+            article["meta"]["review_reason"] = (
+                article["meta"].get("review_reason", "")
+                + f"; {len(rest)} Boxen weiterhin redundant").lstrip("; ")
 
     val_errors = validate_article(article, job, word_floor=wmin)
     if val_errors:
