@@ -1506,6 +1506,56 @@ def _merge_split_speech_tags(article: dict) -> int:
     return removed
 
 
+# Gegenstueck zu _merge_split_speech_tags: eine Zeile darf hoechstens EINE
+# woertliche Rede enthalten (im Hoerspiel = ein Sprecher). Steckt eine zweite
+# Rede dahinter — erkennbar an einer schliessenden Rede, gefolgt von einem
+# Redebegleitsatz bis zum Satzende, direkt vor einer NEU oeffnenden Rede —,
+# gehoert sie in eine eigene Zeile. Sonst spricht spaeter die falsche Stimme und
+# die Mitlese-Lupe verrutscht (PO 2026-07-23). Reine Satzlaenge ist KEIN Signal:
+# ein langer durchgehender Erzaehlsatz ist voellig in Ordnung.
+_DOUBLE_SPEECH_RE = re.compile(r'(“[^„“]*?[.!?])\s+(?=„)')
+
+
+def _split_double_speech_lines(article: dict) -> int:
+    """Trennt Hoerspiel-Zeilen mit mehr als einer Rede in je eigene Zeilen.
+    Gibt die Zahl der neu entstandenen (zusaetzlichen) Zeilen zurueck; bei >0
+    werden die Satz-IDs global neu vergeben."""
+    added = 0
+    for sec in article.get("sections", []):
+        out: list[dict] = []
+        for s in sec.get("sentences", []) or []:
+            txt = (s.get("text") or "").strip()
+            teile = [p.strip() for p in _DOUBLE_SPEECH_RE.split(txt) if p and p.strip()]
+            if len(teile) <= 1:
+                out.append(s)
+                continue
+            for k, t in enumerate(teile):
+                neu = dict(s) if k == 0 else {"text": t, "img_index": -1}
+                neu["text"] = t
+                out.append(neu)
+            added += len(teile) - 1
+        sec["sentences"] = out
+    if added:
+        n = 0
+        for sec in article.get("sections", []):
+            for s in sec.get("sentences", []):
+                n += 1
+                s["id"] = f"s{n:03d}"
+    return added
+
+
+def find_multi_speech_lines(article: dict) -> list[str]:
+    """Sicherheitsnetz: Zeilen, die NACH dem Auftrennen noch mehr als eine Rede
+    tragen (z. B. verschachtelte Faelle, die die Regex nicht fasst)."""
+    hits = []
+    for sec in article.get("sections", []):
+        for s in sec.get("sentences", []):
+            t = s.get("text", "")
+            if t.count("„") >= 2 and _DOUBLE_SPEECH_RE.search(t):
+                hits.append(t[:80])
+    return hits
+
+
 # ── Phase-2-User-Message ──────────────────────────────────────────────────────
 
 def build_grounded_user_message(
@@ -2260,6 +2310,12 @@ def generate_one_level(
         n_merged = _merge_split_speech_tags(article)
         if n_merged:
             log.info("  Redebegleitsatz-Merge: %d getrennte Rede-Zeilen zusammengefuehrt", n_merged)
+        # Gegenrichtung: mehrere Reden in EINER Zeile wieder auftrennen (ein
+        # Sprecher je Zeile). Das ist der echte Defekt, den der alte Satzzahl-
+        # Waechter verfehlt hat (PO 2026-07-23).
+        n_split = _split_double_speech_lines(article)
+        if n_split:
+            log.info("  Doppelrede-Split: %d Zeilen mit mehreren Reden aufgetrennt", n_split)
 
     # ── Bilder: eigener Aufruf auf dem FERTIGEN Text (Rueckkehr zu pass4_images) ──
     if DEFER_IMAGES and not skip_images:
@@ -2303,6 +2359,19 @@ def generate_one_level(
         article["meta"]["review_reason"] = (
             article["meta"].get("review_reason", "")
             + f"; {len(erz_hits)} Erzaehler-Label-Zeilen").lstrip("; ")
+
+    # ── Doppelrede-Riegel: nach dem Auftrennen sollte keine Zeile mehr zwei Reden
+    #    tragen. Bleibt doch eine uebrig, war der Fall zu verschachtelt → melden. ──
+    if content_type == "hoerspiel":
+        multi = find_multi_speech_lines(article)
+        if multi:
+            for h in multi:
+                log.warning("  Zeile mit mehreren Reden (nicht auftrennbar): %s", h)
+            report["phase2"]["multi_speech_lines"] = multi
+            article["meta"]["review_flag"] = True
+            article["meta"]["review_reason"] = (
+                article["meta"].get("review_reason", "")
+                + f"; {len(multi)} Zeilen mit mehreren Reden").lstrip("; ")
 
     val_errors = validate_article(article, job, word_floor=wmin)
     if val_errors:

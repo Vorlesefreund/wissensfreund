@@ -927,6 +927,15 @@ def validate_article(article: dict, job: dict, word_floor: int | None = None) ->
         word_floor is not None and wc_real is not None
         and wc_real >= word_floor and content_type != "hoerspiel"
     )
+    # Hörspiel-Obergrenze: die reine Zeilenzahl ist KEIN Fehlersignal — sie steigt
+    # legitim mit dem (angehobenen) Wortband, ein Hörspiel mit 1100 Wörtern und
+    # gesunden ~14 Wörtern/Zeile landet natürlich über 60 Zeilen (PO 2026-07-23,
+    # Fehlalarm bei 64 gesunden Zeilen). Der echte Defekt — mehrere Reden in EINER
+    # Zeile — wird in generate_grounded aufgetrennt/geflaggt, nicht hier gezählt.
+    # Deshalb koppeln wir die Obergrenze ans Wortbudget (grob 1 Zeile je 5 Wörter);
+    # erst echtes Kurzzeilen-Stakkato überschreitet sie noch.
+    if content_type == "hoerspiel" and wc_real:
+        hi = max(hi, wc_real // 5)
     too_few  = n < lo and not suppress_low
     too_many = n > hi
     if too_few or too_many:
