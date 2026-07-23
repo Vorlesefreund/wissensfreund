@@ -2227,6 +2227,85 @@ def _box_repair_pass(article: dict, model: str, thinking_config) -> dict:
 
 # ── Phase-2-Generierung: je Stufe ────────────────────────────────────────────
 
+def _generate_erzaehltext_6pass(
+    job: dict, primary_text: str, companion_texts: dict[str, str],
+    valid_companions: list[str], images: list[dict], phase1_report: dict,
+    model: str, skip_images: bool,
+) -> tuple[dict | None, dict]:
+    """Erzaehltext (10-12 J. = altes S3) ueber das 6-Schritt-System (pipeline_new)
+    statt ueber den Einzel-Call.
+
+    Der Stufen-Umbau (2026-07-19) hatte den Erzaehltext versehentlich auf den
+    Einzel-Call gelegt, obwohl der Plan „S3 unveraendert" vorsah — die getrennten
+    Arbeitsschritte (eigener Plan-, Prosa-, Box-, Bild-, Quiz-Pass) waren aber der
+    Grund fuer die gute S3-Qualitaet. Hier wird der Text-Motor wiederhergestellt.
+    NUR der Text-Motor: Naming ({slug}_erzaehltext), Meta-Felder, Bild-nach-Text
+    und der geteilte Kompass bleiben. Das Hoerspiel ist NICHT betroffen (laeuft
+    weiter durch generate_one_level). PO-Entscheidung 2026-07-23.
+
+    pipeline_new.generate_article_new macht pass1-6 komplett (Plan, Prosa,
+    Boxen inkl. Redundanz-Check, Belege, Bilder-nach-Text, Quiz). Wir legen nur
+    die drei Meta-Felder nach, die pipeline_new nicht kennt, und die neuen Fixes,
+    die es noch nicht hat (Sprach-Slip But->Aber, Querformat-Hero)."""
+    import pipeline_new  # lazy: pipeline_new importiert aus generate_grounded (Zirkel)
+
+    article_id = job["article_id"]
+    thema      = job.get("thema", job.get("title", ""))
+    appeal     = job.get("resolved_appeal", "medium")
+    report: dict = {
+        "article_id": article_id, "thema": thema,
+        "primaer_wikipedia": job.get("primaer_wikipedia", thema),
+        "phase1": phase1_report,
+        "phase2": {"pipeline": "pass1-6 (6-Schritt-System, S3-Wiederherstellung)"},
+        "errors": [],
+    }
+    log.info("  Phase 2: Erzaehltext ueber 6-Schritt-System (pipeline_new), Thema: %s", thema)
+
+    # generate_article_new liest job["age_level"] als Stufe (erzaehltext -> 3).
+    job2 = {**job, "age_level": job.get("prompt_age_level", 3)}
+    try:
+        article, pnrep = pipeline_new.generate_article_new(
+            job2, primary_text, companion_texts, valid_companions,
+            model=model, images=([] if skip_images else images), appeal=appeal,
+        )
+    except Exception as e:
+        log.error("  6-Schritt-System fehlgeschlagen: %s", e)
+        report["errors"] = [f"pipeline_new: {e}"]
+        return None, report
+    report["phase2"]["pipeline_new_report"] = pnrep
+    if article is None:
+        report["errors"] = pnrep.get("errors", ["pipeline_new: keine Ausgabe"])
+        return None, report
+
+    # Meta-Felder, die pipeline_new nicht setzt (Paritaet mit dem Einzel-Call —
+    # App liest age_level, Review-Docx/historie lesen content_type).
+    m = article.setdefault("meta", {})
+    m["content_type"] = "erzaehltext"
+    m["age_floor"]    = int(job.get("age_floor", job.get("_catalog_age_floor", 1)))
+    m["image_stufe"]  = job.get("image_stufe", 3)
+
+    # Neue Fixes, die pipeline_new noch nicht hat:
+    n_slips = fix_language_slips(article)              # But->Aber u. a.
+    if n_slips:
+        log.info("  Sprach-Slip-Fix: %d Zeilen eingedeutscht", n_slips)
+    if not skip_images and article.get("images"):
+        hero_note = enforce_landscape_hero(article, images)   # Querformat-Hero
+        if hero_note:
+            log.info("  %s", hero_note)
+            report["phase2"]["hero_fix"] = hero_note
+
+    val_errors = validate_article(article, job, word_floor=pnrep.get("wmin"))
+    if val_errors:
+        for e in val_errors:
+            log.warning("  Validierungsfehler: %s", e)
+        m["review_flag"] = True
+        m["review_reason"] = (m.get("review_reason", "") + "; "
+                              + "; ".join(val_errors[:3])).lstrip("; ")
+    report["phase2"]["validation_errors"]  = val_errors
+    report["phase2"]["companions_fetched"] = list(companion_texts.keys())
+    return article, report
+
+
 def generate_one_level(
     client: genai.Client,
     system_prompt: str,
@@ -2250,6 +2329,15 @@ def generate_one_level(
     article_id       = job["article_id"]
     thema            = job.get("thema", job["title"])
     content_type     = _job_ct(job)
+
+    # Erzaehltext (S3) laeuft ueber das alte 6-Schritt-System (bessere Prosa,
+    # PO 2026-07-23). Nur Gemini-Generator; der Claude-A/B-Pfad bleibt beim
+    # Einzel-Call. Hoerspiel ist NICHT betroffen.
+    if content_type == "erzaehltext" and not model.lower().startswith("claude"):
+        return _generate_erzaehltext_6pass(
+            job, primary_text, companion_texts, valid_companions, images,
+            phase1_report, model, skip_images)
+
     image_stufe      = job.get("image_stufe", job.get("prompt_age_level", 3))
     prompt_version   = PROMPT_PATHS.get(content_type, SYSTEM_PROMPT_PATH).stem.split("_v")[-1].split("_")[0]
     generation_method = f"{model}/medium/{content_type}-v{prompt_version}"
