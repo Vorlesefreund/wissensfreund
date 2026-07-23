@@ -431,7 +431,7 @@ Du bist Chef-Rechercheur für das deutsche Kinderlexikon **Wissensfreund**. Du �
 ## 2. ARBEITE IN ZWEI SCHRITTEN (Reihenfolge einhalten)
 
 **SCHRITT 1 — Schreibplan (Feld "plan"):**
-Entscheide zuerst in 2–4 Sätzen, WELCHE Aspekte des Themas der Artikel behandeln soll. Einziger Maßstab: Wie interessant und spannend ist ein Aspekt für den Leser? Nimm die fesselndsten aus VERSCHIEDENEN Blickwinkeln (ein ikonischer Vertreter, ein kultureller/historischer Anker, eine überraschende Facette) — aber KEINE Aufzählung ähnlicher Unterarten oder Vertreter derselben Sorte (nicht vier Walarten): ein starker Aspekt je Blickwinkel schlägt eine Reihe naher Verwandter. **Einer dieser Blickwinkel ist fast immer die Geschichte der MENSCHEN DAHINTER — wie das Thema entdeckt, erforscht, umkämpft oder errungen wurde** (die Entdecker, ihre Rivalität, ein Abenteuer, ein berühmter Irrtum, ein Wettlauf). Diese Menschheits-/Entdeckungsgeschichte ist für Kinder oft der lebendigste, spannendste Stoff — plane sie aktiv ein, wo es sie gibt (z. B. bei Dinosauriern der erbitterte Ausgrabungs-Wettstreit der Knochenkriege; bei einem Planeten das Wettrennen der Entdecker; bei einer Krankheit der Kampf um das Heilmittel), und wähle den passenden Companion dazu. **Wähle das KONKRETE Belegstück, nicht den Oberbegriff:** Wird ein Aspekt an einem berühmten Fundstück, Bauwerk, Werk oder Ort greifbar, nimm dieses als Companion statt der allgemeinen Kategorie — das Konkrete kann ein Kind sich vorstellen, der Oberbegriff nicht (also der berühmte Übergangsfossil-Fund statt „Vögel", der benannte Einschlagkrater statt „Asteroid", das eine berühmte Gemälde statt „Malerei"). Steht der Oberbegriff bereits im Haupttext, gewinnt der konkrete Beleg den Companion-Platz.
+Entscheide zuerst in 2–4 Sätzen, WELCHE Aspekte des Themas der Artikel behandeln soll. Einziger Maßstab: Wie interessant und spannend ist ein Aspekt für den Leser? Nimm die fesselndsten aus VERSCHIEDENEN Blickwinkeln (ein ikonischer Vertreter, ein kultureller/historischer Anker, eine überraschende Facette) — aber KEINE Aufzählung ähnlicher Unterarten oder Vertreter derselben Sorte (nicht vier Walarten): ein starker Aspekt je Blickwinkel schlägt eine Reihe naher Verwandter. **Einer dieser Blickwinkel ist fast immer die Geschichte der MENSCHEN DAHINTER — wie das Thema entdeckt, erforscht, umkämpft oder errungen wurde** (die Entdecker, ihre Rivalität, ein Abenteuer, ein berühmter Irrtum, ein Wettlauf). Diese Menschheits-/Entdeckungsgeschichte ist für Kinder oft der lebendigste, spannendste Stoff — plane sie aktiv ein, wo es sie gibt (z. B. bei Dinosauriern der erbitterte Ausgrabungs-Wettstreit der Knochenkriege; bei einem Planeten das Wettrennen der Entdecker; bei einer Krankheit der Kampf um das Heilmittel), und wähle den passenden Companion dazu. **Wähle das KONKRETE Belegstück, nicht den Oberbegriff:** Wird ein Aspekt an einem berühmten Fundstück, Bauwerk, Werk oder Ort greifbar, nimm dieses als Companion statt der allgemeinen Kategorie — das Konkrete kann ein Kind sich vorstellen, der Oberbegriff nicht (also der berühmte Übergangsfossil-Fund statt „Vögel", der benannte Einschlagkrater statt „Asteroid", das eine berühmte Gemälde statt „Malerei"). Steht der Oberbegriff bereits im Haupttext, gewinnt der konkrete Beleg den Companion-Platz. **Ein dramatisches Ereignis oder Schicksal schlägt ein technisches Nebenphänomen:** Gibt es zum Thema eine berühmte Katastrophe, einen Untergang, eine Rettung, einen Konflikt (bei „Vulkan" der Untergang Pompejis), dann plane DIESE als eigenen, ausführlichen Companion — vor technischen Randaspekten (etwa „Geysir", „Gesteinsarten"), die höchstens am Rande gestreift werden. Kinder erinnern die Geschichte, nicht die Klassifikation.
 **Schöpfe für den Plan aus deinem WELTWISSEN über das Thema** — was ist das Berühmteste, Ikonischste, für Kinder Spannendste, woran denkt man beim Thema als ERSTES? Der Primärartikel oben ist nur EIN Hinweisgeber und oft gekürzt; verlasse dich NICHT darauf, dass jeder wichtige Aspekt darin steht (bei „Vulkan" gehört Pompeji/der Vesuv-Ausbruch in den Plan, auch wenn der Artikelanfang ihn nicht nennt). **Wichtige Trennung:** Weltwissen ist hier NUR erlaubt, um die Aspekte und Companions AUSZUWÄHLEN — die späteren Sachaussagen im Artikel stammen ausschließlich aus den geladenen Quellen (kein erfundener Fakt). Jeder geplante Aspekt MUSS sich einem ECHTEN Wikipedia-Artikel (Companion) zuordnen lassen, der ihn mit Stoff füllt; findest du keinen, lass den Aspekt weg.
 
 **SCHRITT 2 — Companions (Feld "companions"):**
@@ -1104,11 +1104,43 @@ def build_image_pool(
 
 
 def select_images_for_stufe(pool: list[dict], stufe: int, appeal: str) -> list[dict]:
-    """Filtert Bildpool auf Altersfreigabe (ab_stufe <= stufe), cap nach APPEAL_TARGET."""
+    """Filtert Bildpool auf Altersfreigabe (ab_stufe <= stufe), cap nach APPEAL_TARGET.
+
+    Companion-Abdeckung zuerst: Ein reiner Relevanz-Cap hat ganze Companions
+    weggeschnitten — die 6 Archaeopteryx-Bilder fielen hinter die 20 Haupt-Dino-
+    Bilder und waren beim Cap auf 15 weg, obwohl der Text ausdruecklich ueber
+    Archaeopteryx spricht (PO 2026-07-23). Deshalb sichern wir pro Quelle
+    (Companion) das beste Bild in den Pool, BEVOR wir mit dem relevantesten Rest
+    auffuellen. So bekommt assign_images_pass fuer jeden Companion mindestens ein
+    Bild zum Zuordnen."""
+    def base(src: str) -> str:                # "Archaeopteryx (Leitbild)" -> "Archaeopteryx"
+        return (src or "").split(" (")[0].strip()
+
     filtered = [img for img in pool if img.get("ab_stufe", 1) <= stufe]
     filtered.sort(key=lambda x: (-x.get("relevanz", 0), -int(x.get("hero_candidate", False))))
     cap = APPEAL_TARGET.get(appeal, 10)
-    return filtered[:cap]
+    if len(filtered) <= cap:
+        return filtered
+
+    picked: list[dict] = []
+    seen_src: set[str] = set()
+    for img in filtered:                      # je Quelle das relevanteste Bild sichern
+        if len(picked) >= cap:
+            break
+        src = base(img.get("_source", ""))
+        if src and src not in seen_src:
+            picked.append(img)
+            seen_src.add(src)
+    for img in filtered:                      # mit dem relevantesten Rest auffuellen
+        if len(picked) >= cap:
+            break
+        if img not in picked:
+            picked.append(img)
+    # picked ist bereits <= cap; nur fuer die Ausgabe nach Relevanz ordnen (KEIN
+    # erneutes Cappen — das wuerde die eben gesicherten Companion-Bilder wieder
+    # herausschneiden).
+    picked.sort(key=lambda x: (-x.get("relevanz", 0), -int(x.get("hero_candidate", False))))
+    return picked
 
 
 def enforce_landscape_hero(article: dict, pool: list[dict]) -> str | None:
@@ -1553,6 +1585,81 @@ def find_multi_speech_lines(article: dict) -> list[str]:
             t = s.get("text", "")
             if t.count("„") >= 2 and _DOUBLE_SPEECH_RE.search(t):
                 hits.append(t[:80])
+    return hits
+
+
+# Flash schreibt gelegentlich englische Funktionswoerter in den deutschen Text —
+# beobachtet: „But …" statt „Aber …" (spielzeug_hoerspiel, 3×; PO 2026-07-23).
+# Deterministisch ersetzen: nur als eigenstaendiges Wort am Zeilen-/Satz-/Rede-
+# Anfang, damit kein Eigenname (z. B. „Butler") getroffen wird.
+_ENGL_SLIPS = [
+    (re.compile(r'(^|["„»‚\s])But(\s+)'), r'\1Aber\2'),
+    (re.compile(r'(^|["„»‚\s])And(\s+)'), r'\1Und\2'),
+]
+
+
+def fix_language_slips(article: dict) -> int:
+    """Ersetzt vereinzelte englische Funktionswoerter im Fliesstext. Gibt die
+    Zahl der geaenderten Zeilen zurueck."""
+    n = 0
+    for sec in article.get("sections", []):
+        for s in sec.get("sentences", []):
+            orig = s.get("text", "")
+            fixed = orig
+            for rx, repl in _ENGL_SLIPS:
+                fixed = rx.sub(repl, fixed)
+            if fixed != orig:
+                s["text"] = fixed
+                n += 1
+    return n
+
+
+# Box-Anti-Redundanz: eine Callout-Box (WOW/FAKT/STIMMT-DAS) soll etwas NEUES
+# bringen, nicht einen Satz aus dem Fliesstext wiederholen. Der alte Box-Pass
+# (pipeline_new.pass3_boxes) hatte dafuer Prompt-Regel UND Code-Check; beim Umbau
+# auf den Einzel-Call ging beides verloren, die Wiederholungen kamen zurueck
+# (PO 2026-07-23, v. a. Vulkan). Leichter Schwellwert: nur bei starker Ueberlappung
+# mit EINEM Satz melden.
+_BOX_STOP = {"eine", "einen", "einem", "einer", "eines", "und", "oder", "aber",
+             "der", "die", "das", "den", "dem", "des", "sich", "auch", "sehr",
+             "wird", "werden", "kann", "koennen", "sind", "haben", "diese",
+             "dieser", "dieses", "nach", "beim", "durch", "noch", "sein",
+             "seine", "ihre", "mehr", "etwa", "wenn", "dann", "hier", "dort"}
+# Anteil der Box-Inhaltswoerter, die schon IRGENDWO im Fliesstext stehen. Empirie
+# (PO-Review 2026-07-23): die als „Wiederholung" monierten Vulkan-Boxen lagen bei
+# 62–94 %, die als gut befundenen Dino-Boxen bei 25–30 % — 0.60 trennt mit Abstand.
+_BOX_TEXT_OVERLAP = 0.60
+# Fast woertliche Dopplung EINES Satzes (auch wenn die Box neue Begriffe streut).
+_BOX_SENT_OVERLAP = 0.8
+_BOX_MIN_CONTENT_WORDS = 5
+
+
+def _box_content_words(text: str) -> set:
+    toks = re.findall(r"[a-zA-ZäöüÄÖÜß]+", (text or "").lower())
+    return {t for t in toks if len(t) >= 4 and t not in _BOX_STOP}
+
+
+def find_redundant_boxes(article: dict) -> list[str]:
+    """Boxen, die nichts Neues bringen: entweder stehen fast alle ihre
+    Inhaltswoerter schon irgendwo im Fliesstext (Aussage nur zusammengefasst),
+    oder sie doppeln fast woertlich EINEN Satz. Der alte Box-Pass hatte den
+    Schutz, der Einzel-Call verlor ihn (PO 2026-07-23, v. a. Vulkan)."""
+    sentences = [s.get("text", "") for sec in article.get("sections", [])
+                 for s in sec.get("sentences", [])]
+    sent_words = [_box_content_words(t) for t in sentences]
+    text_words: set = set().union(*sent_words) if sent_words else set()
+    hits = []
+    for sec in article.get("sections", []):
+        for box in sec.get("boxes", []) or []:
+            full = (box.get("text", "") + " " + box.get("reveal_text", "")).strip()
+            bw = _box_content_words(full)
+            if len(bw) < _BOX_MIN_CONTENT_WORDS:
+                continue
+            whole = len(bw & text_words) / len(bw)
+            per_sent = max((len(bw & sw) / len(bw) for sw in sent_words if sw), default=0)
+            if whole >= _BOX_TEXT_OVERLAP or per_sent >= _BOX_SENT_OVERLAP:
+                label = (box.get("type", "box") or "box").upper()
+                hits.append(f"[{label}] {box.get('text', '')[:70]} ({whole:.0%} im Text)")
     return hits
 
 
@@ -2306,6 +2413,12 @@ def generate_one_level(
 
     # Hörspiel: getrennt abgelegte Rede + Redebegleitsatz wieder zusammenführen
     # (»„…!", / ruft Theo.« → EIN Eintrag), bevor validiert/lektoriert wird.
+    # Englische Funktionswoerter (But/And …) deterministisch eindeutschen — beide
+    # Inhaltstypen betroffen.
+    n_slips = fix_language_slips(article)
+    if n_slips:
+        log.info("  Sprach-Slip-Fix: %d Zeilen eingedeutscht (But->Aber u. a.)", n_slips)
+
     if content_type == "hoerspiel":
         n_merged = _merge_split_speech_tags(article)
         if n_merged:
@@ -2372,6 +2485,17 @@ def generate_one_level(
             article["meta"]["review_reason"] = (
                 article["meta"].get("review_reason", "")
                 + f"; {len(multi)} Zeilen mit mehreren Reden").lstrip("; ")
+
+    # ── Box-Redundanz-Riegel: Callout-Boxen duerfen den Fliesstext nicht wiederholen ──
+    redundant = find_redundant_boxes(article)
+    if redundant:
+        for h in redundant:
+            log.warning("  Box wiederholt den Text: %s", h)
+        report["phase2"]["redundant_boxes"] = redundant
+        article["meta"]["review_flag"] = True
+        article["meta"]["review_reason"] = (
+            article["meta"].get("review_reason", "")
+            + f"; {len(redundant)} Boxen wiederholen den Text").lstrip("; ")
 
     val_errors = validate_article(article, job, word_floor=wmin)
     if val_errors:
