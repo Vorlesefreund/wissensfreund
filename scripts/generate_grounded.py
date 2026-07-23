@@ -2326,10 +2326,14 @@ def _generate_erzaehltext_6pass(
 # auf das Hoerspiel: Erst plant das Modell in einem eigenen Aufruf NUR den
 # <planung>-Block (Rahmen, Fenster, Erzaehlfaden, Dialog-Rhythmus) — mit voller
 # Aufmerksamkeit, ohne gleichzeitig Prosa+Quiz zu schreiben. Der fertige Plan
-# geht dann als STORY_PLAN in den Schreib-Aufruf (SCHRITT 2). Faellt der
-# Plan-Aufruf aus (503, Parse), wird story_plan=None und der bewaehrte
-# Einzel-Call laeuft unveraendert (Modell plant selbst) — die neue Mechanik
-# kann den Lauf also nicht gefaehrden.
+# geht dann als STORY_PLAN in den Schreib-Aufruf (SCHRITT 2).
+#
+# KEIN Qualitaets-Fallback (PO 2026-07-23): Faellt der Plan-Aufruf aus, wird das
+# Hoerspiel NICHT im schwaecheren Einzel-Call erzeugt — der Job gilt als nicht
+# generiert (generate_one_level gibt (None, report) zurueck) und der Nachtlauf
+# laeuft ihn off-peak erneut an. Lieber ein spaeteres, gutes Hoerspiel (oder im
+# Extremfall gar keines, klar geloggt) als ein stilles Downgrade. call_gemini
+# wiederholt intern schon 5x mit Backoff, der Ausfall ist also ohnehin selten.
 HOERSPIEL_PLAN_SPLIT = True
 _PLANUNG_RE = re.compile(r"<planung>.*?</planung>", re.DOTALL | re.IGNORECASE)
 
@@ -2344,16 +2348,17 @@ def _hoerspiel_story_plan(
 ) -> str | None:
     """Plan-only-Aufruf: gibt NUR den <planung>-Block zurueck (oder None bei Fehler).
 
-    Nutzt denselben Hoerspiel-System-Prompt wie der Schreib-Aufruf (keine
-    Prompt-Duplikation) — nur die User-Message weist an, ausschliesslich
-    SCHRITT 1 auszufuehren und nach </planung> zu stoppen. Bilder bleiben
-    aussen vor (Plan braucht keinen Bildpool)."""
+    None bedeutet fuer den Aufrufer: Hoerspiel-Job schlaegt fehl (KEIN Einzel-Call-
+    Fallback) → Nachtlauf laeuft ihn off-peak erneut an. Nutzt denselben Hoerspiel-
+    System-Prompt wie der Schreib-Aufruf (keine Prompt-Duplikation) — nur die
+    User-Message weist an, ausschliesslich SCHRITT 1 auszufuehren und nach
+    </planung> zu stoppen. Bilder bleiben aussen vor (Plan braucht keinen Bildpool)."""
     try:
         base = build_grounded_user_message(
             job, primary_text, companion_texts, valid_companions, []
         )
     except Exception as e:
-        log.warning("  Story-Plan: User-Message-Bau fehlgeschlagen (%s) — Fallback Einzel-Call", e)
+        log.warning("  Story-Plan: User-Message-Bau fehlgeschlagen (%s) — Job wird neu angelaufen", e)
         return None
     plan_msg = (
         base
@@ -2372,10 +2377,10 @@ def _hoerspiel_story_plan(
             response_mime_type="text/plain",
         )
     except Exception as e:
-        log.warning("  Story-Plan-Aufruf fehlgeschlagen (%s) — Fallback: Modell plant selbst", e)
+        log.warning("  Story-Plan-Aufruf fehlgeschlagen (%s) — Job wird off-peak neu angelaufen", e)
         return None
     if not raw or not raw.strip():
-        log.warning("  Story-Plan leer — Fallback: Modell plant selbst")
+        log.warning("  Story-Plan leer — Job wird off-peak neu angelaufen")
         return None
     m = _PLANUNG_RE.search(raw)
     if m:
@@ -2387,7 +2392,7 @@ def _hoerspiel_story_plan(
         if "FENSTER" in raw_s.upper() and "RAHMEN" in raw_s.upper():
             plan = raw_s if raw_s.lower().startswith("<planung>") else f"<planung>\n{raw_s}\n</planung>"
         else:
-            log.warning("  Story-Plan ohne verwertbaren <planung>-Block — Fallback")
+            log.warning("  Story-Plan ohne verwertbaren <planung>-Block — Job wird off-peak neu angelaufen")
             return None
     log.info("  Story-Plan erstellt (%d Zeichen) — SCHRITT 1 getrennt vorab", len(plan))
     return plan
@@ -2466,8 +2471,10 @@ def generate_one_level(
     # Hoerspiel, neue Mechanik: SCHRITT 1 (Planung) in einem eigenen Aufruf
     # vorab — analog pass1 im 6-Schritt-System. Der fertige <planung>-Block
     # geht als STORY_PLAN in den Schreib-Aufruf. Nur Gemini (Claude-Pfad plant
-    # weiter im selben Call). Faellt der Plan-Aufruf aus, bleibt story_plan
-    # ungesetzt und der bewaehrte Einzel-Call laeuft unveraendert (Fallback).
+    # weiter im selben Call). Faellt der Plan-Aufruf aus, KEIN Einzel-Call-
+    # Fallback (PO 2026-07-23): der Job schlaegt fehl (return None) und der
+    # Nachtlauf laeuft ihn off-peak erneut an — lieber spaeter gut als still
+    # schwaecher.
     if (HOERSPIEL_PLAN_SPLIT and content_type == "hoerspiel"
             and not is_claude_gen and not job.get("story_plan")):
         plan = _hoerspiel_story_plan(
@@ -2478,7 +2485,13 @@ def generate_one_level(
             report["phase2"]["story_plan_split"] = True
             report["phase2"]["story_plan_len"] = len(plan)
         else:
+            msg = ("Story-Plan (SCHRITT 1) fehlgeschlagen — kein Fallback auf den "
+                   "schwaecheren Einzel-Call (PO 2026-07-23). Hoerspiel gilt als "
+                   "nicht erzeugt; der Nachtlauf laeuft es off-peak erneut an.")
+            log.warning("  %s", msg)
             report["phase2"]["story_plan_split"] = False
+            report["errors"].append(msg)
+            return None, report
 
     for gen_attempt in range(1, _GEN_MAX_ATTEMPTS + 1):
         try:

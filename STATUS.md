@@ -17,8 +17,10 @@ Hörspiel (4–9) + Erzähltext (10–12, = altes S3). KI streng aus geladenem Q
 - **Hörspiel-Plan-Split (neue Mechanik, NEU heute):** Überträgt die 6-Schritt-Lehre aufs Hörspiel — SCHRITT 1
   (Planung) läuft in einem EIGENEN Gemini-Aufruf vorab (`_hoerspiel_story_plan`), der fertige `<planung>`-Block
   geht als STORY_PLAN in den Schreib-Aufruf (SCHRITT 2). Steht im variablen Suffix (artikelspezifisch, kein
-  Cache-Eingriff). **Robuster Fallback:** scheitert der Plan-Aufruf (503/Parse) → `story_plan=None` → bewährter
-  Einzel-Call unverändert. Prompt-Regel „SCHRITT 1 überspringen, wenn STORY_PLAN da" ergänzt. Offline getestet.
+  Cache-Eingriff). **KEIN Qualitäts-Fallback (PO 2026-07-23):** scheitert der Plan-Aufruf (503/leer/kein
+  `<planung>`), gilt das Hörspiel als NICHT erzeugt (`generate_one_level`→`None`) → Nachtlauf läuft es off-peak
+  neu an, statt still im schwächeren Einzel-Call zu landen. `call_gemini` wiederholt intern schon 5× (Ausfall
+  selten). Prompt-Regel „SCHRITT 1 überspringen, wenn STORY_PLAN da" ergänzt. Offline getestet.
 - **DEFER_IMAGES (Bilder nach dem Text):** Bildpool geht NICHT mehr in den Schreib-Call; `assign_images_pass`
   ordnet Bilder dem fertigen Text zu (Rückkehr des pass4-Prinzips). Behebt Erzähler-als-Figur + Stakkato.
 - **Companion-Bild-Garantie:** `select_images_for_stufe` sichert 1 Bild je Quelle VOR dem Relevanz-Cap →
