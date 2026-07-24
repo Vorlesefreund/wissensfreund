@@ -41,8 +41,11 @@ Hörspiel (4–9) + Erzähltext (10–12, = altes S3). KI streng aus geladenem Q
   ZWEI große, bisher nur offline verifizierte Umbauten auf einmal (beide fallback-geschützt): S3-Motor-Tausch
   UND Hörspiel-Plan-Split. Erfolg wird an fertiger Artikelzahl gemessen (nicht am Exit-Code). Review-Docx →
   Desktop `Wissensfreund_Review\2026-07-24_Review2\`.
+- **Vergleich alt↔neu wird automatisch mitgebaut:** Der Nachtlauf hängt nach der Review-Docx pro Thema eine
+  `<Thema>_alt_vs_neu_<Datum>.docx` in denselben Desktop-Ordner (`historie_uebersicht.py --fokus 4`): alle
+  frischen Fassungen ★NEU-markiert, dazu die 4 jüngsten alten — chronologisch mit Datum + Pipeline-Label.
 - **Am Morgen prüfen:** liest sich der restaurierte Erzähltext wieder wie der gute 10.07.-Vulkan-Text? Bringt
-  der Hörspiel-Plan-Split spürbar bessere Fenster-Struktur/Rhythmus? (Vergleich alt↔neu in der Docx.)
+  der Hörspiel-Plan-Split spürbar bessere Fenster-Struktur/Rhythmus? (Alles in der alt↔neu-Docx nebeneinander.)
 
 ## Offen nach Priorität
 

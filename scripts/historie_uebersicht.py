@@ -8,14 +8,13 @@ chronologisch und schreibt je Thema EIN Docx: vorne eine Uebersichtstabelle
   python -X utf8 scripts/historie_uebersicht.py dinosaurier vulkan
 """
 from __future__ import annotations
-import json, glob, os, re, sys
+import argparse, datetime, json, glob, os, re, sys
 from pathlib import Path
 from docx import Document
 from docx.shared import Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 
 ROOT = Path(__file__).resolve().parent.parent
-OUTDIR = Path(r"C:\Users\Andreas\Desktop\Wissensfreund_Review\2026-07-22_Historie")
 
 # Alte Stufen-Welt (l1/l2/l3) und neue Inhaltstypen auf eine Spalte bringen.
 STUFE_LABEL = {
@@ -32,7 +31,7 @@ def stufe_of(basename: str, meta: dict) -> str:
     return STUFE_LABEL.get(m.group(1), "?") if m else "?"
 
 
-def collect(thema: str) -> list[dict]:
+def collect(thema: str, highlight: str = "") -> list[dict]:
     out = []
     for f in glob.glob(str(ROOT / "articles" / "**" / "*.json"), recursive=True):
         b = os.path.basename(f)
@@ -56,6 +55,8 @@ def collect(thema: str) -> list[dict]:
             "pipeline": meta.get("generation_method", "?"),
             "titel": meta.get("subtitle") or meta.get("title", ""),
             "companions": meta.get("grounding_companions") or [],
+            # NEU = aus dem aktuellen Lauf (highlight-Substring im Lauf-Pfad)
+            "neu": bool(highlight) and highlight in lauf,
             "doc": d,
         })
     out.sort(key=lambda r: (r["datum"], r["stufe"]))
@@ -63,27 +64,34 @@ def collect(thema: str) -> list[dict]:
 
 
 def add_table(doc: Document, rows: list[dict]) -> None:
-    t = doc.add_table(rows=1, cols=6)
+    t = doc.add_table(rows=1, cols=7)
     t.style = "Light Grid Accent 1"
     for c, h in zip(t.rows[0].cells,
-                    ["Datum", "Lauf", "Stufe", "Wörter", "Pipeline", "Datei"]):
+                    ["", "Datum", "Lauf", "Stufe", "Wörter", "Pipeline", "#"]):
         c.text = h
         c.paragraphs[0].runs[0].font.bold = True
         c.paragraphs[0].runs[0].font.size = Pt(8)
     for i, r in enumerate(rows, 1):
         cells = t.add_row().cells
-        for c, v in zip(cells, [r["datum"], r["lauf"], r["stufe"], str(r["woerter"]),
+        marker = "★ NEU" if r.get("neu") else ""
+        for c, v in zip(cells, [marker, r["datum"], r["lauf"], r["stufe"], str(r["woerter"]),
                                 r["pipeline"], f"#{i}"]):
             c.text = v
             for p in c.paragraphs:
                 for run in p.runs:
                     run.font.size = Pt(7.5)
+                    if marker and v == marker:
+                        run.font.bold = True
+                        run.font.color.rgb = RGBColor(0xB0, 0x00, 0x00)
 
 
 def add_text(doc: Document, idx: int, r: dict) -> None:
-    h = doc.add_heading(f"#{idx}  {r['datum']}  ·  {r['stufe']}  ·  {r['lauf']}", level=1)
+    tag = "★ NEU  " if r.get("neu") else ""
+    h = doc.add_heading(f"{tag}#{idx}  {r['datum']}  ·  {r['stufe']}  ·  {r['lauf']}", level=1)
     for run in h.runs:
         run.font.size = Pt(13)
+        if tag:
+            run.font.color.rgb = RGBColor(0xB0, 0x00, 0x00)
     p = doc.add_paragraph()
     run = p.add_run(f"{r['titel']}   |   {r['woerter']} Wörter   |   {r['pipeline']}   |   {r['pfad']}")
     run.font.size = Pt(8)
@@ -113,25 +121,54 @@ def add_text(doc: Document, idx: int, r: dict) -> None:
 
 
 def main() -> None:
-    themen = [t.lower() for t in sys.argv[1:]] or ["dinosaurier", "vulkan"]
-    OUTDIR.mkdir(parents=True, exist_ok=True)
+    ap = argparse.ArgumentParser(
+        description="Alle Fassungen je Thema chronologisch als Docx (alt vs. neu).")
+    ap.add_argument("themen", nargs="*", default=["dinosaurier", "vulkan"],
+                    help="Themen (Slug, kleingeschrieben)")
+    ap.add_argument("--outdir", default="",
+                    help="Ziel-Ordner (Default: Desktop/Wissensfreund_Review/<heute>_Historie)")
+    ap.add_argument("--stand", default="",
+                    help="Datums-Label im Titel/Dateinamen (Default: heute)")
+    ap.add_argument("--highlight", default="",
+                    help="Lauf-Substring, dessen Fassungen als '★ NEU' markiert werden "
+                         "(z. B. der Nachtlauf-Ordner nacht_review2_20260724)")
+    ap.add_argument("--fokus", type=int, default=0,
+                    help="Auf einen lesbaren Vergleich eindampfen: behalte alle ★NEU-Fassungen "
+                         "plus die N jüngsten ALTEN je Thema (0 = alle Fassungen zeigen).")
+    args = ap.parse_args()
+
+    themen = [t.lower() for t in args.themen] or ["dinosaurier", "vulkan"]
+    stand = args.stand or datetime.date.today().isoformat()
+    outdir = (Path(args.outdir) if args.outdir
+              else Path.home() / "Desktop" / "Wissensfreund_Review" / f"{stand}_Historie")
+    outdir.mkdir(parents=True, exist_ok=True)
+
     for thema in themen:
-        rows = collect(thema)
+        rows = collect(thema, highlight=args.highlight)
         if not rows:
             print(f"{thema}: nichts gefunden")
             continue
+        # Fokus: alle ★NEU behalten, dazu nur die N jüngsten ALTEN (chronologisch
+        # ist rows aufsteigend sortiert → die letzten N Nicht-NEU sind die jüngsten).
+        if args.fokus > 0:
+            neu_rows = [r for r in rows if r.get("neu")]
+            alt_rows = [r for r in rows if not r.get("neu")][-args.fokus:]
+            rows = sorted(neu_rows + alt_rows, key=lambda r: (r["datum"], r["stufe"]))
+        n_neu = sum(1 for r in rows if r.get("neu"))
         doc = Document()
-        doc.add_heading(f"{thema.capitalize()} — alle Fassungen chronologisch", level=0)
-        p = doc.add_paragraph(f"{len(rows)} Fassungen · Stand 2026-07-22 · "
-                              f"Repo: wissensfreund_repo/articles/")
+        doc.add_heading(f"{thema.capitalize()} — alle Fassungen chronologisch (alt vs. neu)", level=0)
+        p = doc.add_paragraph(
+            f"{len(rows)} Fassungen"
+            + (f" · {n_neu} neu (★) aus dem aktuellen Lauf" if n_neu else "")
+            + f" · Stand {stand} · Repo: wissensfreund_repo/articles/")
         p.alignment = WD_ALIGN_PARAGRAPH.LEFT
         add_table(doc, rows)
         doc.add_page_break()
         for i, r in enumerate(rows, 1):
             add_text(doc, i, r)
-        out = OUTDIR / f"{thema.capitalize()}_alle_Fassungen_2026-07-22.docx"
+        out = outdir / f"{thema.capitalize()}_alt_vs_neu_{stand}.docx"
         doc.save(out)
-        print(f"OK: {out}  ({len(rows)} Fassungen, {out.stat().st_size/1024:.0f} KB)")
+        print(f"OK: {out}  ({len(rows)} Fassungen, {n_neu} neu, {out.stat().st_size/1024:.0f} KB)")
 
 
 if __name__ == "__main__":

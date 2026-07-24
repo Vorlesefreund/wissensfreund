@@ -93,6 +93,14 @@ def main() -> int:
             rc = run([PY, "scripts/generate_review_docx.py", str(outdir),
                       "--output", str(docx)], fh)
             fh.write(f"[docx] rc={rc} -> {docx}\n")
+
+            # Vergleich alt vs. neu: je Thema alle Fassungen chronologisch, die
+            # frischen aus diesem Lauf mit '★ NEU' markiert. Landet im selben
+            # Desktop-Ordner, ist morgens also direkt neben der Review-Docx.
+            rc = run([PY, "scripts/historie_uebersicht.py", *[t.lower() for t in args.themen],
+                      "--outdir", str(desk), "--stand", date, "--fokus", "4",
+                      "--highlight", f"nacht_{args.label.lower()}_{stamp}"], fh)
+            fh.write(f"[vergleich] rc={rc} -> {desk} (Thema_alt_vs_neu_{date}.docx)\n")
         else:
             fh.write("[docx] uebersprungen — kein einziger Artikel entstanden.\n")
 
