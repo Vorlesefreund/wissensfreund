@@ -55,6 +55,8 @@ def main() -> int:
     ap.add_argument("--versuche", type=int, default=3, help="Generierungs-Anlaeufe")
     ap.add_argument("--pause", type=int, default=1800, help="Sekunden zwischen den Anlaeufen")
     ap.add_argument("--skip-images", action="store_true")
+    ap.add_argument("--skip-lektorat", action="store_true",
+                    help="Sonnet-Lektorat + Sprach-Pass ausschalten (Standard: AN)")
     args = ap.parse_args()
 
     date  = datetime.date.today().isoformat()
@@ -76,11 +78,12 @@ def main() -> int:
                "--catalog", *args.themen,
                "--typen", *args.typen,
                "--gen-model", "gemini-3.5-flash",
-               "--skip-lektorat",
                "--output-dir", str(outdir),
                "--run-id", f"nacht_{args.label.lower()}_{stamp}"]
         if args.skip_images:
             gen.append("--skip-images")
+        if args.skip_lektorat:
+            gen.append("--skip-lektorat")
 
         # Erfolg an fertigen Artikeln messen, nicht am Exit-Code: der Generator
         # beendet sich auch dann mit 0, wenn einzelne Jobs an 503 gescheitert sind.
