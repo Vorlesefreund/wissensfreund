@@ -1786,63 +1786,99 @@ def regenerate_redundant_boxes(article: dict, primary_text: str,
             f"(kein Quell-Fakt), {rest} weiterhin redundant")
 
 
-# ── Hoerspiel-Jahreszahl-Waechter ────────────────────────────────────────────
-# Absolute Zeitangaben (Jahreszahlen, Tagesdaten, „nach Christus") sind fuer
-# 4–9 verboten — der Hoerspiel-Prompt sagt das an drei Stellen, Flash haelt sich
-# unter der Plan-Split-Mechanik bei geschichtslastigen Themen aber nicht daran
-# (PO-Befund 2026-07-24: Spielzeug 9 nackte Jahre, Vulkan „achtzehnhundert…"/
-# „nach Christus"). Deterministische Erkennung + EIN enger Gemini-Umschreibe-Pass,
-# der NUR die Zeitangabe relativiert (Rest woertlich) — analog Box-Neugenerierung.
-_ABS_DATE_PATTERNS = [
-    re.compile(r'(?<!\d)(?:1[0-9]\d\d|20\d\d)(?!\d)'),          # nackte 4-stellige Jahre
-    re.compile(r'\b\d{1,2}\.\s?(?:Januar|Februar|März|Maerz|April|Mai|Juni|Juli|'
-               r'August|September|Oktober|November|Dezember)\b'),
+# ── SCHRITT 7: Kinder-Lektorat (Hoerspiel) ───────────────────────────────────
+# Finaler Pruef-/Korrektur-Pass auf dem FERTIGEN Hoerspiel, analog einem Lektorat
+# (PO-Wunsch 2026-07-24: „ein 7. Schritt wie ein Lektorat"). Er raeumt die drei
+# Dinge weg, die Flash trotz Prompt-Regel bei geschichtslastigen Themen liegen
+# laesst — ein enger Gemini-Umschreibe-Pass NUR auf den betroffenen Zeilen (Rest
+# woertlich), 503-sicher. Die Regeln stehen laengst im Prompt und werden ignoriert,
+# darum ein deterministischer Backstop.
+#
+# Nuance Jahreszahlen (PO 2026-07-24): NICHT „null Jahreszahlen", sondern
+#   • AUSGESCHRIEBENE Jahreszahlen ('achtzehnhundert…', 'nach Christus') → NIE erlaubt
+#   • nackte Ziffern-Jahre → in Massen ok; erst ueber einem Deckel die ueberzaehligen
+#     relativieren (die wichtigsten bleiben konkret).
+#   • Tagesdaten ('28. Januar 1958') → auf grobe Zeit reduzieren.
+#   • Waffen-/Bomben-Vergleiche ('Hiroshima-Bomben') → harmloses Bild.
+_HOERSPIEL_NAKED_YEAR_CAP = 3
+
+_SPELLED_YEAR_PATTERNS = [
+    # ausgeschriebene historische Jahre (…hundert…); „zweitausend…" bewusst NICHT,
+    # sonst wuerde die relative Wendung „vor fast zweitausend Jahren" faelschlich
+    # als Jahreszahl gewertet (genau die gewuenschte Korrektur).
+    re.compile(r'(?:sechzehn|siebzehn|achtzehn|neunzehn)hundert', re.IGNORECASE),
     re.compile(r'\b(?:nach|vor)\s+Christus\b', re.IGNORECASE),
     re.compile(r'\b[nv]\.\s?Chr\.?', re.IGNORECASE),
-    re.compile(r'(?:sechzehn|siebzehn|achtzehn|neunzehn)hundert', re.IGNORECASE),  # ausgeschr. Jahre
 ]
+_NAKED_YEAR = re.compile(r'(?<!\d)(?:1[0-9]\d\d|20\d\d)(?!\d)')
+_DAY_DATE = re.compile(r'\b\d{1,2}\.\s?(?:Januar|Februar|März|Maerz|April|Mai|Juni|Juli|'
+                       r'August|September|Oktober|November|Dezember)\b')
+# Waffen-/Bomben-Bezug als Vergleich (NICHT die Geologie-'Vulkanbombe' treffen):
+_WEAPON_CMP = re.compile(r'\b(?:hiroshima|nagasaki|atombombe\w*|atomwaffe\w*|'
+                         r'kernwaffe\w*|wasserstoffbombe\w*|nuklear\w*)\b', re.IGNORECASE)
 
 
-def _abs_date_refs(article: dict) -> list[tuple]:
-    """(sec_index, sent_index, text) fuer jede Zeile mit absoluter Zeitangabe."""
-    refs = []
+def _lektorat_issue_rows(article: dict) -> tuple[list, int]:
+    """Pro Zeile die Verstoss-Gruende + Gesamtzahl nackter Jahreszahlen.
+    Rueckgabe: ([(si, sj, text, reasons:set)], naked_total)."""
+    rows, naked_total = [], 0
     for si, sec in enumerate(article.get("sections", [])):
         for sj, s in enumerate(sec.get("sentences", [])):
             t = s.get("text", "") or ""
-            if any(rx.search(t) for rx in _ABS_DATE_PATTERNS):
-                refs.append((si, sj, t))
-    return refs
+            reasons = set()
+            if any(rx.search(t) for rx in _SPELLED_YEAR_PATTERNS):
+                reasons.add("spelled_year")
+            if _DAY_DATE.search(t):
+                reasons.add("day_date")
+            if _WEAPON_CMP.search(t):
+                reasons.add("weapon")
+            nk = len(_NAKED_YEAR.findall(t))
+            if nk:
+                naked_total += nk
+                reasons.add("naked_year")
+            if reasons:
+                rows.append((si, sj, t, reasons))
+    return rows, naked_total
 
 
-def find_absolute_dates(article: dict) -> list[str]:
-    """Kurzliste der Zeilen mit absoluter Zeitangabe (fuer Report/Flag)."""
+def find_kinder_lektorat_issues(article: dict) -> list[str]:
+    """Kurzliste verbleibender harter Verstoesse (fuer Report/Review-Flag).
+    Nackte Jahreszahlen UNTER dem Deckel zaehlen NICHT als Verstoss (erlaubt)."""
+    rows, naked_total = _lektorat_issue_rows(article)
+    over = naked_total > _HOERSPIEL_NAKED_YEAR_CAP
     out = []
-    for _si, _sj, t in _abs_date_refs(article):
-        hits = sorted({m.group(0) for rx in _ABS_DATE_PATTERNS for m in rx.finditer(t)})
-        out.append(f"{', '.join(hits)} :: {t[:70]}")
+    for _si, _sj, t, reasons in rows:
+        hard = {r for r in reasons if r in ("spelled_year", "day_date", "weapon")}
+        if over and "naked_year" in reasons:
+            hard.add(f"zu_viele_jahreszahlen({naked_total})")
+        if hard:
+            out.append(f"{', '.join(sorted(hard))} :: {t[:70]}")
     return out
 
 
-_DATE_FIX_SYSTEM = (
-    "Du korrigierst einzelne Zeilen aus einem Kinder-Hoerspiel (4-9 Jahre). Jede "
-    "gelieferte Zeile enthaelt eine ABSOLUTE Zeitangabe (Jahreszahl, Tagesdatum, "
-    "'nach Christus'), die fuer kleine Kinder verboten ist. Schreibe jede Zeile so "
-    "um, dass die absolute Zeit durch eine RELATIVE, kindgerechte Angabe ersetzt "
-    "wird:\n"
-    "- kuerzlich -> 'vor Kurzem'; einige Jahrzehnte -> 'vor etwa vierzig Jahren'; "
-    "lange her -> 'vor mehr als hundert Jahren' / 'vor sehr langer Zeit' / bei Antike "
-    "'vor fast zweitausend Jahren'.\n"
-    "- Gehoeren zwei Daten zusammen: ein grober Anker + Abstand ('... und viele Jahre "
-    "spaeter ...').\n\n"
-    "STRENGE REGELN:\n"
-    "- Aendere NUR die Zeitangabe. Der GESAMTE Rest der Zeile bleibt WOERTLICH gleich "
-    "- Redebegleitsatz ('sagt Oma Rosa'), typografische Anfuehrungszeichen, Namen, "
-    "Sachfakten, Satzzeichen unveraendert.\n"
-    "- Erfinde KEINE neue Jahreszahl und KEINEN neuen Fakt.\n"
-    "- Gib EXAKT so viele Eintraege zurueck wie geliefert, jeder mit seinem index."
+_KINDER_LEKTORAT_SYSTEM = (
+    "Du bist Kinder-Lektor fuer ein Hoerspiel (4-9 Jahre) und korrigierst EINZELNE "
+    "gelieferte Zeilen. Zu jeder Zeile stehen ihre PROBLEME dabei. Behebe GENAU diese "
+    "Probleme und aendere sonst NICHTS:\n"
+    "- 'ausgeschriebene Jahreszahl' (z. B. 'achtzehnhundertdreiundsechzig', 'im Jahr "
+    "neunundsiebzig nach Christus'): mach die Zeit RELATIV ('vor sehr langer Zeit', "
+    "'vor fast zweitausend Jahren', 'vor mehr als hundert Jahren'). Eine ausgeschriebene "
+    "Jahreszahl ist IMMER verboten.\n"
+    "- 'exaktes Tagesdatum' (z. B. 'am 28. Januar 1958'): auf grobe Zeit reduzieren "
+    "('vor vielen Jahrzehnten').\n"
+    "- 'Waffen-/Bomben-Vergleich': ersetze ihn durch ein harmloses, greifbares Bild "
+    "(ein gewaltiges Gewitter, ein ganzer Berg) oder lass die Groesse weg.\n"
+    "- 'zu viele Jahreszahlen': Insgesamt duerfen HOECHSTENS ZWEI, DREI konkrete "
+    "Ziffern-Jahreszahlen im ganzen Stueck bleiben - die erzaehlerisch WICHTIGSTEN. "
+    "Mach die uebrigen Ziffern-Jahreszahlen in diesen Zeilen relativ; die eine, zwei "
+    "wichtigsten darfst du als Ziffer stehen lassen.\n\n"
+    "STRENGE REGELN: Erhalte den GESAMTEN Rest der Zeile WOERTLICH - Redebegleitsatz "
+    "('sagt Oma Rosa'), typografische Anfuehrungszeichen, Namen, Sachfakten, Satzzeichen. "
+    "Erfinde KEINE neue Jahreszahl und KEINEN neuen Fakt. Gib EXAKT so viele Eintraege "
+    "zurueck wie geliefert, jeder mit seinem index."
 )
 
-_DATE_FIX_SCHEMA = {
+_KINDER_LEKTORAT_SCHEMA = {
     "type": "object",
     "properties": {
         "zeilen": {
@@ -1860,51 +1896,75 @@ _DATE_FIX_SCHEMA = {
     "required": ["zeilen"],
 }
 
+# Reason-Code -> Klartext fuer den Lektorats-Auftrag.
+_LEKTORAT_REASON_TEXT = {
+    "spelled_year": "ausgeschriebene Jahreszahl",
+    "day_date":     "exaktes Tagesdatum",
+    "weapon":       "Waffen-/Bomben-Vergleich",
+    "naked_year":   "zu viele Jahreszahlen",
+}
 
-def fix_hoerspiel_dates(article: dict, thema: str, model: str) -> str:
-    """Relativiert absolute Zeitangaben in einem Hoerspiel (nur dort verboten).
-    Eigener enger Gemini-Pass auf den betroffenen Zeilen. Scheitert er (503),
-    bleiben die Zeilen unveraendert und der Aufrufer flaggt zum Review
-    (kein Datenverlust). Gibt eine kurze Status-Notiz zurueck."""
-    refs = _abs_date_refs(article)
-    if not refs:
+
+def kinder_lektorat_pass(article: dict, content_type: str, thema: str, model: str) -> str:
+    """SCHRITT 7 – Kinder-Lektorat (nur Hoerspiel): ausgeschriebene Jahreszahlen und
+    Tagesdaten relativieren, Waffen-/Bomben-Vergleiche entschaerfen, ueberzaehlige
+    Ziffern-Jahreszahlen ueber dem Deckel reduzieren. Einzelne Ziffern-Jahre bleiben
+    erlaubt (PO 2026-07-24). Ein enger Gemini-Pass auf den betroffenen Zeilen;
+    scheitert er (503), bleiben die Zeilen und der Aufrufer flaggt zum Review."""
+    if content_type != "hoerspiel":
+        return ""
+    rows, naked_total = _lektorat_issue_rows(article)
+    over_cap = naked_total > _HOERSPIEL_NAKED_YEAR_CAP
+
+    fix = []   # (si, sj, text, reason_codes_to_fix)
+    for si, sj, t, reasons in rows:
+        todo = {r for r in reasons if r in ("spelled_year", "day_date", "weapon")}
+        if over_cap and "naked_year" in reasons:
+            todo.add("naked_year")   # nur bei Uebermass anfassen
+        if todo:
+            fix.append((si, sj, t, todo))
+    if not fix:
         return ""
 
-    liste = "\n".join(f"[{i}] {t}" for i, (_si, _sj, t) in enumerate(refs))
-    body = (
-        f"THEMA: {thema}\n\n"
-        f"ZU KORRIGIERENDE ZEILEN (je mit absoluter Zeitangabe — relativ machen, "
-        f"Rest woertlich lassen):\n{liste}\n\n"
-        f"Gib fuer jeden Index die umgeschriebene Zeile zurueck."
-    )
+    liste = "\n".join(
+        f"[{i}] PROBLEME: {'; '.join(_LEKTORAT_REASON_TEXT[r] for r in sorted(todo))}\n"
+        f"    ZEILE: {t}"
+        for i, (_si, _sj, t, todo) in enumerate(fix))
+    body = (f"THEMA: {thema}\n\nZU KORRIGIERENDE ZEILEN:\n{liste}\n\n"
+            f"Gib fuer jeden Index die korrigierte Zeile zurueck.")
     try:
         raw = gemini_client.call_gemini(
-            _DATE_FIX_SYSTEM, body, model=model,
-            response_mime_type="application/json", response_schema=_DATE_FIX_SCHEMA,
-            call_name="fix_dates", max_output_tokens=2048)
+            _KINDER_LEKTORAT_SYSTEM, body, model=model,
+            response_mime_type="application/json", response_schema=_KINDER_LEKTORAT_SCHEMA,
+            call_name="kinder_lektorat", max_output_tokens=2048)
         data = json.loads(raw)
     except Exception as e:
-        log.warning("  Jahreszahl-Fix fehlgeschlagen: %s — Zeilen bleiben, geflaggt", e)
-        return f"FEHLER: {len(refs)} Datums-Zeilen nicht relativiert ({str(e)[:40]})"
+        log.warning("  Kinder-Lektorat fehlgeschlagen: %s — Zeilen bleiben, geflaggt", e)
+        return f"FEHLER: {len(fix)} Zeilen nicht lektoriert ({str(e)[:40]})"
 
     by_index = {b.get("index"): b for b in data.get("zeilen", []) if isinstance(b, dict)}
     sects = article.get("sections", [])
     ersetzt = 0
-    for i, (si, sj, _t) in enumerate(refs):
+    for i, (si, sj, _t, todo) in enumerate(fix):
         neu = (by_index.get(i) or {}).get("text", "").strip()
         if not neu:
             continue
-        # Sicherheitsnetz: nur uebernehmen, wenn die neue Zeile die absolute
-        # Angabe wirklich los ist (sonst nichts gewonnen).
-        if any(rx.search(neu) for rx in _ABS_DATE_PATTERNS):
+        # Sicherheitsnetz: die HARTEN Verstoesse (ausgeschrieben/Datum/Waffe) muessen
+        # in der neuen Zeile wirklich weg sein, sonst nicht uebernehmen.
+        if "spelled_year" in todo and any(rx.search(neu) for rx in _SPELLED_YEAR_PATTERNS):
+            continue
+        if "day_date" in todo and _DAY_DATE.search(neu):
+            continue
+        if "weapon" in todo and _WEAPON_CMP.search(neu):
             continue
         try:
             sects[si]["sentences"][sj]["text"] = neu
             ersetzt += 1
         except (IndexError, KeyError):
             continue
-    rest = len(_abs_date_refs(article))
-    return f"Jahreszahl-Fix: {ersetzt}/{len(refs)} Zeilen relativiert, {rest} verbleibend"
+    rest = len(find_kinder_lektorat_issues(article))
+    return (f"Kinder-Lektorat (Schritt 7): {ersetzt}/{len(fix)} Zeilen korrigiert, "
+            f"{rest} harte Verstoesse verbleibend")
 
 
 # ── Phase-2-User-Message ──────────────────────────────────────────────────────
@@ -2864,20 +2924,22 @@ def generate_one_level(
         n_split = _split_double_speech_lines(article)
         if n_split:
             log.info("  Doppelrede-Split: %d Zeilen mit mehreren Reden aufgetrennt", n_split)
-        # Jahreszahl-Waechter: absolute Zeitangaben (fuer 4–9 verboten) relativieren.
-        date_note = fix_hoerspiel_dates(article, thema, model)
-        if date_note:
-            log.info("  %s", date_note)
-            report["phase2"]["jahreszahl_fix"] = date_note
-        rest_dates = find_absolute_dates(article)
-        if rest_dates:
-            for h in rest_dates:
-                log.warning("  Absolute Zeitangabe bleibt: %s", h)
-            report["phase2"]["absolute_dates_rest"] = rest_dates
+        # SCHRITT 7 – Kinder-Lektorat: ausgeschriebene Jahreszahlen/Tagesdaten
+        # relativieren, Waffen-/Bomben-Vergleiche entschaerfen, zu viele Ziffern-
+        # Jahre reduzieren (einzelne bleiben erlaubt, PO 2026-07-24).
+        lekt_note = kinder_lektorat_pass(article, content_type, thema, model)
+        if lekt_note:
+            log.info("  %s", lekt_note)
+            report["phase2"]["kinder_lektorat"] = lekt_note
+        rest_issues = find_kinder_lektorat_issues(article)
+        if rest_issues:
+            for h in rest_issues:
+                log.warning("  Kinder-Lektorat: harter Verstoss bleibt: %s", h)
+            report["phase2"]["kinder_lektorat_rest"] = rest_issues
             article["meta"]["review_flag"] = True
             article["meta"]["review_reason"] = (
                 article["meta"].get("review_reason", "")
-                + f"; {len(rest_dates)} absolute Zeitangaben (Jahr/Datum)").lstrip("; ")
+                + f"; {len(rest_issues)} Kinder-Lektorat-Verstoesse").lstrip("; ")
 
     # ── Bilder: eigener Aufruf auf dem FERTIGEN Text (Rueckkehr zu pass4_images) ──
     if DEFER_IMAGES and not skip_images:
