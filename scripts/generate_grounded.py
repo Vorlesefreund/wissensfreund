@@ -1218,7 +1218,10 @@ IMG_ASSIGN_SYSTEM = (
     "Nebenthemas). Es MUSS ein mit [QUER] markiertes Bild sein — Hochformat ist als "
     "Startbild unbrauchbar.\n"
     "- caption: eine kurze, kindgerechte Bildunterschrift (EIN Satz), die zum "
-    "wirklich geschriebenen Text passt.\n"
+    "wirklich geschriebenen Text passt. Nutze den ORIGINALTITEL als verlaessliche "
+    "Quelle fuer den Eigennamen des gezeigten Gegenstands/Exponats oder den Ort der "
+    "Aufnahme und benenne ihn konkret (Originaltitel = Metadaten, kein erfundenes "
+    "Detail); erfinde darueber hinaus keine im Bild nicht sichtbaren Szenendetails.\n"
     "- alt: kurzer deutscher Bild-Titel mit Eigenname/Ort aus dem Originaltitel "
     "(max. 6 Woerter, kein ganzer Satz, kein englischer Titel)."
 )

@@ -900,10 +900,14 @@ PASS4_SYSTEM = (
     "Originaltitel hervorgeht (z. B. 'Der Vulkan Teide auf Teneriffa', 'Der Fuji in "
     "Japan', 'Ausbruch des Stromboli'); ist kein Name/Ort erkennbar, ein knapper "
     "deutscher Sachtitel ('Fließende Lava'). (b) caption = eine kurze, kindgerechte "
-    "Bildunterschrift (ein Satz). Sie darf NUR beschreiben, was laut der gelieferten "
-    "Bild-Beschreibung WIRKLICH im Bild zu sehen ist — erfinde keine Szenendetails aus "
-    "dem Thema, die im Bild gar nicht sichtbar sind (z. B. keine Rauchwolken, Schiffe "
-    "oder Personen erwähnen, wenn die Beschreibung sie nicht nennt). Antworte NUR als JSON."
+    "Bildunterschrift (ein Satz). Nutze den ORIGINALTITEL als verlässliche Quelle für "
+    "den EIGENNAMEN des gezeigten Gegenstands/Exponats oder den ORT der Aufnahme (z. B. "
+    "Fundort, Museum, benanntes Objekt) und benenne ihn in der Caption konkret — der "
+    "Originaltitel ist Metadaten, kein erfundenes Detail. Darüber hinaus darf die Caption "
+    "NUR beschreiben, was laut der gelieferten Bild-Beschreibung WIRKLICH im Bild zu sehen "
+    "ist — erfinde keine Szenendetails aus dem Thema, die im Bild gar nicht sichtbar sind "
+    "(z. B. keine Rauchwolken, Schiffe oder Personen erwähnen, wenn die Beschreibung sie "
+    "nicht nennt). Antworte NUR als JSON."
 )
 
 PASS4_SCHEMA = {
