@@ -1,11 +1,28 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-24T07:42:37Z -->
+<!-- updated: 2026-07-24T14:43:55Z -->
 <!-- Ältere Stände (verbatim, inkl. TTS-Woche 16.-18.07. + Stufen-Umbau 19.07.) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
 **Wissensfreund:** Flutter-App für Kinder. Profil 3-stufig (4–6/7–9/10–12, steuert Modi), **Inhalt 2-typig**:
 Hörspiel (4–9) + Erzähltext (10–12, = altes S3). KI streng aus geladenem Quelltext (nie Trainingswissen).
 **Zwei getrennte Text-Motoren** (bewusst) → [[project_zwei_textmotoren]].
+
+## Zuletzt abgeschlossen (2026-07-24) — Review4-Feedback umgesetzt (PO)
+
+- **Theo = 8-Jähriger, präzise** (Hörspiel-Prompt §C, `6c0a4f5`): vier Achsen *denkt/fühlt/spricht/fragt* +
+  „Vermeide 3–5-Jährigen-Verhalten" + verschärftes **„Redeanteil klein"** (pro Fenster ≤1 Reaktion, Fenster
+  ganz ohne ihn, jede Zeile prüfen). Behebt: zu großer Theo-Anteil + unnötige/blöde Fragen (Dino-/Spielzeug-HS).
+- **PASS1 Gegenwartsbezug** (`6c0a4f5`): Erzähltext-Plan bevorzugt heute bekannte, ikonische Vertreter (die
+  gelieferten Begleitartikel = Anker) statt trockener Chronologie/Herstellung/Zölle/Prüfsiegel. Behebt
+  Spielzeug-S3 (Steinzeit→CE-Siegel statt Lego/Steiff/Teddy). Allgemein, kein Themen-Hardcoding.
+- **Lektorat wieder AN + erweitert** (`6c0a4f5`, [[project_lektorat_off]]): Nachtlauf ohne `--skip-lektorat`
+  (Default AN). `LEKTORAT_SYSTEM` prüft zusätzlich **Sinn/Plausibilität/Kontinuität** (Quellen-Widerspruch:
+  Eifel=Kaltwasser-Geysir; innerer Widerspruch: Hühnerknochen→Schnitzelknochen; unplausible Requisite:
+  „immer ein großes Buch dabei"; Register/Jargon: Oma spricht Fachsprache) + **Dezimalregel** (4,4 cm → „knapp
+  viereinhalb"). Entlastet den Flash-Prompt (Konsistenzarbeit statt weitere Frankenstein-Zeile).
+- **Bild-Caption nutzt Originaltitel** (`4380a15`): Caption (beide Motoren) darf Eigenname/Ort des Exponats aus
+  dem Commons-Originaltitel nennen (Metadaten ≠ erfundenes Detail); Anti-Halluzinations-Guard bleibt.
+- **Nächster Lauf terminiert:** Task `Wissensfreund_Nachtlauf_Review5`, 2026-07-25 02:30, 4 Anläufe, Lektorat AN.
 
 ## Zuletzt abgeschlossen (2026-07-23) — S3 wiederhergestellt + Hörspiel-Plan-Split
 
@@ -36,17 +53,15 @@ Hörspiel (4–9) + Erzähltext (10–12, = altes S3). KI streng aus geladenem Q
 
 ## Gerade in Arbeit / Nächster Schritt
 
-- **Lauf erfolgreich (2026-07-24 ~09:40, Tageslauf nach Guthaben-Auffüllung):** 6/6 Artikel. Beide Umbauten
-  liefen ERSTMALS real durch — 6× 6-Schritt-System (Erzähltext), 3× Story-Plan-Split (Hörspiel, Plan 4,9–7,6k Z.).
-  Auto-Checks grün: 0× Erzähler-als-Figur, 0 Engl.-Slips, Archaeopteryx-Bild bei beiden Dino-Artikeln, Hörspiel
-  0 Boxen / Erzähltext je 3. Docx im Desktop-Ordner `2026-07-24_Review2` (Review + 3× `<Thema>_alt_vs_neu`, je 2 ★NEU).
-- **Der 03:00-Nachtlauf war reines Billing** (Prepaid-Guthaben leer, 429 — NICHT 503): 0/6, 5,5 h Retry verheizt.
-  Fixes: `gemini_client.is_billing_depleted` bricht in allen 4 Retry-Stellen sofort ab; `gemini-2.5-flash`-
-  Kompass-Fallback ersatzlos entfernt (PO-Regel). `--pause` im Nachtlauf wird bei Guthaben-leer nicht mehr abgewartet.
-- **PO prüft jetzt am Text:** liest sich der restaurierte S3-Text wie der gute 10.07.-Vulkan-Text? Bringt der
-  Plan-Split bessere Fenster-Struktur? (Optional offen: 10.07.-Baseline fest in die alt↔neu-Docx einpinnen.)
-- **Automatischer Vergleich alt↔neu** hängt der Nachtlauf nach der Review-Docx an (`historie_uebersicht.py
-  --fokus 4`): frische Fassungen ★NEU-markiert + 4 jüngste alte, chronologisch mit Pipeline-Label.
+- **Review5-Nachtlauf abwarten (2026-07-25 02:30):** erster Lauf mit Theo-8J-Profil + Gegenwartsbezug +
+  reaktiviertem/erweitertem Lektorat + Originaltitel-Captions. Review-Docx morgen früh im Desktop-Ordner
+  `2026-07-25_Review5` (inkl. Prüfbericht, da Lektorat AN). PO prüft: weniger Fehler, lebendiger, Theo kleiner?
+- **Erweitertes Lektorat beobachten:** über-/unterkorrigiert die neue Sinn/Plausibilitäts-Prüfung? Erste Läufe
+  gegenlesen (Grounding-Charakter bewusst konservativ gehalten, aber neue Dimension ist ungetestet an echten Läufen).
+- **Flash-Beratung offen** (503 tagsüber): „wie Geschichten lebendiger/flüssiger" — off-peak neu anlaufen,
+  Antwort dann in PASS2/Sprachhandwerk einarbeiten (Skript `scratchpad/flash_advice.py`). Kein 2.5-flash-Ausweich.
+- **Bild-Auswahl-Tiefe (Folgerunde):** überflüssige Bilder aggressiver droppen + fehlende Motive (T-Rex) —
+  das ist Vision-Pool/Filter-Arbeit, bewusst NACH dem Text-/Lektorat-Stand, nicht vor dem Nachtlauf.
 
 ## Offen nach Priorität
 
