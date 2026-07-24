@@ -7,6 +7,7 @@ Eine Quelle, kein Drift.
 """
 import json
 import logging
+import os
 import re
 import time
 import unicodedata
@@ -17,6 +18,11 @@ log = logging.getLogger(__name__)
 
 COMPANION_CHAR_CAP   = 30_000          # positional slice je Companion-Text
 LEKTORAT_MODEL       = "claude-sonnet-5"
+# Denk-Budget (Claude-5 adaptives Thinking) — steuert Qualität ↔ Output-Kosten.
+# "low" spart ~40 % Output-Token (Thinking macht ~⅔ der Lektorat-Ausgabe aus),
+# "medium" fängt mehr subtile Grounding-/Kontinuitätsfehler. Per Umgebungsvariable
+# WF_LEKTORAT_EFFORT ohne Codeänderung umstellbar (Default: medium).
+LEKTORAT_EFFORT      = os.environ.get("WF_LEKTORAT_EFFORT", "medium")
 TIER_VALUES_V2       = {"SILENT", "KORRIGIERT", "PRÜFEN"}
 # Aliase für Backward-Compat (generate_grounded.py, ältere Skripte)
 PROBLEMATIC_VERDICTS = {"NICHT_BELEGT", "ÜBERZOGEN", "WIDERSPRUCH"}
@@ -1067,7 +1073,7 @@ def run_lektorat_sync(
             with client.messages.stream(
                 model=LEKTORAT_MODEL,
                 max_tokens=24000,
-                output_config={"effort": "medium"},
+                output_config={"effort": LEKTORAT_EFFORT},
                 # temperature entfernt: claude-sonnet-4-6 lehnt den Parameter mit 400 ab
                 # ("temperature is deprecated for this model"). Default (=1) ist ok — das
                 # Lektorat ist ohnehin durch forced-JSON/Beleg-Prüfung eng geführt.
@@ -1290,7 +1296,7 @@ def run_lektorat_batch(
                 # (nicht thinking.enabled); höheres max_tokens, sonst frisst das Reasoning
                 # den Cap und der JSON-Block bleibt leer (Befund 2026-07-24).
                 "max_tokens":     24000,
-                "output_config":  {"effort": "medium"},
+                "output_config":  {"effort": LEKTORAT_EFFORT},
                 # temperature entfernt: claude-sonnet-4-6 lehnt den Parameter mit 400 ab
                 # ("temperature is deprecated for this model").
                 "system": [
