@@ -30,6 +30,22 @@ _RETRY_WAITS   = [10, 20, 40, 80, 160]   # Sekunden; je + random Jitter 0–5s
 _DOTENV_PATH   = Path(__file__).parent.parent / ".env"
 
 
+def is_billing_depleted(err_str: str) -> bool:
+    """True, wenn der Fehler „Prepaid-Guthaben aufgebraucht" meldet.
+
+    Das ist zwar ein 429 RESOURCE_EXHAUSTED, aber KEIN transienter Last-Fehler:
+    Retry ist zwecklos, bis der User im AI Studio Guthaben auflaedt. Deshalb
+    NICHT wiederholen, sondern sofort mit klarer Meldung scheitern (sonst
+    verheizt der Nachtlauf Stunden gegen eine Abrechnungswand)."""
+    s = err_str.lower()
+    return (
+        "prepayment credits" in s
+        or "credits are depleted" in s
+        or "billing#prepay" in s
+        or ("billing" in s and "depleted" in s)
+    )
+
+
 def _is_retriable_error(err_str: str) -> bool:
     """True für transiente Fehler (503, 429, Timeout/Deadline, Verbindungsabbruch) → Retry.
     False für echte API-Fehler (400 Bad Request, 404 Not Found) → sofort raise.
@@ -42,6 +58,7 @@ def _is_retriable_error(err_str: str) -> bool:
         or "404 " in err_str
         or "not_found" in s
         or ("not found" in s and "model" in s)
+        or is_billing_depleted(err_str)   # Guthaben leer → Retry sinnlos, sofort raise
     ):
         return False
     return (

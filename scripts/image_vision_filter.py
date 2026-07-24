@@ -830,6 +830,12 @@ def analyze_with_vision(
         except Exception as e:
             err = str(e)
             e_low = err.lower()
+            # Guthaben leer: 429, aber kein transienter Last-Fehler — Retry zwecklos,
+            # sofort raus (sonst 30s Wartezeit je Bild gegen die Abrechnungswand).
+            if ("prepayment credits" in e_low or "credits are depleted" in e_low
+                    or "billing#prepay" in e_low or ("billing" in e_low and "depleted" in e_low)):
+                log.error("  ⛔ Vision abgebrochen: Gemini-Prepaid-Guthaben aufgebraucht.")
+                return None, {}
             is_transient = (
                 "503" in err or "429" in err or "unavailable" in e_low or "overloaded" in e_low
                 or "timeout" in e_low or "timed out" in e_low or "deadline" in e_low

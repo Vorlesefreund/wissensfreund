@@ -35,6 +35,18 @@ def artikel_zahl(outdir: pathlib.Path) -> int:
     return len([f for f in outdir.glob("*.json") if not f.name.endswith("_report.json")])
 
 
+def guthaben_leer(logpath: pathlib.Path) -> bool:
+    """True, wenn das Log die Gemini-Abrechnungswand meldet (Prepaid-Guthaben leer).
+    Dann ist Weiter-Warten zwecklos — der Nachtlauf bricht die Anlaeufe ab."""
+    try:
+        low = logpath.read_text(encoding="utf-8", errors="ignore").lower()
+    except Exception:
+        return False
+    return ("prepayment credits are depleted" in low
+            or "guthaben aufgebraucht" in low
+            or "billing#prepay" in low)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--label", default="Nachtlauf", help="Ordner-/Dateiname auf dem Desktop")
@@ -81,6 +93,12 @@ def main() -> int:
             fh.flush()
             if fertig >= erwartet:
                 fh.write("Vollstaendig — keine weiteren Anlaeufe noetig.\n")
+                break
+            # Guthaben leer + 0 Artikel: Retry ist zwecklos, nicht die Nacht verheizen.
+            if fertig == 0 and guthaben_leer(log):
+                fh.write("⛔ Gemini-Prepaid-Guthaben aufgebraucht — Anlaeufe abgebrochen. "
+                         "Im AI Studio auffuellen und Lauf neu starten.\n")
+                fh.flush()
                 break
             if versuch < args.versuche:
                 fh.write(f"Unvollstaendig — warte {args.pause}s und versuche erneut.\n")

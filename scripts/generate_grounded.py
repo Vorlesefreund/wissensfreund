@@ -82,8 +82,7 @@ from lektorat_common import (            # noqa: E402
 )
 
 GEMINI_MODEL       = "gemini-3.5-flash"
-KOMPASS_MODEL         = "gemini-3.5-flash"   # Primär
-KOMPASS_MODEL_FALLBACK = "gemini-2.5-flash"  # bei 503-Erschöpfung
+KOMPASS_MODEL         = "gemini-3.5-flash"   # Primär (KEIN 2.5-flash-Fallback — PO-Regel)
 OUT_DIR            = ROOT / "articles" / "test_grounded"
 CATALOG_PATH       = ROOT / "catalog_full.json"
 
@@ -645,7 +644,6 @@ def select_companions_raw(
     )
 
     max_attempts = 6
-    exhausted_transient = False
     for attempt in range(1, max_attempts + 1):
         try:
             response = client.models.generate_content(
@@ -677,6 +675,12 @@ def select_companions_raw(
         except Exception as e:
             err = str(e)
             e_low = err.lower()
+            # Guthaben leer: KEIN Retry (Retry ist zwecklos bis zum Auffuellen).
+            # Sofort mit klarer Meldung raus, statt 6x mit Backoff zu warten.
+            if gemini_client.is_billing_depleted(err):
+                log.error("  ⛔ Phase 1 abgebrochen: Gemini-Prepaid-Guthaben aufgebraucht "
+                          "(429 RESOURCE_EXHAUSTED). Im AI Studio auffuellen, dann neu starten.")
+                return [], {}
             is_transient = (
                 "503" in err or "429" in err or "unavailable" in e_low or "overloaded" in e_low
                 or "timeout" in e_low or "timed out" in e_low or "deadline" in e_low
@@ -689,38 +693,18 @@ def select_companions_raw(
                             attempt, max_attempts, err[:80], wait)
                 time.sleep(wait)
             elif is_transient:
-                log.error("  Phase 1 Fehler (transient erschöpft): %s", e)
-                exhausted_transient = True   # alle Versuche transient erschöpft → Fallback unten
-                break
+                # KEIN Modell-Fallback: gemini-2.5-flash ist als Generator/Helfer
+                # generell ausgeschlossen (Qualitaet unzureichend, PO-Regel). Bei
+                # transienter Erschoepfung liefert Phase 1 keine Companions → der
+                # Job schlaegt sauber fehl und der Nachtlauf laeuft ihn off-peak
+                # erneut an, statt auf 2.5-flash abzurutschen.
+                log.error("  Phase 1 transient erschöpft auf %s — kein 2.5-flash-Fallback, "
+                          "Job wird off-peak neu angelaufen.", model)
+                return [], {}
             else:
                 log.error("  Phase 1 Fehler: %s", e)
                 return [], {}
 
-    # Fallback auf alternatives Modell — bei transienter Erschöpfung des Primärmodells
-    if exhausted_transient and model == KOMPASS_MODEL and model != KOMPASS_MODEL_FALLBACK:
-        log.warning("  Kompass transient erschöpft auf %s — Fallback auf %s",
-                    model, KOMPASS_MODEL_FALLBACK)
-        try:
-            fb_thinking = _make_thinking_config(KOMPASS_MODEL_FALLBACK, budget_for_2_5=1024)
-            response = client.models.generate_content(
-                model=KOMPASS_MODEL_FALLBACK,
-                contents=prompt,
-                config=types.GenerateContentConfig(
-                    system_instruction=COMPANION_SYSTEM_PROMPT,
-                    temperature=0.3,
-                    thinking_config=fb_thinking,
-                    response_mime_type="application/json",
-                    response_schema=companions_schema,
-                ),
-            )
-            data = json.loads((response.text or "").strip())
-            usage = {}  # kein Usage-Tracking für Fallback
-            log.warning("  Kompass Fallback erfolgreich: %d Companions",
-                        len(data.get("companions", [])))
-            return _capture_kompass(data), usage
-        except Exception as fe:
-            log.error("  Kompass Fallback auch gescheitert: %s", fe)
-            return [], {}
     return [], {}
 
 
