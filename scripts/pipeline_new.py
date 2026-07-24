@@ -206,11 +206,8 @@ def pass1_plan(thema: str, stufe: int, wmin: int, wmax: int,
         "- companion_rolle: welcher Begleitartikel VERANSCHAULICHT WAS (macht das "
         "Hauptthema greifbarer/verständlicher) — oder \"weglassen\".\n"
         "- abschnitte: 3–5 Abschnitte, je {heading, inhalt(kurz)}. Wähle sie nach "
-        "dem, was für den Leser am interessantesten ist. TIEFE VOR BREITE: lieber "
-        "wenige, geschichtenträchtige Facetten in Ruhe entwickeln als viele Aspekte "
-        "knapp aufzählen. Presse nicht zu viele Themen auf den Wort-Etat — sonst "
-        "entsteht ein gedrängter Steckbrief-Stil aus lauter kurzen Fakten-Sätzen "
-        "(Stakkato) statt ruhig entwickelter Prosa mit langen, verbundenen Sätzen.\n"
+        "dem, was für den Leser am interessantesten ist, und gib dem Artikel Breite "
+        "— mehrere verschiedene spannende Facetten statt nur einer Linie.\n"
         "- subtitle: kurzer kindgerechter Untertitel.\n"
         "- emoji: ein passendes Emoji."
     )
