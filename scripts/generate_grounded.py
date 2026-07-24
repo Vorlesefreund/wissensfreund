@@ -1786,6 +1786,127 @@ def regenerate_redundant_boxes(article: dict, primary_text: str,
             f"(kein Quell-Fakt), {rest} weiterhin redundant")
 
 
+# ── Hoerspiel-Jahreszahl-Waechter ────────────────────────────────────────────
+# Absolute Zeitangaben (Jahreszahlen, Tagesdaten, „nach Christus") sind fuer
+# 4–9 verboten — der Hoerspiel-Prompt sagt das an drei Stellen, Flash haelt sich
+# unter der Plan-Split-Mechanik bei geschichtslastigen Themen aber nicht daran
+# (PO-Befund 2026-07-24: Spielzeug 9 nackte Jahre, Vulkan „achtzehnhundert…"/
+# „nach Christus"). Deterministische Erkennung + EIN enger Gemini-Umschreibe-Pass,
+# der NUR die Zeitangabe relativiert (Rest woertlich) — analog Box-Neugenerierung.
+_ABS_DATE_PATTERNS = [
+    re.compile(r'(?<!\d)(?:1[0-9]\d\d|20\d\d)(?!\d)'),          # nackte 4-stellige Jahre
+    re.compile(r'\b\d{1,2}\.\s?(?:Januar|Februar|März|Maerz|April|Mai|Juni|Juli|'
+               r'August|September|Oktober|November|Dezember)\b'),
+    re.compile(r'\b(?:nach|vor)\s+Christus\b', re.IGNORECASE),
+    re.compile(r'\b[nv]\.\s?Chr\.?', re.IGNORECASE),
+    re.compile(r'(?:sechzehn|siebzehn|achtzehn|neunzehn)hundert', re.IGNORECASE),  # ausgeschr. Jahre
+]
+
+
+def _abs_date_refs(article: dict) -> list[tuple]:
+    """(sec_index, sent_index, text) fuer jede Zeile mit absoluter Zeitangabe."""
+    refs = []
+    for si, sec in enumerate(article.get("sections", [])):
+        for sj, s in enumerate(sec.get("sentences", [])):
+            t = s.get("text", "") or ""
+            if any(rx.search(t) for rx in _ABS_DATE_PATTERNS):
+                refs.append((si, sj, t))
+    return refs
+
+
+def find_absolute_dates(article: dict) -> list[str]:
+    """Kurzliste der Zeilen mit absoluter Zeitangabe (fuer Report/Flag)."""
+    out = []
+    for _si, _sj, t in _abs_date_refs(article):
+        hits = sorted({m.group(0) for rx in _ABS_DATE_PATTERNS for m in rx.finditer(t)})
+        out.append(f"{', '.join(hits)} :: {t[:70]}")
+    return out
+
+
+_DATE_FIX_SYSTEM = (
+    "Du korrigierst einzelne Zeilen aus einem Kinder-Hoerspiel (4-9 Jahre). Jede "
+    "gelieferte Zeile enthaelt eine ABSOLUTE Zeitangabe (Jahreszahl, Tagesdatum, "
+    "'nach Christus'), die fuer kleine Kinder verboten ist. Schreibe jede Zeile so "
+    "um, dass die absolute Zeit durch eine RELATIVE, kindgerechte Angabe ersetzt "
+    "wird:\n"
+    "- kuerzlich -> 'vor Kurzem'; einige Jahrzehnte -> 'vor etwa vierzig Jahren'; "
+    "lange her -> 'vor mehr als hundert Jahren' / 'vor sehr langer Zeit' / bei Antike "
+    "'vor fast zweitausend Jahren'.\n"
+    "- Gehoeren zwei Daten zusammen: ein grober Anker + Abstand ('... und viele Jahre "
+    "spaeter ...').\n\n"
+    "STRENGE REGELN:\n"
+    "- Aendere NUR die Zeitangabe. Der GESAMTE Rest der Zeile bleibt WOERTLICH gleich "
+    "- Redebegleitsatz ('sagt Oma Rosa'), typografische Anfuehrungszeichen, Namen, "
+    "Sachfakten, Satzzeichen unveraendert.\n"
+    "- Erfinde KEINE neue Jahreszahl und KEINEN neuen Fakt.\n"
+    "- Gib EXAKT so viele Eintraege zurueck wie geliefert, jeder mit seinem index."
+)
+
+_DATE_FIX_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "zeilen": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "index": {"type": "integer"},
+                    "text": {"type": "string"},
+                },
+                "required": ["index", "text"],
+            },
+        },
+    },
+    "required": ["zeilen"],
+}
+
+
+def fix_hoerspiel_dates(article: dict, thema: str, model: str) -> str:
+    """Relativiert absolute Zeitangaben in einem Hoerspiel (nur dort verboten).
+    Eigener enger Gemini-Pass auf den betroffenen Zeilen. Scheitert er (503),
+    bleiben die Zeilen unveraendert und der Aufrufer flaggt zum Review
+    (kein Datenverlust). Gibt eine kurze Status-Notiz zurueck."""
+    refs = _abs_date_refs(article)
+    if not refs:
+        return ""
+
+    liste = "\n".join(f"[{i}] {t}" for i, (_si, _sj, t) in enumerate(refs))
+    body = (
+        f"THEMA: {thema}\n\n"
+        f"ZU KORRIGIERENDE ZEILEN (je mit absoluter Zeitangabe — relativ machen, "
+        f"Rest woertlich lassen):\n{liste}\n\n"
+        f"Gib fuer jeden Index die umgeschriebene Zeile zurueck."
+    )
+    try:
+        raw = gemini_client.call_gemini(
+            _DATE_FIX_SYSTEM, body, model=model,
+            response_mime_type="application/json", response_schema=_DATE_FIX_SCHEMA,
+            call_name="fix_dates", max_output_tokens=2048)
+        data = json.loads(raw)
+    except Exception as e:
+        log.warning("  Jahreszahl-Fix fehlgeschlagen: %s — Zeilen bleiben, geflaggt", e)
+        return f"FEHLER: {len(refs)} Datums-Zeilen nicht relativiert ({str(e)[:40]})"
+
+    by_index = {b.get("index"): b for b in data.get("zeilen", []) if isinstance(b, dict)}
+    sects = article.get("sections", [])
+    ersetzt = 0
+    for i, (si, sj, _t) in enumerate(refs):
+        neu = (by_index.get(i) or {}).get("text", "").strip()
+        if not neu:
+            continue
+        # Sicherheitsnetz: nur uebernehmen, wenn die neue Zeile die absolute
+        # Angabe wirklich los ist (sonst nichts gewonnen).
+        if any(rx.search(neu) for rx in _ABS_DATE_PATTERNS):
+            continue
+        try:
+            sects[si]["sentences"][sj]["text"] = neu
+            ersetzt += 1
+        except (IndexError, KeyError):
+            continue
+    rest = len(_abs_date_refs(article))
+    return f"Jahreszahl-Fix: {ersetzt}/{len(refs)} Zeilen relativiert, {rest} verbleibend"
+
+
 # ── Phase-2-User-Message ──────────────────────────────────────────────────────
 
 def build_grounded_user_message(
@@ -2743,6 +2864,20 @@ def generate_one_level(
         n_split = _split_double_speech_lines(article)
         if n_split:
             log.info("  Doppelrede-Split: %d Zeilen mit mehreren Reden aufgetrennt", n_split)
+        # Jahreszahl-Waechter: absolute Zeitangaben (fuer 4–9 verboten) relativieren.
+        date_note = fix_hoerspiel_dates(article, thema, model)
+        if date_note:
+            log.info("  %s", date_note)
+            report["phase2"]["jahreszahl_fix"] = date_note
+        rest_dates = find_absolute_dates(article)
+        if rest_dates:
+            for h in rest_dates:
+                log.warning("  Absolute Zeitangabe bleibt: %s", h)
+            report["phase2"]["absolute_dates_rest"] = rest_dates
+            article["meta"]["review_flag"] = True
+            article["meta"]["review_reason"] = (
+                article["meta"].get("review_reason", "")
+                + f"; {len(rest_dates)} absolute Zeitangaben (Jahr/Datum)").lstrip("; ")
 
     # ── Bilder: eigener Aufruf auf dem FERTIGEN Text (Rueckkehr zu pass4_images) ──
     if DEFER_IMAGES and not skip_images:
