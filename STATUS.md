@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-23T13:19:04Z -->
+<!-- updated: 2026-07-24T07:42:37Z -->
 <!-- Ältere Stände (verbatim, inkl. TTS-Woche 16.-18.07. + Stufen-Umbau 19.07.) → STATUS_ARCHIV.md · `git log STATUS.md` · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
@@ -36,16 +36,17 @@ Hörspiel (4–9) + Erzähltext (10–12, = altes S3). KI streng aus geladenem Q
 
 ## Gerade in Arbeit / Nächster Schritt
 
-- **Nachtlauf heute 03:00** (`Wissensfreund_Nachtlauf_Pass4`, 24.07. 03:00): `nachtlauf.py --label Review2
-  --themen Vulkan Dinosaurier Spielzeug --typen hoerspiel erzaehltext --versuche 3 --pause 1800`. Testet
-  ZWEI große, bisher nur offline verifizierte Umbauten auf einmal (beide fallback-geschützt): S3-Motor-Tausch
-  UND Hörspiel-Plan-Split. Erfolg wird an fertiger Artikelzahl gemessen (nicht am Exit-Code). Review-Docx →
-  Desktop `Wissensfreund_Review\2026-07-24_Review2\`.
-- **Vergleich alt↔neu wird automatisch mitgebaut:** Der Nachtlauf hängt nach der Review-Docx pro Thema eine
-  `<Thema>_alt_vs_neu_<Datum>.docx` in denselben Desktop-Ordner (`historie_uebersicht.py --fokus 4`): alle
-  frischen Fassungen ★NEU-markiert, dazu die 4 jüngsten alten — chronologisch mit Datum + Pipeline-Label.
-- **Am Morgen prüfen:** liest sich der restaurierte Erzähltext wieder wie der gute 10.07.-Vulkan-Text? Bringt
-  der Hörspiel-Plan-Split spürbar bessere Fenster-Struktur/Rhythmus? (Alles in der alt↔neu-Docx nebeneinander.)
+- **Lauf erfolgreich (2026-07-24 ~09:40, Tageslauf nach Guthaben-Auffüllung):** 6/6 Artikel. Beide Umbauten
+  liefen ERSTMALS real durch — 6× 6-Schritt-System (Erzähltext), 3× Story-Plan-Split (Hörspiel, Plan 4,9–7,6k Z.).
+  Auto-Checks grün: 0× Erzähler-als-Figur, 0 Engl.-Slips, Archaeopteryx-Bild bei beiden Dino-Artikeln, Hörspiel
+  0 Boxen / Erzähltext je 3. Docx im Desktop-Ordner `2026-07-24_Review2` (Review + 3× `<Thema>_alt_vs_neu`, je 2 ★NEU).
+- **Der 03:00-Nachtlauf war reines Billing** (Prepaid-Guthaben leer, 429 — NICHT 503): 0/6, 5,5 h Retry verheizt.
+  Fixes: `gemini_client.is_billing_depleted` bricht in allen 4 Retry-Stellen sofort ab; `gemini-2.5-flash`-
+  Kompass-Fallback ersatzlos entfernt (PO-Regel). `--pause` im Nachtlauf wird bei Guthaben-leer nicht mehr abgewartet.
+- **PO prüft jetzt am Text:** liest sich der restaurierte S3-Text wie der gute 10.07.-Vulkan-Text? Bringt der
+  Plan-Split bessere Fenster-Struktur? (Optional offen: 10.07.-Baseline fest in die alt↔neu-Docx einpinnen.)
+- **Automatischer Vergleich alt↔neu** hängt der Nachtlauf nach der Review-Docx an (`historie_uebersicht.py
+  --fokus 4`): frische Fassungen ★NEU-markiert + 4 jüngste alte, chronologisch mit Pipeline-Label.
 
 ## Offen nach Priorität
 
