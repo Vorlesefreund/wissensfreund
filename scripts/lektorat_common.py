@@ -1056,9 +1056,18 @@ def run_lektorat_sync(
     for aid, (sources_prefix, article_task) in parts_by_id.items():
         log.info("  Lektorat-Sync [%s] …", aid)
         try:
-            msg = client.messages.create(
+            # Streaming PFLICHT: Die Lektorat-Calls tragen den ganzen Quellblock
+            # (~40–60k Tokens) + adaptives Thinking + JSON-Antwort. Non-Streaming lehnt
+            # die Anthropic-API ab ("Streaming is required for operations that may take
+            # longer than 10 minutes", Befund 2026-07-24).
+            # Claude-5-Familie: Thinking wird über output_config.effort gesteuert (NICHT
+            # thinking.enabled — das lehnt sonnet-5 mit 400 ab). max_tokens großzügig,
+            # sonst frisst adaptives Reasoning den Cap und der JSON-Block bleibt leer
+            # (Befund: out=16000 → "Leere Antwort").
+            with client.messages.stream(
                 model=LEKTORAT_MODEL,
-                max_tokens=16000,
+                max_tokens=24000,
+                output_config={"effort": "medium"},
                 # temperature entfernt: claude-sonnet-4-6 lehnt den Parameter mit 400 ab
                 # ("temperature is deprecated for this model"). Default (=1) ist ok — das
                 # Lektorat ist ohnehin durch forced-JSON/Beleg-Prüfung eng geführt.
@@ -1071,7 +1080,8 @@ def run_lektorat_sync(
                      "cache_control": {"type": "ephemeral"}},
                     {"type": "text", "text": article_task},
                 ]}],
-            )
+            ) as stream:
+                msg = stream.get_final_message()
             # Robust gegen Thinking-Blocks: claude-sonnet-4-6 liefert bei aktivem
             # Reasoning zuerst einen ThinkingBlock (ohne .text) — den echten
             # Text-Block herausfischen statt blind content[0] zu nehmen.
@@ -1276,7 +1286,11 @@ def run_lektorat_batch(
             "custom_id": aid,
             "params": {
                 "model":       LEKTORAT_MODEL,
-                "max_tokens":  16000,
+                # s. run_lektorat_sync: Claude-5 steuert Thinking über output_config.effort
+                # (nicht thinking.enabled); höheres max_tokens, sonst frisst das Reasoning
+                # den Cap und der JSON-Block bleibt leer (Befund 2026-07-24).
+                "max_tokens":     24000,
+                "output_config":  {"effort": "medium"},
                 # temperature entfernt: claude-sonnet-4-6 lehnt den Parameter mit 400 ab
                 # ("temperature is deprecated for this model").
                 "system": [
