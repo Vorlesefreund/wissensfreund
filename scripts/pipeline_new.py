@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -157,7 +158,16 @@ def _track(run_id: str | None, thema: str, stufe: int, schritt: str, model: str)
 # PASS 1 — PLAN
 # ══════════════════════════════════════════════════════════════════════════════
 
-PASS1_SYSTEM = (
+# ── A/B-Schalter für die 3.1-Pro-Prompt-Variante ────────────────────────────
+# WF_PROMPT_VARIANT=pro aktiviert die von Gemini 3.1 Pro überarbeiteten Prompts
+# (Story-First, kein Zwangs-Zeitstrahl, positiver Rhythmus). Default = Ist-Zustand.
+_PROMPT_VARIANT = os.environ.get("WF_PROMPT_VARIANT", "").strip().lower()
+
+def _pick(base: str, pro: str) -> str:
+    return pro if _PROMPT_VARIANT == "pro" else base
+
+
+_PASS1_SYSTEM_BASE = (
     "Du planst einen kindgerechten Lexikonartikel für eine deutsche Kinder-App. "
     "Du arbeitest AUSSCHLIESSLICH mit dem gelieferten Quelltext — kein Wissen von "
     "außerhalb, nichts erfinden. Der Artikel handelt vom HAUPTTHEMA; Begleitartikel "
@@ -170,6 +180,22 @@ PASS1_SYSTEM = (
     "Plan kommt, bestimmt auch, welche Bilder später passen — plane so, dass Text und "
     "mögliche Bilder dasselbe zeigen. Geht es um ein Lebewesen, plane — sofern die Quelle es hergibt — auch Herkunft/Abstammung und die nächsten Verwandten ein und stelle dabei einen verbreiteten Irrtum klar (z. B. dass der Elefant NICHT vom Mammut abstammt, sondern beide nur miteinander verwandt sind). Bei historischen Themen und Lebewesen mit Werdegang gilt ein STRIKTER Zeitstrahl: Herkunft/Anfang → Hauptereignis/Verlauf → Ende/Tod → Nachwirkung/heutige Bedeutung. Springe nach dem Ende oder Tod NIE zurück zu Herkunft oder Jugend. Forschungs- und Entdeckungsgeschichte (Ausgrabungen, Knochenkriege, Museumsfunde) gehört an den Anfang (als Hinführung) ODER ans Ende (als Nachwirkung), niemals mitten in den laufenden Erzählstrang. Ein Abschnitt über Bedeutung, Vermächtnis oder das Symbol, zu dem jemand/etwas wurde, steht immer am Schluss. Gib NUR den Plan als JSON aus."
 )
+
+_PASS1_SYSTEM_PRO = (
+    "Du planst einen Lexikonartikel für die App \"Wissensfreund\" (Kinder von 10–12 "
+    "Jahren). Arbeite AUSSCHLIESSLICH mit dem Quelltext – erfinde keine Fakten. Wähle "
+    "nur aus, was eine mitreißende Geschichte trägt.\n"
+    "DIE WICHTIGSTE REGEL: Bevorzuge das Lebendige, Dramatische und Ikonische vor "
+    "trockener Chronologie.\n"
+    "- KEIN strikter Zeitstrahl! Beginne stattdessen mit dem ikonischsten Merkmal (dem "
+    "berühmtesten Ereignis, dem Meisterwerk) oder einem starken Gegenwartsbezug (was das "
+    "Kind heute kennt).\n"
+    "- Trockene Randaspekte (Handel, Herstellung, Prüfsiegel) fliegen raus.\n"
+    "- Vermeide kleinteilige Listen. Plane 3–4 starke Abschnitte, die wie Kapitel eines "
+    "Jugendbuchs ineinandergreifen."
+)
+
+PASS1_SYSTEM = _pick(_PASS1_SYSTEM_BASE, _PASS1_SYSTEM_PRO)
 
 PASS1_SCHEMA = {
     "type": "object",
@@ -195,11 +221,13 @@ def pass1_plan(thema: str, stufe: int, wmin: int, wmax: int,
     """Pass 1: Erzählbogen + Kernfakten aus der Quelle (Thema-Primat)."""
     source = _source_block(thema, primary_text, companion_texts)
     comp_str = ", ".join(valid_companions) if valid_companions else "(keine)"
-    body = (
+    header = (
         f"THEMA (Hauptthema, Rückgrat): {thema}\n"
         f"LESESTUFE: {_level_register(stufe)}\n"
         f"WORTZIEL für den späteren Text: {wmin}–{wmax} Wörter.\n"
         f"VERFÜGBARE BEGLEITARTIKEL: {comp_str}\n\n"
+    )
+    _aufgabe_base = (
         "AUFGABE: Plane den Artikel. Gib als JSON aus:\n"
         "- angle: der Erzählbogen ums Hauptthema (ein Satz).\n"
         "- kernfakten: 3–8 wichtigste Fakten AUS DEM QUELLTEXT (wörtlich gedeckt).\n"
@@ -224,6 +252,19 @@ def pass1_plan(thema: str, stufe: int, wmin: int, wmax: int,
         "- subtitle: kurzer kindgerechter Untertitel.\n"
         "- emoji: ein passendes Emoji."
     )
+    _aufgabe_pro = (
+        "AUFGABE: Plane den Artikel. Gib als JSON aus:\n"
+        "- angle: Der rote Faden der Geschichte (ein Satz).\n"
+        "- kernfakten: 3–5 wichtigste Fakten AUS DEM QUELLTEXT (nicht mehr!).\n"
+        "- companion_rolle: Welcher Begleitartikel VERANSCHAULICHT WAS — oder \"weglassen\".\n"
+        "- abschnitte: 3–4 Abschnitte, je {heading, inhalt(kurz)}.\n"
+        "  REZEPT: Baue die Abschnitte um die ikonischen Anker und den Bezug zur "
+        "Lebenswelt der Kinder. Jeder Abschnitt ist eine kleine Szene oder tiefere "
+        "Erklärung (das WIE und WARUM), kein trockener Steckbrief.\n"
+        "- subtitle: kurzer, spannender Untertitel.\n"
+        "- emoji: ein passendes Emoji."
+    )
+    body = header + _pick(_aufgabe_base, _aufgabe_pro)
     thinking = _make_thinking_config(model, 8192)
     raw = _call_pass(PASS1_SYSTEM, body, source, model, thinking, cache,
                      call_name="pass1_plan", response_mime_type="application/json",
@@ -239,7 +280,7 @@ def pass1_plan(thema: str, stufe: int, wmin: int, wmax: int,
 # PASS 2 — PROSA (Markdown) + Wortziel-Schleife
 # ══════════════════════════════════════════════════════════════════════════════
 
-PASS2_SYSTEM = (
+_PASS2_SYSTEM_BASE = (
     "Du schreibst einen kindgerechten Lexikonartikel für eine deutsche Kinder-App. "
     "Schreib EINE zusammenhängende, spannende Geschichte ums Hauptthema — erzähl, "
     "zähl nicht auf, keine dichten Zahlen-Ketten. Baue einen klaren Faden mit "
@@ -294,6 +335,35 @@ PASS2_SYSTEM = (
     "Wortzahl); schreib nie den ganzen Artikel unter eine einzige Überschrift. "
     "Beginne mit einer `## Überschrift`."
 )
+
+_PASS2_SYSTEM_PRO = (
+    "Du schreibst einen Lexikonartikel für Kinder (10–12 Jahre) auf Basis eines Plans.\n"
+    "Dein Ziel: Ein packender, fließender Text, der sich liest wie ein gutes "
+    "Jugend-Sachbuch, nicht wie eine Aufzählung.\n\n"
+    "REGELN FÜR DEN ERZÄHLFLUSS:\n"
+    "1. Keine harte Chronologie: Wenn der Einstieg das heutige Leben oder das "
+    "berühmteste Ereignis zeigt, webe die Vorgeschichte elegant danach ein.\n"
+    "2. Weiche Übergänge: Jeder Absatz knüpft an den vorigen an. Keine losen Fakten, "
+    "die aus dem Nichts kommen. Nutze echte Überleitungen (\"Doch nicht nur das Feuer "
+    "war gefährlich – auch...\").\n"
+    "3. Veranschaulichen statt Behaupten: Nutze greifbare Vergleiche aus der Welt der "
+    "Kinder (\"wie ein aufgehender Hefeteig\"). Die Vergleiche müssen physikalisch/"
+    "biologisch stimmen (Achtung: Asche gefriert nichts ein, Tiere sind nicht Cousinen, "
+    "sondern Verwandte).\n"
+    "4. Sprachrhythmus: Vermeide Stakkato-Sätze. Variiere Satzlängen, nutze lebendige "
+    "Verben. Nach langen Erklärungen darf ein ganz kurzer Satz wirken (z.B. \"Alles "
+    "wurde still.\").\n\n"
+    "FAKTENTREUE:\n"
+    "Nutze AUSSCHLIESSLICH belegte Fakten aus der Quelle. Erfinde niemals Gefühle, "
+    "Motive oder Dialoge realer Personen. Bei Leid oder Gewalt bleibst du nüchtern und "
+    "sachlich.\n\n"
+    "FORMAT:\n"
+    "NUR Markdown mit `## Überschrift`-Zeilen und normalen Absätzen. KEIN JSON, keine "
+    "Listen, keine IDs. Mindestens 3 Abschnitte mit eigenen Überschriften. Beginne mit "
+    "einer `## Überschrift`."
+)
+
+PASS2_SYSTEM = _pick(_PASS2_SYSTEM_BASE, _PASS2_SYSTEM_PRO)
 
 
 def _strip_md_fences(text: str) -> str:
@@ -891,7 +961,7 @@ def _quiz_stub(stufe: int) -> dict:
 # PASS 4 — BILD (Zuordnung + Hero + Caption) und PASS 5 — QUIZ
 # ══════════════════════════════════════════════════════════════════════════════
 
-PASS4_SYSTEM = (
+_PASS4_SYSTEM_BASE = (
     "Du ordnest einem fertigen Kinderlexikon-Artikel Bilder zu. Nutze "
     "AUSSCHLIESSLICH die gelieferten Bilder (per Index) — erfinde keine. Jeder "
     "Abschnitt soll möglichst SEIN eigenes, passendes Bild bekommen: verteile die "
@@ -916,6 +986,31 @@ PASS4_SYSTEM = (
     "(z. B. keine Rauchwolken, Schiffe oder Personen erwähnen, wenn die Beschreibung sie "
     "nicht nennt). Antworte NUR als JSON."
 )
+
+_PASS4_SYSTEM_PRO = (
+    "Du ordnest einem fertigen Artikel Bilder zu. Nutze NUR die gelieferten Bilder "
+    "(per Index).\n"
+    "ZIEL: Eine perfekte visuelle Abdeckung über den GANZEN Artikel.\n"
+    "GEHE SCHRITTWEISE VOR:\n"
+    "1. Nimm den ersten Text-Abschnitt. Welches Bild aus dem Pool zeigt EXAKT das, "
+    "worüber dort gesprochen wird? Weise es zu.\n"
+    "2. Gehe zum nächsten Abschnitt. Wähle zwingend ein ANDERES Bild aus dem Pool, das "
+    "inhaltlich am besten andockt.\n"
+    "3. Jeder Abschnitt MUSS ein eigenes, einmaliges Bild bekommen, solange noch "
+    "halbwegs passende Bilder im Pool sind. Die App zeigt sonst Fehler.\n"
+    "4. Nur im äußersten Notfall (wenn wirklich gar kein Bild auch nur entfernt passt) "
+    "vergibst du -1.\n"
+    "5. hero_index: Wähle das stärkste Querformat-Bild des Hauptthemas.\n"
+    "BESCHRIFTUNG (streng belegt):\n"
+    "- alt: Kurzer deutscher Bild-Titel (max. 6 Wörter). Nenne Eigennamen/Ort aus dem "
+    "Originaltitel!\n"
+    "- caption: Ein kindgerechter Satz, der beschreibt, was im Bild WIRKLICH zu sehen "
+    "ist (keine im Bild unsichtbaren Story-Details erfinden). Nutze den Originaltitel "
+    "für Orts-/Namens-Fakten.\n"
+    "Antworte NUR als JSON."
+)
+
+PASS4_SYSTEM = _pick(_PASS4_SYSTEM_BASE, _PASS4_SYSTEM_PRO)
 
 PASS4_SCHEMA = {
     "type": "object",

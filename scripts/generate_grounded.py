@@ -1205,7 +1205,7 @@ def enforce_landscape_hero(article: dict, pool: list[dict]) -> str | None:
             f"{imgs[0].get('filename', '?')} (aspect={asp(imgs[0])})")
 
 
-IMG_ASSIGN_SYSTEM = (
+_IMG_ASSIGN_SYSTEM_BASE = (
     "Du ordnest einem FERTIGEN Kindertext Bilder zu. Der Text ist unveraenderlich — "
     "du schreibst nichts um, du waehlst nur aus und beschriftest.\n\n"
     "REGELN:\n"
@@ -1228,6 +1228,29 @@ IMG_ASSIGN_SYSTEM = (
     "Detail); erfinde darueber hinaus keine im Bild nicht sichtbaren Szenendetails.\n"
     "- alt: kurzer deutscher Bild-Titel mit Eigenname/Ort aus dem Originaltitel "
     "(max. 6 Woerter, kein ganzer Satz, kein englischer Titel)."
+)
+
+_IMG_ASSIGN_SYSTEM_PRO = (
+    "Du ordnest einem fertigen Hörspiel-Text Bilder zu. Der Text ist unveränderlich.\n"
+    "ZIEL: Der Zuhörer soll immer ein passendes Bild zur aktuellen Szene sehen.\n"
+    "REGELN ZUR VERTEILUNG:\n"
+    "- Gehe den Text Abschnitt für Abschnitt durch.\n"
+    "- Jeder Abschnitt MUSS ein eigenes, neues Bild bekommen, das das Besprochene "
+    "zeigt. Wenn kein perfektes Bild da ist, wähle das thematisch bestpassende.\n"
+    "- Verteile die Bilder über die ganze Dauer. Lass keinen Abschnitt leer, es sei "
+    "denn, der restliche Bildpool ist komplett unpassend (dann -1). Jedes Bild maximal "
+    "einmal nutzen.\n"
+    "- hero_index: Repräsentativstes Bild des Themas (mit [QUER] markiert, Querformat).\n"
+    "BESCHRIFTUNG:\n"
+    "- caption: Ein kindgerechter Satz (kein Zitat). Beschreibe nur, was SICHTBAR ist. "
+    "Nutze den Originaltitel für Fakten (Name/Ort).\n"
+    "- alt: Kurzer Titel (max. 6 Wörter) mit Eigennamen aus dem Originaltitel."
+)
+
+IMG_ASSIGN_SYSTEM = (
+    _IMG_ASSIGN_SYSTEM_PRO
+    if os.environ.get("WF_PROMPT_VARIANT", "").strip().lower() == "pro"
+    else _IMG_ASSIGN_SYSTEM_BASE
 )
 
 IMG_ASSIGN_SCHEMA = {
