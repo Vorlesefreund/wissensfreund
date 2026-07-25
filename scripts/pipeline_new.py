@@ -893,10 +893,14 @@ def _quiz_stub(stufe: int) -> dict:
 
 PASS4_SYSTEM = (
     "Du ordnest einem fertigen Kinderlexikon-Artikel Bilder zu. Nutze "
-    "AUSSCHLIESSLICH die gelieferten Bilder (per Index) — erfinde keine. Zu jedem "
-    "Abschnitt wähle den Index des Bildes, das am besten zu SEINEM Inhalt passt "
-    "(es zeigt genau das, wovon der Abschnitt handelt) — oder -1, wenn kein Bild "
-    "wirklich passt (lieber -1 als ein verwandtes, aber falsches Motiv). Wähle ein "
+    "AUSSCHLIESSLICH die gelieferten Bilder (per Index) — erfinde keine. Jeder "
+    "Abschnitt soll möglichst SEIN eigenes, passendes Bild bekommen: verteile die "
+    "Bilder über ALLE Abschnitte und gib möglichst jedem Abschnitt ein ANDERES Bild "
+    "(sonst zeigt die App dort das Bild des vorigen Abschnitts). Zu jedem Abschnitt "
+    "wähle den Index des Bildes, das am besten zu SEINEM Inhalt passt (es zeigt "
+    "möglichst genau das, wovon der Abschnitt handelt). Gibt es kein exakt passendes "
+    "Bild, wähle das thematisch am besten passende statt gar keins; vergib -1 nur, "
+    "wenn WIRKLICH kein Bild einen Bezug zum Abschnitt hat. Wähle ein "
     "Hero-Bild, das das Hauptthema zeigt. Schreibe zu JEDEM Bild (alle Indizes) "
     "(a) alt = ein KURZER Bild-Titel (höchstens 6 Wörter, KEIN ganzer Satz, KEIN "
     "englischer Originaltitel), der den EIGENNAMEN oder ORT nennt, sofern er aus dem "
@@ -1029,10 +1033,40 @@ def pass4_images(sections: list[dict], images_stufe: list[dict], thema: str,
 
     zmap = {z.get("section_id"): z.get("img_index", -1)
             for z in data.get("zuordnung", []) if isinstance(z, dict)}
+    n = len(images_list)
+
+    def _valid(ix) -> bool:
+        return isinstance(ix, int) and 0 <= ix < n
+
+    def _is_svg(ix: int) -> bool:
+        return (images_list[ix].get("filename") or "").lower().endswith(".svg")
+
+    # 1. Gueltige Modellzuordnungen zuerst, jedes Bild nur EINEM Abschnitt.
+    sec_ix: dict[str, int] = {}
+    used: set[int] = set()
     for s in sections:
         ix = zmap.get(s["id"], -1)
-        if not (isinstance(ix, int) and 0 <= ix < len(images_list)):
-            ix = -1
+        if _valid(ix) and ix not in used and not _is_svg(ix):
+            sec_ix[s["id"]] = ix
+            used.add(ix)
+    # 2. Abschnitte ohne (freies) Bild: bestes noch freies Nicht-SVG-Bild — sonst
+    #    uebernimmt die App das Bild des vorigen Abschnitts (bestmoegliches statt
+    #    gar keins, PO 2026-07-25). Pool ist relevanz-sortiert -> erstes freies.
+    frei = [i for i in range(n) if i not in used and not _is_svg(i)]
+    fi = 0
+    for s in sections:
+        if s["id"] in sec_ix:
+            continue
+        if fi < len(frei):
+            sec_ix[s["id"]] = frei[fi]
+            used.add(frei[fi])
+            fi += 1
+        else:                              # Pool erschoepft: Modellwunsch, sonst -1
+            ix = zmap.get(s["id"], -1)
+            sec_ix[s["id"]] = ix if _valid(ix) else -1
+
+    for s in sections:
+        ix = sec_ix.get(s["id"], -1)
         for x in s["sentences"]:
             x["img_index"] = ix
     return images_list

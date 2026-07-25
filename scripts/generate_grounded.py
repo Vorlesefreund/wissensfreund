@@ -1209,10 +1209,14 @@ IMG_ASSIGN_SYSTEM = (
     "Du ordnest einem FERTIGEN Kindertext Bilder zu. Der Text ist unveraenderlich — "
     "du schreibst nichts um, du waehlst nur aus und beschriftest.\n\n"
     "REGELN:\n"
-    "- Ein Bild kommt an eine Zeile NUR, wenn es genau das zeigt, wovon die Zeile "
-    "handelt. Im Zweifel gar kein Bild: ein unpassendes Bild ist schlimmer als keines.\n"
-    "- Verteile die Bilder ueber den ganzen Text (verschiedene Abschnitte), nicht "
-    "geballt an den Anfang.\n"
+    "- Jeder Abschnitt soll moeglichst EIN eigenes, passendes Bild bekommen. Verteile "
+    "die Bilder ueber ALLE Abschnitte, nie geballt an den Anfang, und lass keinen "
+    "Abschnitt leer ausgehen, solange noch ein halbwegs passendes Bild frei ist — "
+    "sonst zeigt die App dort einfach das Bild des vorigen Abschnitts.\n"
+    "- Ein Bild kommt an die Zeile, die am besten dazu passt (es zeigt moeglichst "
+    "genau das, wovon die Zeile handelt). Gibt es fuer einen Abschnitt kein exakt "
+    "passendes Bild, waehle das thematisch am besten passende statt gar keins; nur "
+    "wenn wirklich KEIN Bild einen Bezug zum Abschnitt hat, lass ihn frei.\n"
     "- Jedes Bild hoechstens EINMAL zuordnen.\n"
     "- hero_index: das repraesentativste Bild des HAUPTTHEMAS (nicht eines "
     "Nebenthemas). Es MUSS ein mit [QUER] markiertes Bild sein — Hochformat ist als "
@@ -1272,7 +1276,15 @@ def assign_images_pass(article: dict, pool: list[dict], thema: str, model: str,
     nur zum Thema — das konnte der alte Weg prinzipiell nicht.
 
     Mutiert article['images'] und die img_index der Saetze. Rueckgabe: Log-Meldung."""
-    sents = [s for sec in article.get("sections", []) for s in sec.get("sentences", [])]
+    secs = article.get("sections", [])
+    sents: list[dict] = []
+    sec_of: list[int] = []                # flacher Satzindex -> Abschnittsindex
+    first_line: dict[int, int] = {}       # Abschnittsindex -> erster flacher Satzindex
+    for si, sec in enumerate(secs):
+        for s in sec.get("sentences", []):
+            first_line.setdefault(si, len(sents))
+            sec_of.append(si)
+            sents.append(s)
     for s in sents:                       # Ausgangszustand: kein Bild
         s["img_index"] = -1
     if not pool or not sents:
@@ -1327,6 +1339,27 @@ def assign_images_pass(article: dict, pool: list[dict], thema: str, model: str,
         paare.append((li, pi))
         if len(paare) >= max_inline:
             break
+
+    # Abschnitt-Abdeckung: jeder Abschnitt bekommt ein eigenes Bild, sonst uebernimmt
+    # die App das Bild des vorigen Abschnitts (PO 2026-07-25). Fehlt einem Abschnitt
+    # ein Anker, haengt das beste noch freie Nicht-SVG-Bild an seine erste Zeile —
+    # bestmoegliches Bild statt gar keins. Das darf max_inline ueberschreiten (eine
+    # luekenlose Abdeckung geht der Ober-Obergrenze vor).
+    def _img_rank(i: int) -> tuple[float, float]:
+        p = pool[i]
+        return (float(p.get("relevanz", 0) or 0), -abs(float(p.get("aspect") or 0) - 1.4))
+
+    covered = {sec_of[li] for li, _pi in paare}
+    for si in range(len(secs)):
+        if si in covered:
+            continue
+        frei = [i for i in range(len(pool)) if i not in belegt and not _is_svg(pool[i])]
+        if not frei:
+            break
+        best = max(frei, key=_img_rank)
+        belegt.add(best)
+        paare.append((first_line[si], best))
+        covered.add(si)
 
     # Hero bestimmen — Modellwunsch nur, wenn Querformat UND kein SVG; sonst bestes Querformat.
     def quer(i: int) -> bool:
