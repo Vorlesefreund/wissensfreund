@@ -937,7 +937,24 @@ def build_image_pool(
             seen.add(fn)
             unique.append(img)
 
-    to_check = unique[:MAX_VISION_CHECKS]
+    # ROUND-ROBIN über die Quellen statt primary-first (PO-Befund Archaeopteryx
+    # 2026-07-25): Vorher lagen erst ~5 Leitbilder + 20 Primary-Bilder vorn, danach
+    # erst die Companions — bei MAX_VISION_CHECKS=40 + Früh-Stopp bei target S1-Bildern
+    # wurden spätere Companions NIE vision-geprüft und blieben mit 0 Bildern im Pool.
+    # Interleaving je Quelle garantiert jedem Companion einen Platz im Vision-Budget.
+    by_source: dict[str, list[dict]] = {}
+    for img in unique:
+        by_source.setdefault(img.get("_source", "?"), []).append(img)
+    queues = list(by_source.values())
+    interleaved: list[dict] = []
+    depth = 0
+    while any(depth < len(q) for q in queues):
+        for q in queues:
+            if depth < len(q):
+                interleaved.append(q[depth])
+        depth += 1
+
+    to_check = interleaved[:MAX_VISION_CHECKS]
     log.info("    Kandidaten gesamt (dedupliziert): %d, Vision-Check: %d",
              len(unique), len(to_check))
 
@@ -970,7 +987,7 @@ def build_image_pool(
         result, vision_usage = analyze_with_vision(client, img_bytes, mime, thema)
         if vision_usage:
             cost_tracker.track(run_id=_RUN_ID, thema=thema, stufe="S0",
-                                schritt="vision", modell="gemini-2.5-flash", **vision_usage)
+                                schritt="vision", modell="gemini-3.5-flash", **vision_usage)
         if result is None:
             rejected_vision.append({**img, "reason": "Vision-Fehler"})
             time.sleep(2.0)

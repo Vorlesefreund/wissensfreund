@@ -33,7 +33,7 @@ from image_vision_filter import (  # noqa: E402
 )
 from generate_articles import USER_AGENT  # noqa: E402
 
-VISION_MODEL = "gemini-2.5-flash"   # identisch zu run_batch.py
+VISION_MODEL = "gemini-3.5-flash"   # Vision: PO 2026-07-25 auf 3.5 (Preis identisch zu 2.5)
 
 logging.basicConfig(
     level=logging.INFO,

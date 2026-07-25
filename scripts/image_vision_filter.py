@@ -59,7 +59,7 @@ logging.basicConfig(
 log = logging.getLogger(__name__)
 
 WIKIPEDIA_API = "https://de.wikipedia.org/w/api.php"
-GEMINI_MODEL = "gemini-2.5-flash"
+GEMINI_MODEL = "gemini-3.5-flash"   # Vision: PO 2026-07-25 auf 3.5 (Preis identisch zu 2.5)
 
 _IMG_SKIP_PREFIXES = (
     "File:Commons-logo", "File:Wikidata", "File:Question",
