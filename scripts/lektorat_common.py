@@ -18,9 +18,11 @@ log = logging.getLogger(__name__)
 
 COMPANION_CHAR_CAP   = 30_000          # positional slice je Companion-Text
 LEKTORAT_MODEL       = "claude-sonnet-5"   # nur noch für Audit-Skripte (run_lektorat_sync)
-# Produktions-Faktenlektor (Schritt 8) = Gemini Flash: ~10 % der Sonnet-Kosten bei
-# gleicher/besserer Trefferquote (Bakeoff 2026-07-25). Ein Call prüft Fakten UND
-# Sprache (der frühere separate Claude-Sprachpass ist in LEKTORAT_SYSTEM aufgegangen).
+# Produktions-Lektor (Schritt 8) = Gemini Flash: ~10 % der Sonnet-Kosten bei
+# gleicher/besserer Trefferquote (Bakeoff 2026-07-25). BEWUSST ZWEI schlanke Pässe
+# statt eines überladenen Prompts — Flash kippt qualitativ, wenn ein Call zu viele
+# Aufgaben jongliert (PO 2026-07-25): 8a Fakten (grounded, LEKTORAT_SYSTEM),
+# 8b Sprache (ungrounded, SPRACH_SYSTEM). Beide mergen in EINEN annotate-Aufbau.
 FACT_LEKTORAT_MODEL  = "gemini-3.5-flash"
 # Denk-Budget (Claude-5 adaptives Thinking) — steuert Qualität ↔ Output-Kosten.
 # "low" spart ~40 % Output-Token (Thinking macht ~⅔ der Lektorat-Ausgabe aus),
@@ -351,36 +353,6 @@ LEKTORAT_SYSTEM = (
     "    anderes im selben Satz richtigstellst. Schreib keinen ganzen Satz/Teilsatz um,\n"
     "    wenn ein Wort genügt.\n"
     "  · Register wahren (S1 kindgerecht, S3 sachlich). Belegte Aussagen: nicht auflisten.\n\n"
-
-    "══════════════════════════════════════════════════\n"
-    "SPRACHE & KINDGERECHTE WORTWAHL (zusätzlich zu den Fakten — als corrections ausgeben)\n"
-    "══════════════════════════════════════════════════\n"
-    "Prüfe NEBEN den Fakten auch echte Sprachfehler und gib sie im selben corrections-\n"
-    "Array aus (stufe KORRIGIERT, beleg = «Sprachkorrektur»; claim_original = der GANZE\n"
-    "betroffene Satz, korrektur_neu = derselbe Satz korrigiert, nie leer). Nur ECHTE\n"
-    "Fehler — Ton, Stil, Satzbau, Vergleiche und kindgerechte Vereinfachungen NIE\n"
-    "verschönern. Im Zweifel NICHT anfassen (lieber eine Korrektur zu wenig):\n"
-    "  (a) Falsches Wort, das im Kontext keinen Sinn ergibt (Verschreiber): «Vorlagen der\n"
-    "      Wale» → «Vorfahren der Wale».\n"
-    "  (b) Grammatik-/Flexionsfehler (falscher Fall, Numerus, Verbform, Bezug).\n"
-    "  (c) Un-kindgerechte Fachbegriffe/Fremdwörter, die NICHT im Text selbst erklärt\n"
-    "      werden: gibt es ein einfaches deutsches Wort → ERSETZE («CO2» → «Kohlendioxid»,\n"
-    "      «Spongiosaknochen» → «schwammartige, leichte Knochen»); gibt es keinen\n"
-    "      einfachen Ersatz und der Begriff bringt Kindern nichts → ENTFERNE die Benennung,\n"
-    "      behalte die kindgerechte Erklärung drumherum (auch lateinische Gattungsnamen:\n"
-    "      «Osedax-Würmer» → «besondere Würmer»). SCHÜTZE dagegen Fachwörter, die im Text\n"
-    "      selbst erklärt werden oder zentral zur Geschichte gehören (z. B. Barten, Fluke,\n"
-    "      Blas, Krill, Blubber) — die BLEIBEN unangetastet.\n"
-    "  (d) Herablassende/veraltete Anreden fürs Kind («Jungchen», «Kindchen», «Bürschchen»,\n"
-    "      «mein Junge») → ERSETZE durch den Namen des Kindes (steht im Kontext) oder\n"
-    "      streiche die Anrede ersatzlos.\n"
-    "  (e) Offensichtliche UNMÖGLICHKEITEN/Selbstwidersprüche der erzählten Szene (physisch\n"
-    "      unmöglich oder mit dem Schauplatz unvereinbar): «unsere Berge hier im Garten»,\n"
-    "      «sie hört mit abgenommenen Kopfhörern das ferne Summen», «zeigt auf ein Bild»,\n"
-    "      das nie eingeführt wurde. Minimal aufs Plausible korrigieren oder nur die\n"
-    "      unmögliche Angabe entfernen (Rest der Zeile bleibt). NUR eindeutige Fälle —\n"
-    "      NICHT bei erfundenen Gefühlen, Fantasie-Rahmen, kindgerechten Vergleichen oder\n"
-    "      sprechenden Erzähler-Figuren (die dürfen erfunden/vereinfacht sein).\n\n"
 
     "Antworte NUR mit diesem JSON-Objekt:\n"
     "{\n"
@@ -1168,6 +1140,62 @@ def run_fact_lektorat_flash(
         log.error("  Faktenlektorat [%s] fehlgeschlagen: %s — Artikel ohne Lektorat-Feld",
                   thema or content_type, str(exc)[:120])
         return {"corrections": [], "pruefen": []}, {}
+
+
+def run_sprach_lektorat_flash(
+    article: dict,
+    thema: str = "",
+    content_type: str = "",
+    model: str = FACT_LEKTORAT_MODEL,
+) -> tuple[list[dict], dict]:
+    """Schritt 8b — Sprachlektorat über Gemini Flash, OHNE Quellblock.
+
+    Prüft NUR Sprache/Kindgerechtheit (Wortwahl, Grammatik, un-kindgerechte
+    Fachwörter, herablassende Anreden, Szenen-Unmöglichkeiten) — bewusst getrennt
+    vom Fakten-Pass (8a), damit KEIN Flash-Call überfrachtet wird (Flash verliert
+    Qualität, wenn ein Prompt zu viele Aufgaben trägt; PO 2026-07-25).
+
+    Gibt (corrections, usage) zurück — corrections im annotate_article_lektorat_v2-
+    Format (stufe KORRIGIERT, beleg «Sprache»). Bei API-Ausfall leere Liste.
+    """
+    import gemini_client
+    from generate_grounded import _make_thinking_config
+
+    turns = [(s.get("text") or "")
+             for sec in article.get("sections", [])
+             for s in sec.get("sentences", [])]
+    text = "\n".join(t for t in turns if t)
+    if not text.strip():
+        return [], {}
+    user = "TEXT (nur Wortwahl/Grammatik/Kindgerechtheit prüfen, KEINE Fakten):\n\n" + text
+    try:
+        raw = gemini_client.call_gemini(
+            SPRACH_SYSTEM, user, model=model,
+            thinking_config=_make_thinking_config(model, 2048),
+            response_mime_type="application/json", response_schema=SPRACH_SCHEMA,
+            call_name="sprach_lektorat", max_output_tokens=4096,
+        )
+        usage = dict(getattr(gemini_client, "_last_usage", {}) or {})
+        data = json.loads(raw)
+    except Exception as exc:  # noqa: BLE001 — Sprachpass nie den Artikel reißen lassen
+        log.warning("  Sprachlektorat [%s] fehlgeschlagen: %s — überspringe",
+                    thema or content_type, str(exc)[:120])
+        return [], {}
+
+    corr: list[dict] = []
+    for c in (data.get("corrections") or []):
+        claim = (c.get("claim_original") or "").strip()
+        neu   = (c.get("korrektur_neu") or "").strip()
+        if not (claim and neu and claim != neu):
+            continue
+        # Teilsatz → ganzer Sprecher-Turn (Jaccard-Einbau = 1.0, nur bei Substring).
+        for t in turns:
+            if claim != t and claim in t:
+                claim, neu = t, t.replace(claim, neu, 1)
+                break
+        corr.append({"claim_original": claim, "korrektur_neu": neu,
+                     "stufe": "KORRIGIERT", "beleg": "Sprache"})
+    return corr, usage
 
 
 # ── Anthropic Sync-API (nur noch für Audit-/Vergleichs-Skripte) ──────────────

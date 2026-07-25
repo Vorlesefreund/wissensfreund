@@ -78,6 +78,7 @@ from lektorat_common import (            # noqa: E402
     build_lektorat_parts,
     annotate_article_lektorat_v2,
     run_fact_lektorat_flash,
+    run_sprach_lektorat_flash,
 )
 
 GEMINI_MODEL       = "gemini-3.5-flash"
@@ -3055,34 +3056,45 @@ def generate_one_level(
                 article["meta"].get("review_reason", "")
                 + f"; {len(rest)} Boxen weiterhin redundant").lstrip("; ")
 
-    # ── SCHRITT 8 – Faktenlektorat (Gemini Flash) ────────────────────────────
-    # Prüft Fakten UND Sprache gegen die Wikipedia-Quellen und baut die Korrekturen
-    # sofort ein (Pruefbericht + ggf. review_flag). Ersetzt den früheren
-    # nachgelagerten Sonnet-Batch samt separatem Sprachpass — Bakeoff 2026-07-25:
-    # Flash ~10 % der Kosten bei gleicher/besserer Trefferquote (Eifel, Knochen).
+    # ── SCHRITT 8 – Lektorat (Gemini Flash), bewusst ZWEI schlanke Pässe ──────
+    # Flash verliert Qualität, wenn ein Call zu viele Aufgaben trägt (PO 2026-07-25).
+    # Darum getrennt: 8a Fakten (grounded, gegen die Wikipedia-Quellen) + 8b Sprache
+    # (ungrounded, nur der Text). Beide Ergebnisse mergen in EINEN annotate-Aufbau →
+    # ein Pruefbericht. Ersetzt den früheren Sonnet-Batch + Claude-Sprachpass
+    # (Bakeoff 2026-07-25: Flash ~10 % der Kosten, gleiche/bessere Trefferquote).
     if not skip_lektorat and sources_block:
-        lekt_result, lekt_usage = run_fact_lektorat_flash(
+        # 8a — Fakten/Plausibilität/Kontinuität gegen die Quellen
+        lekt_result, fakt_usage = run_fact_lektorat_flash(
             article, sources_block, thema=thema, content_type=content_type,
             model=FACT_LEKTORAT_MODEL)
+        # 8b — Sprache/Kindgerechtheit (eigener, schlanker Prompt ohne Quellblock)
+        sprach_corr, sprach_usage = run_sprach_lektorat_flash(
+            article, thema=thema, content_type=content_type, model=FACT_LEKTORAT_MODEL)
+        if sprach_corr:
+            lekt_result.setdefault("corrections", []).extend(sprach_corr)
+        # Ein Einbau für beide Pässe
         annotate_article_lektorat_v2(article, lekt_result, thema=thema, stufe=content_type)
         pb = article.get("pruefbericht", {})
-        log.info("  Faktenlektorat [Schritt 8, %s]: silent=%d korrigiert=%d pruefen=%d%s",
+        log.info("  Lektorat [Schritt 8, %s]: silent=%d korrigiert=%d pruefen=%d "
+                 "(8b Sprache: %d)%s",
                  FACT_LEKTORAT_MODEL, pb.get("n_silent", 0), pb.get("n_korrigiert", 0),
-                 pb.get("n_pruefen", 0),
+                 pb.get("n_pruefen", 0), len(sprach_corr),
                  " ⚠ review_flag" if pb.get("n_pruefen", 0) > 0 else "")
-        report["phase2"]["faktenlektorat"] = {
-            "modell":       FACT_LEKTORAT_MODEL,
-            "n_silent":     pb.get("n_silent", 0),
-            "n_korrigiert": pb.get("n_korrigiert", 0),
-            "n_pruefen":    pb.get("n_pruefen", 0),
+        report["phase2"]["lektorat"] = {
+            "modell":        FACT_LEKTORAT_MODEL,
+            "n_silent":      pb.get("n_silent", 0),
+            "n_korrigiert":  pb.get("n_korrigiert", 0),
+            "n_pruefen":     pb.get("n_pruefen", 0),
+            "n_sprache":     len(sprach_corr),
         }
-        if lekt_usage:
-            cost_tracker.track(
-                run_id=_RUN_ID, thema=thema, stufe=content_type, schritt="lektorat",
-                modell=FACT_LEKTORAT_MODEL,
-                input_tok=lekt_usage.get("input_tok", 0),
-                output_tok=lekt_usage.get("output_tok", 0) + lekt_usage.get("thoughts_tok", 0),
-                cached_tok=lekt_usage.get("cached_tok", 0))
+        for _u in (fakt_usage, sprach_usage):
+            if _u:
+                cost_tracker.track(
+                    run_id=_RUN_ID, thema=thema, stufe=content_type, schritt="lektorat",
+                    modell=FACT_LEKTORAT_MODEL,
+                    input_tok=_u.get("input_tok", 0),
+                    output_tok=_u.get("output_tok", 0) + _u.get("thoughts_tok", 0),
+                    cached_tok=_u.get("cached_tok", 0))
 
     val_errors = validate_article(article, job, word_floor=wmin)
     if val_errors:
