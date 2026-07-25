@@ -357,10 +357,13 @@ _PASS2_SYSTEM_PRO = (
     "Nutze AUSSCHLIESSLICH belegte Fakten aus der Quelle. Erfinde niemals Gefühle, "
     "Motive oder Dialoge realer Personen. Bei Leid oder Gewalt bleibst du nüchtern und "
     "sachlich.\n\n"
-    "FORMAT:\n"
-    "NUR Markdown mit `## Überschrift`-Zeilen und normalen Absätzen. KEIN JSON, keine "
-    "Listen, keine IDs. Mindestens 3 Abschnitte mit eigenen Überschriften. Beginne mit "
-    "einer `## Überschrift`."
+    "FORMAT (streng):\n"
+    "NUR Markdown mit `## Überschrift`-Zeilen und normalen Text-Absätzen. KEIN JSON, "
+    "keine Listen, keine IDs. Mindestens 3 bis 4 Abschnitte mit eigenen Überschriften.\n"
+    "WICHTIG FÜR DIE LESBARKEIT: Schreibe keine Textwüsten! Gliedere den Text UNTERHALB "
+    "jeder `## Überschrift` zwingend in 2 bis 3 kürzere Absätze (durch Leerzeilen "
+    "getrennt). Ein einzelner Absatz darf höchstens 5 bis 6 Sätze lang sein. Das ist "
+    "essenziell, damit Kinder den Text auf Bildschirmen gut lesen können."
 )
 
 PASS2_SYSTEM = _pick(_PASS2_SYSTEM_BASE, _PASS2_SYSTEM_PRO)
@@ -638,7 +641,7 @@ def build_sections(markdown: str, fallback_heading: str) -> list[dict]:
 
     for si, sec in enumerate(parsed, start=1):
         out_sentences: list[dict] = []
-        for para in sec["paragraphs"]:
+        for pi, para in enumerate(sec["paragraphs"]):
             spans = sentence_spans(para)
             # 1) Zeichengenaue Kachelung: Rohslices müssen den Absatz exakt ergeben.
             rebuilt = "".join(para[a:b] for a, b in spans)
@@ -665,10 +668,15 @@ def build_sections(markdown: str, fallback_heading: str) -> list[dict]:
                     f"(rejoined {len(_rejoined)} vs orig {len(_orig)} Zeichen) "
                     f"| orig={_orig[max(0,d-25):d+25]!r} "
                     f"| rejoin={_rejoined[max(0,d-25):d+25]!r}")
-            for t in sent_texts:
+            for j, t in enumerate(sent_texts):
                 sent_no += 1
-                out_sentences.append({"id": f"s{sent_no:03d}", "text": t,
-                                      "img_index": -1})
+                sent = {"id": f"s{sent_no:03d}", "text": t, "img_index": -1}
+                # Erster Satz eines NEUEN Absatzes (nicht der erste Absatz der Section)
+                # trägt para_break -> App/Renderer setzt hier einen Absatzumbruch, statt
+                # die ganze Section als eine Textwüste zu zeigen (PO 2026-07-25).
+                if pi > 0 and j == 0:
+                    sent["para_break"] = True
+                out_sentences.append(sent)
         sections.append({
             "id": f"sec{si}",
             "heading": sec["heading"],

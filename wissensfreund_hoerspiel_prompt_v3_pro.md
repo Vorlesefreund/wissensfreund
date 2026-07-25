@@ -39,13 +39,16 @@ Beginne mit einer konkreten Szene am richtigen Schauplatz, idealerweise mit eine
 Baue nur **3 bis 4 Stationen (Fenster)** ein. Hake nicht alles ab. Erzähle lieber, *wie* oder *warum* etwas passiert ist (das dramatische Ereignis, das berühmte Werk, das Verhalten), anstatt trockene Steckbriefe (Größe, Gewicht, Artnamen) aufzuzählen. Das ikonischste, bekannteste Merkmal des Themas MUSS vorkommen.
 
 **C. Zahlen und Zeit kindgerecht (4–9 Jahre)**
-- Maximal EINE Zahl pro Erwachsenen-Antwort (nur, wenn sie Staunen auslöst).
-- Übersetze alles andere in konkrete Vergleiche: statt „13 Meter“ -> „so lang wie ein Linienbus“.
-- **Keine Jahreszahlen!** Keine abstrakten Millionen. Übersetze Zeit relativ: „Vor sehr langer Zeit, lange vor den Menschen“, „Vor etwa 40 Jahren“.
+- MAXIMAL EINE EINZIGE ZAHL pro Erwachsenen-Antwort! Das ist ein hartes Limit.
+- Wenn du eine Zahl genannt hast (z. B. „13 Meter“), dürfen alle anderen Maße NUR NOCH als reiner Vergleich ohne Ziffern auftauchen (FALSCH: „wog 9 Tonnen, so viel wie ein Lkw“ -> RICHTIG: „und war so schwer wie ein vollbeladener Lkw“).
+- Keine Jahreszahlen! Keine abstrakten Millionen. Übersetze Zeit relativ: „Vor sehr langer Zeit“, „Vor etwa 40 Jahren“.
 - Harte Themen (Tod, Krieg, Katastrophen) sachlich, unblutig und hoffnungsvoll beenden (keine Atombomben-Vergleiche).
 
-**D. Fließender Rhythmus**
-Die Erwachsene redet auch mal 3-4 fließende Sätze am Stück. Theo muss nicht ständig dazwischenfunken. Weniger Theo ist mehr. Ein Erwachsenen-Satz ist kein Stakkato, sondern nutzt fließende Bindewörter.
+**D. Rhythmus: KEIN 1:1 Ping-Pong!**
+- Theo redet NICHT nach jedem Satz der Erwachsenen. Ein 1:1-Gespräch ist verboten.
+- Die erwachsene Person soll lange Passagen (3–5 Sätze) fließend erzählen.
+- Nutze ERZÄHLER-ZEILEN (Handlungen, Blicke, Herumgehen im Raum), um die Erklärungen der Erwachsenen zu strukturieren, anstatt Theo antworten zu lassen.
+- Theo hat im gesamten Hörspiel nur einen SEHR KLEINEN Redeanteil (höchstens 3 bis 4 kurze Reaktionen im gesamten Skript). Weniger Theo ist mehr!
 
 ## 4. DEIN WORKFLOW
 
