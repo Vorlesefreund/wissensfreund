@@ -72,13 +72,12 @@ from image_vision_filter import (        # noqa: E402
 )
 from lektorat_common import (            # noqa: E402
     COMPANION_CHAR_CAP,
+    FACT_LEKTORAT_MODEL,
     PROBLEMATIC_VERDICTS,
     build_grounded_sources_block,
     build_lektorat_parts,
     annotate_article_lektorat_v2,
-    run_lektorat_batch,
-    run_lektorat_sync,
-    run_sprachpass_sync,
+    run_fact_lektorat_flash,
 )
 
 GEMINI_MODEL       = "gemini-3.5-flash"
@@ -2612,6 +2611,8 @@ def generate_one_level(
     skip_images: bool,
     out_dir: Path,
     gemini_cache: str | None = None,
+    sources_block: str = "",
+    skip_lektorat: bool = False,
 ) -> tuple[dict | None, dict]:
     """Phase 2: Artikel für eine Stufe generieren (shared sources).
 
@@ -3054,6 +3055,35 @@ def generate_one_level(
                 article["meta"].get("review_reason", "")
                 + f"; {len(rest)} Boxen weiterhin redundant").lstrip("; ")
 
+    # ── SCHRITT 8 – Faktenlektorat (Gemini Flash) ────────────────────────────
+    # Prüft Fakten UND Sprache gegen die Wikipedia-Quellen und baut die Korrekturen
+    # sofort ein (Pruefbericht + ggf. review_flag). Ersetzt den früheren
+    # nachgelagerten Sonnet-Batch samt separatem Sprachpass — Bakeoff 2026-07-25:
+    # Flash ~10 % der Kosten bei gleicher/besserer Trefferquote (Eifel, Knochen).
+    if not skip_lektorat and sources_block:
+        lekt_result, lekt_usage = run_fact_lektorat_flash(
+            article, sources_block, thema=thema, content_type=content_type,
+            model=FACT_LEKTORAT_MODEL)
+        annotate_article_lektorat_v2(article, lekt_result, thema=thema, stufe=content_type)
+        pb = article.get("pruefbericht", {})
+        log.info("  Faktenlektorat [Schritt 8, %s]: silent=%d korrigiert=%d pruefen=%d%s",
+                 FACT_LEKTORAT_MODEL, pb.get("n_silent", 0), pb.get("n_korrigiert", 0),
+                 pb.get("n_pruefen", 0),
+                 " ⚠ review_flag" if pb.get("n_pruefen", 0) > 0 else "")
+        report["phase2"]["faktenlektorat"] = {
+            "modell":       FACT_LEKTORAT_MODEL,
+            "n_silent":     pb.get("n_silent", 0),
+            "n_korrigiert": pb.get("n_korrigiert", 0),
+            "n_pruefen":    pb.get("n_pruefen", 0),
+        }
+        if lekt_usage:
+            cost_tracker.track(
+                run_id=_RUN_ID, thema=thema, stufe=content_type, schritt="lektorat",
+                modell=FACT_LEKTORAT_MODEL,
+                input_tok=lekt_usage.get("input_tok", 0),
+                output_tok=lekt_usage.get("output_tok", 0) + lekt_usage.get("thoughts_tok", 0),
+                cached_tok=lekt_usage.get("cached_tok", 0))
+
     val_errors = validate_article(article, job, word_floor=wmin)
     if val_errors:
         for e in val_errors:
@@ -3175,11 +3205,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--skip-lektorat", action="store_true",
-        help="Lektorat-Schritt (Claude Sonnet) nach Generierung ueberspringen",
-    )
-    parser.add_argument(
-        "--lektorat-batch", action="store_true",
-        help="Lektorat ueber Anthropic Batch-API (async, Polling) statt synchron",
+        help="Faktenlektorat (Schritt 8, Gemini Flash) ueberspringen",
     )
     args = parser.parse_args()
 
@@ -3200,17 +3226,15 @@ def main() -> None:
     out_dir       = Path(args.output_dir).resolve() if args.output_dir else OUT_DIR
     model_slug    = model.replace("gemini-", "").replace(".", "-")
     skip_lektorat = args.skip_lektorat
-    use_batch_lektorat = args.lektorat_batch
 
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
         log.error("GEMINI_API_KEY nicht gesetzt.")
         sys.exit(1)
 
+    # Faktenlektorat (Schritt 8) läuft über Gemini Flash — kein ANTHROPIC_API_KEY
+    # mehr nötig. Der Key bleibt nur für den optionalen Claude-GENERATOR relevant.
     anthropic_key = os.environ.get("ANTHROPIC_API_KEY")
-    if not skip_lektorat and not anthropic_key:
-        log.warning("ANTHROPIC_API_KEY fehlt — Lektorat wird uebersprungen (--skip-lektorat zum Unterdrücken)")
-        skip_lektorat = True
 
     log.info("System-Prompts: Erzähltext %d Z. | Hörspiel %d Z.",
              len(system_prompt_for("erzaehltext")), len(system_prompt_for("hoerspiel")))
@@ -3450,6 +3474,8 @@ def main() -> None:
                     primary_text, companion_texts, valid_companions, images,
                     phase1_report, model, args.skip_images, out_dir,
                     gemini_cache=type_caches.get(ct),
+                    sources_block=sources_block,
+                    skip_lektorat=skip_lektorat,
                 )
 
                 report_path = out_dir / f"{article_id}_report.json"
@@ -3464,77 +3490,10 @@ def main() -> None:
                     failed_levels.append(article_id)
                     print(f"  FEHLGESCHLAGEN: {report.get('errors')}")
 
-            # Lektorat (alle Stufen, Quellblock geteilt; sync=default, batch=--lektorat-batch)
-            if not skip_lektorat and topic_articles:
-                parts = {}
-                aid_to_meta: dict[str, tuple[str, str]] = {}
-                for job, article, _ in topic_articles:
-                    aid = job["article_id"]
-                    parts[aid] = build_lektorat_parts(article, sources_block)
-                    aid_to_meta[aid] = (job.get("thema", job["title"]), _job_ct(job))
-                if use_batch_lektorat:
-                    log.info("  Starte Lektorat-Batch fuer %d Artikel (Modell: claude-sonnet-4-6) ...",
-                             len(topic_articles))
-                    try:
-                        lektorat_results = run_lektorat_batch(parts, anthropic_key)
-                        lektorat_usage: dict[str, dict] = {}
-                    except Exception as exc:
-                        log.error("  Lektorat-Batch fehlgeschlagen: %s — Artikel ohne Lektorat-Feld", exc)
-                        lektorat_results = {}
-                        lektorat_usage = {}
-                else:
-                    log.info("  Starte Lektorat-Sync fuer %d Artikel (Modell: claude-sonnet-4-6) ...",
-                             len(topic_articles))
-                    try:
-                        lektorat_results, lektorat_usage = run_lektorat_sync(parts, anthropic_key)
-                    except Exception as exc:
-                        log.error("  Lektorat-Sync fehlgeschlagen: %s — Artikel ohne Lektorat-Feld", exc)
-                        lektorat_results = {}
-                        lektorat_usage = {}
-                for aid, u in lektorat_usage.items():
-                    if u:
-                        _thema_l, _ct_l = aid_to_meta.get(aid, (thema, "erzaehltext"))
-                        cost_tracker.track(
-                            run_id=_RUN_ID, thema=_thema_l,
-                            stufe=_ct_l, schritt="lektorat",
-                            modell="claude-sonnet-4-6",
-                            input_tok=u.get("input_tok", 0),
-                            output_tok=u.get("output_tok", 0),
-                            cached_tok=u.get("cache_read_tok", 0),
-                        )
-                # Zweiter, leichter Sprach-Pass (Wortwahl/Grammatik) — mergt in
-                # dasselbe Lektorat-Ergebnis: EIN Einbau + EIN Pruefbericht.
-                try:
-                    _sp_articles = {job["article_id"]: art
-                                    for job, art, _ in topic_articles}
-                    sprach_results = run_sprachpass_sync(_sp_articles, anthropic_key)
-                    n_sp = sum(len(v) for v in sprach_results.values())
-                    log.info("  Sprach-Pass: %d Wort-/Grammatik-Korrektur(en)", n_sp)
-                    for aid_sp, corr in sprach_results.items():
-                        if corr:
-                            lr = lektorat_results.setdefault(
-                                aid_sp, {"corrections": [], "pruefen": []})
-                            lr.setdefault("corrections", []).extend(corr)
-                except Exception as exc:
-                    log.warning("  Sprach-Pass fehlgeschlagen: %s — ueberspringe",
-                                str(exc)[:100])
-
-                for job, article, _ in topic_articles:
-                    aid = job["article_id"]
-                    lektorat_result = lektorat_results.get(aid, {"corrections": [], "pruefen": []})
-                    _thema_a, _ct_a = aid_to_meta.get(aid, (thema, _job_ct(job)))
-                    annotate_article_lektorat_v2(
-                        article, lektorat_result, thema=_thema_a, stufe=_ct_a
-                    )
-                    pb = article.get("pruefbericht", {})
-                    log.info(
-                        "  Lektorat [%s]: silent=%d korrigiert=%d pruefen=%d%s",
-                        aid,
-                        pb.get("n_silent", 0),
-                        pb.get("n_korrigiert", 0),
-                        pb.get("n_pruefen", 0),
-                        " ⚠ review_flag" if pb.get("n_pruefen", 0) > 0 else "",
-                    )
+            # Faktenlektorat läuft jetzt inline PRO Artikel als Schritt 8 in
+            # generate_one_level (Gemini Flash, Fakten + Sprache). Kein nachgelagerter
+            # Sonnet-Batch mehr — die Artikel tragen ihr lektorat-Feld/Pruefbericht
+            # bereits, wenn wir hier ankommen.
 
             # Artikel schreiben (mit ggf. annotiertem lektorat-Feld)
             for job, article, report in topic_articles:
