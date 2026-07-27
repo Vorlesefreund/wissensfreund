@@ -79,6 +79,7 @@ from lektorat_common import (            # noqa: E402
     annotate_article_lektorat_v2,
     run_fact_lektorat_flash,
     run_sprach_lektorat_flash,
+    run_vergleich_lektorat_flash,
 )
 
 GEMINI_MODEL       = "gemini-3.5-flash"
@@ -1676,6 +1677,150 @@ def find_multi_speech_lines(article: dict) -> list[str]:
     return hits
 
 
+# ── v6-KOLLAPS-WAECHTER (PO 2026-07-26) ──────────────────────────────────────
+# _split_double_speech_lines faengt nur Rede->Rede. Der beobachtete Flash-Kollaps
+# (~1/3 Hoerspiele, v4 Dino / v5 Spielzeug) ballt aber Rede+Redebegleitsatz ->
+# ERZAEHLER-HANDLUNG oder gleich mehrere Turns in EIN sentences[].text-Feld
+# (200-320 Woerter). Dieser Waechter zerlegt solche Felder quotenbewusst in echte
+# Sprech-Zeilen: an Satzende (.!?…) NUR auf Zitat-Tiefe 0, damit mehrsaetzige
+# woertliche Rede zusammenbleibt. Port derselben Logik wie die App-Anzeige
+# (article_screen.dart _sentenceRanges) — dieselbe Granularitaet wie im Reader.
+#
+# Sicherheit: greift NUR bei echten Kollaps-Feldern (> _KOLLAPS_TRIGGER_WORDS),
+# normale Zeilen (inkl. legitimer langer Rede) bleiben unberuehrt. Abkuerzungen
+# (Dr., St. …) werden nicht getrennt. Nicht teilbare Monster (ein Riesen-Feld
+# ohne Satzgrenze) werden geflaggt (review_flag) statt still durchgelassen.
+_KOLLAPS_TRIGGER_WORDS = 45   # ab hier verdaechtig auf Zusammenballung pruefen
+_KOLLAPS_MONSTER_WORDS = 60   # eine Zeile, die danach noch so lang ist = Monster
+_SEG_ENDPUNCT = ".!?…"
+_SEG_ABBREV = {"Dr", "Prof", "St", "Nr", "Hr", "Fr", "ca", "bzw", "usw", "etc",
+               "Mt", "Jr", "Sr", "vgl", "z", "B", "u", "d", "h", "Abk", "Sgt"}
+
+
+def _seg_boundary_next(nxt: str) -> bool:
+    if nxt == "":
+        return True
+    return (nxt == nxt.upper() and nxt != nxt.lower()) or nxt in ('„', '"', '“')
+
+
+def _line_ranges(text: str) -> list[tuple[int, int]]:
+    """Quotenbewusste Segmentierung in Sprech-Zeilen. Trennt an .!?… nur auf
+    Zitat-Tiefe 0; „ oeffnet, " / “ / ” schliessen. Dezimalzahlen (1.000) und
+    gaengige Abkuerzungen (Dr., St.) werden nicht getrennt."""
+    n = len(text)
+    if n == 0:
+        return []
+    res: list[tuple[int, int]] = []
+    start = 0
+    i = 0
+    depth = 0
+
+    def next_non_space(m: int) -> int:
+        while m < n and text[m] in " \n\t\r":
+            m += 1
+        return m
+
+    def push(s: int, e: int) -> None:
+        while e > s and text[e - 1] in " \n\t\r":
+            e -= 1
+        while s < e and text[s] in " \n\t\r":
+            s += 1
+        if e > s:
+            res.append((s, e))
+
+    while i < n:
+        c = text[i]
+        if c == '„':
+            depth += 1
+            i += 1
+            continue
+        if c == '"' or c == '“' or c == '”':
+            was_inside = depth > 0
+            if c == '"':
+                depth = depth - 1 if was_inside else depth + 1
+            elif depth > 0:
+                depth -= 1
+            i += 1
+            if was_inside and i >= 2 and text[i - 2] in _SEG_ENDPUNCT:
+                m = next_non_space(i)
+                nxt = text[m] if m < n else ""
+                if _seg_boundary_next(nxt) and nxt not in ",;:" and not (
+                        nxt != "" and nxt == nxt.lower() and nxt != nxt.upper()):
+                    push(start, i)
+                    start = m
+                    i = m
+            continue
+        if c in _SEG_ENDPUNCT and depth == 0:
+            if c == '.':
+                # Dezimalzahl 1.000 / 3.14 nicht trennen
+                if i > 0 and text[i - 1].isdigit() and i + 1 < n and text[i + 1].isdigit():
+                    i += 1
+                    continue
+                # Abkuerzung (Dr., St. …) nicht trennen
+                w = i
+                while w > 0 and text[w - 1] not in " \n\t\r.,;:!?\"„“”":
+                    w -= 1
+                if text[w:i] in _SEG_ABBREV:
+                    i += 1
+                    continue
+            j = i
+            while j < n and text[j] in _SEG_ENDPUNCT:
+                j += 1
+            m = next_non_space(j)
+            nxt = text[m] if m < n else ""
+            if _seg_boundary_next(nxt) and nxt not in ",;:" and not (
+                    nxt != "" and nxt == nxt.lower() and nxt != nxt.upper()):
+                push(start, j)
+                start = m
+                i = m
+                continue
+            i = j
+            continue
+        i += 1
+    if start < n:
+        push(start, n)
+    return res
+
+
+def split_collapsed_lines(article: dict) -> tuple[int, list[str]]:
+    """v6-Kollaps-Waechter. Zerlegt zusammengeballte Hoerspiel-Felder (> _KOLLAPS_
+    TRIGGER_WORDS Woerter) in je eine Sprech-Zeile. Gibt (zusaetzliche Zeilen,
+    Monster-Previews) zurueck. Monster = ein Feld/Stueck, das >_KOLLAPS_MONSTER_
+    WORDS bleibt und sich nicht teilen laesst -> vom Aufrufer per review_flag
+    markiert. Vergibt bei Aenderung die Satz-IDs global neu."""
+    added = 0
+    monsters: list[str] = []
+    for sec in article.get("sections", []):
+        out: list[dict] = []
+        for s in sec.get("sentences", []) or []:
+            txt = (s.get("text") or "").strip()
+            if len(txt.split()) <= _KOLLAPS_TRIGGER_WORDS:
+                out.append(s)
+                continue
+            ranges = _line_ranges(txt)
+            if len(ranges) <= 1:
+                out.append(s)
+                if len(txt.split()) > _KOLLAPS_MONSTER_WORDS:
+                    monsters.append(txt[:100])
+                continue
+            for k, (a, b) in enumerate(ranges):
+                piece = txt[a:b].strip()
+                neu = dict(s) if k == 0 else {"text": piece, "img_index": -1}
+                neu["text"] = piece
+                out.append(neu)
+                if len(piece.split()) > _KOLLAPS_MONSTER_WORDS:
+                    monsters.append(piece[:100])
+            added += len(ranges) - 1
+        sec["sentences"] = out
+    if added:
+        n = 0
+        for sec in article.get("sections", []):
+            for s in sec.get("sentences", []):
+                n += 1
+                s["id"] = f"s{n:03d}"
+    return added, monsters
+
+
 # Flash schreibt gelegentlich englische Funktionswoerter in den deutschen Text —
 # beobachtet: „But …" statt „Aber …" (spielzeug_hoerspiel, 3×; PO 2026-07-23).
 # Deterministisch ersetzen: nur als eigenstaendiges Wort am Zeilen-/Satz-/Rede-
@@ -2483,10 +2628,71 @@ def _box_repair_pass(article: dict, model: str, thinking_config) -> dict:
 
 # ── Phase-2-Generierung: je Stufe ────────────────────────────────────────────
 
+def _apply_lektorat_schritt8(
+    article: dict, sources_block: str, thema: str, content_type: str,
+    skip_lektorat: bool, report: dict,
+) -> None:
+    """SCHRITT 8 – Lektorat (Gemini Flash), bewusst ZWEI schlanke Pässe.
+
+    Flash verliert Qualität, wenn ein Call zu viele Aufgaben trägt (PO 2026-07-25).
+    Darum getrennt: 8a Fakten (grounded, gegen die Wikipedia-Quellen) + 8b Sprache
+    (ungrounded, nur der Text). Beide Ergebnisse mergen in EINEN annotate-Aufbau →
+    ein Pruefbericht. Ersetzt den früheren Sonnet-Batch + Claude-Sprachpass
+    (Bakeoff 2026-07-25: Flash ~10 % der Kosten, gleiche/bessere Trefferquote).
+
+    Läuft für BEIDE Motoren (Hörspiel-Einzelcall + Erzähltext-6-Schritt), damit der
+    text-lastige S3 nicht ungeprüft bleibt (PO-Motivation: weniger Fehler in den
+    Texten). No-op bei skip_lektorat oder leerem Quellblock. Mutiert article +
+    report in place."""
+    if skip_lektorat or not sources_block:
+        return
+    # 8a — Fakten/Plausibilität/Kontinuität gegen die Quellen
+    lekt_result, fakt_usage = run_fact_lektorat_flash(
+        article, sources_block, thema=thema, content_type=content_type,
+        model=FACT_LEKTORAT_MODEL)
+    # 8b — Sprache/Kindgerechtheit (eigener, schlanker Prompt ohne Quellblock)
+    sprach_corr, sprach_usage = run_sprach_lektorat_flash(
+        article, thema=thema, content_type=content_type, model=FACT_LEKTORAT_MODEL)
+    if sprach_corr:
+        lekt_result.setdefault("corrections", []).extend(sprach_corr)
+    # 8c — Vergleiche (Größen/Gewicht/Tempo): sachlich falsch / unvorstellbar /
+    # verstörend → korrigieren. Eigener schlanker Pass, damit Flash nicht kippt
+    # (PO 2026-07-27: 8a-Vergleichsregel greift im überladenen Fakten-Prompt zu selten).
+    vergl_corr, vergl_usage = run_vergleich_lektorat_flash(
+        article, thema=thema, content_type=content_type, model=FACT_LEKTORAT_MODEL)
+    if vergl_corr:
+        lekt_result.setdefault("corrections", []).extend(vergl_corr)
+    # Ein Einbau für alle Pässe
+    annotate_article_lektorat_v2(article, lekt_result, thema=thema, stufe=content_type)
+    pb = article.get("pruefbericht", {})
+    log.info("  Lektorat [Schritt 8, %s]: silent=%d korrigiert=%d pruefen=%d "
+             "(8b Sprache: %d · 8c Vergleiche: %d)%s",
+             FACT_LEKTORAT_MODEL, pb.get("n_silent", 0), pb.get("n_korrigiert", 0),
+             pb.get("n_pruefen", 0), len(sprach_corr), len(vergl_corr),
+             " ⚠ review_flag" if pb.get("n_pruefen", 0) > 0 else "")
+    report.setdefault("phase2", {})["lektorat"] = {
+        "modell":        FACT_LEKTORAT_MODEL,
+        "n_silent":      pb.get("n_silent", 0),
+        "n_korrigiert":  pb.get("n_korrigiert", 0),
+        "n_pruefen":     pb.get("n_pruefen", 0),
+        "n_sprache":     len(sprach_corr),
+        "n_vergleich":   len(vergl_corr),
+    }
+    for _u in (fakt_usage, sprach_usage, vergl_usage):
+        if _u:
+            cost_tracker.track(
+                run_id=_RUN_ID, thema=thema, stufe=content_type, schritt="lektorat",
+                modell=FACT_LEKTORAT_MODEL,
+                input_tok=_u.get("input_tok", 0),
+                output_tok=_u.get("output_tok", 0) + _u.get("thoughts_tok", 0),
+                cached_tok=_u.get("cached_tok", 0))
+
+
 def _generate_erzaehltext_6pass(
     job: dict, primary_text: str, companion_texts: dict[str, str],
     valid_companions: list[str], images: list[dict], phase1_report: dict,
     model: str, skip_images: bool,
+    sources_block: str = "", skip_lektorat: bool = False,
 ) -> tuple[dict | None, dict]:
     """Erzaehltext (10-12 J. = altes S3) ueber das 6-Schritt-System (pipeline_new)
     statt ueber den Einzel-Call.
@@ -2549,6 +2755,14 @@ def _generate_erzaehltext_6pass(
         if hero_note:
             log.info("  %s", hero_note)
             report["phase2"]["hero_fix"] = hero_note
+
+    # SCHRITT 8 – Lektorat (Fakten 8a + Sprache 8b) auch für den Erzähltext.
+    # Der 6-Schritt-Motor (pipeline_new) hat keinen eigenen Lektorats-Pass; ohne
+    # dies bliebe der text-lastige S3 ungeprüft (PO: „noch viele Fehler in den
+    # Texten"). Gleicher Helfer wie im Hörspiel-Pfad, gegen denselben Quellblock.
+    _apply_lektorat_schritt8(
+        article, sources_block, thema=thema, content_type="erzaehltext",
+        skip_lektorat=skip_lektorat, report=report)
 
     val_errors = validate_article(article, job, word_floor=pnrep.get("wmin"))
     if val_errors:
@@ -2671,7 +2885,8 @@ def generate_one_level(
     if content_type == "erzaehltext" and not model.lower().startswith("claude"):
         return _generate_erzaehltext_6pass(
             job, primary_text, companion_texts, valid_companions, images,
-            phase1_report, model, skip_images)
+            phase1_report, model, skip_images,
+            sources_block=sources_block, skip_lektorat=skip_lektorat)
 
     image_stufe      = job.get("image_stufe", job.get("prompt_age_level", 3))
     prompt_version   = PROMPT_PATHS.get(content_type, SYSTEM_PROMPT_PATH).stem.split("_v")[-1].split("_")[0]
@@ -3002,6 +3217,22 @@ def generate_one_level(
         n_split = _split_double_speech_lines(article)
         if n_split:
             log.info("  Doppelrede-Split: %d Zeilen mit mehreren Reden aufgetrennt", n_split)
+        # v6-Kollaps-Waechter: robuster, quotenbewusster Splitter (Rede+Handlung,
+        # Multi-Turn) + Monster-Flag. Faengt den Flash-Segmentierungs-Kollaps
+        # (~1/3 Hoerspiele), den _split_double_speech_lines (nur Rede->Rede) verfehlt.
+        n_coll, _kollaps_monsters = split_collapsed_lines(article)
+        if n_coll:
+            log.info("  Kollaps-Waechter: %d zusammengeballte Zeile(n) aufgetrennt", n_coll)
+        if _kollaps_monsters:
+            log.warning("  Kollaps-Waechter: %d nicht teilbare Monsterzeile(n) — review_flag gesetzt",
+                        len(_kollaps_monsters))
+            for _mprev in _kollaps_monsters[:3]:
+                log.warning("      Monster: %s ...", _mprev)
+            _m = article.setdefault("meta", {})
+            _m["review_flag"] = True
+            _m["review_reason"] = (
+                (_m.get("review_reason", "") + "; "
+                 + f"{len(_kollaps_monsters)} nicht teilbare Monsterzeile(n)").lstrip("; "))
         # SCHRITT 7 – Kinder-Lektorat: ausgeschriebene Jahreszahlen/Tagesdaten
         # relativieren, Waffen-/Bomben-Vergleiche entschaerfen, zu viele Ziffern-
         # Jahre reduzieren (einzelne bleiben erlaubt, PO 2026-07-24).
@@ -3096,45 +3327,12 @@ def generate_one_level(
                 article["meta"].get("review_reason", "")
                 + f"; {len(rest)} Boxen weiterhin redundant").lstrip("; ")
 
-    # ── SCHRITT 8 – Lektorat (Gemini Flash), bewusst ZWEI schlanke Pässe ──────
-    # Flash verliert Qualität, wenn ein Call zu viele Aufgaben trägt (PO 2026-07-25).
-    # Darum getrennt: 8a Fakten (grounded, gegen die Wikipedia-Quellen) + 8b Sprache
-    # (ungrounded, nur der Text). Beide Ergebnisse mergen in EINEN annotate-Aufbau →
-    # ein Pruefbericht. Ersetzt den früheren Sonnet-Batch + Claude-Sprachpass
-    # (Bakeoff 2026-07-25: Flash ~10 % der Kosten, gleiche/bessere Trefferquote).
-    if not skip_lektorat and sources_block:
-        # 8a — Fakten/Plausibilität/Kontinuität gegen die Quellen
-        lekt_result, fakt_usage = run_fact_lektorat_flash(
-            article, sources_block, thema=thema, content_type=content_type,
-            model=FACT_LEKTORAT_MODEL)
-        # 8b — Sprache/Kindgerechtheit (eigener, schlanker Prompt ohne Quellblock)
-        sprach_corr, sprach_usage = run_sprach_lektorat_flash(
-            article, thema=thema, content_type=content_type, model=FACT_LEKTORAT_MODEL)
-        if sprach_corr:
-            lekt_result.setdefault("corrections", []).extend(sprach_corr)
-        # Ein Einbau für beide Pässe
-        annotate_article_lektorat_v2(article, lekt_result, thema=thema, stufe=content_type)
-        pb = article.get("pruefbericht", {})
-        log.info("  Lektorat [Schritt 8, %s]: silent=%d korrigiert=%d pruefen=%d "
-                 "(8b Sprache: %d)%s",
-                 FACT_LEKTORAT_MODEL, pb.get("n_silent", 0), pb.get("n_korrigiert", 0),
-                 pb.get("n_pruefen", 0), len(sprach_corr),
-                 " ⚠ review_flag" if pb.get("n_pruefen", 0) > 0 else "")
-        report["phase2"]["lektorat"] = {
-            "modell":        FACT_LEKTORAT_MODEL,
-            "n_silent":      pb.get("n_silent", 0),
-            "n_korrigiert":  pb.get("n_korrigiert", 0),
-            "n_pruefen":     pb.get("n_pruefen", 0),
-            "n_sprache":     len(sprach_corr),
-        }
-        for _u in (fakt_usage, sprach_usage):
-            if _u:
-                cost_tracker.track(
-                    run_id=_RUN_ID, thema=thema, stufe=content_type, schritt="lektorat",
-                    modell=FACT_LEKTORAT_MODEL,
-                    input_tok=_u.get("input_tok", 0),
-                    output_tok=_u.get("output_tok", 0) + _u.get("thoughts_tok", 0),
-                    cached_tok=_u.get("cached_tok", 0))
+    # ── SCHRITT 8 – Lektorat (Gemini Flash), 8a Fakten + 8b Sprache ───────────
+    # Gemeinsamer Helfer mit dem Erzähltext-Pfad (ein Pruefbericht, ein Ort der
+    # Wahrheit). Details/Begründung siehe _apply_lektorat_schritt8.
+    _apply_lektorat_schritt8(
+        article, sources_block, thema=thema, content_type=content_type,
+        skip_lektorat=skip_lektorat, report=report)
 
     val_errors = validate_article(article, job, word_floor=wmin)
     if val_errors:

@@ -186,13 +186,15 @@ _PASS1_SYSTEM_PRO = (
     "Jahren). Arbeite AUSSCHLIESSLICH mit dem Quelltext – erfinde keine Fakten. Wähle "
     "nur aus, was eine mitreißende Geschichte trägt.\n"
     "DIE WICHTIGSTE REGEL: Bevorzuge das Lebendige, Dramatische und Ikonische vor "
-    "trockener Chronologie.\n"
+    "trockener Chronologie, ABER sorge für eine breite Themenabdeckung.\n"
     "- KEIN strikter Zeitstrahl! Beginne stattdessen mit dem ikonischsten Merkmal (dem "
-    "berühmtesten Ereignis, dem Meisterwerk) oder einem starken Gegenwartsbezug (was das "
-    "Kind heute kennt).\n"
-    "- Trockene Randaspekte (Handel, Herstellung, Prüfsiegel) fliegen raus.\n"
-    "- Vermeide kleinteilige Listen. Plane 3–4 starke Abschnitte, die wie Kapitel eines "
-    "Jugendbuchs ineinandergreifen."
+    "berühmtesten Ereignis) oder einem starken Gegenwartsbezug.\n"
+    "- Wenn ein Thema historisch beginnt, zwinge dich, im Plan auch in der Gegenwart "
+    "(bzw. bei modernen Beispielen) anzukommen. Bleib nicht in der Antike stecken, wenn "
+    "die Quelle auch modernes Wissen (z.B. Lego, Weltraum, Neuzeit) liefert!\n"
+    "- Trockene Randaspekte (Handel, Zölle, Prüfsiegel) fliegen raus.\n"
+    "- Vermeide kleinteilige Listen. Plane 4–5 starke Abschnitte, die wie fesselnde "
+    "Kapitel eines Jugendbuchs ineinandergreifen."
 )
 
 PASS1_SYSTEM = _pick(_PASS1_SYSTEM_BASE, _PASS1_SYSTEM_PRO)
@@ -254,13 +256,14 @@ def pass1_plan(thema: str, stufe: int, wmin: int, wmax: int,
     )
     _aufgabe_pro = (
         "AUFGABE: Plane den Artikel. Gib als JSON aus:\n"
-        "- angle: Der rote Faden der Geschichte (ein Satz).\n"
-        "- kernfakten: 3–5 wichtigste Fakten AUS DEM QUELLTEXT (nicht mehr!).\n"
+        "- angle: Der rote Faden der Geschichte (ein Satz). Erzeuge inhaltlichen Sog "
+        "(z.B. den fesselnden Ausbruch in Pompeji), keine bloße Museums-Tour.\n"
+        "- kernfakten: 4–7 wichtigste Fakten AUS DEM QUELLTEXT.\n"
         "- companion_rolle: Welcher Begleitartikel VERANSCHAULICHT WAS — oder \"weglassen\".\n"
-        "- abschnitte: 3–4 Abschnitte, je {heading, inhalt(kurz)}.\n"
-        "  REZEPT: Baue die Abschnitte um die ikonischen Anker und den Bezug zur "
-        "Lebenswelt der Kinder. Jeder Abschnitt ist eine kleine Szene oder tiefere "
-        "Erklärung (das WIE und WARUM), kein trockener Steckbrief.\n"
+        "- abschnitte: 4–5 Abschnitte, je {heading, inhalt(kurz)}.\n"
+        "  REZEPT: Baue die Abschnitte um die ikonischen Anker. Achte auf breite "
+        "Abdeckung (Historie UND moderne Beispiele). Jeder Abschnitt ist eine kleine, "
+        "packende Szene oder tiefere Erklärung, kein trockener Steckbrief.\n"
         "- subtitle: kurzer, spannender Untertitel.\n"
         "- emoji: ein passendes Emoji."
     )
@@ -340,30 +343,32 @@ _PASS2_SYSTEM_PRO = (
     "Du schreibst einen Lexikonartikel für Kinder (10–12 Jahre) auf Basis eines Plans.\n"
     "Dein Ziel: Ein packender, fließender Text, der sich liest wie ein gutes "
     "Jugend-Sachbuch, nicht wie eine Aufzählung.\n\n"
-    "REGELN FÜR DEN ERZÄHLFLUSS:\n"
-    "1. Keine harte Chronologie: Wenn der Einstieg das heutige Leben oder das "
-    "berühmteste Ereignis zeigt, webe die Vorgeschichte elegant danach ein.\n"
-    "2. Weiche Übergänge: Jeder Absatz knüpft an den vorigen an. Keine losen Fakten, "
-    "die aus dem Nichts kommen. Nutze echte Überleitungen (\"Doch nicht nur das Feuer "
-    "war gefährlich – auch...\").\n"
-    "3. Veranschaulichen statt Behaupten: Nutze greifbare Vergleiche aus der Welt der "
-    "Kinder (\"wie ein aufgehender Hefeteig\"). Die Vergleiche müssen physikalisch/"
-    "biologisch stimmen (Achtung: Asche gefriert nichts ein, Tiere sind nicht Cousinen, "
-    "sondern Verwandte).\n"
-    "4. Sprachrhythmus: Vermeide Stakkato-Sätze. Variiere Satzlängen, nutze lebendige "
-    "Verben. Nach langen Erklärungen darf ein ganz kurzer Satz wirken (z.B. \"Alles "
-    "wurde still.\").\n\n"
+    "REGELN FÜR DEN ERZÄHLFLUSS & SPRACHE:\n"
+    "1. Keine harte Chronologie: Wenn der Einstieg das heutige Leben zeigt, webe die "
+    "Vorgeschichte elegant danach ein. Decke das Thema thematisch breit ab.\n"
+    "2. Weiche Übergänge: Jeder Absatz knüpft an den vorigen an. Keine losen Fakten.\n"
+    "3. Veranschaulichen statt Behaupten: Nutze greifbare Vergleiche, aber bleibe "
+    "SACHLICH UND LOGISCH. Wenn eine Zahl für 10-Jährige gut vorstellbar ist "
+    "(z.B. 2 Kilogramm), braucht es keinen krampfhaften Vergleich.\n"
+    "4. Spezifisch vs. Allgemein (WICHTIG!): Unterscheide klar zwischen einem "
+    "konkreten Einzelereignis (z.B. Tiere, die den Vulkanausbruch am Mount St. Helens "
+    "überlebten) und allgemeinen Fakten. Verallgemeinere niemals ein spezifisches "
+    "Beispiel für alle Fälle!\n"
+    "5. Sprachliche Präzision & Rhythmus: Nenne wichtige Eigennamen präzise (z.B. "
+    "\"der Urvogel Archaeopteryx\"). Formuliere elegant (z.B. \"es gibt sie noch!\" "
+    "statt \"die gibt es\"). Vermeide Stakkato-Sätze.\n"
+    "6. Starker Schluss: Der allerletzte Satz des Textes muss ein starker, prägnanter "
+    "Schlusssatz sein, der das Thema abrundet – niemals ein schwacher Nebensatz über "
+    "ein Randdetail!\n\n"
     "FAKTENTREUE:\n"
     "Nutze AUSSCHLIESSLICH belegte Fakten aus der Quelle. Erfinde niemals Gefühle, "
-    "Motive oder Dialoge realer Personen. Bei Leid oder Gewalt bleibst du nüchtern und "
-    "sachlich.\n\n"
+    "Motive oder Dialoge realer Personen. Bei Leid oder Gewalt bleibst du nüchtern.\n\n"
     "FORMAT (streng):\n"
     "NUR Markdown mit `## Überschrift`-Zeilen und normalen Text-Absätzen. KEIN JSON, "
-    "keine Listen, keine IDs. Mindestens 3 bis 4 Abschnitte mit eigenen Überschriften.\n"
+    "keine Listen, keine IDs. Mindestens 4 Abschnitte mit eigenen Überschriften.\n"
     "WICHTIG FÜR DIE LESBARKEIT: Schreibe keine Textwüsten! Gliedere den Text UNTERHALB "
     "jeder `## Überschrift` zwingend in 2 bis 3 kürzere Absätze (durch Leerzeilen "
-    "getrennt). Ein einzelner Absatz darf höchstens 5 bis 6 Sätze lang sein. Das ist "
-    "essenziell, damit Kinder den Text auf Bildschirmen gut lesen können."
+    "getrennt). Ein einzelner Absatz darf höchstens 5 bis 6 Sätze lang sein."
 )
 
 PASS2_SYSTEM = _pick(_PASS2_SYSTEM_BASE, _PASS2_SYSTEM_PRO)
@@ -996,25 +1001,30 @@ _PASS4_SYSTEM_BASE = (
 )
 
 _PASS4_SYSTEM_PRO = (
-    "Du ordnest einem fertigen Artikel Bilder zu. Nutze NUR die gelieferten Bilder "
-    "(per Index).\n"
-    "ZIEL: Eine perfekte visuelle Abdeckung über den GANZEN Artikel.\n"
-    "GEHE SCHRITTWEISE VOR:\n"
-    "1. Nimm den ersten Text-Abschnitt. Welches Bild aus dem Pool zeigt EXAKT das, "
-    "worüber dort gesprochen wird? Weise es zu.\n"
-    "2. Gehe zum nächsten Abschnitt. Wähle zwingend ein ANDERES Bild aus dem Pool, das "
-    "inhaltlich am besten andockt.\n"
-    "3. Jeder Abschnitt MUSS ein eigenes, einmaliges Bild bekommen, solange noch "
-    "halbwegs passende Bilder im Pool sind. Die App zeigt sonst Fehler.\n"
-    "4. Nur im äußersten Notfall (wenn wirklich gar kein Bild auch nur entfernt passt) "
-    "vergibst du -1.\n"
-    "5. hero_index: Wähle das stärkste Querformat-Bild des Hauptthemas.\n"
-    "BESCHRIFTUNG (streng belegt):\n"
-    "- alt: Kurzer deutscher Bild-Titel (max. 6 Wörter). Nenne Eigennamen/Ort aus dem "
-    "Originaltitel!\n"
-    "- caption: Ein kindgerechter Satz, der beschreibt, was im Bild WIRKLICH zu sehen "
-    "ist (keine im Bild unsichtbaren Story-Details erfinden). Nutze den Originaltitel "
-    "für Orts-/Namens-Fakten.\n"
+    "Du ordnest einem fertigen Artikel Bilder zu und beschriftest den gesamten Bildpool. "
+    "Nutze NUR die gelieferten Bilder (per Index).\n\n"
+    "GEHE ZWINGEND IN ZWEI SCHRITTEN VOR:\n\n"
+    "SCHRITT 1: DEN GESAMTEN POOL BESCHRIFTEN (Lückenlos!)\n"
+    "Du MUSST zu JEDEM einzelnen Bild im Pool (von Index 0 bis zum letzten Bild) einen "
+    "deutschen Alt-Titel und eine Caption schreiben – EGAL, ob du das Bild später im Text "
+    "platzierst oder ob es nur in der Galerie landet! Lass kein einziges Bild unbeschriftet.\n"
+    "- alt: Kurzer deutscher Titel (max. 6 Wörter). Nenne zwingend Eigennamen oder Orte, "
+    "die aus dem Originaltitel hervorgehen!\n"
+    "- caption: Ein kindgerechter Satz, der beschreibt, was WIRKLICH im Bild zu sehen ist "
+    "(keine unsichtbaren Story-Details erfinden). Nutze den Originaltitel als Faktenquelle.\n\n"
+    "SCHRITT 2: BILDER DEN ABSCHNITTEN ZUWEISEN\n"
+    "Gehe nun den Artikel durch und weise ihm die Bilder aus dem Pool zu.\n"
+    "- MENGE PRO ABSCHNITT: Jeder Abschnitt bekommt MINDESTENS 1 passendes Bild. Gibt es "
+    "weitere gute Treffer, darfst du AUCH 2 Bilder pro Abschnitt zuweisen (aber NIEMALS mehr "
+    "als 2).\n"
+    "- PRÄZISE PASSUNG: Ordne ein Bild exakt dem Abschnitt zu, der das Motiv inhaltlich "
+    "behandelt (z.B. ein Archaeopteryx-Bild gehört in den Archaeopteryx-Abschnitt, nicht "
+    "schon davor). Setze Bilder nicht zu früh oder zu spät ein!\n"
+    "- HÖCHSTE PRIORITÄT: Lieber ein passendes Bild zu viel im Text platzieren als eines "
+    "fälschlich auszulassen. Lass ein inhaltlich gut passendes Bild niemals weg, nur um "
+    "Redundanz zu vermeiden!\n"
+    "- hero_index: Wähle das stärkste Querformat-Bild, das das Hauptthema am besten "
+    "repräsentiert.\n\n"
     "Antworte NUR als JSON."
 )
 
@@ -1025,8 +1035,10 @@ PASS4_SCHEMA = {
     "required": ["zuordnung", "hero_index", "captions"],
     "properties": {
         "zuordnung": {"type": "array", "items": {"type": "object",
-            "required": ["section_id", "img_index"], "properties": {
-                "section_id": {"type": "string"}, "img_index": {"type": "integer"}}}},
+            "required": ["section_id", "img_indices"], "properties": {
+                "section_id": {"type": "string"},
+                "img_indices": {"type": "array", "maxItems": 2,
+                                "items": {"type": "integer"}}}}},
         "hero_index": {"type": "integer"},
         "captions": {"type": "array", "items": {"type": "object",
             "required": ["img_index", "caption"], "properties": {
@@ -1104,7 +1116,8 @@ def pass4_images(sections: list[dict], images_stufe: list[dict], thema: str,
     body = (
         "ABSCHNITTE (section_id | Überschrift: Text):\n" + sec_list + "\n\n"
         "BILDER (index: Originaltitel — zu sehen):\n" + img_list + "\n\n"
-        "Gib JSON: zuordnung (je Abschnitt {section_id, img_index oder -1}), "
+        "Gib JSON: zuordnung (je Abschnitt {section_id, img_indices: Liste mit 1 bis 2 "
+        "Bild-Indizes in Reihenfolge ihres Auftretens im Abschnitt; mindestens 1}), "
         "hero_index (Bild des Hauptthemas), captions (für JEDES Bild, alle Indizes, "
         "{img_index, caption, alt}). caption = kurze kindgerechte Bildunterschrift "
         "(ein Satz). alt = kurzer deutscher Bild-Titel mit Eigenname/Ort aus dem "
@@ -1134,8 +1147,6 @@ def pass4_images(sections: list[dict], images_stufe: list[dict], thema: str,
         if not im["caption"]:
             im["caption"] = im["alt"]
 
-    zmap = {z.get("section_id"): z.get("img_index", -1)
-            for z in data.get("zuordnung", []) if isinstance(z, dict)}
     n = len(images_list)
 
     def _valid(ix) -> bool:
@@ -1144,34 +1155,63 @@ def pass4_images(sections: list[dict], images_stufe: list[dict], thema: str,
     def _is_svg(ix: int) -> bool:
         return (images_list[ix].get("filename") or "").lower().endswith(".svg")
 
-    # 1. Gueltige Modellzuordnungen zuerst, jedes Bild nur EINEM Abschnitt.
-    sec_ix: dict[str, int] = {}
+    # Modellzuordnung parsen: section_id -> Liste gueltiger, deduplizierter, Nicht-SVG-
+    # Indizes (max 2). Toleriert Alt-Format (Einzelwert img_index) und Einzel-Integer.
+    zmap: dict[str, list[int]] = {}
+    for z in data.get("zuordnung", []):
+        if not isinstance(z, dict):
+            continue
+        sid = z.get("section_id")
+        raw = z.get("img_indices", z.get("img_index", []))
+        if isinstance(raw, int):
+            raw = [raw]
+        picks: list[int] = []
+        for ix in (raw or []):
+            if _valid(ix) and not _is_svg(ix) and ix not in picks:
+                picks.append(ix)
+            if len(picks) == 2:
+                break
+        zmap[sid] = picks
+
+    # 1. Modellwuensche uebernehmen, jedes Bild nur EINEM Abschnitt (Vielfalt).
+    sec_imgs: dict[str, list[int]] = {}
     used: set[int] = set()
     for s in sections:
-        ix = zmap.get(s["id"], -1)
-        if _valid(ix) and ix not in used and not _is_svg(ix):
-            sec_ix[s["id"]] = ix
-            used.add(ix)
-    # 2. Abschnitte ohne (freies) Bild: bestes noch freies Nicht-SVG-Bild — sonst
-    #    uebernimmt die App das Bild des vorigen Abschnitts (bestmoegliches statt
-    #    gar keins, PO 2026-07-25). Pool ist relevanz-sortiert -> erstes freies.
+        picks = [ix for ix in zmap.get(s["id"], []) if ix not in used][:2]
+        used.update(picks)
+        sec_imgs[s["id"]] = picks
+    # 2. Abschnitte ohne Bild: bestes noch freies Nicht-SVG-Bild (MINDESTENS 1 pro
+    #    Abschnitt, PO 2026-07-27). Pool ist relevanz-sortiert -> erstes freies.
+    #    Sonst (Pool leer) Modellwunsch, sonst leer.
     frei = [i for i in range(n) if i not in used and not _is_svg(i)]
     fi = 0
     for s in sections:
-        if s["id"] in sec_ix:
+        if sec_imgs.get(s["id"]):
             continue
         if fi < len(frei):
-            sec_ix[s["id"]] = frei[fi]
+            sec_imgs[s["id"]] = [frei[fi]]
             used.add(frei[fi])
             fi += 1
-        else:                              # Pool erschoepft: Modellwunsch, sonst -1
-            ix = zmap.get(s["id"], -1)
-            sec_ix[s["id"]] = ix if _valid(ix) else -1
+        else:
+            picks = zmap.get(s["id"], [])
+            sec_imgs[s["id"]] = [picks[0]] if picks else []
 
+    # 3. Bilder ueber die Saetze des Abschnitts verteilen: bei 2 Bildern zeigt die erste
+    #    Haelfte Bild A, die zweite Haelfte Bild B (zwei Scroll-Positionen); bei 1 Bild
+    #    bekommen alle Saetze dasselbe; bei 0 -> -1.
     for s in sections:
-        ix = sec_ix.get(s["id"], -1)
-        for x in s["sentences"]:
-            x["img_index"] = ix
+        picks = sec_imgs.get(s["id"], [])
+        sents = s["sentences"]
+        if not picks:
+            for x in sents:
+                x["img_index"] = -1
+        elif len(picks) == 1 or len(sents) < 2:
+            for x in sents:
+                x["img_index"] = picks[0]
+        else:
+            mid = max(1, len(sents) // 2)
+            for j, x in enumerate(sents):
+                x["img_index"] = picks[0] if j < mid else picks[1]
     return images_list
 
 

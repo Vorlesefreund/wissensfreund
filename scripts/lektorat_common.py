@@ -65,6 +65,52 @@ LEKTORAT_SYSTEM = (
     "    solange die Aussage inhaltlich nicht falsch ist.\n\n"
 
     "══════════════════════════════════════════════════\n"
+    "ALTERS-LEITPLANKE: KINDGERECHT VOR KORREKT-ABER-VERSTÖREND\n"
+    "══════════════════════════════════════════════════\n"
+    "Die PRÜF-ARTIKEL-Zeile nennt die Stufe: Stufe 1–2 (Hörspiel) = 4–9 Jahre,\n"
+    "Stufe 3 (Erzähltext) = 10–12. Für 4–9 gilt diese Leitplanke STRENG, für 10–12\n"
+    "abgemildert. Sie bindet, wann IMMER du korrigierst — sie erlaubt keine neue Härte.\n"
+    "  · Eine Korrektur darf den Text NIE alters-UNangemessener machen als das Original.\n"
+    "    Steht sachliche Genauigkeit gegen Kindgerechtheit, GEWINNT die Kindgerechtheit.\n"
+    "  · Führe bei 4–9 durch eine Korrektur KEIN angstbesetztes GEWALTbild NEU ein: Bomben/\n"
+    "    Atombomben, Waffen, Schießen, Töten/Getötetwerden, Gemetzel, Blut, explizite\n"
+    "    Kriegsgewalt (kämpfende/sterbende Soldaten), Massensterben-Drastik. Das gilt auch,\n"
+    "    wenn die Quelle so ein Bild wörtlich hergibt — die Explosivkraft eines Einschlags\n"
+    "    IN «Millionen Hiroshima-Bomben» zu messen ist quellenrichtig, für ein 5-jähriges\n"
+    "    Kind aber verstörend → NICHT verwenden.\n"
+    "  · Ein FALSCHER/schiefer Vergleich wird korrigiert — aber der Ersatz muss BEIDES\n"
+    "    sein: sachlich stimmig UND altersgerecht. Ersetze einen verharmlosenden Vergleich\n"
+    "    («so stark wie ein Gewitter» für einen Asteroideneinschlag — ein Kind erlebt\n"
+    "    Gewitter ständig, das verharmlost) NICHT durch einen verstörenden («wie Millionen\n"
+    "    Atombomben»). Wähle ein Bild, das GEWALTIG und zugleich HARMLOS ist (die ganze\n"
+    "    Erde bebte; es wurde für Jahre dunkel und eisig) ODER nenne die Wucht ohne\n"
+    "    verstörendes Vehikel. Im Zweifel: Vergleichs-Vehikel weglassen, belegte Wirkung\n"
+    "    behalten.\n"
+    "  · Wenn der ORIGINALTEXT (nicht deine Korrektur) für 4–9 ein solches GEWALTbild\n"
+    "    (Bombe/Waffe/Schießen/Töten/kämpfende Soldaten/Blut) enthält, ist das ein Alters-\n"
+    "    Bruch → KORRIGIERT: auf ein gewaltiges, aber harmloses Bild oder die neutrale\n"
+    "    belegte Wirkung. NUR diese klaren GEWALT-Fälle — normale Spannung, Dunkelheit,\n"
+    "    Kälte, Aussterben an sich NICHT abschwächen.\n"
+    "    GROUNDING-OVERRIDE (die EINZIGE Ausnahme zur Grounding-Regel unten): Ein\n"
+    "    Gewaltbild für 4–9 wird korrigiert, AUCH wenn die Quelle es wörtlich stützt.\n"
+    "    «belegt» rechtfertigt hier KEIN Stehenlassen. Beispiel: die Quelle misst die\n"
+    "    Explosivkraft «in 200 Millionen Hiroshima-Bomben», der Text sagt «so stark wie\n"
+    "    Millionen Atombomben» → trotz Quellendeckung KORRIGIERT auf «eine unvorstellbare\n"
+    "    Wucht» / «die ganze Erde bebte». Dies ist der eine Fall, in dem Kindgerechtheit\n"
+    "    die Regel «belegt = kein Flag» schlägt.\n"
+    "  · AUSNAHME — metaphorischer/benannter «Krieg» OHNE Gewalt BLEIBT UNANGETASTET:\n"
+    "    «Krieg», «Kampf», «Schlacht», «Wettstreit» in klar UNblutigem, übertragenem Sinn\n"
+    "    sind KEIN Gewaltbild — z. B. «Knochenkriege» (der historische Name des\n"
+    "    wissenschaftlichen Wettstreits Marsh↔Cope), «ein Kampf um die meisten Funde».\n"
+    "    Feststehende EIGEN-/FACHNAMEN (Bone Wars = «Knochenkriege») NIE umbenennen oder\n"
+    "    verharmlosen. Klärt der Text SELBST, dass kein echter Krieg gemeint ist (Kind\n"
+    "    fragt «Mit Soldaten?», Erwachsene stellt klar «Nein, ein Wettstreit um Knochen»),\n"
+    "    ist das ein GUTES, verständnisförderndes Mittel → unbedingt unangetastet lassen.\n"
+    "  · Füge KEINE Präzision hinzu, die das Kind nicht braucht (Fachnamen, technische\n"
+    "    Tempo-/Maßwerte, seltene Fremdwörter), nur um «genauer» zu sein. Kürzen und\n"
+    "    Neutralisieren ist erlaubt, Dramatisieren nicht.\n\n"
+
+    "══════════════════════════════════════════════════\n"
     "GROUNDING-REGEL\n"
     "══════════════════════════════════════════════════\n"
     "  EINGRIFFSGRENZE (Kernregel): Greife NUR ein, wenn eine Aussage entweder\n"
@@ -1359,6 +1405,147 @@ SPRACH_SCHEMA = {
     },
     "required": ["corrections"],
 }
+
+
+# ── Vergleichs-Pass 8c (fokussierter Größen-/Bild-Check) ─────────────────────
+#
+# Vergleiche sind ERWÜNSCHT (sie machen Größen greifbar), aber Flash produziert
+# im Einzel-Call zu viele falsche/unpassende (PO 2026-07-27: «viel schwerer als
+# ein afrikanischer Elefant» für ~9 t stimmt nicht; das Fakten-Lektorat 8a fängt
+# das nicht zuverlässig, weil seine Vergleichsregel unter Dutzenden anderer Regeln
+# vergraben ist und Flash bei überfrachtetem Prompt kippt). Darum ein EIGENER,
+# schlanker Pass — gleiche Bauart wie der Sprachpass 8b, nur mit EINER Aufgabe:
+# jeden Vergleich finden und auf (1) sachliche Richtigkeit, (2) Vorstellbarkeit,
+# (3) Alterstauglichkeit prüfen. Ändert NIE die belegte Zahl selbst, nur das
+# Bezugsobjekt. Ungegroundet (nur Text + generische Alltagsgrößen).
+
+VERGLEICH_SYSTEM = (
+    "Du bist Vergleichs-Prüfer für Kinder-Texte im Wissensfreund. Vergleiche sind "
+    "ERWÜNSCHT — sie machen Größen, Gewichte und Tempo greifbar. Deine EINZIGE Aufgabe: "
+    "jeden Vergleich im Text finden und prüfen, ob er (1) sachlich stimmt, (2) für ein "
+    "Kind vorstellbar ist und (3) passend/nicht verstörend ist. Ein guter, richtiger, "
+    "harmloser Vergleich bleibt IMMER unverändert.\n\n"
+
+    "WAS IST EIN VERGLEICH: jede Veranschaulichung, die eine Sache an einer anderen misst —\n"
+    "«so groß/schwer/schnell/lang/alt/hoch wie X», «größer/schwerer/… als X», «wie ein/eine X»,\n"
+    "«so viel wie X», «vergleichbar mit X». Ein scherzhafter Kinder-Vergleich («eine riesige\n"
+    "Banane aus Stein» für einen gebogenen Zahn) ist erlaubter kindlicher Spaß und BLEIBT,\n"
+    "solange er nicht sachlich in die Irre führt.\n\n"
+
+    "PRÜFE JEDEN VERGLEICH AUF DREI KRITERIEN:\n"
+    "  1. SACHLICH RICHTIG (Richtung UND Größenordnung). Rechne mit diesen Alltagsgrößen nach:\n"
+    "       · erwachsener Mensch ~1,8 m / ~80 kg    · Schulkind ~1,3 m\n"
+    "       · Auto (PKW) ~4,5 m lang / ~1,5 t        · Reisebus ~12 m lang / ~13 t\n"
+    "       · Zimmertür ~2 m hoch  · Fußballtor 2,44 m hoch  · Stockwerk ~3 m  · Banane ~20 cm\n"
+    "       · afrikanischer Elefant: Kühe ~3 t, große Bullen ~6 t (Rekord ~10 t)\n"
+    "       · Blauwal ~30 m / ~150 t\n"
+    "     Ist der Vergleich falsch (falsche Richtung oder grob falsche Größenordnung),\n"
+    "     KORRIGIERE nur das Bezugsobjekt/den Vergleich. Beispiel: «neun Tonnen — viel schwerer\n"
+    "     als ein afrikanischer Elefant» ist falsch, weil ein großer Elefant ähnlich viel wiegt\n"
+    "     → «… etwa so schwer wie ein großer afrikanischer Elefant».\n"
+    "  2. VORSTELLBAR: Das Bezugsobjekt muss einem Kind vertraut sein (Auto, Bus, Elefant,\n"
+    "     Fußballtor, Mensch, Banane …). Vage Objekte mit riesiger Spannweite («ein Gebäude»,\n"
+    "     «ein Tier», «ein Baum») → präzisieren. Abstrakte/technische Bezugswerte, die ein Kind\n"
+    "     nicht fühlen kann (Tempo in «Kilometern pro Stunde», «so schnell wie eine Kugel»),\n"
+    "     → durch ein vorstellbares Bild ersetzen ODER den Vergleich streichen und nur die\n"
+    "     Sachaussage stehen lassen.\n"
+    "  3. PASSEND / NICHT VERSTÖREND: Kein Bild, das einem kleinen Kind unnötig Angst macht\n"
+    "     (Waffen, Bomben, Krieg, Tod — «so stark wie Millionen Atombomben») → durch ein\n"
+    "     harmloses, ebenso anschauliches Bild ersetzen oder streichen. Kein schiefes/absurdes\n"
+    "     Bild («robust wie eine Banane»).\n\n"
+
+    "EISERNE GRENZEN (nicht verhandelbar):\n"
+    "  · Ändere NIEMALS die zugrunde liegende, belegte ZAHL/MASSANGABE selbst («dreißig\n"
+    "    Zentimeter», «neun Tonnen» bleiben) — NUR das Vergleichs-/Bezugsobjekt.\n"
+    "  · Erfinde KEINE neue Sachzahl. Dein Weltwissen dient NUR dazu, einen Vergleich als\n"
+    "    stimmig oder falsch zu beurteilen, nie dazu, einen neuen Fakt in den Text zu setzen.\n"
+    "  · Im Zweifel NICHT anfassen — lieber eine Korrektur zu wenig als eine überflüssige.\n"
+    "  · Register und Kindstil wahren. Redebegleitsätze («, sagt Nele»), Namen, Ton unverändert.\n\n"
+
+    "Gib für jede Korrektur den GANZEN betroffenen Satz (die ganze Sprecher-/Erzähler-Zeile)\n"
+    "als claim_original zurück und dieselbe Zeile mit dem verbesserten Vergleich als\n"
+    "korrektur_neu. korrektur_neu ist NIE leer und enthält weiterhin die unveränderte\n"
+    "Sachaussage. Keine Korrektur ohne echten Vergleichsfehler."
+)
+
+VERGLEICH_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "corrections": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "claim_original": {"type": "string",
+                                       "description": "Der Originalsatz, unverändert."},
+                    "korrektur_neu":  {"type": "string",
+                                       "description": "Derselbe Satz mit verbessertem Vergleich."},
+                    "grund":          {"type": "string",
+                                       "description": "Kurz: falsch / unvorstellbar / verstörend."},
+                },
+                "required": ["claim_original", "korrektur_neu"],
+            },
+        },
+    },
+    "required": ["corrections"],
+}
+
+
+def run_vergleich_lektorat_flash(
+    article: dict,
+    thema: str = "",
+    content_type: str = "",
+    model: str = FACT_LEKTORAT_MODEL,
+) -> tuple[list[dict], dict]:
+    """Schritt 8c — Vergleichs-Lektorat über Gemini Flash, OHNE Quellblock.
+
+    Prüft NUR Vergleiche (Größen-/Gewichts-/Tempo-Bilder) auf sachliche Richtigkeit,
+    Vorstellbarkeit und Alterstauglichkeit — bewusst getrennt von Fakten (8a) und
+    Sprache (8b), damit KEIN Flash-Call überfrachtet wird (Flash kippt bei zu vielen
+    Aufgaben; PO 2026-07-25/27). Ändert nie die belegte Zahl, nur das Bezugsobjekt.
+
+    Gibt (corrections, usage) im annotate_article_lektorat_v2-Format zurück
+    (stufe KORRIGIERT, beleg «Vergleich»). Bei API-Ausfall leere Liste — der
+    Artikel darf nie am Vergleichs-Pass scheitern.
+    """
+    import gemini_client
+    from generate_grounded import _make_thinking_config
+
+    turns = [(s.get("text") or "")
+             for sec in article.get("sections", [])
+             for s in sec.get("sentences", [])]
+    text = "\n".join(t for t in turns if t)
+    if not text.strip():
+        return [], {}
+    user = "TEXT (NUR Vergleiche prüfen — belegte Zahlen NICHT ändern):\n\n" + text
+    try:
+        raw = gemini_client.call_gemini(
+            VERGLEICH_SYSTEM, user, model=model,
+            thinking_config=_make_thinking_config(model, 2048),
+            response_mime_type="application/json", response_schema=VERGLEICH_SCHEMA,
+            call_name="vergleich_lektorat", max_output_tokens=4096,
+        )
+        usage = dict(getattr(gemini_client, "_last_usage", {}) or {})
+        data = json.loads(raw)
+    except Exception as exc:  # noqa: BLE001 — Vergleichspass nie den Artikel reißen lassen
+        log.warning("  Vergleichslektorat [%s] fehlgeschlagen: %s — überspringe",
+                    thema or content_type, str(exc)[:120])
+        return [], {}
+
+    corr: list[dict] = []
+    for c in (data.get("corrections") or []):
+        claim = (c.get("claim_original") or "").strip()
+        neu   = (c.get("korrektur_neu") or "").strip()
+        if not (claim and neu and claim != neu):
+            continue
+        # Teilsatz → ganzer Sprecher-Turn (Jaccard-Einbau = 1.0, nur bei Substring).
+        for t in turns:
+            if claim != t and claim in t:
+                claim, neu = t, t.replace(claim, neu, 1)
+                break
+        corr.append({"claim_original": claim, "korrektur_neu": neu,
+                     "stufe": "KORRIGIERT", "beleg": "Vergleich"})
+    return corr, usage
 
 
 def run_sprachpass_sync(
