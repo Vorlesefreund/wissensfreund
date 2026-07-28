@@ -1639,19 +1639,31 @@ _DOUBLE_SPEECH_RE = re.compile(r'(“[^„“]*?[.!?])\s+(?=„)')
 
 def _split_double_speech_lines(article: dict) -> int:
     """Trennt Hoerspiel-Zeilen mit mehr als einer Rede in je eigene Zeilen.
-    Gibt die Zahl der neu entstandenen (zusaetzlichen) Zeilen zurueck; bei >0
-    werden die Satz-IDs global neu vergeben."""
+
+    Nutzt denselben quotentiefen Segmentierer wie split_collapsed_lines
+    (_line_ranges): geschnitten wird an Satzenden NUR auf Zitat-Tiefe 0, sodass
+    ein schliessendes Anfuehrungszeichen NIE von seiner Rede getrennt wird.
+    (Der alte Regex-Split _DOUBLE_SPEECH_RE fasste den schliessenden Teil
+    »“, sagt X.« als eigenes Segment und verwaiste so das schliessende „“ —
+    v7-Dino »„Ja, Theo« / »“, antwortet Nele«, PO 2026-07-28.) Greift nur bei
+    Feldern mit mind. ZWEI Reden (>=2 oeffnende „); Ein-Rede-Zeilen und reine
+    Erzaehlzeilen bleiben unberuehrt. Gibt die Zahl der neu entstandenen Zeilen
+    zurueck; bei >0 werden die Satz-IDs global neu vergeben."""
     added = 0
     for sec in article.get("sections", []):
         out: list[dict] = []
         for s in sec.get("sentences", []) or []:
             txt = (s.get("text") or "").strip()
-            teile = [p.strip() for p in _DOUBLE_SPEECH_RE.split(txt) if p and p.strip()]
+            teile = [txt]
+            if txt.count("„") >= 2:                       # mind. zwei Reden im Feld
+                rngs = _line_ranges(txt)
+                if len(rngs) >= 2:
+                    teile = [txt[a:b] for a, b in rngs]
             if len(teile) <= 1:
                 out.append(s)
                 continue
             for k, t in enumerate(teile):
-                neu = dict(s) if k == 0 else {"text": t, "img_index": -1}
+                neu = dict(s) if k == 0 else {"img_index": -1}
                 neu["text"] = t
                 out.append(neu)
             added += len(teile) - 1
