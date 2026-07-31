@@ -118,3 +118,22 @@ articles/restore_*/
 articles/_GOLD_*/
 articles/test_*/
 articles/*_backup/
+
+# --- Aufraeumen 2026-07 (Teil 2) ---
+# Artikel-Ordner sind reine Generierungs-/Experiment-Ausgaben; die echten Artikel
+# sind bereits getrackt (bleiben getrackt). Neue Produktionsartikel bewusst per
+# `git add -f` aufnehmen. Pauschal ignorieren haelt `git status` sauber.
+articles/
+# Generierungs-/Vision-/TTS-Ausgabeordner (reproduzierbar, nur lokal)
+gutachten_material/
+output/
+pilot_output/
+sound_candidates/
+tts_audio_compare_out/
+tts_out/
+tts_tagging_compare_out/
+upload_staging/
+upload_staging_test/
+# Lokal erhaltenes Archiv alter Prompt-Versionen/Architektur-Notizen — bewusst
+# NICHT im oeffentlichen Repo, aber lokal aufgehoben (statt hart geloescht).
+archiv/aufraeumen_2026-07/
