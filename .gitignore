@@ -96,3 +96,25 @@ scripts/_yt_katalog/
 
 # Wegwerf-Galerie fuer die Browser-Vorschau
 _video_galerie.html
+
+# --- Experiment-/Test-Artefakte (Aufraeumen 2026-07) — reproduzierbar, nur lokal ---
+temp/
+.cache/
+_alt/
+ab_out/
+scripts/upload_staging/
+scripts/_*.py
+scripts/dims_cache.json
+_nightly_*.py
+_nightly_*.ps1
+_replik_*.py
+_*_bakeoff.py
+# Generierungs-/Bakeoff-Artikel-Ausgaben (reproduzierbar aus der Pipeline)
+articles/bakeoff_*/
+articles/batch_*/
+articles/branch_*/
+articles/bestof_*/
+articles/restore_*/
+articles/_GOLD_*/
+articles/test_*/
+articles/*_backup/
