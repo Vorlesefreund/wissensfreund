@@ -2306,6 +2306,18 @@ class _ModeAContentState extends State<_ModeAContent> {
 
     final result = <Widget>[];
     for (int i = 0; i < sentences.length; i++) {
+      // Absatzumbruch: die Pipeline setzt zwischen Absätzen eine Leerzeile
+      // (\n\n) in den plainText. Überschriften erzeugen nur ein einzelnes \n
+      // und verschmelzen mit dem Folgesatz — daher hier ≥2 Zeilenumbrüche in
+      // der Lücke vor dem Satz als Absatzbeginn werten.
+      bool paraBreak = false;
+      if (i > 0) {
+        final prevEnd = sentStarts[i - 1] + sentences[i - 1].length;
+        if (prevEnd <= sentStarts[i] && sentStarts[i] <= fullText.length) {
+          final gap = fullText.substring(prevEnd, sentStarts[i]);
+          paraBreak = '\n'.allMatches(gap).length >= 2;
+        }
+      }
       result.add(_SentenceWidget(
         key: _keyFor(i),
         text: sentences[i],
@@ -2314,6 +2326,7 @@ class _ModeAContentState extends State<_ModeAContent> {
         cursorInSent: i == activeIdx ? activeCursorInSent : -1,
         links: sentLinks[i],
         onLinkTap: onLinkTap,
+        paraBreakBefore: paraBreak,
       ));
     }
     return result;
@@ -2496,6 +2509,8 @@ class _SentenceWidget extends StatefulWidget {
   final int cursorInSent;
   final List<Map<String, dynamic>> links;
   final void Function(String) onLinkTap;
+  /// Beginnt dieser Satz einen neuen Absatz? Steuert oberen Abstand.
+  final bool paraBreakBefore;
 
   const _SentenceWidget({
     super.key,
@@ -2505,6 +2520,7 @@ class _SentenceWidget extends StatefulWidget {
     this.cursorInSent = -1,
     this.links = const [],
     required this.onLinkTap,
+    this.paraBreakBefore = false,
   });
 
   @override
@@ -2577,6 +2593,8 @@ class _SentenceWidgetState extends State<_SentenceWidget> {
 
   @override
   Widget build(BuildContext context) {
+    // Absatzabstand: neuer Absatz bekommt oben Luft.
+    final double topPad = widget.paraBreakBefore ? 14.0 : 0.0;
     // ── Window highlight: stable at punctuation boundaries ────────────────
     if (widget.isActive && widget.cursorInSent >= 0 && widget.text.isNotEmpty) {
       final pos = widget.cursorInSent.clamp(0, widget.text.length);
@@ -2595,7 +2613,7 @@ class _SentenceWidgetState extends State<_SentenceWidget> {
       final wStart = (baseStart < pos - 20 ? baseStart : pos - 20).clamp(0, pos);
       final wEnd   = (baseEnd > pos + 20 ? baseEnd : pos + 20).clamp(pos, widget.text.length);
       return Padding(
-        padding: EdgeInsets.only(right: widget.extraRightPad, bottom: 4),
+        padding: EdgeInsets.only(right: widget.extraRightPad, bottom: 4, top: topPad),
         child: Text.rich(
           TextSpan(
             style: _base.copyWith(color: const Color(0xFF333333)),
@@ -2619,7 +2637,7 @@ class _SentenceWidgetState extends State<_SentenceWidget> {
     // ── Full-sentence highlight (active, paused / idle) ────────────────────
     if (widget.isActive) {
       return Padding(
-        padding: EdgeInsets.only(right: widget.extraRightPad, bottom: 4),
+        padding: EdgeInsets.only(right: widget.extraRightPad, bottom: 4, top: topPad),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
           decoration: BoxDecoration(

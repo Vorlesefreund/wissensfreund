@@ -19,10 +19,21 @@ class WfArticleConverter {
       }
 
       final renderedSentences = <RenderedSentence>[];
-      for (final s in sec.sentences) {
+      for (int si = 0; si < sec.sentences.length; si++) {
+        final s = sec.sentences[si];
         final start = buffer.length;
         buffer.write(s.text);
-        if (!s.text.endsWith(' ')) buffer.write(' ');
+        // Absatzlücke, wenn der FOLGENDE Satz einen neuen Absatz beginnt
+        // (para_break). Leerzeile im plainText → der Reader erkennt sie über
+        // die Wortlücke und setzt Absatzabstand. Erster Satz einer Section
+        // trägt nie para_break (Überschrift trennt bereits).
+        final nextIsPara =
+            si + 1 < sec.sentences.length && sec.sentences[si + 1].paraBreak;
+        if (nextIsPara) {
+          buffer.write('\n\n');
+        } else if (!s.text.endsWith(' ')) {
+          buffer.write(' ');
+        }
         renderedSentences.add(RenderedSentence(
           id:         s.id,
           text:       s.text,

@@ -90,17 +90,23 @@ class WfSentence {
   final String id;
   final String text;
   final int imgIndex;
+  /// True, wenn dieser Satz einen neuen Absatz beginnt (para_break aus der
+  /// Pipeline). Steuert im Reader eine Absatzlücke; erster Satz einer Section
+  /// setzt es nie (Überschrift trennt bereits).
+  final bool paraBreak;
 
   const WfSentence({
     required this.id,
     required this.text,
     required this.imgIndex,
+    this.paraBreak = false,
   });
 
   factory WfSentence.fromJson(Map<String, dynamic> j) => WfSentence(
-        id:       j['id']        as String? ?? '',
-        text:     j['text']      as String? ?? '',
-        imgIndex: j['img_index'] as int?    ?? 0,
+        id:        j['id']         as String? ?? '',
+        text:      j['text']       as String? ?? '',
+        imgIndex:  j['img_index']  as int?    ?? 0,
+        paraBreak: j['para_break'] as bool?   ?? false,
       );
 }
 
