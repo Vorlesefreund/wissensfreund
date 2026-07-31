@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-31T15:57:38Z -->
+<!-- updated: 2026-07-31T21:05:08Z -->
 <!-- Ältere Stände (Rückbau 29.07, Review4, S3-Wiederherstellung, TTS-Woche, Stufen-Umbau) → git log STATUS.md · STATUS_ARCHIV.md · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
@@ -23,6 +23,12 @@ Hörspiel (4–9) + Erzähltext (10–12, = altes S3). KI streng aus geladenem Q
 
 ## Gerade in Arbeit / Nächster Schritt
 
+- **Nachtlauf geplant (Scheduler, 01.08. 02:30):** 5 Themen (Fußball, Hänsel und Gretel,
+  Afrika, Alexander der Große, Auto) × 2 Typen (hoerspiel+erzaehltext) × **2 Varianten A/B**
+  = 20 Texte, mit Bildern+Quiz+Lektorat, Prompt v2_B, gemini-3.5-flash. Runner
+  `_nightly_5themen.py` (lokal/ignored), Task `Wissensfreund_Nachtlauf_5Themen`.
+  Ausgabe: `Desktop/Wissensfreund_Review/2026-08-01_Nachtlauf_5Themen/` — je Variante
+  eine Review-Docx (2-spaltig, Korrekturspalte). **Morgen früh prüfen/lesen.**
 - **Sauberer Stand hergestellt — Arbeitsbaum komplett clean (0 modifiziert, 0 untracked).**
   Kein offener Code-Umbau; Produktion = Gemini Flash (BASE + v2_B).
 - **Aufräumen abgeschlossen (Teil 2, e987ff8):** untracked-Artefakte gebändigt.
