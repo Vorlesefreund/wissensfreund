@@ -1,38 +1,33 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-29T06:05:12Z -->
-<!-- Ältere Stände (Review4, S3-Wiederherstellung, TTS-Woche, Stufen-Umbau) → git log STATUS.md · STATUS_ARCHIV.md · Wissen → WISSEN_*.md -->
+<!-- updated: 2026-07-31T15:02:45Z -->
+<!-- Ältere Stände (Rückbau 29.07, Review4, S3-Wiederherstellung, TTS-Woche, Stufen-Umbau) → git log STATUS.md · STATUS_ARCHIV.md · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
 **Wissensfreund:** Flutter-App für Kinder. Profil 3-stufig (4–6/7–9/10–12, steuert Modi), **Inhalt 2-typig**:
 Hörspiel (4–9) + Erzähltext (10–12, = altes S3). KI streng aus geladenem Quelltext (nie Trainingswissen).
 **Zwei getrennte Text-Motoren** (bewusst) → [[project_zwei_textmotoren]].
 
-## Zuletzt abgeschlossen (2026-07-29) — KEHRTWENDE: Rückbau auf den letzten guten Stand (PO)
+## Zuletzt abgeschlossen (2026-07-31) — GPT als Generator getestet & VERWORFEN, sauberer Stand
 
-- **Kernentscheidung (PO):** Die Prompt-Iteration v4→v8 (25.–28.07.) hat die Qualität NICHT verbessert,
-  sondern verschlechtert (Stakkato, „durcheinander", Theo nimmt Fakten vorweg, schwacher Schluss). PO:
-  „Es wird nicht besser." → Rückbau auf die guten Stände: **Hörspiel = `nacht_review2` (24.07),
-  Erzähltext = `bakeoff_BASE` (25.07)**. Gold-Referenz in `articles/_GOLD_dino_baseline/`.
-- **Ursache (eindeutig, git-belegt):** Die Experiment-Runner `_v7/_v8_nightly.cmd` erzwangen
-  `WF_PROMPT_VARIANT=pro` → die **PRO-Prompts** (ab 25.07, `7109798`/`6e30287`) = degradiert. Das Hörspiel
-  degradierte separat über die externen `--hoerspiel-prompt`-Dateien (v4–v8). **Die guten Prompts lagen die
-  ganze Zeit im Code:** BASE (`_pick()`, pipeline_new.py) + Default-Hörspiel `wissensfreund_hoerspiel_prompt_v2_B.md`.
-- **Rückbau = KEINE funktionale Code-Änderung:** Der Produktions-Runner `_nightly_rerun.ps1` (via `run_batch.py`)
-  nutzte nie `pro`/`--hoerspiel-prompt` → er war **schon immer** auf dem guten Stand. Nur die Experiment-Runner
-  `_v7`/`_v8` entfernt (forcierten den schlechten Pfad). PRO-Prompt-Code bleibt dormant hinter dem Default-off-Schalter.
-- **Validierung (off-peak `WF_Restore_Test`, 29.07. 03:00, kein 503):** Dino/Vulkan/Spielzeug auf Plain-Config
-  (BASE + v2_B) neu erzeugt → `articles/restore_20260729/`. Dino gegen Gold geprüft: **gut, auf Niveau/darüber** —
-  kein Stakkato, geordnete Kohärenz, Theo maßvoll, starker Schluss, „Wettstreit" statt „Wettwahn", keine
-  zerschnittenen Zitate. Review-Docx: `Desktop/Wissensfreund_Review/2026-07-29_restore/Review_Restore.docx`.
-- **Behaltene echte Fixes:** Zitat-Splitter-Bugfix (`_split_double_speech_lines` über `_line_ranges`, `1d5f822`) —
-  reiner Gewinn, bleibt drin. Lektorat 8a/8b/8c + Alters-Leitplanke bleiben (additiv, nur bei Problemfällen).
+- **Entscheidung (PO, final): Wir bleiben bei Flash.** Bakeoff `gpt-5.6-terra` vs. `gemini-3.5-flash`
+  (Dino-Hörspiel, identische Pipeline + Prompt, nur Generator getauscht). Objektiver Rubrik-Score
+  (Claude-Sonnet-5-Judge): **Flash 3.64 vs. GPT 3.18**. GPT erzählt enzyklopädisch/„Museumsführung"
+  (lange Erklärblöcke, unerklärte Fachbegriffe), weniger Story-Sog; Flash hat den stärkeren Hook +
+  mehr „show, don't tell". Detail + Grund im Entscheidungs-Log (PROJEKTDOKUMENT.md, 31.07.).
+- **GPT-Scaffolding restlos entfernt:** `scripts/openai_client.py` gelöscht, GPT-Zweige in
+  `generate_grounded.py` per `git restore` zurückgerollt, GPT-Preiszeilen aus `cost_tracker.py` raus.
+  **Produktion unverändert:** Gemini Flash, Rückbau-Default **BASE + v2_B** (29.07.) bleibt maßgeblich.
+- **Committet (offene Arbeit, u.a. aus Parallel-Chat):** App-Feature Absatzumbrüche (`para_break`) im
+  Reader (3 Dart-Dateien); `cost_tracker` per-Prozess-Log via `WF_COST_LOG` (Parallelitäts-Härtung).
+- **Review-Docx** beider Hörspiele: `Desktop/Wissensfreund_Review/2026-07-31_bakeoff_gpt_vs_flash/`.
 
 ## Gerade in Arbeit / Nächster Schritt
 
-- **Rückbau festgeschrieben + gepusht** (`1d5f822` + Restore-Commit). Produktions-Default = BASE + v2_B.
-- **PRO-Prompts + v4–v8-Hörspiel-Prompts sind deprecated** — nicht wieder `WF_PROMPT_VARIANT=pro` setzen,
-  kein `--hoerspiel-prompt vX` mehr. Wer neu läuft: schlicht `run_batch.py`/`generate_grounded.py` ohne diese Schalter.
-- **Nächster Produktionslauf** kann über `_nightly_rerun.ps1` (Datum/Themen anpassen) oder direkt gefahren werden.
+- **Sauberer Stand hergestellt.** Kein offener Code-Umbau; Produktion = Gemini Flash (BASE + v2_B).
+- **Offen (Aufräumen, kein Blocker):** ~357 untracked Artefakte (`temp/`, `scripts/upload_staging/`,
+  alte Prompt-Versionen, `audit_*.py`, `_*probe.py`) — per `.gitignore` bändigen oder gezielt sichten.
+- **Offene Kleinentscheidung:** `scripts/bewertung.py` (provider-neutraler Rubrik-Scorer für Bakeoffs)
+  behalten (nützlich für Flash-A/B) oder entfernen — steht noch aus.
 
 ## Offen nach Priorität
 
