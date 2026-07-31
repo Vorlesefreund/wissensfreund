@@ -1,5 +1,5 @@
 # Wissensfreund — STATUS
-<!-- updated: 2026-07-31T15:02:45Z -->
+<!-- updated: 2026-07-31T15:57:38Z -->
 <!-- Ältere Stände (Rückbau 29.07, Review4, S3-Wiederherstellung, TTS-Woche, Stufen-Umbau) → git log STATUS.md · STATUS_ARCHIV.md · Wissen → WISSEN_*.md -->
 <!-- Entscheidungs-Log + Roadmap → PROJEKTDOKUMENT.md · Stimm-Rezept → STIMME_NICO_EINGEFROREN.md -->
 
@@ -23,11 +23,14 @@ Hörspiel (4–9) + Erzähltext (10–12, = altes S3). KI streng aus geladenem Q
 
 ## Gerade in Arbeit / Nächster Schritt
 
-- **Sauberer Stand hergestellt.** Kein offener Code-Umbau; Produktion = Gemini Flash (BASE + v2_B).
-- **Offen (Aufräumen, kein Blocker):** ~357 untracked Artefakte (`temp/`, `scripts/upload_staging/`,
-  alte Prompt-Versionen, `audit_*.py`, `_*probe.py`) — per `.gitignore` bändigen oder gezielt sichten.
-- **Offene Kleinentscheidung:** `scripts/bewertung.py` (provider-neutraler Rubrik-Scorer für Bakeoffs)
-  behalten (nützlich für Flash-A/B) oder entfernen — steht noch aus.
+- **Sauberer Stand hergestellt — Arbeitsbaum komplett clean (0 modifiziert, 0 untracked).**
+  Kein offener Code-Umbau; Produktion = Gemini Flash (BASE + v2_B).
+- **Aufräumen abgeschlossen (Teil 2, e987ff8):** untracked-Artefakte gebändigt.
+  Behalten+getrackt: 3 TTS-Cast-Skripte, 6 `scripts/`-Tools, 9 Wortbudget-/Ergiebigkeits-XLSX,
+  `scripts/bewertung.py` (Rubrik-Scorer, bleibt für Flash-A/B). `.gitignore`: `articles/` pauschal
+  (nur Experiment-Output; 88 echte Artikel bleiben getrackt) + Ausgabeordner + Archiv.
+  Alte Prompt-Versionen/Architektur-Notizen → lokal `archiv/aufraeumen_2026-07/` (aus Git verborgen,
+  nicht hart gelöscht). Reine Maschinen-Dumps (audit_*, test_*, Caches) gelöscht.
 
 ## Offen nach Priorität
 
