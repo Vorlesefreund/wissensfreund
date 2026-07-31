@@ -29,11 +29,15 @@ Usage (CLI):
 import argparse
 import json
 import logging
+import os
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
 
-LOG_PATH = Path(__file__).parent / "cost_log.json"
+# Per-Prozess-Log ueber WF_COST_LOG isolierbar (Prozess-Parallelitaet: jeder Worker
+# schreibt seine eigene Datei, sonst korrumpiert der Read-Modify-Write-Append die
+# gemeinsame Datei). Ohne die Env-Var wie bisher die zentrale cost_log.json.
+LOG_PATH = Path(os.environ.get("WF_COST_LOG") or (Path(__file__).parent / "cost_log.json"))
 
 log = logging.getLogger(__name__)
 
